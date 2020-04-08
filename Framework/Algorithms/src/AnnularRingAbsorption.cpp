@@ -25,7 +25,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/format.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,7 +63,7 @@ const std::string AnnularRingAbsorption::summary() const {
  */
 void AnnularRingAbsorption::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -75,7 +75,7 @@ void AnnularRingAbsorption::init() {
                   "The name to use for the output workspace.");
 
   // -- can properties --
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("CanOuterRadius", -1.0, mustBePositive,
                   "The outer radius of the can in centimetres");
@@ -87,7 +87,7 @@ void AnnularRingAbsorption::init() {
                   "The height of the sample in centimetres");
   declareProperty("SampleThickness", -1.0, mustBePositive,
                   "The thickness of the sample in centimetres");
-  auto nonEmptyString = boost::make_shared<MandatoryValidator<std::string>>();
+  auto nonEmptyString = std::make_shared<MandatoryValidator<std::string>>();
   declareProperty("SampleChemicalFormula", "",
                   "Chemical composition of the sample material",
                   nonEmptyString);
@@ -96,7 +96,7 @@ void AnnularRingAbsorption::init() {
                   "cubic angstrom");
 
   // -- Monte Carlo properties --
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "

@@ -96,8 +96,8 @@ protected:
   finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities,
                       const std::vector<double> &dValues) const;
 
-  boost::shared_ptr<PoldiAbstractDetector> m_detector;
-  boost::shared_ptr<PoldiAbstractChopper> m_chopper;
+  std::shared_ptr<PoldiAbstractDetector> m_detector;
+  std::shared_ptr<PoldiAbstractChopper> m_chopper;
 
   std::pair<double, double> m_wavelengthRange;
 

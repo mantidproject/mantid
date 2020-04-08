@@ -62,10 +62,10 @@ private:
   } m_gslFree;
 
   /// GSL interpolation accelerator object
-  boost::shared_ptr<gsl_interp_accel> m_acc;
+  std::shared_ptr<gsl_interp_accel> m_acc;
 
   /// GSL data structure used to calculate spline
-  boost::shared_ptr<gsl_spline> m_spline;
+  std::shared_ptr<gsl_spline> m_spline;
 
   /// Flag for checking if the spline needs recalculating
   mutable bool m_recalculateSpline;
@@ -99,8 +99,8 @@ private:
   double splineEval(const double x) const;
 };
 
-using CubicSpline_sptr = boost::shared_ptr<CubicSpline>;
-using CubicSpline_const_sptr = const boost::shared_ptr<CubicSpline>;
+using CubicSpline_sptr = std::shared_ptr<CubicSpline>;
+using CubicSpline_const_sptr = const std::shared_ptr<CubicSpline>;
 
 } // namespace Functions
 } // namespace CurveFitting

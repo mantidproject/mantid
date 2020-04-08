@@ -92,8 +92,7 @@ public:
     if (!ws)
       return;
 
-    MDHistoWorkspace_sptr out =
-        boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+    MDHistoWorkspace_sptr out = std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumDims(), 4);
     TS_ASSERT_EQUALS(out->getDimension(0)->getNBins(), 40);

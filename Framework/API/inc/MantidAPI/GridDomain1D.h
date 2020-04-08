@@ -43,7 +43,7 @@ private:
 }; // class IGridDomain
 
 /// typedef for a shared pointer
-using GridDomain1D_sptr = boost::shared_ptr<GridDomain1D>;
+using GridDomain1D_sptr = std::shared_ptr<GridDomain1D>;
 
 } // namespace API
 } // namespace Mantid

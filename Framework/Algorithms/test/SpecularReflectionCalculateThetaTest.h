@@ -24,8 +24,7 @@ class SpecularReflectionCalculateThetaTest: public CxxTest::TestSuite,
 
 private:
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionCalculateTheta>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionCalculateTheta>();
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();

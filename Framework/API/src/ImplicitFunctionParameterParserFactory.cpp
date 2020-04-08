@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace API {
 
-boost::shared_ptr<ImplicitFunctionParameterParser>
+std::shared_ptr<ImplicitFunctionParameterParser>
 ImplicitFunctionParameterParserFactoryImpl::create(
     const std::string &xmlString) const {
   UNUSED_ARG(xmlString);

@@ -12,7 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <cstring>
 #include <limits>
@@ -239,8 +239,8 @@ MANTID_API_DLL std::ostream &operator<<(std::ostream &, const API::Boolean &);
 /// Redaing a Boolean from an input stream
 MANTID_API_DLL std::istream &operator>>(std::istream &istr, API::Boolean &);
 
-using Column_sptr = boost::shared_ptr<Column>;
-using Column_const_sptr = boost::shared_ptr<const Column>;
+using Column_sptr = std::shared_ptr<Column>;
+using Column_const_sptr = std::shared_ptr<const Column>;
 
 } // namespace API
 } // Namespace Mantid

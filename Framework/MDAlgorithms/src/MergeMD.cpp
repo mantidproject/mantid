@@ -41,7 +41,7 @@ void MergeMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the input MDWorkspaces as a comma-separated list");
 
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
@@ -59,7 +59,7 @@ void MergeMD::init() {
 void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   auto it = inputs.begin();
   for (; it != inputs.end(); it++) {
-    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(*it));
     if (!ws)
       throw std::invalid_argument(
@@ -209,7 +209,7 @@ template <typename MDE, size_t nd>
 void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
   // CPUTimer tim;
   typename MDEventWorkspace<MDE, nd>::sptr ws1 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MergeMD.");
 

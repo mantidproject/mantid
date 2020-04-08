@@ -13,7 +13,7 @@
 #include <QFrame>
 #include <QMap>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class Instrument3DWidget;
 
@@ -120,7 +120,7 @@ protected:
 
   void clearProperties();
   void setProperties();
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
   createMaskWorkspace(bool invertMask, bool temp = false) const;
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
@@ -143,7 +143,7 @@ private:
   /// Load masks applied to the view but not to the workspace
   void loadMaskViewFromProject(const std::string &name);
   /// Run the LoadMask algorithm to get a MaskWorkspace
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
   loadMask(const std::string &fileName);
 
 protected:

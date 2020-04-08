@@ -182,9 +182,8 @@ private:
         alg->setPropertyValue("OutputWorkspace", outputName));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
-    MatrixWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputName));
+    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(outputName));
 
     return outputWS;
   }

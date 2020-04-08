@@ -62,7 +62,7 @@ void GenerateIPythonNotebook::init() {
                                         "Specify None"};
   declareProperty(
       "SpecifyAlgorithmVersions", "Specify Old",
-      boost::make_shared<StringListValidator>(saveVersions),
+      std::make_shared<StringListValidator>(saveVersions),
       "When to specify which algorithm version was used by Mantid.");
 }
 

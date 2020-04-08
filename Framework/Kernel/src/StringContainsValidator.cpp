@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StringContainsValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -27,7 +27,7 @@ StringContainsValidator::StringContainsValidator(
  * @return A clone of the current state of the validator
  */
 IValidator_sptr StringContainsValidator::clone() const {
-  return boost::make_shared<StringContainsValidator>(*this);
+  return std::make_shared<StringContainsValidator>(*this);
 }
 
 /**

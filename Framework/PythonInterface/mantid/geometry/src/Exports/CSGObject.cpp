@@ -18,7 +18,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(CSGObject)
 
 void export_Object() {
-  register_ptr_to_python<boost::shared_ptr<CSGObject>>();
+  register_ptr_to_python<std::shared_ptr<CSGObject>>();
 
   class_<CSGObject, boost::python::bases<IObject>, boost::noncopyable>(
       "CSGObject", no_init)

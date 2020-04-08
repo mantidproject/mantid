@@ -100,7 +100,7 @@ void LoadSNSspec::init() {
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   declareProperty("Unit", "Energy",
-                  boost::make_shared<Kernel::StringListValidator>(units),
+                  std::make_shared<Kernel::StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\") (default: Energy)");
 }

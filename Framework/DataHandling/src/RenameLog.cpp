@@ -25,10 +25,10 @@ void RenameLog::init() {
           "Workspace", "Anonymous", Direction::InOut),
       "Workspace to have logs merged");
   declareProperty("OriginalLogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "Log's original name.");
   declareProperty("NewLogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "Log's new name.");
 }
 

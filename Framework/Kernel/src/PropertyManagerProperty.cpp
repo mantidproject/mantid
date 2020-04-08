@@ -93,7 +93,7 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
 
   auto value = (*this)();
   if (!value) {
-    value = boost::make_shared<PropertyManager>();
+    value = std::make_shared<PropertyManager>();
     (*this) = value;
   }
   std::ostringstream msg;

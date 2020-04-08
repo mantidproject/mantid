@@ -161,7 +161,7 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
   MatrixWorkspace_sptr matrixWS; // Workspace to return
   // Cast succeeds: have already checked group contains only MatrixWorkspaces
   const auto firstWS =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[0]);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[0]);
 
   // If we are making a surface plot, create a point data workspace.
   // If it's a contour plot, make a histo workspace.
@@ -178,7 +178,7 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
   std::vector<double> logValues;
   for (size_t i = 0; i < nWorkspaces; i++) {
     const auto ws =
-        boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[i]);
+        std::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[i]);
     if (ws) {
       // Make sure the X data is set as the correct mode
       if (xMode == Histogram::XMode::BinEdges) {
@@ -277,7 +277,7 @@ QString MantidSurfaceContourPlotGenerator::getXAxisTitle(
     return QString();
   }
   const auto firstWS =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[0]);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[0]);
   // Already checked group contains only MatrixWorkspaces
   const auto &xAxisLabel = firstWS->getXDimension()->getName();
   const auto &xAxisUnits = firstWS->getXDimension()->getUnits().ascii();
@@ -312,7 +312,7 @@ bool MantidSurfaceContourPlotGenerator::groupContentsHaveSameX(
   const auto getXData = [&workspaces](const size_t index,
                                       const size_t spectrum) {
     const auto &ws =
-        boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[index]);
+        std::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[index]);
     if (ws) {
       if (ws->getNumberHistograms() < spectrum) {
         throw std::logic_error("Spectrum index too large for some workspaces");

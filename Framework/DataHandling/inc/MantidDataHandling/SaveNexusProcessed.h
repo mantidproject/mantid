@@ -90,7 +90,7 @@ private:
                           const std::string &propertyValue,
                           int perioidNum) override;
   void doExec(const Mantid::API::Workspace_sptr &inputWorkspace,
-              boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
+              std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
               const bool keepFile = false,
               boost::optional<size_t> entryNumber = boost::optional<size_t>());
 

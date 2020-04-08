@@ -190,6 +190,13 @@ class YAxisEditor(AxisEditor):
         self.create_model()
 
 
+class ZAxisEditor(AxisEditor):
+
+    def __init__(self, canvas, axes):
+        super(ZAxisEditor, self).__init__(canvas, axes, 'z')
+        self.create_model()
+
+
 class ColorbarAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):

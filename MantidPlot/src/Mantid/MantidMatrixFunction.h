@@ -41,10 +41,10 @@ private:
 
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace>) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &) override;
   void clearADSHandle() override;
 
   MantidMatrixFunction *m_function;

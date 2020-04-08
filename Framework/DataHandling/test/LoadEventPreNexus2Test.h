@@ -119,7 +119,7 @@ public:
     // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
 
     // Get the start time of all pulses
@@ -157,7 +157,7 @@ public:
     // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
     /*
      * LoadEventPreNexusTest.h
@@ -175,7 +175,7 @@ public:
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels_with_events);
 
     // Check if the instrument was loaded correctly
-    boost::shared_ptr<const Instrument> inst = ew->getInstrument();
+    std::shared_ptr<const Instrument> inst = ew->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "CNCS");
 
     // Mapping between workspace index and spectrum number
@@ -236,7 +236,7 @@ public:
 
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs_skipped"));
 
     // Only some of the pixels weretof loaded, because of lot of them are empty
@@ -276,7 +276,7 @@ public:
     eventLoader->setPropertyValue("TotalChunks", "2");
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk1");
     TS_ASSERT(eventLoader->execute());
-    EventWorkspace_sptr chunk1 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr chunk1 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk1"));
 
     // Load chunk 2 of 2
@@ -286,7 +286,7 @@ public:
     eventLoader->setPropertyValue("TotalChunks", "2");
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk2");
     TS_ASSERT(eventLoader->execute());
-    EventWorkspace_sptr chunk2 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr chunk2 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk2"));
 
     // The number of events should be roughly equal and the sum should be 112266

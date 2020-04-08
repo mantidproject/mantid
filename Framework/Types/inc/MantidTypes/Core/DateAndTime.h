@@ -179,8 +179,8 @@ inline DateAndTime DateAndTime::operator+(const double sec) const {
  */
 inline int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
   const double nano = sec * 1e9;
-  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
-  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
+  constexpr auto minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr auto maximum = static_cast<double>(MAX_NANOSECONDS);
   // Use these limits to avoid integer overflows
   if (nano > maximum)
     return MAX_NANOSECONDS;

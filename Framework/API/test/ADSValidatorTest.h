@@ -11,7 +11,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::API::ADSValidator;
 using Mantid::API::AnalysisDataService;
@@ -57,7 +57,7 @@ public:
   void test_SingleValue() {
     const std::string wsName = "ADSValidatorTest_w1";
     auto &ads = AnalysisDataService::Instance();
-    ads.addOrReplace(wsName, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(wsName, std::make_shared<MockWorkspace>());
 
     ADSValidator adsValidator(false);
 
@@ -76,9 +76,9 @@ public:
     const std::string ws3Name = "ADSValidatorTest_w3";
     const std::string wsInvalidName = "ADSValidatorTest_wInvalid";
     auto &ads = AnalysisDataService::Instance();
-    ads.addOrReplace(ws1Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws2Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws3Name, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws1Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws2Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws3Name, std::make_shared<MockWorkspace>());
 
     ADSValidator adsValidator(true);
 
@@ -106,9 +106,9 @@ public:
     const std::string ws3Name = "ADSValidatorTest_w3";
     const std::string wsInvalidName = "ADSValidatorTest_wInvalid";
     auto &ads = AnalysisDataService::Instance();
-    ads.addOrReplace(ws1Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws2Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws3Name, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws1Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws2Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws3Name, std::make_shared<MockWorkspace>());
 
     ADSValidator adsValidator(true);
 

@@ -123,7 +123,7 @@ public:
     MatrixWorkspace_sptr result =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
     EventWorkspace_sptr ev_result =
-        boost::dynamic_pointer_cast<EventWorkspace>(result);
+        std::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor events should be untouched
     EventList mon_ev = ev_result->getSpectrum(0);
@@ -195,7 +195,7 @@ public:
     MatrixWorkspace_sptr result =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
     EventWorkspace_sptr ev_result =
-        boost::dynamic_pointer_cast<EventWorkspace>(result);
+        std::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor should be untouched
     EventList mon_ev = ev_result->getSpectrum(0);

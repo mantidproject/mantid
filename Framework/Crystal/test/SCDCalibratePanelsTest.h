@@ -30,7 +30,7 @@ class SCDCalibratePanelsTest : public CxxTest::TestSuite {
 public:
   void test_TOPAZ_5637() {
     // load a peaks file
-    boost::shared_ptr<Algorithm> alg =
+    std::shared_ptr<Algorithm> alg =
         AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
     alg->initialize();
     alg->setPropertyValue("Filename", "Peaks5637.integrate");

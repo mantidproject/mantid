@@ -42,7 +42,7 @@ public:
 
   EnggDiffFittingPresenterNoThread(
       IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
-      boost::shared_ptr<IEnggDiffractionParam> mainParam)
+      std::shared_ptr<IEnggDiffractionParam> mainParam)
       : EnggDiffFittingPresenter(view, std::move(model), nullptr,
                                  std::move(mainParam)) {}
 
@@ -312,7 +312,7 @@ public:
   void test_browse_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -341,7 +341,7 @@ public:
   void test_browse_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -376,7 +376,7 @@ public:
   void test_save_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -403,7 +403,7 @@ public:
   void test_save_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),

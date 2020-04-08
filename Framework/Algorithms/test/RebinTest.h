@@ -270,7 +270,7 @@ public:
     MatrixWorkspace_sptr outWS;
     EventWorkspace_sptr eventOutWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)
@@ -278,7 +278,7 @@ public:
 
     // Is the output gonna be events?
     if (expectOutputEvent) {
-      eventOutWS = boost::dynamic_pointer_cast<EventWorkspace>(outWS);
+      eventOutWS = std::dynamic_pointer_cast<EventWorkspace>(outWS);
       TS_ASSERT(eventOutWS);
       if (!eventOutWS)
         return;
@@ -386,7 +386,7 @@ public:
 
     TS_ASSERT(reb->isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("test_RebinPointDataOutput"));
 
     TS_ASSERT(!outWS->isHistogramData());
@@ -610,8 +610,7 @@ private:
       return;
     }
 
-    auto ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
 
     if (!ws) {
       TS_FAIL("Unable to retrieve result workspace");

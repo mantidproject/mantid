@@ -16,8 +16,8 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IDetector)
 
 void export_IDetector() {
-  register_ptr_to_python<boost::shared_ptr<IDetector>>();
-  register_ptr_to_python<boost::shared_ptr<const IDetector>>();
+  register_ptr_to_python<std::shared_ptr<IDetector>>();
+  register_ptr_to_python<std::shared_ptr<const IDetector>>();
 
   class_<IDetector, bases<IObjComponent>, boost::noncopyable>("IDetector",
                                                               no_init)

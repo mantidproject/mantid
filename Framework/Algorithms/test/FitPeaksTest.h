@@ -116,7 +116,7 @@ public:
 
       // about the parameters
       API::MatrixWorkspace_sptr peak_params_ws =
-          boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
       TS_ASSERT(peak_params_ws);
       // 2 spectra
@@ -184,19 +184,19 @@ public:
 
     // get fitted peak data
     API::MatrixWorkspace_sptr main_out_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
     TS_ASSERT(main_out_ws);
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
     TS_ASSERT(plot_ws);
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+        std::dynamic_pointer_cast<API::ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParametersWS"));
     TS_ASSERT(param_ws);
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
@@ -227,7 +227,7 @@ public:
 
     // check the fitted peak workspace
     API::MatrixWorkspace_sptr data_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             API::AnalysisDataService::Instance().retrieve(
                 m_inputWorkspaceName));
     TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(),
@@ -292,19 +292,19 @@ public:
 
     // get fitted peak data
     API::MatrixWorkspace_sptr main_out_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
     TS_ASSERT(main_out_ws);
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
     TS_ASSERT(plot_ws);
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+        std::dynamic_pointer_cast<API::ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParametersWS"));
     TS_ASSERT(param_ws);
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
@@ -335,7 +335,7 @@ public:
 
     // check the fitted peak workspace
     API::MatrixWorkspace_sptr data_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             API::AnalysisDataService::Instance().retrieve(
                 m_inputWorkspaceName));
     TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(),
@@ -400,7 +400,7 @@ public:
 
     // about the parameters
     API::MatrixWorkspace_sptr peak_params_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
     TS_ASSERT(peak_params_ws);
     TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
@@ -454,7 +454,7 @@ public:
 
     // about the parameters
     API::MatrixWorkspace_sptr peak_params_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
     TS_ASSERT(peak_params_ws);
     TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
@@ -507,7 +507,7 @@ public:
 
     TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS2"));
     API::MatrixWorkspace_sptr fitted_data_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             API::AnalysisDataService::Instance().retrieve("FittedPeaksWS2"));
     TS_ASSERT(fitted_data_ws);
 
@@ -701,7 +701,7 @@ public:
     // Generate input workspace
     std::string input_ws_name = loadVulcanHighAngleData();
     API::MatrixWorkspace_sptr input_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(input_ws_name));
 
     // Generate peak and background parameters
@@ -842,24 +842,24 @@ public:
 
     // get fitted peak data
     API::MatrixWorkspace_sptr main_out_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
     TS_ASSERT(main_out_ws);
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
     TS_ASSERT(plot_ws);
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+        std::dynamic_pointer_cast<API::ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParametersWS"));
     TS_ASSERT(param_ws);
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
     API::ITableWorkspace_sptr error_table =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+        std::dynamic_pointer_cast<API::ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("FitErrorsWS"));
     TS_ASSERT(error_table);
     // shall be same number of rows to OutputPeakParametersWorkspace
@@ -937,10 +937,9 @@ public:
     bool ishist = false;
     double xval(0), yval(0), eval(0), dxval(1);
     std::set<int64_t> maskedws;
-    MatrixWorkspace_sptr center_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
-                nhist, nbins, ishist, xval, yval, eval, dxval, maskedws));
+    MatrixWorkspace_sptr center_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
+            nhist, nbins, ishist, xval, yval, eval, dxval, maskedws));
 
     std::cout << "Center workspace has " << center_ws->readX(0).size()
               << " bins"
@@ -970,10 +969,9 @@ public:
                                     const std::string &workspace_name) {
     // create the empty workspace containing 3 spectrum
     const size_t num_peaks = peak_index_vec.size();
-    MatrixWorkspace_sptr center_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            WorkspaceCreationHelper::create2DWorkspace(
-                3, static_cast<int>(num_peaks) * 2));
+    MatrixWorkspace_sptr center_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspace(
+            3, static_cast<int>(num_peaks) * 2));
     for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < peak_index_vec.size(); ++j) {
         const int peak_index = peak_index_vec[j];
@@ -1091,7 +1089,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("diamond_3peaks"));
 
     API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("diamond_3peaks"));
     TS_ASSERT(ws);
 
@@ -1119,7 +1117,7 @@ public:
     }
 
     // check workspace type
-    workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws_name));
     TS_ASSERT(workspace);
     if (!workspace) {
@@ -1154,7 +1152,7 @@ public:
     }
 
     // check workspace type
-    workspace = boost::dynamic_pointer_cast<ITableWorkspace>(
+    workspace = std::dynamic_pointer_cast<ITableWorkspace>(
         AnalysisDataService::Instance().retrieve(ws_name));
     TS_ASSERT(workspace);
     if (!workspace) {

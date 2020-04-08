@@ -178,7 +178,7 @@ void CompareWorkspaces::init() {
           "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
-  m_messages = boost::make_shared<TableWorkspace>();
+  m_messages = std::make_shared<TableWorkspace>();
   m_messages->addColumn("str", "Message");
   m_messages->addColumn("str", "Workspace 1");
   m_messages->addColumn("str", "Workspace 2");
@@ -228,9 +228,9 @@ bool CompareWorkspaces::processGroups() {
 
   // Attempt to cast to WorkspaceGroups (will be nullptr on failure)
   WorkspaceGroup_const_sptr ws1 =
-      boost::dynamic_pointer_cast<const WorkspaceGroup>(w1);
+      std::dynamic_pointer_cast<const WorkspaceGroup>(w1);
   WorkspaceGroup_const_sptr ws2 =
-      boost::dynamic_pointer_cast<const WorkspaceGroup>(w2);
+      std::dynamic_pointer_cast<const WorkspaceGroup>(w2);
 
   if (ws1 && ws2) { // Both are groups
     processGroups(ws1, ws2);
@@ -262,8 +262,8 @@ bool CompareWorkspaces::processGroups() {
  * @param groupTwo
  */
 void CompareWorkspaces::processGroups(
-    const boost::shared_ptr<const API::WorkspaceGroup> &groupOne,
-    const boost::shared_ptr<const API::WorkspaceGroup> &groupTwo) {
+    const std::shared_ptr<const API::WorkspaceGroup> &groupOne,
+    const std::shared_ptr<const API::WorkspaceGroup> &groupTwo) {
 
   // Check their sizes
   const auto totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
@@ -323,8 +323,8 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  PeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
-  PeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
+  PeaksWorkspace_sptr pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(w1);
+  PeaksWorkspace_sptr pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(w2);
   if ((pws1 && !pws2) || (!pws1 && pws2)) {
     recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
     return;
@@ -340,8 +340,8 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  auto tws1 = boost::dynamic_pointer_cast<const ITableWorkspace>(w1);
-  auto tws2 = boost::dynamic_pointer_cast<const ITableWorkspace>(w2);
+  auto tws1 = std::dynamic_pointer_cast<const ITableWorkspace>(w1);
+  auto tws2 = std::dynamic_pointer_cast<const ITableWorkspace>(w2);
   if ((tws1 && !tws2) || (!tws1 && tws2)) {
     recordMismatch("One workspace is a TableWorkspace and the other is not.");
     return;
@@ -357,9 +357,9 @@ void CompareWorkspaces::doComparison() {
 
   // Check things for IMDEventWorkspaces
   IMDEventWorkspace_const_sptr mdews1 =
-      boost::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
+      std::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
   IMDEventWorkspace_const_sptr mdews2 =
-      boost::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
+      std::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
   if ((mdews1 && !mdews2) || (!mdews1 && mdews2)) {
     recordMismatch(
         "One workspace is an IMDEventWorkspace and the other is not.");
@@ -367,9 +367,9 @@ void CompareWorkspaces::doComparison() {
   }
   // Check things for IMDHistoWorkspaces
   IMDHistoWorkspace_const_sptr mdhws1 =
-      boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
+      std::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
   IMDHistoWorkspace_const_sptr mdhws2 =
-      boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
+      std::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
   if ((mdhws1 && !mdhws2) || (!mdhws1 && mdhws2)) {
     recordMismatch(
         "One workspace is an IMDHistoWorkspace and the other is not.");
@@ -389,14 +389,14 @@ void CompareWorkspaces::doComparison() {
 
   // These casts must succeed or there's a logical problem in the code
   MatrixWorkspace_const_sptr ws1 =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(w1);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(w1);
   MatrixWorkspace_const_sptr ws2 =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(w2);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(w2);
 
   EventWorkspace_const_sptr ews1 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws1);
   EventWorkspace_const_sptr ews2 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws2);
   if (getProperty("CheckType")) {
     if ((ews1 && !ews2) || (!ews1 && ews2)) {
       recordMismatch(
@@ -1054,7 +1054,7 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
     const IPeak &peak1 = tws1->getPeak(i);
     const IPeak &peak2 = tws2->getPeak(i);
     for (size_t j = 0; j < tws1->columnCount(); j++) {
-      boost::shared_ptr<const API::Column> col = tws1->getColumn(j);
+      std::shared_ptr<const API::Column> col = tws1->getColumn(j);
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
@@ -1182,8 +1182,8 @@ void CompareWorkspaces::doTableComparison(
 void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1,
                                        const Workspace_sptr &w2) {
   IMDWorkspace_sptr mdws1, mdws2;
-  mdws1 = boost::dynamic_pointer_cast<IMDWorkspace>(w1);
-  mdws2 = boost::dynamic_pointer_cast<IMDWorkspace>(w2);
+  mdws1 = std::dynamic_pointer_cast<IMDWorkspace>(w1);
+  mdws2 = std::dynamic_pointer_cast<IMDWorkspace>(w2);
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("CompareMDWorkspaces");
   alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);

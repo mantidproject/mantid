@@ -1128,6 +1128,13 @@ class MantidAxes3D(Axes3D):
 
     name = 'mantid3d'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Remove the connection for when you click on the plot as this is dealt with in figureinteraction.py to stop
+        # it interfering with double-clicking on the axes.
+        self.figure.canvas.mpl_disconnect(self._cids[1])
+
     def plot(self, *args, **kwargs):
         """
         If the **mantid3d** projection is chosen, it can be

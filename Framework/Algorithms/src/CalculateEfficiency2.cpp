@@ -84,7 +84,7 @@ void CalculateEfficiency2::init() {
                                             Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(PropertyNames::MIN_THRESHOLD, 0.0, positiveDouble,
                   "Minimum threshold for a pixel to be considered");

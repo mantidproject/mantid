@@ -40,7 +40,7 @@ IAlgorithm_sptr algorithmWithoutOptionalPropertiesSet(
     const std::string &inputWSName, const std::string &pairName,
     const std::vector<int> &group1, const std::vector<int> &group2) {
 
-  auto alg = boost::make_shared<MuonPairingAsymmetry>();
+  auto alg = std::make_shared<MuonPairingAsymmetry>();
   alg->initialize();
   alg->setProperty("SpecifyGroupsManually", true);
   alg->setProperty("OutputWorkspace", "__notUsed");
@@ -80,7 +80,7 @@ IAlgorithm_sptr setUpAlgorithmWithGroups(const WorkspaceGroup_sptr &ws,
 IAlgorithm_sptr
 setUpAlgorithmWithGroupWorkspaces(const MatrixWorkspace_sptr &groupedWS1,
                                   const MatrixWorkspace_sptr &groupedWS2) {
-  auto alg = boost::make_shared<MuonPairingAsymmetry>();
+  auto alg = std::make_shared<MuonPairingAsymmetry>();
   alg->initialize();
   alg->setProperty("SpecifyGroupsManually", false);
   alg->setProperty("OutputWorkspace", "__notUsed");
@@ -96,7 +96,7 @@ setUpAlgorithmWithGroupWorkspaces(const MatrixWorkspace_sptr &groupedWS1,
 IAlgorithm_sptr
 setUpAlgorithmWithGroupWorkspaceGroups(const WorkspaceGroup_sptr &groupedWS1,
                                        const WorkspaceGroup_sptr &groupedWS2) {
-  auto alg = boost::make_shared<MuonPairingAsymmetry>();
+  auto alg = std::make_shared<MuonPairingAsymmetry>();
   alg->setRethrows(true);
   alg->initialize();
   alg->setProperty("SpecifyGroupsManually", false);
@@ -121,7 +121,7 @@ MatrixWorkspace_sptr createGroupWorkspace(const std::string &groupName,
   auto ws = createMultiPeriodAsymmetryData(nPeriods, 4, 10, "group");
   setUpADSWithWorkspace setup(ws);
 
-  auto alg = boost::make_shared<MuonGroupingCounts>();
+  auto alg = std::make_shared<MuonGroupingCounts>();
   alg->initialize();
   alg->setProperty("OutputWorkspace", "__notUsed");
   alg->setProperty("InputWorkspace", setup.inputWSName);
@@ -133,7 +133,7 @@ MatrixWorkspace_sptr createGroupWorkspace(const std::string &groupName,
   alg->execute();
 
   Workspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
 }
 
 WorkspaceGroup_sptr
@@ -142,11 +142,11 @@ createMultiPeriodGroupedWorkspace(const std::string &groupName,
                                   const int &nPeriods) {
   auto ws = createMultiPeriodAsymmetryData(nPeriods, 4, 10, "group");
 
-  auto wsGroup = boost::make_shared<WorkspaceGroup>();
+  auto wsGroup = std::make_shared<WorkspaceGroup>();
 
   for (int i = 1; i < nPeriods + 1; i++) {
     std::vector<int> periods = {i};
-    auto alg = boost::make_shared<MuonGroupingCounts>();
+    auto alg = std::make_shared<MuonGroupingCounts>();
     alg->initialize();
     alg->setProperty("OutputWorkspace", "__notUsed");
     alg->setProperty("InputWorkspace", ws);
@@ -202,7 +202,7 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonPairingAsymmetry>();
+    auto alg = std::make_shared<MuonPairingAsymmetry>();
     alg->initialize();
 
     TS_ASSERT_THROWS_ANYTHING(
@@ -213,7 +213,7 @@ public:
 
     auto ws = createMultiPeriodWorkspaceGroup(1, 6, 10, "group1");
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonPairingAsymmetry>();
+    auto alg = std::make_shared<MuonPairingAsymmetry>();
     alg->initialize();
 
     TS_ASSERT_THROWS_NOTHING(

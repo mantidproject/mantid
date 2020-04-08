@@ -97,7 +97,7 @@ void CalMuonDeadTime::exec() {
 
   // Do the initial setup of the ouput table-workspace
 
-  API::ITableWorkspace_sptr outTable = boost::make_shared<TableWorkspace>();
+  API::ITableWorkspace_sptr outTable = std::make_shared<TableWorkspace>();
   outTable->addColumn("int", "spectrum");
   outTable->addColumn("double", "dead-time");
 
@@ -116,7 +116,7 @@ void CalMuonDeadTime::exec() {
 
   // get cropped input workspace
 
-  boost::shared_ptr<API::MatrixWorkspace> wsCrop =
+  std::shared_ptr<API::MatrixWorkspace> wsCrop =
       cropWS->getProperty("OutputWorkspace");
 
   // next step is to take these data. Create a point workspace
@@ -133,7 +133,7 @@ void CalMuonDeadTime::exec() {
 
   // get pointworkspace
 
-  boost::shared_ptr<API::MatrixWorkspace> wsFitAgainst =
+  std::shared_ptr<API::MatrixWorkspace> wsFitAgainst =
       convertToPW->getProperty("OutputWorkspace");
 
   const size_t numSpec = wsFitAgainst->getNumberHistograms();

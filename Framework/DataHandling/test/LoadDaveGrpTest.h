@@ -41,7 +41,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWSName));
     MatrixWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
       TS_ASSERT_EQUALS(outputWS->x(0).size(), 60);
@@ -88,7 +88,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWSName));
     MatrixWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
       TS_ASSERT_EQUALS(outputWS->x(0).size(), 61);

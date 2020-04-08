@@ -49,7 +49,7 @@ public:
   static bool compareName(const std::string &proposedMatch);
 
   /// Create all the detector pixels of this grid detector.
-  void initialize(boost::shared_ptr<IObject> shape, int xpixels, double xstart,
+  void initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart,
                   double xstep, int ypixels, double ystart, double ystep,
                   int zpixels, double zstart, double zstep, int idstart,
                   const std::string &idFillOrder, int idstepbyrow,
@@ -58,8 +58,8 @@ public:
   //! Make a clone of the present component
   GridDetector *clone() const override;
 
-  boost::shared_ptr<Detector> getAtXYZ(const int x, const int y,
-                                       const int z) const;
+  std::shared_ptr<Detector> getAtXYZ(const int x, const int y,
+                                     const int z) const;
 
   detid_t getDetectorIDAtXYZ(const int x, const int y, const int z) const;
   std::tuple<int, int, int> getXYZForDetectorID(const detid_t detectorID) const;
@@ -94,7 +94,7 @@ public:
   detid_t minDetectorID();
   /// maximum detector id
   detid_t maxDetectorID();
-  boost::shared_ptr<const IComponent>
+  std::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
@@ -138,7 +138,7 @@ public:
   void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const IObject> shape() const override;
+  const std::shared_ptr<const IObject> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
 
@@ -153,7 +153,7 @@ protected:
                    int &minDetID, int &maxDetID);
 
 private:
-  void initializeValues(boost::shared_ptr<IObject> shape, int xpixels,
+  void initializeValues(std::shared_ptr<IObject> shape, int xpixels,
                         double xstart, double xstep, int ypixels, double ystart,
                         double ystep, int zpixels, double zstart, double zstep,
                         int idstart, const std::string &idFillOrder,
@@ -194,7 +194,7 @@ private:
   double m_zstep;
 
   /// Pointer to the shape of the pixels in this detector array.
-  boost::shared_ptr<IObject> m_shape;
+  std::shared_ptr<IObject> m_shape;
   /// minimum detector id
   detid_t m_minDetId;
   /// maximum detector id
@@ -215,8 +215,8 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const GridDetector &);
 
-using GridDetector_sptr = boost::shared_ptr<GridDetector>;
-using GridDetector_const_sptr = boost::shared_ptr<const GridDetector>;
+using GridDetector_sptr = std::shared_ptr<GridDetector>;
+using GridDetector_const_sptr = std::shared_ptr<const GridDetector>;
 
 } // Namespace Geometry
 } // Namespace Mantid

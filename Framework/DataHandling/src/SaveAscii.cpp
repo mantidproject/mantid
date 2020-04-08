@@ -43,7 +43,7 @@ void SaveAscii::init() {
                                                  FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
   declareProperty("WorkspaceIndexMin", 0, mustBeNonNegative,
                   "The starting workspace index.");
@@ -73,7 +73,7 @@ void SaveAscii::init() {
   }
 
   declareProperty("Separator", "CSV",
-                  boost::make_shared<StringListValidator>(sepOptions),
+                  std::make_shared<StringListValidator>(sepOptions),
                   "Character(s) to put as separator between X, Y, E values.");
 
   declareProperty(

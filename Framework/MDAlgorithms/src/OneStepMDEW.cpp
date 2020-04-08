@@ -59,7 +59,7 @@ void OneStepMDEW::exec() {
   loadAlg->executeAsChildAlg();
   Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
   IEventWorkspace_sptr tempWS =
-      boost::dynamic_pointer_cast<IEventWorkspace>(temp);
+      std::dynamic_pointer_cast<IEventWorkspace>(temp);
 
   // --------- Now Convert -------------------------------
 

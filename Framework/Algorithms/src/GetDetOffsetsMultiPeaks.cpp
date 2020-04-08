@@ -150,7 +150,7 @@ GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
 void GetDetOffsetsMultiPeaks::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
+                      std::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D matrix workspace with X values of d-spacing");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("DReference"),
@@ -171,13 +171,13 @@ void GetDetOffsetsMultiPeaks::init() {
   std::vector<std::string> peaktypes =
       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty("PeakFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peaktypes),
+                  std::make_shared<StringListValidator>(peaktypes),
                   "Type of peak to fit");
 
   std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
-      boost::make_shared<StringListValidator>(bkgdtypes),
+      std::make_shared<StringListValidator>(bkgdtypes),
       "Type of Background. The choice can be either Linear or Quadratic");
 
   declareProperty("HighBackground", true,
@@ -346,7 +346,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   }
 
   // Some shortcuts for event workspaces
-  m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
+  m_eventW = std::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   // bool m_isEvent = false;
   m_isEvent = false;
   if (m_eventW)
@@ -364,10 +364,10 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
   // Create output workspaces
-  m_outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
-  m_outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+  m_outputW = std::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+  m_outputNP = std::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
   MatrixWorkspace_sptr tempmaskws =
-      boost::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
+      std::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
   m_maskWS = tempmaskws;
 
   // Input resolution
@@ -1132,7 +1132,7 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   size_t numspec = m_inputWS->getNumberHistograms();
 
   // Create output offset calculation status table
-  m_infoTableWS = boost::make_shared<TableWorkspace>();
+  m_infoTableWS = std::make_shared<TableWorkspace>();
 
   // set up columns
   m_infoTableWS->addColumn("int", "WorkspaceIndex");
@@ -1151,7 +1151,7 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   }
 
   // Create output peak fitting information table
-  m_peakOffsetTableWS = boost::make_shared<TableWorkspace>();
+  m_peakOffsetTableWS = std::make_shared<TableWorkspace>();
 
   // set up columns
   m_peakOffsetTableWS->addColumn("int", "WorkspaceIndex");

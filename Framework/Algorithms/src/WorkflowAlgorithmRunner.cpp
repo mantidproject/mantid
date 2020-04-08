@@ -93,7 +93,7 @@ DECLARE_ALGORITHM(WorkflowAlgorithmRunner)
 
 void WorkflowAlgorithmRunner::init() {
   declareProperty(PropertyNames::ALGORITHM, "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "Name of the algorithm to run");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       PropertyNames::SETUP_TABLE.c_str(), "", Direction::Input),

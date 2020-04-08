@@ -52,7 +52,7 @@ void GetAllEi::init() {
           "Workspace", "", Kernel::Direction::Input),
       "The input workspace containing the monitor's spectra "
       "measured after the last chopper");
-  auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto nonNegative = std::make_shared<Kernel::BoundedValidator<int>>();
   nonNegative->setLower(0);
 
   declareProperty(
@@ -98,7 +98,7 @@ void GetAllEi::init() {
                           Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           "Defined in IDF"));
 
-  auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto maxInRange = std::make_shared<Kernel::BoundedValidator<double>>();
   maxInRange->setLower(1.e-6);
   maxInRange->setUpper(0.1);
 
@@ -108,7 +108,7 @@ void GetAllEi::init() {
                   "maximum). \nPeaks, sharper then "
                   "this width are rejected. Accepted limits are: 1e^(-6)-0.1");
 
-  auto minInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto minInRange = std::make_shared<Kernel::BoundedValidator<double>>();
   minInRange->setLower(0.001);
   minInRange->setUpper(0.5);
   declareProperty(
@@ -118,7 +118,7 @@ void GetAllEi::init() {
       "Peaks broader then this width are rejected. Accepted limits are: "
       "0.001-0.5");
 
-  auto peakInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto peakInRange = std::make_shared<Kernel::BoundedValidator<double>>();
   peakInRange->setLower(0.0);
   minInRange->setUpper(1.);
   declareProperty(
@@ -412,7 +412,7 @@ void GetAllEi::exec() {
  */
 void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
                                   const std::pair<double, double> &TOF_range,
-                                  boost::shared_ptr<Kernel::Unit> &destUnit) {
+                                  std::shared_ptr<Kernel::Unit> &destUnit) {
 
   g_log.debug() << "*Found : " << guess_opening.size()
                 << " chopper prospective opening within time frame: "
@@ -896,7 +896,7 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
 
   // assuming equally binned ws.
-  boost::shared_ptr<API::HistoWorkspace> working_ws =
+  std::shared_ptr<API::HistoWorkspace> working_ws =
       DataObjects::create<API::HistoWorkspace>(
           *inputWS,
           Indexing::extract(inputWS->indexInfo(),
@@ -1176,7 +1176,7 @@ and if it's present, it is a time-series property
 */
 bool check_time_series_property(
     const GetAllEi *algo, const API::MatrixWorkspace_sptr &inputWS,
-    const boost::shared_ptr<const Geometry::IComponent> &chopper,
+    const std::shared_ptr<const Geometry::IComponent> &chopper,
     const std::string &prop_name, const std::string &err_presence,
     const std::string &err_type, bool fail,
     std::map<std::string, std::string> &result) {

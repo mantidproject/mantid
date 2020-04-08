@@ -359,7 +359,7 @@ void IndexPeaks::init() {
           Prop::PEAKSWORKSPACE, "", Direction::InOut),
       "Input Peaks Workspace");
 
-  auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.0);
   this->declareProperty(Prop::TOLERANCE, 0.15, mustBePositiveDbl,
                         "Main peak indexing tolerance", Direction::Input);

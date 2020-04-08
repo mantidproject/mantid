@@ -148,11 +148,11 @@ private:
   std::unique_ptr<Rule> createUnionSphereAndCylinder() {
     auto sR1 = std::make_unique<SurfPoint>();
     auto sR2 = std::make_unique<SurfPoint>();
-    auto sP = boost::make_shared<Sphere>();
+    auto sP = std::make_shared<Sphere>();
     sP->setSurface("s 2.0 0.0 0.0 2");
     sR1->setKey(sP); // Sphere
     sR1->setKeyN(-10);
-    auto cP = boost::make_shared<Cylinder>();
+    auto cP = std::make_shared<Cylinder>();
     cP->setSurface("cy 1.0");
     sR2->setKey(cP); // cappedcylinder
     sR2->setKeyN(-11);

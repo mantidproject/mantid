@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -28,7 +28,7 @@ public:
   virtual std::vector<double> dataToImage(const std::vector<double> &data) = 0;
 };
 
-using MaxentTransform_sptr = boost::shared_ptr<MaxentTransform>;
+using MaxentTransform_sptr = std::shared_ptr<MaxentTransform>;
 
 } // namespace Algorithms
 } // namespace Mantid

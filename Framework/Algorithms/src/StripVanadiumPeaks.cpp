@@ -41,7 +41,7 @@ void StripVanadiumPeaks::init() {
       "If the input workspace is an EventWorkspace, then the output must be "
       "different (and will be made into a Workspace2D).");
 
-  auto min = boost::make_shared<BoundedValidator<double>>();
+  auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   // The estimated width of a peak in terms of number of channels
   declareProperty("PeakWidthPercent", 1.0, min,
@@ -56,7 +56,7 @@ void StripVanadiumPeaks::init() {
       "Only peaks near these positions will be fitted.\n"
       "If not entered, the default vanadium peak positions will be used.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, peaks will only be removed from this spectrum "
@@ -69,7 +69,7 @@ void StripVanadiumPeaks::exec() {
 
   // Check for trying to rewrite an EventWorkspace
   EventWorkspace_sptr inputEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(inputWS);
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputEvent && (inputWS == outputWS)) {
     throw std::invalid_argument(

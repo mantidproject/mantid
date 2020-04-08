@@ -250,7 +250,7 @@ QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
   QMap<QString, QVariant> map;
 
-  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  auto projection3D = std::dynamic_pointer_cast<Projection3D>(obj);
   if (projection3D) {
     map.insert(QString("projection3DSuccess"), QVariant(true));
     map.insert(QString("projection3D"),

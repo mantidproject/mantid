@@ -11,4 +11,4 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 // Boost
-#include <boost/shared_ptr.hpp>
+#include <memory>

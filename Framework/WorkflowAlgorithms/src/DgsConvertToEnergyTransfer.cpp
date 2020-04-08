@@ -91,7 +91,7 @@ void DgsConvertToEnergyTransfer::exec() {
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
@@ -188,7 +188,7 @@ void DgsConvertToEnergyTransfer::exec() {
         Workspace_sptr monWSOutput = loadmon->getProperty("OutputWorkspace");
         // the algorithm can return a group workspace if the file is multi
         // period
-        monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
+        monWS = std::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
         if ((monWSOutput) && (!monWS))
           // this was a group workspace - DGSReduction does not support multi
           // period data yet

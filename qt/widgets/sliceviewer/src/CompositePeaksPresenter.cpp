@@ -189,7 +189,7 @@ SetPeaksWorkspaces CompositePeaksPresenter::presentedWorkspaces() const {
 */
 CompositePeaksPresenter::SubjectContainer::iterator
 CompositePeaksPresenter::getPresenterIteratorFromWorkspace(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) {
   SubjectContainer::iterator presenterFound = m_subjects.end();
   for (auto presenterIterator = m_subjects.begin();
        presenterIterator != m_subjects.end(); ++presenterIterator) {
@@ -209,7 +209,7 @@ CompositePeaksPresenter::getPresenterIteratorFromWorkspace(
 */
 CompositePeaksPresenter::SubjectContainer::const_iterator
 CompositePeaksPresenter::getPresenterIteratorFromWorkspace(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   SubjectContainer::const_iterator presenterFound = m_subjects.end();
   for (auto presenterIterator = m_subjects.begin();
        presenterIterator != m_subjects.end(); ++presenterIterator) {
@@ -229,7 +229,7 @@ Set the foreground colour of the peaks.
 @ colour to use for re-colouring
 */
 void CompositePeaksPresenter::setForegroundColor(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
     const PeakViewColor &color) {
   SubjectContainer::iterator iterator =
       getPresenterIteratorFromWorkspace(std::move(ws));
@@ -248,7 +248,7 @@ Set the background colour of the peaks.
 @ colour to use for re-colouring
 */
 void CompositePeaksPresenter::setBackgroundColor(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
     const PeakViewColor &color) {
   SubjectContainer::iterator iterator =
       getPresenterIteratorFromWorkspace(std::move(ws));
@@ -284,7 +284,7 @@ PeakPalette<PeakViewColor> CompositePeaksPresenter::getPalette() const {
 @return the foreground colour corresponding to the peaks workspace.
 */
 PeakViewColor CompositePeaksPresenter::getForegroundPeakViewColor(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   if (useDefault()) {
     throw std::runtime_error("Foreground colours from palette cannot be "
                              "fetched until nested presenters are added.");
@@ -300,7 +300,7 @@ PeakViewColor CompositePeaksPresenter::getForegroundPeakViewColor(
 @return the background colour corresponding to the peaks workspace.
 */
 PeakViewColor CompositePeaksPresenter::getBackgroundPeakViewColor(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   if (useDefault()) {
     throw std::runtime_error("Background colours from palette cannot be "
                              "fetched until nested presenters are added.");
@@ -318,7 +318,7 @@ PeakViewColor CompositePeaksPresenter::getBackgroundPeakViewColor(
  * @param shown : True to show.
  */
 void CompositePeaksPresenter::setBackgroundRadiusShown(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
     const bool shown) {
   if (useDefault()) {
     return m_default->showBackgroundRadius(shown);
@@ -332,7 +332,7 @@ void CompositePeaksPresenter::setBackgroundRadiusShown(
  * @param peaksWS : Peaks list to remove.
  */
 void CompositePeaksPresenter::remove(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS) {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS) {
   if (useDefault()) {
     return;
   }
@@ -351,7 +351,7 @@ void CompositePeaksPresenter::remove(
  * @param shown : True to show.
  */
 void CompositePeaksPresenter::setShown(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS,
     const bool shown) {
   if (useDefault()) {
     return m_default->setShown(shown);
@@ -372,7 +372,7 @@ void CompositePeaksPresenter::setShown(
  * @param peakIndex : Index of the peak in the peaks list to zoom into.
  */
 void CompositePeaksPresenter::zoomToPeak(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS,
     const int peakIndex) {
   auto iterator = getPresenterIteratorFromWorkspace(std::move(peaksWS));
   auto subjectPresenter = *iterator;
@@ -465,7 +465,7 @@ double CompositePeaksPresenter::getPeakSizeIntoProjection() const {
  * @return
  */
 bool CompositePeaksPresenter::getShowBackground(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   if (useDefault()) {
     throw std::runtime_error("Get show background cannot be fetched until "
                              "nested presenters are added.");
@@ -599,8 +599,7 @@ void CompositePeaksPresenter::zoomToPeak(PeaksPresenter *const presenter,
  * @return True if hidden.
  */
 bool CompositePeaksPresenter::getIsHidden(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS)
-    const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS) const {
   auto iterator = getPresenterIteratorFromWorkspace(std::move(peaksWS));
   auto subjectPresenter = *iterator;
   return subjectPresenter->isHidden();
@@ -636,7 +635,7 @@ int CompositePeaksPresenter::getZoomedPeakIndex() const {
 
 void CompositePeaksPresenter::editCommand(
     EditMode editMode,
-    const boost::weak_ptr<const Mantid::API::IPeaksWorkspace> &target) {
+    const std::weak_ptr<const Mantid::API::IPeaksWorkspace> &target) {
   if (auto ws = target.lock()) {
 
     // Change the right subject to the desired edit mode.
@@ -656,7 +655,7 @@ void CompositePeaksPresenter::editCommand(
 
 void CompositePeaksPresenter::updatePeaksWorkspace(
     const std::string &toName,
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) {
+    std::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) {
   if (m_owner) {
     m_owner->updatePeaksWorkspace(toName, toWorkspace);
   }

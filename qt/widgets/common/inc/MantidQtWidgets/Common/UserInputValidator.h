@@ -108,7 +108,7 @@ public:
 private:
   /// Gets a workspace from the ADS
   template <typename T = Mantid::API::MatrixWorkspace>
-  boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
+  std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
 
   /// Any raised error messages.
   QStringList m_errorMessages;
@@ -149,7 +149,7 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
  * @return The workspace
  */
 template <typename T>
-boost::shared_ptr<T>
+std::shared_ptr<T>
 UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(
       workspaceName);

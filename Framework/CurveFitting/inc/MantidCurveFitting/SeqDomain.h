@@ -66,7 +66,7 @@ protected:
   /// Currently active values.
   mutable std::vector<API::FunctionValues_sptr> m_values;
   /// Domain creators.
-  std::vector<boost::shared_ptr<API::IDomainCreator>> m_creators;
+  std::vector<std::shared_ptr<API::IDomainCreator>> m_creators;
 };
 
 } // namespace CurveFitting

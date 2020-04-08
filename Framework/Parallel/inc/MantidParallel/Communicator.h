@@ -59,13 +59,13 @@ public:
   detail::ThreadingBackend &backend() const;
 
 private:
-  Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
+  Communicator(std::shared_ptr<detail::ThreadingBackend> backend,
                const int rank);
 
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::communicator m_communicator;
 #endif
-  boost::shared_ptr<detail::ThreadingBackend> m_backend;
+  std::shared_ptr<detail::ThreadingBackend> m_backend;
   int m_rank{0};
 
   // For accessing constructor with threading backend.

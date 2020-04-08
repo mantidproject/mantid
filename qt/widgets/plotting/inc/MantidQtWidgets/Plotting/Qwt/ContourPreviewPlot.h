@@ -37,9 +37,8 @@ namespace MantidWidgets {
 class ColorBarWidget;
 class SafeQwtPlot;
 
-using MWDimension_sptr = boost::shared_ptr<Mantid::API::MWDimension>;
-using MWDimension_const_sptr =
-    boost::shared_ptr<Mantid::API::MWDimension const>;
+using MWDimension_sptr = std::shared_ptr<Mantid::API::MWDimension>;
+using MWDimension_const_sptr = std::shared_ptr<Mantid::API::MWDimension const>;
 using DimensionRange = std::pair<Mantid::coord_t, Mantid::coord_t>;
 
 class EXPORT_OPT_MANTIDQT_PLOTTING ContourPreviewPlot
@@ -67,7 +66,7 @@ public:
 protected:
   void preDeleteHandle(
       std::string const &workspaceName,
-      boost::shared_ptr<Mantid::API::Workspace> const workspace) override;
+      std::shared_ptr<Mantid::API::Workspace> const &workspace) override;
 
 private slots:
   void handleSetTransparentZeros(bool const &transparent);
@@ -97,7 +96,7 @@ private:
   /// Data presenter
   std::unique_ptr<API::QwtRasterDataMD> m_data;
   /// Md Settings for colour maps
-  boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
+  std::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
   /// Workspace being shown
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   /// The calculated range of values in the full data set

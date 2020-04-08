@@ -27,7 +27,7 @@ public:
   static void destroySuite(SampleValidatorTest *suite) { delete suite; }
 
   void test_fail() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
     SampleValidator validator;
     TS_ASSERT_EQUALS(
@@ -36,7 +36,7 @@ public:
   }
 
   void test_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     auto sphere = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
     Mantid::Kernel::Material material(
         "stuff", Mantid::PhysicalConstants::NeutronAtom(), 10);

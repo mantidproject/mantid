@@ -48,7 +48,7 @@ private:
   size_t m_iteration;
 };
 
-using Poldi2DFunction_sptr = boost::shared_ptr<Poldi2DFunction>;
+using Poldi2DFunction_sptr = std::shared_ptr<Poldi2DFunction>;
 
 } // namespace Poldi
 } // namespace Mantid

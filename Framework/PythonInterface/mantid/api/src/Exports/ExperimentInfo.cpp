@@ -58,7 +58,7 @@ void setRun(ExperimentInfo &expInfo, const Mantid::API::Run &run) {
 } // namespace
 
 void export_ExperimentInfo() {
-  register_ptr_to_python<boost::shared_ptr<ExperimentInfo>>();
+  register_ptr_to_python<std::shared_ptr<ExperimentInfo>>();
 
   class_<ExperimentInfo, boost::noncopyable>("ExperimentInfo", no_init)
       .def("getInstrument", &ExperimentInfo::getInstrument,

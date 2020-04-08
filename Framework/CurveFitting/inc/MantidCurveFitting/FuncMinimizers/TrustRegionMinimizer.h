@@ -51,7 +51,7 @@ private:
                      const NLLS::nlls_options &options);
 
   /// Stored cost function
-  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
+  std::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// Stored to access IFunction interface in iterate()
   API::IFunction_sptr m_function;
   /// Fitting data weights

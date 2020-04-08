@@ -34,7 +34,7 @@ UnwrapMonitor::UnwrapMonitor()
 
 /// Initialisation method
 void UnwrapMonitor::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
@@ -48,7 +48,7 @@ void UnwrapMonitor::init() {
           "OutputWorkspace", "", Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  auto validator = boost::make_shared<BoundedValidator<double>>();
+  auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.01);
   declareProperty("LRef", 0.0, validator,
                   "The length of the reference flight path (in metres)");

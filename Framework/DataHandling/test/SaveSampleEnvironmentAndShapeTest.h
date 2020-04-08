@@ -65,7 +65,7 @@ public:
 
     auto mesh2 = createCube();
     mesh2->translate(Kernel::V3D{10, 10, 10});
-    auto can = boost::make_shared<Container>(mesh2);
+    auto can = std::make_shared<Container>(mesh2);
     auto environment = std::make_unique<SampleEnvironment>("name", can);
     ws->mutableSample().setEnvironment(std::move(environment));
 
@@ -85,7 +85,7 @@ public:
 
     auto mesh2 = createCube();
     mesh2->translate(Kernel::V3D{10, 10, 10});
-    auto can = boost::make_shared<Container>(mesh2);
+    auto can = std::make_shared<Container>(mesh2);
     auto environment = std::make_unique<SampleEnvironment>("name", can);
     auto mesh3 = createCube();
     mesh3->translate(Kernel::V3D{20, 20, 20});
@@ -110,7 +110,7 @@ public:
     SaveSampleEnvironmentAndShape alg;
     auto ws = setup(alg);
 
-    const auto container = boost::make_shared<Container>();
+    const auto container = std::make_shared<Container>();
     ws->mutableSample().setShape(container);
 
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument &);
@@ -122,8 +122,7 @@ public:
 
     const std::vector<uint32_t> v1;
     const std::vector<Kernel::V3D> v2;
-    const auto mesh =
-        boost::make_shared<MeshObject>(v1, v2, Kernel::Material());
+    const auto mesh = std::make_shared<MeshObject>(v1, v2, Kernel::Material());
     ws->mutableSample().setShape(mesh);
 
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument &);
@@ -138,9 +137,8 @@ public:
 
     const std::vector<uint32_t> v1;
     const std::vector<Kernel::V3D> v2;
-    const auto mesh2 =
-        boost::make_shared<MeshObject>(v1, v2, Kernel::Material());
-    auto can = boost::make_shared<Container>(mesh2);
+    const auto mesh2 = std::make_shared<MeshObject>(v1, v2, Kernel::Material());
+    auto can = std::make_shared<Container>(mesh2);
     auto environment = std::make_unique<SampleEnvironment>("name", can);
     ws->mutableSample().setEnvironment(std::move(environment));
 
@@ -157,9 +155,9 @@ public:
     auto mesh2 = createCube();
     const std::vector<uint32_t> v1;
     const std::vector<Kernel::V3D> v2;
-    auto can = boost::make_shared<Container>(mesh2);
+    auto can = std::make_shared<Container>(mesh2);
     auto environment = std::make_unique<SampleEnvironment>("can", can);
-    auto mesh3 = boost::make_shared<MeshObject>(v1, v2, Kernel::Material());
+    auto mesh3 = std::make_shared<MeshObject>(v1, v2, Kernel::Material());
     environment->add(mesh3);
     ws->mutableSample().setEnvironment(std::move(environment));
 
@@ -180,11 +178,11 @@ public:
     return inputWS;
   }
 
-  boost::shared_ptr<MeshObject> retrieveSavedMesh() {
+  std::shared_ptr<MeshObject> retrieveSavedMesh() {
     LoadBinaryStl loader = LoadBinaryStl(m_OutputFile, ScaleUnits::metres);
     TS_ASSERT(loader.isBinarySTL(m_OutputFile))
     auto shape = loader.readStl();
-    return boost::shared_ptr<MeshObject>(shape.release());
+    return std::shared_ptr<MeshObject>(shape.release());
   }
 
   void assertVectorsMatch(const MeshObject &mesh1, const MeshObject &mesh2) {
@@ -201,7 +199,7 @@ public:
   }
 
   // create a cube mesh object
-  boost::shared_ptr<MeshObject> createCube() {
+  std::shared_ptr<MeshObject> createCube() {
     const std::vector<uint32_t> faces{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5,
                                       2, 5, 4, 6, 1, 3, 6, 5, 1, 4, 5, 6,
                                       7, 3, 0, 0, 4, 7, 7, 6, 3, 4, 6, 7};
@@ -210,12 +208,12 @@ public:
         Mantid::Kernel::V3D(5, -5, -15),  Mantid::Kernel::V3D(-5, 5, -15),
         Mantid::Kernel::V3D(5, -5, 15),   Mantid::Kernel::V3D(5, 5, 15),
         Mantid::Kernel::V3D(-5, 5, 15),   Mantid::Kernel::V3D(-5, -5, 15)};
-    auto cube = boost::make_shared<MeshObject>(faces, vertices,
-                                               Mantid::Kernel::Material());
+    auto cube = std::make_shared<MeshObject>(faces, vertices,
+                                             Mantid::Kernel::Material());
     return cube;
   }
   // create a mesh of cubes for comparison
-  boost::shared_ptr<MeshObject> createCubes(int num, int translation) {
+  std::shared_ptr<MeshObject> createCubes(int num, int translation) {
     uint32_t offset = 0;
     int actualTranslation = 0;
     std::vector<uint32_t> faces;
@@ -251,8 +249,8 @@ public:
       actualTranslation += translation;
       offset += 8;
     }
-    auto cube = boost::make_shared<MeshObject>(faces, vertices,
-                                               Mantid::Kernel::Material());
+    auto cube = std::make_shared<MeshObject>(faces, vertices,
+                                             Mantid::Kernel::Material());
     return cube;
   }
 

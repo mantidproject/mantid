@@ -11,8 +11,8 @@
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
-#include <boost/shared_ptr.hpp>
 #include <cstddef>
+#include <memory>
 #include <unordered_map>
 #include <utility>
 
@@ -48,58 +48,58 @@ class MANTID_GEOMETRY_DLL InstrumentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 private:
   /// Detector indices
-  boost::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
+  std::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
 
   /// Detectors components always specified first
-  boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
+  std::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
 
   /// Detector indexes sorted by assembly
-  boost::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
+  std::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
 
   /// Component indexes sorted by assembly
-  boost::shared_ptr<std::vector<size_t>> m_assemblySortedComponentIndices;
+  std::shared_ptr<std::vector<size_t>> m_assemblySortedComponentIndices;
 
   /// Index of the parent component
-  boost::shared_ptr<std::vector<size_t>> m_parentComponentIndices;
+  std::shared_ptr<std::vector<size_t>> m_parentComponentIndices;
 
   /// Stores instrument tree structure by storing children of all Components
-  boost::shared_ptr<std::vector<std::vector<size_t>>> m_children;
+  std::shared_ptr<std::vector<std::vector<size_t>>> m_children;
 
   /// Only Assemblies and other NON-detectors yield detector ranges
-  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
+  std::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
 
   /// Component ranges.
-  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_componentRanges;
+  std::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_componentRanges;
 
   /// Component ID -> Component Index map
-  boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
+  std::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
       m_componentIdToIndexMap;
 
   /// Detector ID -> index mappings
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+  std::shared_ptr<const std::unordered_map<detid_t, size_t>>
       m_detectorIdToIndexMap;
 
   /// Positions for non-detectors
-  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
+  std::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
 
   /// Positions for detectors
-  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_detectorPositions;
+  std::shared_ptr<std::vector<Eigen::Vector3d>> m_detectorPositions;
 
   /// Rotations for non-detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond,
-                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+  std::shared_ptr<std::vector<Eigen::Quaterniond,
+                              Eigen::aligned_allocator<Eigen::Quaterniond>>>
       m_rotations;
 
   /// Rotations for detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond,
-                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+  std::shared_ptr<std::vector<Eigen::Quaterniond,
+                              Eigen::aligned_allocator<Eigen::Quaterniond>>>
       m_detectorRotations;
 
   /// Monitor indexes for detectors
-  boost::shared_ptr<std::vector<size_t>> m_monitorIndices;
+  std::shared_ptr<std::vector<size_t>> m_monitorIndices;
 
   /// Instrument to build around
-  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
+  std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
 
   /// Parameter map to purge.
   Mantid::Geometry::ParameterMap *m_pmap;
@@ -117,21 +117,20 @@ private:
   int64_t m_sampleIndex = -1;
 
   /// Null shared (empty shape)
-  boost::shared_ptr<const Mantid::Geometry::IObject> m_nullShape;
+  std::shared_ptr<const Mantid::Geometry::IObject> m_nullShape;
 
   /// Shapes stored in fly-weight fashion
-  boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>>
+  std::shared_ptr<std::vector<std::shared_ptr<const Mantid::Geometry::IObject>>>
       m_shapes;
 
   /// Scale factors
-  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
+  std::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
   /// Structured bank flag
-  boost::shared_ptr<std::vector<Beamline::ComponentType>> m_componentType;
+  std::shared_ptr<std::vector<Beamline::ComponentType>> m_componentType;
 
   /// Component names
-  boost::shared_ptr<std::vector<std::string>> m_names;
+  std::shared_ptr<std::vector<std::string>> m_names;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
@@ -143,7 +142,7 @@ private:
   size_t commonRegistration(const Mantid::Geometry::IComponent &component);
 
 public:
-  InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
+  InstrumentVisitor(std::shared_ptr<const Instrument> instrument);
 
   void walkInstrument();
 
@@ -177,14 +176,14 @@ public:
   virtual size_t
   registerObjComponentAssembly(const ObjCompAssembly &obj) override;
 
-  boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+  std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
   componentIds() const;
 
-  boost::shared_ptr<
+  std::shared_ptr<
       const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
   componentIdToIndexMap() const;
 
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+  std::shared_ptr<const std::unordered_map<detid_t, size_t>>
   detectorIdToIndexMap() const;
   size_t size() const;
 
@@ -193,7 +192,7 @@ public:
   std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
   std::unique_ptr<Beamline::DetectorInfo> detectorInfo() const;
 
-  boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
+  std::shared_ptr<std::vector<detid_t>> detectorIds() const;
 
   static std::pair<std::unique_ptr<ComponentInfo>,
                    std::unique_ptr<DetectorInfo>>

@@ -38,7 +38,7 @@ UnwrapSNS::UnwrapSNS()
 
 /// Initialisation method
 void UnwrapSNS::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
@@ -51,7 +51,7 @@ void UnwrapSNS::init() {
                   "This workspace will be in the units of time of flight. (See "
                   "http://www.mantidproject.org/Units)");
 
-  auto validator = boost::make_shared<BoundedValidator<double>>();
+  auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.01);
   declareProperty("LRef", 0.0, validator,
                   "A distance at which it is possible to deduce if a particle "
@@ -97,7 +97,7 @@ void UnwrapSNS::exec() {
                 << "\n";
 
   // go off and do the event version if appropriate
-  m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
+  m_inputEvWS = std::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   if ((m_inputEvWS != nullptr)) // && ! this->getProperty("ForceHist")) // TODO
                                 // remove ForceHist option
   {
@@ -175,7 +175,7 @@ void UnwrapSNS::execEvent() {
     matrixOutW = m_inputWS->clone();
     setProperty("OutputWorkspace", matrixOutW);
   }
-  auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
+  auto outW = std::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   // set up the progress bar
   m_progress =

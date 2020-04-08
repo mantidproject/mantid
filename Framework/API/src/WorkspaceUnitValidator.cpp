@@ -25,7 +25,7 @@ WorkspaceUnitValidator::WorkspaceUnitValidator(const std::string &unitID)
  * Clone the current state
  */
 Kernel::IValidator_sptr WorkspaceUnitValidator::clone() const {
-  return boost::make_shared<WorkspaceUnitValidator>(*this);
+  return std::make_shared<WorkspaceUnitValidator>(*this);
 }
 
 /** Checks that the units of the workspace data are declared match any
@@ -46,7 +46,7 @@ WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   // can be anything
   if (m_unitID.empty()) {
     return (
-        unit && (!boost::dynamic_pointer_cast<const Kernel::Units::Empty>(unit))
+        unit && (!std::dynamic_pointer_cast<const Kernel::Units::Empty>(unit))
             ? ""
             : "The workspace must have units");
   }

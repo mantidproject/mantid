@@ -68,7 +68,7 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_shape = rhs.m_shape;
   m_environment = rhs.m_environment;
   m_geom_id = rhs.m_geom_id;
-  m_samples = std::vector<boost::shared_ptr<Sample>>(rhs.m_samples);
+  m_samples = std::vector<std::shared_ptr<Sample>>(rhs.m_samples);
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
@@ -144,7 +144,7 @@ const SampleEnvironment &Sample::getEnvironment() const {
  * ownership of the object.
  */
 void Sample::setEnvironment(std::unique_ptr<SampleEnvironment> env) {
-  m_environment = boost::shared_ptr<SampleEnvironment>(std::move(env));
+  m_environment = std::shared_ptr<SampleEnvironment>(std::move(env));
 }
 
 /** Return a const reference to the OrientedLattice of this sample
@@ -284,7 +284,7 @@ std::size_t Sample::size() const { return m_samples.size() + 1; }
  * Adds a sample to the sample collection
  * @param childSample The child sample to be added
  */
-void Sample::addSample(const boost::shared_ptr<Sample> &childSample) {
+void Sample::addSample(const std::shared_ptr<Sample> &childSample) {
   m_samples.emplace_back(childSample);
 }
 
@@ -302,7 +302,7 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->putAttr("version", 1);
   std::string shapeXML("");
   if (auto csgObject =
-          boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
+          std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
     shapeXML = csgObject->getShapeXML();
   }
   file->putAttr("shape_xml", shapeXML);
@@ -378,8 +378,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     Kernel::Material material;
     material.loadNexus(file, "material");
     // CSGObject expected, if so, set its material
-    if (auto csgObj =
-            boost::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
+    if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
       csgObj->setMaterial(material);
     }
 
@@ -387,7 +386,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     int num_other_samples;
     file->readData("num_other_samples", num_other_samples);
     for (int i = 0; i < num_other_samples; i++) {
-      auto extra = boost::make_shared<Sample>();
+      auto extra = std::make_shared<Sample>();
       extra->loadNexus(file, "sample" + Strings::toString(i + 1));
       this->addSample(extra);
     }

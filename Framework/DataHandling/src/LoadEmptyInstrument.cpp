@@ -77,7 +77,7 @@ void LoadEmptyInstrument::init() {
           "OutputWorkspace", "", Direction::Output),
       "The name of the workspace in which to store the imported instrument");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "DetectorValue", 1.0, mustBePositive,

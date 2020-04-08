@@ -9,8 +9,8 @@
 #include "MantidCrystal/DisjointElement.h"
 #include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -27,12 +27,12 @@ public:
   using ClusterIntegratedValues = boost::tuple<double, double>;
 
   /// integrate the cluster
-  virtual ClusterIntegratedValues integrate(
-      boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const = 0;
+  virtual ClusterIntegratedValues
+  integrate(std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const = 0;
 
   /// Apply labels to the workspace
   virtual void
-  writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const = 0;
+  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const = 0;
 
   /// Get the originally set label
   virtual size_t getOriginalLabel() const = 0;

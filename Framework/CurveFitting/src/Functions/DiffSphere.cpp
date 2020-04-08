@@ -71,10 +71,10 @@ void DiffSphere::setAttribute(const std::string &name,
  * @brief Initialize elastic and inelastic parts, aliases, attributes, and ties
  */
 void DiffSphere::init() {
-  m_elastic = boost::dynamic_pointer_cast<ElasticDiffSphere>(
+  m_elastic = std::dynamic_pointer_cast<ElasticDiffSphere>(
       API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
   this->addFunction(m_elastic);
-  m_inelastic = boost::dynamic_pointer_cast<InelasticDiffSphere>(
+  m_inelastic = std::dynamic_pointer_cast<InelasticDiffSphere>(
       API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
   this->addFunction(m_inelastic);
 

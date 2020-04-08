@@ -19,7 +19,7 @@
 #include <numeric>
 #include <random>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 using Mantid::CurveFitting::Functions::TeixeiraWaterSQE;
 
 class TeixeiraWaterSQETest : public CxxTest::TestSuite {
@@ -90,8 +90,8 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableTeixeiraWaterSQE> createTestTeixeiraWaterSQE() {
-    auto func = boost::make_shared<TestableTeixeiraWaterSQE>();
+  std::shared_ptr<TestableTeixeiraWaterSQE> createTestTeixeiraWaterSQE() {
+    auto func = std::make_shared<TestableTeixeiraWaterSQE>();
     func->initialize();
     func->setParameter("Height", 1.0);
     func->setParameter("DiffCoeff", 1.0); // 1Angstrom

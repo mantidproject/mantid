@@ -42,7 +42,7 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleEnvironment::init() {
-  auto wsValidator = boost::make_shared<InstrumentValidator>();
+  auto wsValidator = std::make_shared<InstrumentValidator>();
   // input workspace
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -90,7 +90,7 @@ void LoadSampleEnvironment::init() {
   declareProperty("AtomicNumber", 0, "The atomic number");
   declareProperty("MassNumber", 0,
                   "Mass number if ion (use 0 for default mass sensity)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
                   "This number density of the sample in number of "
@@ -124,7 +124,7 @@ void LoadSampleEnvironment::init() {
                   "to be used to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
   declareProperty("NumberDensityUnit", units.front(),
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
@@ -213,7 +213,7 @@ void LoadSampleEnvironment::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+  std::shared_ptr<MeshObject> environmentMesh = nullptr;
 
   std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
@@ -284,7 +284,7 @@ void LoadSampleEnvironment::exec() {
     environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
-    auto can = boost::make_shared<Container>(environmentMesh);
+    auto can = std::make_shared<Container>(environmentMesh);
     environment = std::make_unique<SampleEnvironment>(name, can);
   }
   // Put Environment into sample.

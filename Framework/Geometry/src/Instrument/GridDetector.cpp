@@ -19,8 +19,8 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <utility>
@@ -94,8 +94,8 @@ GridDetector *GridDetector::clone() const { return new GridDetector(*this); }
  * @throw runtime_error if the x/y/z pixel width is not set, or x/y/z are out of
  *range
  */
-boost::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y,
-                                                   const int z) const {
+std::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y,
+                                                 const int z) const {
   if ((xpixels() <= 0) || (ypixels() <= 0))
     throw std::runtime_error("GridDetector::getAtXY: invalid X or Y "
                              "width set in the object.");
@@ -112,22 +112,22 @@ boost::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y,
   }
 
   // Find the index and return that.
-  boost::shared_ptr<ICompAssembly> xCol;
+  std::shared_ptr<ICompAssembly> xCol;
   // Get to layer
   if (this->zpixels() > 0) {
-    auto zLayer = boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(z));
+    auto zLayer = std::dynamic_pointer_cast<ICompAssembly>(this->getChild(z));
     if (!zLayer)
       throw std::runtime_error(
           "GridDetector::getAtXYZ: z specified is out of range.");
 
-    xCol = boost::dynamic_pointer_cast<ICompAssembly>(zLayer->getChild(x));
+    xCol = std::dynamic_pointer_cast<ICompAssembly>(zLayer->getChild(x));
   } else
-    xCol = boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(x));
+    xCol = std::dynamic_pointer_cast<ICompAssembly>(this->getChild(x));
 
   if (!xCol)
     throw std::runtime_error(
         "GridDetector::getAtXYZ: x specified is out of range.");
-  return boost::dynamic_pointer_cast<Detector>(xCol->getChild(y));
+  return std::dynamic_pointer_cast<Detector>(xCol->getChild(y));
 }
 
 detid_t getFillFirstZ(const GridDetector *me, int x, int y, int z) {
@@ -530,11 +530,11 @@ void GridDetector::validateInput() const {
         "GridDetector::initialize(): ypixels should be > 0");
 }
 
-void GridDetector::initializeValues(boost::shared_ptr<IObject> shape,
-                                    int xpixels, double xstart, double xstep,
-                                    int ypixels, double ystart, double ystep,
-                                    int zpixels, double zstart, double zstep,
-                                    int idstart, const std::string &idFillOrder,
+void GridDetector::initializeValues(std::shared_ptr<IObject> shape, int xpixels,
+                                    double xstart, double xstep, int ypixels,
+                                    double ystart, double ystep, int zpixels,
+                                    double zstart, double zstep, int idstart,
+                                    const std::string &idFillOrder,
                                     int idstepbyrow, int idstep) {
 
   m_xpixels = xpixels;
@@ -599,7 +599,7 @@ void GridDetector::initializeValues(boost::shared_ptr<IObject> shape,
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
-void GridDetector::initialize(boost::shared_ptr<IObject> shape, int xpixels,
+void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels,
                               double xstart, double xstep, int ypixels,
                               double ystart, double ystep, int zpixels,
                               double zstart, double zstep, int idstart,
@@ -654,11 +654,11 @@ detid_t GridDetector::maxDetectorID() {
 
 //-------------------------------------------------------------------------------------------------
 /// @copydoc Mantid::Geometry::CompAssembly::getComponentByName
-boost::shared_ptr<const IComponent>
+std::shared_ptr<const IComponent>
 GridDetector::getComponentByName(const std::string &cname, int nlevels) const {
   // exact matches
   if (cname == this->getName())
-    return boost::shared_ptr<const IComponent>(this);
+    return std::shared_ptr<const IComponent>(this);
 
   // cache the detector's name as all the other names are longer
   // The extra ( is because all children of this have that as the next character
@@ -668,7 +668,7 @@ GridDetector::getComponentByName(const std::string &cname, int nlevels) const {
   // check that the searched for name starts with the detector's
   // name as they are generated
   if (cname.substr(0, MEMBER_NAME.length()) != MEMBER_NAME) {
-    return boost::shared_ptr<const IComponent>();
+    return std::shared_ptr<const IComponent>();
   } else {
     return CompAssembly::getComponentByName(cname, nlevels);
   }
@@ -856,7 +856,7 @@ void GridDetector::initDraw() const {
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the shape of the Object
-const boost::shared_ptr<const IObject> GridDetector::shape() const {
+const std::shared_ptr<const IObject> GridDetector::shape() const {
   // --- Create a cuboid shape for your pixels ----
   double szX = m_xpixels;
   double szY = m_ypixels;
@@ -875,7 +875,7 @@ const boost::shared_ptr<const IObject> GridDetector::shape() const {
 
   std::string xmlCuboidShape(xmlShapeStream.str());
   Geometry::ShapeFactory shapeCreator;
-  boost::shared_ptr<Geometry::IObject> cuboidShape =
+  std::shared_ptr<Geometry::IObject> cuboidShape =
       shapeCreator.createShape(xmlCuboidShape);
 
   return cuboidShape;

@@ -82,7 +82,7 @@ public:
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     alg->setProperty("Geometry", props);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     props = createRectangularBeamProps();
@@ -111,7 +111,7 @@ private:
     using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"),
                            "");
     props->declareProperty(std::make_unique<DoubleProperty>("Width", 1.0), "");

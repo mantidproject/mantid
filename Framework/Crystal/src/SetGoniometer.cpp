@@ -42,7 +42,7 @@ void SetGoniometer::init() {
   std::vector<std::string> gonOptions{"None, Specify Individually",
                                       "Universal"};
   declareProperty("Goniometers", gonOptions[0],
-                  boost::make_shared<StringListValidator>(gonOptions),
+                  std::make_shared<StringListValidator>(gonOptions),
                   "Set the axes and motor names according to goniometers that "
                   "we define in the code (Universal defined for SNS)");
 
@@ -62,11 +62,11 @@ void SetGoniometer::init() {
  */
 void SetGoniometer::exec() {
   Workspace_sptr ws = getProperty("Workspace");
-  auto ei = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  auto ei = std::dynamic_pointer_cast<ExperimentInfo>(ws);
 
   if (!ei) {
     // We're dealing with an MD workspace which has multiple experiment infos
-    auto infos = boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
+    auto infos = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
     if (!infos) {
       throw std::invalid_argument(
           "Input workspace does not support Goniometer");

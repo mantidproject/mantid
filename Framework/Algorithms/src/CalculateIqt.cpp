@@ -132,7 +132,7 @@ void CalculateIqt::init() {
   declareProperty("EnergyMax", 0.5, "Maximum energy for fit. Default = 0.5.");
   declareProperty("EnergyWidth", 0.1, "Width of energy bins for fit.");
 
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
 
   declareProperty("NumberOfIterations", DEFAULT_ITERATIONS, positiveInt,

@@ -110,7 +110,7 @@ public:
     using Mantid::Kernel::Units::Degrees;
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    ws->getAxis(0)->unit() = boost::make_shared<EmptyUtf8Label>();
+    ws->getAxis(0)->unit() = std::make_shared<EmptyUtf8Label>();
     TS_ASSERT_EQUALS("Caption (unittext)", PlotAxis(*ws, 0).title());
   }
 

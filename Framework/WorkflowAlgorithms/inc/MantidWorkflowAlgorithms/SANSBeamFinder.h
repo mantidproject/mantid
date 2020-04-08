@@ -44,7 +44,7 @@ private:
                  int low, int left, int right,
                  const std::string &componentName = "detector1");
 
-  boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
+  std::shared_ptr<Kernel::PropertyManager> m_reductionManager;
   std::string m_output_message;
 };
 

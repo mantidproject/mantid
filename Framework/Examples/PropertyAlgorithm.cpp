@@ -33,7 +33,7 @@ void PropertyAlgorithm::init() {
   // declareProperty("IntValue",1);
 
   // A validator puts restrictions on property's possible values
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("PositiveIntValue", 0, mustBePositive);
   declareProperty("PositiveIntValue1", 0, mustBePositive);

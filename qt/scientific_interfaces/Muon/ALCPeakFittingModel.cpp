@@ -61,7 +61,7 @@ void ALCPeakFittingModel::setData(MatrixWorkspace_sptr newData) {
 MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace() {
   if (m_data && m_data->getNumberHistograms() > 2) {
 
-    return boost::const_pointer_cast<MatrixWorkspace>(m_data);
+    return std::const_pointer_cast<MatrixWorkspace>(m_data);
 
   } else {
 
@@ -90,7 +90,7 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   fit->setChild(true);
   fit->setProperty("Function", peaks->asString());
   fit->setProperty("InputWorkspace",
-                   boost::const_pointer_cast<MatrixWorkspace>(m_data));
+                   std::const_pointer_cast<MatrixWorkspace>(m_data));
   fit->setProperty("CreateOutput", true);
   fit->setProperty("OutputCompositeMembers", true);
 
@@ -113,7 +113,7 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
 MatrixWorkspace_sptr
 ALCPeakFittingModel::guessData(IFunction_const_sptr function,
                                const std::vector<double> &xValues) {
-  const auto inputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  const auto inputWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
                                           xValues.size()));
   inputWorkspace->mutableX(0) = xValues;

@@ -40,7 +40,7 @@ using namespace HistogramData;
 
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
-  auto wsVal = boost::make_shared<CompositeValidator>();
+  auto wsVal = std::make_shared<CompositeValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
@@ -54,7 +54,7 @@ void ConvertSpectrumAxis2::init() {
       "Theta", "SignedTheta",  "ElasticQ",       "ElasticQSquared",
       "theta", "signed_theta", "ElasticDSpacing"};
   declareProperty(
-      "Target", "", boost::make_shared<StringListValidator>(targetOptions),
+      "Target", "", std::make_shared<StringListValidator>(targetOptions),
       "The unit to which spectrum axis is converted to - \"theta\" (for the "
       "angle in degrees), Q or Q^2, where elastic Q is evaluated at EFixed. "
       "Note that 'theta' and 'signed_theta' are there for compatibility "
@@ -63,10 +63,10 @@ void ConvertSpectrumAxis2::init() {
   eModeOptions.emplace_back("Direct");
   eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
-                  boost::make_shared<StringListValidator>(eModeOptions),
+                  std::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "
                   "(\"Direct\" or \"Indirect\")");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
@@ -229,7 +229,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   MatrixWorkspace_sptr outputWorkspace = nullptr;
   std::unique_ptr<NumericAxis> newAxis = nullptr;
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(inputWS);
   if (m_toOrder) {
     // Can not re-use the input one because the spectra are re-ordered.
     const Histogram hist =
@@ -252,7 +252,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
       targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    newAxis->unit() = boost::make_shared<Units::Degrees>();
+    newAxis->unit() = std::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {

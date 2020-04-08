@@ -55,7 +55,7 @@ public:
     // match workspace
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("to_remap")));
     auto resultDetIDs = result->getSpectrum(0).getDetectorIDs();
     TS_ASSERT(detIDs == resultDetIDs);

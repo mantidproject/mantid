@@ -36,7 +36,7 @@ public:
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(Mantid::Types::Core::DateAndTime startTime =
                  Mantid::Types::Core::DateAndTime()) override;
-  boost::shared_ptr<Mantid::API::Workspace> extractData() override;
+  std::shared_ptr<Mantid::API::Workspace> extractData() override;
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override { return 0; }

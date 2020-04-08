@@ -130,7 +130,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
 
-    // boost::shared_ptr<Sample> sample = output->getSample();
+    // std::shared_ptr<Sample> sample = output->getSample();
 
     Property *l_property = output->run().getLogData("HRP37129_ICPevent");
     TimeSeriesProperty<std::string> *l_timeSeries =

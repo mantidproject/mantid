@@ -23,14 +23,14 @@ public:
   static void destroySuite(HistogramValidatorTest *suite) { delete suite; }
 
   void test_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
     HistogramValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_fail() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 10, 10);
     HistogramValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws),

@@ -59,7 +59,7 @@ std::string __repr__implementation(const PointGroup &self) {
 } // namespace
 
 void export_PointGroup() {
-  register_ptr_to_python<boost::shared_ptr<PointGroup>>();
+  register_ptr_to_python<std::shared_ptr<PointGroup>>();
 
   scope pointGroupScope =
       class_<PointGroup, boost::noncopyable>("PointGroup", no_init);

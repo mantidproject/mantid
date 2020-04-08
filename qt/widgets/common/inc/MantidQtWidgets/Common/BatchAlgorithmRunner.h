@@ -48,7 +48,7 @@ private:
   AlgorithmRuntimeProps m_properties;
 };
 
-using IConfiguredAlgorithm_sptr = boost::shared_ptr<IConfiguredAlgorithm>;
+using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
 
 class BatchCompleteNotification : public Poco::Notification {
 public:

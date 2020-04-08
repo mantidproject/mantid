@@ -364,7 +364,7 @@ boost::python::dict validateInputs(IAlgorithm &self) {
 void export_ialgorithm() {
   class_<AlgorithmIDProxy>("AlgorithmID", no_init).def(self == self);
 
-  register_ptr_to_python<boost::shared_ptr<IAlgorithm>>();
+  register_ptr_to_python<std::shared_ptr<IAlgorithm>>();
 
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>(
       "IAlgorithm", "Interface for all algorithms", no_init)

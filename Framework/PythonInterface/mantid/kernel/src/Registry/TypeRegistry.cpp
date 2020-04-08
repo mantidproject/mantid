@@ -22,7 +22,7 @@ namespace // <anonymous>
 /// boost::python::type_info objects so that they work across DLL boundaries
 /// unlike std::type_info objects
 using TypeIDMap = std::map<const boost::python::type_info,
-                           boost::shared_ptr<PropertyValueHandler>>;
+                           std::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Returns a reference to the static type map
@@ -77,7 +77,7 @@ void TypeRegistry::subscribe(const std::type_info &typeObject,
   boost::python::type_info typeInfo(typeObject);
   if (typeHandlers.find(typeInfo) == typeHandlers.end()) {
     typeHandlers.emplace(typeInfo,
-                         boost::shared_ptr<PropertyValueHandler>(handler));
+                         std::shared_ptr<PropertyValueHandler>(handler));
   } else {
     throw std::invalid_argument(
         std::string("TypeRegistry::subscribe() - A handler has already "

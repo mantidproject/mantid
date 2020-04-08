@@ -29,7 +29,7 @@ void FindUBUsingIndexedPeaks::init() {
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Input Peaks Workspace");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("Tolerance", 0.1, mustBePositive, "Indexing Tolerance (0.1)");
   declareProperty("ToleranceForSatellite", 0.1, mustBePositive,

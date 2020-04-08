@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
 #include <QTreeWidget>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -43,7 +43,7 @@ public:
   void disableNodes(bool);
   void sort();
   void dropEvent(QDropEvent *de) override;
-  QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
+  QList<std::shared_ptr<const Mantid::API::MatrixWorkspace>>
   getSelectedMatrixWorkspaces() const;
 
   /// Action that is executed when a workspace in the tree is double clicked.

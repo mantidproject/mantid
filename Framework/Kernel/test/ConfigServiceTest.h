@@ -16,8 +16,8 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
+#include <memory>
 #include <string>
 
 #include <Poco/Environment.h>

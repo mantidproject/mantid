@@ -174,7 +174,7 @@ public:
     E.assign(E.size(), 0.001);
 
     // Create table workspace
-    TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr fitWindowWS = std::make_shared<TableWorkspace>();
     fitWindowWS->addColumn("int", "spectrum");
     fitWindowWS->addColumn("double", "peak0_left");
     fitWindowWS->addColumn("double", "peak0_right");
@@ -245,7 +245,7 @@ public:
     E.assign(E.size(), 0.001);
 
     // Create table workspace
-    TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr fitWindowWS = std::make_shared<TableWorkspace>();
     fitWindowWS->addColumn("int", "spectrum");
     fitWindowWS->addColumn("double", "peak0_left");
     fitWindowWS->addColumn("double", "peak0_right");

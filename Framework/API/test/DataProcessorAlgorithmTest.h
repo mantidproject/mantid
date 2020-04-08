@@ -147,8 +147,8 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite {
       alg->initialize();
       alg->execute();
 
-      boost::shared_ptr<MatrixWorkspace> output =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output =
+          std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -177,8 +177,8 @@ public:
   }
 
   void test_Nested_History() {
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input =
+        std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     TopLevelAlgorithm alg;
@@ -221,8 +221,8 @@ public:
   }
 
   void test_Dont_Record_Nested_History() {
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input =
+        std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     TopLevelAlgorithm alg;

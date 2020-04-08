@@ -209,10 +209,10 @@ void IKafkaStreamDecoder::captureImpl() noexcept {
     captureImplExcept();
   } catch (std::exception &exc) {
     m_cbError();
-    m_exception = boost::make_shared<std::runtime_error>(exc.what());
+    m_exception = std::make_shared<std::runtime_error>(exc.what());
   } catch (...) {
     m_cbError();
-    m_exception = boost::make_shared<std::runtime_error>(
+    m_exception = std::make_shared<std::runtime_error>(
         "IKafkaStreamDecoder: Unknown exception type caught.");
   }
   m_capturing = false;

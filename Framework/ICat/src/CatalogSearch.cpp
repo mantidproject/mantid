@@ -29,7 +29,7 @@ DECLARE_ALGORITHM(CatalogSearch)
 
 /// Initialisation method.
 void CatalogSearch::init() {
-  auto isDate = boost::make_shared<Kernel::DateValidator>();
+  auto isDate = std::make_shared<Kernel::DateValidator>();
 
   // Properties related to the search fields the user will fill in to improve
   // search.

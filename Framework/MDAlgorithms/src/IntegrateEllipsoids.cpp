@@ -226,7 +226,7 @@ const std::string IntegrateEllipsoids::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateEllipsoids::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<WorkspaceUnitValidator>("TOF");
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
@@ -241,7 +241,7 @@ void IntegrateEllipsoids::init() {
                   "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
                   "be indexed with integer HKL values.");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -325,9 +325,8 @@ void IntegrateEllipsoids::exec() {
   // get the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");
 
-  EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(wksp);
-  Workspace2D_sptr histoWS = boost::dynamic_pointer_cast<Workspace2D>(wksp);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(wksp);
+  Workspace2D_sptr histoWS = std::dynamic_pointer_cast<Workspace2D>(wksp);
   if (!eventWS && !histoWS) {
     throw std::runtime_error("IntegrateEllipsoids needs either a "
                              "EventWorkspace or Workspace2D as input.");
@@ -601,7 +600,7 @@ void IntegrateEllipsoids::exec() {
         "Workspace2D", histogramNumber, principalaxis1.size(),
         principalaxis1.size());
     Workspace2D_sptr wsProfile2D =
-        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+        std::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
 
     // set output workspace
@@ -659,7 +658,7 @@ void IntegrateEllipsoids::exec() {
             "Workspace2D", histogramNumber, principalaxis1.size(),
             principalaxis1.size());
         Workspace2D_sptr wsProfile2D2 =
-            boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
+            std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
 

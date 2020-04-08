@@ -15,7 +15,7 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/System.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -101,7 +101,7 @@ protected:
   CompositeBraggScatterer_sptr m_scatterers;
 };
 
-using CrystalStructure_sptr = boost::shared_ptr<CrystalStructure>;
+using CrystalStructure_sptr = std::shared_ptr<CrystalStructure>;
 
 } // namespace Geometry
 } // namespace Mantid

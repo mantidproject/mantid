@@ -15,8 +15,8 @@
 #include "MantidKernel/LibraryManager.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 #include <locale>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -116,8 +116,8 @@ SpaceGroup_const_sptr AbstractSpaceGroupGenerator::generatePrototype() {
         "Could not create group from supplied symmetry operations.");
   }
 
-  return boost::make_shared<const SpaceGroup>(m_number, m_hmSymbol,
-                                              *generatingGroup);
+  return std::make_shared<const SpaceGroup>(m_number, m_hmSymbol,
+                                            *generatingGroup);
 }
 
 /// Constructor of AlgorithmicSpaceGroupGenerator which throws an
@@ -167,7 +167,7 @@ Group_const_sptr TransformationSpaceGroupGenerator::generateGroup() const {
 
   GroupTransformation transformation(m_transformation);
 
-  return boost::make_shared<Group>(transformation(*baseGroup));
+  return std::make_shared<Group>(transformation(*baseGroup));
 }
 
 /// This method is virtual for testing purposes so that using the actual
@@ -406,7 +406,7 @@ std::string SpaceGroupFactoryImpl::getTransformedSymbolOrthorhombic(
 /// object.
 SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(
     const SpaceGroup_const_sptr &prototype) const {
-  return boost::make_shared<const SpaceGroup>(*prototype);
+  return std::make_shared<const SpaceGroup>(*prototype);
 }
 
 /// Fills the internal multimap that maintains the mapping between space and

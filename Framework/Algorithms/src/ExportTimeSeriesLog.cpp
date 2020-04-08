@@ -60,7 +60,7 @@ void ExportTimeSeriesLog::init() {
   std::vector<std::string> units{"Seconds", "Nano Seconds"};
   declareProperty(
       "UnitOfTime", "Seconds",
-      boost::make_shared<Kernel::StringListValidator>(units),
+      std::make_shared<Kernel::StringListValidator>(units),
       "StartTime, StopTime and DeltaTime can be given in various unit."
       "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
       "They can also be defined as 'Percentage' of total run time.");
@@ -296,7 +296,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
   if (outsize > static_cast<size_t>(numentries))
     outsize = static_cast<size_t>(numentries);
 
-  boost::shared_ptr<EventWorkspace> outEventWS = create<EventWorkspace>(
+  std::shared_ptr<EventWorkspace> outEventWS = create<EventWorkspace>(
       *m_inputWS, numberOfSpectra, HistogramData::BinEdges(2));
   m_outWS = outEventWS;
 

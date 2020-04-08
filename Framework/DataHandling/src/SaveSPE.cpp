@@ -95,7 +95,7 @@ SaveSPE::SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(0) {}
  */
 void SaveSPE::init() {
   // Data must be in Energy Transfer and common bins
-  auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+  auto wsValidator = std::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(

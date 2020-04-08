@@ -111,7 +111,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
                                       "TOPAZ_3007", "OutputWorkspace",
                                       "peaks_predicted");
 
-    pw = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    pw = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("peaks_predicted"));
 
     TS_ASSERT(pw);

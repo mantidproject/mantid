@@ -13,8 +13,8 @@
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <boost/make_shared.hpp>
 #include <locale>
+#include <memory>
 
 using namespace Mantid::DataObjects;
 

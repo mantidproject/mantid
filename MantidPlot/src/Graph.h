@@ -54,7 +54,7 @@
 #include "PlotToolInterface.h"
 #include "ScaleDraw.h"
 #include "Table.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 
 #include <float.h>
@@ -982,8 +982,8 @@ private:
   int m_normalizationMD;
 
   // x and y units of MantidCurves
-  boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
-  boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
+  std::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
+  std::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 };
 
 Q_DECLARE_METATYPE(GraphOptions::CurveType)

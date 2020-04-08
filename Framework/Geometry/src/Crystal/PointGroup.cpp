@@ -8,7 +8,7 @@
 #include "MantidKernel/System.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <set>
 
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
@@ -125,7 +125,7 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
 
   for (const auto &operation : m_allOperations) {
     SymmetryElementWithAxis_sptr element =
-        boost::dynamic_pointer_cast<SymmetryElementWithAxis>(
+        std::dynamic_pointer_cast<SymmetryElementWithAxis>(
             SymmetryElementFactory::Instance().createSymElement(operation));
 
     if (element) {

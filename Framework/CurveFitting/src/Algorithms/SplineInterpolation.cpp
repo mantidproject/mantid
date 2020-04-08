@@ -32,7 +32,7 @@ using Functions::CubicSpline;
 /** Constructor
  */
 SplineInterpolation::SplineInterpolation()
-    : m_cspline(boost::make_shared<CubicSpline>()) {}
+    : m_cspline(std::make_shared<CubicSpline>()) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -78,7 +78,7 @@ void SplineInterpolation::init() {
                       PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
-  auto validator = boost::make_shared<BoundedValidator<int>>(0, 2);
+  auto validator = std::make_shared<BoundedValidator<int>>(0, 2);
   declareProperty("DerivOrder", 2, validator,
                   "Order to derivatives to calculate.");
 
@@ -186,7 +186,7 @@ void SplineInterpolation::exec() {
     // for each histogram in workspace, calculate interpolation and derivatives
     for (size_t i = 0; i < histNo; ++i) {
       // Create and instance of the cubic spline function
-      m_cspline = boost::make_shared<CubicSpline>();
+      m_cspline = std::make_shared<CubicSpline>();
       // set the interpolation points
       setInterpolationPoints(iwspt, i);
       // compare the data set against our spline

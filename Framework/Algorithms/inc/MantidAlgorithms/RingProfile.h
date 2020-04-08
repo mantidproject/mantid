@@ -39,7 +39,7 @@ public:
   };
 
 protected:
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
 
 private:
   void init() override;

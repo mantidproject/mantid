@@ -9,7 +9,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/NeutronAtom.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -271,11 +271,10 @@ Material MaterialBuilder::build() const {
  */
 Material::ChemicalFormula
 MaterialBuilder::createCompositionFromAtomicNumber() const {
-  Material::FormulaUnit unit{
-      boost::make_shared<PhysicalConstants::Atom>(
-          getAtom(static_cast<uint16_t>(m_atomicNo.get()),
-                  static_cast<uint16_t>(m_massNo))),
-      1.};
+  Material::FormulaUnit unit{std::make_shared<PhysicalConstants::Atom>(getAtom(
+                                 static_cast<uint16_t>(m_atomicNo.get()),
+                                 static_cast<uint16_t>(m_massNo))),
+                             1.};
   Material::ChemicalFormula formula;
   formula.emplace_back(unit);
 

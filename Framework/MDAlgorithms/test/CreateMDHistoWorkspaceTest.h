@@ -27,7 +27,7 @@ private:
   be overriden in individual tests.
   */
   IAlgorithm_sptr make_standard_algorithm(const std::string &outWSName) {
-    IAlgorithm_sptr alg = boost::make_shared<CreateMDHistoWorkspace>();
+    IAlgorithm_sptr alg = std::make_shared<CreateMDHistoWorkspace>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("SignalInput", "1,2,3");

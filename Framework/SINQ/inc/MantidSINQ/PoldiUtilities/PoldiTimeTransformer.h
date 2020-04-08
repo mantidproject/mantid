@@ -79,7 +79,7 @@ protected:
 };
 
 using DetectorElementData_const_sptr =
-    boost::shared_ptr<const DetectorElementData>;
+    std::shared_ptr<const DetectorElementData>;
 
 class MANTID_SINQ_DLL PoldiTimeTransformer {
 public:
@@ -113,7 +113,7 @@ protected:
   PoldiSourceSpectrum_const_sptr m_spectrum;
 };
 
-using PoldiTimeTransformer_sptr = boost::shared_ptr<PoldiTimeTransformer>;
+using PoldiTimeTransformer_sptr = std::shared_ptr<PoldiTimeTransformer>;
 
 } // namespace Poldi
 } // namespace Mantid

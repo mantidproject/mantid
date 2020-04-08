@@ -83,7 +83,7 @@ const std::string ConjoinXRuns::summary() const {
 void ConjoinXRuns::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
-          INPUT_WORKSPACE_PROPERTY, boost::make_shared<ADSValidator>()),
+          INPUT_WORKSPACE_PROPERTY, std::make_shared<ADSValidator>()),
       "The names of the input workspaces or workspace groups as a list. At "
       "least two point-data MatrixWorkspaces are "
       "required, having the same instrument, same number of spectra and "
@@ -121,7 +121,7 @@ void ConjoinXRuns::init() {
                                                          STOP_BEHAVIOUR};
   declareProperty(
       "FailBehaviour", SKIP_BEHAVIOUR,
-      boost::make_shared<StringListValidator>(failBehaviourOptions),
+      std::make_shared<StringListValidator>(failBehaviourOptions),
       "Choose whether to skip the workspace and continue, or stop and "
       "throw and error, when encountering a failure on merging.");
 }

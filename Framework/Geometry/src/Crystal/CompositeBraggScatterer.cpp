@@ -21,7 +21,7 @@ CompositeBraggScatterer::CompositeBraggScatterer()
 /// returns it (wrapped by a smart pointer).
 CompositeBraggScatterer_sptr CompositeBraggScatterer::create() {
   CompositeBraggScatterer_sptr compositeScatterer =
-      boost::make_shared<CompositeBraggScatterer>();
+      std::make_shared<CompositeBraggScatterer>();
   compositeScatterer->initialize();
 
   return compositeScatterer;
@@ -42,7 +42,7 @@ CompositeBraggScatterer_sptr CompositeBraggScatterer::create(
 /// composite.
 BraggScatterer_sptr CompositeBraggScatterer::clone() const {
   CompositeBraggScatterer_sptr clone =
-      boost::make_shared<CompositeBraggScatterer>();
+      std::make_shared<CompositeBraggScatterer>();
   clone->initialize();
 
   clone->setScatterers(m_scatterers);

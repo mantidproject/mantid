@@ -10,7 +10,7 @@
 // Includes
 //-----------------------------------------
 #include <QGLWidget>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "MantidKernel/V3D.h"
 
@@ -44,7 +44,7 @@ public:
   ~MantidGLWidget() override;
 
   /// Set the Mantid geometry object
-  void setDisplayObject(boost::shared_ptr<Mantid::Geometry::IObject> object);
+  void setDisplayObject(std::shared_ptr<Mantid::Geometry::IObject> object);
 
 protected:
   /// Initialize the renderer
@@ -72,7 +72,7 @@ private:
   /// Handle a MouseMoveEvent
   void mouseMoveEvent(QMouseEvent *event) override;
   /// A Mantid geometry object
-  boost::shared_ptr<Mantid::Geometry::IObject> m_display_object;
+  std::shared_ptr<Mantid::Geometry::IObject> m_display_object;
   /// The current X, Y and Z rotations
   GLdouble m_x_rot, m_y_rot, m_z_rot;
   /// The scaling factor to use

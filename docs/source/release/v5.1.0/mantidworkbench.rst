@@ -22,12 +22,16 @@ Improvements
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 
+- On 3D plots you can now double-click on the z-axis to change its limits or label.
+
 
 Bugfixes
 ########
 
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly.
 - Fixed a crash when you selected a spectra to plot that was not present in a workspace.
+- Fixed a crash when you defined a new Fit Function after deleting a plot.
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
+
 
 :ref:`Release 5.1.0 <v5.1.0>`

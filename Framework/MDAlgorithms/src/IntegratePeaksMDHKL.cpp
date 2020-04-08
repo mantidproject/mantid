@@ -49,7 +49,7 @@ void IntegratePeaksMDHKL::init() {
                   "Number of points in 5^3 surrounding "
                   "points above intensity threshold for "
                   "point to be part of peak.");
-  auto fluxValidator = boost::make_shared<CompositeValidator>();
+  auto fluxValidator = std::make_shared<CompositeValidator>();
   fluxValidator->add<WorkspaceUnitValidator>("Momentum");
   fluxValidator->add<InstrumentValidator>();
   fluxValidator->add<CommonBinsValidator>();
@@ -122,9 +122,9 @@ void IntegratePeaksMDHKL::exec() {
   MatrixWorkspace_sptr sa = getProperty("SolidAngleWorkspace");
 
   IMDEventWorkspace_sptr m_eventWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
   IMDHistoWorkspace_sptr m_histoWS =
-      boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
+      std::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = std::make_unique<Progress>(this, 0.3, 1.0, npeaks);
@@ -191,7 +191,7 @@ IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
   alg->setPropertyValue("OutputWorkspace", "out");
   alg->execute();
   IMDWorkspace_sptr out = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(out);
 }
 
 void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
@@ -334,7 +334,7 @@ IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
   binMD->setPropertyValue("OutputWorkspace", "out");
   binMD->executeAsChildAlg();
   Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 /**
@@ -362,7 +362,7 @@ IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box,
   cropMD->setPropertyValue("OutputWorkspace", "out");
   cropMD->executeAsChildAlg();
   IMDHistoWorkspace_sptr outputWS = cropMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 } // namespace MDAlgorithms

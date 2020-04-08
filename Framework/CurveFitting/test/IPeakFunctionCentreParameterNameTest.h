@@ -42,7 +42,7 @@ public:
       const std::string &peakFunctionName = expectedResult.first;
       const std::string &centreParameterName = expectedResult.second;
 
-      IPeakFunction_sptr fn = boost::dynamic_pointer_cast<IPeakFunction>(
+      IPeakFunction_sptr fn = std::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(peakFunctionName));
 
       TS_ASSERT(fn);

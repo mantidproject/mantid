@@ -171,7 +171,7 @@ void PDCalibration::init() {
                   "Input signal workspace");
 
   declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "TofBinning", boost::make_shared<RebinParamsValidator>()),
+                      "TofBinning", std::make_shared<RebinParamsValidator>()),
                   "Min, Step, and Max of time-of-flight bins. "
                   "Logarithmic binning is used if Step is negative.");
 
@@ -190,31 +190,30 @@ void PDCalibration::init() {
   std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
                                      "Lorentzian", "PseudoVoigt"};
   declareProperty("PeakFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peaktypes));
+                  std::make_shared<StringListValidator>(peaktypes));
   vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
-  auto peaksValidator = boost::make_shared<CompositeValidator>();
-  auto mustBePosArr =
-      boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
+  auto peaksValidator = std::make_shared<CompositeValidator>();
+  auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   peaksValidator->add(mustBePosArr);
   peaksValidator->add(
-      boost::make_shared<MandatoryValidator<std::vector<double>>>());
+      std::make_shared<MandatoryValidator<std::vector<double>>>());
   declareProperty(
       std::make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
       "Comma delimited d-space positions of reference peaks.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "PeakWindow", 0.1, mustBePositive,
       "The maximum window (in d space) around peak to look for peak.");
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
 
-  auto min = boost::make_shared<BoundedValidator<double>>();
+  auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
                   "The estimated peak width as a "
@@ -237,7 +236,7 @@ void PDCalibration::init() {
       "the peak width either estimted by observation or calculate.");
 
   declareProperty("CalibrationParameters", "DIFC",
-                  boost::make_shared<StringListValidator>(modes),
+                  std::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
 
   declareProperty(
@@ -391,7 +390,7 @@ void PDCalibration::exec() {
   setProperty("InputWorkspace", m_uncalibratedWS);
 
   auto uncalibratedEWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
+      std::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
   auto isEvent = bool(uncalibratedEWS);
 
   // Load Previous Calibration or create calibration table from signal file
@@ -411,7 +410,7 @@ void PDCalibration::exec() {
                       "MaskWorkspace", maskWSName, Direction::Output),
                   "An output workspace containing the mask");
 
-  MaskWorkspace_sptr maskWS = boost::make_shared<DataObjects::MaskWorkspace>(
+  MaskWorkspace_sptr maskWS = std::make_shared<DataObjects::MaskWorkspace>(
       m_uncalibratedWS->getInstrument());
   for (size_t i = 0; i < maskWS->getNumberHistograms(); ++i) // REMOVE
     maskWS->setMaskedIndex(i, true); // mask everything to start
@@ -640,7 +639,7 @@ void PDCalibration::exec() {
   auto resolutionWksp = calculateResolutionTable();
 
   // set the diagnostic workspaces out
-  auto diagnosticGroup = boost::make_shared<API::WorkspaceGroup>();
+  auto diagnosticGroup = std::make_shared<API::WorkspaceGroup>();
   // add workspaces calculated by FitPeaks
   API::AnalysisDataService::Instance().addOrReplace(
       diagnostic_prefix + "_fitparam", fittedTable);
@@ -954,7 +953,7 @@ MatrixWorkspace_sptr PDCalibration::load(const std::string &filename) {
   alg->executeAsChildAlg();
   API::Workspace_sptr workspace = alg->getProperty("OutputWorkspace");
 
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 MatrixWorkspace_sptr PDCalibration::loadAndBin() {
@@ -1004,7 +1003,7 @@ void PDCalibration::createCalTableFromExisting() {
   }
 
   // create a new workspace
-  m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_calibrationTable = std::make_shared<DataObjects::TableWorkspace>();
   // TODO m_calibrationTable->setTitle("");
   m_calibrationTable->addColumn("int", "detid");
   m_calibrationTable->addColumn("double", "difc");
@@ -1046,7 +1045,7 @@ void PDCalibration::createCalTableNew() {
   API::MatrixWorkspace_const_sptr difcWS = alg->getProperty("OutputWorkspace");
 
   // create a new workspace
-  m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_calibrationTable = std::make_shared<DataObjects::TableWorkspace>();
   // TODO m_calibrationTable->setTitle("");
   m_calibrationTable->addColumn("int", "detid");
   m_calibrationTable->addColumn("double", "difc");
@@ -1079,9 +1078,9 @@ void PDCalibration::createCalTableNew() {
 
 void PDCalibration::createInformationWorkspaces() {
   // table for the fitted location of the various peaks
-  m_peakPositionTable = boost::make_shared<DataObjects::TableWorkspace>();
-  m_peakWidthTable = boost::make_shared<DataObjects::TableWorkspace>();
-  m_peakHeightTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_peakPositionTable = std::make_shared<DataObjects::TableWorkspace>();
+  m_peakWidthTable = std::make_shared<DataObjects::TableWorkspace>();
+  m_peakHeightTable = std::make_shared<DataObjects::TableWorkspace>();
 
   m_peakPositionTable->addColumn("int", "detid");
   m_peakWidthTable->addColumn("int", "detid");
@@ -1125,7 +1124,7 @@ void PDCalibration::createInformationWorkspaces() {
 
 API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
   DataObjects::SpecialWorkspace2D_sptr resolutionWksp =
-      boost::make_shared<DataObjects::SpecialWorkspace2D>(
+      std::make_shared<DataObjects::SpecialWorkspace2D>(
           m_uncalibratedWS->getInstrument());
   resolutionWksp->setTitle("average width/height");
 

@@ -35,7 +35,7 @@ void SortEvents::init() {
   std::vector<std::string> propOptions{"X Value", "Pulse Time",
                                        "Pulse Time + TOF"};
   declareProperty("SortBy", "X Value",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "How to sort the events:\n"
                   "  X Value: the x-position of the event in each pixel "
                   "(typically Time of Flight).\n"

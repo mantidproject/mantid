@@ -50,7 +50,7 @@ const std::string CrystalFieldEnergies::summary() const {
 void CrystalFieldEnergies::init() {
 
   // Input
-  auto bounds = boost::make_shared<Kernel::BoundedValidator<int>>(-99, 13);
+  auto bounds = std::make_shared<Kernel::BoundedValidator<int>>(-99, 13);
   declareProperty("Nre", 1, bounds,
                   "A rare earth ion. Possible values are: "
                   "1=Ce 2=Pr 3=Nd 4=Pm 5=Sm 6=Eu 7=Gd 8=Tb "

@@ -17,12 +17,12 @@ from functools import partial
 
 # third party imports
 from matplotlib.container import ErrorbarContainer
-from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
@@ -34,7 +34,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, 
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
-                                                 ColorbarAxisEditor)
+                                                 ColorbarAxisEditor, ZAxisEditor)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -155,6 +155,8 @@ class FigureInteraction(object):
                         self.canvas.toolbar.press_pan(event)
                     finally:
                         event.button = 3
+        elif isinstance(event.inaxes, Axes3D):
+            event.inaxes._button_press(event)
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
@@ -230,6 +232,12 @@ class FigureInteraction(object):
                     move_and_show(YAxisEditor(canvas, ax))
                 else:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
+            if hasattr(ax, 'zaxis'):
+                if ax.zaxis.label.contains(event)[0]:
+                    move_and_show(LabelEditor(canvas, ax.zaxis.label))
+                elif (ax.zaxis.contains(event)[0]
+                      or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
+                    move_and_show(ZAxisEditor(canvas, ax))
 
     def _show_markers_menu(self, markers, event):
         """
@@ -769,5 +777,7 @@ class FigureInteraction(object):
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
                 if image.norm.vmin is not None and image.norm.vmax is not None:
-                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
+                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin,
+                                                        image.norm.vmax)
+
         self.canvas.draw_idle()

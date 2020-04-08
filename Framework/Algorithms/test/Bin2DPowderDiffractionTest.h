@@ -74,7 +74,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // get and check output workspace
-    boost::shared_ptr<MatrixWorkspace> outputWS =
+    std::shared_ptr<MatrixWorkspace> outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "_bin2d_test1");
     TS_ASSERT(outputWS);
@@ -122,7 +122,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // get and check output workspace
-    boost::shared_ptr<MatrixWorkspace> outputWS =
+    std::shared_ptr<MatrixWorkspace> outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "_bin2d_test1");
     TS_ASSERT(outputWS);
@@ -171,7 +171,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // get and check output workspace
-    boost::shared_ptr<MatrixWorkspace> outputWS =
+    std::shared_ptr<MatrixWorkspace> outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "_bin2d_test1");
     TS_ASSERT(outputWS);
@@ -254,7 +254,7 @@ private:
     }
     eventWS->replaceAxis(0, std::move(ax0));
     // detector angles
-    auto algc = boost::make_shared<MoveInstrumentComponent>();
+    auto algc = std::make_shared<MoveInstrumentComponent>();
     algc->initialize();
     algc->setProperty<EventWorkspace_sptr>("Workspace", eventWS);
     algc->setPropertyValue("ComponentName", "bank1");

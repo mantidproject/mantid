@@ -28,7 +28,7 @@ public:
                    const std::vector<double> &Y) = 0;
 };
 
-using IBackgroundFunction_sptr = boost::shared_ptr<IBackgroundFunction>;
+using IBackgroundFunction_sptr = std::shared_ptr<IBackgroundFunction>;
 
 } // namespace API
 } // namespace Mantid

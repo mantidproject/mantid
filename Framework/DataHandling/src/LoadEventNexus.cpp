@@ -29,8 +29,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <H5Cpp.h>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using Mantid::Types::Core::DateAndTime;
 using std::map;
@@ -186,7 +185,7 @@ void LoadEventNexus::init() {
                   "This specified the tolerance to use (in microseconds) when "
                   "compressing.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
                   "If loading the file by sections ('chunks'), this is the "
@@ -212,7 +211,7 @@ void LoadEventNexus::init() {
 
   std::vector<std::string> options{"", "Events", "Histogram"};
   declareProperty("MonitorsLoadOnly", "",
-                  boost::make_shared<Kernel::StringListValidator>(options),
+                  std::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
                   "Default is to load the one that is present.");
 
@@ -286,7 +285,7 @@ void LoadEventNexus::init() {
   loadType.emplace_back("MPI");
 #endif // MPI_EXPERIMENTAL
 
-  auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
+  auto loadTypeValidator = std::make_shared<StringListValidator>(loadType);
   declareProperty("LoadType", "Default", loadTypeValidator,
                   "Set type of loader. 2 options {Default, Multiproceess},"
                   "'Multiprocess' should work faster for big files and it is "
@@ -398,8 +397,8 @@ void LoadEventNexus::exec() {
   Progress prog(this, 0.0, 0.3, reports);
 
   // Load the detector events
-  m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm currently
-                                                         // relies on an
+  m_ws = std::make_shared<EventWorkspaceCollection>(); // Algorithm currently
+                                                       // relies on an
   // object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
 
@@ -555,14 +554,14 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
  * @return Pulse times given in the DAS logs
  */
 template <typename T>
-boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
+std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
     bool returnpulsetimes, int &nPeriods,
     std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
-  boost::shared_ptr<BankPulseTimes> out;
+  std::shared_ptr<BankPulseTimes> out;
   API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -604,7 +603,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
         temp = log->timesAsVector();
     }
     if (returnpulsetimes)
-      out = boost::make_shared<BankPulseTimes>(temp);
+      out = std::make_shared<BankPulseTimes>(temp);
 
     // Use the first pulse as the run_start time.
     if (!temp.empty()) {
@@ -707,7 +706,7 @@ void LoadEventNexus::checkForCorruptedPeriods(
  * @return Pulse times given in the DAS logs
  */
 template <>
-boost::shared_ptr<BankPulseTimes>
+std::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
     EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
@@ -796,7 +795,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == nullptr) {
     std::vector<DateAndTime> temp;
-    m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
+    m_allBanksPulseTimes = std::make_shared<BankPulseTimes>(temp);
   }
 
   if (!m_ws->getInstrument() || !m_instrument_loaded_correctly) {
@@ -1179,26 +1178,26 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
  */
 void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
                                  const std::vector<std::string> &bankNames) {
-  Instrument_sptr inst = boost::const_pointer_cast<Instrument>(
+  Instrument_sptr inst = std::const_pointer_cast<Instrument>(
       workspace->getInstrument()->baseInstrument());
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector>> detList;
+  std::vector<std::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
+    std::shared_ptr<RectangularDetector> det;
+    std::shared_ptr<ICompAssembly> assem;
+    std::shared_ptr<ICompAssembly> assem2;
 
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
       detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g.
       // PG3). We are not doing a full recursive search since that will be
       // very long for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
+      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
-          det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
+          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             detList.emplace_back(det);
 
@@ -1206,10 +1205,10 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
             // Also, look in the second sub-level for RectangularDetectors
             // (e.g. PG3). We are not doing a full recursive search since that
             // will be very long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
+            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = boost::dynamic_pointer_cast<RectangularDetector>(
+                det = std::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
@@ -1234,15 +1233,15 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
         break;
     }
     if (!keep) {
-      boost::shared_ptr<const IComponent> parent =
+      std::shared_ptr<const IComponent> parent =
           inst->getComponentByName(det_name);
       std::vector<Geometry::IComponent_const_sptr> children;
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
       for (auto &col : children) {
-        boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
+        std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+            std::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
         std::vector<Geometry::IComponent_const_sptr> grandchildren;
         asmb2->getChildren(grandchildren, false);
 
@@ -1359,7 +1358,7 @@ void LoadEventNexus::runLoadMonitors() {
 
   // The output will either be a group workspace or a matrix workspace
   MatrixWorkspace_sptr mons =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
+      std::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
   if (mons) {
     // Set the internal monitor workspace pointer as well
     m_ws->setMonitorWorkspace(mons);
@@ -1367,7 +1366,7 @@ void LoadEventNexus::runLoadMonitors() {
     filterDuringPause(mons);
   } else {
     WorkspaceGroup_sptr monsGrp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
+        std::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
     if (monsGrp) {
       // declare a property for each member of the group
       for (int i = 0; i < monsGrp->getNumberOfEntries(); i++) {

@@ -19,7 +19,7 @@ SpectraAxisValidator::SpectraAxisValidator(const int &axisNumber)
 
 /// Clone the current validator
 Kernel::IValidator_sptr SpectraAxisValidator::clone() const {
-  return boost::make_shared<SpectraAxisValidator>(*this);
+  return std::make_shared<SpectraAxisValidator>(*this);
 }
 
 /** Checks that the axis stated

@@ -84,7 +84,7 @@ void SetSpecialCoordinates::init() {
 
   declareProperty(
       "SpecialCoordinates", "Q (lab frame)",
-      boost::make_shared<StringListValidator>(m_specialCoordinatesNames),
+      std::make_shared<StringListValidator>(m_specialCoordinatesNames),
       "What will be the dimensions of the output workspace?\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
       "  Q (sample frame): Wave-vector change of the lattice in the frame of "
@@ -95,7 +95,7 @@ void SetSpecialCoordinates::init() {
 bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
     const Workspace_sptr &inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
-  if (boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
+  if (auto mdEventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
                   "special coordinate system for an MDEvent workspace any "
                   "longer.");
@@ -107,7 +107,7 @@ bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
 bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
     const Workspace_sptr &inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
+  if (auto mdHistoWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
                   "special coordinate system for an MDHisto workspace any "
                   "longer.");
@@ -119,7 +119,7 @@ bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
 bool SetSpecialCoordinates::writeCoordinatesToPeaksWorkspace(
     const Workspace_sptr &inWS, SpecialCoordinateSystem coordinateSystem) {
   bool written = false;
-  if (auto peaksWS = boost::dynamic_pointer_cast<IPeaksWorkspace>(inWS)) {
+  if (auto peaksWS = std::dynamic_pointer_cast<IPeaksWorkspace>(inWS)) {
     peaksWS->setCoordinateSystem(coordinateSystem);
     written = true;
   }

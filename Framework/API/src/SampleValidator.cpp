@@ -31,7 +31,7 @@ std::string SampleValidator::getType() const { return "Sample"; }
  * @return A copy of the current state of the object
  */
 Kernel::IValidator_sptr SampleValidator::clone() const {
-  return boost::make_shared<SampleValidator>(*this);
+  return std::make_shared<SampleValidator>(*this);
 }
 
 /**
