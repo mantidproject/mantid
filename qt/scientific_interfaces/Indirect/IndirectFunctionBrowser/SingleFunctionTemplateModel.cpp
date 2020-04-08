@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FQFunctionModel.h"
+#include "SingleFunctionTemplateModel.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -19,9 +19,9 @@ namespace IDA {
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-FQFunctionModel::FQFunctionModel() {}
+SingleFunctionTemplateModel::SingleFunctionTemplateModel() {}
 
-void FQFunctionModel::updateAvailableFunctions(
+void SingleFunctionTemplateModel::updateAvailableFunctions(
     std::map<std::string, std::string> functionInitialisationStrings) {
   m_functionStore.clear();
   m_globalParameterStore.clear();
@@ -36,15 +36,15 @@ void FQFunctionModel::updateAvailableFunctions(
   m_fitType = m_functionStore.keys().first();
 }
 
-QStringList FQFunctionModel::getFunctionList() {
+QStringList SingleFunctionTemplateModel::getFunctionList() {
   return m_functionStore.keys();
 }
 
-int FQFunctionModel::getEnumIndex() {
+int SingleFunctionTemplateModel::getEnumIndex() {
   return m_functionStore.keys().indexOf(m_fitType);
 }
 
-void FQFunctionModel::setFunction(IFunction_sptr fun) {
+void SingleFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   if (!fun)
     return;
   if (fun->nFunctions() == 0) {
@@ -60,7 +60,7 @@ void FQFunctionModel::setFunction(IFunction_sptr fun) {
   }
 }
 
-void FQFunctionModel::setFitType(const QString &name) {
+void SingleFunctionTemplateModel::setFitType(const QString &name) {
   if (m_function) {
     m_globalParameterStore[m_fitType] = getGlobalParameters();
   }
@@ -73,14 +73,14 @@ void FQFunctionModel::setFitType(const QString &name) {
   FunctionModel::setFunction(m_functionStore[name]->clone());
 }
 
-QString FQFunctionModel::getFitType() { return m_fitType; }
+QString SingleFunctionTemplateModel::getFitType() { return m_fitType; }
 
-void FQFunctionModel::updateParameterEstimationData(
+void SingleFunctionTemplateModel::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }
 
-void FQFunctionModel::setGlobal(const QString &name, bool isGlobal) {
+void SingleFunctionTemplateModel::setGlobal(const QString &name, bool isGlobal) {
   auto globalParameters = getGlobalParameters();
   if (isGlobal && !globalParameters.contains(name)) {
     globalParameters << name;

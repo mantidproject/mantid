@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FQTemplatePresenter.h"
-#include "FQTemplateBrowser.h"
+#include "SingleFunctionTemplatePresenter.h"
+#include "SingleFunctionTemplateBrowser.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include <math.h>
 
@@ -19,8 +19,8 @@ using namespace MantidWidgets;
  * Constructor
  * @param parent :: The parent widget.
  */
-FQTemplatePresenter::FQTemplatePresenter(
-    FQTemplateBrowser *view,
+SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
+    SingleFunctionTemplateBrowser *view,
     std::map<std::string, std::string> functionInitialisationStrings)
     : QObject(view), m_view(view), m_model() {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
@@ -31,19 +31,19 @@ FQTemplatePresenter::FQTemplatePresenter(
   m_model.updateAvailableFunctions(functionInitialisationStrings);
 }
 
-void FQTemplatePresenter::init() {
+void SingleFunctionTemplatePresenter::init() {
   m_view->setDataType(m_model.getFunctionList());
   setFitType(m_model.getFitType());
 }
 
-void FQTemplatePresenter::updateAvailableFunctions(
+void SingleFunctionTemplatePresenter::updateAvailableFunctions(
     std::map<std::string, std::string> functionInitialisationStrings) {
   m_model.updateAvailableFunctions(functionInitialisationStrings);
   m_view->setDataType(m_model.getFunctionList());
   setFitType(m_model.getFitType());
 }
 
-void FQTemplatePresenter::setFitType(const QString &name) {
+void SingleFunctionTemplatePresenter::setFitType(const QString &name) {
   m_view->clear();
   m_model.setFitType(name);
   if (name == "None")
@@ -58,19 +58,19 @@ void FQTemplatePresenter::setFitType(const QString &name) {
   emit functionStructureChanged();
 }
 
-void FQTemplatePresenter::setNumberOfDatasets(int n) {
+void SingleFunctionTemplatePresenter::setNumberOfDatasets(int n) {
   m_model.setNumberDomains(n);
 }
 
-int FQTemplatePresenter::getNumberOfDatasets() const {
+int SingleFunctionTemplatePresenter::getNumberOfDatasets() const {
   return m_model.getNumberDomains();
 }
 
-int FQTemplatePresenter::getCurrentDataset() {
+int SingleFunctionTemplatePresenter::getCurrentDataset() {
   return m_model.currentDomainIndex();
 }
 
-void FQTemplatePresenter::setFunction(const QString &funStr) {
+void SingleFunctionTemplatePresenter::setFunction(const QString &funStr) {
   m_view->clear();
   m_model.setFunctionString(funStr);
 
@@ -86,95 +86,95 @@ void FQTemplatePresenter::setFunction(const QString &funStr) {
   emit functionStructureChanged();
 }
 
-IFunction_sptr FQTemplatePresenter::getGlobalFunction() const {
+IFunction_sptr SingleFunctionTemplatePresenter::getGlobalFunction() const {
   return m_model.getFitFunction();
 }
 
-IFunction_sptr FQTemplatePresenter::getFunction() const {
+IFunction_sptr SingleFunctionTemplatePresenter::getFunction() const {
   return m_model.getCurrentFunction();
 }
 
-QStringList FQTemplatePresenter::getGlobalParameters() const {
+QStringList SingleFunctionTemplatePresenter::getGlobalParameters() const {
   return m_model.getGlobalParameters();
 }
 
-QStringList FQTemplatePresenter::getLocalParameters() const {
+QStringList SingleFunctionTemplatePresenter::getLocalParameters() const {
   return m_model.getLocalParameters();
 }
 
-void FQTemplatePresenter::setGlobalParameters(const QStringList &globals) {
+void SingleFunctionTemplatePresenter::setGlobalParameters(const QStringList &globals) {
   m_model.setGlobalParameters(globals);
   m_view->setGlobalParametersQuiet(globals);
 }
 
-void FQTemplatePresenter::setGlobal(const QString &parName, bool on) {
+void SingleFunctionTemplatePresenter::setGlobal(const QString &parName, bool on) {
   m_model.setGlobal(parName, on);
   m_view->setGlobalParametersQuiet(m_model.getGlobalParameters());
 }
 
-void FQTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
+void SingleFunctionTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   m_model.updateMultiDatasetParameters(fun);
   updateView();
 }
 
-void FQTemplatePresenter::updateParameters(const IFunction &fun) {
+void SingleFunctionTemplatePresenter::updateParameters(const IFunction &fun) {
   m_model.updateParameters(fun);
   updateView();
 }
 
-void FQTemplatePresenter::setCurrentDataset(int i) {
+void SingleFunctionTemplatePresenter::setCurrentDataset(int i) {
   m_model.setCurrentDomainIndex(i);
   updateView();
 }
 
-void FQTemplatePresenter::setDatasetNames(const QStringList &names) {
+void SingleFunctionTemplatePresenter::setDatasetNames(const QStringList &names) {
   m_model.setDatasetNames(names);
 }
 
-void FQTemplatePresenter::setErrorsEnabled(bool enabled) {
+void SingleFunctionTemplatePresenter::setErrorsEnabled(bool enabled) {
   m_view->setErrorsEnabled(enabled);
 }
 
-void FQTemplatePresenter::updateParameterEstimationData(
+void SingleFunctionTemplatePresenter::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_model.updateParameterEstimationData(std::move(data));
 }
 
-QStringList FQTemplatePresenter::getDatasetNames() const {
+QStringList SingleFunctionTemplatePresenter::getDatasetNames() const {
   return m_model.getDatasetNames();
 }
 
-double FQTemplatePresenter::getLocalParameterValue(const QString &parName,
+double SingleFunctionTemplatePresenter::getLocalParameterValue(const QString &parName,
                                                    int i) const {
   return m_model.getLocalParameterValue(parName, i);
 }
 
-bool FQTemplatePresenter::isLocalParameterFixed(const QString &parName,
+bool SingleFunctionTemplatePresenter::isLocalParameterFixed(const QString &parName,
                                                 int i) const {
   return m_model.isLocalParameterFixed(parName, i);
 }
 
-QString FQTemplatePresenter::getLocalParameterTie(const QString &parName,
+QString SingleFunctionTemplatePresenter::getLocalParameterTie(const QString &parName,
                                                   int i) const {
   return m_model.getLocalParameterTie(parName, i);
 }
 
-QString FQTemplatePresenter::getLocalParameterConstraint(const QString &parName,
+QString SingleFunctionTemplatePresenter::getLocalParameterConstraint(const QString &parName,
                                                          int i) const {
   return m_model.getLocalParameterConstraint(parName, i);
 }
 
-void FQTemplatePresenter::setLocalParameterValue(const QString &parName, int i,
+void SingleFunctionTemplatePresenter::setLocalParameterValue(const QString &parName, int i,
                                                  double value) {
   m_model.setLocalParameterValue(parName, i, value);
 }
 
-void FQTemplatePresenter::setLocalParameterTie(const QString &parName, int i,
+void SingleFunctionTemplatePresenter::setLocalParameterTie(const QString &parName, int i,
                                                const QString &tie) {
   m_model.setLocalParameterTie(parName, i, tie);
 }
 
-void FQTemplatePresenter::updateView() {
+void SingleFunctionTemplatePresenter::updateView() {
   if (m_model.getFitType() == "None")
     return;
   for (auto parameterName : m_model.getParameterNames()) {
@@ -184,12 +184,12 @@ void FQTemplatePresenter::updateView() {
   }
 }
 
-void FQTemplatePresenter::setLocalParameterFixed(const QString &parName, int i,
+void SingleFunctionTemplatePresenter::setLocalParameterFixed(const QString &parName, int i,
                                                  bool fixed) {
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
-void FQTemplatePresenter::editLocalParameter(const QString &parName) {
+void SingleFunctionTemplatePresenter::editLocalParameter(const QString &parName) {
   auto const wsNames = getDatasetNames();
   QList<double> values;
   QList<bool> fixes;
@@ -214,7 +214,7 @@ void FQTemplatePresenter::editLocalParameter(const QString &parName) {
   m_editLocalParameterDialog->open();
 }
 
-void FQTemplatePresenter::editLocalParameterFinish(int result) {
+void SingleFunctionTemplatePresenter::editLocalParameterFinish(int result) {
   if (result == QDialog::Accepted) {
     const auto parName = m_editLocalParameterDialog->getParameterName();
     const auto values = m_editLocalParameterDialog->getValues();
@@ -237,7 +237,7 @@ void FQTemplatePresenter::editLocalParameterFinish(int result) {
   emit functionStructureChanged();
 }
 
-void FQTemplatePresenter::viewChangedParameterValue(const QString &parName,
+void SingleFunctionTemplatePresenter::viewChangedParameterValue(const QString &parName,
                                                     double value) {
   if (parName.isEmpty())
     return;

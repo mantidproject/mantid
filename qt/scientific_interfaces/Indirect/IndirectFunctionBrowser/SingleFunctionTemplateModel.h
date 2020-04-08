@@ -24,9 +24,9 @@ namespace IDA {
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
-class MANTIDQT_INDIRECT_DLL FQFunctionModel : public FunctionModel {
+class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateModel : public FunctionModel {
 public:
-  FQFunctionModel();
+  SingleFunctionTemplateModel();
   void setFunction(IFunction_sptr fun) override;
   void updateAvailableFunctions(
       std::map<std::string, std::string> functionInitialisationStrings);

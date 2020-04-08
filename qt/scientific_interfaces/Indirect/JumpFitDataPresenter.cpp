@@ -16,7 +16,7 @@ namespace IDA {
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
-    IFQFitObserver *fQTemplateBrowser)
+    IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view,
                                std::make_unique<JumpFitDataTablePresenter>(
                                    model, view->getDataTable())),
@@ -39,7 +39,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
 
   updateParameterSelectionEnabled();
   m_notifier = Notifier<IFQFitObserver>();
-  m_notifier.subscribe(fQTemplateBrowser);
+  m_notifier.subscribe(SingleFunctionTemplateBrowser);
 }
 
 void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {

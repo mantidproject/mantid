@@ -7,10 +7,10 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "FQTemplatePresenter.h"
+#include "FQFitConstants.h"
+#include "SingleFunctionTemplatePresenter.h"
 #include "FunctionTemplateBrowser.h"
 #include "IFQFitObserver.h"
-#include "FQFitConstants.h"
 
 #include <QMap>
 #include <QWidget>
@@ -26,14 +26,15 @@ namespace IDA {
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL FQTemplateBrowser : public FunctionTemplateBrowser,
-                                                public IFQFitObserver {
+class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateBrowser
+    : public FunctionTemplateBrowser,
+      public IFQFitObserver {
   Q_OBJECT
 public:
-  explicit FQTemplateBrowser(std::map<std::string, std::string>
-                                 functionInitialisationStrings,
-                             QWidget *parent = nullptr);
-  virtual ~FQTemplateBrowser() = default;
+  explicit SingleFunctionTemplateBrowser(
+      std::map<std::string, std::string> functionInitialisationStrings,
+      QWidget *parent = nullptr);
+  virtual ~SingleFunctionTemplateBrowser() = default;
   void updateAvailableFunctions(std::map<std::string, std::string>
                                     functionInitialisationStrings) override;
   void setFunction(const QString &funStr) override;
@@ -88,11 +89,11 @@ private:
   QMap<QtProperty *, QString> m_parameterNames;
 
 private:
-  FQTemplatePresenter m_presenter;
+  SingleFunctionTemplatePresenter m_presenter;
   bool m_emitParameterValueChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
-  friend class FQTemplatePresenter;
+  friend class SingleFunctionTemplatePresenter;
 };
 
 } // namespace IDA

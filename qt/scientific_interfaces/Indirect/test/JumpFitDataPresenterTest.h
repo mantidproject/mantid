@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitDataView.h"
-#include "IndirectFunctionBrowser/FQTemplateBrowser.h"
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "JumpFitDataPresenter.h"
 #include "JumpFitModel.h"
 
@@ -107,7 +107,7 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };
 
-class FQTemplateBrowserMock : public IFQFitObserver {
+class SingleFunctionTemplateBrowserMock : public IFQFitObserver {
   MOCK_METHOD1(
       updateAvailableFunctions,
       void(std::map<std::string, std::string> functionInitialisationStrings));
@@ -138,7 +138,7 @@ public:
     m_ParameterCombo = createComboBox(getJumpParameters());
     m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
     m_ParameterLabel = createLabel(PARAMETER_LABEL);
-    m_FQTemplateBrowser = std::make_unique<FQTemplateBrowserMock>();
+    m_SingleFunctionTemplateBrowser = std::make_unique<SingleFunctionTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
@@ -147,7 +147,7 @@ public:
         std::move(m_ParameterTypeCombo.get()),
         std::move(m_ParameterCombo.get()),
         std::move(m_ParameterTypeLabel.get()),
-        std::move(m_ParameterLabel.get()), m_FQTemplateBrowser.get());
+        std::move(m_ParameterLabel.get()), m_SingleFunctionTemplateBrowser.get());
 
     SetUpADSWithWorkspace m_ads(
         "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
@@ -211,7 +211,7 @@ private:
   std::unique_ptr<QComboBox> m_ParameterCombo;
   std::unique_ptr<QLabel> m_ParameterTypeLabel;
   std::unique_ptr<QLabel> m_ParameterLabel;
-  std::unique_ptr<FQTemplateBrowserMock> m_FQTemplateBrowser;
+  std::unique_ptr<SingleFunctionTemplateBrowserMock> m_SingleFunctionTemplateBrowser;
 
   std::unique_ptr<MockJumpFitDataView> m_view;
   std::unique_ptr<MockJumpFitModel> m_model;

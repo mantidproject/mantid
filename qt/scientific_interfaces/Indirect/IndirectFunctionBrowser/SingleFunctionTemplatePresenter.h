@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "FQFunctionModel.h"
+#include "SingleFunctionTemplateModel.h"
 #include "IFQFitObserver.h"
 #include "ParameterEstimation.h"
 
@@ -23,18 +23,18 @@ class EditLocalParameterDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class FQTemplateBrowser;
+class SingleFunctionTemplateBrowser;
 
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL FQTemplatePresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL SingleFunctionTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit FQTemplatePresenter(
-      FQTemplateBrowser *view,
+  explicit SingleFunctionTemplatePresenter(
+      SingleFunctionTemplateBrowser *view,
       std::map<std::string, std::string> functionInitialisationStrings);
   void updateAvailableFunctions(
       std::map<std::string, std::string> functionInitialisationStrings);
@@ -77,8 +77,8 @@ private:
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   void updateView();
-  FQTemplateBrowser *m_view;
-  FQFunctionModel m_model;
+  SingleFunctionTemplateBrowser *m_view;
+  SingleFunctionTemplateModel m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
