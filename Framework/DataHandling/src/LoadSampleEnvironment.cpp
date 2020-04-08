@@ -216,7 +216,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(
     MatrixWorkspace_const_sptr inputWS, const std::string filename,
     Sample &sample, const bool add, std::string debugString) {
   std::unique_ptr<SampleEnvironment> environment = nullptr;
-  boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+  std::shared_ptr<MeshObject> environmentMesh = nullptr;
 
   std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;

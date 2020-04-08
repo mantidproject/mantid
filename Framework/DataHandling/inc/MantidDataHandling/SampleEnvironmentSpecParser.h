@@ -54,7 +54,7 @@ private:
   parseContainer(Poco::XML::Element *element) const;
   boost::shared_ptr<Geometry::IObject>
   parseComponent(Poco::XML::Element *element) const;
-  boost::shared_ptr<Geometry::MeshObject>
+  std::shared_ptr<Geometry::MeshObject>
   loadMeshFromSTL(Poco::XML::Element *stlFileElement) const;
   void LoadOptionalDoubleFromXML(Poco::XML::Element *componentElement,
                                  const std::string &elementName,
