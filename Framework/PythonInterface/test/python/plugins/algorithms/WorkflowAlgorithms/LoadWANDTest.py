@@ -20,6 +20,7 @@ class LoadWANDTest(unittest.TestCase):
         self.assertAlmostEqual(ws.run().getGoniometer().getEulerAngles()[0], -142.6)
         self.assertEqual(ws.run().getLogData('Wavelength').value, 1.488)
         self.assertAlmostEqual(ws.run().getLogData('Ei').value, 36.94619794)
+        self.assertAlmostEqual(ws.run().getLogData('duration').value, 40.05)
 
         # Check masking
         self.assertTrue(ws.detectorInfo().isMasked(0))
