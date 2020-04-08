@@ -76,7 +76,7 @@ class DrillModel(QObject):
             if (e < len(self.samples) and len(self.samples[e]) > 0):
                 kwargs = self.convolute(self.samples[e])
                 kwargs.update(self.settings)
-                kwargs['OutputWorkspace'] = str(e) + "_" + kwargs['SampleRuns']
+                kwargs['OutputWorkspace'] = "sample_" + str(e)
                 self.thread.add_process(self.algorithm, **kwargs)
                 self.processes_running += 1
         self.thread.process_done.connect(self.on_process_done)
