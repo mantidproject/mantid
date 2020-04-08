@@ -54,7 +54,6 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   setupSurfaceTypeOptions();
 
   //Reset view button
-
   m_resetView = new QPushButton(tr("Reset View"));
   m_resetView->setToolTip("Reset the instrument view to default");
   connect(m_resetView, SIGNAL(clicked()), this, SLOT(resetView()));

@@ -313,6 +313,9 @@ protected:
   /// dict of selected tabs
   std::vector<std::pair<std::string, bool>> m_stateOfTabs;
 
+  /// Is the workspace monochromatic ?
+  bool m_isMonochromatic;
+
 private:
   /// ADS notification handlers
   void preDeleteHandle(

@@ -153,10 +153,20 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   mainLayout->addWidget(controlPanelLayout);
 
-  m_xIntegration = new XIntegrationControl(this);
-  mainLayout->addWidget(m_xIntegration);
-  connect(m_xIntegration, SIGNAL(changed(double, double)), this,
-          SLOT(setIntegrationRange(double, double)));
+  m_instrumentActor.reset(
+      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+
+  bool isHistogram = m_instrumentActor->getWorkspace()->isHistogramData();
+  size_t binCount = m_instrumentActor->getWorkspace()->x(0).size();
+
+  m_isMonochromatic =
+      (isHistogram && binCount <= 2) || (!isHistogram && binCount <= 1);
+  if (!m_isMonochromatic) {
+    m_xIntegration = new XIntegrationControl(this);
+    mainLayout->addWidget(m_xIntegration);
+    connect(m_xIntegration, SIGNAL(changed(double, double)), this,
+            SLOT(setIntegrationRange(double, double)));
+  }
 
   // Set the mouse/keyboard operation info and help button
   auto *infoLayout = new QHBoxLayout();
@@ -176,9 +186,6 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   // Background colour
   setBackgroundColor(
       settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
-
-  m_instrumentActor.reset(
-      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
 
   // Create the b=tabs
   createTabs(settings);
@@ -294,10 +301,13 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
     m_instrumentActor.reset(
         new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
-  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
-                                m_instrumentActor->maxBinValue());
-  m_xIntegration->setUnits(QString::fromStdString(
-      m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+
+  if (!m_isMonochromatic) {
+    m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
+                                  m_instrumentActor->maxBinValue());
+    m_xIntegration->setUnits(QString::fromStdString(
+        m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+  }
   auto surface = getSurface();
   if (resetGeometry || !surface) {
     if (setDefaultView) {
@@ -1241,8 +1251,10 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_maskTab = new InstrumentWidgetMaskTab(this);
   connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
-  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
-          SLOT(changedIntegrationRange(double, double)));
+  if (!m_isMonochromatic) {
+    connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
+            SLOT(changedIntegrationRange(double, double)));
+  }
   m_maskTab->loadSettings(settings);
 
   // Instrument tree controls
