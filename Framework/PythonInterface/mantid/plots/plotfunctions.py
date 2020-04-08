@@ -87,7 +87,7 @@ def figure_title(workspaces, fig_num):
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False, waterfall=False, log_values=None):
+         window_title=None, tiled=False, waterfall=False, log_name=None, log_values=None):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -105,6 +105,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param window_title: A string denoting name of the GUI window which holds the graph
     :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
     :param waterfall: An optional flag controlling whether or not to do a waterfall plot
+    :param log_name: The optional log being plotted against.
     :param log_values: An optional list of log values to plot against.
     :return: The figure containing the plots
     """
@@ -142,7 +143,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         show_title = ("on" == ConfigService.getString("plots.ShowTitle").lower()) and not overplot
         ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
         ax.axis('on')
-        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_values)
+        _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
 
     # Can't have a waterfall plot with only one line.
     if len(nums)*len(workspaces) == 1 and waterfall:
@@ -360,7 +361,7 @@ def _validate_workspace_names(workspaces):
         return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
 
 
-def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, log_values=None):
+def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, log_name=None, log_values=None):
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
 
@@ -380,5 +381,13 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             plot_fn(ws, **plot_kwargs)
     ax.make_legend()
     if set_title:
-        title = workspaces[0].name()
+        workspace_names = [ws.name() for ws in workspaces]
+        title = ", ".join(workspace_names)
+
+        if len(title) > 50:
+            title = f"{workspace_names[0]} - {workspace_names[-1]}"
+
+        if log_name:
+            title += f" ({log_name})"
+
         ax.set_title(title)

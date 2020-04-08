@@ -137,7 +137,8 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
         return plot(selection.workspaces, spectrum_nums=selection.spectra,
                     wksp_indices=selection.wksp_indices,
                     errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type == selection.Tiled,
-                    waterfall=selection.plot_type == selection.Waterfall, log_values=log_values)
+                    waterfall=selection.plot_type == selection.Waterfall,
+                    log_name=selection.log_name, log_values=log_values)
 
 
 def pcolormesh_from_names(names, fig=None, ax=None):

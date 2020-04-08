@@ -34,6 +34,8 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
             ax.set_title("Surface" + title)
             ax.set_ylabel(axis_name)
 
+            fig.canvas.set_window_title("Surface" + title)
+
             fig.colorbar(surface)
 
             # grid is enabled by default so set the toolbar button to be checked
@@ -48,6 +50,8 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
 
             ax.set_ylabel(axis_name)
             ax.set_title("Contour" + title)
+
+            fig.canvas.set_window_title("Contour" + title)
 
 
 def _create_workspace_for_group_plot(plot_type: SpectraSelection, workspaces: List[Workspace], plot_index: int,
