@@ -150,7 +150,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        evout = boost::dynamic_pointer_cast<EventWorkspace>(
+        evout = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("test_ev_polyc_out")));
 
     TS_ASSERT(evout); // should be an event workspace

@@ -12,7 +12,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 #include <vector>
 
@@ -76,13 +75,13 @@ protected:
       nullptr; ///< ObjComponent that uses this geometry handler
   CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
 public:
-  GeometryHandler(IObjComponent *comp);                     ///< Constructor
-  GeometryHandler(const boost::shared_ptr<CSGObject> &obj); ///< Constructor
-  GeometryHandler(CSGObject *obj);                          ///< Constructor
+  GeometryHandler(IObjComponent *comp);                   ///< Constructor
+  GeometryHandler(const std::shared_ptr<CSGObject> &obj); ///< Constructor
+  GeometryHandler(CSGObject *obj);                        ///< Constructor
   GeometryHandler(const MeshObject &obj);
   GeometryHandler(const MeshObject2D &obj);
   GeometryHandler(const GeometryHandler &handler);
-  boost::shared_ptr<GeometryHandler> clone() const;
+  std::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();
   void render() const; ///< Render Object or ObjComponent
   void

@@ -59,7 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(nxsLoader.execute());
 
     const auto ws = AnalysisDataService::Instance().retrieve(wsName);
-    const auto inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    const auto inputWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
     auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(inputWs, fileHandle.path());

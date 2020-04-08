@@ -66,8 +66,8 @@ private:
 
   void createWorkspace(const std::string &wsName) {
     // create a fake workspace for testing
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input =
+        std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace(wsName, input);
 
     Mantid::API::AlgorithmFactory::Instance().subscribe<SimpleSum>();

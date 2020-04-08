@@ -47,16 +47,16 @@ void CreatePSDBleedMask::init() {
                                             Direction::Output),
       "The name of the output MaskWorkspace which will contain the result "
       "masks.");
-  auto mustBePosDbl = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePosDbl = std::make_shared<BoundedValidator<double>>();
   mustBePosDbl->setLower(0.0);
   declareProperty("MaxTubeFramerate", -1.0, mustBePosDbl,
                   "The maximum rate allowed for a tube in counts/us/frame.");
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
                   "The number of pixels about the centre to ignore.");
   declareProperty("NumberOfFailures", 0,
-                  boost::make_shared<Kernel::NullValidator>(),
+                  std::make_shared<Kernel::NullValidator>(),
                   "An output property containing the number of masked tubes",
                   Direction::Output);
 }
@@ -122,7 +122,7 @@ void CreatePSDBleedMask::exec() {
       continue;
 
     auto &det = spectrumInfo.detector(i);
-    boost::shared_ptr<const Geometry::IComponent> parent;
+    std::shared_ptr<const Geometry::IComponent> parent;
 
     if (!spectrumInfo.hasUniqueDetector(i)) {
       const auto &group = dynamic_cast<const Geometry::DetectorGroup &>(det);

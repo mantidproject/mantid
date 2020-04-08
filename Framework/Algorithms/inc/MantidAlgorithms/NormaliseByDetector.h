@@ -10,7 +10,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 
@@ -51,13 +51,13 @@ private:
   tryParseFunctionParameter(const Mantid::Geometry::Parameter_sptr &parameter,
                             const Geometry::IDetector &det);
   /// Block to process histograms.
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> processHistograms(
-      const boost::shared_ptr<Mantid::API::MatrixWorkspace> &inWS);
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
+  processHistograms(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inWS);
   /// Process indivdual histogram.
   void processHistogram(
       size_t wsIndex,
-      const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &inWS,
-      const boost::shared_ptr<Mantid::API::MatrixWorkspace> &denominatorWS,
+      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &inWS,
+      const std::shared_ptr<Mantid::API::MatrixWorkspace> &denominatorWS,
       Mantid::API::Progress &prog);
 
   void init() override;

@@ -16,7 +16,7 @@
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -83,12 +83,12 @@ public:
         WorkspaceCreationHelper::create1DWorkspaceConstant(20, 1.5, 0.5, true);
 
     FunctionParameterDecorator_sptr fn =
-        boost::make_shared<SimpleFunctionParameterDecorator>();
+        std::make_shared<SimpleFunctionParameterDecorator>();
     fn->setDecoratedFunction("FlatBackground");
     fn->setParameter("A0", 10.5);
 
     IAlgorithm_sptr fitAlg = AlgorithmManager::Instance().create("Fit");
-    fitAlg->setProperty("Function", boost::static_pointer_cast<IFunction>(fn));
+    fitAlg->setProperty("Function", std::static_pointer_cast<IFunction>(fn));
     fitAlg->setProperty("InputWorkspace", ws);
 
     fitAlg->execute();

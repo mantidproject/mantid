@@ -411,7 +411,7 @@ public:
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
     auto &oldHistory = inputWS->history();
-    auto historyEntry = boost::make_shared<AlgorithmHistory>(
+    auto historyEntry = std::make_shared<AlgorithmHistory>(
         "LineProfileTestDummyAlgorithmName", 1,
         boost::uuids::to_string(boost::uuids::random_generator()()));
     oldHistory.addHistory(historyEntry);
@@ -435,10 +435,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    MatrixWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(
-                "LineProfileTest_test_input_history"));
+    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "LineProfileTest_test_input_history"));
     TS_ASSERT(outputWS);
     const auto &history = outputWS->getHistory();
     TS_ASSERT_EQUALS(history.size(), 2)

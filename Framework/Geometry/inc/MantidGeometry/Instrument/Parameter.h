@@ -7,10 +7,8 @@
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
-#ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#endif
 #include <iomanip>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -104,6 +102,9 @@ private:
 /// Templated class for parameters of type \c Type
 template <class Type> class DLLExport ParameterType : public Parameter {
 public:
+  /// Constructor
+  ParameterType() : Parameter(), m_value() {}
+
   /// Returns the value of the property as a string
   std::string asString() const override;
   /// Set the value of the property via a string
@@ -123,11 +124,6 @@ private:
   void setValue(const Type &value);
   /// Set the value of the parameter
   ParameterType &operator=(const Type &value);
-
-protected:
-  friend class Kernel::Instantiator<ParameterType<Type>, Parameter>;
-  /// Constructor
-  ParameterType() : Parameter(), m_value() {}
 
 private:
   Type m_value; ///< Value
@@ -202,7 +198,7 @@ ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
 }
 
 /// Typedef for the shared pointer
-using Parameter_sptr = boost::shared_ptr<Parameter>;
+using Parameter_sptr = std::shared_ptr<Parameter>;
 
 } // namespace Geometry
 } // namespace Mantid

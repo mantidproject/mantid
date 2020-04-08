@@ -67,7 +67,7 @@ private:
 };
 
 using AbstractSpaceGroupGenerator_sptr =
-    boost::shared_ptr<AbstractSpaceGroupGenerator>;
+    std::shared_ptr<AbstractSpaceGroupGenerator>;
 
 /// Concrete space group generator that uses space group generators as given in
 /// ITA.
@@ -172,7 +172,7 @@ public:
     }
 
     AbstractSpaceGroupGenerator_sptr generator =
-        boost::make_shared<T>(number, hmSymbol, generatorString);
+        std::make_shared<T>(number, hmSymbol, generatorString);
 
     subscribe(generator);
   }

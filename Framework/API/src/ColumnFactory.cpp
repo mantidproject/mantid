@@ -11,9 +11,9 @@
 namespace Mantid {
 namespace API {
 
-boost::shared_ptr<Column>
+std::shared_ptr<Column>
 ColumnFactoryImpl::create(const std::string &type) const {
-  boost::shared_ptr<Column> c = Kernel::DynamicFactory<Column>::create(type);
+  std::shared_ptr<Column> c = Kernel::DynamicFactory<Column>::create(type);
   c->m_type = type;
   return c;
 }

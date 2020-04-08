@@ -12,7 +12,7 @@
 #include "MantidKernel/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <map>
@@ -97,10 +97,10 @@ private:
   using CommandMap = std::map<std::string, commands>;
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
-  boost::shared_ptr<Kernel::Property> m_periods;
+  std::shared_ptr<Kernel::Property> m_periods;
 
   /// TimeSeriesProperty<bool> containing running status. Created by LogParser
-  boost::shared_ptr<Kernel::TimeSeriesProperty<bool>> m_status;
+  std::shared_ptr<Kernel::TimeSeriesProperty<bool>> m_status;
 
   /// Number of periods
   int m_nOfPeriods;

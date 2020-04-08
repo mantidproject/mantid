@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactoryBase.h"
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 

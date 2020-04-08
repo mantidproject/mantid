@@ -53,7 +53,7 @@ void HFIRLoad::init() {
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
   // the value in the data file (used when the data file is not populated)
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "Wavelength", EMPTY_DBL(), mustBePositive,
@@ -116,12 +116,12 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
 void HFIRLoad::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    reductionManager = boost::make_shared<PropertyManager>();
+    reductionManager = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         reductionManager);
   }
@@ -172,7 +172,7 @@ void HFIRLoad::exec() {
     loadAlg->executeAsChildAlg();
     Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr dataWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
+        std::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
     dataWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
     setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
     g_log.notice() << "Successfully loaded " << fileName
@@ -185,7 +185,7 @@ void HFIRLoad::exec() {
   g_log.debug() << "Calling LoadSpice2D Done. OutputWorkspace name = "
                 << dataWS_tmp->getName() << '\n';
   API::MatrixWorkspace_sptr dataWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
+      std::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance
   // If SampleDetectorDistance is provided, use it!
@@ -330,7 +330,7 @@ void HFIRLoad::exec() {
   }
 
   setProperty<MatrixWorkspace_sptr>(
-      "OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
+      "OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
   setPropertyValue("OutputMessage", output_message);
 }
 

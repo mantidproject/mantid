@@ -135,7 +135,7 @@ private:
 };
 
 /// Typedef for a shared pointer to a PropertyManager
-using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+using PropertyManager_sptr = std::shared_ptr<PropertyManager>;
 
 /// Return the value of the PropertyManager as a Json::Value
 MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const PropertyManager &propMgr);

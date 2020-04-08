@@ -10,7 +10,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <map>
 #include <set>
@@ -82,7 +82,7 @@ protected:
 };
 
 /// Shared pointer to a PointGroup
-using PointGroup_sptr = boost::shared_ptr<PointGroup>;
+using PointGroup_sptr = std::shared_ptr<PointGroup>;
 
 MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
 

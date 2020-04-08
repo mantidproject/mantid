@@ -52,7 +52,7 @@ using namespace Kernel;
  */
 XMLInstrumentParameter::XMLInstrumentParameter(
     const std::string &logfileID, const std::string &value,
-    const boost::shared_ptr<Kernel::Interpolation> &interpolation,
+    const std::shared_ptr<Kernel::Interpolation> &interpolation,
     const std::string &formula, const std::string &formulaUnit,
     const std::string &resultUnit, const std::string &paramName,
     const std::string &type, const std::string &tie,

@@ -53,7 +53,7 @@ public:
     Workspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieve(wsName));
-    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(ws);
     TS_ASSERT(data);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 192 * 192);
     const auto &spectrumInfo = data->spectrumInfo();

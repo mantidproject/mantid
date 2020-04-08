@@ -55,7 +55,7 @@ public:
     // 5. Check result
     Mantid::API::MatrixWorkspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(
-        workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("inputWS")));
 
     const auto &spectrumInfo = workspace->spectrumInfo();
@@ -101,7 +101,7 @@ public:
     // 5. Check result
     Mantid::API::MatrixWorkspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(
-        workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("inputWS2")));
 
     checkDetectorParameters(workspace, 0, 1.1, 90.1, 1.0);

@@ -13,8 +13,8 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <boost/weak_ptr.hpp>
 #include <list>
+#include <memory>
 #include <utility>
 
 namespace Mantid {
@@ -42,10 +42,10 @@ public:
   void declareDatasetProperties(const std::string &suffix = "",
                                 bool addProp = true) override;
   /// Create an output workspace.
-  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+  std::shared_ptr<API::Workspace> createOutputWorkspace(
       const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
+      std::shared_ptr<API::FunctionDomain> domain,
+      std::shared_ptr<API::FunctionValues> values,
       const std::string &outputWorkspacePropertyName) override;
   /// Return the size of the domain to be created.
   size_t getDomainSize() const override;
@@ -53,7 +53,7 @@ public:
   void initFunction(API::IFunction_sptr function) override;
   /// Set the workspace
   /// @param ws :: workspace to set.
-  void setWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) {
+  void setWorkspace(std::shared_ptr<API::MatrixWorkspace> ws) {
     m_matrixWorkspace = std::move(ws);
   }
   /// Set the workspace index
@@ -74,7 +74,7 @@ protected:
   virtual void setParameters() const;
 
   /// Creates the blank output workspace of the correct size
-  boost::shared_ptr<API::MatrixWorkspace>
+  std::shared_ptr<API::MatrixWorkspace>
   createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
   /// Set initial values for parameters with default values.
   void setInitialValues(API::IFunction &function);
@@ -91,9 +91,9 @@ protected:
   /// Add the calculated function values to the workspace
   void addFunctionValuesToWS(
       const API::IFunction_sptr &function,
-      boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-      const boost::shared_ptr<API::FunctionDomain> &domain,
-      const boost::shared_ptr<API::FunctionValues> &resultValues) const;
+      std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+      const std::shared_ptr<API::FunctionDomain> &domain,
+      const std::shared_ptr<API::FunctionValues> &resultValues) const;
 
   /// Store workspace property name
   std::string m_workspacePropertyName;
@@ -105,7 +105,7 @@ protected:
   std::string m_endXPropertyName;
 
   /// The input MareixWorkspace
-  mutable boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
+  mutable std::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
   /// The workspace index
   mutable size_t m_workspaceIndex;
   /// startX
@@ -113,8 +113,8 @@ protected:
   /// endX
   mutable double m_endX;
   /// Store the created domain and values
-  mutable boost::weak_ptr<API::FunctionDomain1D> m_domain;
-  mutable boost::weak_ptr<API::FunctionValues> m_values;
+  mutable std::weak_ptr<API::FunctionDomain1D> m_domain;
+  mutable std::weak_ptr<API::FunctionValues> m_values;
   size_t m_startIndex;
 };
 

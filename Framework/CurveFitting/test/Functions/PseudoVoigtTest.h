@@ -16,7 +16,7 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/MersenneTwister.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -425,7 +425,7 @@ public:
 private:
   IPeakFunction_sptr getInitializedPV(double center, double intensity,
                                       double fwhm, double mixing) {
-    IPeakFunction_sptr pv = boost::make_shared<PseudoVoigt>();
+    IPeakFunction_sptr pv = std::make_shared<PseudoVoigt>();
     pv->initialize();
     pv->setParameter("PeakCentre", center);
     pv->setParameter("FWHM", fwhm);

@@ -90,7 +90,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Nothing above background in input workspace, should "
                       "have found no peaks!",
@@ -108,7 +108,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
     TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40,
@@ -131,7 +131,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS(
         "Background has been set to 40, should have found no peaks!", 0,
@@ -151,7 +151,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
     TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
@@ -171,7 +171,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found three peaks!", 3, result->rowCount());
 
@@ -226,7 +226,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0,
                       result->rowCount());
@@ -252,7 +252,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0,
                       result->rowCount());
@@ -270,7 +270,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
@@ -287,7 +287,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
 
@@ -320,7 +320,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
     TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
@@ -346,7 +346,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found three peaks!", 3, result->rowCount());
 
@@ -409,7 +409,7 @@ public:
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
-    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     std::cout << "Number of Peaks Found: " << result->rowCount() << '\n';
     TSM_ASSERT("Should have found many peaks!", 0 < result->rowCount());

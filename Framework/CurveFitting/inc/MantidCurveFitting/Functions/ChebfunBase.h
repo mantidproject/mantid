@@ -9,8 +9,8 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-#include <boost/shared_ptr.hpp>
 #include <functional>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -107,18 +107,18 @@ public:
   void derivative(const std::vector<double> &a,
                   std::vector<double> &aout) const;
   /// Calculate the integral
-  boost::shared_ptr<ChebfunBase> integral(const std::vector<double> &a,
-                                          std::vector<double> &aout) const;
+  std::shared_ptr<ChebfunBase> integral(const std::vector<double> &a,
+                                        std::vector<double> &aout) const;
   /// Find all roots of a function on this interval
   std::vector<double> roots(const std::vector<double> &a) const;
 
   /// Fit a function until full convergence
-  static boost::shared_ptr<ChebfunBase>
+  static std::shared_ptr<ChebfunBase>
   bestFit(double start, double end, ChebfunFunctionType, std::vector<double> &p,
           std::vector<double> &a, double maxA = 0.0, double tolerance = 0.0,
           size_t maxSize = 0);
   /// Fit a function until full convergence
-  static boost::shared_ptr<ChebfunBase>
+  static std::shared_ptr<ChebfunBase>
   bestFit(double start, double end, const API::IFunction &,
           std::vector<double> &p, std::vector<double> &a, double maxA = 0.0,
           double tolerance = 0.0, size_t maxSize = 0);
@@ -128,7 +128,7 @@ public:
   /// Find best fit with highest possible tolerance (to be used with noisy
   /// data).
   template <class FunctionType>
-  static boost::shared_ptr<ChebfunBase>
+  static std::shared_ptr<ChebfunBase>
   bestFitAnyTolerance(double start, double end, FunctionType f,
                       std::vector<double> &p, std::vector<double> &a,
                       double maxA = 0.0, double tolerance = 0.0,
@@ -159,7 +159,7 @@ private:
                            double tolerance, size_t shift = 0);
   /// Templated implementation of bestFit method
   template <class FunctionType>
-  static boost::shared_ptr<ChebfunBase>
+  static std::shared_ptr<ChebfunBase>
   bestFitTempl(double start, double end, FunctionType f, std::vector<double> &p,
                std::vector<double> &a, double maxA, double tolerance,
                size_t maxSize);
@@ -184,11 +184,11 @@ private:
   static const size_t g_maxNumberPoints;
 };
 
-using ChebfunBase_sptr = boost::shared_ptr<ChebfunBase>;
+using ChebfunBase_sptr = std::shared_ptr<ChebfunBase>;
 
 /// Find best fit with highest possible tolerance (to be used with noisy data).
 template <class FunctionType>
-boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
+std::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
     double start, double end, FunctionType f, std::vector<double> &p,
     std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
   if (tolerance == 0.0)

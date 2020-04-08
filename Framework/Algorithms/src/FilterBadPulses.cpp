@@ -52,7 +52,7 @@ void FilterBadPulses::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
-  auto range = boost::make_shared<BoundedValidator<double>>();
+  auto range = std::make_shared<BoundedValidator<double>>();
   range->setBounds(0., 100.);
   declareProperty("LowerCutoff", 95., range,
                   "The percentage of the average to use as the lower bound");

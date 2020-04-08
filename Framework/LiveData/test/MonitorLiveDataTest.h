@@ -60,12 +60,12 @@ public:
   }
 
   /** Create but don't start a MonitorLiveData thread */
-  boost::shared_ptr<MonitorLiveData>
+  std::shared_ptr<MonitorLiveData>
   makeAlgo(const std::string &output, const std::string &accumWS = "",
            const std::string &AccumulationMethod = "Replace",
            const std::string &RunTransitionBehavior = "Restart",
            const std::string &UpdateEvery = "1") {
-    auto alg = boost::dynamic_pointer_cast<MonitorLiveData>(
+    auto alg = std::dynamic_pointer_cast<MonitorLiveData>(
         AlgorithmManager::Instance().create("MonitorLiveData", -1));
     alg->setPropertyValue("Instrument", "TestDataListener");
     alg->setPropertyValue("UpdateEvery", UpdateEvery);
@@ -86,7 +86,7 @@ public:
     }
 
     // This algorithm dies because another thread has the same output
-    boost::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake1");
+    std::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake1");
     TSM_ASSERT("validateInputs should complaing (return a non-empty map)",
                !alg2->validateInputs().empty());
 
@@ -105,7 +105,7 @@ public:
     }
 
     // This algorithm dies because another thread has the same output
-    boost::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake2", "accum1");
+    std::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake2", "accum1");
     TSM_ASSERT("validateInputs should complaing (return a non-empty map)",
                !alg2->validateInputs().empty());
 
@@ -167,7 +167,7 @@ public:
   /** Executes the given algorithm asynchronously, until you reach the given
    * chunk number.
    * @return false if test failed*/
-  bool runAlgoUntilChunk(const boost::shared_ptr<MonitorLiveData> &alg1,
+  bool runAlgoUntilChunk(const std::shared_ptr<MonitorLiveData> &alg1,
                          size_t stopAtChunk) {
     Poco::ActiveResult<bool> res1 = alg1->executeAsync();
     Poco::Thread::sleep(50);
@@ -186,7 +186,7 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_newStatus",
                                         "4" /* ILiveListener::EndRun */);
 
-    boost::shared_ptr<MonitorLiveData> alg1 =
+    std::shared_ptr<MonitorLiveData> alg1 =
         makeAlgo("fake1", "", "Add", "Restart", "0.05");
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 5))
@@ -215,7 +215,7 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_newStatus",
                                         "4" /* ILiveListener::EndRun */);
 
-    boost::shared_ptr<MonitorLiveData> alg1 =
+    std::shared_ptr<MonitorLiveData> alg1 =
         makeAlgo("fake2", "", "Add", "Rename", "0.05");
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 5))

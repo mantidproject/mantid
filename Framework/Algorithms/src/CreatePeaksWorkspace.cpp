@@ -43,11 +43,11 @@ void CreatePeaksWorkspace::exec() {
   Workspace_sptr instWS = this->getProperty("InstrumentWorkspace");
 
   MultipleExperimentInfos_sptr instMDWS =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(instWS);
+      std::dynamic_pointer_cast<MultipleExperimentInfos>(instWS);
 
   ExperimentInfo_sptr ei;
 
-  auto out = boost::make_shared<PeaksWorkspace>();
+  auto out = std::make_shared<PeaksWorkspace>();
   setProperty("OutputWorkspace", out);
   int NumberOfPeaks = getProperty("NumberOfPeaks");
 
@@ -60,7 +60,7 @@ void CreatePeaksWorkspace::exec() {
       throw std::invalid_argument("InstrumentWorkspace has no ExperimentInfo");
     }
   } else {
-    ei = boost::dynamic_pointer_cast<ExperimentInfo>(instWS);
+    ei = std::dynamic_pointer_cast<ExperimentInfo>(instWS);
     if (ei) {
       out->setInstrument(ei->getInstrument());
       out->mutableRun().setGoniometer(ei->run().getGoniometer().getR(), false);

@@ -242,7 +242,7 @@ private:
 
     auto stdWorkspaceName = wsName.toStdString();
 
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(
         AnalysisDataService::Instance().retrieve(stdWorkspaceName + "_1"));
     group->addWorkspace(

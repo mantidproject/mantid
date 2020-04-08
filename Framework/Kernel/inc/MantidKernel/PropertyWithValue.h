@@ -59,7 +59,7 @@ public:
   std::string getDefault() const override;
   std::string setValue(const std::string &value) override;
   std::string setValueFromJson(const Json::Value &value) override;
-  std::string setDataItem(const boost::shared_ptr<DataItem> data) override;
+  std::string setDataItem(const std::shared_ptr<DataItem> &data) override;
   PropertyWithValue &operator=(const PropertyWithValue &right);
   PropertyWithValue &operator+=(Property const *right) override;
   virtual PropertyWithValue &operator=(const TYPE &value);

@@ -149,7 +149,7 @@ signals:
 public:
   AlgorithmHistoryWindow(
       QWidget *parent,
-      const boost::shared_ptr<const Mantid::API::Workspace> & /*wsptr*/);
+      const std::shared_ptr<const Mantid::API::Workspace> & /*wsptr*/);
   AlgorithmHistoryWindow(QWidget *parent, const QString &workspaceName);
   ~AlgorithmHistoryWindow() override;
 
@@ -189,7 +189,7 @@ private:
   AlgExecSummaryGrpBox *m_execSumGrpBox;
   AlgEnvHistoryGrpBox *m_envHistGrpBox;
   QString m_wsName;
-  boost::shared_ptr<Mantid::API::HistoryView> m_view;
+  std::shared_ptr<Mantid::API::HistoryView> m_view;
 };
 
 class AlgHistoryProperties : public QObject {

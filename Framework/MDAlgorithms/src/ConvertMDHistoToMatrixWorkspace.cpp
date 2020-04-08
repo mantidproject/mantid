@@ -70,7 +70,7 @@ size_t findXAxis(const VMD &start, const VMD &end,
     return dimIndex;
   }
 
-  auto originalWS = boost::dynamic_pointer_cast<IMDWorkspace>(
+  auto originalWS = std::dynamic_pointer_cast<IMDWorkspace>(
       inputWorkspace->getOriginalWorkspace(nOriginalWorkspaces - 1));
 
   for (size_t d = 0; d < diff.getNumDims(); d++) {
@@ -201,7 +201,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
       inputWorkspace->getNumberTransformsToOriginal();
 
   CoordTransform_const_sptr transform =
-      boost::make_shared<NullCoordTransform>(inputWorkspace->getNumDims());
+      std::make_shared<NullCoordTransform>(inputWorkspace->getNumDims());
   if (numberTransformsToOriginal > 0) {
     const size_t indexToLastTransform = numberTransformsToOriginal - 1;
     transform = CoordTransform_const_sptr(
@@ -231,8 +231,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   }
   // outputWorkspace->mutableX(0) = inTargetCoord;
 
-  boost::shared_ptr<Kernel::Units::Label> labelX =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> labelX =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
   labelX->setLabel(xAxisLabel);
   outputWorkspace->getAxis(0)->unit() = labelX;
@@ -321,7 +321,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   }
 
   // set the first axis
-  auto labelX = boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  auto labelX = std::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));
   labelX->setLabel(xDim->getName());
   outputWorkspace->getAxis(0)->unit() = labelX;
@@ -331,7 +331,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   for (size_t i = 0; i <= ny; ++i) {
     yAxis->setValue(i, yDim->getX(i));
   }
-  auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  auto labelY = std::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel(yDim->getName());
   yAxis->unit() = labelY;

@@ -41,8 +41,7 @@ DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
 void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
                                             size_t /*maxIterations*/) {
   m_leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-          function);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
   if (!m_leastSquares) {
     throw std::invalid_argument(
         "Damped Gauss-Newton minimizer works only with least "

@@ -256,9 +256,9 @@ public:
   }
 
 private:
-  static boost::shared_ptr<Algorithms::CalculatePolynomialBackground>
+  static std::shared_ptr<Algorithms::CalculatePolynomialBackground>
   makeAlgorithm() {
-    auto a = boost::make_shared<Algorithms::CalculatePolynomialBackground>();
+    auto a = std::make_shared<Algorithms::CalculatePolynomialBackground>();
     a->initialize();
     a->setChild(true);
     a->setRethrows(true);

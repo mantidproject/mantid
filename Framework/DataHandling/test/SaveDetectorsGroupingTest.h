@@ -52,7 +52,7 @@ public:
     TS_ASSERT(load.isExecuted());
 
     DataObjects::GroupingWorkspace_sptr gws =
-        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
             API::AnalysisDataService::Instance().retrieve("Vulcan_Group"));
 
     // 3. Save
@@ -76,7 +76,7 @@ public:
     TS_ASSERT(load2.isExecuted());
 
     DataObjects::GroupingWorkspace_sptr gws2 =
-        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
             API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
 
     TS_ASSERT_DELTA(gws2->y(0)[0], 1.0, 1.0E-5);
@@ -132,7 +132,7 @@ public:
     TS_ASSERT(load2.isExecuted());
 
     // Get GroupingWorkspace instance
-    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+    auto gws = std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(testWs));
 
     // Check that description was saved

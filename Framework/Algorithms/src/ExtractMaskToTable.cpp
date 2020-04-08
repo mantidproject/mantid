@@ -58,7 +58,7 @@ void ExtractMaskToTable::exec() {
   if (!m_dataWS)
     throw runtime_error("InputWorkspace cannot be cast to a MatrixWorkspace.");
   MaskWorkspace_const_sptr maskws =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+      std::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
 
   bool m_inputIsMask = false;
   if (maskws) {
@@ -78,7 +78,7 @@ void ExtractMaskToTable::exec() {
         "XMin or XMax cannot be empty.  XMin must be less than XMax.");
 
   // Create and set up output workspace
-  auto outws = boost::make_shared<TableWorkspace>();
+  auto outws = std::make_shared<TableWorkspace>();
   outws->addColumn("double", "XMin");
   outws->addColumn("double", "XMax");
   outws->addColumn("str", "DetectorIDsList");
@@ -244,7 +244,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
 
   // Go through all spectra to find masked workspace
   MaskWorkspace_const_sptr maskws =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+      std::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
   size_t numhist = maskws->getNumberHistograms();
   for (size_t i = 0; i < numhist; ++i) {
     // Rule out the spectrum without mask

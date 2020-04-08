@@ -207,7 +207,7 @@ public:
         FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     CompositeFunction_sptr cf =
-        boost::dynamic_pointer_cast<CompositeFunction>(fun);
+        std::dynamic_pointer_cast<CompositeFunction>(fun);
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(cf->nParams(), 4);
     TS_ASSERT_EQUALS(cf->parameterName(0), "f0.a0");
@@ -228,7 +228,7 @@ public:
         FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     CompositeFunction_sptr cf =
-        boost::dynamic_pointer_cast<CompositeFunction>(fun);
+        std::dynamic_pointer_cast<CompositeFunction>(fun);
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(cf->nParams(), 4);
     TS_ASSERT_EQUALS(cf->parameterName(0), "f0.a0");
@@ -424,7 +424,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         fun = FunctionFactory::Instance().createInitialized(fnString));
     TS_ASSERT(fun);
-    const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+    const auto mdfunc = std::dynamic_pointer_cast<MultiDomainFunction>(fun);
     TS_ASSERT(mdfunc);
     if (mdfunc) {
       TS_ASSERT_EQUALS(mdfunc->nFunctions(), 2);
@@ -446,7 +446,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         fun = FunctionFactory::Instance().createInitialized(fnString));
     TS_ASSERT(fun);
-    const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+    const auto mdfunc = std::dynamic_pointer_cast<MultiDomainFunction>(fun);
     TS_ASSERT(mdfunc);
     if (mdfunc) {
       TS_ASSERT_EQUALS(mdfunc->asString(),
@@ -468,10 +468,10 @@ public:
       TS_ASSERT_EQUALS(domainsSecondFunc, std::vector<size_t>{1});
 
       // test composite functions
-      const auto first = boost::dynamic_pointer_cast<CompositeFunction>(
-          mdfunc->getFunction(0));
-      const auto second = boost::dynamic_pointer_cast<CompositeFunction>(
-          mdfunc->getFunction(1));
+      const auto first =
+          std::dynamic_pointer_cast<CompositeFunction>(mdfunc->getFunction(0));
+      const auto second =
+          std::dynamic_pointer_cast<CompositeFunction>(mdfunc->getFunction(1));
       TS_ASSERT(first);
       TS_ASSERT(second);
 

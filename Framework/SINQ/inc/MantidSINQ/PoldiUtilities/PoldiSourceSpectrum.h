@@ -44,8 +44,8 @@ protected:
   Kernel::Interpolation m_spectrum;
 };
 
-using PoldiSourceSpectrum_sptr = boost::shared_ptr<PoldiSourceSpectrum>;
+using PoldiSourceSpectrum_sptr = std::shared_ptr<PoldiSourceSpectrum>;
 using PoldiSourceSpectrum_const_sptr =
-    boost::shared_ptr<const PoldiSourceSpectrum>;
+    std::shared_ptr<const PoldiSourceSpectrum>;
 } // namespace Poldi
 } // namespace Mantid

@@ -33,9 +33,9 @@ protected:
                        const size_t nData) override;
 };
 
-boost::shared_ptr<Mantid::API::MultiDomainFunction> makeMultiDomainFunction3();
+std::shared_ptr<Mantid::API::MultiDomainFunction> makeMultiDomainFunction3();
 
-boost::shared_ptr<Mantid::API::JointDomain> makeMultiDomainDomain3();
+std::shared_ptr<Mantid::API::JointDomain> makeMultiDomainDomain3();
 
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace1();
 

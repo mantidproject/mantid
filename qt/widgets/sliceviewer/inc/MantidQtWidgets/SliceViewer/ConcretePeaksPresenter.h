@@ -14,13 +14,13 @@
 #include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace MantidQt {
 namespace SliceViewer {
 /// Alias for Vector of Peak Overlay Views
-using VecPeakOverlayView = std::vector<boost::shared_ptr<PeakOverlayView>>;
+using VecPeakOverlayView = std::vector<std::shared_ptr<PeakOverlayView>>;
 
 /// Coordinate System Enum to String.
 std::string DLLExport
@@ -37,7 +37,7 @@ public:
   ConcretePeaksPresenter(
       PeakOverlayViewFactory_sptr viewFactory,
       const Mantid::API::IPeaksWorkspace_sptr &peaksWS,
-      const boost::shared_ptr<Mantid::API::MDGeometry> &mdWS,
+      const std::shared_ptr<Mantid::API::MDGeometry> &mdWS,
       const Mantid::Geometry::PeakTransformFactory_sptr &transformFactory);
   void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS) override;
   ~ConcretePeaksPresenter() override;
@@ -71,11 +71,11 @@ private:
   /// Peak overlay view.
   PeakOverlayView_sptr m_viewPeaks;
   /// View factory
-  boost::shared_ptr<PeakOverlayViewFactory> m_viewFactory;
+  std::shared_ptr<PeakOverlayViewFactory> m_viewFactory;
   /// Peaks workspace.
-  boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
+  std::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
   /// Transform factory
-  boost::shared_ptr<Mantid::Geometry::PeakTransformFactory> m_transformFactory;
+  std::shared_ptr<Mantid::Geometry::PeakTransformFactory> m_transformFactory;
   /// Peak transformer
   Mantid::Geometry::PeakTransform_sptr m_transform;
   /// current slicing point.
@@ -107,7 +107,7 @@ private:
   void produceViews();
   /// Check workspace compatibilities.
   void checkWorkspaceCompatibilities(
-      const boost::shared_ptr<Mantid::API::MDGeometry> &mdWS);
+      const std::shared_ptr<Mantid::API::MDGeometry> &mdWS);
   /// Find peaks interacting with the slice and update the view.
   void doFindPeaksInRegion();
   /// make owner update.

@@ -58,7 +58,7 @@ void ConvertSpiceDataToRealSpace::init() {
   /// TODO - Add HB2B as it is implemented in future
   std::array<std::string, 1> allowedinstruments = {{"HB2A"}};
   auto instrumentvalidator =
-      boost::make_shared<ListValidator<std::string>>(allowedinstruments);
+      std::make_shared<ListValidator<std::string>>(allowedinstruments);
   declareProperty("Instrument", "HB2A", instrumentvalidator,
                   "Instrument to be loaded. ");
 
@@ -531,7 +531,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
   // Add N experiment info as there are N measurment points
   for (const auto &ws2d : vec_ws2d) {
     // Create an ExperimentInfo object
-    ExperimentInfo_sptr tmp_expinfo = boost::make_shared<ExperimentInfo>();
+    ExperimentInfo_sptr tmp_expinfo = std::make_shared<ExperimentInfo>();
     Geometry::Instrument_const_sptr tmp_inst = ws2d->getInstrument();
     tmp_expinfo->setInstrument(tmp_inst);
 
@@ -544,7 +544,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
   }
 
   // Add one additional in order to contain the combined sample logs
-  ExperimentInfo_sptr combine_expinfo = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr combine_expinfo = std::make_shared<ExperimentInfo>();
   combine_expinfo->mutableRun().addProperty(
       new PropertyWithValue<int>("run_number", -1));
   mdws->addExperimentInfo(combine_expinfo);
@@ -596,7 +596,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   // Add events
   // Creates a new instance of the MDEventInserter.
   MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outWs);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outWs);
 
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
       MDEW_MDEVENT_3);
@@ -671,7 +671,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
   // Add events
   // Creates a new instance of the MDEventInserter.
   MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outWs);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outWs);
 
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
       MDEW_MDEVENT_3);

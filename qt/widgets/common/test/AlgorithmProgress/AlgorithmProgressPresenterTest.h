@@ -14,11 +14,10 @@
 #include "MockAlgorithmProgressWidget.h"
 
 #include <QCoreApplication>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 

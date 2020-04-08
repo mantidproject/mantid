@@ -73,9 +73,9 @@ public:
                 double L0);
 
   static void
-  cLone(boost::shared_ptr<Geometry::ParameterMap> &pmap,
-        const boost::shared_ptr<const Geometry::IComponent> &component,
-        boost::shared_ptr<const Geometry::ParameterMap> &pmapSv);
+  cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
+        const std::shared_ptr<const Geometry::IComponent> &component,
+        std::shared_ptr<const Geometry::ParameterMap> &pmapSv);
 
   void getRun2MatMap(DataObjects::PeaksWorkspace_sptr &Peaks,
                      const std::string &OptRuns,
@@ -88,7 +88,7 @@ public:
   static Kernel::Matrix<double> RotationMatrixAboutRegAxis(double theta,
                                                            char axis);
 
-  boost::shared_ptr<Geometry::Instrument>
+  std::shared_ptr<Geometry::Instrument>
   getNewInstrument(const DataObjects::PeaksWorkspace_sptr &Peaks) const;
 
   std::vector<std::string> getAttributeNames() const override {
@@ -156,10 +156,10 @@ private:
 
   void setUpOptRuns();
 
-  mutable boost::shared_ptr<Geometry::Instrument> instChange;
+  mutable std::shared_ptr<Geometry::Instrument> instChange;
   mutable bool hasParameterMap = false;
   mutable Kernel::V3D sampPos;
-  mutable boost::shared_ptr<const Geometry::ParameterMap> pmapSv;
+  mutable std::shared_ptr<const Geometry::ParameterMap> pmapSv;
 };
 } // namespace Crystal
 } // namespace Mantid

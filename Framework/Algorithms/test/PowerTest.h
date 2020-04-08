@@ -209,7 +209,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        evout = boost::dynamic_pointer_cast<EventWorkspace>(
+        evout = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("test_ev_pow_out")));
 
     TS_ASSERT(!evout); // should not be an event workspace

@@ -73,7 +73,7 @@ public:
   MOCK_METHOD1(zoomToPeak, void(const int));
   MOCK_CONST_METHOD0(isHidden, bool());
   MOCK_METHOD1(reInitialize,
-               void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
+               void(std::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
   MOCK_CONST_METHOD1(contentsDifferent, bool(const PeaksPresenter *other));
   MOCK_METHOD1(deletePeaksIn, bool(PeakBoundingBox));
   MOCK_METHOD1(peakEditMode, void(EditMode));
@@ -159,13 +159,13 @@ Mock Widget Factory.
 class MockPeakOverlayFactory : public PeakOverlayViewFactory {
 public:
   MOCK_CONST_METHOD2(
-      createView, boost::shared_ptr<PeakOverlayView>(PeaksPresenter *,
-                                                     PeakTransform_const_sptr));
+      createView, std::shared_ptr<PeakOverlayView>(PeaksPresenter *,
+                                                   PeakTransform_const_sptr));
   MOCK_CONST_METHOD0(getPlotXLabel, std::string());
   MOCK_CONST_METHOD0(getPlotYLabel, std::string());
   MOCK_METHOD0(updateView, void());
   MOCK_METHOD1(swapPeaksWorkspace,
-               void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> &));
+               void(std::shared_ptr<Mantid::API::IPeaksWorkspace> &));
   MOCK_METHOD1(getNonOrthogonalInfo, void(NonOrthogonalAxis &));
 };
 
@@ -177,7 +177,7 @@ public:
   MOCK_CONST_METHOD0(getNumDims, size_t());
   MOCK_CONST_METHOD1(
       getDimension,
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension>(size_t));
+      std::shared_ptr<const Mantid::Geometry::IMDDimension>(size_t));
   ~MockMDGeometry() override {}
 };
 

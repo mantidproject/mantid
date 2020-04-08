@@ -35,7 +35,7 @@ public:
 
     IMDEventWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        out = std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("OneStepMDEWTest")););
     TS_ASSERT(out);
     if (!out)

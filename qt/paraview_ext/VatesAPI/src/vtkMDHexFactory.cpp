@@ -215,7 +215,7 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
       // Slice from >3D down to 3D
       this->slice = true;
       this->sliceMask = std::make_unique<bool[]>(nd);
-      this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
+      this->sliceImplicitFunction = std::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions
       for (size_t d = 0; d < nd; d++)

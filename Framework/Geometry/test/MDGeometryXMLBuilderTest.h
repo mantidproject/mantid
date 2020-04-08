@@ -19,7 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -71,23 +71,23 @@ private:
 
 public:
   void testCopyConstruction() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"_a"}, b{"_b"}, c{"_c"}, d{"_d"};
     EXPECT_CALL(Const(*pDimensionX), getDimensionId())
         .WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
 
-    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    auto pDimensionY = std::make_shared<MockIMDDimension>();
     EXPECT_CALL(Const(*pDimensionY), getDimensionId())
         .WillRepeatedly(ReturnRef(b));
     EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
 
-    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
+    auto pDimensionZ = std::make_shared<MockIMDDimension>();
     EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
         .WillRepeatedly(ReturnRef(c));
     EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
 
-    auto pDimensionT = boost::make_shared<MockIMDDimension>();
+    auto pDimensionT = std::make_shared<MockIMDDimension>();
     EXPECT_CALL(Const(*pDimensionT), getDimensionId())
         .WillRepeatedly(ReturnRef(d));
     EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
@@ -108,23 +108,23 @@ public:
   }
 
   void testAssignment() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"_a"}, b{"_b"}, c{"_c"}, d{"_d"};
     EXPECT_CALL(Const(*pDimensionX), getDimensionId())
         .WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
 
-    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    auto pDimensionY = std::make_shared<MockIMDDimension>();
     EXPECT_CALL(Const(*pDimensionY), getDimensionId())
         .WillRepeatedly(ReturnRef(b));
     EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
 
-    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
+    auto pDimensionZ = std::make_shared<MockIMDDimension>();
     EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
         .WillRepeatedly(ReturnRef(c));
     EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
 
-    auto pDimensionT = boost::make_shared<MockIMDDimension>();
+    auto pDimensionT = std::make_shared<MockIMDDimension>();
     EXPECT_CALL(Const(*pDimensionT), getDimensionId())
         .WillRepeatedly(ReturnRef(d));
     EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
@@ -145,7 +145,7 @@ public:
   }
 
   void testCannotAddSameDimensionMultipleTimes() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"a"};
     EXPECT_CALL(Const(*pDimensionX), getDimensionId())
         .WillRepeatedly(ReturnRef(a));
@@ -176,7 +176,7 @@ public:
   }
 
   void testStrictPolicy() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"a"};
     EXPECT_CALL(Const(*pDimensionX), getDimensionId())
         .WillRepeatedly(ReturnRef(a));
@@ -205,7 +205,7 @@ public:
   // Same as test above, but shouldn't throw.
   void testNoPolicy() {
     std::string a{"a"};
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
     EXPECT_CALL(Const(*pDimensionX), getDimensionId())
         .WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, getIsIntegrated()).WillRepeatedly(Return(true));
@@ -227,7 +227,7 @@ public:
   }
 
   void testWithOrinaryDimensionOnly() {
-    auto pDimensionOrdinary = boost::make_shared<MockIMDDimension>();
+    auto pDimensionOrdinary = std::make_shared<MockIMDDimension>();
 
     EXPECT_CALL(*pDimensionOrdinary, toXMLString())
         .Times(1)
@@ -271,9 +271,9 @@ public:
   }
 
   void testManyOrinaryDimensions() {
-    auto pDimA = boost::make_shared<MockIMDDimension>();
-    auto pDimB = boost::make_shared<MockIMDDimension>();
-    auto pDimC = boost::make_shared<MockIMDDimension>();
+    auto pDimA = std::make_shared<MockIMDDimension>();
+    auto pDimB = std::make_shared<MockIMDDimension>();
+    auto pDimC = std::make_shared<MockIMDDimension>();
     std::string a{"a"}, b{"b"}, c{"c"};
     EXPECT_CALL(Const(*pDimA), getDimensionId()).WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(Const(*pDimB), getDimensionId()).WillRepeatedly(ReturnRef(b));
@@ -304,7 +304,7 @@ public:
   }
 
   void testWithXDimensionOnly() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"a"};
     EXPECT_CALL(*pDimensionX, toXMLString())
         .WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", a)));
@@ -345,8 +345,8 @@ public:
   }
 
   void testWithXYDimensionOnly() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
-    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
+    auto pDimensionY = std::make_shared<MockIMDDimension>();
     std::string a{"a"}, b{"b"};
 
     EXPECT_CALL(*pDimensionX, toXMLString())
@@ -395,9 +395,9 @@ public:
   }
 
   void testWithXYZDimensionOnly() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
-    auto pDimensionY = boost::make_shared<MockIMDDimension>();
-    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
+    auto pDimensionY = std::make_shared<MockIMDDimension>();
+    auto pDimensionZ = std::make_shared<MockIMDDimension>();
     std::string a{"a"}, b{"b"}, c{"c"};
 
     EXPECT_CALL(*pDimensionX, toXMLString())
@@ -452,10 +452,10 @@ public:
   }
 
   void testFullCreate() {
-    auto pDimensionX = boost::make_shared<MockIMDDimension>();
-    auto pDimensionY = boost::make_shared<MockIMDDimension>();
-    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
-    auto pDimensionT = boost::make_shared<MockIMDDimension>();
+    auto pDimensionX = std::make_shared<MockIMDDimension>();
+    auto pDimensionY = std::make_shared<MockIMDDimension>();
+    auto pDimensionZ = std::make_shared<MockIMDDimension>();
+    auto pDimensionT = std::make_shared<MockIMDDimension>();
     std::string a{"a"}, b{"b"}, c{"c"}, d{"d"};
 
     EXPECT_CALL(*pDimensionX, toXMLString())

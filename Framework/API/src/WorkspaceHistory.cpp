@@ -170,7 +170,7 @@ operator[](const size_t index) const {
  * @param index ::  An index within the workspace history
  * @returns A shared pointer to an algorithm object
  */
-boost::shared_ptr<IAlgorithm>
+std::shared_ptr<IAlgorithm>
 WorkspaceHistory::getAlgorithm(const size_t index) const {
   return Algorithm::fromHistory(*(this->getAlgorithmHistory(index)));
 }
@@ -179,7 +179,7 @@ WorkspaceHistory::getAlgorithm(const size_t index) const {
  * Convenience function for retrieving the last algorithm
  * @returns A shared pointer to the algorithm
  */
-boost::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
+std::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
   if (m_algorithms.empty()) {
     throw std::out_of_range(
         "WorkspaceHistory::lastAlgorithm() - History contains no algorithms.");
@@ -317,7 +317,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File *file) {
  * the workspace history.
  */
 void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
-                                         const AlgorithmHistory_sptr &parent) {
+                                         AlgorithmHistory_sptr parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
   for (auto historyNumber : historyNumbers) {
@@ -478,16 +478,15 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
     alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
   }
 
-  AlgorithmHistory_sptr history =
-      boost::make_shared<AlgorithmHistory>(alg_hist);
+  AlgorithmHistory_sptr history = std::make_shared<AlgorithmHistory>(alg_hist);
   return history;
 }
 
 //-------------------------------------------------------------------------------------------------
 /** Create a flat view of the workspaces algorithm history
  */
-boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
-  return boost::make_shared<HistoryView>(*this);
+std::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
+  return std::make_shared<HistoryView>(*this);
 }
 
 //------------------------------------------------------------------------------------------------

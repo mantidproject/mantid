@@ -178,7 +178,7 @@ public:
     TS_ASSERT_DELTA(box.zMax(), 3000.5, 1e-08);
 
     // Pull out a component and check that
-    boost::shared_ptr<Detector> pixelDet = det->getAtXY(1, 2);
+    std::shared_ptr<Detector> pixelDet = det->getAtXY(1, 2);
     box = BoundingBox();
     pixelDet->getBoundingBox(box);
     TS_ASSERT_DELTA(box.xMin(), 950.5, 1e-08);

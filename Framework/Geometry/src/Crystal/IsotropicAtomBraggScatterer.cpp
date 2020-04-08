@@ -31,7 +31,7 @@ IsotropicAtomBraggScatterer::IsotropicAtomBraggScatterer()
 /// Clones the instance.
 BraggScatterer_sptr IsotropicAtomBraggScatterer::clone() const {
   IsotropicAtomBraggScatterer_sptr clone =
-      boost::make_shared<IsotropicAtomBraggScatterer>();
+      std::make_shared<IsotropicAtomBraggScatterer>();
   clone->initialize();
   clone->setProperties(this->asString(false));
 
@@ -99,8 +99,8 @@ void IsotropicAtomBraggScatterer::declareScattererProperties() {
   // Default behavior requires this.
   setElement("H");
 
-  boost::shared_ptr<BoundedValidator<double>> uValidator =
-      boost::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> uValidator =
+      std::make_shared<BoundedValidator<double>>();
   uValidator->setLower(0.0);
 
   declareProperty(
@@ -108,13 +108,13 @@ void IsotropicAtomBraggScatterer::declareScattererProperties() {
       "Isotropic atomic displacement in Angstrom^2");
 
   IValidator_sptr occValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 1.0);
+      std::make_shared<BoundedValidator<double>>(0.0, 1.0);
   declareProperty(std::make_unique<PropertyWithValue<double>>("Occupancy", 1.0,
                                                               occValidator),
                   "Site occupancy, values on interval [0,1].");
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-      "Element", "H", boost::make_shared<MandatoryValidator<std::string>>()));
+      "Element", "H", std::make_shared<MandatoryValidator<std::string>>()));
 }
 
 /// After setting the element as a string, the corresponding
@@ -220,7 +220,7 @@ IsotropicAtomBraggScattererParser::getCleanScattererTokens(
 std::string
 getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scatterer) {
   IsotropicAtomBraggScatterer_sptr isotropicAtom =
-      boost::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(scatterer);
+      std::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(scatterer);
 
   if (!isotropicAtom) {
     throw std::invalid_argument(

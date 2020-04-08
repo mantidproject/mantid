@@ -19,13 +19,13 @@ MantidMDCurveDialog::MantidMDCurveDialog(QWidget *parent, const QString &wsName)
   ui.mainLayout->insertWidget(0, m_lineOptions);
 
   // To set the right dimension labels
-  IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+  IMDWorkspace_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(m_wsName.toStdString()));
   if (ws) {
     // Retrieve the original workspace. Prefer the "intermediate" one if
     // available.
     if (ws->hasOriginalWorkspace())
-      ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+      ws = std::dynamic_pointer_cast<IMDWorkspace>(
           ws->getOriginalWorkspace(ws->numOriginalWorkspaces() - 1));
     if (ws)
       m_lineOptions->setOriginalWorkspace(ws);

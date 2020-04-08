@@ -223,11 +223,11 @@ void SampleLogDialogBase::init() {
     throw std::runtime_error("Wrong type of a workspace (" + m_wsname +
                              " is not an IMDWorkspace)");
   // Is it MatrixWorkspace, which itself is ExperimentInfo?
-  m_ei = boost::dynamic_pointer_cast<const ExperimentInfo>(ws);
+  m_ei = std::dynamic_pointer_cast<const ExperimentInfo>(ws);
   ;
   if (!m_ei) {
-    boost::shared_ptr<MultipleExperimentInfos> mei =
-        boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
+    std::shared_ptr<MultipleExperimentInfos> mei =
+        std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
     if (mei) {
       if (m_experimentInfoIndex >= mei->getNumExperimentInfo()) {
         std::cerr << "ExperimentInfo requested (#" +
@@ -421,7 +421,7 @@ void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
  */
 void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
   // -------------- The ExperimentInfo selector------------------------
-  boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
+  std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
       AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
           m_wsname);
 

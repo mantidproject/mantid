@@ -17,6 +17,8 @@
 
 #include <Poco/ActiveResult.h>
 
+#include <memory>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
@@ -71,7 +73,7 @@ void StartLiveData::init() {
   initProps();
 
   declareProperty(std::make_unique<AlgorithmProperty>(
-                      "MonitorLiveData", boost::make_shared<NullValidator>(),
+                      "MonitorLiveData", std::make_shared<NullValidator>(),
                       Direction::Output),
                   "A handle to the MonitorLiveData algorithm instance that "
                   "continues to read live data after this algorithm "
@@ -106,7 +108,7 @@ void StartLiveData::afterPropertySet(const std::string &propName) {
  * @param listener ILiveListener from which to copy properties
  */
 void StartLiveData::copyListenerProperties(
-    const boost::shared_ptr<ILiveListener> &listener) {
+    const std::shared_ptr<ILiveListener> &listener) {
   // Add clones of listener's properties to this algorithm
   for (auto listenerProp : listener->getProperties()) {
     auto prop = std::unique_ptr<Property>(listenerProp->clone());
@@ -196,7 +198,7 @@ void StartLiveData::exec() {
                 "The effective start time is therefore 'now'.");
   }
 
-  auto loadAlg = boost::dynamic_pointer_cast<LoadLiveData>(
+  auto loadAlg = std::dynamic_pointer_cast<LoadLiveData>(
       createChildAlgorithm("LoadLiveData"));
   if (!loadAlg)
     throw std::logic_error(

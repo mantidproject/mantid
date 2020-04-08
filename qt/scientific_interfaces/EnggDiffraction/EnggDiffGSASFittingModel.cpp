@@ -229,7 +229,7 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   auto wsTest = ADS.retrieveWS<API::Workspace>(wsName);
-  const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(wsTest);
+  const auto ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(wsTest);
   if (!ws) {
     throw std::invalid_argument(
         "Invalid Workspace loaded, are you sure it has been focused?");
@@ -345,7 +345,7 @@ void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
 }
 
 void EnggDiffGSASFittingModel::setObserver(
-    boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) {
+    std::shared_ptr<IEnggDiffGSASFittingObserver> observer) {
   m_observer = observer;
 }
 

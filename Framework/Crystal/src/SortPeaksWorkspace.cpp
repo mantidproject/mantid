@@ -44,7 +44,7 @@ void SortPeaksWorkspace::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  auto mustHave = boost::make_shared<MandatoryValidator<std::string>>();
+  auto mustHave = std::make_shared<MandatoryValidator<std::string>>();
   declareProperty("ColumnNameToSortBy", "", mustHave, "Column to sort by");
 
   declareProperty(

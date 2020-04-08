@@ -75,7 +75,7 @@ public:
       m_function = FunctionFactory::Instance().createInitialized(
           fun + funStr.toStdString());
     } else {
-      auto parentFun = boost::dynamic_pointer_cast<CompositeFunction>(
+      auto parentFun = std::dynamic_pointer_cast<CompositeFunction>(
           getFunctionWithPrefix(prefix, m_function));
       parentFun->addFunction(
           FunctionFactory::Instance().createInitialized(funStr.toStdString()));
@@ -92,7 +92,7 @@ public:
     QString parentPrefix;
     int i;
     std::tie(parentPrefix, i) = splitFunctionPrefix(prefix);
-    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto fun = std::dynamic_pointer_cast<CompositeFunction>(
         getFunctionWithPrefix(parentPrefix, m_function));
     if (i >= 0)
       fun->removeFunction(i);

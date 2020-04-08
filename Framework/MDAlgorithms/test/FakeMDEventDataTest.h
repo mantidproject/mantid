@@ -150,7 +150,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TSM_ASSERT("can not retrieve binned workspace from analysis data service",
                out);

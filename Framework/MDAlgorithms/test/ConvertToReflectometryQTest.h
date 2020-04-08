@@ -41,7 +41,7 @@ private:
 
   Makes the tests much more readable like this.
   */
-  boost::shared_ptr<ConvertToReflectometryQ>
+  std::shared_ptr<ConvertToReflectometryQ>
   make_standard_algorithm(const std::string &outputdimensions = "Q (lab frame)",
                           bool outputAsMD = true) {
     MatrixWorkspace_sptr in_ws =
@@ -55,9 +55,9 @@ private:
 
     auto newAxis = std::make_unique<NumericAxis>(in_ws->getAxis(1)->length());
 
-    newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
+    newAxis->unit() = std::make_shared<Mantid::Kernel::Units::Degrees>();
     in_ws->replaceAxis(1, std::move(newAxis));
-    auto alg = boost::make_shared<ConvertToReflectometryQ>();
+    auto alg = std::make_shared<ConvertToReflectometryQ>();
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
     TS_ASSERT(alg->isInitialized())
@@ -153,7 +153,7 @@ public:
   void test_execute_qxqz_md() {
     auto alg = make_standard_algorithm();
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -170,7 +170,7 @@ public:
   void test_execute_kikf_md() {
     auto alg = make_standard_algorithm("K (incident, final)");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -185,7 +185,7 @@ public:
   void test_execute_pipf_md() {
     auto alg = make_standard_algorithm("P (lab frame)");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -201,7 +201,7 @@ public:
     const bool outputAsMD = false;
     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -213,7 +213,7 @@ public:
     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
     alg->setProperty("Method", "NormalisedPolygon");
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -225,7 +225,7 @@ public:
     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
     alg->setProperty("Method", "NormalisedPolygon");
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -236,7 +236,7 @@ public:
     const bool outputAsMD = false;
     auto alg = make_standard_algorithm("K (incident, final)", outputAsMD);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -246,7 +246,7 @@ public:
     const bool outputAsMD = false;
     auto alg = make_standard_algorithm("P (lab frame)", outputAsMD);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);

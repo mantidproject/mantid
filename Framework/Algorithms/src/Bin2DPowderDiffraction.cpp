@@ -61,7 +61,7 @@ const std::string Bin2DPowderDiffraction::summary() const {
 /** Initialize the algorithm's properties.
  */
 void Bin2DPowderDiffraction::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<SpectraAxisValidator>();
   wsValidator->add<InstrumentValidator>();
@@ -83,7 +83,7 @@ void Bin2DPowderDiffraction::init() {
       "this can be followed by a comma and more widths and last boundary "
       "pairs. "
       "Negative width values indicate logarithmic binning.";
-  auto rebinValidator = boost::make_shared<RebinParamsValidator>(true);
+  auto rebinValidator = std::make_shared<RebinParamsValidator>(true);
   declareProperty(
       std::make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
       docString);

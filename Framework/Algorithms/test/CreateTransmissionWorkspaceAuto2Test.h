@@ -68,7 +68,7 @@ public:
     lAlg->setPropertyValue("OutputWorkspace", "demo_ws");
     lAlg->execute();
     Workspace_sptr temp = lAlg->getProperty("OutputWorkspace");
-    m_dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    m_dataWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
   }
 
   ~CreateTransmissionWorkspaceAuto2Test() override {}

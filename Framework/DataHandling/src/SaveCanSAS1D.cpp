@@ -20,7 +20,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <list>
 
@@ -70,7 +70,7 @@ void SaveCanSAS1D::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>(
           "InputWorkspace", "", Kernel::Direction::Input,
-          boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
+          std::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
   declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".xml"),
@@ -89,7 +89,7 @@ void SaveCanSAS1D::init() {
                                             "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
-      boost::make_shared<Kernel::StringListValidator>(radiation_source),
+      std::make_shared<Kernel::StringListValidator>(radiation_source),
       "The type of radiation used.");
   declareProperty("Append", false,
                   "Selecting append allows the workspace to "
@@ -111,10 +111,10 @@ void SaveCanSAS1D::init() {
   };
   declareProperty(
       "Geometry", "Disc",
-      boost::make_shared<Kernel::StringListValidator>(collimationGeometry),
+      std::make_shared<Kernel::StringListValidator>(collimationGeometry),
       "The geometry type of the collimation.");
   auto mustBePositiveOrZero =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+      std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveOrZero->setLower(0);
   declareProperty("SampleHeight", 0.0, mustBePositiveOrZero,
                   "The height of the collimation element in mm. If specified "
@@ -567,9 +567,9 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
     boost::algorithm::trim(detectorName);
 
     // get first component with name detectorName in IDF
-    boost::shared_ptr<const IComponent> comp =
+    std::shared_ptr<const IComponent> comp =
         m_workspace->getInstrument()->getComponentByName(detectorName);
-    if (comp != boost::shared_ptr<const IComponent>()) {
+    if (comp != std::shared_ptr<const IComponent>()) {
       sasDet += "\n\t\t\t<SASdetector>";
 
       std::string sasDetname = "\n\t\t\t\t<name>";

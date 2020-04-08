@@ -36,7 +36,7 @@ GNU_DIAG_ON("unused-local-typedef")
 
 void export_CompositeFunction() {
 
-  register_ptr_to_python<boost::shared_ptr<CompositeFunction>>();
+  register_ptr_to_python<std::shared_ptr<CompositeFunction>>();
 
   class_<CompositeFunction, bases<IFunction>, boost::noncopyable>(
       "CompositeFunction", "Composite Fit functions")

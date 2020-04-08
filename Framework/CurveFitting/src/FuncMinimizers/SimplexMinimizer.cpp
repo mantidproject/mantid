@@ -38,8 +38,8 @@ double SimplexMinimizer::fun(const gsl_vector *x, void *params) {
       minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
     }
   }
-  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+  std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
           minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();

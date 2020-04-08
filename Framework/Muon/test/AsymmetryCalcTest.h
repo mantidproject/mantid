@@ -151,13 +151,13 @@ public:
    * We have to use the ADS to test WorkspaceGroups
    */
   void testValidateInputsWithWSGroup() {
-    auto ws1 = boost::static_pointer_cast<Workspace>(
+    auto ws1 = std::static_pointer_cast<Workspace>(
         WorkspaceCreationHelper::create2DWorkspace(2, 1));
-    auto ws2 = boost::static_pointer_cast<Workspace>(
+    auto ws2 = std::static_pointer_cast<Workspace>(
         WorkspaceCreationHelper::create2DWorkspace(2, 1));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().add("group", group);
     group->add("workspace1");
     group->add("workspace2");
@@ -183,7 +183,7 @@ private:
     loader.execute();
     if (loader.isExecuted()) {
       Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
-      auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+      auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
       if (matrixWS) {
         return matrixWS;
       } else {

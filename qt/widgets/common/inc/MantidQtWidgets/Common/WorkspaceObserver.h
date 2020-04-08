@@ -121,7 +121,7 @@ protected:
   @param ws :: Pointer to the workspace to be deleted.
   */
   virtual void preDeleteHandle(const std::string &wsName,
-                               const Mantid::API::Workspace_sptr ws) {
+                               const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
@@ -138,7 +138,7 @@ protected:
   @param ws :: The shared pointer to the workspace to be added.
   */
   virtual void addHandle(const std::string &wsName,
-                         const Mantid::API::Workspace_sptr ws) {
+                         const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
@@ -149,7 +149,7 @@ protected:
   @param ws :: The shared pointer to the workspace to be deleted.
   */
   virtual void afterReplaceHandle(const std::string &wsName,
-                                  const Mantid::API::Workspace_sptr ws) {
+                                  const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }

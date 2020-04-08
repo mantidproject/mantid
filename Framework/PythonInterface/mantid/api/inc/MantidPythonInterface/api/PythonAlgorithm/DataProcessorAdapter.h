@@ -106,7 +106,7 @@ public:
 
   void forwardPropertiesProxy() { this->forwardProperties(); }
 
-  boost::shared_ptr<Kernel::PropertyManager> getProcessPropertiesProxy(
+  std::shared_ptr<Kernel::PropertyManager> getProcessPropertiesProxy(
       const std::string &propertyManager = std::string()) {
     return this->getProcessProperties(propertyManager);
   }

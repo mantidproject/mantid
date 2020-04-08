@@ -305,7 +305,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   auto properties = createAlgorithmRuntimeProps(model, row);
 
   // Return the configured algorithm
-  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
+  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(
       alg, properties, updateRowFromOutputProperties, &row);
   return jobAlgorithm;
 }

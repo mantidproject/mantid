@@ -51,6 +51,6 @@ protected:
   PoldiAbstractDetector() = default;
 };
 
-using PoldiAbstractDetector_sptr = boost::shared_ptr<PoldiAbstractDetector>;
+using PoldiAbstractDetector_sptr = std::shared_ptr<PoldiAbstractDetector>;
 } // namespace Poldi
 } // namespace Mantid

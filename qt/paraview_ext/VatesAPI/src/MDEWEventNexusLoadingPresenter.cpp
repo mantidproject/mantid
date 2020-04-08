@@ -102,7 +102,7 @@ MDEWEventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
   Workspace_sptr result =
       AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
   Mantid::API::IMDEventWorkspace_sptr eventWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
   // Create visualisation in one-shot.
@@ -138,7 +138,7 @@ void MDEWEventNexusLoadingPresenter::executeLoadMetadata() {
   Workspace_sptr result =
       AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
   IMDEventWorkspace_sptr eventWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
   m_wsTypeName = eventWs->id();
   // Call base-class extraction method.
   this->extractMetadata(*eventWs);

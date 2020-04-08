@@ -18,8 +18,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using namespace testing;
 using namespace Mantid::API;
@@ -36,7 +35,7 @@ public:
 
   void setUp() override {
     mockView.reset();
-    mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
+    mockView = std::make_shared<NiceMock<MockWorkspaceDockView>>();
     presenter = mockView->getPresenterSharedPtr();
   }
 
@@ -209,7 +208,7 @@ public:
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("NewGroup"));
 
     TS_ASSERT(group != nullptr);
@@ -253,7 +252,7 @@ public:
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("NewGroup"));
     auto names = AnalysisDataService::Instance().getObjectNames();
 
@@ -654,7 +653,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
+  std::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   WorkspacePresenterVN_sptr presenter;
 
   void createGroup(const std::string &groupName) {

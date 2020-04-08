@@ -25,7 +25,7 @@ using namespace API;
 using namespace Geometry;
 
 void SaveSampleEnvironmentAndShape::init() {
-  auto wsValidator = boost::make_shared<InstrumentValidator>();
+  auto wsValidator = std::make_shared<InstrumentValidator>();
 
   // input workspace
   declareProperty(

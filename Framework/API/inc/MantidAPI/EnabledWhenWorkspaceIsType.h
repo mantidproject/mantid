@@ -71,7 +71,7 @@ public:
       return true;
     }
     // Does it cast to the desired type?
-    boost::shared_ptr<T> castWS = boost::dynamic_pointer_cast<T>(ws);
+    std::shared_ptr<T> castWS = std::dynamic_pointer_cast<T>(ws);
     if (castWS)
       return m_enabledSetting;
     else

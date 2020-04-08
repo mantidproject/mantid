@@ -59,7 +59,7 @@ void DeadTimeCorrection::init() {
                       "GroupingPattern", "", Direction::Input),
                   "See the GroupingPattern documentation of GroupDetectors.");
 
-  auto positive = boost::make_shared<BoundedValidator<double>>();
+  auto positive = std::make_shared<BoundedValidator<double>>();
   positive->setLower(0.);
   declareProperty("Tau", 0., positive, "The count rate coefficient.");
 

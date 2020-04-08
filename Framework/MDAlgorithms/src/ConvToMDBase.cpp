@@ -29,7 +29,7 @@ Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
  */
 size_t ConvToMDBase::initialize(
     const MDAlgorithms::MDWSDescription &WSD,
-    boost::shared_ptr<MDAlgorithms::MDEventWSWrapper> inWSWrapper,
+    std::shared_ptr<MDAlgorithms::MDEventWSWrapper> inWSWrapper,
     bool ignoreZeros) {
 
   m_ignoreZeros = ignoreZeros;

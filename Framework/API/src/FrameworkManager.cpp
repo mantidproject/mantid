@@ -320,7 +320,7 @@ Workspace *FrameworkManagerImpl::getWorkspace(const std::string &wsName) {
  */
 bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   bool retVal = false;
-  boost::shared_ptr<Workspace> ws_sptr;
+  std::shared_ptr<Workspace> ws_sptr;
   try {
     ws_sptr = AnalysisDataService::Instance().retrieve(wsName);
   } catch (Kernel::Exception::NotFoundError &ex) {
@@ -328,8 +328,8 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
     return false;
   }
 
-  boost::shared_ptr<WorkspaceGroup> ws_grpsptr =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
+  std::shared_ptr<WorkspaceGroup> ws_grpsptr =
+      std::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
   if (ws_grpsptr) {
     //  selected workspace is a group workspace
     AnalysisDataService::Instance().deepRemoveGroup(wsName);

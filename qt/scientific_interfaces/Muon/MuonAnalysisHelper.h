@@ -115,8 +115,8 @@ MANTIDQT_MUONINTERFACE_DLL std::pair<std::string, std::string> findLogRange(
 
 /// Concatenates time-series log of one workspace with the second
 MANTIDQT_MUONINTERFACE_DLL void
-appendTimeSeriesLogs(const boost::shared_ptr<Mantid::API::Workspace> &toAppend,
-                     const boost::shared_ptr<Mantid::API::Workspace> &resultant,
+appendTimeSeriesLogs(const std::shared_ptr<Mantid::API::Workspace> &toAppend,
+                     const std::shared_ptr<Mantid::API::Workspace> &resultant,
                      const std::string &logName);
 
 /// Parse analysis workspace name
@@ -133,8 +133,8 @@ runNumberString(const std::string &workspaceName, const std::string &firstRun);
 
 /// Decide if grouping needs to be reloaded
 MANTIDQT_MUONINTERFACE_DLL bool isReloadGroupingNecessary(
-    const boost::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
-    const boost::shared_ptr<Mantid::API::Workspace> &loadedWorkspace);
+    const std::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
+    const std::shared_ptr<Mantid::API::Workspace> &loadedWorkspace);
 
 /// Parse run label into instrument and runs
 MANTIDQT_MUONINTERFACE_DLL void parseRunLabel(const std::string &label,
@@ -143,7 +143,7 @@ MANTIDQT_MUONINTERFACE_DLL void parseRunLabel(const std::string &label,
 
 /// Get colors for workspaces to go in table
 MANTIDQT_MUONINTERFACE_DLL QMap<int, QColor> getWorkspaceColors(
-    const std::vector<boost::shared_ptr<Mantid::API::Workspace>> &workspaces);
+    const std::vector<std::shared_ptr<Mantid::API::Workspace>> &workspaces);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are

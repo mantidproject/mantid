@@ -39,7 +39,7 @@ DECLARE_ALGORITHM(SaveIsawPeaks)
 void SaveIsawPeaks::init() {
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
 
   declareProperty("AppendFile", false,
@@ -244,13 +244,13 @@ void SaveIsawPeaks::exec() {
 
       std::string bankName = mess.str();
       // Retrieve it
-      boost::shared_ptr<const IComponent> det =
+      std::shared_ptr<const IComponent> det =
           inst->getComponentByName(bankName);
       if (inst->getName() ==
           "CORELLI") // for Corelli with sixteenpack under bank
       {
         std::vector<Geometry::IComponent_const_sptr> children;
-        auto asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+        auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             inst->getComponentByName(bankName));
         asmb->getChildren(children, false);
         det = children[0];
@@ -463,19 +463,17 @@ void SaveIsawPeaks::exec() {
 bool SaveIsawPeaks::bankMasked(const IComponent_const_sptr &parent,
                                const Geometry::DetectorInfo &detectorInfo) {
   std::vector<Geometry::IComponent_const_sptr> children;
-  auto asmb =
-      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+  auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
   asmb->getChildren(children, false);
   if (children[0]->getName() == "sixteenpack") {
     asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     children.clear();
     asmb->getChildren(children, false);
   }
 
   for (const auto &col : children) {
-    auto asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
+    auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     for (const auto &row : grandchildren) {
@@ -497,17 +495,17 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
   auto parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
     const auto RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
     const auto pixel = RDet->getAtXY(col, row);
     return pixel->getPos();
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
     auto asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-          children[0]);
+      asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
@@ -515,7 +513,7 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
     // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
-    auto asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+    auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
         children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
@@ -530,7 +528,7 @@ void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS,
   const auto parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
     const auto RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     NCOLS = RDet->xpixels();
     NROWS = RDet->ypixels();
@@ -539,16 +537,16 @@ void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS,
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
     auto asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-          children[0]);
+      asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
     const auto asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     NROWS = static_cast<int>(grandchildren.size());

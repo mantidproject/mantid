@@ -46,7 +46,7 @@ using namespace DataObjects;
 Q1D2::Q1D2() : API::Algorithm(), m_dataWS(), m_doSolidAngle(false) {}
 
 void Q1D2::init() {
-  auto dataVal = boost::make_shared<CompositeValidator>();
+  auto dataVal = std::make_shared<CompositeValidator>();
   dataVal->add<WorkspaceUnitValidator>("Wavelength");
   dataVal->add<HistogramValidator>();
   dataVal->add<InstrumentValidator>();
@@ -60,7 +60,7 @@ void Q1D2::init() {
       "Name of the workspace that will contain the result of the calculation");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
+          "OutputBinning", std::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
@@ -70,7 +70,7 @@ void Q1D2::init() {
                       "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "Scaling to apply to each spectrum. Must have\n"
                   "the same number of spectra as the DetBankWorkspace");
-  auto wavVal = boost::make_shared<CompositeValidator>();
+  auto wavVal = std::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -89,7 +89,7 @@ void Q1D2::init() {
   declareProperty("SolidAngleWeighting", true,
                   "If true, pixels will be weighted by their solid angle.",
                   Direction::Input);
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty(

@@ -157,7 +157,7 @@ public:
 
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
-    auto workspace = boost::make_shared<Workspace2D>();
+    auto workspace = std::make_shared<Workspace2D>();
     SpectraLegacy const spec = std::make_pair(0u, 0u);
     IndirectFitDataLegacy const data(workspace, spec);
 

@@ -14,8 +14,8 @@
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <numeric>
 
 using namespace Mantid::Kernel;
@@ -44,7 +44,7 @@ public:
     WorkspaceProperty<Workspace> wkspProp("InputWorkspace", "",
                                           Direction::Input);
 
-    auto ws = boost::make_shared<TableWorkspaceTester>();
+    auto ws = std::make_shared<TableWorkspaceTester>();
     wkspProp = ws;
 
     IndexProperty indexProp("IndexSet", wkspProp, m_itypeProp);

@@ -71,15 +71,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieve(outputWSname));
     MatrixWorkspace_sptr result =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieve(formFactorWSname));
     MatrixWorkspace_sptr ffout =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieve(inputWSname));
     MatrixWorkspace_sptr input =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_LESS_THAN(checkWorkspaces(input, result, ffout), 1.e-8);
   }
 

@@ -82,10 +82,10 @@ std::string Parameter::getShortDescription() const {
  *   @return A pointer to the created parameter
  *   @throw runtime_error if the type has not been registered
  */
-boost::shared_ptr<Parameter>
+std::shared_ptr<Parameter>
 ParameterFactory::create(const std::string &className,
                          const std::string &name) {
-  boost::shared_ptr<Parameter> p;
+  std::shared_ptr<Parameter> p;
   FactoryMap::const_iterator it = s_map.find(className);
   if (it != s_map.end())
     p = it->second->createInstance();

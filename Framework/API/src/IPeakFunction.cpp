@@ -15,9 +15,9 @@
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <limits>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -218,7 +218,7 @@ void IPeakFunction::setIntensity(const double newIntensity) {
 
 std::string IPeakFunction::getCentreParameterName() const {
   FunctionParameterDecorator_sptr fn =
-      boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+      std::dynamic_pointer_cast<FunctionParameterDecorator>(
           FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
   if (!fn) {

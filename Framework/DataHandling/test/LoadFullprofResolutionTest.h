@@ -60,7 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestBank1Table"));
     TS_ASSERT(outws);
 
@@ -105,7 +105,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestBank3Table"));
     TS_ASSERT(outws);
 
@@ -152,7 +152,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check output workspace
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestBank4Table"));
     TS_ASSERT(outws);
 
@@ -184,9 +184,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check output workspace
-    TableWorkspace_sptr outwsFalse =
-        boost::dynamic_pointer_cast<TableWorkspace>(
-            AnalysisDataService::Instance().retrieve("TestBank4TableFalse"));
+    TableWorkspace_sptr outwsFalse = std::dynamic_pointer_cast<TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("TestBank4TableFalse"));
     TS_ASSERT(outwsFalse);
 
     // Check table workspace size
@@ -207,7 +206,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check output workspace
-    TableWorkspace_sptr outwsTrue = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outwsTrue = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestBank4TableTrue"));
     TS_ASSERT(outwsTrue);
 
@@ -251,7 +250,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check output workspace
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestBank5Table"));
     TS_ASSERT(outws);
 
@@ -293,7 +292,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestAGSTable"));
     TS_ASSERT(outws);
 
@@ -353,9 +352,9 @@ public:
     WorkspaceGroup_sptr gws;
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     Workspace_sptr wsi = gws->getItem(0);
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     const auto &paramMap = ws->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr =
         ws->getInstrument();
 
     Mantid::Geometry::Parameter_sptr alpha0Param =
@@ -463,21 +462,21 @@ public:
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     // 1st Workspace - bank 2
     Workspace_sptr wsi = gws->getItem(0);
-    auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    auto ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     const auto &paramMap1 = ws1->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr1 =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr1 =
         ws1->getInstrument();
     // 2nd Workspace - bank 3
     wsi = gws->getItem(1);
-    auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    auto ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     const auto &paramMap2 = ws2->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr2 =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr2 =
         ws2->getInstrument();
     // 3rd Workspace - bank 4
     wsi = gws->getItem(2);
-    auto ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    auto ws3 = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     const auto &paramMap3 = ws3->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr3 =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr3 =
         ws3->getInstrument();
 
     // Check Beta0 parameter in each workspace
@@ -527,15 +526,15 @@ public:
     // Check parameters in workspaces of group
     // 1st Workspace - bank 4
     wsi = gws->getItem(0);
-    auto ws01 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    auto ws01 = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     const auto &paramMap01 = ws01->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr01 =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr01 =
         ws01->getInstrument();
     // 3rd Workspace - bank 2
     wsi = gws->getItem(2);
-    auto ws03 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    auto ws03 = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     const auto &paramMap03 = ws03->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr03 =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr03 =
         ws03->getInstrument();
 
     // Check Beta0 parameter in each workspace
@@ -594,9 +593,9 @@ public:
     WorkspaceGroup_sptr gws;
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     Workspace_sptr wsi = gws->getItem(0);
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     const auto &paramMap = ws->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr =
         ws->getInstrument();
 
     Mantid::Geometry::Parameter_sptr S_Param =
@@ -698,7 +697,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve output
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestNPROFTable"));
     TS_ASSERT(outws);
 
@@ -796,7 +795,7 @@ public:
     for (size_t i = 0; i < numberOfWorkspaces; ++i) {
       Workspace_sptr ws =
           WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+      Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
       gws->addWorkspace(ws2D);
     }
 

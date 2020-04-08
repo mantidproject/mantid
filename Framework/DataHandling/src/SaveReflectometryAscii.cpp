@@ -20,11 +20,11 @@
 
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
 #include <map>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -47,7 +47,7 @@ void SaveReflectometryAscii::init() {
       "The output filename");
   std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
   declareProperty("FileExtension", ".mft",
-                  boost::make_shared<StringListValidator>(extension),
+                  std::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
   auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
                                                    "mft");
@@ -70,7 +70,7 @@ void SaveReflectometryAscii::init() {
                       std::make_unique<VisibleWhenProperty>(
                           "FileExtension", IS_EQUAL_TO, "custom"));
   declareProperty("Separator", "tab",
-                  boost::make_shared<StringListValidator>(separator),
+                  std::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
   setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>(
                                        "FileExtension", IS_EQUAL_TO, "custom"));
@@ -295,7 +295,7 @@ bool SaveReflectometryAscii::checkGroups() {
       if (i->getName().empty())
         g_log.warning("InputWorkspace must have a name, skip");
       else {
-        const auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(i);
+        const auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(i);
         if (!ws)
           g_log.warning("WorkspaceGroup must contain MatrixWorkspaces, skip");
         else {

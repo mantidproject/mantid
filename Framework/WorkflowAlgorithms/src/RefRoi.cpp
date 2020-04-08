@@ -31,7 +31,7 @@ RefRoi::RefRoi()
 void RefRoi::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
+                      std::make_shared<CommonBinsValidator>()),
                   "Workspace to calculate the ROI from");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),

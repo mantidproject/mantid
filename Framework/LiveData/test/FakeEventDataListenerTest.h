@@ -56,7 +56,7 @@ public:
     TS_ASSERT_EQUALS(buffer.use_count(), 1)
     // Check it's an event workspace
     EventWorkspace_const_sptr evbuf =
-        boost::dynamic_pointer_cast<const EventWorkspace>(buffer);
+        std::dynamic_pointer_cast<const EventWorkspace>(buffer);
     TS_ASSERT(evbuf)
     // Check the workspace has the correct dimension
     TS_ASSERT_EQUALS(evbuf->getNumberHistograms(), 2)
@@ -72,7 +72,7 @@ public:
     // Check it's a different workspace to last time
     TS_ASSERT_DIFFERS(buffer.get(), evbuf.get())
     // Check it's an event workspace
-    evbuf = boost::dynamic_pointer_cast<const EventWorkspace>(buffer);
+    evbuf = std::dynamic_pointer_cast<const EventWorkspace>(buffer);
     TS_ASSERT(evbuf)
     // Check the workspace has the correct dimension
     TS_ASSERT_EQUALS(evbuf->getNumberHistograms(), 2)
@@ -100,5 +100,5 @@ public:
   }
 
 private:
-  boost::shared_ptr<ILiveListener> fakel;
+  std::shared_ptr<ILiveListener> fakel;
 };

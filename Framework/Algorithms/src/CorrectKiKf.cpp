@@ -31,7 +31,7 @@ using std::size_t;
 
 /// Initialisation method
 void CorrectKiKf::init() {
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("DeltaE");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("DeltaE");
 
   this->declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
@@ -44,9 +44,9 @@ void CorrectKiKf::init() {
 
   std::vector<std::string> propOptions{"Direct", "Indirect"};
   this->declareProperty("EMode", "Direct",
-                        boost::make_shared<StringListValidator>(propOptions),
+                        std::make_shared<StringListValidator>(propOptions),
                         "The energy mode (default: Direct)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   this->declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
                         "Value of fixed energy in meV : EI (EMode=Direct) or "
@@ -60,7 +60,7 @@ void CorrectKiKf::exec() {
 
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != nullptr) {
     this->execEvent();
     return;
@@ -179,8 +179,7 @@ void CorrectKiKf::execEvent() {
 
   const MatrixWorkspace_const_sptr matrixInputWS =
       getProperty("InputWorkspace");
-  auto inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+  auto inputWS = std::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
@@ -188,7 +187,7 @@ void CorrectKiKf::execEvent() {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  auto outputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   const std::string emodeStr = getProperty("EMode");
   double efixedProp = getProperty("EFixed"), efixed;

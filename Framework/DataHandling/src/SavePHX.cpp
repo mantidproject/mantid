@@ -34,7 +34,7 @@ using namespace Mantid::Geometry;
 void SavePHX::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "The input workspace");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::Save),

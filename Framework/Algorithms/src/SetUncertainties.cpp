@@ -79,8 +79,8 @@ const std::string SetUncertainties::name() const { return "SetUncertainties"; }
 int SetUncertainties::version() const { return (1); }
 
 void SetUncertainties::init() {
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveInt = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   mustBePositiveInt->setLower(0);
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
@@ -90,7 +90,7 @@ void SetUncertainties::init() {
   std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO,
                                          CUSTOM};
   declareProperty("SetError", ZERO,
-                  boost::make_shared<StringListValidator>(errorTypes),
+                  std::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
   declareProperty("SetErrorTo", 1.000, mustBePositive,
                   "The error value to set when using custom mode");
@@ -113,7 +113,7 @@ void SetUncertainties::init() {
 void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   auto inputEventWorkspace =
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(
           inputWorkspace);
   MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
   std::string errorType = getProperty("SetError");

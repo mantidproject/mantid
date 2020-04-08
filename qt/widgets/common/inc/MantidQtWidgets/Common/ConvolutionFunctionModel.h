@@ -8,8 +8,8 @@
 
 #include "DllOption.h"
 #include "FunctionModel.h"
-#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
+#include <memory>
 #include <vector>
 
 namespace MantidQt {

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include <algorithm>
+#include <functional>
 #include <iterator>
-
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -19,7 +19,7 @@ template <typename... Args> struct RegisterConditions;
 // Specialisation for recursive case
 template <typename R, typename... Args> struct RegisterConditions<R, Args...> {
   static void run(ReflectionConditions &container) {
-    container.emplace_back(boost::make_shared<R>());
+    container.emplace_back(std::make_shared<R>());
     RegisterConditions<Args...>::run(container);
   }
 };

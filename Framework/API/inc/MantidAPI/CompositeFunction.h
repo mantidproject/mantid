@@ -51,11 +51,10 @@ public:
   /// Returns the function's name
   std::string name() const override { return "CompositeFunction"; }
   /// Sets the workspace for each member function
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
 
   /// Function you want to fit to.
   void function(const FunctionDomain &domain,
@@ -134,7 +133,7 @@ public:
   /// Get number of domains required by this function
   size_t getNumberDomains() const override;
   /// Split this function (if needed) into a list of independent functions.
-  std::vector<boost::shared_ptr<IFunction>>
+  std::vector<std::shared_ptr<IFunction>>
   createEquivalentFunctions() const override;
   /// Returns the pointer to i-th function
   IFunction_sptr getFunction(std::size_t i) const override;
@@ -232,9 +231,9 @@ private:
 };
 
 /// shared pointer to the composite function base class
-using CompositeFunction_sptr = boost::shared_ptr<CompositeFunction>;
+using CompositeFunction_sptr = std::shared_ptr<CompositeFunction>;
 /// shared pointer to the composite function base class (const version)
-using CompositeFunction_const_sptr = boost::shared_ptr<const CompositeFunction>;
+using CompositeFunction_const_sptr = std::shared_ptr<const CompositeFunction>;
 
 /** A Jacobian for individual functions
  */

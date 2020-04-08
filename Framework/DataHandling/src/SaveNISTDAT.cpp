@@ -27,9 +27,9 @@ using namespace API;
 using namespace Geometry;
 
 void SaveNISTDAT::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add(
-      boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer"));
+      std::make_shared<WorkspaceUnitValidator>("MomentumTransfer"));
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));

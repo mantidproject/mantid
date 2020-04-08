@@ -175,7 +175,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
@@ -318,7 +318,7 @@ public:
     // 0.0, 10.0, 0);
     auto a_ws = createSimple3DWorkspace();
     MDEventWorkspace3Lean::sptr in_ws =
-        boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(a_ws);
+        std::dynamic_pointer_cast<MDEventWorkspace3Lean>(a_ws);
     TS_ASSERT(in_ws);
     if (!in_ws)
       return;
@@ -362,7 +362,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TSM_ASSERT("can not retrieve binned workspace from analysis data service",
                out);
@@ -513,7 +513,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
@@ -1025,7 +1025,7 @@ public:
     in_ws->setDisplayNormalizationHisto(histoNorm);
 
     // Use an instrument name which does not match any actual instrument
-    auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+    auto inst = std::make_shared<Mantid::Geometry::Instrument>();
     inst->setName("TestName");
 
     auto exp_info = in_ws->getExperimentInfo(0);

@@ -47,7 +47,7 @@ void MergeRuns::init() {
   // moment
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces", boost::make_shared<ADSValidator>()),
+          "InputWorkspaces", std::make_shared<ADSValidator>()),
       "The names of the input workspaces as a list. You may "
       "also group workspaces using the GUI or [[GroupWorkspaces]], and specify "
       "the name of the group instead.");
@@ -71,13 +71,13 @@ void MergeRuns::init() {
   const std::vector<std::string> rebinOptions = {REBIN_BEHAVIOUR,
                                                  FAIL_BEHAVIOUR};
   declareProperty("RebinBehaviour", REBIN_BEHAVIOUR,
-                  boost::make_shared<StringListValidator>(rebinOptions),
+                  std::make_shared<StringListValidator>(rebinOptions),
                   "Choose whether to rebin when bins are different, or fail "
                   "(fail behaviour defined in FailBehaviour option).");
   const std::vector<std::string> failBehaviourOptions = {SKIP_BEHAVIOUR,
                                                          STOP_BEHAVIOUR};
   declareProperty("FailBehaviour", SKIP_BEHAVIOUR,
-                  boost::make_shared<StringListValidator>(failBehaviourOptions),
+                  std::make_shared<StringListValidator>(failBehaviourOptions),
                   "Choose whether to skip the file and continue, or stop and "
                   "throw and error, when encountering a failure.");
 }

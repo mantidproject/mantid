@@ -46,7 +46,7 @@ public:
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(
       Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
-  boost::shared_ptr<API::Workspace> extractData() override;
+  std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;
@@ -62,14 +62,14 @@ private:
   void getIntArray(const std::string &par, std::vector<int> &arr,
                    const size_t dim);
   void getData(int period, int index, int count,
-               const boost::shared_ptr<API::MatrixWorkspace> &workspace,
+               const std::shared_ptr<API::MatrixWorkspace> &workspace,
                size_t workspaceIndex);
   void calculateIndicesForReading(std::vector<int> &index,
                                   std::vector<int> &count);
   void loadSpectraMap();
-  void runLoadInstrument(
-      const boost::shared_ptr<API::MatrixWorkspace> &localWorkspace,
-      const std::string &iName);
+  void
+  runLoadInstrument(const std::shared_ptr<API::MatrixWorkspace> &localWorkspace,
+                    const std::string &iName);
   void loadTimeRegimes();
   int getTimeRegimeToLoad() const;
   bool isPeriodIgnored(int period) const;

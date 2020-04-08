@@ -8,8 +8,8 @@
 
 #include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MockObjects.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid;
@@ -173,8 +173,7 @@ public:
     PeakTransform_sptr clone = A.clone();
 
     TSM_ASSERT("Clone product is the wrong type.",
-               boost::dynamic_pointer_cast<PeakTransformQLab>(clone) !=
-                   nullptr);
+               std::dynamic_pointer_cast<PeakTransformQLab>(clone) != nullptr);
 
     // Test indirectly via what the transformations produce.
     V3D productA = A.transform(V3D(0, 1, 2));
@@ -190,7 +189,7 @@ public:
   void test_factory() {
     // Create the benchmark.
     PeakTransform_sptr expectedProduct =
-        boost::make_shared<PeakTransformQLab>("Q_lab_x", "Q_lab_y");
+        std::make_shared<PeakTransformQLab>("Q_lab_x", "Q_lab_y");
 
     // Use the factory to create a product.
     PeakTransformQLabFactory factory;
@@ -198,7 +197,7 @@ public:
 
     // Check the type of the output product object.
     TSM_ASSERT("Factory product is the wrong type.",
-               boost::dynamic_pointer_cast<PeakTransformQLab>(product) !=
+               std::dynamic_pointer_cast<PeakTransformQLab>(product) !=
                    nullptr);
 
     // Now test that the benchmark and the factory product are equivalent.

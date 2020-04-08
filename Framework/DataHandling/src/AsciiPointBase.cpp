@@ -16,10 +16,10 @@ GUI
 #include "MantidKernel/ListValidator.h"
 
 #include <Poco/File.h>
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -131,7 +131,7 @@ void AsciiPointBase::appendSeparatorProperty() {
   propOptions.emplace_back("space");
   propOptions.emplace_back("tab");
   declareProperty("Separator", "tab",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The separator used for splitting data columns.");
 }
 } // namespace DataHandling

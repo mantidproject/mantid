@@ -161,7 +161,7 @@ struct Wing : public SolidAngleCalculator {
 void SolidAngle::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "This workspace is used to identify the instrument to use "
                   "and also which\n"
                   "spectra to create a solid angle for. If the Max and Min "
@@ -175,7 +175,7 @@ void SolidAngle::init() {
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "The index number of the first spectrum for which to find "
@@ -190,7 +190,7 @@ void SolidAngle::init() {
                                          VERTICAL_TUBE, HORIZONTAL_TUBE,
                                          VERTICAL_WING, HORIZONTAL_WING};
   declareProperty("Method", GENERIC_SHAPE,
-                  boost::make_shared<StringListValidator>(methods),
+                  std::make_shared<StringListValidator>(methods),
                   "Select the method to calculate the Solid Angle.");
 }
 

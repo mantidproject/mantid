@@ -33,8 +33,8 @@ HistogramDomainCreator::HistogramDomainCreator(
  * @param i0 :: Size offset for values object if it already contains data.
  */
 void HistogramDomainCreator::createDomain(
-    boost::shared_ptr<FunctionDomain> &domain,
-    boost::shared_ptr<FunctionValues> &values, size_t i0) {
+    std::shared_ptr<FunctionDomain> &domain,
+    std::shared_ptr<FunctionValues> &values, size_t i0) {
 
   setParameters();
 
@@ -97,7 +97,7 @@ void HistogramDomainCreator::createDomain(
     values->setFitData(j, y);
     values->setFitWeight(j, weight);
   }
-  m_domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
+  m_domain = std::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
   m_values = values;
 }
 
@@ -109,10 +109,10 @@ void HistogramDomainCreator::createDomain(
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-boost::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
+std::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
     const std::string &baseName, API::IFunction_sptr function,
-    boost::shared_ptr<API::FunctionDomain> domain,
-    boost::shared_ptr<API::FunctionValues> values,
+    std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
   auto ws = IMWDomainCreator::createOutputWorkspace(
       baseName, function, domain, values, outputWorkspacePropertyName);

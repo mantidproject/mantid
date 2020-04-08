@@ -96,7 +96,7 @@ RebinAlgorithmDialogProvider::getWorkspace(const std::string &workspaceName) {
 
   // Make sure it is a and MDEvent
   eventWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
 
   return eventWorkspace;
 }

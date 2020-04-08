@@ -42,7 +42,7 @@ namespace DataObjects {
 TMDE_CLASS
 class DLLExport MDGridBox : public MDBoxBase<MDE, nd> {
 public:
-  MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth,
+  MDGridBox(std::shared_ptr<API::BoxController> &bc, const uint32_t depth,
             const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
                 &extentsVector);
   MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
@@ -216,7 +216,7 @@ public:
 
 public:
   /// Typedef for a shared pointer to a MDGridBox
-  using sptr = boost::shared_ptr<MDGridBox<MDE, nd>>;
+  using sptr = std::shared_ptr<MDGridBox<MDE, nd>>;
 
   /// Typedef for a vector of MDBoxBase pointers
   using boxVector_t = std::vector<MDBoxBase<MDE, nd> *>;

@@ -72,7 +72,7 @@ public:
 private:
   Mantid::DataObjects::Workspace2D_sptr setupWS() {
     Mantid::DataObjects::Workspace2D_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 3, 10, 10));
     for (int i = 0; i < 3; i++) {
       Mantid::MantidVec &X = ws->dataX(i);

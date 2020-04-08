@@ -137,7 +137,7 @@ void AsciiSaver::save(std::string const &saveDirectory,
         // don't handle groups. When we switch to SaveReflectometryAscii we can
         // probably remove this
         Mantid::API::WorkspaceGroup_sptr group =
-            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
         for (auto child : group->getAllItems())
           save(child, saveDirectory, logParameters, fileFormat);
         continue;

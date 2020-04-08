@@ -57,7 +57,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsetsWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "MaskWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(maskWS)));
+        "MaskWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(maskWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("Filename", "SaveCalFileTest.cal"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););

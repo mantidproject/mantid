@@ -122,7 +122,7 @@ groupToVector(const WorkspaceGroup_sptr &group) {
   std::vector<MatrixWorkspace_sptr> out;
   for (size_t i = 0; i < group->size(); ++i) {
     out.emplace_back(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i)));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i)));
   }
   return out;
 }

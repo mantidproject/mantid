@@ -20,7 +20,7 @@
 #include <limits>
 #include <numeric>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 using Mantid::CurveFitting::Functions::InelasticIsoRotDiff;
 using BConstraint = Mantid::CurveFitting::Constraints::BoundaryConstraint;
 
@@ -112,9 +112,8 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableInelasticIsoRotDiff>
-  createTestInelasticIsoRotDiff() {
-    auto func = boost::make_shared<TestableInelasticIsoRotDiff>();
+  std::shared_ptr<TestableInelasticIsoRotDiff> createTestInelasticIsoRotDiff() {
+    auto func = std::make_shared<TestableInelasticIsoRotDiff>();
     func->initialize();
     func->setParameter("Height", 0.88);
     func->setParameter("Radius", 1.06); // Angstrom

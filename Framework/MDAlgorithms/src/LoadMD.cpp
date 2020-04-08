@@ -252,15 +252,14 @@ void LoadMD::exec() {
       g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
       transform_alg->setProperty("InputWorkspace",
-                                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+                                 std::dynamic_pointer_cast<IMDWorkspace>(ws));
       transform_alg->setProperty("Scaling", scaling);
       transform_alg->executeAsChildAlg();
       IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
-      ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
+      ws = std::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
     }
     // Save to output
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    setProperty("OutputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(ws));
   } else {
     // MDHistoWorkspace case.
     this->loadHisto();
@@ -312,10 +311,10 @@ void LoadMD::loadHisto() {
   MDHistoWorkspace_sptr ws;
   // If display normalization has been provided. Use that.
   if (m_visualNormalization) {
-    ws = boost::make_shared<MDHistoWorkspace>(m_dims,
-                                              m_visualNormalization.get());
+    ws =
+        std::make_shared<MDHistoWorkspace>(m_dims, m_visualNormalization.get());
   } else {
-    ws = boost::make_shared<MDHistoWorkspace>(
+    ws = std::make_shared<MDHistoWorkspace>(
         m_dims); // Whatever MDHistoWorkspace defaults to.
   }
 
@@ -330,7 +329,7 @@ void LoadMD::loadHisto() {
     ws->history().loadNexus(m_file.get());
   }
 
-  this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+  this->loadAffineMatricies(std::dynamic_pointer_cast<IMDWorkspace>(ws));
 
   if (m_saveMDVersion == 2)
     m_file->openGroup("data", "NXdata");
@@ -365,15 +364,15 @@ void LoadMD::loadHisto() {
     g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace",
-                               boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+                               std::dynamic_pointer_cast<IMDWorkspace>(ws));
     transform_alg->setProperty("Scaling", scaling);
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
-    ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+    ws = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   }
 
   // Save to output
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(ws));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -432,7 +431,7 @@ void LoadMD::loadDimensions2() {
             MDFrameArgument(frame, units));
     m_file->getData(axis);
     m_file->closeData();
-    m_dims.emplace_back(boost::make_shared<MDHistoDimension>(
+    m_dims.emplace_back(std::make_shared<MDHistoDimension>(
         long_name, splitAxes[d - 1], *mdFrame,
         static_cast<coord_t>(axis.front()), static_cast<coord_t>(axis.back()),
         axis.size() - 1));
@@ -523,7 +522,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     ws->history().loadNexus(m_file.get());
   }
 
-  this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+  this->loadAffineMatricies(std::dynamic_pointer_cast<IMDWorkspace>(ws));
 
   m_file->closeGroup();
   m_file->close();
@@ -553,7 +552,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // ---------------------------------------- DEAL WITH BOXES
   // ------------------------------------
   if (fileBackEnd) { // TODO:: call to the file format factory
-    auto loader = boost::shared_ptr<API::IBoxControllerIO>(
+    auto loader = std::shared_ptr<API::IBoxControllerIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
     bc->setFileBacked(loader, m_filename);

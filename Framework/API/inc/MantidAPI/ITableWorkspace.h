@@ -18,7 +18,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <sstream>
@@ -199,7 +199,7 @@ public:
          @return the reference to the data element
    */
   T &getRef(const std::string &name, size_t index) {
-    boost::shared_ptr<Column> c = getColumn(name);
+    std::shared_ptr<Column> c = getColumn(name);
     if (!c->isType<T>()) {
       std::string str = std::string("getRef: Type mismatch. ") +
                         typeid(T).name() + " != " + c->get_type_info().name() +
