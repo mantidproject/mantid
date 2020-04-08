@@ -288,7 +288,9 @@ class DrillView(QMainWindow):
                 )
 
     def load_rundex(self):
-        filename = QFileDialog.getOpenFileName(self, 'Load rundex')
+        filename = QFileDialog.getOpenFileName(
+                self, 'Load rundex', '.', "Rundex (*.mrd);;All files (*.*)"
+                )
         if not filename[0]:
             return
         self.call_settings_listeners(
@@ -296,7 +298,9 @@ class DrillView(QMainWindow):
                 )
 
     def save_rundex(self):
-        filename = QFileDialog.getSaveFileName(self, 'Save rundex')
+        filename = QFileDialog.getSaveFileName(
+                self, 'Save rundex', '.', "Rundex (*.mrd)"
+                )
         if not filename[0]:
             return
         self.call_settings_listeners(
