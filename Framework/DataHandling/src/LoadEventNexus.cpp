@@ -80,24 +80,6 @@ LoadEventNexus::LoadEventNexus()
       loadlogs(false), event_id_is_spec(false) {}
 
 //----------------------------------------------------------------------------------------------
-/**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
-int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
-  int confidence(0);
-  if (descriptor.classTypeExists("NXevent_data")) {
-    if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
-        descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
-      confidence = 80;
-    }
-  }
-  return confidence;
-}
-
-//----------------------------------------------------------------------------------------------
 /** Initialisation method.
  */
 void LoadEventNexus::init() {
@@ -373,7 +355,7 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
  */
-void LoadEventNexus::exec() {
+void LoadEventNexus::execLoader() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
@@ -15,7 +16,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -68,8 +69,7 @@ bool exists(const std::map<std::string, std::string> &entries,
 
   @date Sep 27, 2010
   */
-class DLLExport LoadEventNexus
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadEventNexus : public API::NexusFileLoader {
 
 public:
   LoadEventNexus();
@@ -91,9 +91,6 @@ public:
 
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
-
-  /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   template <typename T>
   static std::shared_ptr<BankPulseTimes> runLoadNexusLogs(
@@ -194,7 +191,7 @@ private:
   void init() override;
 
   /// Execution code
-  void exec() override;
+  void execLoader() override;
 
   LoadEventNexus::LoaderType
   defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,

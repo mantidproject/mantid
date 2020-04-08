@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidKernel/NexusHDF5Descriptor.h"
+
+#include <boost/multi_index/detail/index_matcher.hpp>
+
 #include "MantidKernel/NexusDescriptor.h"
 
 #include <hdf5.h>
@@ -13,6 +16,8 @@
 #include <cstdlib>   // malloc, calloc
 #include <cstring>   // strcpy
 #include <stdexcept> // std::invalid_argument
+
+using boost::multi_index::detail::index_matcher::entry;
 
 namespace Mantid::Kernel {
 
@@ -217,6 +222,22 @@ NexusHDF5Descriptor::initAllEntries() {
 
   // rely on move semantics
   return allEntries;
+}
+
+bool NexusHDF5Descriptor::isClassEntry(const std::string &groupClass,
+                                       const std::string &entryName) const
+    noexcept {
+
+  auto itClass = m_allEntries.find(groupClass);
+  if (itClass == m_allEntries.end()) {
+    return false;
+  }
+
+  if (itClass->second.count(entryName) == 1) {
+    return true;
+  }
+
+  return false;
 }
 
 } // namespace Mantid::Kernel

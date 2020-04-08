@@ -42,6 +42,9 @@ public:
 
     TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.getFilename());
 
+    TS_ASSERT_EQUALS(
+        nexusHDF5Descriptor.isClassEntry("NXentry", "/entry/DASlogs"), true);
+
     const std::map<std::string, std::set<std::string>> &allEntries =
         nexusHDF5Descriptor.getAllEntries();
 

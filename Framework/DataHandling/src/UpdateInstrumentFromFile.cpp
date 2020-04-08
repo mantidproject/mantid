@@ -101,8 +101,11 @@ void UpdateInstrumentFromFile::exec() {
     LoadEventNexus eventNexus;
     boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(
         new Kernel::NexusDescriptor(filename));
+    boost::scoped_ptr<Kernel::NexusHDF5Descriptor> descriptorNexusHDF5(
+        new Kernel::NexusHDF5Descriptor(filename));
+
     if (isisNexus.confidence(*descriptor) > 0 ||
-        eventNexus.confidence(*descriptor) > 0) {
+        eventNexus.confidence(*descriptorNexusHDF5) > 0) {
       auto &nxFile = descriptor->data();
       const auto &rootEntry = descriptor->firstEntryNameType();
       nxFile.openGroup(rootEntry.first, rootEntry.second);

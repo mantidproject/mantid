@@ -52,6 +52,16 @@ public:
   const std::map<std::string, std::set<std::string>> &getAllEntries() const
       noexcept;
 
+  /**
+   * Checks if a full-path entry exists for a particular groupClass in a Nexus
+   * dataset
+   * @param groupClass e.g. NxLog , Nexus entry attribute
+   * @param entryName full path for an entry name /entry/NXlogs
+   * @return true: entryName exists for a groupClass, otherwise false
+   */
+  bool isClassEntry(const std::string &groupClass,
+                    const std::string &entryName) const noexcept;
+
 private:
   /**
    * Sets m_allEntries, called in HDF5 constructor.
