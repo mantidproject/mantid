@@ -30,6 +30,8 @@ class Atom;
 
 namespace Kernel {
 
+class AttenuationProfile;
+
 /**
   A material is defined as being composed of a given element, defined as a
   PhysicalConstants::NeutronAtom, with the following properties:
@@ -104,6 +106,7 @@ public:
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  double attenuationCoefficient(const double lambda) const;
   /// Compute the attenuation at a given wavelength over the given distance
   double attenuation(const double distance,
                      const double lambda =

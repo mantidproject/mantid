@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
@@ -255,19 +256,27 @@ double Material::absorbXSection(const double lambda) const {
 }
 
 /**
+ * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
+ * reference lambda)
+ * @return The attenuation coefficient in m-1
+ */
+double Material::attenuationCoefficient(const double lambda) const {
+  if (!m_attenuationOverride) {
+    return 100 * numberDensity() *
+           (totalScatterXSection() + absorbXSection(lambda));
+  } else {
+    return m_attenuationOverride->getAttenuationCoefficient(lambda);
+  }
+}
+
+/**
  * @param distance Distance (m) travelled
  * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
  * reference lambda)
- * @return The dimensionless attenuation coefficient
+ * @return The dimensionless attenuation factor
  */
 double Material::attenuation(const double distance, const double lambda) const {
-  if (!m_attenuationOverride) {
-    return exp(-100 * numberDensity() *
-               (totalScatterXSection() + absorbXSection(lambda)) * distance);
-  } else {
-    return exp(-m_attenuationOverride->getAttenuationCoefficient(lambda) *
-               distance);
-  }
+  return exp(-attenuationCoefficient(lambda) * distance);
 }
 
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
