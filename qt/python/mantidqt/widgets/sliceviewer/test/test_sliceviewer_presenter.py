@@ -21,11 +21,10 @@ from mantidqt.widgets.sliceviewer.presenter import PeaksViewerCollectionPresente
 
 
 class SliceViewerTest(unittest.TestCase):
-
     def setUp(self):
         self.view = mock.Mock(spec=SliceViewerView)
-        self.view.dimensions = mock.Mock()
-        self.view.norm_opts = mock.Mock()
+        self.view.data_view.dimensions = mock.Mock()
+        self.view.data_view.norm_opts = mock.Mock()
 
         self.model = mock.Mock(spec=SliceViewerModel)
         self.model.get_ws = mock.Mock()
@@ -39,24 +38,24 @@ class SliceViewerTest(unittest.TestCase):
         # setup calls
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
-        self.assertEqual(self.view.plot_MDH.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
 
         # new_plot
         self.model.reset_mock()
         self.view.reset_mock()
         presenter.new_plot()
         self.assertEqual(self.model.get_ws.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
-        self.assertEqual(self.view.plot_MDH.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
 
         # update_plot_data
         self.model.reset_mock()
         self.view.reset_mock()
         presenter.update_plot_data()
         self.assertEqual(self.model.get_data.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
-        self.assertEqual(self.view.update_plot_data.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.update_plot_data.call_count, 1)
 
     def test_sliceviewer_MDE(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
@@ -66,27 +65,27 @@ class SliceViewerTest(unittest.TestCase):
         # setup calls
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_bin_params.call_count, 1)
-        self.assertEqual(self.view.plot_MDH.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_bin_params.call_count, 1)
+        self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
 
         # new_plot
         self.model.reset_mock()
         self.view.reset_mock()
         presenter.new_plot()
         self.assertEqual(self.model.get_ws.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_bin_params.call_count, 1)
-        self.assertEqual(self.view.plot_MDH.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_bin_params.call_count, 1)
+        self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
 
         # update_plot_data
         self.model.reset_mock()
         self.view.reset_mock()
         presenter.update_plot_data()
         self.assertEqual(self.model.get_data.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_bin_params.call_count, 1)
-        self.assertEqual(self.view.update_plot_data.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_bin_params.call_count, 1)
+        self.assertEqual(self.view.data_view.update_plot_data.call_count, 1)
 
     def test_sliceviewer_matrix(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
@@ -96,29 +95,30 @@ class SliceViewerTest(unittest.TestCase):
         # setup calls
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 0)
-        self.assertEqual(self.view.plot_matrix.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 0)
+        self.assertEqual(self.view.data_view.plot_matrix.call_count, 1)
 
         # new_plot
         self.model.reset_mock()
         self.view.reset_mock()
         presenter.new_plot()
         self.assertEqual(self.model.get_ws.call_count, 1)
-        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 0)
-        self.assertEqual(self.view.plot_matrix.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 0)
+        self.assertEqual(self.view.data_view.plot_matrix.call_count, 1)
 
     def test_normalization_change_set_correct_normalization(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
-        self.view.plot_matrix = mock.Mock()
+        self.view.data_view.plot_matrix = mock.Mock()
 
         presenter = SliceViewer(None, model=self.model, view=self.view)
         presenter.normalization_changed("By bin width")
-        self.view.plot_matrix.assert_called_with(self.model.get_ws(),
-                                                 normalize=mantid.api.MDNormalization.VolumeNormalization)
+        self.view.data_view.plot_matrix.assert_called_with(
+            self.model.get_ws(), normalize=mantid.api.MDNormalization.VolumeNormalization)
 
     @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter")
-    @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
-                spec=PeaksViewerCollectionPresenter)
+    @mock.patch(
+        "mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
+        spec=PeaksViewerCollectionPresenter)
     def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
 

@@ -49,8 +49,8 @@ class SliceViewer(object):
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent)
         if self.model.can_normalize_workspace():
-            self.view.norm_opts.currentTextChanged.connect(self.normalization_changed)
-            self.view.set_normalization(ws)
+            self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
+            self.view.data_view.set_normalization(ws)
 
         self.new_plot()
 
@@ -58,38 +58,39 @@ class SliceViewer(object):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
         """
-        self.view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
+        self.view.data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
 
     def new_plot_MDE(self):
         """
         Tell the view to display a new plot of an MDEventWorkspace
         """
-        self.view.plot_MDH(
+        self.view.data_view.plot_MDH(
             self.model.get_ws(
-                slicepoint=self.get_slicepoint(), bin_params=self.view.dimensions.get_bin_params()))
+                slicepoint=self.get_slicepoint(),
+                bin_params=self.view.data_view.dimensions.get_bin_params()))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
-        self.view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
+        self.view.data_view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
 
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
         return SliceInfo(
-            indices=self.view.dimensions.get_indices(),
+            indices=self.view.data_view.dimensions.get_indices(),
             frame=self.model.get_frame(),
-            point=self.view.dimensions.get_slicepoint(),
-            range=self.view.dimensions.get_slicerange())
+            point=self.view.data_view.dimensions.get_slicepoint(),
+            range=self.view.data_view.dimensions.get_slicerange())
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
            None indicates that dimension is being displayed"""
-        return self.view.dimensions.get_slicepoint()
+        return self.view.data_view.dimensions.get_slicepoint()
 
     def set_slicevalue(self, value):
         """Set the value within the slicing dimension
         :param value: The value of the slice point
         """
-        self.view.dimensions.set_slicevalue(value)
+        self.view.data_view.dimensions.set_slicevalue(value)
 
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
@@ -105,18 +106,18 @@ class SliceViewer(object):
         """
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
-        self.view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(), self.view.dimensions.transpose))
+        self.view.data_view.update_plot_data(
+            self.model.get_data(self.get_slicepoint(), self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
         Update the view to display an updated MDEventWorkspace slice/cut
         """
-        self.view.update_plot_data(
+        self.view.data_view.update_plot_data(
             self.model.get_data(
                 self.get_slicepoint(),
-                bin_params=self.view.dimensions.get_bin_params(),
-                transpose=self.view.dimensions.transpose))
+                bin_params=self.view.data_view.dimensions.get_bin_params(),
+                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -127,7 +128,7 @@ class SliceViewer(object):
         Display the attached line plots for the integrated signal over each dimension for the current cursor
         position
         """
-        self.view.create_axes()
+        self.view.data_view.create_axes()
         self.new_plot()
 
     def normalization_changed(self, norm_type):
@@ -152,6 +153,8 @@ class SliceViewer(object):
         names_to_overlay = self.view.query_peaks_to_overlay(names_overlayed)
         if names_to_overlay or names_overlayed:
             self._peaks_view_presenter.overlay_peaksworkspaces(names_to_overlay)
+        else:
+            self.view.peaks_view.hide()
 
     # private api
     @property

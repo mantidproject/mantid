@@ -27,18 +27,16 @@ from .peaksviewer.representation.painter import MplPainter
 import numpy as np
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QVBoxLayout, QWidget
 
 
-class SliceViewerView(QWidget):
+class SliceViewerDataView(QWidget):
+    """The view for the data portion of the sliceviewer"""
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super().__init__(parent)
 
         self.presenter = presenter
-
-        self.setWindowTitle("SliceViewer")
-        self.setWindowFlags(Qt.Window)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.line_plots = False
         self.can_normalise = can_normalise
@@ -82,11 +80,7 @@ class SliceViewerView(QWidget):
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
         self.mpl_toolbar.linePlotsClicked.connect(self.line_plots_toggle)
-        self.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
-
-        #  peaks viewer off by default
-        self._peaks_view = None
 
         # layout
         self.layout = QGridLayout(self)
@@ -94,27 +88,11 @@ class SliceViewerView(QWidget):
         self.layout.addWidget(self.mpl_toolbar, 1, 0)
         self.layout.addLayout(self.mpl_layout, 2, 0)
 
-        self.show()
-
-    @property
-    def peaks_view(self):
-        """Lazily instantiates PeaksViewer and returns it"""
-        if self._peaks_view is None:
-            self._peaks_view = PeaksViewerCollectionView(MplPainter(self.ax), self.presenter)
-            from_row, from_col, row_span, col_span = 0, 1, -1, 1
-            self.layout.addWidget(self._peaks_view, from_row, from_col, row_span, col_span)
-
-        return self._peaks_view
-
     def create_axes(self):
         self.fig.clf()
         if self.line_plots:
-            gs = gridspec.GridSpec(2,
-                                   2,
-                                   width_ratios=[1, 4],
-                                   height_ratios=[4, 1],
-                                   wspace=0.0,
-                                   hspace=0.0)
+            gs = gridspec.GridSpec(
+                2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
             self.ax = self.fig.add_subplot(gs[1], projection='mantid')
             self.ax.xaxis.set_visible(False)
             self.ax.yaxis.set_visible(False)
@@ -131,12 +109,13 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.ax.clear()
-        self.im = self.ax.imshow(ws,
-                                 origin='lower',
-                                 aspect='auto',
-                                 transpose=self.dimensions.transpose,
-                                 norm=self.colorbar.get_norm(),
-                                 **kwargs)
+        self.im = self.ax.imshow(
+            ws,
+            origin='lower',
+            aspect='auto',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -144,14 +123,15 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MatrixWorkspace
         """
         self.ax.clear()
-        self.im = imshow_sampling(self.ax,
-                                  ws,
-                                  origin='lower',
-                                  aspect='auto',
-                                  interpolation='none',
-                                  transpose=self.dimensions.transpose,
-                                  norm=self.colorbar.get_norm(),
-                                  **kwargs)
+        self.im = imshow_sampling(
+            self.ax,
+            ws,
+            origin='lower',
+            aspect='auto',
+            interpolation='none',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.im._resample_image()
         self.draw_plot()
 
@@ -245,7 +225,51 @@ class SliceViewerView(QWidget):
             self.presenter.normalization = mantid.api.MDNormalization.NoNormalization
             self.norm_opts.setCurrentIndex(0)
 
-    # peaks tools
+
+class SliceViewerView(QWidget):
+    """Combines the data view for the slice viewer with the optional peaks viewer."""
+
+    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+        super().__init__(parent)
+
+        self.presenter = presenter
+
+        self.setWindowTitle("SliceViewer")
+        self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        self._splitter = QSplitter(self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self)
+        self._splitter.addWidget(self._data_view)
+        #  peaks viewer off by default
+        self._peaks_view = None
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._splitter)
+        self.setLayout(layout)
+
+        # connect up additional peaks signals
+        self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
+
+    @property
+    def data_view(self):
+        return self._data_view
+
+    @property
+    def dimensions(self):
+        return self._data_view.dimensions
+
+    @property
+    def peaks_view(self):
+        """Lazily instantiates PeaksViewer and returns it"""
+        if self._peaks_view is None:
+            self._peaks_view = PeaksViewerCollectionView(
+                MplPainter(self.data_view.ax), self.presenter)
+            self._splitter.addWidget(self._peaks_view)
+
+        return self._peaks_view
+
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled
         """
@@ -262,8 +286,8 @@ class SliceViewerView(QWidget):
         :param current_overlayed_names: A list of names that are currently overlayed
         :returns: A list of workspace names to overlay on the display
         """
-        model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(),
-                                            checked_names=current_overlayed_names)
+        model = PeaksWorkspaceSelectorModel(
+            mantid.api.AnalysisDataService.Instance(), checked_names=current_overlayed_names)
         view = PeaksWorkspaceSelectorView(self)
         presenter = PeaksWorkspaceSelectorPresenter(view, model)
         return presenter.select_peaks_workspaces()
@@ -279,4 +303,4 @@ class SliceViewerView(QWidget):
     # event handlers
     def closeEvent(self, event):
         self.deleteLater()
-        super(SliceViewerView, self).closeEvent(event)
+        super().closeEvent(event)

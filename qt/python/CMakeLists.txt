@@ -97,9 +97,6 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
     mantidqt/widgets/test/test_functionbrowser.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
-    mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
-    mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
-    mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
@@ -133,6 +130,9 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
       mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+      mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
+      mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
+      mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewercollection_presenter.py
