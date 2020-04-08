@@ -439,10 +439,7 @@ void LoadNexusLogs::execLoader() {
       // match for 2nd level entry /a/b
       if (std::count(entry.begin(), entry.end(), '/') == 2) {
         if (isLog) {
-          const std::string group_name =
-              entry.substr(entry.find_last_of("/") + 1);
-          loadLogs(file, group_name, group_class, workspace);
-          // loadLogs(file, entry, group_class, workspace);
+          loadLogs(file, entry, group_class, workspace);
         } else {
           loadNPeriods(file, workspace);
         }
@@ -466,8 +463,7 @@ void LoadNexusLogs::execLoader() {
         continue;
       }
       // here we must search only in NxLogs and NXpositioner sets
-      loadLogs(file, group_name, group_class, workspace);
-      // loadLogs(file, absoluteGroupName, group_class, workspace);
+      loadLogs(file, absoluteGroupName, group_class, workspace);
     }
   };
 
@@ -479,8 +475,6 @@ void LoadNexusLogs::execLoader() {
   // If there's title information, load that info as logs.
   loadAndApplyRunTitle(&file, *workspace);
 
-  // TODO: remove
-  std::map<std::string, std::string> entries = file.getEntries();
   // Freddie Akeroyd 12/10/2011
   // current ISIS implementation contains an additional indirection between
   // collected frames via an
@@ -682,21 +676,43 @@ void LoadNexusLogs::loadNPeriods(
  * @param workspace :: A pointer to the workspace to store the logs
  */
 void LoadNexusLogs::loadLogs(
-    ::NeXus::File &file, const std::string &entry_name,
+    ::NeXus::File &file, const std::string &absolute_entry_name,
     const std::string &entry_class,
     const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
-  file.openGroup(entry_name, entry_class);
-  std::map<std::string, std::string> entries = file.getEntries();
-  std::map<std::string, std::string>::const_iterator iend = entries.end();
-  for (std::map<std::string, std::string>::const_iterator itr = entries.begin();
-       itr != iend; ++itr) {
-    std::string log_class = itr->second;
-    if (log_class == "NXlog" || log_class == "NXpositioner") {
-      loadNXLog(file, itr->first, log_class, workspace);
-    } else if (log_class == "IXseblock") {
-      loadSELog(file, itr->first, workspace);
+
+  const std::map<std::string, std::set<std::string>> &allEntries =
+      getFileInfo()->getAllEntries();
+
+  auto lf_LoadByLogClass = [&](const std::string &logClass,
+                               const bool isNxLog) {
+    auto itLogClass = allEntries.find(logClass);
+    if (itLogClass == allEntries.end()) {
+      return;
     }
-  }
+    const std::set<std::string> &logsSet = itLogClass->second;
+    auto itPrefixBegin = logsSet.lower_bound(absolute_entry_name);
+
+    for (auto it = itPrefixBegin;
+         it != logsSet.end() &&
+         it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0;
+         ++it) {
+      // must be third level entry
+      if (std::count(it->begin(), it->end(), '/') == 3) {
+        if (isNxLog) {
+          loadNXLog(file, *it, logClass, workspace);
+        } else {
+          loadSELog(file, *it, workspace);
+        }
+      }
+    }
+  };
+
+  const std::string entry_name =
+      absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
+  file.openGroup(entry_name, entry_class);
+  lf_LoadByLogClass("NXlog", true);
+  lf_LoadByLogClass("NXpositioner", true);
+  lf_LoadByLogClass("IXseblock", false);
   loadVetoPulses(file, workspace);
 
   file.closeGroup();
@@ -711,21 +727,50 @@ void LoadNexusLogs::loadLogs(
  * @param workspace :: A pointer to the workspace to store the logs
  */
 void LoadNexusLogs::loadNXLog(
-    ::NeXus::File &file, const std::string &entry_name,
+    ::NeXus::File &file, const std::string &absolute_entry_name,
     const std::string &entry_class,
+<<<<<<< HEAD
     const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   g_log.debug() << "processing " << entry_name << ":" << entry_class << "\n";
+=======
+    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
+>>>>>>> Refactored LoadNexusLogs
 
+  const std::string entry_name =
+      absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
+
+  g_log.debug() << "processing " << entry_name << ":" << entry_class << "\n";
   file.openGroup(entry_name, entry_class);
   // Validate the NX log class.
-  std::map<std::string, std::string> entries = file.getEntries();
-  if ((entries.find("value") == entries.end()) ||
-      (entries.find("time") == entries.end())) {
+  // Just verify that time and value entries exist
+  const std::string timeEntry = absolute_entry_name + "/time";
+  const std::string valueEntry = absolute_entry_name + "/value";
+  bool foundValue = false;
+  bool foundTime = false;
+
+  const std::map<std::string, std::set<std::string>> &allEntries =
+      getFileInfo()->getAllEntries();
+  // reverse search to take advantage of the fact that these are located in SDS
+  for (auto it = allEntries.rbegin(); it != allEntries.rend(); ++it) {
+    const std::set<std::string> &entriesSet = it->second;
+    if (entriesSet.count(timeEntry) == 1) {
+      foundTime = true;
+    }
+    if (entriesSet.count(valueEntry) == 1) {
+      foundValue = true;
+    }
+    if (foundTime && foundValue) {
+      break;
+    }
+  }
+
+  if (!foundTime || !foundValue) {
     g_log.warning() << "Invalid NXlog entry " << entry_name
                     << " found. Did not contain 'value' and 'time'.\n";
     file.closeGroup();
     return;
   }
+
   // whether or not to overwrite logs on workspace
   bool overwritelogs = this->getProperty("OverwriteLogs");
   try {
@@ -750,9 +795,17 @@ void LoadNexusLogs::loadNXLog(
  * @param workspace :: A pointer to the workspace to store the logs
  */
 void LoadNexusLogs::loadSELog(
+<<<<<<< HEAD
     ::NeXus::File &file, const std::string &entry_name,
     const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   // Open the entry
+=======
+    ::NeXus::File &file, const std::string &absolute_entry_name,
+    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
+
+  const std::string entry_name =
+      absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
+>>>>>>> Refactored LoadNexusLogs
   file.openGroup(entry_name, "IXseblock");
   std::string propName = entry_name;
   if (workspace->run().hasProperty(propName)) {
@@ -762,9 +815,28 @@ void LoadNexusLogs::loadSELog(
   //   value_log - A time series entry. This can contain a corrupt value entry
   //   so if it does use the value one
   //   value - A single value float entry
+  const std::string valueEntry = absolute_entry_name + "/value";
+  const std::string valueLogEntry = absolute_entry_name + "/value_log";
+  bool foundValue = false;
+  bool foundValueLog = false;
+
+  const std::map<std::string, std::set<std::string>> &allEntries =
+      getFileInfo()->getAllEntries();
+
+  for (auto it = allEntries.rbegin(); it != allEntries.rend(); ++it) {
+    const std::set<std::string> &entriesSet = it->second;
+    if (entriesSet.count(valueEntry) == 1) {
+      foundValue = true;
+    }
+    if (entriesSet.count(valueLogEntry) == 1) {
+      foundValueLog = true;
+      // takes precedence
+      break;
+    }
+  }
+
   std::unique_ptr<Kernel::Property> logValue;
-  const auto entries = file.getEntries();
-  if (entries.find("value_log") != entries.end()) {
+  if (foundValueLog) {
     try {
       try {
         file.openGroup("value_log", "NXlog");
@@ -785,7 +857,7 @@ void LoadNexusLogs::loadSELog(
       file.closeGroup(); // entry_name
       return;
     }
-  } else if (entries.find("value") != entries.end()) {
+  } else if (foundValue) {
     try {
       // This may have a larger dimension than 1 bit it has no time field so
       // take the first entry

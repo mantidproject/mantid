@@ -37,8 +37,8 @@ void NexusFileLoader::setFileInfo(
   m_fileInfo = std::move(fileInfo);
 }
 
-std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor>
-NexusFileLoader::getFileInfo() {
+const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor>
+NexusFileLoader::getFileInfo() const noexcept {
   return m_fileInfo;
 }
 
