@@ -7,13 +7,13 @@
 from qtpy import QtWidgets
 
 from mantidqt.utils.qt import load_ui
-from Muon.GUI.Common.plotting_widget.abstract_plotting_widget_view import AbstractPlottingWidgetView
+from Muon.GUI.Common.plotting_widget.plotting_widget_view_interface import PlottingWidgetViewInterface
 import Muon.GUI.Common.message_box as message_box
 
 ui_plotting_view, _ = load_ui(__file__, "plotting_widget_view.ui")
 
 
-class PlotWidgetView1(QtWidgets.QWidget, AbstractPlottingWidgetView, ui_plotting_view):
+class PlotWidgetView1(QtWidgets.QWidget, PlottingWidgetViewInterface, ui_plotting_view):
 
     @staticmethod
     def warning_popup(message):
@@ -23,28 +23,39 @@ class PlotWidgetView1(QtWidgets.QWidget, AbstractPlottingWidgetView, ui_plotting
         super().__init__(parent=parent)
         self.setupUi(self)
 
-        self.plot_type_combo.addItems(["Asymmetry", "Counts"])
-        self.tiled_by_combo.addItems(["Group/Pair", "Run"])
+        self.tiled_by_combo
+
+    def setup_plot_type_options(self, options):
+        self.plot_type_combo.blockSignals(True)
+        self.plot_type_combo.clear()
+        for option in options:
+            self.plot_type_combo.addItem(option)
+        self.plot_type_combo.blockSignals(False)
+
+    def setup_tiled_by_options(self, options):
+        self.tiled_by_combo.blockSignals(True)
+        self.tiled_by_combo.clear()
+        for option in options:
+            self.tiled_by_combo.addItem(option)
+        self.tiled_by_combo.blockSignals(False)
 
     def add_canvas_widget(self, canvas_widget):
         canvas_layout = QtWidgets.QHBoxLayout(self)
         self.canvasFrame.setLayout(canvas_layout)
         canvas_layout.addWidget(canvas_widget)
 
-    def get_plot_type(self): pass
+    def get_plot_type(self):
+        return self.plot_type_combo.currentText()
 
     def is_data_rebinned(self): pass
-
-    def plot_data(self, data): pass
-
-    def clear_plot(self): pass
 
     def is_tiled_plot(self): pass
 
     def tiled_by(self):
         return self.tiled_by_combo.currentText()
 
-    def on_plot_type_changed(self, slot): pass
+    def on_plot_type_changed(self, slot):
+        self.plot_type_combo.currentIndexChanged.connect(slot)
 
     def on_plot_tiled_checkbox_changed(self, slot):
         self.tiled_plot_checkbox.stateChanged.connect(slot)

@@ -52,42 +52,13 @@ class PlottingCanvasModel(object):
     def is_tiled(self, state: bool):
         self._is_tiled = state
 
-    def get_axis_limits(self, axes):
-        if self._user_axis_limits is None:
-            return self.get_default_limits(axes)
-
-    def get_default_limits(self, axes):
-        xmin = DEFAULT_X_LIMITS[0]
-        xmax = DEFAULT_X_LIMITS[1]
-        ymin, ymax = self._get_autoscale_y_limits(axes, xmin, xmax)
-        return [xmin, xmax], [ymin, ymax]
-
-    def _get_autoscale_y_limits(self, axes, xmin, xmax):
-        new_bottom = 1e9
-        new_top = -1e9
-        for axis in axes:
-            ylim = np.inf, -np.inf
-            for line in axis.lines:
-                x, y = line.get_data()
-                start, stop = np.searchsorted(x, tuple([xmin, xmax]))
-                y_within_range = y[max(start - 1, 0):(stop + 1)]
-                ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
-
-            new_bottom_i = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
-            new_top_i = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
-            if new_bottom_i < new_bottom:
-                new_bottom = new_bottom_i
-            if new_top_i > new_top:
-                new_top = new_top_i
-
-        return new_bottom, new_top
-
     def get_workspaces_to_plot_and_remove(self, input_workspace_names, indices,
-                                          plotted_workspace_information: PlotInformation):
+                                          plotted_workspace_information: PlotInformation,
+                                          errors=False):
         workspace_information = []
         for workspace_name, index in zip(input_workspace_names, indices):
             axis = self._get_workspace_plot_axis(workspace_name)
-            workspace_information += [self.create_plot_information(workspace_name, index, axis)]
+            workspace_information += [self.create_plot_information(workspace_name, index, axis, errors)]
         workspaces_to_remove = [plot_info for plot_info in plotted_workspace_information if
                                 plot_info not in workspace_information]
         workspaces_to_add = [plot_info for plot_info in workspace_information if plot_info not in
@@ -108,14 +79,13 @@ class PlottingCanvasModel(object):
         self._is_tiled = True
         self._axes_workspace_map = {}
         self._tiled_by = tiled_by_type
-        print(tiled_keys)
         for axis_number, key in enumerate(tiled_keys):
             self._axes_workspace_map[key] = axis_number
 
-    def create_plot_information(self, workspace_name, index, axis):
+    def create_plot_information(self, workspace_name, index, axis, errors):
         label = self._create_workspace_label(workspace_name)
         return PlotInformation(workspace_name=workspace_name, index=index, axis=axis, normalised=self._normalised,
-                               errors=self._errors, label=label)
+                               errors=errors, label=label)
 
     def _create_workspace_label(self, workspace_name):
         label = ''
@@ -133,8 +103,3 @@ class PlottingCanvasModel(object):
             return ''
         else:
             return list(self._axes_workspace_map.keys())
-
-
-
-
-

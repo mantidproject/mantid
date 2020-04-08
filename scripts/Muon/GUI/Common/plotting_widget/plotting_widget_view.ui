@@ -28,7 +28,7 @@
      <item>
       <widget class="QCheckBox" name="tiled_plot_checkbox">
        <property name="text">
-        <string>Tiled plot</string>
+        <string>Tiled plot by:</string>
        </property>
       </widget>
      </item>
@@ -40,16 +40,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox_2">
+      <widget class="QCheckBox" name="plot_raw_checkbox">
        <property name="text">
-        <string>CheckBox</string>
+        <string>Plot raw</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="external_plot_button">
        <property name="text">
-        <string>PushButton</string>
+        <string>External Plot</string>
        </property>
       </widget>
      </item>

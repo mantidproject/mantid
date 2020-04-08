@@ -13,7 +13,7 @@ class PlottingCanvasPresenterInterface(object):
 
     @abc.abstractmethod
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int],
-                               overplot: bool):
+                               overplot: bool, autoscale : bool):
         pass
 
     @abc.abstractmethod
@@ -25,11 +25,17 @@ class PlottingCanvasPresenterInterface(object):
         pass
 
     @abc.abstractmethod
-    def convert_to_tiled_plot(self, keys: List[str], tiled_by: str):
+    def create_tiled_plot(self, keys, tiled_by): pass
+
+    @abc.abstractmethod
+    def create_single_plot(self): pass
+
+    @abc.abstractmethod
+    def convert_plot_to_tiled_plot(self, keys: List[str], tiled_by: str):
         pass
 
     @abc.abstractmethod
-    def convert_to_single_plot(self):
+    def convert_plot_to_single_plot(self):
         pass
 
     @abc.abstractmethod
