@@ -18,6 +18,7 @@ class DrillPresenter(DrillEventListener):
 
         # signals connections
         self.model.process_done.connect(self.on_process_done)
+        self.model.processing_done.connect(self.on_processing_done)
 
         self.update_view_from_model()
 
@@ -32,7 +33,13 @@ class DrillPresenter(DrillEventListener):
 
     def on_process(self, rows):
         self.model.process(rows)
+        n, nmax = self.model.get_processing_progress()
+        self.view.set_progress(n, nmax)
         self.view.set_disabled(True)
+
+    def on_process_stop(self):
+        self.model.stop_process();
+        self.view.set_disabled(False)
 
     def on_instrument_changed(self, instrument):
         self.model.set_instrument(instrument)
@@ -48,8 +55,9 @@ class DrillPresenter(DrillEventListener):
     def on_process_done(self):
         n, nmax = self.model.get_processing_progress()
         self.view.set_progress(n, nmax)
-        if (n == nmax):
-            self.view.set_disabled(False)
+
+    def on_processing_done(self):
+        self.view.set_disabled(False)
 
     def update_view_from_model(self):
         self.view.set_table(self.model.get_columns(),

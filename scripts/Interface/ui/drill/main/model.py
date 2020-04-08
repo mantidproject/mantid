@@ -18,14 +18,30 @@ class DrillWorker(QThread):
     def __init__(self):
         super(DrillWorker, self).__init__()
         self.processes = list()
+        self.stopped = False
 
-    def add_process(self, fn, *args, **kwargs):
-        self.processes.append((fn, args, kwargs))
+    def add_process(self, algo, **kwargs):
+        self.processes.append((algo, kwargs))
+
+    def stop(self):
+        self.stopped = True
+        for process in self.processes:
+            p = sapi.AlgorithmManager.newestInstanceOf(process[0])
+            if p:
+                p.cancel()
 
     def run(self):
         for process in self.processes:
-            process[0](*process[1], **process[2])
-            self.process_done.emit()
+            if self.stopped:
+                return
+            try:
+                fn = getattr(sapi, process[0])
+                fn(**process[1])
+                self.process_done.emit()
+            except Exception as e:
+                print(e)
+            except:
+                pass
 
 
 class DrillModel(QObject):
@@ -33,6 +49,7 @@ class DrillModel(QObject):
     settings = dict()
     algorithm = None
     process_done = Signal()
+    processing_done = Signal()
 
     def __init__(self):
         super(DrillModel, self).__init__()
@@ -60,14 +77,22 @@ class DrillModel(QObject):
                 kwargs = self.convolute(self.samples[e])
                 kwargs.update(self.settings)
                 kwargs['OutputWorkspace'] = str(e) + "_" + kwargs['SampleRuns']
-                self.thread.add_process(getattr(sapi, self.algorithm), **kwargs)
+                self.thread.add_process(self.algorithm, **kwargs)
                 self.processes_running += 1
         self.thread.process_done.connect(self.on_process_done)
+        self.thread.finished.connect(self.on_processing_done)
         self.thread.start()
+
+    def stop_process(self):
+        self.thread.stop()
+        self.processing_done.emit()
 
     def on_process_done(self):
         self.processes_done += 1
         self.process_done.emit()
+
+    def on_processing_done(self):
+        self.processing_done.emit()
 
     def set_instrument(self, instrument):
         self.samples = list()

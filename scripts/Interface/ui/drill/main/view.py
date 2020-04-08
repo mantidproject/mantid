@@ -40,6 +40,10 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
+    def on_process_stop(self):
+        pass
+
+    @abstractmethod
     def on_instrument_changed(self, instrument):
         pass
 
@@ -116,6 +120,7 @@ class DrillView(QMainWindow):
         self.processAll.clicked.connect(self.process_all_rows)
 
         self.stop.setIcon(icons.get_icon("mdi.stop"))
+        self.stop.clicked.connect(self.process_stop)
 
     def setup_table(self):
         table_header = self.table.horizontalHeader()
@@ -280,6 +285,11 @@ class DrillView(QMainWindow):
             self.call_settings_listeners(
                     lambda listener: listener.on_process(rows)
                     )
+
+    def process_stop(self):
+        self.call_settings_listeners(
+                lambda listener: listener.on_process_stop()
+                )
 
     def data_changed(self, row, column):
         contents = self.get_cell_contents(row, column)
