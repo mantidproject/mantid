@@ -9,8 +9,6 @@
 
 #include "MantidDataHandling/MeshFileIO.h"
 #include "lib3mf_implicit.hpp"
-
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace Mantid {
@@ -21,9 +19,9 @@ class MeshObject;
 namespace DataHandling {
 
 /// Typdef for a shared pointer
-using MeshObject_sptr = boost::shared_ptr<Geometry::MeshObject>;
+using MeshObject_sptr = std::shared_ptr<Geometry::MeshObject>;
 /// Typdef for a shared pointer to a const object
-using MeshObject_const_sptr = boost::shared_ptr<const Geometry::MeshObject>;
+using MeshObject_const_sptr = std::shared_ptr<const Geometry::MeshObject>;
 
 /**
 

@@ -162,7 +162,7 @@ Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
     }
   };
 
-  auto mesh = boost::make_shared<Geometry::MeshObject>(
+  auto mesh = std::make_shared<Geometry::MeshObject>(
       std::move(m_triangle), std::move(m_vertices), material);
   mesh->setID(meshObject->GetName());
 

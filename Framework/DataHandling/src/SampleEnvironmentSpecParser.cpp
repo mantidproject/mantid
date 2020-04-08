@@ -219,8 +219,8 @@ void SampleEnvironmentSpecParser::loadFullSpecification(
     std::string fileExt = suppliedFileName.getExtension();
     std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
 
     if (fileExt == "3MF") {
 #ifdef ENABLE_LIB3MF
@@ -237,7 +237,7 @@ void SampleEnvironmentSpecParser::loadFullSpecification(
           // 3mf format doesn't nicely support multiple cans so just
           // hardcode id to default
           cpt->setID("default");
-          auto can = boost::make_shared<Container>(cpt);
+          auto can = std::make_shared<Container>(cpt);
           can->setSampleShape(sampleMesh);
           spec->addContainer(can);
         } else {
