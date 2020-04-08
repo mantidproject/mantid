@@ -52,8 +52,7 @@ private:
   void init() override;
   void exec() override;
 
-  void loadEnvironmentFromSTL(API::MatrixWorkspace_const_sptr inputWS,
-                              const std::string filename, API::Sample &sample,
+  void loadEnvironmentFromSTL(const std::string filename, API::Sample &sample,
                               const bool add, std::string debugString);
 
   void loadEnvironmentFrom3MF(API::MatrixWorkspace_const_sptr inputWS,

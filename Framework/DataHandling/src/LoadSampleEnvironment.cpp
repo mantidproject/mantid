@@ -204,7 +204,6 @@ std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
 
 /**
  * Load a sample environment definition from a .stl file
- * @param inputWS Workspace containing optional goniometer info
  * @param filename Name of the .stl file
  * @param sample The sample object that any sample geometry present will be
  * loaded into
@@ -212,9 +211,10 @@ std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
  * be added to any pre-existing components already in the environment
  * @param debugString Debug string that can be appended to by this function
  */
-void LoadSampleEnvironment::loadEnvironmentFromSTL(
-    MatrixWorkspace_const_sptr inputWS, const std::string filename,
-    Sample &sample, const bool add, std::string debugString) {
+void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
+                                                   Sample &sample,
+                                                   const bool add,
+                                                   std::string debugString) {
   std::unique_ptr<SampleEnvironment> environment = nullptr;
   std::shared_ptr<MeshObject> environmentMesh = nullptr;
 
@@ -287,6 +287,10 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(
     auto can = std::make_shared<Container>(environmentMesh);
     environment = std::make_unique<SampleEnvironment>(name, can);
   }
+
+  debugString +=
+      "Environment has: " + std::to_string(environment->nelements()) +
+      " elements.";
 
   // Put Environment into sample.
   sample.setEnvironment(std::move(environment));
@@ -389,7 +393,7 @@ void LoadSampleEnvironment::exec() {
   std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
   if (fileExt == "STL") {
-    loadEnvironmentFromSTL(inputWS, filename, sample, add, debugString);
+    loadEnvironmentFromSTL(filename, sample, add, debugString);
   } else if (fileExt == "3MF") {
     loadEnvironmentFrom3MF(inputWS, filename, sample, add, debugString);
   } else {
