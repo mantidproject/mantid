@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableModel import SequentialTableModel, default_table_columns
+from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import QSequentialTableModel, default_table_columns
 from mantidqt.utils.testing.mocks.mock_sequentialtable import MockSequentialTableModel, MockSequentialTableView
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
@@ -81,7 +81,7 @@ class SequentialTableWidgetTest(unittest.TestCase):
 
 class SequentialTableModelTest(unittest.TestCase):
     def setUp(self):
-        self.model = SequentialTableModel()
+        self.model = QSequentialTableModel()
 
         self.workspace_data = [["2223", "bwd", "No Fit", 0], ["2223", "fwd", "No Fit", 0]]
         self.parameter_data = [[0, 1, 2], [3, 4, 5]]

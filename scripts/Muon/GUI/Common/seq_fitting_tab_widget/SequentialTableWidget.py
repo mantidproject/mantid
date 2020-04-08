@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableView import SequentialTableView
-from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableModel import SequentialTableModel
+from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableView import QSequentialTableView
+from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import QSequentialTableModel
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FIT_STATUSES
 from collections import namedtuple
 
@@ -13,10 +13,11 @@ WorkspaceInfo = namedtuple('Workspace', 'runs groups')
 
 
 class SequentialTableWidget(object):
-
+    """ Sequential table widget implemented using a QTableView and QAbstractTableModel
+    Based on the model-view pattern https://doc.qt.io/qt-5/model-view-programming.html"""
     def __init__(self, parent, view=None, model=None):
-        self._view = view if view else SequentialTableView(parent)
-        self._model = model if model else SequentialTableModel()
+        self._view = view if view else QSequentialTableView(parent)
+        self._model = model if model else QSequentialTableModel()
         self._view.setModel(self._model)
 
     @property

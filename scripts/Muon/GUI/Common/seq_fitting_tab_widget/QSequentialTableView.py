@@ -6,15 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt, Signal
-from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableModel import FIT_STATUS_COLUMN
+from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import FIT_STATUS_COLUMN
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FitQualityDelegate
 
 
-class SequentialTableView(QtWidgets.QTableView):
+class QSequentialTableView(QtWidgets.QTableView):
     keyUpDownPressed = Signal()
 
     def __init__(self, parent):
-        super(SequentialTableView, self).__init__(parent)
+        super(QSequentialTableView, self).__init__(parent)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -31,7 +31,7 @@ class SequentialTableView(QtWidgets.QTableView):
             else:
                 self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
 
-        super(SequentialTableView, self).resizeColumnsToContents()
+        super(QSequentialTableView, self).resizeColumnsToContents()
 
     def set_selection_to_last_row(self):
         index = self.model().index(self.model().rowCount() - 1, 0)
@@ -40,7 +40,7 @@ class SequentialTableView(QtWidgets.QTableView):
 
     def keyPressEvent(self, event):
         if not self.signalsBlocked():
-            super(SequentialTableView, self).keyPressEvent(event)
+            super(QSequentialTableView, self).keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
         if self.signalsBlocked():

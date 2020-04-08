@@ -16,11 +16,11 @@ default_fit_status = "No fit"
 default_chi_squared = 0.0
 
 
-class SequentialTableModel(QAbstractTableModel):
+class QSequentialTableModel(QAbstractTableModel):
     parameterChanged = Signal(object)
 
     def __init__(self):
-        super(SequentialTableModel, self).__init__()
+        super(QSequentialTableModel, self).__init__()
         self._defaultData = []  # holds the default data (run, group, fit quality)
         self._parameterData = []  # holds the parameter data
         self._defaultHeaders = default_table_columns.copy()  # default table columns
@@ -65,7 +65,7 @@ class SequentialTableModel(QAbstractTableModel):
             else:
                 return self._parameterHeaders[section - len(default_table_columns)]
         else:
-            return super(SequentialTableModel, self).headerData(section, orientation, role)
+            return super(QSequentialTableModel, self).headerData(section, orientation, role)
 
     def setHeaderData(self, section, orientation, value, role=Qt.EditRole):
         if role == Qt.EditRole and orientation == Qt.Horizontal:
