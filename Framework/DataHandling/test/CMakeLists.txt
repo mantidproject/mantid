@@ -33,11 +33,14 @@ if(CXXTEST_FOUND)
                         HistogramData
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES})
+                        ${HDF5_HL_LIBRARIES}
+                        gmock)
+
   if(ENABLE_LIB3MF)
     target_link_libraries(DataHandlingTest LINK_PRIVATE
                           ${LIB3MF_LIBRARIES})
   endif()
+
   add_dependencies(DataHandlingTest Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests DataHandlingTest)
   # Test data
