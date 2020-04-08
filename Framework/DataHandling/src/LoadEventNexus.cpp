@@ -816,8 +816,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // This may not be needed in the future if both LoadEventNexus and
     // LoadInstrument are made to use the same Nexus/HDF5 library
     m_file->close();
-    m_instrument_loaded_correctly =
-        loadInstrument(m_filename, m_ws, m_top_entry_name, this, descriptor);
+    m_instrument_loaded_correctly = loadInstrument(
+        m_filename, m_ws, m_top_entry_name, this, descriptor.get());
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! "
@@ -867,8 +867,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         }
         // get the number of events
         const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
-        std::size_t num =
-            numEvents(*m_file, true, oldNeXusFileNames, prefix, *descriptor);
+        bool hasTotalCounts = true;
+        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames,
+                                    prefix, *descriptor);
         bankNames.emplace_back(entry_name);
         bankNumEvents.emplace_back(num);
 
@@ -1183,7 +1184,7 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
     EventWorkspaceCollection_sptr localWorkspace,
     const std::string &top_entry_name, Algorithm *alg,
-    const std::shared_ptr<NexusHDF5Descriptor> &descriptor) {
+    const Kernel::NexusHDF5Descriptor *descriptor) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
   auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(
       nexusfilename, ws, top_entry_name, alg, descriptor);

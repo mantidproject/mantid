@@ -246,7 +246,7 @@ bool NexusHDF5Descriptor::isEntry(const std::string &entryName,
 
 bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
 
-  for (auto itClass = m_allEntries.cbegin(); itClass != m_allEntries.cend();
+  for (auto itClass = m_allEntries.rbegin(); itClass != m_allEntries.rend();
        ++itClass) {
     if (itClass->second.count(entryName) == 1) {
       return true;

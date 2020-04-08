@@ -729,16 +729,10 @@ void LoadNexusLogs::loadLogs(
 void LoadNexusLogs::loadNXLog(
     ::NeXus::File &file, const std::string &absolute_entry_name,
     const std::string &entry_class,
-<<<<<<< HEAD
     const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
-  g_log.debug() << "processing " << entry_name << ":" << entry_class << "\n";
-=======
-    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
->>>>>>> Refactored LoadNexusLogs
 
   const std::string entry_name =
       absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
-
   g_log.debug() << "processing " << entry_name << ":" << entry_class << "\n";
   file.openGroup(entry_name, entry_class);
   // Validate the NX log class.
@@ -795,17 +789,12 @@ void LoadNexusLogs::loadNXLog(
  * @param workspace :: A pointer to the workspace to store the logs
  */
 void LoadNexusLogs::loadSELog(
-<<<<<<< HEAD
-    ::NeXus::File &file, const std::string &entry_name,
+    ::NeXus::File &file, const std::string &absolute_entry_name,
     const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   // Open the entry
-=======
-    ::NeXus::File &file, const std::string &absolute_entry_name,
-    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
-
   const std::string entry_name =
       absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
->>>>>>> Refactored LoadNexusLogs
+
   file.openGroup(entry_name, "IXseblock");
   std::string propName = entry_name;
   if (workspace->run().hasProperty(propName)) {
