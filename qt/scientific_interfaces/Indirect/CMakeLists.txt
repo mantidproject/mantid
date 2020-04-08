@@ -92,9 +92,6 @@ set(
         IndirectFunctionBrowser/IqtFunctionModel.cpp
         IndirectFunctionBrowser/IqtTemplateBrowser.cpp
         IndirectFunctionBrowser/IqtTemplatePresenter.cpp
-        IndirectFunctionBrowser/MSDFunctionModel.cpp
-        IndirectFunctionBrowser/MSDTemplateBrowser.cpp
-        IndirectFunctionBrowser/MSDTemplatePresenter.cpp
         IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
         IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
         IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
@@ -137,7 +134,6 @@ set(
         IqtFitModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectFunctionBrowser/IqtFunctionModel.h
-        IndirectFunctionBrowser/MSDFunctionModel.h
         JumpFitModel.h
         MSDFitModel.h
         Notifier.h
@@ -221,8 +217,6 @@ set(
         IndirectFunctionBrowser/ConvTemplatePresenter.h
         IndirectFunctionBrowser/IqtTemplateBrowser.h
         IndirectFunctionBrowser/IqtTemplatePresenter.h
-        IndirectFunctionBrowser/MSDTemplateBrowser.h
-        IndirectFunctionBrowser/MSDTemplatePresenter.h
         IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
         IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
         IndirectFitPropertyBrowser.h
@@ -421,9 +415,6 @@ set(
         IndirectFunctionBrowser/IqtFunctionModel.cpp
         IndirectFunctionBrowser/IqtTemplateBrowser.cpp
         IndirectFunctionBrowser/IqtTemplatePresenter.cpp
-        IndirectFunctionBrowser/MSDFunctionModel.cpp
-        IndirectFunctionBrowser/MSDTemplateBrowser.cpp
-        IndirectFunctionBrowser/MSDTemplatePresenter.cpp
         IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
         IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
         IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
@@ -519,8 +510,6 @@ set(
         IndirectFunctionBrowser/ConvTemplatePresenter.h
         IndirectFunctionBrowser/IqtTemplateBrowser.h
         IndirectFunctionBrowser/IqtTemplatePresenter.h
-        IndirectFunctionBrowser/MSDTemplateBrowser.h
-        IndirectFunctionBrowser/MSDTemplatePresenter.h
         IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
         IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
         Iqt.h
