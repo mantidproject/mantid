@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFit.h"
-#include "IndirectFunctionBrowser/MSDTemplateBrowser.h"
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -27,6 +27,16 @@ Mantid::Kernel::Logger g_log("MSDFit");
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+auto msdFunctionStrings = std::map<std::string, std::string>(
+    {{"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
+     {"Peters",
+      "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
+      "Msd>0, Beta>0)"},
+     {"Yi",
+      "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
+      "Sigma>0)"}});
+
 MSDFit::MSDFit(QWidget *parent)
     : IndirectFitAnalysisTab(new MSDFitModel, parent),
       m_uiForm(new Ui::MSDFit) {
@@ -38,22 +48,19 @@ MSDFit::MSDFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  auto templateBrowser = new MSDTemplateBrowser;
+  auto templateBrowser = new SingleFunctionTemplateBrowser(msdFunctionStrings);
   m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(false);
   m_uiForm->fitDataView->setStartAndEndHidden(false);
+  respondToFunctionChanged();
+  fitFunctionChanged();
 }
 
 void MSDFit::setupFitTab() {
-  auto &functionFactory = FunctionFactory::Instance();
-  auto gaussian = functionFactory.createFunction("MSDGauss");
-  auto peters = functionFactory.createFunction("MSDPeters");
-  auto yi = functionFactory.createFunction("MSDYi");
-
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 }
 
 void MSDFit::runClicked() { runTab(); }

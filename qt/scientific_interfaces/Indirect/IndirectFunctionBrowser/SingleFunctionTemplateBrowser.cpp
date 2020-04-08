@@ -65,7 +65,8 @@ void SingleFunctionTemplateBrowser::createProperties() {
   m_presenter.init();
 }
 
-void SingleFunctionTemplateBrowser::setDataType(const QStringList &allowedFunctionsList) {
+void SingleFunctionTemplateBrowser::setDataType(
+    const QStringList &allowedFunctionsList) {
   ScopedFalse _false(m_emitEnumChange);
   m_enumManager->setEnumNames(m_fitType, allowedFunctionsList);
   m_enumManager->setValue(m_fitType, 0);
@@ -76,8 +77,8 @@ void SingleFunctionTemplateBrowser::setEnumValue(int enumIndex) {
   m_enumManager->setValue(m_fitType, enumIndex);
 }
 
-void SingleFunctionTemplateBrowser::addParameter(const QString &parameterName,
-                                     const QString &parameterDescription) {
+void SingleFunctionTemplateBrowser::addParameter(
+    const QString &parameterName, const QString &parameterDescription) {
   auto newParameter = m_parameterManager->addProperty(parameterName);
   m_parameterManager->setDescription(newParameter,
                                      parameterDescription.toStdString());
@@ -123,7 +124,8 @@ QStringList SingleFunctionTemplateBrowser::getLocalParameters() const {
   return m_presenter.getLocalParameters();
 }
 
-void SingleFunctionTemplateBrowser::setGlobalParameters(const QStringList &globals) {
+void SingleFunctionTemplateBrowser::setGlobalParameters(
+    const QStringList &globals) {
   m_presenter.setGlobalParameters(globals);
 }
 
@@ -136,7 +138,8 @@ void SingleFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void SingleFunctionTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
+void SingleFunctionTemplateBrowser::globalChanged(QtProperty *, const QString &,
+                                                  bool) {}
 
 void SingleFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
@@ -151,19 +154,21 @@ void SingleFunctionTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
   emit localParameterButtonClicked(m_parameterNames[prop]);
 }
 
-void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
+void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(
+    const IFunction &fun) {
   m_presenter.updateMultiDatasetParameters(fun);
 }
 
-void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &) {}
+void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(
+    const ITableWorkspace &) {}
 
 void SingleFunctionTemplateBrowser::updateParameters(const IFunction &fun) {
   m_presenter.updateParameters(fun);
 }
 
-void SingleFunctionTemplateBrowser::setParameterValue(const QString &parameterName,
-                                          double parameterValue,
-                                          double parameterError) {
+void SingleFunctionTemplateBrowser::setParameterValue(
+    const QString &parameterName, double parameterValue,
+    double parameterError) {
   m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
   m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
 }
@@ -172,7 +177,8 @@ void SingleFunctionTemplateBrowser::setCurrentDataset(int i) {
   m_presenter.setCurrentDataset(i);
 }
 
-void SingleFunctionTemplateBrowser::updateParameterNames(const QMap<int, QString> &) {}
+void SingleFunctionTemplateBrowser::updateParameterNames(
+    const QMap<int, QString> &) {}
 
 void SingleFunctionTemplateBrowser::updateParameterDescriptions(
     const QMap<int, std::string> &) {}
@@ -196,7 +202,8 @@ void SingleFunctionTemplateBrowser::updateParameterEstimationData(
 void SingleFunctionTemplateBrowser::popupMenu(const QPoint &) {}
 
 void SingleFunctionTemplateBrowser::setParameterPropertyValue(QtProperty *prop,
-                                                  double value, double error) {
+                                                              double value,
+                                                              double error) {
   if (prop) {
     ScopedFalse _false(m_emitParameterValueChange);
     m_parameterManager->setValue(prop, value);
@@ -204,7 +211,8 @@ void SingleFunctionTemplateBrowser::setParameterPropertyValue(QtProperty *prop,
   }
 }
 
-void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
+void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(
+    const QStringList &globals) {
   ScopedFalse _false(m_emitParameterValueChange);
   for (auto &parameterName : m_parameterMap.keys()) {
     if (globals.contains(parameterName)) {
@@ -217,7 +225,7 @@ void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(const QStringList &
 
 void SingleFunctionTemplateBrowser::setBackgroundA0(double) {}
 void SingleFunctionTemplateBrowser::setResolution(std::string const &,
-                                      TableDatasetIndex const &) {}
+                                                  TableDatasetIndex const &) {}
 void SingleFunctionTemplateBrowser::setResolution(
     const std::vector<std::pair<std::string, int>> &) {}
 void SingleFunctionTemplateBrowser::setQValues(const std::vector<double> &) {}
