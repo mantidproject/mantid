@@ -92,6 +92,8 @@ public:
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+
   template <typename T>
   static std::shared_ptr<BankPulseTimes> runLoadNexusLogs(
       const std::string &nexusfilename, T localWorkspace, Algorithm &alg,

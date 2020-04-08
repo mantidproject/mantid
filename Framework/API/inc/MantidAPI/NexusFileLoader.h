@@ -29,6 +29,9 @@ public:
   virtual void
   setFileInfo(std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo);
 
+  virtual int
+  confidence(Kernel::NexusHDF5Descriptor &descriptor) const override = 0;
+
 private:
   std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> m_fileInfo;
 };

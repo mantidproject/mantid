@@ -41,26 +41,4 @@ std::string NexusFileLoader::getFilenamePropertyName() const {
   return "Filename";
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
-int NexusFileLoader::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
-
-  int confidence = 0;
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      descriptor.getAllEntries();
-  if (allEntries.count("NXevent_data") == 1) {
-    if (descriptor.isEntry("/entry", "NXentry") ||
-        descriptor.isEntry("/raw_data_1", "NXentry")) {
-      confidence = 80;
-    }
-  }
-
-  return confidence;
-}
-
 } // namespace Mantid::API
