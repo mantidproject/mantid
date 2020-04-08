@@ -29,9 +29,12 @@ class MANTIDQT_INDIRECT_DLL FQTemplateBrowser : public FunctionTemplateBrowser,
                                                 public IFQFitObserver {
   Q_OBJECT
 public:
-  explicit FQTemplateBrowser(QWidget *parent = nullptr);
+  explicit FQTemplateBrowser(std::unordered_map<std::string, std::string>
+                                 functionInitialisationStrings,
+                             QWidget *parent = nullptr);
   virtual ~FQTemplateBrowser() = default;
-
+  void updateAvailableFunctions(std::unordered_map<std::string, std::string>
+                                    functionInitialisationStrings) override;
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
@@ -57,8 +60,6 @@ public:
   void setResolution(const std::vector<std::pair<std::string, int>> &) override;
   void setQValues(const std::vector<double> &) override;
   int getCurrentDataset() override;
-  void updateDataType(DataType) override;
-  void spectrumChanged(int) override;
   void addParameter(const QString &parameterName,
                     const QString &parameterDescription);
   void setParameterValue(const QString &parameterName, double parameterValue,

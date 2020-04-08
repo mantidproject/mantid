@@ -33,8 +33,13 @@ class FQTemplateBrowser;
 class MANTIDQT_INDIRECT_DLL FQTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit FQTemplatePresenter(FQTemplateBrowser *view);
+  explicit FQTemplatePresenter(FQTemplateBrowser *view,
+                               std::unordered_map<std::string, std::string>
+                                   functionInitialisationStrings);
+  void updateAvailableFunctions(std::unordered_map<std::string, std::string>
+                                    functionInitialisationStrings);
   void setFitType(const QString &name);
+  void init();
 
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
@@ -58,7 +63,6 @@ signals:
   void functionStructureChanged();
 
 private slots:
-  void handleDataTypeChanged(DataType);
   void editLocalParameter(const QString &parName);
   void editLocalParameterFinish(int result);
   void viewChangedParameterValue(const QString &parName, double value);

@@ -108,8 +108,9 @@ public:
 };
 
 class FQTemplateBrowserMock : public IFQFitObserver {
-  MOCK_METHOD1(updateDataType, void(DataType dataType));
-  MOCK_METHOD1(spectrumChanged, void(int spec));
+  MOCK_METHOD1(updateAvailableFunctions,
+               void(std::unordered_map<std::string, std::string>
+                        functionInitialisationStrings));
 };
 
 /// Mock object to mock the model

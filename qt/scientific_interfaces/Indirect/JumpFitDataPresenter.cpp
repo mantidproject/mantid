@@ -13,6 +13,31 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+std::unordered_map<std::string, std::string>
+    widthFits({{"ChudleyElliot", "name=ChudleyElliot"},
+               {"HallRoss", "name=Hallross"},
+               {"FickDiffusion", "name=FickDiffusion"},
+               {"TeixeiraWater", "name=TeixeiraWater"}});
+
+std::unordered_map<std::string, std::string>
+    EISFFits({{"EISFDiffCylinder", "name=EISFDiffCylinder"},
+              {"EISFDiffSphere", "name=EISFDiffSphere"},
+              {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl"}});
+
+std::unordered_map<std::string, std::string>
+    AllFits({{"ChudleyElliot", "name=ChudleyElliot"},
+             {"HallRoss", "name=Hallross"},
+             {"FickDiffusion", "name=FickDiffusion"},
+             {"TeixeiraWater", "name=TeixeiraWater"},
+             {"EISFDiffCylinder", "name=EISFDiffCylinder"},
+             {"EISFDiffSphere", "name=EISFDiffSphere"},
+             {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl"}});
+
+std::unordered_map<DataType, std::unordered_map<std::string, std::string>>
+    availableFits({{DataType::WIDTH, widthFits},
+                   {DataType::EISF, EISFFits},
+                   {DataType::ALL, AllFits}});
+
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
@@ -56,8 +81,9 @@ void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
 
 void JumpFitDataPresenter::handleMultipleInputSelected() {
   hideParameterComboBoxes();
-  m_notifier.notify(
-      [](IFQFitObserver &obs) { obs.updateDataType(DataType::ALL); });
+  m_notifier.notify([](IFQFitObserver &obs) {
+    obs.updateAvailableFunctions(availableFits[DataType::ALL]);
+  });
 }
 
 void JumpFitDataPresenter::handleSingleInputSelected() {
@@ -67,8 +93,9 @@ void JumpFitDataPresenter::handleSingleInputSelected() {
   auto dataType = m_cbParameterType->currentText() == QString("Width")
                       ? DataType::WIDTH
                       : DataType::EISF;
-  m_notifier.notify(
-      [&dataType](IFQFitObserver &obs) { obs.updateDataType(dataType); });
+  m_notifier.notify([&dataType](IFQFitObserver &obs) {
+    obs.updateAvailableFunctions(availableFits[dataType]);
+  });
 }
 
 void JumpFitDataPresenter::hideParameterComboBoxes() {
@@ -139,11 +166,12 @@ void JumpFitDataPresenter::handleParameterTypeChanged(
     const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
   updateAvailableParameters(parameter);
+  emit dataChanged();
   auto dataType =
       parameter == QString("Width") ? DataType::WIDTH : DataType::EISF;
-  m_notifier.notify(
-      [&dataType](IFQFitObserver &obs) { obs.updateDataType(dataType); });
-  emit dataChanged();
+  m_notifier.notify([&dataType](IFQFitObserver &obs) {
+    obs.updateAvailableFunctions(availableFits[dataType]);
+  });
 }
 
 void JumpFitDataPresenter::setDialogParameterNames(

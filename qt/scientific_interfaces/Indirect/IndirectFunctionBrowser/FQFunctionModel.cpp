@@ -19,40 +19,30 @@ namespace IDA {
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-QStringList widthFits = QStringList(
-    {"None", "ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater"});
+FQFunctionModel::FQFunctionModel() {}
 
-QStringList eisfFits = QStringList(
-    {"None", "EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"});
-
-QStringList combinedFits = QStringList(
-    {"None", "ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater",
-     "EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"});
-
-std::unordered_map<DataType, QStringList>
-    dataTypeFitTypeMap({{DataType::WIDTH, widthFits},
-                        {DataType::EISF, eisfFits},
-                        {DataType::ALL, combinedFits}});
-
-FQFunctionModel::FQFunctionModel() {
-  for (auto functionName : widthFits + eisfFits) {
-    if (functionName == "None")
-      continue;
+void FQFunctionModel::updateAvailableFunctions(
+    std::unordered_map<std::string, std::string>
+        functionInitialisationStrings) {
+  m_functionStore.clear();
+  m_globalParameterStore.clear();
+  for (auto functionInfo : functionInitialisationStrings) {
     auto function =
-        FunctionFactory::Instance().createFunction(functionName.toStdString());
-    m_functionStore.insert(functionName, function);
-    m_globalParameterStore.insert(functionName, QStringList());
+        FunctionFactory::Instance().createInitialized(functionInfo.second);
+    m_functionStore.insert(QString::fromStdString(functionInfo.first),
+                           function);
+    m_globalParameterStore.insert(QString::fromStdString(functionInfo.first),
+                                  QStringList());
   }
-  m_fitType = "None";
-  m_dataType = DataType::WIDTH;
+  m_fitType = m_functionStore.keys().first();
 }
 
 QStringList FQFunctionModel::getFunctionList() {
-  return dataTypeFitTypeMap.at(m_dataType);
+  return m_functionStore.keys();
 }
 
 int FQFunctionModel::getEnumIndex() {
-  return dataTypeFitTypeMap.at(m_dataType).indexOf(m_fitType);
+  return m_functionStore.keys().indexOf(m_fitType);
 }
 
 void FQFunctionModel::setFunction(IFunction_sptr fun) {
@@ -60,7 +50,7 @@ void FQFunctionModel::setFunction(IFunction_sptr fun) {
     return;
   if (fun->nFunctions() == 0) {
     const auto name = fun->name();
-    const auto &functionNameList = dataTypeFitTypeMap.at(m_dataType);
+    const auto &functionNameList = m_functionStore.keys();
     if (functionNameList.contains(QString::fromStdString(name))) {
       setFitType(QString::fromStdString(name));
     } else {
@@ -70,8 +60,6 @@ void FQFunctionModel::setFunction(IFunction_sptr fun) {
     throw std::runtime_error("Function has wrong structure.");
   }
 }
-
-void FQFunctionModel::setDataType(DataType dataType) { m_dataType = dataType; }
 
 void FQFunctionModel::setFitType(const QString &name) {
   if (m_function) {

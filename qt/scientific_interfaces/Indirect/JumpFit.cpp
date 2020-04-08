@@ -34,7 +34,12 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  auto templateBrowser = new FQTemplateBrowser;
+  auto templateBrowser =
+      new FQTemplateBrowser(std::unordered_map<std::string, std::string>(
+          {{"ChudleyElliot", "name=ChudleyElliot"},
+           {"HallRoss", "name=Hallross"},
+           {"FickDiffusion", "name=FickDiffusion"},
+           {"TeixeiraWater", "name=TeixeiraWater"}}));
   setPlotView(m_uiForm->pvFitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,

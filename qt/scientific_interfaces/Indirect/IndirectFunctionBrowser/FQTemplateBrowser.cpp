@@ -36,10 +36,19 @@ namespace IDA {
  * Constructor
  * @param parent :: The parent widget.
  */
-FQTemplateBrowser::FQTemplateBrowser(QWidget *parent)
-    : FunctionTemplateBrowser(parent), m_presenter(this) {
+FQTemplateBrowser::FQTemplateBrowser(
+    std::unordered_map<std::string, std::string> functionInitialisationStrings,
+    QWidget *parent)
+    : FunctionTemplateBrowser(parent),
+      m_presenter(this, functionInitialisationStrings) {
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this,
           SIGNAL(functionStructureChanged()));
+}
+
+void FQTemplateBrowser::updateAvailableFunctions(
+    std::unordered_map<std::string, std::string>
+        functionInitialisationStrings) {
+  m_presenter.updateAvailableFunctions(functionInitialisationStrings);
 }
 
 void FQTemplateBrowser::createProperties() {
@@ -49,11 +58,12 @@ void FQTemplateBrowser::createProperties() {
 
   m_fitType = m_enumManager->addProperty("Fit Type");
   m_browser->addProperty(m_fitType);
-  updateDataType(DataType::WIDTH);
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
+
+  m_presenter.init();
 }
 
 void FQTemplateBrowser::setDataType(const QStringList &allowedFunctionsList) {
@@ -212,12 +222,6 @@ void FQTemplateBrowser::setResolution(std::string const &,
 void FQTemplateBrowser::setResolution(
     const std::vector<std::pair<std::string, int>> &) {}
 void FQTemplateBrowser::setQValues(const std::vector<double> &) {}
-
-void FQTemplateBrowser::updateDataType(DataType dataType) {
-  emit dataTypeChanged(dataType);
-}
-
-void FQTemplateBrowser::spectrumChanged(int) {}
 
 } // namespace IDA
 } // namespace CustomInterfaces

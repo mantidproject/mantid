@@ -19,14 +19,29 @@ using namespace MantidWidgets;
  * Constructor
  * @param parent :: The parent widget.
  */
-FQTemplatePresenter::FQTemplatePresenter(FQTemplateBrowser *view)
-    : QObject(view), m_view(view) {
+FQTemplatePresenter::FQTemplatePresenter(
+    FQTemplateBrowser *view,
+    std::unordered_map<std::string, std::string> functionInitialisationStrings)
+    : QObject(view), m_view(view), m_model() {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
           SLOT(editLocalParameter(const QString &)));
   connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this,
           SLOT(viewChangedParameterValue(const QString &, double)));
-  connect(m_view, SIGNAL(dataTypeChanged(DataType)), this,
-          SLOT(handleDataTypeChanged(DataType)));
+
+  m_model.updateAvailableFunctions(functionInitialisationStrings);
+}
+
+void FQTemplatePresenter::init() {
+  m_view->setDataType(m_model.getFunctionList());
+  setFitType(m_model.getFitType());
+}
+
+void FQTemplatePresenter::updateAvailableFunctions(
+    std::unordered_map<std::string, std::string>
+        functionInitialisationStrings) {
+  m_model.updateAvailableFunctions(functionInitialisationStrings);
+  m_view->setDataType(m_model.getFunctionList());
+  setFitType(m_model.getFitType());
 }
 
 void FQTemplatePresenter::setFitType(const QString &name) {
@@ -241,12 +256,6 @@ void FQTemplatePresenter::viewChangedParameterValue(const QString &parName,
     setLocalParameterValue(parName, i, value);
   }
   emit functionStructureChanged();
-}
-
-void FQTemplatePresenter::handleDataTypeChanged(DataType dataType) {
-  m_model.setDataType(dataType);
-  m_view->setDataType(m_model.getFunctionList());
-  setFitType("None");
 }
 
 } // namespace IDA
