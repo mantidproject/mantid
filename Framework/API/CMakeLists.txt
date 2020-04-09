@@ -67,6 +67,7 @@ set(SRC_FILES
     src/IFunctionGeneral.cpp
     src/IFunctionMD.cpp
     src/IFunctionMW.cpp
+	src/IJournal.cpp
     src/ILatticeFunction.cpp
     src/IMDEventWorkspace.cpp
     src/IMDHistoWorkspace.cpp
