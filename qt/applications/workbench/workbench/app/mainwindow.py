@@ -849,8 +849,9 @@ def start_workbench(app, command_line_options):
     else:
         main_window.project_recovery.start_recovery_thread()
 
-    if AboutPresenter.should_show_on_startup():
-        AboutPresenter(main_window).show()
+    if not (command_line_options.execute or command_line_options.quit):
+        if AboutPresenter.should_show_on_startup():
+            AboutPresenter(main_window).show()
 
     # lift-off!
     return app.exec_()

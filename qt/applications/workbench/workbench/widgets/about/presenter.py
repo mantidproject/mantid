@@ -21,6 +21,8 @@ class AboutPresenter(object):
     DO_NOT_SHOW_GROUP = "Mantid/FirstUse"
     DO_NOT_SHOW = "DoNotShowUntilNextRelease"
     LAST_VERSION = "LastVersion"
+    FACILITY = "default.facility"
+    INSTRUMENT = "default.instrument"
 
     def __init__(self, parent, view=None, usage_reporting_verification_view = None):
         self.view = view if view else AboutView(parent, self, version_str(), release_date().strip())
@@ -58,8 +60,8 @@ class AboutPresenter(object):
         :return: True if the dialog should be shown
         """
         # first check the facility and instrument
-        facility = ConfigService.getString("default.facility")
-        instrument = ConfigService.getString("default.instrument")
+        facility = ConfigService.getString(AboutPresenter.FACILITY)
+        instrument = ConfigService.getString(AboutPresenter.INSTRUMENT)
         if not facility:
             return True
         else:
@@ -76,7 +78,7 @@ class AboutPresenter(object):
 
         settings = QSettings()
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease =int(settings.value(AboutPresenter.DO_NOT_SHOW, 0))
+        doNotShowUntilNextRelease =int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
         lastVersion = settings.value(AboutPresenter.LAST_VERSION, "")
         settings.endGroup()
 
