@@ -8,9 +8,9 @@
 
 #include "DllConfig.h"
 #include "FQFitConstants.h"
-#include "SingleFunctionTemplatePresenter.h"
 #include "FunctionTemplateBrowser.h"
 #include "IFQFitObserver.h"
+#include "SingleFunctionTemplatePresenter.h"
 
 #include <QMap>
 #include <QWidget>

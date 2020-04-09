@@ -138,7 +138,8 @@ public:
     m_ParameterCombo = createComboBox(getJumpParameters());
     m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
     m_ParameterLabel = createLabel(PARAMETER_LABEL);
-    m_SingleFunctionTemplateBrowser = std::make_unique<SingleFunctionTemplateBrowserMock>();
+    m_SingleFunctionTemplateBrowser =
+        std::make_unique<SingleFunctionTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
@@ -147,7 +148,8 @@ public:
         std::move(m_ParameterTypeCombo.get()),
         std::move(m_ParameterCombo.get()),
         std::move(m_ParameterTypeLabel.get()),
-        std::move(m_ParameterLabel.get()), m_SingleFunctionTemplateBrowser.get());
+        std::move(m_ParameterLabel.get()),
+        m_SingleFunctionTemplateBrowser.get());
 
     SetUpADSWithWorkspace m_ads(
         "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
@@ -211,7 +213,8 @@ private:
   std::unique_ptr<QComboBox> m_ParameterCombo;
   std::unique_ptr<QLabel> m_ParameterTypeLabel;
   std::unique_ptr<QLabel> m_ParameterLabel;
-  std::unique_ptr<SingleFunctionTemplateBrowserMock> m_SingleFunctionTemplateBrowser;
+  std::unique_ptr<SingleFunctionTemplateBrowserMock>
+      m_SingleFunctionTemplateBrowser;
 
   std::unique_ptr<MockJumpFitDataView> m_view;
   std::unique_ptr<MockJumpFitModel> m_model;

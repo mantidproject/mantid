@@ -7,9 +7,9 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "SingleFunctionTemplateModel.h"
 #include "IFQFitObserver.h"
 #include "ParameterEstimation.h"
+#include "SingleFunctionTemplateModel.h"
 
 #include <QMap>
 #include <QWidget>

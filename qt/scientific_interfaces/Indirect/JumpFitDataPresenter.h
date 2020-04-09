@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "FQFitConstants.h"
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "JumpFitAddWorkspaceDialog.h"
 #include "JumpFitModel.h"
-#include "FQFitConstants.h"
 #include "Notifier.h"
 
 #include <QComboBox>

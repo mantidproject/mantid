@@ -80,7 +80,8 @@ void SingleFunctionTemplateModel::updateParameterEstimationData(
   m_estimationData = std::move(data);
 }
 
-void SingleFunctionTemplateModel::setGlobal(const QString &name, bool isGlobal) {
+void SingleFunctionTemplateModel::setGlobal(const QString &name,
+                                            bool isGlobal) {
   auto globalParameters = getGlobalParameters();
   if (isGlobal && !globalParameters.contains(name)) {
     globalParameters << name;

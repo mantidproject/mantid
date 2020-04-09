@@ -7,10 +7,9 @@
 #pragma once
 
 #include "JumpFit.h"
+#include "FQFitConstants.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "JumpFitDataPresenter.h"
-#include "FQFitConstants.h"
-
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -39,8 +38,7 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  auto templateBrowser =
-      new SingleFunctionTemplateBrowser(widthFits);
+  auto templateBrowser = new SingleFunctionTemplateBrowser(widthFits);
   setPlotView(m_uiForm->pvFitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
