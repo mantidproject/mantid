@@ -12,7 +12,12 @@ import numpy as np
 class Tester(object):
     """Base class for testing Abins input loaders"""
 
-    _loaders_extensions = {"CASTEPLoader": "phonon", "CRYSTALLoader": "out", "DMOL3Loader": "outmol", "GAUSSIANLoader": "log"}
+    _loaders_extensions = {"CASTEPLoader": "phonon",
+                           "CRYSTALLoader": "out",
+                           "DMOL3Loader": "outmol",
+                           "GAUSSIANLoader": "log",
+                           "LoadVASP": "xml",
+                           "LoadVASPOUTCAR": "OUTCAR"}
 
     @staticmethod
     def _prepare_data(seedname):
@@ -121,9 +126,18 @@ class Tester(object):
             self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
                                                atoms["atom_%s" % item]["coord"]))
 
-    def check(self, name=None, loader=None):
+    def check(self, *,
+              name: str,
+              loader: AbinsModules.GeneralAbInitioProgram,
+              extension: str = None):
+        """Run loader and compare output with reference files
 
-        extension = self._loaders_extensions[str(loader)]
+        Args:
+            name: prefix for test files (e.g. 'ethane_LoadVASP')
+
+        """
+        if extension is None:
+            extension = self._loaders_extensions[str(loader)]
 
         # get calculated data
         data = self._read_ab_initio(loader=loader, filename=name, extension=extension)

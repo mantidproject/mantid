@@ -7,6 +7,7 @@
 
 from itertools import chain
 import logging
+import os
 import re
 from typing import Any, Dict, Optional, Union
 from xml.etree import ElementTree
@@ -31,7 +32,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
 
     """
 
-    def __init__(self, input_ab_initio_filename) -> None:
+    def __init__(self, input_ab_initio_filename: str = None) -> None:
         """
 
         :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
@@ -43,6 +44,9 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                                         logger: Logger = None,
                                         ) -> AbinsData:
         input_filename = self._clerk.get_input_filename()
+
+        if not os.path.isfile(input_filename):
+            raise IOError("Could not find file: {}".format(input_filename))
 
         if input_filename[-4:] == '.xml':
             data = self._read_vasprun(input_filename)
@@ -61,8 +65,8 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             self._num_k = 1
 
         else:
-            raise ValueError('Cannot guess format from filename "{}". '
-                             'Expected *.xml or *OUTCAR*')
+            raise ValueError('Cannot guess format from filename "{}". Expected'
+                             ' *.xml or *OUTCAR*'.format(input_filename))
 
         self.save_ab_initio_data(data=data)
         return self._rearrange_data(data=data)
