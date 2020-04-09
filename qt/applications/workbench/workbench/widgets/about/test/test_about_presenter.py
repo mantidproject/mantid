@@ -95,8 +95,8 @@ class AboutPresenterTest(TestCase):
         with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
             with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = version_str):
                 self.assertFalse(AboutPresenter.should_show_on_startup(),
-                                 "If do not show is in Qsettings then should_show_on_startup should always be False" +
-                                 "for the same version")
+                                 "If do not show is in Qsettings then should_show_on_startup should always be False"
+                                 + "for the same version")
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
                                                       call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
@@ -108,8 +108,8 @@ class AboutPresenterTest(TestCase):
         with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
             with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = "not the " + version_str):
                 self.assertTrue(AboutPresenter.should_show_on_startup(),
-                                "If do not show is in Qsettings then should_show_on_startup should always be True" +
-                                " for different versions")
+                                "If do not show is in Qsettings then should_show_on_startup should always be True"
+                                + " for different versions")
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
                                                       call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])

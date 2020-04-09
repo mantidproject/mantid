@@ -73,8 +73,8 @@ class AboutPresenter(object):
                                                                                        instrumentInfo.name()))
             except RuntimeError:
                 # failed to find the facility or instrument
-                logger.error("Could not find your default facility '{0}' or instrument '{1}' in facilities.xml, " +
-                             "showing please select again.\n".format(facility, instrument))
+                logger.error("Could not find your default facility '{0}' or instrument '{1}' in facilities.xml, "
+                             + "showing please select again.\n".format(facility, instrument))
                 return True
 
         settings = QSettings()
