@@ -46,7 +46,12 @@ public:
                          const Version version = AnyVersion);
 
 public:
-  /// Constructor accepting a filename
+  /**
+   * Constructor accepting a filename
+   * @param filename input filename
+   * @param init true: expensive init including walking through the file, false:
+   * don't init
+   */
   NexusDescriptor(const std::string &filename, const bool init = true);
   /// Destructor
   ~NexusDescriptor();

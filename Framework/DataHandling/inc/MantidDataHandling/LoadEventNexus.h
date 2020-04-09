@@ -110,8 +110,16 @@ public:
                                 const std::string &entry_name,
                                 const Kernel::NexusHDF5Descriptor &descriptor);
 
-  /// Load instrument from Nexus file if possible, else from IDF spacified by
-  /// Nexus file
+  /**
+   * Load instrument from Nexus file if possible, else from IDF spacified by
+   * Nexus file
+   * @param nexusfilename input nexus file name
+   * @param localWorkspace input
+   * @param top_entry_name e.g. /entry
+   * @param alg input algorithm executing this task
+   * @param descriptor input descriptor
+   * @return true: success, false: failure
+   */
   template <typename T>
   static bool
   loadInstrument(const std::string &nexusfilename, T localWorkspace,
@@ -124,7 +132,15 @@ public:
   runLoadIDFFromNexus(const std::string &nexusfilename, T localWorkspace,
                       const std::string &top_entry_name, Algorithm *alg);
 
-  /// Load instrument from IDF file specified by Nexus file
+  /**
+   * Load instrument from IDF file specified by Nexus file
+   * @param nexusfilename input nexus file name
+   * @param localWorkspace input
+   * @param top_entry_name e.g. /entry
+   * @param alg input algorithm executing this task
+   * @param descriptor input descriptor
+   * @return true: success, false: failure
+   */
   template <typename T>
   static bool
   runLoadInstrument(const std::string &nexusfilename, T localWorkspace,
@@ -359,20 +375,20 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
  *modified.
  * @param entry_name :: An NXentry tag in the file
  * @param classType :: The type of the events: either detector or monitor
+ * @param desciptor :: input descriptor carrying metadata information
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(
     ::NeXus::File &file, T localWorkspace, const std::string &entry_name,
     const std::string &classType,
-    const std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor =
-        std::shared_ptr<Kernel::NexusHDF5Descriptor>()) {
+    const Kernel::NexusHDF5Descriptor *descriptor = nullptr) {
   bool done = false;
   // Go to the root, and then top entry
   file.openPath("/");
   file.openGroup(entry_name, "NXentry");
 
   // NexusHDF5Descriptor
-  if (descriptor) {
+  if (descriptor != nullptr) {
     // not an ISIS file
     if (!descriptor->isEntry("/" + entry_name + "/detector_1_events")) {
       return;

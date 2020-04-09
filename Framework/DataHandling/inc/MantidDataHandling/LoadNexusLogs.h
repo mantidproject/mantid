@@ -63,16 +63,37 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void execLoader() override;
-  /// Load log data from a group
-  void loadLogs(::NeXus::File &file, const std::string &entry_name,
+
+  /**
+   * Load log data from a group
+   * @param file input Nexus file handler
+   * @param absolute_entry_name full entry name in Nexus
+   * @param entry_class type of the entry (NXlog)
+   * @param workspace input workspace
+   */
+  void loadLogs(::NeXus::File &file, const std::string &absolute_entry_name,
                 const std::string &entry_class,
                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
-  /// Load an NXlog entry
-  void loadNXLog(::NeXus::File &file, const std::string &entry_name,
+
+  /**
+   * Load an NXlog entry
+   * @param file input Nexus file handler
+   * @param absolute_entry_name full entry name in Nexus
+   * @param entry_class type of the entry (NXlog)
+   * @param workspace input workspace
+   */
+  void loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name,
                  const std::string &entry_class,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
-  /// Load an IXseblock entry
-  void loadSELog(::NeXus::File &file, const std::string &entry_name,
+
+  /**
+   * Load an IXseblock entry
+   * @param file input Nexus file handler
+   * @param absolute_entry_name full entry name in Nexus
+   * @param entry_class type of the entry (NXlog)
+   * @param workspace input workspace
+   */
+  void loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
   void
   loadVetoPulses(::NeXus::File &file,

@@ -671,7 +671,7 @@ void LoadNexusLogs::loadNPeriods(
  * Load log entries from the given group
  * @param file :: A reference to the NeXus file handle opened such that the
  * next call can be to open the named group
- * @param entry_name :: The name of the log entry
+ * @param absolute_entry_name :: The name of the log entry
  * @param entry_class :: The class type of the log entry
  * @param workspace :: A pointer to the workspace to store the logs
  */
@@ -722,7 +722,7 @@ void LoadNexusLogs::loadLogs(
  * Load an NX log entry a group type that has value and time entries.
  * @param file :: A reference to the NeXus file handle opened at the parent
  * group
- * @param entry_name :: The name of the log entry
+ * @param absolute_entry_name :: The name of the log entry
  * @param entry_class :: The type of the entry
  * @param workspace :: A pointer to the workspace to store the logs
  */
@@ -785,7 +785,7 @@ void LoadNexusLogs::loadNXLog(
  * Load an SE log entry
  * @param file :: A reference to the NeXus file handle opened at the parent
  * group
- * @param entry_name :: The name of the log entry
+ * @param absolute_entry_name :: The name of the log entry
  * @param workspace :: A pointer to the workspace to store the logs
  */
 void LoadNexusLogs::loadSELog(

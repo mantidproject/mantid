@@ -500,7 +500,7 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
  * This variable will be changed if the field is not there.
  * @param oldNeXusFileNames Whether to try using old names. This variable will
  * be changed if it is determined that old names are being used.
- *
+ * @param descriptor input containing metadata information
  * @return The number of events.
  */
 std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
@@ -1115,7 +1115,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
-  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType);
+  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType,
+                               descriptor.get());
 }
 
 //-----------------------------------------------------------------------------
@@ -1177,6 +1178,7 @@ LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
  *geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
  *  @param alg :: Handle of the algorithm
+ *  @param descriptor :: input containing metadata information
  *  @return true if successful
  */
 template <>
