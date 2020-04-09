@@ -8,51 +8,34 @@
 from unittest import TestCase
 
 from unittest.mock import call, Mock, patch
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictPropertyMock, StrictMock
 from workbench.widgets.about.presenter import AboutPresenter
 
-class MockConfigServiceNoFacility(object):
-    def __init__(self):
-        self.getString = StrictMock(return_value=None)
 
-class MockConfigServiceInvalidFacility(object):
-    def __init__(self):
-        self.getString = StrictMock(return_value="FACILITY1")
-        self.getFacility = StrictMock(return_value=None)
-        self.getFacility.side_effect = self.side_effect_runtime_error
-    def side_effect_runtime_error(self, string):
-        raise RuntimeError("Not Found")
+class MockInstrument(object):
+    def __init__(self, idx):
+        self.name = StrictMock(return_value="instr{}".format(idx))
 
-class MockConfigServiceInvalidInstrument(object):
-    def __init__(self):
-        self.getString = StrictMock(return_value="FACILITY1")
-        self.getFacility = StrictMock(return_value=None)
-        self.getInstrument = StrictMock(return_value=None)
-        self.getInstrument.side_effect = self.side_effect_runtime_error
-    def side_effect_runtime_error(self, string):
-        raise RuntimeError("Not Found")
+
+class MockFacility(object):
+    def __init__(self, name):
+        self.name = StrictMock(return_value=name)
+        self.all_instruments = [MockInstrument(0), MockInstrument(1)]
+        self.instruments = StrictMock(return_value=self.all_instruments)
 
 class MockConfigService(object):
+    all_facilities = ["facility1", "facility2"]
     def __init__(self):
+        self.mock_facility = MockFacility(self.all_facilities[0])
+        self.mock_instrument = self.mock_facility.all_instruments[0]
+        self.getFacilityNames = StrictMock(return_value=self.all_facilities)
+        self.getFacility = StrictMock(return_value=self.mock_facility)
+        self.getInstrument = StrictMock(return_value=self.mock_instrument)
         self.getString = StrictMock(return_value="FACILITY1")
-        self.getFacility = StrictMock(return_value=None)
-        self.getInstrument = StrictMock(return_value=None)
-        self.getInstrument.side_effect = self.side_effect_runtime_error
-    def side_effect_runtime_error(self, string):
-        raise RuntimeError("Not Found")
-
-class FakeInfo(object):
-    def __init__(self, name_value):
-        self.name_value = name_value
-    def name(self):
-        return self.name_value
-
-class MockConfigService(object):
-    def __init__(self):
-        self.getString = StrictMock(return_value="FACILITY1")
-        self.getFacility = StrictMock(return_value=FakeInfo("FACILITY1"))
-        self.getInstrument = StrictMock(return_value=FakeInfo("INST1"))
+        self.setFacility = StrictMock()
+        self.setString = StrictMock()
 
 class FakeQSettings(object):
     def __init__(self, string_value):
@@ -70,68 +53,38 @@ class FakeQSettings(object):
         else:
             return "unknown p_str"
 
-def MockQSettings():
-    return FakeQSettings
-
-class FakeMVP(object):
-    def __init__(self):
-        self.view = MockQWidget()
-
-
-class FakeSectionsListWidget:
-    def __init__(self):
-        self.fake_items = []
-
-    def addItems(self, item):
-        self.fake_items.extend(item)
-
-    def item(self, index):
-        return self.fake_items[index]
-
-
-class MockAboutView(object):
-    def __init__(self):
-        self.mock_container = MockQWidget()
-        self.mock_current = MockQWidget()
-        self.container = StrictPropertyMock(return_value=self.mock_container)
-        self.current = StrictPropertyMock(return_value=self.mock_current)
-        self.sections = FakeSectionsListWidget()
-        self.general_settings = FakeMVP()
-        self.categories_settings = FakeMVP()
-        self.plot_settings = FakeMVP()
-        self.fitting_settings = FakeMVP()
-        self.save_settings_button = MockQButton()
-        self.help_button = MockQButton()
-
-
+@start_qapplication
 class AboutPresenterTest(TestCase):
     CONFIG_SERVICE_CLASSPATH = "workbench.widgets.about.presenter.ConfigService"
     QSETTINGS_CLASSPATH = "workbench.widgets.about.presenter.QSettings"
     RELEASE_NOTES_URL_CLASSPATH = "workbench.widgets.about.presenter.release_notes_url"
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigServiceNoFacility)
-    def test_should_show_on_startup_no_facility(self, MockConfigServiceNoFacility):
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_should_show_on_startup_no_facility(self, MockConfigService):
+        MockConfigService.getString.return_value = ""
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the facilty is not set then should_show_on_startup should always be true")
-        MockConfigServiceNoFacility.getString.assert_has_calls([call(AboutPresenter.FACILITY),
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
                                                                 call(AboutPresenter.INSTRUMENT)])
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigServiceInvalidFacility)
-    def test_should_show_on_startup_invalid_facility(self, MockConfigServiceInvalidFacility):
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_should_show_on_startup_invalid_facility(self, MockConfigService):
+        MockConfigService.getFacility.side_effect = RuntimeError("Invalid Facility name")
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the facilty is invalid then should_show_on_startup should always be true")
-        MockConfigServiceInvalidFacility.getString.assert_has_calls([call(AboutPresenter.FACILITY),
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
                                                                 call(AboutPresenter.INSTRUMENT)])
-        MockConfigServiceInvalidFacility.getFacility.assert_has_calls([call("FACILITY1")])
+        MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigServiceInvalidInstrument)
-    def test_should_show_on_startup_invalid_instrument(self, MockConfigServiceInvalidInstrument):
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_should_show_on_startup_invalid_instrument(self, MockConfigService):
+        MockConfigService.getInstrument.side_effect = RuntimeError("Invalid Instrument name")
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the instrument is invalid then should_show_on_startup should always be true")
-        MockConfigServiceInvalidInstrument.getString.assert_has_calls([call(AboutPresenter.FACILITY),
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
                                                                 call(AboutPresenter.INSTRUMENT)])
-        MockConfigServiceInvalidInstrument.getFacility.assert_has_calls([call("FACILITY1")])
-        MockConfigServiceInvalidInstrument.getInstrument.assert_has_calls([call("FACILITY1")])
+        MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
+        MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_do_not_show_same_version(self, MockConfigService):
@@ -156,3 +109,79 @@ class AboutPresenterTest(TestCase):
                                                                 call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
+
+    def assert_connected_once(self, owner, signal):
+        self.assertEqual(1, owner.receivers(signal))
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_setup_facilities_with_valid_combination(self, mock_ConfigService):
+        self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
+        presenter = AboutPresenter(None)
+        self.assertEqual(0, mock_ConfigService.setFacility.call_count)
+        self.assertEqual(3, mock_ConfigService.getFacility.call_count)
+        self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
+        self.assert_connected_once(presenter.view.cbFacility, presenter.view.cbFacility.currentTextChanged)
+
+        mock_ConfigService.getInstrument.assert_called_once_with()
+        self.assertEqual(2, mock_ConfigService.mock_instrument.name.call_count)
+        self.assert_connected_once(presenter.view.cbInstrument, presenter.view.cbInstrument.currentTextChanged)
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_setup_facilities_with_invalid_default_facility_chooses_first(self, mock_ConfigService):
+        mock_ConfigService.getFacility.side_effect = [RuntimeError("Invalid facility name"),
+                                                      mock_ConfigService.mock_facility,
+                                                      mock_ConfigService.mock_facility]
+        presenter = AboutPresenter(None)
+
+        self.assertEqual(mock_ConfigService.mock_facility.name(),
+                         presenter.view.cbFacility.currentText())
+        self.assertEqual(mock_ConfigService.mock_instrument.name(),
+                         presenter.view.cbInstrument.currentText())
+        self.assert_connected_once(presenter.view.cbFacility, presenter.view.cbFacility.currentTextChanged)
+        self.assert_connected_once(presenter.view.cbInstrument, presenter.view.cbInstrument.currentTextChanged)
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_setup_facilities_with_invalid_default_instrument_chooses_first(self, mock_ConfigService):
+        mock_ConfigService.getInstrument.side_effect = [RuntimeError("Invalid instrument name"),
+                                                        mock_ConfigService.mock_instrument]
+        presenter = AboutPresenter(None)
+
+        self.assertEqual(mock_ConfigService.mock_instrument.name(),
+                         presenter.view.cbInstrument.currentText())
+        self.assert_connected_once(presenter.view.cbFacility, presenter.view.cbFacility.currentTextChanged)
+        self.assert_connected_once(presenter.view.cbInstrument, presenter.view.cbInstrument.currentTextChanged)
+
+    def test_setup_checkbox_signals(self):
+        presenter = AboutPresenter(None)
+
+        self.assert_connected_once(presenter.view.chkDoNotShowUntilNextRelease,
+                                   presenter.view.chkDoNotShowUntilNextRelease.stateChanged)
+
+        self.assert_connected_once(presenter.view.chkAllowUsageData,
+                                   presenter.view.chkAllowUsageData.stateChanged)
+
+    def test_setup_button_signals(self):
+        presenter = AboutPresenter(None)
+
+        self.assert_connected_once(presenter.view.clbReleaseNotes,
+                                   presenter.view.clbReleaseNotes.clicked)
+        self.assert_connected_once(presenter.view.clbSampleDatasets,
+                                   presenter.view.clbSampleDatasets.clicked)
+        self.assert_connected_once(presenter.view.clbMantidIntroduction,
+                                   presenter.view.clbMantidIntroduction.clicked)
+        self.assert_connected_once(presenter.view.clbPythonIntroduction,
+                                   presenter.view.clbPythonIntroduction.clicked)
+        self.assert_connected_once(presenter.view.clbPythonInMantid,
+                                   presenter.view.clbPythonInMantid.clicked)
+        self.assert_connected_once(presenter.view.clbExtendingMantid,
+                                   presenter.view.clbExtendingMantid.clicked)
+        self.assert_connected_once(presenter.view.pbMUD,
+                                   presenter.view.pbMUD.clicked)
+        self.assert_connected_once(presenter.view.lblPrivacyPolicy,
+                                   presenter.view.lblPrivacyPolicy.linkActivated)
+
+    def test_setup_link_signals(self):
+        presenter = AboutPresenter(None)
+
+        self.assert_connected_once(presenter.view.clbReleaseNotes,
+                                   presenter.view.clbReleaseNotes.clicked)
