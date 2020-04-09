@@ -610,7 +610,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
         ReadMaterial::MaterialParameters materialParams;
         setMaterial(materialParams, *canMaterialArgs);
         if (materialParams.sampleVolume <= 0.) {
-            materialParams.sampleVolume = shape->volume() * CUBIC_METRE_TO_CM;
+          materialParams.sampleVolume = shape->volume() * CUBIC_METRE_TO_CM;
         }
         ReadMaterial reader;
         reader.setMaterialParameters(materialParams);
@@ -1000,9 +1000,9 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
                            : getPropertyAsDouble(args, "Radius");
   std::vector<double> centre = {0., 0., 0.};
   if (args.existsProperty(ShapeArgs::CENTER)) {
-      centre = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
-      std::transform(centre.begin(), centre.end(), centre.begin(),
-                     [](double val) { return val *= 0.01; });
+    centre = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+    std::transform(centre.begin(), centre.end(), centre.begin(),
+                   [](double val) { return val *= 0.01; });
   }
   // convert to metres
   height *= 0.01;
