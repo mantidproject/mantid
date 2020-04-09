@@ -9,6 +9,6 @@
 class IFQFitObserver {
 public:
   virtual ~IFQFitObserver() = default;
-  virtual void updateAvailableFunctions(
-      std::map<std::string, std::string> functionInitialisationStrings) = 0;
+  virtual void updateAvailableFunctions(const std::map<std::string, std::string>
+                                            &functionInitialisationStrings) = 0;
 };

@@ -32,11 +32,11 @@ class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateBrowser
   Q_OBJECT
 public:
   explicit SingleFunctionTemplateBrowser(
-      std::map<std::string, std::string> functionInitialisationStrings,
+      const std::map<std::string, std::string> &functionInitialisationStrings,
       QWidget *parent = nullptr);
   virtual ~SingleFunctionTemplateBrowser() = default;
-  void updateAvailableFunctions(std::map<std::string, std::string>
-                                    functionInitialisationStrings) override;
+  void updateAvailableFunctions(const std::map<std::string, std::string>
+                                    &functionInitialisationStrings) override;
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;

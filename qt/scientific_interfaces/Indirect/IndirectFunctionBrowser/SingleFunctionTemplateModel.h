@@ -29,7 +29,7 @@ public:
   SingleFunctionTemplateModel();
   void setFunction(IFunction_sptr fun) override;
   void updateAvailableFunctions(
-      std::map<std::string, std::string> functionInitialisationStrings);
+      const std::map<std::string, std::string> &functionInitialisationStrings);
 
   void setFitType(const QString &name);
   QString getFitType();

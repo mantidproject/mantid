@@ -22,7 +22,7 @@ using namespace Mantid::API;
 SingleFunctionTemplateModel::SingleFunctionTemplateModel() {}
 
 void SingleFunctionTemplateModel::updateAvailableFunctions(
-    std::map<std::string, std::string> functionInitialisationStrings) {
+    const std::map<std::string, std::string> &functionInitialisationStrings) {
   m_functionStore.clear();
   m_globalParameterStore.clear();
   for (auto functionInfo : functionInitialisationStrings) {

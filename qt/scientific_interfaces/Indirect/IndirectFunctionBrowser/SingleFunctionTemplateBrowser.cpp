@@ -37,7 +37,7 @@ namespace IDA {
  * @param parent :: The parent widget.
  */
 SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(
-    std::map<std::string, std::string> functionInitialisationStrings,
+    const std::map<std::string, std::string> &functionInitialisationStrings,
     QWidget *parent)
     : FunctionTemplateBrowser(parent),
       m_presenter(this, functionInitialisationStrings) {
@@ -46,7 +46,7 @@ SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(
 }
 
 void SingleFunctionTemplateBrowser::updateAvailableFunctions(
-    std::map<std::string, std::string> functionInitialisationStrings) {
+    const std::map<std::string, std::string> &functionInitialisationStrings) {
   m_presenter.updateAvailableFunctions(functionInitialisationStrings);
 }
 

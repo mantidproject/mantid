@@ -35,9 +35,9 @@ class MANTIDQT_INDIRECT_DLL SingleFunctionTemplatePresenter : public QObject {
 public:
   explicit SingleFunctionTemplatePresenter(
       SingleFunctionTemplateBrowser *view,
-      std::map<std::string, std::string> functionInitialisationStrings);
+      const std::map<std::string, std::string> &functionInitialisationStrings);
   void updateAvailableFunctions(
-      std::map<std::string, std::string> functionInitialisationStrings);
+      const std::map<std::string, std::string> &functionInitialisationStrings);
   void setFitType(const QString &name);
   void init();
 

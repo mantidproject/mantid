@@ -21,7 +21,7 @@ using namespace MantidWidgets;
  */
 SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
     SingleFunctionTemplateBrowser *view,
-    std::map<std::string, std::string> functionInitialisationStrings)
+    const std::map<std::string, std::string> &functionInitialisationStrings)
     : QObject(view), m_view(view), m_model() {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
           SLOT(editLocalParameter(const QString &)));
@@ -37,7 +37,7 @@ void SingleFunctionTemplatePresenter::init() {
 }
 
 void SingleFunctionTemplatePresenter::updateAvailableFunctions(
-    std::map<std::string, std::string> functionInitialisationStrings) {
+    const std::map<std::string, std::string> &functionInitialisationStrings) {
   m_model.updateAvailableFunctions(functionInitialisationStrings);
   m_view->setDataType(m_model.getFunctionList());
   setFitType(m_model.getFitType());

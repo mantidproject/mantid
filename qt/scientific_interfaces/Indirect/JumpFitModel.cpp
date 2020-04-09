@@ -389,7 +389,8 @@ std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
 
-std::string JumpFitModel::constructOutputName(std::string batchType) const {
+std::string
+JumpFitModel::constructOutputName(const std::string &batchType) const {
   auto const name = createOutputName(
       "%1%_FofQFit_" + batchType + "_" + m_fitType, "", TableDatasetIndex{0});
   auto const position = name.find("_Result");
