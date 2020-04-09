@@ -90,7 +90,6 @@ private:
    * Load an IXseblock entry
    * @param file input Nexus file handler
    * @param absolute_entry_name full entry name in Nexus
-   * @param entry_class type of the entry (NXlog)
    * @param workspace input workspace
    */
   void loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,

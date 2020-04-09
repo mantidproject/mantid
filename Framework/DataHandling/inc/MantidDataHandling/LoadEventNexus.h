@@ -375,7 +375,7 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
  *modified.
  * @param entry_name :: An NXentry tag in the file
  * @param classType :: The type of the events: either detector or monitor
- * @param desciptor :: input descriptor carrying metadata information
+ * @param descriptor :: input descriptor carrying metadata information
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(

@@ -500,6 +500,7 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
  * This variable will be changed if the field is not there.
  * @param oldNeXusFileNames Whether to try using old names. This variable will
  * be changed if it is determined that old names are being used.
+ * @param prefix current entry name prefix (e.g. /entry)
  * @param descriptor input containing metadata information
  * @return The number of events.
  */

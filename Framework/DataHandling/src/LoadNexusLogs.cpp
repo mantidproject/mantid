@@ -781,13 +781,6 @@ void LoadNexusLogs::loadNXLog(
   file.closeGroup();
 }
 
-/**
- * Load an SE log entry
- * @param file :: A reference to the NeXus file handle opened at the parent
- * group
- * @param absolute_entry_name :: The name of the log entry
- * @param workspace :: A pointer to the workspace to store the logs
- */
 void LoadNexusLogs::loadSELog(
     ::NeXus::File &file, const std::string &absolute_entry_name,
     const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
