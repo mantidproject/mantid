@@ -46,7 +46,7 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
             fig = pcolormesh([matrix_ws])
             ax = fig.get_axes()[0]
 
-            ax.contour(matrix_ws, colors='k', linewidths=0.5)
+            ax.contour(matrix_ws, levels=2, colors='k', linewidths=0.5)
 
             ax.set_ylabel(axis_name)
             ax.set_title("Contour" + title)
