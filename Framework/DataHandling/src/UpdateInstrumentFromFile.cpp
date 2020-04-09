@@ -99,10 +99,18 @@ void UpdateInstrumentFromFile::exec() {
   if (NexusDescriptor::isReadable(filename)) {
     LoadISISNexus2 isisNexus;
     LoadEventNexus eventNexus;
+
+    // we open and close the HDF5 file.
+    // there is an issue with how HDF5 files are opened (only one at a time)
+    // swap the order of descriptors
+    boost::scoped_ptr<Kernel::NexusHDF5Descriptor> descriptorNexusHDF5(
+        new Kernel::NexusHDF5Descriptor(filename));
+
     boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(
         new Kernel::NexusDescriptor(filename));
+
     if (isisNexus.confidence(*descriptor) > 0 ||
-        eventNexus.confidence(*descriptor) > 0) {
+        eventNexus.confidence(*descriptorNexusHDF5) > 0) {
       auto &nxFile = descriptor->data();
       const auto &rootEntry = descriptor->firstEntryNameType();
       nxFile.openGroup(rootEntry.first, rootEntry.second);

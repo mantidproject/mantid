@@ -33,6 +33,20 @@ bool LoadGeometry::isNexus(const std::string &filename) {
   return false;
 }
 
+bool LoadGeometry::isNexus(
+    const std::string &filename,
+    const std::map<std::string, std::set<std::string>> &allEntries) {
+  if (!filename.empty() &&
+      !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
+    Mantid::Kernel::NexusDescriptor descriptor(filename, false);
+    return descriptor.isReadable(filename) &&
+           (allEntries.count("NXcylindrical_geometry") == 1 ||
+            allEntries.count("NXoff_geometry") == 1 ||
+            allEntries.count("NXtransformations") == 1);
+  }
+  return false;
+}
+
 /// List allowed file extensions for geometry
 const std::vector<std::string> LoadGeometry::validExtensions() {
   return {".xml", ".nxs", ".hdf5"};
