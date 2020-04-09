@@ -17,6 +17,8 @@ default_chi_squared = 0.0
 
 
 class QSequentialTableModel(QAbstractTableModel):
+    """Implements a QAbstractTableModel which holds the data for the Sequential table view.
+     See the Qt documentation for further details https://doc.qt.io/qt-5/qabstracttablemodel.html"""
     parameterChanged = Signal(object)
 
     def __init__(self):
