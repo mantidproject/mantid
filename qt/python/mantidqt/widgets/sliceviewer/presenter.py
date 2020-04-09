@@ -123,13 +123,15 @@ class SliceViewer(object):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
         pass
 
-    def line_plots(self):
+    def line_plots(self, state):
         """
-        Display the attached line plots for the integrated signal over each dimension for the current cursor
+        Toggle the attached line plots for the integrated signal over each dimension for the current cursor
         position
         """
-        self.view.data_view.create_axes()
-        self.new_plot()
+        if state:
+            self.view.data_view.add_line_plots()
+        else:
+            self.view.data_view.remove_line_plots()
 
     def normalization_changed(self, norm_type):
         """

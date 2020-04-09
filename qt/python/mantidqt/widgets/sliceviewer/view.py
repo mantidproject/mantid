@@ -64,8 +64,8 @@ class SliceViewerDataView(QWidget):
         # MPL figure + colorbar
         self.mpl_layout = QHBoxLayout()
         self.fig = Figure()
+        self.ax = None
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
-        self.fig.set_tight_layout(True)
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
         self.create_axes()
@@ -90,18 +90,59 @@ class SliceViewerDataView(QWidget):
 
     def create_axes(self):
         self.fig.clf()
+        self.ax = self.fig.add_subplot(111, projection='mantid')
         if self.line_plots:
-            gs = gridspec.GridSpec(
-                2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
-            self.ax = self.fig.add_subplot(gs[1], projection='mantid')
-            self.ax.xaxis.set_visible(False)
-            self.ax.yaxis.set_visible(False)
-            self.axx = self.fig.add_subplot(gs[3], sharex=self.ax)
-            self.axx.yaxis.tick_right()
-            self.axy = self.fig.add_subplot(gs[0], sharey=self.ax)
-            self.axy.xaxis.tick_top()
-        else:
-            self.ax = self.fig.add_subplot(111, projection='mantid')
+            self.add_line_plots()
+
+        self.canvas.draw_idle()
+
+    def add_line_plots(self):
+        """Assuming line plots are currently disabled, enable them on the current figure
+        The image axes must have been created first.
+        """
+        if self.line_plots:
+            return
+        image_axes = self.ax
+        if image_axes is None:
+            return
+
+        # Create a new GridSpec and reposition the existing image Axes
+        gs = gridspec.GridSpec(
+            2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
+        image_axes.set_position(gs[1].get_position(self.fig))
+        image_axes.xaxis.set_visible(False)
+        image_axes.yaxis.set_visible(False)
+        self.axx = self.fig.add_subplot(gs[3], sharex=image_axes)
+        self.axx.yaxis.tick_right()
+        self.axy = self.fig.add_subplot(gs[0], sharey=image_axes)
+        self.axy.xaxis.tick_top()
+
+        self.mpl_toolbar.update()  # sync list of axes in navstack
+        self.canvas.draw_idle()
+
+    def remove_line_plots(self):
+        """Assuming line plots are currently enabled, remove them from the current figure
+        """
+        if not self.line_plots:
+            return
+        image_axes = self.ax
+        if image_axes is None:
+            return
+
+        self.clear_line_plots()
+        all_axes = self.fig.axes
+        # The order is defined by the order of the add_subplot calls so we always want to remove
+        # the last two Axes. Do it backwards to cope with the container size change
+        all_axes[2].remove()
+        all_axes[1].remove()
+
+        gs = gridspec.GridSpec(1, 1)
+        image_axes.set_position(gs[0].get_position(self.fig))
+        image_axes.xaxis.set_visible(True)
+        image_axes.yaxis.set_visible(True)
+        self.axx, self.axy = None, None
+
+        self.mpl_toolbar.update()  # sync list of axes in navstack
         self.canvas.draw_idle()
 
     def plot_MDH(self, ws, **kwargs):
@@ -151,9 +192,8 @@ class SliceViewerDataView(QWidget):
         self.colorbar.update_clim()
 
     def line_plots_toggle(self, state):
+        self.presenter.line_plots(state)
         self.line_plots = state
-        self.clear_line_plots()
-        self.presenter.line_plots()
 
     def clear_line_plots(self):
         try:  # clear old plots
@@ -176,9 +216,8 @@ class SliceViewerDataView(QWidget):
         self.canvas.draw_idle()
 
     def mouse_move(self, event):
-        if event.inaxes == self.ax:
-            if self.line_plots:
-                self.update_line_plots(event.xdata, event.ydata)
+        if self.line_plots and event.inaxes == self.ax:
+            self.update_line_plots(event.xdata, event.ydata)
 
     def plot_x_line(self, x, y):
         try:
