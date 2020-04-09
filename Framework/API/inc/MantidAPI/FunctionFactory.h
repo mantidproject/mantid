@@ -55,7 +55,7 @@ public:
 
   /// Creates an instnce of an inizialised multidomain function where each
   /// domain has the same function.
-  boost::shared_ptr<MultiDomainFunction>
+  std::shared_ptr<MultiDomainFunction>
   createInitializedMultiDomainFunction(const std::string &input,
                                        size_t domainNumber);
 

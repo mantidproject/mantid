@@ -87,11 +87,11 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
  * @param domainNumber :: The number of domains to add to the function.
  * @return A pointer to the created function.
  */
-boost::shared_ptr<MultiDomainFunction>
+std::shared_ptr<MultiDomainFunction>
 FunctionFactoryImpl::createInitializedMultiDomainFunction(
     const std::string &input, size_t domainNumber) {
   auto singleFunction = createInitialized(input);
-  auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+  auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
 
   if (!singleFunction) {
     return multiDomainFunction;
