@@ -164,6 +164,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_plot);
+  collapsePlotPanel();
 
   m_selectionType = Single;
 
@@ -286,6 +287,16 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   layout->addWidget(m_activeTool);
   layout->addLayout(toolBox);
   layout->addWidget(panelStack);
+}
+
+/**
+ * If the workspace is monochromatic, the plot panel is useless and should be
+ * collapsed
+ */
+void InstrumentWidgetPickTab::collapsePlotPanel() {
+  if (m_instrWidget->getIsMonochromatic()) {
+    m_plotPanel->collapse();
+  }
 }
 
 /**

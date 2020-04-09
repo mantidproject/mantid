@@ -160,6 +160,7 @@ public:
   void addTab(const std::string &tabName);
   void hideHelp();
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
+  bool getIsMonochromatic() { return m_isMonochromatic; }
 
 signals:
   void enableLighting(bool /*_t1*/);

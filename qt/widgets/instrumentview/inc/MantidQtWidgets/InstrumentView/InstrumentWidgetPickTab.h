@@ -30,6 +30,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
 class CollapsiblePanel;
+class CollapsibleStack;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
@@ -124,6 +125,7 @@ private slots:
 private:
   void showEvent(QShowEvent * /*unused*/) override;
   QColor getShapeBorderColor() const;
+  void collapsePlotPanel();
 
   /* Pick tab controls */
   MiniPlot *m_plot;     ///< Miniplot to display data in the detectors
