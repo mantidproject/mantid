@@ -120,7 +120,7 @@ bool NexusDescriptor::isReadable(const std::string &filename,
  * involves simply checking for the signature if a HDF file at the start of the
  * file
  */
-NexusDescriptor::NexusDescriptor(const std::string &filename)
+NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
     : m_filename(), m_extension(), m_firstEntryNameType(), m_rootAttrs(),
       m_pathsToTypes(), m_file(nullptr) {
   if (filename.empty()) {
@@ -131,12 +131,16 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
     throw std::invalid_argument("NexusDescriptor() - File '" + filename +
                                 "' does not exist");
   }
-  try {
-    initialize(filename);
-  } catch (::NeXus::Exception &e) {
-    throw std::invalid_argument(
-        "NexusDescriptor::initialize - File '" + filename +
-        "' does not look like a HDF file.\n Error was: " + e.what());
+
+  if (init) {
+    try {
+      // this is very expesive as it walk the entire file
+      initialize(filename);
+    } catch (::NeXus::Exception &e) {
+      throw std::invalid_argument(
+          "NexusDescriptor::initialize - File '" + filename +
+          "' does not look like a HDF file.\n Error was: " + e.what());
+    }
   }
 }
 

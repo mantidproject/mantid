@@ -519,8 +519,10 @@ void LoadTOFRawNexus::exec() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
+  Kernel::NexusHDF5Descriptor descriptor(filename);
+
   try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
+    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
