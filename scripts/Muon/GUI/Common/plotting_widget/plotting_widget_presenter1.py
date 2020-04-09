@@ -41,14 +41,13 @@ class PlotWidgetPresenterCommmon(HomeTabSubWidget):
         self._model = model
         self.context = context
         self.workspace_finder = WorkspaceFinder(self.context)
+        self._model = self.workspace_finder
 
         # figure presenter - the common presenter talks to this through an interface
         self._figure_presenter = figure_presenter
 
-        # observers
-        self.input_workspace_observer = GenericObserver(self.handle_data_updated)
-        self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
-        self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
+        # gui observers
+        self._setup_gui_observers()
 
         # Connect to the view
         self._view.on_plot_tiled_checkbox_changed(self.handle_plot_tiled_state_changed)
@@ -58,6 +57,13 @@ class PlotWidgetPresenterCommmon(HomeTabSubWidget):
         # setup view options
         self._view.setup_plot_type_options([ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE])
         self._view.setup_tiled_by_options(([TILED_BY_GROUP_TYPE, TILED_BY_RUN_TYPE]))
+
+    def _setup_gui_observers(self):
+        self.input_workspace_observer = GenericObserver(self.handle_data_updated)
+        self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
+        self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
+        self.added_group_or_pair_observer = GenericObserverWithArgPassing(
+            self.handle_added_or_removed_group_or_pair_to_plot)
 
     def handle_data_updated(self):
         """
@@ -70,7 +76,7 @@ class PlotWidgetPresenterCommmon(HomeTabSubWidget):
 
         workspace_list = self.workspace_finder.get_workspace_list_to_plot(True, self._view.get_plot_type())
         indices = [0 for _ in range(len(workspace_list))]
-        self._figure_presenter.plot_workspaces(workspace_list, indices, False)
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
 
     def handle_workspace_deleted_from_ads(self, workspace):
         """
@@ -94,18 +100,16 @@ class PlotWidgetPresenterCommmon(HomeTabSubWidget):
         """
         Handles the use raw workspaces being changed (e.g rebinned) in ads
         """
-        current_plot_type = self._view.get_plot_type()
-        if len(self.context.group_pair_context.selected_pairs) != 0 and current_plot_type == COUNTS_PLOT_TYPE:
+        if len(self.context.group_pair_context.selected_pairs) != 0 and self._view.get_selected() == COUNTS_PLOT_TYPE:
             self._view.plot_selector.blockSignals(True)
             self._view.plot_selector.setCurrentText(ASYMMETRY_PLOT_TYPE)
             self._view.plot_selector.blockSignals(False)
             self._view.warning_popup(
-                'Pair workspaces have no counts workspace, remove pairs from analysis and retry')
-            return
+                'Pair workspaces have no counts workspace, plotting Asymmetry')
 
         workspace_list = self.workspace_finder.get_workspace_list_to_plot(True, self._view.get_plot_type())
         indices = [0 for _ in range(len(workspace_list))]
-        self._figure_presenter.plot_workspaces(workspace_list, indices, False, autoscale=True)
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=True)
 
     def handle_plot_tiled_state_changed(self):
         """
@@ -131,9 +135,71 @@ class PlotWidgetPresenterCommmon(HomeTabSubWidget):
     def handle_rebin_options_changed(self):
         pass
 
+    def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info):
+        """
+        Handles a group or pair being added or removed from
+        the grouping widget analysis table
+        """
+        is_added = group_pair_info["is_added"]
+        name = group_pair_info["name"]
+        if is_added:
+            self.handle_added_group_or_pair_to_plot(name)
+        else:
+            self.handle_removed_group_or_pair_to_plot(name)
+
+    def handle_added_group_or_pair_to_plot(self, group_or_pair_name):
+        """
+        Handles a group or pair being added from the view
+        """
+        if len(self.context.group_pair_context.selected_pairs) != 0 and self._view.get_selected() == COUNTS_PLOT_TYPE:
+            self._view.plot_selector.blockSignals(True)
+            self._view.plot_selector.setCurrentText(ASYMMETRY_PLOT_TYPE)
+            self._view.plot_selector.blockSignals(False)
+            self._view.warning_popup(
+                'Pair workspaces have no counts workspace, plotting Asymmetry')
+
+        # # if tiled by group, we will need to recreate the tiles
+        if self._view.tiled_plot_checkbox.isChecked() and self._view.tiled_by() == TILED_BY_GROUP_TYPE:
+            tiled_by = self._view.tiled_by()
+            keys = self._create_tiled_keys(tiled_by)
+            self._figure_presenter.create_tiled_plot(keys, tiled_by)
+            workspace_list = self.workspace_finder.get_workspace_list_to_plot(True, self._view.get_plot_type())
+            indices = [0 for _ in range(len(workspace_list))]
+            self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+
+        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair \
+            (group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
+
+    def handle_removed_group_or_pair_to_plot(self, group_or_pair_name):
+        """
+        Handles a group or pair being removed in grouping widget analysis table
+        """
+        # # if tiled by group, we will need to recreate the tiles
+        if self._view.tiled_plot_checkbox.isChecked() and self._view.tiled_by() == TILED_BY_GROUP_TYPE:
+            tiled_by = self._view.tiled_by()
+            keys = self._create_tiled_keys(tiled_by)
+            self._figure_presenter.create_tiled_plot(keys, tiled_by)
+            workspace_list = self.workspace_finder.get_workspace_list_to_plot(True, self._view.get_plot_type())
+            indices = [0 for _ in range(len(workspace_list))]
+            self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+
+        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair \
+            (group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
+        self._figure_presenter.remove_workspace_names_from_plot(workspace_list)
+
+    def handle_instrument_changed(self):
+        pass
+
+    # Interface to plotting
+    # def plot_run_and_fit_workspaces(self, workspaces):
+    #     pass
+    #     #self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
+
     def _create_tiled_keys(self, tiled_by):
         if tiled_by == TILED_BY_GROUP_TYPE:
             keys = self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
         else:
             keys = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
         return keys
+

@@ -4,10 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import List
+
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 from Muon.GUI.Common.plotting_widget.plotting_canvas_model import PlottingCanvasModel
 from Muon.GUI.Common.plotting_widget.plotting_canvas_presenter_interface import PlottingCanvasPresenterInterface
 from Muon.GUI.Common.plotting_widget.plotting_canvas_view import PlottingCanvasView
+from mantid import AnalysisDataService
 
 
 class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
@@ -19,6 +22,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter = options_presenter
 
         # connection to quick edit widget
+        self._setup_quick_edit_widgeet()
+
+    def _setup_quick_edit_widgeet(self):
         self._options_presenter.connect_errors_changed(self.handle_error_selection_changed)
         self._options_presenter.connect_x_range_changed(self.handle_xlim_changed_in_quick_edit_options)
         self._options_presenter.connect_y_range_changed(self.handle_ylim_changed_in_quick_edit_options)
@@ -26,62 +32,94 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
 
     # Interface implementation
-    def plot_workspaces(self, workspace_names, workspace_indices, overplot, autoscale=False):
+    def plot_workspaces(self, workspace_names, workspace_indices, hold_on, autoscale=False):
+        """Plots the input workspace names and indices in the figure window
+        If hold_on is True the existing workspaces plotted in the figure are kept"""
 
-        workspace_plot_info_to_add, workspace_plot_info_to_remove = \
-            self._model.get_workspaces_to_plot_and_remove(workspace_names, workspace_indices,
-                                                          self._view.plotted_workspace_information,
-                                                          self._options_presenter.get_errors())
+        if not hold_on:
+            self._view.clear_all_workspaces_from_plot()
 
-        if not overplot:
-            self._view.remove_workspaces_from_plot(workspace_plot_info_to_remove)
+        workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
+                                                                            self._options_presenter.get_errors(),
+                                                                            self._view.plotted_workspace_information)
 
-        self._view.add_workspaces_to_plot(workspace_plot_info_to_add)
+        self._view.add_workspaces_to_plot(workspace_plot_info)
 
         self._set_axes_limits_and_titles(autoscale)
         self._update_quickedit_widget()
 
+    def remove_workspace_names_from_plot(self, workspace_names: List[str]):
+        """Removes the input workspace names from the plot"""
+        for workspace_name in workspace_names:
+            try:
+                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+            except RuntimeError:
+                continue
+            self._view.remove_workspace_from_plot(workspace)
+        self._view.redraw_figure()
+
     def remove_workspace_from_plot(self, workspace):
-        self._view.remove_specified_workspace_from_plot(workspace)
+        """Removes all references to the input workspace from the plot
+           The workspace deleted ads observer has to call this function directly"""
+        self._view.remove_workspace_from_plot(workspace)
 
     def replace_workspace_in_plot(self, workspace):
+        """Replace specified workspace in the plot with a new and presumably updated instance"""
         self._view.replace_specified_workspace_in_plot(workspace)
 
+    def replot_workspace_with_error_state(self, workspace_name, error_state):
+        """Replot a workspace in the plot with a different error_state"""
+        self._view.replot_workspace_with_error_state(workspace_name, error_state)
+
     def convert_plot_to_tiled_plot(self, keys, tiled_by):
+        """Converts the current plot into a tiled plot specified by the keys and tiled by type
+        In then replots the existing data on the new tiles"""
         workspaces, indices = self._view.plotted_workspaces_and_indices
         self.create_tiled_plot(keys, tiled_by)
         # Replot data on new axis
         self.plot_workspaces(workspaces, indices, False, False)
 
     def convert_plot_to_single_plot(self):
+        """Converts the current plot into a single plot
+        In then replots the existing data on the new tiles"""
         workspaces, indices = self._view.plotted_workspaces_and_indices
         self.create_single_plot()
         # Replot data on new axis
         self.plot_workspaces(workspaces, indices, False, False)
 
     def create_tiled_plot(self, keys, tiled_by):
+        """Creates a blank tiled plot specified by the keys and tiled by type"""
         self._model.update_tiled_axis_map(keys, tiled_by)
         self._view.create_new_plot_canvas(len(keys))
 
     def create_single_plot(self):
+        """Creates a blank single plot """
         self._model.is_tiled = False
         self._view.create_new_plot_canvas(1)
 
     def get_plotted_workspaces_and_indices(self):
+        """Returns the workspace names and indices which are plotted in the figure """
         plotted_workspaces, indices = self._view.plotted_workspaces_and_indices
         return plotted_workspaces, indices
 
     def autoscale_y_axes(self):
+        """Autoscales all y-axes in the figure using the existing x axis"""
         self._view.autoscale_y_axes()
         self._view.redraw_figure()
 
     def autoscale_selected_y_axis(self, axis_num):
+        """Autoscales a selected y-axis in the figure using the existing x axis"""
         self._view.autoscale_selected_y_axis(axis_num)
         self._view.redraw_figure()
 
     def set_axis_limits(self, ax_num, xlims, ylims):
+        "Sets the x and y limits for a specified axis in the figure"
         self._view.set_axis_xlimits(ax_num, xlims)
         self._view.set_axis_ylimits(ax_num, ylims)
+
+    def set_axis_title(self, ax_num, title):
+        "Sets the title for a specified axis in the figure"
+        self._view.set_titles(self._model.create_axes_titles())
 
     # Implementation of QuickEdit widget
     def _update_quickedit_widget(self):
@@ -114,14 +152,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def handle_autoscale_requested_in_quick_edit_options(self):
         selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
-        for subplot in selected_subplots:
-            self.autoscale_selected_y_axis(subplot)
+
+        if len(selected_subplots) == 1:
+            self.autoscale_selected_y_axis(selected_subplots[0])
+        else:
+            self.autoscale_y_axes()
 
     def handle_error_selection_changed(self):
         plotted_workspaces, _ = self._view.plotted_workspaces_and_indices
         for workspace_name in plotted_workspaces:
-            self._view.replot_workspace_with_error_state(workspace_name, self._options_presenter.get_errors())
-        self._view.redraw_figure()
+            self.replot_workspace_with_error_state(workspace_name, self._options_presenter.get_errors())
 
     def _get_selected_subplots_from_quick_edit_widget(self):
         subplots = self._options_presenter.get_selection()
@@ -147,6 +187,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             self._view.set_axes_limits(xlims, ylims)
             if autoscale:
                 self._view.autoscale_y_axes()
-        self._view.set_titles(self._model.create_axes_titles())
+        titles = self._model.create_axes_titles()
+        for axis_number, title in enumerate(titles):
+            self._view.set_title(axis_number, title)
         # Finally redraw the figure
         self._view.redraw_figure()

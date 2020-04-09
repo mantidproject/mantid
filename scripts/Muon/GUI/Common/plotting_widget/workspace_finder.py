@@ -82,3 +82,18 @@ class WorkspaceFinder(object):
             return workspace_list
         except AttributeError:
             return []
+
+    def get_workspace_and_indices_for_group_or_pair(self, group_or_pair, is_raw, plot_type):
+        workspace_list = []
+        if FREQ_PLOT_TYPE in plot_type:
+            workspace_list += self.get_freq_workspaces_to_plot(group_or_pair, plot_type)
+        else:
+            workspace_list += self.get_time_workspaces_to_plot(group_or_pair, is_raw, plot_type)
+        indices = self._generate_run_indicies(workspace_list)
+
+        return workspace_list, indices
+
+    def _generate_run_indicies(self, workspace_list):
+        indices = [0 for _ in workspace_list]
+        return indices
+

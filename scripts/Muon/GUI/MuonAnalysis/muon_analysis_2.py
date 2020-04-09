@@ -87,9 +87,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         # create the dockable widget
         self.dockable_plot_widget = PlottingWidget(self.context, parent=self)
-        self.dockable_plot_widget1 = PlottingWidget1(self.context, parent=self)
+        self.plot_widget = PlottingWidget1(self.context, parent=self)
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
-                                                              plotting_widget=self.dockable_plot_widget1.view)
+                                                              plotting_widget=self.plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
 
         # Add dock widget to main Muon analysis window
@@ -198,13 +198,13 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
+            self.plot_widget.presenter.added_group_or_pair_observer)
 
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
+            self.plot_widget.presenter.added_group_or_pair_observer)
 
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
@@ -300,7 +300,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.dockable_plot_widget1.presenter.input_workspace_observer)
+            self.plot_widget.presenter.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.dockable_plot_widget.presenter.rebin_options_set_observer)

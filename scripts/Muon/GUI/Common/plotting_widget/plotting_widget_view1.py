@@ -23,8 +23,6 @@ class PlotWidgetView1(QtWidgets.QWidget, PlottingWidgetViewInterface, ui_plottin
         super().__init__(parent=parent)
         self.setupUi(self)
 
-        self.tiled_by_combo
-
     def setup_plot_type_options(self, options):
         self.plot_type_combo.blockSignals(True)
         self.plot_type_combo.clear()

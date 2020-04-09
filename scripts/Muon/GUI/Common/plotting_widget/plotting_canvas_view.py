@@ -9,7 +9,7 @@ from typing import List
 from matplotlib.container import ErrorbarContainer
 from qtpy import QtWidgets
 from Muon.GUI.Common.plotting_widget.dockable_plot_toolbar import DockablePlotToolbar
-from Muon.GUI.Common.plotting_widget.plotting_canvas_model import PlotInformation
+from Muon.GUI.Common.plotting_widget.plotting_canvas_model import WorkspacePlotInformation
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable, MantidAxes
 from mantid.plots.plotfunctions import get_plot_fig
@@ -31,8 +31,6 @@ def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
     plot_fn = ax.errorbar if errors else ax.plot
     plot_kwargs['wkspIndex'] = index
     plot_fn(workspace, **plot_kwargs)
-    legend = ax.legend(prop=dict(size=5))
-    legend_set_draggable(legend, True)
 
 
 class PlottingCanvasView(QtWidgets.QWidget):
@@ -83,6 +81,7 @@ class PlottingCanvasView(QtWidgets.QWidget):
         self.layout().addWidget(widget)
 
     def create_new_plot_canvas(self, num_axes):
+        """Creates a new blank plotting canvas"""
         self._plot_information_list = []
         self._number_of_axes = num_axes
         self.fig.clf()
@@ -91,7 +90,15 @@ class PlottingCanvasView(QtWidgets.QWidget):
         self.fig.tight_layout()
         self.fig.canvas.draw()
 
-    def add_workspaces_to_plot(self, workspace_plot_info_list: List[PlotInformation]):
+    def clear_all_workspaces_from_plot(self):
+        """Clears all workspaces from the plot"""
+        for ax in self.fig.axes:
+            ax.cla()
+        self._plot_information_list = []
+
+    def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+        """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
+        The PlotInformation contains the workspace name, workspace index and target axis."""
         for workspace_plot_info in workspace_plot_info_list:
             workspace_name = workspace_plot_info.workspace_name
             try:
@@ -106,42 +113,33 @@ class PlottingCanvasView(QtWidgets.QWidget):
                             plot_kwargs=self._get_plot_kwargs(workspace_plot_info))
             self._plot_information_list.append(workspace_plot_info)
 
-    def remove_workspaces_from_plot(self, workspace_plot_info_list: List[PlotInformation]):
-        for workspace_plot_info in workspace_plot_info_list:
-            axis = self.fig.axes[workspace_plot_info.axis]
-            workspace_name = workspace_plot_info.workspace_name
-            self._plot_information_list.remove(workspace_plot_info)
-            try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except RuntimeError:
-                continue
-            axis.remove_workspace_artists(workspace)
-
-    # callbacks from ADS observers
-    def remove_specified_workspace_from_plot(self, workspace):
+    def remove_workspace_from_plot(self, workspace):
+        """Remove a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
+           The PlotInformation contains the workspace name, workspace index and target axis."""
         for workspace_plot_info in reversed(self._plot_information_list):
-            plotted_workspace_name = workspace_plot_info.workspace_name
-            workspace_name = workspace.name()
-            if workspace_name == plotted_workspace_name:
+            workspace_name = workspace_plot_info.workspace_name
+            if workspace_name == workspace.name():
                 axis = self.fig.axes[workspace_plot_info.axis]
                 axis.remove_workspace_artists(workspace)
                 self._plot_information_list.remove(workspace_plot_info)
-                self.redraw_figure()
+        self.redraw_figure()
 
+    # Ads observer functions
     def replace_specified_workspace_in_plot(self, workspace):
+        """Replace specified workspace in the plot with a new and presumably updated instance"""
         for workspace_plot_info in self._plot_information_list:
             plotted_workspace_name = workspace_plot_info.workspace_name
             workspace_name = workspace.name()
             if workspace_name == plotted_workspace_name:
                 axis = self.fig.axes[workspace_plot_info.axis]
                 axis.replace_workspace_artists(workspace)
+        self.redraw_figure()
 
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
         for plot_info in self.plotted_workspace_information:
             if plot_info.workspace_name == workspace_name:
                 axis = self.fig.axes[plot_info.axis]
                 workspace_name = plot_info.workspace_name
-                print(workspace_name)
                 artist_info = axis.tracked_workspaces[workspace_name]
                 for ws_artist in artist_info:
                     for artist in ws_artist._artists:
@@ -152,6 +150,7 @@ class PlottingCanvasView(QtWidgets.QWidget):
                         plot_kwargs = self._get_plot_kwargs(plot_info)
                         plot_kwargs["color"] = color
                         axis.replot_artist(artist, with_errors, **plot_kwargs)
+        self.redraw_figure()
 
     def redraw_figure(self):
         self.fig.canvas.toolbar.update()
@@ -161,8 +160,9 @@ class PlottingCanvasView(QtWidgets.QWidget):
 
     def redraw_legend(self):
         for ax in self.fig.axes:
-            legend = ax.legend(prop=dict(size=5))
-            legend_set_draggable(legend, True)
+            if ax.get_legend_handles_labels()[0]:
+                legend = ax.legend(prop=dict(size=5))
+                legend_set_draggable(legend, True)
 
     def set_axis_xlimits(self, axis_number, xlims):
         ax = self.fig.axes[axis_number]
@@ -175,11 +175,11 @@ class PlottingCanvasView(QtWidgets.QWidget):
     def set_axes_limits(self, xlim, ylim):
         plt.setp(self.fig.axes, xlim=xlim, ylim=ylim)
 
-    def set_titles(self, titles):
-        if len(titles) != len(self.fig.axes):
+    def set_title(self, axis_number, title):
+        if axis_number >= self.number_of_axes:
             return
-        for ax, title in zip(self.fig.axes, titles):
-            ax.set_title(title)
+        axis = self.fig.axes[axis_number]
+        axis.set_title(title)
 
     def get_axis_limits(self, axis_number):
         xmin, xmax = self.fig.axes[axis_number].get_xlim()
@@ -193,7 +193,7 @@ class PlottingCanvasView(QtWidgets.QWidget):
         index = num_artists
         return 'C' + str(index)
 
-    def _get_plot_kwargs(self, workspace_info: PlotInformation):
+    def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         color = self._get_color_index(workspace_info.axis)
         label = workspace_info.label
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'color': color, 'label': label}
@@ -240,3 +240,6 @@ class PlottingCanvasView(QtWidgets.QWidget):
             if top_i > top:
                 top = top_i
         return bottom, top
+
+    def resizeEvent(self, event):
+        self.fig.tight_layout()

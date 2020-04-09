@@ -13,7 +13,7 @@ class PlottingCanvasPresenterInterface(object):
 
     @abc.abstractmethod
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int],
-                               overplot: bool, autoscale : bool):
+                               hold_on: bool, autoscale : bool):
         pass
 
     @abc.abstractmethod

@@ -14,7 +14,7 @@ from Muon.GUI.Common.contexts.muon_context import MuonContext
 DEFAULT_X_LIMITS = [0, 15]
 
 
-class PlotInformation(NamedTuple):
+class WorkspacePlotInformation(NamedTuple):
     workspace_name: str
     index: int
     axis: int
@@ -52,19 +52,17 @@ class PlottingCanvasModel(object):
     def is_tiled(self, state: bool):
         self._is_tiled = state
 
-    def get_workspaces_to_plot_and_remove(self, input_workspace_names, indices,
-                                          plotted_workspace_information: PlotInformation,
-                                          errors=False):
-        workspace_information = []
-        for workspace_name, index in zip(input_workspace_names, indices):
+    def create_workspace_plot_information(self, input_workspace_names, input_indices, errors,
+                                          existing_plot_information):
+        workspace_plot_information = []
+        for workspace_name, index in zip(input_workspace_names, input_indices):
             axis = self._get_workspace_plot_axis(workspace_name)
-            workspace_information += [self.create_plot_information(workspace_name, index, axis, errors)]
-        workspaces_to_remove = [plot_info for plot_info in plotted_workspace_information if
-                                plot_info not in workspace_information]
-        workspaces_to_add = [plot_info for plot_info in workspace_information if plot_info not in
-                             plotted_workspace_information]
 
-        return workspaces_to_add, workspaces_to_remove
+            workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors)]
+        workspaces_plot_information_to_add = [plot_info for plot_info in workspace_plot_information if plot_info not in
+                                              existing_plot_information]
+
+        return workspaces_plot_information_to_add
 
     def _get_workspace_plot_axis(self, workspace_name):
         if not self._is_tiled:
@@ -84,15 +82,17 @@ class PlottingCanvasModel(object):
 
     def create_plot_information(self, workspace_name, index, axis, errors):
         label = self._create_workspace_label(workspace_name)
-        return PlotInformation(workspace_name=workspace_name, index=index, axis=axis, normalised=self._normalised,
-                               errors=errors, label=label)
+        return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
+                                        normalised=self._normalised,
+                                        errors=errors, label=label)
 
     def _create_workspace_label(self, workspace_name):
         label = ''
         group = str(get_group_or_pair_from_name(workspace_name))
         run = str(get_run_number_from_workspace_name(workspace_name, self._context.data_context.instrument))
+        instrument = self._context.data_context.instrument
         if not self._is_tiled:
-            return label.join([run, ';', group])
+            return label.join([instrument, run, ';', group])
         if self._tiled_by == "Group/Pair":
             return label.join([run])
         else:
