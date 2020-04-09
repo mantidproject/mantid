@@ -21,8 +21,8 @@ class AboutView(base, form):
         self.presenter = presenter
 
     def set_layout(self, version_text, date_text):
-        self.setWindowTitle(self.windowTitle() + " " +
-                                   version_text)
+        self.setWindowTitle(self.windowTitle() + " "
+                            + version_text)
         version_label = version_text
         # add a date if it is an official release
         if date_text and len(version_text) < 10:
@@ -47,9 +47,7 @@ class AboutView(base, form):
             "}"
             self.setStyleSheet(ss)
 
-
     def closeEvent(self, event):
         self.presenter.action_close()
         self.deleteLater()
         super(AboutView, self).closeEvent(event)
-

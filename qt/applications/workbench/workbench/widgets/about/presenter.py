@@ -67,14 +67,15 @@ class AboutPresenter(object):
         else:
             # check we can get the facility and instrument
             try:
-              facilityInfo = ConfigService.getFacility(facility)
-              instrumentInfo = ConfigService.getInstrument(instrument)
-              logger.information("Default facility '{0}', instrument '{1}'\n".format(facilityInfo.name(), instrumentInfo.name()))
+                facilityInfo = ConfigService.getFacility(facility)
+                instrumentInfo = ConfigService.getInstrument(instrument)
+                logger.information("Default facility '{0}', instrument '{1}'\n".format(facilityInfo.name(),
+                                                                                       instrumentInfo.name()))
             except RuntimeError:
-              # failed to find the facility or instrument
-              logger.error("Could not find your default facility '{0}' or instrument '{1}' in facilities.xml, showing please select again.\n".format(facility, instrument))
-              return True
-
+                # failed to find the facility or instrument
+                logger.error("Could not find your default facility '{0}' or instrument '{1}' in facilities.xml, " +
+                             "showing please select again.\n".format(facility, instrument))
+                return True
 
         settings = QSettings()
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
@@ -88,7 +89,6 @@ class AboutPresenter(object):
         # Now check if the version has changed since last time
         version = release_notes_url()
         return version != lastVersion
-
 
     def setup_facilities_group(self):
         facilities = ConfigService.getFacilityNames()
@@ -157,7 +157,7 @@ class AboutPresenter(object):
         InterfaceManager().showWebPage('http://www.mantidproject.org/Extending_Mantid_With_Python')
 
     def action_open_external_link(self, url):
-            InterfaceManager().showWebPage(url)
+        InterfaceManager().showWebPage(url)
 
     def action_usage_data_changed(self, checkedState):
         if not checkedState:

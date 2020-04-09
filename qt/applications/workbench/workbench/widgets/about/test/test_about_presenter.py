@@ -7,10 +7,9 @@
 #  This file is part of the mantid workbench
 from unittest import TestCase
 
-from unittest.mock import call, Mock, patch
+from unittest.mock import call, patch
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
-from mantidqt.utils.testing.strict_mock import StrictPropertyMock, StrictMock
+from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.about.presenter import AboutPresenter
 
 
@@ -25,8 +24,10 @@ class MockFacility(object):
         self.all_instruments = [MockInstrument(0), MockInstrument(1)]
         self.instruments = StrictMock(return_value=self.all_instruments)
 
+
 class MockConfigService(object):
     all_facilities = ["facility1", "facility2"]
+
     def __init__(self):
         self.mock_facility = MockFacility(self.all_facilities[0])
         self.mock_instrument = self.mock_facility.all_instruments[0]
@@ -36,6 +37,7 @@ class MockConfigService(object):
         self.getString = StrictMock(return_value="FACILITY1")
         self.setFacility = StrictMock()
         self.setString = StrictMock()
+
 
 class FakeQSettings(object):
     def __init__(self, string_value):
@@ -53,6 +55,7 @@ class FakeQSettings(object):
         else:
             return "unknown p_str"
 
+
 @start_qapplication
 class AboutPresenterTest(TestCase):
     CONFIG_SERVICE_CLASSPATH = "workbench.widgets.about.presenter.ConfigService"
@@ -65,7 +68,7 @@ class AboutPresenterTest(TestCase):
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the facilty is not set then should_show_on_startup should always be true")
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                                call(AboutPresenter.INSTRUMENT)])
+                                                      call(AboutPresenter.INSTRUMENT)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_invalid_facility(self, MockConfigService):
@@ -73,7 +76,7 @@ class AboutPresenterTest(TestCase):
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the facilty is invalid then should_show_on_startup should always be true")
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                                call(AboutPresenter.INSTRUMENT)])
+                                                      call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -82,7 +85,7 @@ class AboutPresenterTest(TestCase):
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the instrument is invalid then should_show_on_startup should always be true")
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                                call(AboutPresenter.INSTRUMENT)])
+                                                      call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
 
@@ -92,9 +95,10 @@ class AboutPresenterTest(TestCase):
         with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
             with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = version_str):
                 self.assertFalse(AboutPresenter.should_show_on_startup(),
-                                 "If do not show is in Qsettings then should_show_on_startup should always be False for the same version")
+                                 "If do not show is in Qsettings then should_show_on_startup should always be False" +
+                                 "for the same version")
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                                call(AboutPresenter.INSTRUMENT)])
+                                                      call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
 
@@ -104,9 +108,10 @@ class AboutPresenterTest(TestCase):
         with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
             with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = "not the " + version_str):
                 self.assertTrue(AboutPresenter.should_show_on_startup(),
-                                 "If do not show is in Qsettings then should_show_on_startup should always be True for  different versions")
+                                "If do not show is in Qsettings then should_show_on_startup should always be True" +
+                                " for different versions")
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                                call(AboutPresenter.INSTRUMENT)])
+                                                      call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
 
