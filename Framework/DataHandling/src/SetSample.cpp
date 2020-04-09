@@ -515,8 +515,7 @@ void SetSample::exec() {
   if (environArgs) {
     sampleEnviron = setSampleEnvironmentFromFile(*experiment, environArgs);
   } else if (canGeometryArgs) {
-    sampleEnviron = setSampleEnvironmentFromXML(*experiment, canGeometryArgs,
-                                                canMaterialArgs);
+    setSampleEnvironmentFromXML(*experiment, canGeometryArgs, canMaterialArgs);
   }
 
   double sampleVolume = 0.;
@@ -610,6 +609,9 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
       if (canMaterialArgs) {
         ReadMaterial::MaterialParameters materialParams;
         setMaterial(materialParams, *canMaterialArgs);
+        if (materialParams.sampleVolume <= 0.) {
+            materialParams.sampleVolume = shape->volume() * CUBIC_METRE_TO_CM;
+        }
         ReadMaterial reader;
         reader.setMaterialParameters(materialParams);
         auto canMaterial = reader.buildMaterial();
@@ -641,9 +643,9 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
   if (materialArgs.existsProperty("MassNumber")) {
     materialParams.massNumber = materialArgs.getProperty("MassNumber");
   }
-  if (materialArgs.existsProperty("NumberDensity")) {
+  if (materialArgs.existsProperty("SampleNumberDensity")) {
     materialParams.sampleNumberDensity =
-        materialArgs.getProperty("NumberDensity");
+        materialArgs.getProperty("SampleNumberDensity");
   }
   if (materialArgs.existsProperty("ZParameter")) {
     materialParams.zParameter = materialArgs.getProperty("ZParameter");
@@ -651,14 +653,15 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
   if (materialArgs.existsProperty("UnitCellVolume")) {
     materialParams.unitCellVolume = materialArgs.getProperty("UnitCellVolume");
   }
-  if (materialArgs.existsProperty("MassDensity")) {
-    materialParams.sampleMassDensity = materialArgs.getProperty("MassDensity");
+  if (materialArgs.existsProperty("SampleMassDensity")) {
+    materialParams.sampleMassDensity =
+        materialArgs.getProperty("SampleMassDensity");
   }
-  if (materialArgs.existsProperty("Mass")) {
-    materialParams.sampleMass = materialArgs.getProperty("Mass");
+  if (materialArgs.existsProperty("SampleMass")) {
+    materialParams.sampleMass = materialArgs.getProperty("SampleMass");
   }
-  if (materialArgs.existsProperty("Volume")) {
-    materialParams.sampleVolume = materialArgs.getProperty("Volume");
+  if (materialArgs.existsProperty("SampleVolume")) {
+    materialParams.sampleVolume = materialArgs.getProperty("SampleVolume");
   }
   if (materialArgs.existsProperty("CoherentXSection")) {
     materialParams.coherentXSection =
@@ -859,14 +862,16 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
     lbb.rotate(rotation);
     rfb.rotate(rotation);
   }
-  std::vector<double> center = args.getProperty(ShapeArgs::CENTER);
-  const V3D centrePos(center[0] * 0.01, center[1] * 0.01, center[2] * 0.01);
-  // translate to true center after rotation
-  lfb += centrePos;
-  lft += centrePos;
-  lbb += centrePos;
-  rfb += centrePos;
-
+  std::vector<double> center = {0., 0., 0.};
+  if (args.existsProperty(ShapeArgs::CENTER)) {
+    center = args.getProperty(ShapeArgs::CENTER);
+    const V3D centrePos(center[0] * 0.01, center[1] * 0.01, center[2] * 0.01);
+    // translate to true center after rotation
+    lfb += centrePos;
+    lft += centrePos;
+    lbb += centrePos;
+    rfb += centrePos;
+  }
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"" << id << "\"> "
                  << "<left-front-bottom-point x=\"" << lfb.X() << "\" y=\""
@@ -896,14 +901,20 @@ std::string SetSample::createFlatPlateHolderXML(
     const Kernel::PropertyManager &args,
     const Geometry::ReferenceFrame &refFrame) const {
 
-  std::vector<double> centre =
-      getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+  std::vector<double> centre = {0., 0., 0.};
+  if (args.existsProperty(ShapeArgs::CENTER)) {
+    centre = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+  }
+
   const double sampleThickness = getPropertyAsDouble(args, ShapeArgs::THICK);
   const double frontPlateThickness =
       getPropertyAsDouble(args, ShapeArgs::FRONT_THICK);
   const double backPlateThickness =
       getPropertyAsDouble(args, ShapeArgs::BACK_THICK);
-  const double angle = degToRad(getPropertyAsDouble(args, ShapeArgs::ANGLE));
+  double angle = 0.;
+  if (args.existsProperty(ShapeArgs::ANGLE)) {
+    degToRad(getPropertyAsDouble(args, ShapeArgs::ANGLE));
+  }
   const auto pointingAlongBeam = refFrame.pointingAlongBeam();
   const auto pointingHorizontal = refFrame.pointingHorizontal();
   const int horizontalSign = (centre[pointingHorizontal] > 0) ? -1 : 1;
@@ -917,7 +928,10 @@ std::string SetSample::createFlatPlateHolderXML(
   frontCentre[pointingAlongBeam] -= frontCentreOffset * alongBeamProjection;
   frontCentre[pointingHorizontal] +=
       frontCentreOffset * horizontalProjection * horizontalSign;
-  frontPlate.setProperty(ShapeArgs::CENTER, frontCentre);
+  if (!frontPlate.existsProperty(ShapeArgs::CENTER)) {
+    frontPlate.declareProperty(ShapeArgs::CENTER, frontCentre);
+    frontPlate.setProperty(ShapeArgs::CENTER, frontCentre);
+  }
   const std::string frontPlateXML =
       createFlatPlateXML(frontPlate, refFrame, "front");
 
@@ -927,7 +941,10 @@ std::string SetSample::createFlatPlateHolderXML(
   backCentre[pointingAlongBeam] += backCentreOffset * alongBeamProjection;
   backCentre[pointingHorizontal] -=
       backCentreOffset * horizontalProjection * horizontalSign;
-  backPlate.setProperty(ShapeArgs::CENTER, backCentre);
+  if (!backPlate.existsProperty(ShapeArgs::CENTER)) {
+    backPlate.declareProperty(ShapeArgs::CENTER, backCentre);
+    backPlate.setProperty(ShapeArgs::CENTER, backCentre);
+  }
   const std::string backPlateXML =
       createFlatPlateXML(backPlate, refFrame, "back");
 
@@ -981,14 +998,16 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   double outerRadius = hollow
                            ? getPropertyAsDouble(args, ShapeArgs::OUTER_RADIUS)
                            : getPropertyAsDouble(args, "Radius");
-  std::vector<double> centre =
-      getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+  std::vector<double> centre = {0., 0., 0.};
+  if (args.existsProperty(ShapeArgs::CENTER)) {
+      centre = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+      std::transform(centre.begin(), centre.end(), centre.begin(),
+                     [](double val) { return val *= 0.01; });
+  }
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;
   outerRadius *= 0.01;
-  std::transform(centre.begin(), centre.end(), centre.begin(),
-                 [](double val) { return val *= 0.01; });
   // XML needs center position of bottom base but user specifies center of
   // cylinder
   V3D baseCentre;

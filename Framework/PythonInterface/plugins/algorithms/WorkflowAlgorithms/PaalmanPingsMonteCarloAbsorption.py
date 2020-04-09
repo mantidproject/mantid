@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroupProperty, SpectraAxis,
-                        WorkspaceGroup, WorkspaceProperty)
+                        WorkspaceGroup, WorkspaceProperty, Sample)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, LogicOperator)
-from mantid.simpleapi import (config, logger)
+                           FloatBoundedValidator, Direction, LogicOperator, EnabledWhenProperty)
+from mantid.simpleapi import (config, logger, mtd)
 import math
 import numpy as np
 import os.path
@@ -88,7 +88,22 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Maximum number of tries made to generate a scattering point')
+        self.declareProperty(name='SparseInstrument', defaultValue=False,
+                             doc='Whether to spatially approximate the instrument for faster calculation.')
+        self.declareProperty(name='NumberOfDetectorRows', defaultValue=3,
+                             validator=IntBoundedValidator(lower=3),
+                             doc='Number of detector rows in the detector grid of the sparse instrument.')
+        self.declareProperty(name='NumberOfDetectorColumns', defaultValue=2,
+                             validator=IntBoundedValidator(lower=2),
+                             doc='Number of detector columns in the detector grid of the sparse instrument.')
 
+        sparse_condition = EnabledWhenProperty('SpareInstrument', PropertyCriterion.IsNotDefault)
+        self.setPropertySettings('NumberOfDetectorRows', sparse_condition)
+        self.setPropertySettings('NumberOfDetectorColumns', sparse_condition)
+
+        self.setPropertyGroup('SparseInstrument', 'Monte Carlo Options')
+        self.setPropertyGroup('NumberOfDetectorRows', 'Monte Carlo Options')
+        self.setPropertyGroup('NumberOfDetectorColumns', 'Monte Carlo Options')
         self.setPropertyGroup('NumberOfWavelengthPoints', 'Monte Carlo Options')
         self.setPropertyGroup('EventsPerPoint', 'Monte Carlo Options')
         self.setPropertyGroup('Interpolation', 'Monte Carlo Options')
@@ -307,6 +322,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._set_beam(sample_wave_ws)
 
         if not self._container_ws:
+            sample_wave_ws.setSample(Sample())
             self._set_sample(sample_wave_ws, ['Sample'])
             monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                         startProgress=0, endProgress=1)
@@ -317,6 +333,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             monte_carlo_alg.execute()
             ass_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
             ass_ws = self._convert_from_wavelength(ass_ws)
+            mtd.addOrReplace(self._ass_ws_name, ass_ws)
             self._output_ws = self._group_ws([ass_ws])
 
         else:
@@ -330,21 +347,23 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             monte_carlo_alg_ssc.execute()
             assc_ws = monte_carlo_alg_ssc.getProperty("OutputWorkspace").value
             assc_ws = self._convert_from_wavelength(assc_ws)
+            mtd.addOrReplace(self._assc_ws_name, assc_ws)
 
             can_wave_ws = self._convert_to_wavelength(self._container_ws)
             self._set_beam(can_wave_ws)
 
-            # make sure the sample is not defined at this point, otherwise it will also attenuate
-            self._set_sample(can_wave_ws, ['Container'])
+            # since container can not exist without a valid sample, we work around this by setting container as sample
+            self._set_sample(can_wave_ws, ['Container'], True)
             monte_carlo_alg_cc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                            startProgress=0.33, endProgress=0.66)
             self._set_algorithm_properties(monte_carlo_alg_cc, self._monte_carlo_kwargs)
             monte_carlo_alg_cc.setProperty("InputWorkspace", can_wave_ws)
             monte_carlo_alg_cc.setProperty("OutputWorkspace", self._acc_ws_name)
-            monte_carlo_alg_cc.setProperty("SimulateScatteringPointIn", "EnvironmentOnly")
+            monte_carlo_alg_cc.setProperty("SimulateScatteringPointIn", "SampleOnly")
             monte_carlo_alg_cc.execute()
             acc_ws = monte_carlo_alg_cc.getProperty("OutputWorkspace").value
             acc_ws = self._convert_from_wavelength(acc_ws)
+            mtd.addOrReplace(self._acc_ws_name, acc_ws)
 
             self._set_sample(can_wave_ws, ['Sample', 'Container'])
             monte_carlo_alg_csc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
@@ -356,6 +375,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             monte_carlo_alg_csc.execute()
             acsc_ws = monte_carlo_alg_csc.getProperty("OutputWorkspace").value
             acsc_ws = self._convert_from_wavelength(acsc_ws)
+            mtd.addOrReplace(self._acsc_ws_name, acsc_ws)
 
             self._output_ws = self._group_ws([assc_ws, acsc_ws, acc_ws])
 
@@ -370,12 +390,13 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                                               'Height': self._beam_height})
         set_beam_alg.execute()
 
-    def _set_sample(self, ws, define):
+    def _set_sample(self, ws, components, can_as_sample=False):
 
+        ws.setSample(Sample())
         set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
         set_sample_alg.setProperty("InputWorkspace", ws)
 
-        if 'Sample' in define:
+        if 'Sample' in components:
             sample_geometry = dict()
             sample_geometry['Height'] = self._height
 
@@ -389,11 +410,13 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             if self._shape == 'Cylinder':
                 sample_geometry['Shape'] = 'Cylinder'
                 sample_geometry['Radius'] = self._sample_radius
+                sample_geometry['Center'] = [0.0, 0.0, 0.0]
 
             if self._shape == 'Annulus':
                 sample_geometry['Shape'] = 'HollowCylinder'
                 sample_geometry['InnerRadius'] = self._sample_inner_radius
                 sample_geometry['OuterRadius'] = self._sample_outer_radius
+                sample_geometry['Center'] = [0.0, 0.0, 0.0]
 
             set_sample_alg.setProperty("Geometry", sample_geometry)
 
@@ -414,24 +437,26 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                     sample_material['NumberDensityUnit'] = self._sample_number_density_unit
                 set_sample_alg.setProperty("Material", sample_material)
 
-        if 'Container' in define:
+        if 'Container' in components:
             container_geometry = dict()
             container_geometry['Height'] = self._height
 
             if self._shape == 'FlatPlate':
                 container_geometry['Shape'] = 'FlatPlateHolder'
                 container_geometry['Width'] = self._sample_width
-                # yes, this is the sample thickness!
+                # we need to know the thickness and the centre of the sample as well,
+                # in order to calculate the center offsets for the container panels
                 container_geometry['Thick'] = self._sample_thickness
                 container_geometry['Center'] = [0.0, 0.0, self._sample_center]
                 container_geometry['Angle'] = self._sample_angle
-                container_geometry['FrontTick'] = self._container_front_thickness
-                container_geometry['BackTick'] = self._container_back_thickness
+                container_geometry['FrontThick'] = self._container_front_thickness
+                container_geometry['BackThick'] = self._container_back_thickness
 
             if self._shape == 'Cylinder':
                 container_geometry['Shape'] = 'HollowCylinder'
                 container_geometry['InnerRadius'] = self._sample_radius
                 container_geometry['OuterRadius'] = self._container_radius
+                container_geometry['Center'] = [0.0, 0.0, 0.0]
 
             if self._shape == 'Annulus':
                 container_geometry['Shape'] = 'HollowCylinderHolder'
@@ -439,8 +464,12 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_geometry['InnerOuterRadius'] = self._sample_inner_radius
                 container_geometry['OuterInnerRadius'] = self._sample_outer_radius
                 container_geometry['OuterRadius'] = self._container_outer_radius
+                container_geometry['Center'] = [0.0, 0.0, 0.0]
 
-            set_sample_alg.setProperty("ContainerGeometry", container_geometry)
+            if can_as_sample:
+                set_sample_alg.setProperty("Geometry", container_geometry)
+            else:
+                set_sample_alg.setProperty("ContainerGeometry", container_geometry)
 
             if not self._container_material_defined:
                 container_material = dict()
@@ -450,11 +479,19 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                     container_material['CoherentXSection'] = self._container_coherent_cross_section
                     container_material['IncoherentXSection'] = self._container_incoherent_cross_section
                     container_material['AttenuationXSection'] = self._container_attenuation_cross_section
-                container_material['DensityType'] = self._container_density_type
-                container_material['Density'] = self._container_density
+                    container_material[
+                        'ScatteringXSection'] = self._container_coherent_cross_section + self._container_incoherent_cross_section
+
+                if self._container_density_type == 'Mass Density':
+                    container_material['SampleMassDensity'] = self._container_density
                 if self._container_density_type == 'Number Density':
+                    container_material['SampleNumberDensity'] = self._container_density
                     container_material['NumberDensityUnit'] = self._container_number_density_unit
-                set_sample_alg.setProperty("ContainerMaterial", container_material)
+
+                if can_as_sample:
+                    set_sample_alg.setProperty("Material", container_material)
+                else:
+                    set_sample_alg.setProperty("ContainerMaterial", container_material)
 
         set_sample_alg.execute()
 
@@ -477,11 +514,13 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._monte_carlo_kwargs = {'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,
                                     'EventsPerPoint': self.getProperty('EventsPerPoint').value,
                                     'Interpolation': self.getProperty('Interpolation').value,
-                                    'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value}
+                                    'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value,
+                                    'SparseInstrument': self.getProperty('SparseInstrument').value,
+                                    'NumberOfDetectorRows': self.getProperty('NumberOfDetectorRows').value,
+                                    'NumberOfDetectorColumns': self.getProperty('NumberOfDetectorColumns').value}
 
         self._shape = self.getProperty('Shape').value
         self._height = self.getProperty('Height').value
-        self._sample_material_defined = self.getProperty('SampleMaterialAlreadyDefined').value
 
         self._sample_unit = self._sample_ws.getAxis(0).getUnit().unitID()
         if self._sample_unit == 'dSpacing':
@@ -491,6 +530,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         if self._emode == 'Indirect' or 'Direct':
             self._efixed = self._get_efixed()
 
+        self._sample_material_defined = self.getProperty('SampleMaterialAlreadyDefined').value
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
         self._sample_coherent_cross_section = self.getPropertyValue('SampleCoherentXSection')
         self._sample_incoherent_cross_section = self.getPropertyValue('SampleIncoherentXSection')
