@@ -12,7 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 //#include "MantidKernel/PropertyManager.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <stdexcept>
 
@@ -40,7 +40,7 @@ public:
 };
 
 /// typedef for a shared pointer
-using FunctionDomain_sptr = boost::shared_ptr<FunctionDomain>;
+using FunctionDomain_sptr = std::shared_ptr<FunctionDomain>;
 
 } // namespace API
 } // namespace Mantid

@@ -21,7 +21,7 @@ public:
   // the name of the property that the NexusHDF5Descriptor should be created
   // against
   virtual std::string getFilenamePropertyName() const = 0;
-  boost::shared_ptr<Algorithm> createChildAlgorithm(
+  std::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1) override;

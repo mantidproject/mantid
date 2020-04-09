@@ -193,7 +193,7 @@ template <class T, class IndexArg, class HistArg,
           typename std::enable_if<!std::is_base_of<
               API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T>
-create(const boost::shared_ptr<const Geometry::Instrument> instrument,
+create(const std::shared_ptr<const Geometry::Instrument> &instrument,
        const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = std::make_unique<T>();
   ws->setInstrument(std::move(instrument));

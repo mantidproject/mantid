@@ -319,7 +319,7 @@ void IndirectSymmetrise::updateMiniPlots() {
       static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
   Mantid::API::MatrixWorkspace_sptr input =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               workspaceName.toStdString()));
 

@@ -20,9 +20,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDAxisValidator.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/pointer_cast.hpp>
 #include <map>
+#include <memory>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -80,11 +80,11 @@ void SetMDFrame::init() {
 
   declareProperty(
       propName, Mantid::Geometry::GeneralFrame::GeneralFrameName,
-      boost::make_shared<Mantid::Kernel::StringListValidator>(mdFrames),
+      std::make_shared<Mantid::Kernel::StringListValidator>(mdFrames),
       "MDFrame type selection.\n");
 
   auto axisValidator =
-      boost::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>();
+      std::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>();
   axisValidator->setLower(0);
   declareProperty(
       std::make_unique<Kernel::ArrayProperty<int>>(
@@ -118,9 +118,9 @@ void SetMDFrame::exec() {
     // of the MDHistoDimension which we only get as a const -- hence
     // we need a const-cast at this point.
     auto mdHistoDimension =
-        boost::const_pointer_cast<Mantid::Geometry::MDHistoDimension>(
-            boost::dynamic_pointer_cast<
-                const Mantid::Geometry::MDHistoDimension>(dimension));
+        std::const_pointer_cast<Mantid::Geometry::MDHistoDimension>(
+            std::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(
+                dimension));
     if (!mdHistoDimension) {
       throw std::runtime_error("SetMDFrame: Cannot convert to MDHistDimension");
     }
@@ -136,8 +136,8 @@ std::map<std::string, std::string> SetMDFrame::validateInputs() {
   std::map<std::string, std::string> invalidProperties;
   Mantid::API::IMDWorkspace_sptr ws = getProperty("InputWorkspace");
 
-  if (!boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws) &&
-      !boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws)) {
+  if (!std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws) &&
+      !std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws)) {
     invalidProperties.insert(
         std::make_pair("InputWorkspace", "The input workspace has to be either "
                                          "an MDEvent or MDHisto Workspace."));

@@ -102,9 +102,9 @@ private:
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
   void createOutput();
   /// The cost function
-  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
+  std::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
   /// The minimizer
-  boost::shared_ptr<API::IFuncMinimizer> m_minimizer;
+  std::shared_ptr<API::IFuncMinimizer> m_minimizer;
   /// Max number of iterations
   size_t m_maxIterations;
 };

@@ -60,7 +60,7 @@ public:
     TS_ASSERT(ws);
 
     ITableWorkspace_sptr tableWs =
-        boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+        std::dynamic_pointer_cast<ITableWorkspace>(ws);
 
     TS_ASSERT(tableWs);
     // There should be 68 unique reflections for this cell and d-range.

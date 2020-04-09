@@ -23,13 +23,13 @@ namespace {
  * @param self A reference to the calling object to emulate method on Python
  * object
  */
-boost::shared_ptr<Mantid::Geometry::IObject> getShape(IObjComponent &self) {
-  return boost::const_pointer_cast<Mantid::Geometry::IObject>(self.shape());
+std::shared_ptr<Mantid::Geometry::IObject> getShape(IObjComponent &self) {
+  return std::const_pointer_cast<Mantid::Geometry::IObject>(self.shape());
 }
 } // namespace
 
 void export_IObjComponent() {
-  register_ptr_to_python<boost::shared_ptr<IObjComponent>>();
+  register_ptr_to_python<std::shared_ptr<IObjComponent>>();
 
   class_<IObjComponent, boost::python::bases<IComponent>, boost::noncopyable>(
       "IObjComponent", no_init)

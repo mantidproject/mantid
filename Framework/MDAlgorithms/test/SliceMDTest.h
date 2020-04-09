@@ -173,7 +173,7 @@ public:
 
     IMDEventWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        out = std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("SliceMDTest_outWS"));)
     TS_ASSERT(out);
     if (!out)
@@ -386,7 +386,7 @@ public:
 
     IMDEventWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        out = std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("SliceMDTest_outWS"));)
     TS_ASSERT(out);
     if (!out)

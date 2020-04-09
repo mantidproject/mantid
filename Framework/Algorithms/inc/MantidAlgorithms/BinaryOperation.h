@@ -50,7 +50,7 @@ public:
    * lhs. -1 if not found.
    */
   using BinaryOperationTable = std::vector<int64_t>;
-  using BinaryOperationTable_sptr = boost::shared_ptr<BinaryOperationTable>;
+  using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
 
   static BinaryOperationTable_sptr
   buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,

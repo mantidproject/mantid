@@ -14,7 +14,7 @@
 
 #include <vector>
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include "tbb/concurrent_unordered_map.h"
@@ -227,9 +227,9 @@ private:
 };
 
 /// Shared pointer to the Unit base class
-using Unit_sptr = boost::shared_ptr<Unit>;
+using Unit_sptr = std::shared_ptr<Unit>;
 /// Shared pointer to the Unit base class (const version)
-using Unit_const_sptr = boost::shared_ptr<const Unit>;
+using Unit_const_sptr = std::shared_ptr<const Unit>;
 
 //----------------------------------------------------------------------
 // Now the concrete units classes

@@ -65,8 +65,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
     // Check two X vectors are the same
@@ -105,7 +104,7 @@ public:
     Workspace_sptr wsSptr =
         AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+        std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
     std::vector<std::string> wsNamevec;
     wsNamevec = sptrWSGrp->getNames();
     int period = 1;

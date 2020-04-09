@@ -132,7 +132,7 @@ void FunctionCurve::loadData(int points) {
 
     try {
       Mantid::API::MatrixWorkspace_const_sptr ws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
                   wsName.toStdString()));
 

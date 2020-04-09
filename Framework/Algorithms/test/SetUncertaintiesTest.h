@@ -351,6 +351,6 @@ public:
 private:
   SetUncertainties algZero;
   SetUncertainties algCalc;
-  boost::shared_ptr<Mantid::DataObjects::Workspace2D> inputWs;
+  std::shared_ptr<Mantid::DataObjects::Workspace2D> inputWs;
   const std::string wsName = "outputWs";
 };

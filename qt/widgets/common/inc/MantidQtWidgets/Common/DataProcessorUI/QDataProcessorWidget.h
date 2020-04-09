@@ -63,7 +63,7 @@ public:
   void addActions(std::vector<std::unique_ptr<Command>> commands) override;
 
   // Connect the model
-  void showTable(boost::shared_ptr<AbstractTreeModel> model) override;
+  void showTable(std::shared_ptr<AbstractTreeModel> model) override;
 
   // Dialog/Prompt methods
   QString requestNotebookPath() override;
@@ -163,7 +163,7 @@ private:
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  boost::shared_ptr<AbstractTreeModel> m_model;
+  std::shared_ptr<AbstractTreeModel> m_model;
   // Command adapters
   std::vector<std::unique_ptr<QtCommandAdapter>> m_commands;
   // the interface (uses actions owned by m_commands)

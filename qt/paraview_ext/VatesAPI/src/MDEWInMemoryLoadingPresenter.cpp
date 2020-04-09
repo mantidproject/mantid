@@ -52,7 +52,7 @@ bool MDEWInMemoryLoadingPresenter::canReadFile() const {
     // The workspace does not exist.
     bCanReadIt = false;
   } else if (nullptr ==
-             boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+             std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
                  m_repository->fetchWorkspace(m_wsName))
                  .get()) {
     // The workspace can be found, but is not an IMDEventWorkspace.
@@ -80,7 +80,7 @@ MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
 
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
   IMDEventWorkspace_sptr eventWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
   auto visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
@@ -103,7 +103,7 @@ void MDEWInMemoryLoadingPresenter::executeLoadMetadata() {
 
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
   IMDEventWorkspace_sptr eventWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
   m_wsTypeName = eventWs->id();
   m_specialCoords = eventWs->getSpecialCoordinateSystem();
 

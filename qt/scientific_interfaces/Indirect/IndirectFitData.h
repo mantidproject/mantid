@@ -13,7 +13,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/optional.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include <cctype>
 #include <numeric>

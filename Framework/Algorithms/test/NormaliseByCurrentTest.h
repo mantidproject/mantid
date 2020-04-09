@@ -322,7 +322,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
 
     EventWorkspace_const_sptr outputEvent;
-    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
+    outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(
         doTest("normInEvent", "normOutEvent", 2.0, 1.0, 0.5 * M_SQRT2));
     // Output is an event workspace
     TS_ASSERT(outputEvent);
@@ -340,7 +340,7 @@ public:
     // intentionally set the wrong `gd_prtn_chrg` to stress getting the right
     // answer
     EventWorkspace_const_sptr outputEvent;
-    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
+    outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(
         doTest("normInEvent", "normOutEvent", 100.0, 1.0, 0.5 * M_SQRT2));
     // Output is an event workspace
     TS_ASSERT(outputEvent);
@@ -355,7 +355,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
 
     EventWorkspace_const_sptr outputEvent;
-    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
+    outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(
         doTest("normInEvent", "normInEvent", 2.0, 1.0, 0.5 * M_SQRT2));
     // Output is an event workspace
     TS_ASSERT(outputEvent);
@@ -475,12 +475,12 @@ public:
 
   void test_execEventPerformance() {
     EventWorkspace_const_sptr outputEvent;
-    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(doTest(
+    outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(doTest(
         execEventWSIn, execEventWSOut, 1.0, 0.5 * M_SQRT2, false, performance));
   }
   void test_execEventInPlacePerformance() {
     EventWorkspace_const_sptr outputEvent;
-    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
+    outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(
         doTest(execEventInPlaceWSIn, execEventInPlaceWSIn, 1.0, 0.5 * M_SQRT2,
                false, performance));
   }

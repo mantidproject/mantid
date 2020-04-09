@@ -33,7 +33,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
 
 private:
   void init() override;

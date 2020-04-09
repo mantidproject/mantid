@@ -47,7 +47,7 @@ void SaveCalFile::init() {
                                                  FileProperty::Save, ".cal"),
                   "Path to the .cal file that will be created.");
 
-  auto offsetprecision = boost::make_shared<BoundedValidator<int>>();
+  auto offsetprecision = std::make_shared<BoundedValidator<int>>();
   offsetprecision->setLower(7);
   offsetprecision->setUpper(11);
   declareProperty("OffsetPrecision", 7, offsetprecision,

@@ -279,10 +279,10 @@ void FitPeaks::init() {
   const std::vector<std::string> peakNames =
       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty(PropertyNames::PEAK_FUNC, "Gaussian",
-                  boost::make_shared<StringListValidator>(peakNames));
+                  std::make_shared<StringListValidator>(peakNames));
   const vector<string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(PropertyNames::BACK_FUNC, "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
   const std::string funcgroup("Function Types");
@@ -301,7 +301,7 @@ void FitPeaks::init() {
                       PropertyMode::Optional),
                   "MatrixWorkspace for of peak windows");
 
-  auto min = boost::make_shared<BoundedValidator<double>>();
+  auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   // min->setUpper(1.); TODO make this a limit
   declareProperty(PropertyNames::PEAK_WIDTH_PERCENT, EMPTY_DBL(), min,
@@ -352,7 +352,7 @@ void FitPeaks::init() {
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
                   "Cost functions");
 
-  auto min_max_iter = boost::make_shared<BoundedValidator<int>>();
+  auto min_max_iter = std::make_shared<BoundedValidator<int>>();
   min_max_iter->setLower(49);
   declareProperty(PropertyNames::MAX_FIT_ITER, 50, min_max_iter,
                   "Maximum number of function fitting iterations.");
@@ -466,7 +466,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   // check that the suggested peak parameter names exist in the peak function
   if (!suppliedParameterNames.empty()) {
     std::string peakfunctiontype = getPropertyValue(PropertyNames::PEAK_FUNC);
-    m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+    m_peakFunction = std::dynamic_pointer_cast<IPeakFunction>(
         API::FunctionFactory::Instance().createFunction(peakfunctiontype));
 
     // put the names in a vector
@@ -606,7 +606,7 @@ void FitPeaks::processInputs() {
 void FitPeaks::processInputFunctions() {
   // peak functions
   std::string peakfunctiontype = getPropertyValue(PropertyNames::PEAK_FUNC);
-  m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_peakFunction = std::dynamic_pointer_cast<IPeakFunction>(
       API::FunctionFactory::Instance().createFunction(peakfunctiontype));
 
   // background functions
@@ -618,13 +618,11 @@ void FitPeaks::processInputFunctions() {
     bkgdname = "FlatBackground";
   else
     bkgdname = bkgdfunctiontype;
-  m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
+  m_bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
       API::FunctionFactory::Instance().createFunction(bkgdname));
   if (m_highBackground)
-    m_linearBackgroundFunction =
-        boost::dynamic_pointer_cast<IBackgroundFunction>(
-            API::FunctionFactory::Instance().createFunction(
-                "LinearBackground"));
+    m_linearBackgroundFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
+        API::FunctionFactory::Instance().createFunction("LinearBackground"));
   else
     m_linearBackgroundFunction = nullptr;
 
@@ -929,7 +927,7 @@ void FitPeaks::convertParametersNameToIndex() {
 //----------------------------------------------------------------------------------------------
 /** main method to fit peaks among all
  */
-std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
 FitPeaks::fitPeaks() {
   API::Progress prog(this, 0., 1.,
                      m_stopWorkspaceIndex - m_startWorkspaceIndex);
@@ -937,7 +935,7 @@ FitPeaks::fitPeaks() {
   /// Vector to record all the FitResult (only containing specified number of
   /// spectra. shift is expected)
   size_t num_fit_result = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
-  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+  std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
       fit_result_vector(num_fit_result);
 
   // cppcheck-suppress syntaxError
@@ -954,9 +952,9 @@ FitPeaks::fitPeaks() {
     // initialize output for this
     size_t numfuncparams =
         m_peakFunction->nParams() + m_bkgdFunction->nParams();
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
-        boost::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
-                                                             numfuncparams);
+    std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
+        std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
+                                                           numfuncparams);
 
     fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
                      fit_result);
@@ -1027,7 +1025,7 @@ double numberCounts(const Histogram &histogram, const double xmin,
  */
 void FitPeaks::fitSpectrumPeaks(
     size_t wi, const std::vector<double> &expected_peak_centers,
-    const boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
+    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
   if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight) {
     for (size_t i = 0; i < fit_result->getNumberPeaks(); ++i)
       fit_result->setBadRecord(i, -1.);
@@ -1047,9 +1045,9 @@ void FitPeaks::fitSpectrumPeaks(
 
   // Clone the function
   IPeakFunction_sptr peakfunction =
-      boost::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
+      std::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
   IBackgroundFunction_sptr bkgdfunction =
-      boost::dynamic_pointer_cast<API::IBackgroundFunction>(
+      std::dynamic_pointer_cast<API::IBackgroundFunction>(
           m_bkgdFunction->clone());
 
   // set up properties of algorithm (reference) 'Fit'
@@ -1176,7 +1174,7 @@ void FitPeaks::processSinglePeakFitResult(
     size_t wsindex, size_t peakindex, const double cost,
     const std::vector<double> &expected_peak_positions,
     const FitPeaksAlgorithm::FitFunction &fitfunction,
-    const boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
+    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
   // determine peak position tolerance
   double postol(DBL_MAX);
   bool case23(false);
@@ -1281,7 +1279,7 @@ void FitPeaks::processSinglePeakFitResult(
  * table
  */
 void FitPeaks::calculateFittedPeaks(
-    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+    std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
         fit_results) {
   // check
   if (!m_fittedParamTable)
@@ -1297,11 +1295,10 @@ void FitPeaks::calculateFittedPeaks(
 
     // get a copy of peak function and background function
     IPeakFunction_sptr peak_function =
-        boost::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
+        std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
     IBackgroundFunction_sptr bkgd_function =
-        boost::dynamic_pointer_cast<IBackgroundFunction>(
-            m_bkgdFunction->clone());
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result_i =
+        std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
+    std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result_i =
         fit_results[iws - m_startWorkspaceIndex];
     // FIXME - This is a just a pure check
     if (!fit_result_i)
@@ -1338,7 +1335,7 @@ void FitPeaks::calculateFittedPeaks(
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
       CompositeFunction_sptr comp_func =
-          boost::make_shared<API::CompositeFunction>();
+          std::make_shared<API::CompositeFunction>();
       comp_func->addFunction(peak_function);
       comp_func->addFunction(bkgd_function);
       comp_func->function(domain, values);
@@ -1726,11 +1723,10 @@ double FitPeaks::fitFunctionSD(
   }
 
   // Create the composition function
-  CompositeFunction_sptr comp_func =
-      boost::make_shared<API::CompositeFunction>();
+  CompositeFunction_sptr comp_func = std::make_shared<API::CompositeFunction>();
   comp_func->addFunction(peak_function);
   comp_func->addFunction(bkgd_function);
-  IFunction_sptr fitfunc = boost::dynamic_pointer_cast<IFunction>(comp_func);
+  IFunction_sptr fitfunc = std::dynamic_pointer_cast<IFunction>(comp_func);
 
   // Set the properties
   fit->setProperty("Function", fitfunc);
@@ -1808,8 +1804,8 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
 
   // This use multi-domain; but does not know how to set up IFunction_sptr
   // fitfunc,
-  boost::shared_ptr<MultiDomainFunction> md_function =
-      boost::make_shared<MultiDomainFunction>();
+  std::shared_ptr<MultiDomainFunction> md_function =
+      std::make_shared<MultiDomainFunction>();
 
   // Set function first
   md_function->addFunction(fit_function);
@@ -1823,7 +1819,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
 
   // Set the properties
   fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<IFunction>(md_function));
+                   std::dynamic_pointer_cast<IFunction>(md_function));
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
   fit->setProperty("StartX", vec_xmin[0]);
@@ -1861,7 +1857,7 @@ double FitPeaks::fitFunctionHighBackground(
   // high background to reduce
   API::IBackgroundFunction_sptr high_bkgd_function(nullptr);
   if (m_linearBackgroundFunction)
-    high_bkgd_function = boost::dynamic_pointer_cast<API::IBackgroundFunction>(
+    high_bkgd_function = std::dynamic_pointer_cast<API::IBackgroundFunction>(
         m_linearBackgroundFunction->clone());
 
   // Fit the background first if there is enough data points
@@ -2008,7 +2004,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
     param_vec.emplace_back(m_bkgdFunction->parameterName(iparam));
 
   // parameter value table
-  m_fittedParamTable = boost::make_shared<TableWorkspace>();
+  m_fittedParamTable = std::make_shared<TableWorkspace>();
   setupParameterTableWorkspace(m_fittedParamTable, param_vec, true);
 
   // for error workspace
@@ -2020,7 +2016,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
     m_fitErrorTable = nullptr;
   } else {
     // create table and set up parameter table
-    m_fitErrorTable = boost::make_shared<TableWorkspace>();
+    m_fitErrorTable = std::make_shared<TableWorkspace>();
     setupParameterTableWorkspace(m_fitErrorTable, param_vec, false);
   }
 
@@ -2047,7 +2043,7 @@ void FitPeaks::generateCalculatedPeaksWS() {
 //----------------------------------------------------------------------------------------------
 /// set up output workspaces
 void FitPeaks::processOutputs(
-    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+    std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
         fit_result_vec) {
   setProperty(PropertyNames::OUTPUT_WKSP, m_outputPeakPositionWorkspace);
   setProperty(PropertyNames::OUTPUT_WKSP_PARAMS, m_fittedParamTable);
@@ -2277,7 +2273,7 @@ void FitPeaks::estimateLinearBackground(const Histogram &histogram,
  */
 void FitPeaks::writeFitResult(
     size_t wi, const std::vector<double> &expected_positions,
-    const boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
+    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
   // convert to
   size_t out_wi = wi - m_startWorkspaceIndex;
   if (out_wi >= m_outputPeakPositionWorkspace->getNumberHistograms()) {
@@ -2340,7 +2336,7 @@ void FitPeaks::writeFitResult(
   // go through each peak
   // get a copy of peak function and background function
   IPeakFunction_sptr peak_function =
-      boost::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
+      std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
   size_t num_peakfunc_params = peak_function->nParams();
   size_t num_bkgd_params = m_bkgdFunction->nParams();
 

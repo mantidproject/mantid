@@ -43,7 +43,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("Filename", "SaveIsawDetCalTest.DetCal"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws)));
+        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(ws)));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

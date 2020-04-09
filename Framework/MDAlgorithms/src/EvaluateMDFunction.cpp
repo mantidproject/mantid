@@ -72,7 +72,7 @@ void EvaluateMDFunction::exec() {
 
   API::IMDWorkspace_sptr clone = cloner->getProperty("OutputWorkspace");
   API::IMDHistoWorkspace_sptr output =
-      boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(clone);
+      std::dynamic_pointer_cast<API::IMDHistoWorkspace>(clone);
 
   if (!output)
     throw std::runtime_error("Cannot create output workspace");

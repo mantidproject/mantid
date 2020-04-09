@@ -53,9 +53,9 @@ public:
                     const API::IFunction::Attribute &att) override;
 
 private:
-  boost::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;
+  std::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;
 
-  boost::shared_ptr<InelasticDiffRotDiscreteCircle> m_inelastic;
+  std::shared_ptr<InelasticDiffRotDiscreteCircle> m_inelastic;
 };
 
 } // namespace Functions

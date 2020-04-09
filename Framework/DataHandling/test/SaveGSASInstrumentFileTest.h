@@ -40,7 +40,7 @@ public:
     // Load a (local) table workspace
     loadProfileTable("PG3ProfileTable");
     TableWorkspace_sptr profiletablews =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             AnalysisDataService::Instance().retrieve("PG3ProfileTable"));
     TS_ASSERT(profiletablews);
 
@@ -189,7 +189,7 @@ public:
   void loadProfileTable(const string &wsname) {
     // The data befow is from Bank1 in pg60_2011B.irf
 
-    auto tablews = boost::make_shared<TableWorkspace>();
+    auto tablews = std::make_shared<TableWorkspace>();
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value_1");
 

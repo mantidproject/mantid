@@ -71,7 +71,7 @@ public:
     if (!ws_found)
       return;
     MatrixWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             dataStore.retrieve(outputName));
     TS_ASSERT(outputWS);
     if (!outputWS) {

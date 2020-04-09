@@ -8,7 +8,7 @@
 
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 class vtkDataSet;
@@ -55,7 +55,7 @@ private:
   int m_specialCoords;
   /// Cached visual histogram workspace. Post transpose. Avoids repeating
   /// transpose.
-  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> m_cachedVisualHistoWs;
+  std::shared_ptr<Mantid::API::IMDHistoWorkspace> m_cachedVisualHistoWs;
 };
 } // namespace VATES
 } // namespace Mantid

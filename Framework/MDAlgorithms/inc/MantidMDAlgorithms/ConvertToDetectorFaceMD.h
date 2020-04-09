@@ -45,7 +45,7 @@ private:
 
   template <class T, class MDE, size_t nd>
   void convertEventList(
-      boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
+      std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
       size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
       uint16_t runIndex, int32_t detectorID);
 

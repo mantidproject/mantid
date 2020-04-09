@@ -40,11 +40,11 @@ private:
   /// Execution code
   void exec() override;
   void setupTransmission(
-      const boost::shared_ptr<Kernel::PropertyManager> &reductionManager);
+      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
   void setupBackground(
-      const boost::shared_ptr<Kernel::PropertyManager> &reductionManager);
+      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
   void setupSensitivity(
-      const boost::shared_ptr<Kernel::PropertyManager> &reductionManager);
+      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
 };
 
 } // namespace WorkflowAlgorithms

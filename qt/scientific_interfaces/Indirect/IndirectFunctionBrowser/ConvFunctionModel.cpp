@@ -87,7 +87,7 @@ void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_hasTempCorrection = true;
-      if (boost::dynamic_pointer_cast<CompositeFunction>(
+      if (std::dynamic_pointer_cast<CompositeFunction>(
               innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else

@@ -58,7 +58,7 @@ private:
   ~CatalogFactoryImpl() override = default;
   /// Stores pointers to already created Catalog instances, with their name as
   /// the key
-  mutable std::map<std::string, boost::shared_ptr<ICatalog>> m_createdCatalogs;
+  mutable std::map<std::string, std::shared_ptr<ICatalog>> m_createdCatalogs;
 };
 
 /// The specialisation of the SingletonHolder class that holds the

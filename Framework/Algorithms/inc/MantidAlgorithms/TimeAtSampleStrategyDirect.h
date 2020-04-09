@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 
@@ -23,8 +23,7 @@ class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyDirect
     : public TimeAtSampleStrategy {
 public:
   TimeAtSampleStrategyDirect(
-      const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &ws,
-      double ei);
+      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws, double ei);
   Correction calculate(const size_t &workspace_index) const override;
 
 private:

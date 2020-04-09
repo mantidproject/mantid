@@ -158,7 +158,7 @@ public:
 
     auto result = runScaleX(inputWS, "Multiply", -1, parname);
     auto resultEventWS =
-        boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
+        std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
     TS_ASSERT(resultEventWS);
 
     const size_t xsize = result->blocksize();

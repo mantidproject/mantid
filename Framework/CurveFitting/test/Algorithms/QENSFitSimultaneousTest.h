@@ -236,7 +236,7 @@ private:
 
   IFunction_sptr createMultiDomainFunction(const IFunction_sptr &function,
                                            std::size_t numberOfDomains) {
-    auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+    auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
 
     for (auto i = 0u; i < numberOfDomains; ++i) {
       multiDomainFunction->addFunction(function);

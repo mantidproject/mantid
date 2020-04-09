@@ -27,7 +27,7 @@ size_t GridDomain::size() const {
   else
     return std::accumulate(
         m_grids.begin(), m_grids.end(), size_t{1},
-        [](size_t n, const boost::shared_ptr<GridDomain> &grid) {
+        [](size_t n, const std::shared_ptr<GridDomain> &grid) {
           return n * grid->size();
         });
 }
@@ -35,7 +35,7 @@ size_t GridDomain::size() const {
 /// number of dimensions of the grid
 size_t GridDomain::nDimensions() {
   return std::accumulate(m_grids.begin(), m_grids.end(), size_t{0},
-                         [](size_t n, boost::shared_ptr<GridDomain> &grid) {
+                         [](size_t n, std::shared_ptr<GridDomain> &grid) {
                            return n + grid->nDimensions();
                          });
 }

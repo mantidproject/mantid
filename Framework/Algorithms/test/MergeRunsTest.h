@@ -23,8 +23,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTypes/SpectrumDefinition.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdarg.h>
 
 using namespace Mantid::API;
@@ -47,7 +46,7 @@ private:
     }
     for (size_t i = 0; i < ws->size(); ++i) {
       MatrixWorkspace_sptr currentWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
 
       PropertyWithValue<int> *nperiodsProp =
           new PropertyWithValue<int>("nperiods", nperiods);
@@ -67,7 +66,7 @@ private:
         WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a1");
     // b->setName("b1");
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     // group->setName("group1");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
@@ -86,7 +85,7 @@ private:
         WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a2");
     // b->setName("b2");
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     // group->setName("group2");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
@@ -111,7 +110,7 @@ private:
         WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a4");
     // b->setName("b4");
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     // group->setName("group4");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
@@ -136,7 +135,7 @@ private:
         WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a3");
     // b->setName("b3");
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     // group->setName("group3");
     group->addWorkspace(a);
     group->addWorkspace(b);
@@ -190,7 +189,7 @@ private:
         b->getInstrument()->getComponentID(),
         MergeRunsParameter::FAIL_MERGE_TOLERANCES, tolerances);
 
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
     group->addWorkspace(b);
 
@@ -227,7 +226,7 @@ private:
       b->setHistogram(i, histogram);
     }
 
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
     group->addWorkspace(b);
 
@@ -270,7 +269,7 @@ private:
 
   void do_test_treat_as_non_period_groups(const WorkspaceGroup_sptr &input) {
     MatrixWorkspace_sptr sampleInputWorkspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
     const double uniformSignal = sampleInputWorkspace->y(0)[0];
     const double uniformError = sampleInputWorkspace->e(0)[0];
     const size_t nXValues = sampleInputWorkspace->x(0).size();
@@ -381,26 +380,26 @@ public:
     ev1 =
         WorkspaceCreationHelper::createEventWorkspace(3, 10, 100, 0.0, 1.0, 3);
     AnalysisDataService::Instance().addOrReplace(
-        "ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(ev1)); // 100 ev
+        "ev1", std::dynamic_pointer_cast<MatrixWorkspace>(ev1)); // 100 ev
     AnalysisDataService::Instance().addOrReplace(
-        "ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(
+        "ev2", std::dynamic_pointer_cast<MatrixWorkspace>(
                    WorkspaceCreationHelper::createEventWorkspace(
                        3, 10, 100, 0.0, 1.0, 2))); // 200 ev
     AnalysisDataService::Instance().addOrReplace(
-        "ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(
+        "ev3", std::dynamic_pointer_cast<MatrixWorkspace>(
                    WorkspaceCreationHelper::createEventWorkspace(
                        3, 10, 100, 0.0, 1.0, 2, 100))); // 200 events per
                                                         // spectrum, but the
                                                         // spectra are at
                                                         // different pixel ids
     // Make one with weird units
-    MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ev4 = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceCreationHelper::createEventWorkspace(3, 10, 100, 0.0, 1.0, 2,
                                                       100));
     ev4->setYUnit("Microfurlongs per Megafortnights");
     AnalysisDataService::Instance().addOrReplace("ev4_weird_units", ev4);
     AnalysisDataService::Instance().addOrReplace(
-        "ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(
+        "ev5", std::dynamic_pointer_cast<MatrixWorkspace>(
                    WorkspaceCreationHelper::createEventWorkspace(
                        5, 10, 100, 0.0, 1.0, 2, 100))); // 200 events per
                                                         // spectrum, but the
@@ -409,7 +408,7 @@ public:
     ev6 = WorkspaceCreationHelper::createEventWorkspace(6, 10, 100, 0.0, 1.0,
                                                         3); // ids 0-5
     AnalysisDataService::Instance().addOrReplace(
-        "ev6", boost::dynamic_pointer_cast<MatrixWorkspace>(ev6));
+        "ev6", std::dynamic_pointer_cast<MatrixWorkspace>(ev6));
     // a 2d workspace with the value 2 in each bin
     AnalysisDataService::Instance().addOrReplace(
         "in2D",
@@ -422,7 +421,7 @@ public:
     groups.emplace_back(makeVector(3, 3, 4, 5));
     evg1 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
-        "evg1", boost::dynamic_pointer_cast<MatrixWorkspace>(evg1));
+        "evg1", std::dynamic_pointer_cast<MatrixWorkspace>(evg1));
 
     // let's check on the setup
     TS_ASSERT_EQUALS(evg1->getNumberEvents(), 600);
@@ -438,7 +437,7 @@ public:
     groups.emplace_back(makeVector(1, 15));
     evg2 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
-        "evg2", boost::dynamic_pointer_cast<MatrixWorkspace>(evg2));
+        "evg2", std::dynamic_pointer_cast<MatrixWorkspace>(evg2));
   }
 
   void EventTeardown() {
@@ -899,11 +898,11 @@ public:
 
   void test_throws_if_workspace_ordering_in_group_corrupted() {
     WorkspaceGroup_sptr a = create_good_multiperiod_workspace_group();
-    MatrixWorkspace_sptr first = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr first = std::dynamic_pointer_cast<MatrixWorkspace>(
         a->getItem(0)); // Has current_period = 1
-    MatrixWorkspace_sptr second = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr second = std::dynamic_pointer_cast<MatrixWorkspace>(
         a->getItem(1)); // Has current_period = 2
-    WorkspaceGroup_sptr aCorrupted = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr aCorrupted = std::make_shared<WorkspaceGroup>();
     aCorrupted->addWorkspace(second);
     aCorrupted->addWorkspace(first);
     // aCorrupted->setName("aCorrupted");
@@ -917,10 +916,10 @@ public:
     // Extract some internal information from the nested workspaces in order to
     // run test asserts later.
     const size_t expectedNumHistograms =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0))
+        std::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0))
             ->getNumberHistograms();
     MatrixWorkspace_sptr sampleNestedInputWorkspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
     const double uniformSignal = sampleNestedInputWorkspace->y(0)[0];
     const double uniformError = sampleNestedInputWorkspace->e(0)[0];
     const size_t nXValues = sampleNestedInputWorkspace->x(0).size();
@@ -939,7 +938,7 @@ public:
     // Loop through each workspace in the group
     for (size_t i = 0; i < wsgroup->size(); ++i) {
       MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(wsgroup->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(wsgroup->getItem(i));
       TS_ASSERT(ws != nullptr);
       TS_ASSERT_EQUALS(expectedNumHistograms, ws->getNumberHistograms());
       // Loop through each histogram in each workspace
@@ -1156,7 +1155,7 @@ public:
     WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1", 1.0, 2.0, 0.0, 0.0);
     MatrixWorkspace_sptr a =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
                                         mergeType, "prop1, non_existent");
     do_test_mergeSampleLogs(
@@ -1171,7 +1170,7 @@ public:
         mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
 
     MatrixWorkspace_sptr a =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
                                         mergeTypeTimeSeries, "prop1, prop1");
 
@@ -1187,7 +1186,7 @@ public:
     WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
         mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
     MatrixWorkspace_sptr a =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
                                         mergeTypeList, "prop1");
 
@@ -1205,7 +1204,7 @@ public:
     WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
         mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
     MatrixWorkspace_sptr a =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
                                         mergeTypeWarn, "prop1");
 

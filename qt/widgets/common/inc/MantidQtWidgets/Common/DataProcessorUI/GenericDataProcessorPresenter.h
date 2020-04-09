@@ -369,13 +369,14 @@ private:
   QSet<QString> m_workspaceList;
 
   void addHandle(const std::string &name,
-                 Mantid::API::Workspace_sptr workspace) override;
+                 const Mantid::API::Workspace_sptr &workspace) override;
   void postDeleteHandle(const std::string &name) override;
   void clearADSHandle() override;
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
-  void afterReplaceHandle(const std::string &name,
-                          Mantid::API::Workspace_sptr workspace) override;
+  void
+  afterReplaceHandle(const std::string &name,
+                     const Mantid::API::Workspace_sptr &workspace) override;
   std::vector<std::unique_ptr<Command>> getTableList();
 
   // set/get values in the table

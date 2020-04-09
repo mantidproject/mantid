@@ -57,7 +57,7 @@ private:
   double m_bkpos;
 };
 
-using FullprofPolynomial_sptr = boost::shared_ptr<FullprofPolynomial>;
+using FullprofPolynomial_sptr = std::shared_ptr<FullprofPolynomial>;
 
 } // namespace Functions
 } // namespace CurveFitting

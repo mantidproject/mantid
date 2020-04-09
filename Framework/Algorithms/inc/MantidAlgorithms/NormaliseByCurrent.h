@@ -8,7 +8,7 @@
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 namespace Mantid {
 namespace API {
 // Forward declare
@@ -56,7 +56,7 @@ private:
   void exec() override;
   // Extract the charge value from the logs.
   double
-  extractCharge(const boost::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
+  extractCharge(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
                 const bool integratePCharge) const;
 };
 

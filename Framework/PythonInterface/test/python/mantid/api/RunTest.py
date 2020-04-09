@@ -155,6 +155,12 @@ class RunTest(unittest.TestCase):
     def test_deep_copyable(self):
         self.do_test_copyable(copy.deepcopy)
 
+    def test_equals(self):
+        other = copy.deepcopy(self._run)
+        self.assertEqual(self._run, other)
+        other.addProperty("pressure", 1, True)
+        self.assertNotEqual(self._run, other)
+
 
 if __name__ == '__main__':
     unittest.main()

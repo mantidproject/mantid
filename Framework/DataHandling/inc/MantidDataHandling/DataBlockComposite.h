@@ -48,7 +48,7 @@ private:
 /**
  * Populates a DataBlockComposite with DataBlocks which are extracted from a
  * indexable collection (array-type). Note that std::is_array does not
- * work on boost::shared_array which is one of the use cases. Hence this
+ * work on std::shared_array which is one of the use cases. Hence this
  * function could get abused. Monitor spectra get their own data block
  * @param dataBlockComposite: the detector block composite which will get
  * populated

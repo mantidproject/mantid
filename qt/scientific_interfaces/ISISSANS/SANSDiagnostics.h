@@ -103,7 +103,7 @@ private:
                        const QString &orientation, const QString &hvMin,
                        const QString &hvMax);
   // get rectangular detector details
-  std::vector<boost::shared_ptr<RectDetectorDetails>>
+  std::vector<std::shared_ptr<RectDetectorDetails>>
   rectangularDetectorDetails(Mantid::API::Workspace_sptr &ws_sptr);
   /// returns sumspectra script
   bool runsumSpectra(const QString &ipwsName, const QString &opwsName,
@@ -195,7 +195,7 @@ private:
   int m_totalPeriods;               ///< total periods
   int m_Period;                     ///< Current period
   std::vector<std::string> m_wsVec; ///< workspace vector
-  std::vector<boost::shared_ptr<RectDetectorDetails>> m_rectDetectors;
+  std::vector<std::shared_ptr<RectDetectorDetails>> m_rectDetectors;
 
 private slots:
 

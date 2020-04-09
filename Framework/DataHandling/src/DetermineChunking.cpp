@@ -91,7 +91,7 @@ void DetermineChunking::init() {
       "typically of the form INST_####_event.nxs (N.B. case sensitive if "
       "running on Linux).");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("MaxChunkSize", EMPTY_DBL(), mustBePositive,
                   "Get chunking strategy for chunks with this number of "

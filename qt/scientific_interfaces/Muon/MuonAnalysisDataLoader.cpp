@@ -291,12 +291,12 @@ MuonAnalysisDataLoader::getDeadTimesTable(const LoadResult &loadedData) const {
 
   // Convert dead times into a table
   if (deadTimes) {
-    if (auto table = boost::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
+    if (auto table = std::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
       deadTimesTable = table;
     } else if (auto group =
-                   boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
+                   std::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
       deadTimesTable =
-          boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+          std::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
     }
   }
 
@@ -346,16 +346,16 @@ Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
   alg->initialize();
 
   // Set input workspace property
-  auto inputGroup = boost::make_shared<WorkspaceGroup>();
+  auto inputGroup = std::make_shared<WorkspaceGroup>();
   // If is a group, will need to handle periods
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     for (int i = 0; i < group->getNumberOfEntries(); i++) {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       inputGroup->addWorkspace(ws);
     }
     alg->setProperty("SummedPeriodSet", options.summedPeriods);
     alg->setProperty("SubtractedPeriodSet", options.subtractedPeriods);
-  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  } else if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
     alg->setProperty("SummedPeriodSet", "1");
@@ -460,7 +460,7 @@ void MuonAnalysisDataLoader::updateCache() const {
     if (!ws) { // Workspace has been deleted
       invalidKeys.emplace_back(entry.first);
     } else if (const auto wsGroup =
-                   boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+                   std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       if (wsGroup->size() == 0) { // Group has been cleared
         invalidKeys.emplace_back(entry.first);
       }

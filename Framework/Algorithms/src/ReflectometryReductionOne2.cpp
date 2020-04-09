@@ -139,7 +139,7 @@ void ReflectometryReductionOne2::init() {
   // Processing instructions
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
-                      boost::make_shared<MandatoryValidator<std::string>>(),
+                      std::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
                   "Grouping pattern on spectrum numbers to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
@@ -147,14 +147,14 @@ void ReflectometryReductionOne2::init() {
   // Minimum wavelength
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
+                      std::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum in angstroms");
 
   // Maximum wavelength
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
+                      std::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 

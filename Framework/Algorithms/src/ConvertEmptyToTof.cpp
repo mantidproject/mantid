@@ -50,7 +50,7 @@ const std::string ConvertEmptyToTof::category() const {
  */
 void ConvertEmptyToTof::init() {
 
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Empty");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Empty");
   declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
@@ -78,7 +78,7 @@ void ConvertEmptyToTof::init() {
       "a list '12,15,26,28' gives '10-20,26,28'.");
 
   // OR Specify EPP
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "ElasticPeakPosition", EMPTY_INT(), mustBePositive,
@@ -351,7 +351,7 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
 
   // 2. Use factory to generate Gaussian
   auto temppeak = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussianpeak = boost::dynamic_pointer_cast<API::IPeakFunction>(temppeak);
+  auto gaussianpeak = std::dynamic_pointer_cast<API::IPeakFunction>(temppeak);
   gaussianpeak->setHeight(height);
   gaussianpeak->setCentre(center);
   gaussianpeak->setFwhm(sigma);
@@ -371,8 +371,8 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
-  fitalg->setProperty(
-      "Function", boost::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
+  fitalg->setProperty("Function",
+                      std::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
   fitalg->setProperty("InputWorkspace", m_inputWS);
   fitalg->setProperty("WorkspaceIndex", workspaceindex);
   fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");

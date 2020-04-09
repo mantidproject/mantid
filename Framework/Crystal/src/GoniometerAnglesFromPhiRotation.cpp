@@ -290,7 +290,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   std::string Ties = "SampleXOffset=0.0,SampleYOffset=0.0,SampleZOffset=0.0,"
                      "GonRotx=0.0,GonRoty=0.0,GonRotz=0.0";
 
-  boost::shared_ptr<Algorithm> Fit = createChildAlgorithm("Fit");
+  std::shared_ptr<Algorithm> Fit = createChildAlgorithm("Fit");
 
   Fit->initialize();
   Fit->setProperty("Function", FunctionArgs);
@@ -305,7 +305,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   Fit->executeAsChildAlg();
 
-  boost::shared_ptr<API::ITableWorkspace> results =
+  std::shared_ptr<API::ITableWorkspace> results =
       Fit->getProperty("OutputParameters");
   double chisq = Fit->getProperty("OutputChi2overDoF");
 

@@ -10,7 +10,7 @@
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h"
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 /** This class is used to plot MDWorkspace line plots.
  * For example, in the LineViewer and via the "Plot MD" menu on workspaces.
@@ -101,7 +101,7 @@ private:
   bool m_isDistribution;
 
   /// Original workspace (for purposes of showing alternative coordinates)
-  boost::weak_ptr<const Mantid::API::IMDWorkspace> m_originalWorkspace;
+  std::weak_ptr<const Mantid::API::IMDWorkspace> m_originalWorkspace;
 
   /// Optional coordinate transformation to go from distance on line to another
   /// coordinate

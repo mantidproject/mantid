@@ -61,9 +61,9 @@ void MuonProcess::init() {
 
   std::vector<std::string> allowedModes{"CorrectAndGroup", "Analyse",
                                         "Combined"};
-  auto modeVal = boost::make_shared<CompositeValidator>();
-  modeVal->add(boost::make_shared<StringListValidator>(allowedModes));
-  modeVal->add(boost::make_shared<MandatoryValidator<std::string>>());
+  auto modeVal = std::make_shared<CompositeValidator>();
+  modeVal->add(std::make_shared<StringListValidator>(allowedModes));
+  modeVal->add(std::make_shared<MandatoryValidator<std::string>>());
   declareProperty("Mode", "Combined", modeVal,
                   "Mode to run in. CorrectAndGroup applies dead time "
                   "correction and grouping; Analyse changes bin offset, "
@@ -96,7 +96,7 @@ void MuonProcess::init() {
   declareProperty("TimeZero", EMPTY_DBL(),
                   "Value used for Time Zero correction");
   declareProperty("LoadedTimeZero", EMPTY_DBL(),
-                  boost::make_shared<MandatoryValidator<double>>(),
+                  std::make_shared<MandatoryValidator<double>>(),
                   "Time Zero value loaded from file, e.g. from LoadMuonNexus.");
   declareProperty(
       std::make_unique<ArrayProperty<double>>("RebinParams"),
@@ -107,7 +107,7 @@ void MuonProcess::init() {
   std::vector<std::string> allowedTypes{"PairAsymmetry", "GroupAsymmetry",
                                         "GroupCounts"};
   declareProperty("OutputType", "PairAsymmetry",
-                  boost::make_shared<StringListValidator>(allowedTypes),
+                  std::make_shared<StringListValidator>(allowedTypes),
                   "What kind of workspace required for analysis.");
 
   declareProperty("PairFirstIndex", EMPTY_INT(),
@@ -142,15 +142,15 @@ void MuonProcess::exec() {
 
   std::vector<int> summedPeriods = getProperty("SummedPeriodSet");
   std::vector<int> subtractedPeriods = getProperty("SubtractedPeriodSet");
-  auto allPeriodsWS = boost::make_shared<WorkspaceGroup>();
+  auto allPeriodsWS = std::make_shared<WorkspaceGroup>();
   progress.report();
 
   // Deal with single-period workspace
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     allPeriodsWS->addWorkspace(ws);
   }
   // Deal with multi-period workspace
-  else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+  else if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     allPeriodsWS = group;
   }
 
@@ -221,9 +221,9 @@ void MuonProcess::exec() {
 WorkspaceGroup_sptr
 MuonProcess::groupWorkspaces(const WorkspaceGroup_sptr &wsGroup,
                              const TableWorkspace_sptr &grouping) {
-  WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr outWS = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       MatrixWorkspace_sptr result;
       IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
@@ -245,9 +245,9 @@ MuonProcess::groupWorkspaces(const WorkspaceGroup_sptr &wsGroup,
  */
 WorkspaceGroup_sptr MuonProcess::applyDTC(const WorkspaceGroup_sptr &wsGroup,
                                           const TableWorkspace_sptr &dt) {
-  WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr outWS = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       MatrixWorkspace_sptr result;
       IAlgorithm_sptr dtc = createChildAlgorithm("ApplyDeadTimeCorr");
@@ -277,9 +277,9 @@ WorkspaceGroup_sptr MuonProcess::applyDTC(const WorkspaceGroup_sptr &wsGroup,
 WorkspaceGroup_sptr
 MuonProcess::correctWorkspaces(const WorkspaceGroup_sptr &wsGroup,
                                double loadedTimeZero) {
-  WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr outWS = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       MatrixWorkspace_sptr result;
       result = correctWorkspace(ws, loadedTimeZero);
@@ -366,7 +366,7 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
   std::vector<int> subtractedPeriods = getProperty(propSubtractedPeriodSet);
 
   // If single-period data, test the sets of periods specified
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     if (std::find_if_not(summedPeriods.begin(), summedPeriods.end(), isOne) !=
         summedPeriods.end()) {
       errors[propSummedPeriodSet] = "Single period data but set of periods to "
@@ -378,7 +378,7 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
     }
   } else {
     // If not a MatrixWorkspace, must be a multi-period WorkspaceGroup
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
     if (group == nullptr) {
       errors[propInputWS] = "Input workspace is of invalid type";
     } else {

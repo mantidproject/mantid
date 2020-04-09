@@ -107,7 +107,7 @@ public:
   void verifySuccessCase(double expectedCounts = 2.0,
                          double expectedErrors = sqrt(2.0)) {
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES);
@@ -206,7 +206,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
     const auto &xAxis = outWS->getAxis(0);
     TS_ASSERT_EQUALS(xAxis->length(), 6)
@@ -343,7 +343,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -370,7 +370,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     const auto &xAxis = outWS->getAxis(0);
@@ -418,7 +418,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -465,7 +465,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -490,7 +490,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -516,7 +516,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -574,7 +574,7 @@ public:
     alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
 
     const auto &xAxis = outWS->getAxis(0);
@@ -694,7 +694,7 @@ public:
     alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
 
     auto yAxis = outWS->getAxis(1);
@@ -731,7 +731,7 @@ public:
     alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
 
     auto yAxis = outWS->getAxis(1);
@@ -762,7 +762,7 @@ public:
 
   void setUp() override {
 
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
 
     for (size_t i = 0; i < m_numberOfWorkspaces; ++i) {
       std::vector<double> rotations;

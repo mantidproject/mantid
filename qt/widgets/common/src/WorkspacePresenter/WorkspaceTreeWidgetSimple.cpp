@@ -102,8 +102,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } catch (Exception::NotFoundError &) {
       return;
     }
-    if (auto matrixWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+    if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
 
       // Don't plot 1D spectra if only one X value
@@ -143,28 +142,28 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
       menu->addAction(m_showDetectors);
-    } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
+    } else if (std::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
-      if (boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
+      if (std::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
         menu->addAction(m_showDetectors);
       }
-    } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+    } else if (std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
     } else if (auto wsGroup =
-                   boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+                   std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
       auto workspaces = wsGroup->getAllItems();
       bool containsMatrixWorkspace{false};
       bool containsPeaksWorkspace{false};
 
       for (auto ws : workspaces) {
-        if (auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+        if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
           containsMatrixWorkspace = true;
           break;
         } else if (auto peaksWS =
-                       boost::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
+                       std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
           containsPeaksWorkspace = true;
         }
       }

@@ -21,7 +21,7 @@ HistogramValidator::HistogramValidator(const bool &mustBeHistogram)
 
 /// Clone the current state
 Kernel::IValidator_sptr HistogramValidator::clone() const {
-  return boost::make_shared<HistogramValidator>(*this);
+  return std::make_shared<HistogramValidator>(*this);
 }
 
 /** Checks if the workspace contains a histogram when it shouldn't and

@@ -46,7 +46,7 @@ public:
     wsName = "LoadInstrumentFromRawTest";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
@@ -73,13 +73,13 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(i->getName(), "LOQ     ");
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "Source");
     TS_ASSERT_DELTA(source->getPos().Z(), -11, 0.01);
 
-    boost::shared_ptr<const IComponent> samplepos = i->getSample();
+    std::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();

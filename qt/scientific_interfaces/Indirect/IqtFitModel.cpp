@@ -36,7 +36,7 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function,
     return nullptr;
   if (function->category() == category)
     return function;
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     return getFirstInCategory(composite, category);
   return nullptr;
@@ -233,7 +233,7 @@ IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
 
 MultiDomainFunction_sptr IqtFitModel::createFunctionWithGlobalBeta(
     const IFunction_sptr &function) const {
-  boost::shared_ptr<MultiDomainFunction> multiDomainFunction(
+  std::shared_ptr<MultiDomainFunction> multiDomainFunction(
       new MultiDomainFunction);
   const auto functionString = function->asString();
   for (auto i = TableDatasetIndex{0}; i < numberOfWorkspaces(); ++i) {

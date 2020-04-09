@@ -49,7 +49,7 @@ private:
   void throwIfUnsupportedFileType(int32_t sqwType);
   void createOutputWorkspace();
   void readAllSPEHeadersToWorkspace();
-  boost::shared_ptr<API::ExperimentInfo> readSingleSPEHeader();
+  std::shared_ptr<API::ExperimentInfo> readSingleSPEHeader();
   void cacheFrameTransforms(const Geometry::OrientedLattice &lattice);
   void skipDetectorSection();
   void readDataSection();
@@ -73,7 +73,7 @@ private:
 
   std::unique_ptr<std::ifstream> m_file;
   std::unique_ptr<Kernel::BinaryStreamReader> m_reader;
-  boost::shared_ptr<SQWWorkspace> m_outputWS;
+  std::shared_ptr<SQWWorkspace> m_outputWS;
   uint16_t m_nspe = 0;
   Kernel::DblMatrix m_uToRLU;
   std::string m_outputFrame;

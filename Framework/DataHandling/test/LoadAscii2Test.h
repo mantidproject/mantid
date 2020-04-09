@@ -388,7 +388,7 @@ public:
       Workspace_sptr output;
       TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
       TableWorkspace_sptr outputWS =
-          boost::dynamic_pointer_cast<TableWorkspace>(output);
+          std::dynamic_pointer_cast<TableWorkspace>(output);
       if (outputWS) {
         checkTableData(outputWS);
       } else {
@@ -490,7 +490,7 @@ private:
       file.close();
     } else {
       Mantid::DataObjects::Workspace2D_sptr wsToSave =
-          boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+          std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
       for (int i = 0; i < 5; i++) {
         auto &X = wsToSave->mutableX(i);
@@ -566,7 +566,7 @@ private:
         Workspace_sptr output;
         TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
         MatrixWorkspace_sptr outputWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+            std::dynamic_pointer_cast<MatrixWorkspace>(output);
         if (outputWS) {
           if (dataCheck) {
             checkData(outputWS, cols);
@@ -679,7 +679,7 @@ private:
     constexpr int xyLen = 100;
 
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen,
                                                 xyLen));
 

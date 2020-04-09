@@ -62,25 +62,23 @@ private:
   /// Load log data from a group
   void loadLogs(::NeXus::File &file, const std::string &entry_name,
                 const std::string &entry_class,
-                const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
+                const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
   /// Load an NXlog entry
-  void
-  loadNXLog(::NeXus::File &file, const std::string &entry_name,
-            const std::string &entry_class,
-            const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void loadNXLog(::NeXus::File &file, const std::string &entry_name,
+                 const std::string &entry_class,
+                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
   /// Load an IXseblock entry
+  void loadSELog(::NeXus::File &file, const std::string &entry_name,
+                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
   void
-  loadSELog(::NeXus::File &file, const std::string &entry_name,
-            const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
-  void loadVetoPulses(
-      ::NeXus::File &file,
-      const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  loadVetoPulses(::NeXus::File &file,
+                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
   void
   loadNPeriods(::NeXus::File &file,
-               const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
+               const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /// Progress reporting object
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
 
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
   /// SNAP

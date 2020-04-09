@@ -57,7 +57,7 @@ public:
 
     auto peakProfile = createFunction();
 
-    auto domain = boost::shared_ptr<FunctionDomain1DVector>(
+    auto domain = std::shared_ptr<FunctionDomain1DVector>(
         new FunctionDomain1DVector(-1, 1, 3));
     Mantid::API::FunctionValues outputs(*domain);
     peakProfile->setParameter(0, 0.93);
@@ -74,7 +74,7 @@ public:
 private:
   Mantid::API::IFunction_sptr createFunction() {
     Mantid::API::IFunction_sptr profile =
-        boost::make_shared<ComptonPeakProfile>();
+        std::make_shared<ComptonPeakProfile>();
     profile->initialize();
     auto paramWS = ComptonProfileTestHelpers::createTestWorkspace(
         1, 300, 351, 0.5, ComptonProfileTestHelpers::NoiseType::None, true,

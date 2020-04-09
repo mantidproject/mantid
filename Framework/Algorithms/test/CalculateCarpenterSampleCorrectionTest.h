@@ -123,8 +123,8 @@ public:
     // Check the correction workspaces in the group
     Workspace_sptr absPtr = test_output_WS->getItem(0);
     Workspace_sptr msPtr = test_output_WS->getItem(1);
-    auto absWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
-    auto msWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
+    auto absWksp = std::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
+    auto msWksp = std::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
     TS_ASSERT(absWksp);
     TS_ASSERT(msWksp);
 
@@ -244,13 +244,13 @@ public:
             outName));
     // Check the correction workspaces in the group
     auto absWksp =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
     auto msWksp =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
     TS_ASSERT(absWksp);
     TS_ASSERT(msWksp);
 
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outputWS);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outputWS);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // Check absorption correction

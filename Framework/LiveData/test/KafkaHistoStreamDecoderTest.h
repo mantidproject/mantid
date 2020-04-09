@@ -84,7 +84,7 @@ public:
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto histoWksp = boost::dynamic_pointer_cast<Workspace2D>(workspace);
+    auto histoWksp = std::dynamic_pointer_cast<Workspace2D>(workspace);
     TSM_ASSERT(
         "Expected a Workspace2D from extractData(). Found something else",
         histoWksp);

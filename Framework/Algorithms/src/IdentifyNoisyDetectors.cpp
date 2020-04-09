@@ -24,7 +24,7 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(IdentifyNoisyDetectors)
 
 void IdentifyNoisyDetectors::init() {
-  auto wsVal = boost::make_shared<CompositeValidator>();
+  auto wsVal = std::make_shared<CompositeValidator>();
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();

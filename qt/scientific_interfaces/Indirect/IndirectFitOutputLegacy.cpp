@@ -120,7 +120,7 @@ MatrixWorkspace_sptr
 getMatrixWorkspaceFromGroup(const WorkspaceGroup_sptr &group,
                             std::size_t index) {
   if (group->size() > index)
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(index));
+    return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(index));
   return nullptr;
 }
 

@@ -583,6 +583,22 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   return jsonMap;
 }
 
+bool PropertyManager::operator==(const PropertyManager &other) const {
+  if (other.m_properties.size() != m_properties.size())
+    return false;
+  for (const auto &[key, value] : m_properties) {
+    if (other.m_properties.count(key) != 1)
+      return false;
+    if (*other.m_properties.at(key) != *value)
+      return false;
+  }
+  return true;
+}
+
+bool PropertyManager::operator!=(const PropertyManager &other) const {
+  return !this->operator==(other);
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Get a property by name
  *  @param name :: The name of the property (case insensitive)

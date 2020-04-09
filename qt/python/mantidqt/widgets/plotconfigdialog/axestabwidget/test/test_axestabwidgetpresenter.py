@@ -38,7 +38,9 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         ax2.plot([-1000000, 10000], [10, 12], 'rx')
 
     def _generate_presenter(self):
-        mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)")
+        mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
+                              get_axis=lambda: "x",
+                              get_properties=lambda: {})
         return Presenter(self.fig, view=mock_view)
 
     def test_generate_ax_name_returns_correct_name(self):
@@ -51,26 +53,25 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         ax_mock = mock.MagicMock()
         presenter = self._generate_presenter()
         with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock):
-            presenter.apply_properties()
-            # Mock properties object and view then test that the view's setters
-            # are called with the correct property values
-            view_mock = presenter.view
-            get_props_mock = view_mock.get_properties
-            view_mock.get_properties.assert_called_once_with()
-            ax_mock.set_title.assert_called_once_with(
-                get_props_mock().title)
-            ax_mock.set_xlim.assert_called_once_with(
-                get_props_mock().xlim)
-            ax_mock.set_xlabel.assert_called_once_with(
-                get_props_mock().xlabel)
-            ax_mock.set_xscale.assert_called_once_with(
-                get_props_mock().xscale)
-            ax_mock.set_ylim.assert_called_once_with(
-                get_props_mock().ylim)
-            ax_mock.set_ylabel.assert_called_once_with(
-                get_props_mock().ylabel)
-            ax_mock.set_yscale.assert_called_once_with(
-                get_props_mock().yscale)
+            with mock.patch.object(presenter, 'update_view', lambda: None):
+                presenter.current_view_props = presenter.get_selected_ax_properties()
+                presenter.apply_properties()
+                # Mock properties object and view then test that the view's setters
+                # are called with the correct property values
+                ax_mock.set_title.assert_called_once_with(
+                    presenter.current_view_props.title)
+                ax_mock.set_xlim.assert_called_once_with(
+                    presenter.current_view_props.xlim)
+                ax_mock.set_xlabel.assert_called_once_with(
+                    presenter.current_view_props.xlabel)
+                ax_mock.set_xscale.assert_called_once_with(
+                    presenter.current_view_props.xscale)
+                ax_mock.set_ylim.assert_called_once_with(
+                    presenter.current_view_props.ylim)
+                ax_mock.set_ylabel.assert_called_once_with(
+                    presenter.current_view_props.ylabel)
+                ax_mock.set_yscale.assert_called_once_with(
+                    presenter.current_view_props.yscale)
 
     def test_get_axes_names_dict(self):
         actual_dict = get_axes_names_dict(self.fig)
@@ -130,41 +131,19 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
 
     def test_update_view_calls_correct_setters_with_correct_values(self):
         presenter = self._generate_presenter()
-        new_view_mock = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)")
+        new_view_mock = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
+                                  get_axis=lambda: "x",
+                                  get_properties=lambda: {})
         ax = self.fig.get_axes()[0]
-        setters = ['set_title', 'set_xlower_limit', 'set_xupper_limit',
-                   'set_ylower_limit', 'set_yupper_limit', 'set_xlabel',
-                   'set_ylabel', 'set_xscale', 'set_yscale']
+        setters = ['set_title', 'set_lower_limit', 'set_upper_limit',
+                   'set_label', 'set_scale']
         expected_vals = [self.title,
-                         ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0],
-                         ax.get_ylim()[1], self.x_label, self.y_label,
-                         self.x_scale, self.y_scale]
+                         ax.get_xlim()[0], ax.get_xlim()[1],
+                         self.x_label, self.x_scale]
         with mock.patch.object(presenter, 'view', new_view_mock):
             presenter.update_view()
             for setter, value in zip(setters, expected_vals):
                 getattr(new_view_mock, setter).assert_called_once_with(value)
-
-    def test_apply_properties_correctly_handles_negative_axis_when_changing_to_log_scale(self):
-        fig = figure()
-        ax = fig.add_subplot(111)
-        ax.plot([0, 1], [10, 12], 'rx')
-        ax.set_title("My Axes")
-        mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)")
-        presenter = Presenter(fig, view=mock_view)
-
-        ax_properties = AxProperties.from_ax_object(ax)
-        min_limit = -10
-        max_limit = 10
-        ax_properties.xscale = 'Log'
-        ax_properties.xlim = (min_limit, max_limit)
-        ax_properties.yscale = 'Log'
-        ax_properties.ylim = (min_limit, max_limit)
-        presenter.view.get_properties.return_value = ax_properties
-
-        presenter.apply_properties()
-
-        self.assertEqual(ax.get_xlim(), (0.01*max_limit, max_limit))
-        self.assertEqual(ax.get_ylim(), (0.01*max_limit, max_limit))
 
 
 if __name__ == '__main__':

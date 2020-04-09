@@ -61,8 +61,8 @@ void FunctionDomain1DSpectrumCreator::setWorkspaceIndex(size_t workspaceIndex) {
  *data.
  */
 void FunctionDomain1DSpectrumCreator::createDomain(
-    boost::shared_ptr<FunctionDomain> &domain,
-    boost::shared_ptr<FunctionValues> &values, size_t i0) {
+    std::shared_ptr<FunctionDomain> &domain,
+    std::shared_ptr<FunctionValues> &values, size_t i0) {
   throwIfWorkspaceInvalid();
 
   auto points = m_matrixWorkspace->points(m_workspaceIndex);

@@ -23,20 +23,20 @@ public:
   static void destroySuite(CommonBinsValidatorTest *suite) { delete suite; }
 
   void test_empty() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     CommonBinsValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_zero_length_bins() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
     CommonBinsValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_common_bins() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(3, 11, 10);
     for (size_t k = 0; k < 3; ++k)
       for (size_t i = 0; i < 11; ++i) {
@@ -48,7 +48,7 @@ public:
   }
 
   void test_diff_bins() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(3, 11, 10);
     for (size_t k = 0; k < 3; ++k)
       for (size_t i = 0; i < 11; ++i) {

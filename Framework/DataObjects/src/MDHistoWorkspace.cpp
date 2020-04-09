@@ -17,11 +17,11 @@
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/scoped_array.hpp>
 #include <cmath>
 #include <map>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -123,7 +123,7 @@ void MDHistoWorkspace::init(
   dim2.reserve(dimensions.size());
   std::transform(dimensions.cbegin(), dimensions.cend(),
                  std::back_inserter(dim2), [](const auto dimension) {
-                   return boost::dynamic_pointer_cast<IMDDimension>(dimension);
+                   return std::dynamic_pointer_cast<IMDDimension>(dimension);
                  });
   this->init(dim2);
   m_nEventsContributed = 0;

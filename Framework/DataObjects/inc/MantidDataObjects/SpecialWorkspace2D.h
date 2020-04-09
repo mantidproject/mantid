@@ -60,11 +60,11 @@ public:
 
   std::set<detid_t> getDetectorIDs(const std::size_t workspaceIndex) const;
 
-  void binaryOperation(boost::shared_ptr<const SpecialWorkspace2D> &ws,
+  void binaryOperation(std::shared_ptr<const SpecialWorkspace2D> &ws,
                        const unsigned int operatortype);
   void binaryOperation(const unsigned int operatortype);
 
-  virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
+  virtual void copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 private:
   SpecialWorkspace2D *doClone() const override {
@@ -73,7 +73,7 @@ private:
   SpecialWorkspace2D *doCloneEmpty() const override {
     return new SpecialWorkspace2D();
   }
-  bool isCompatible(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
+  bool isCompatible(const std::shared_ptr<const SpecialWorkspace2D> &ws);
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -86,9 +86,9 @@ protected:
   /// Return human-readable string
   const std::string toString() const override;
 
-  void binaryAND(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
-  void binaryOR(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
-  void binaryXOR(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
+  void binaryAND(const std::shared_ptr<const SpecialWorkspace2D> &ws);
+  void binaryOR(const std::shared_ptr<const SpecialWorkspace2D> &ws);
+  void binaryXOR(const std::shared_ptr<const SpecialWorkspace2D> &ws);
   void binaryNOT();
 
   /// Map with key = detector ID, and value = workspace index.
@@ -96,11 +96,10 @@ protected:
 };
 
 /// shared pointer to the SpecialWorkspace2D class
-using SpecialWorkspace2D_sptr = boost::shared_ptr<SpecialWorkspace2D>;
+using SpecialWorkspace2D_sptr = std::shared_ptr<SpecialWorkspace2D>;
 
 /// shared pointer to a const SpecialWorkspace2D
-using SpecialWorkspace2D_const_sptr =
-    boost::shared_ptr<const SpecialWorkspace2D>;
+using SpecialWorkspace2D_const_sptr = std::shared_ptr<const SpecialWorkspace2D>;
 
 } // namespace DataObjects
 } // namespace Mantid

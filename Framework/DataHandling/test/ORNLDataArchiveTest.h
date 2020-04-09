@@ -138,7 +138,7 @@ public:
   }
 
   void testFactory() {
-    boost::shared_ptr<IArchiveSearch> arch =
+    std::shared_ptr<IArchiveSearch> arch =
         ArchiveSearchFactory::Instance().create("ORNLDataSearch");
     TS_ASSERT(arch);
   }

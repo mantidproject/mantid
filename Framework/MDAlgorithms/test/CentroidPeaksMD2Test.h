@@ -135,7 +135,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    peakWS = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    peakWS = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve(OutputWorkspace));
     TS_ASSERT(peakWS);
     if (!peakWS)

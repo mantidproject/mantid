@@ -74,7 +74,7 @@ class setUpADSWithWorkspace {
 public:
   setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
-    wsGroup = boost::make_shared<WorkspaceGroup>();
+    wsGroup = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace(groupWSName, wsGroup);
   };
 
@@ -249,7 +249,7 @@ public:
     alg.initialize();
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Current behaviour is to convert bin edge x-values to bin centre x-values
@@ -277,7 +277,7 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.setProperty("TimeOffset", 0.2);
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Account for the bin edges to point data conversion
@@ -312,7 +312,7 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.setProperty("SummedPeriods", "1,2");
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
@@ -342,7 +342,7 @@ public:
     alg.setProperty("SummedPeriods", "1,2");
     alg.setProperty("SubtractedPeriods", "3");
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
@@ -382,7 +382,7 @@ public:
 
     alg.execute();
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
@@ -423,7 +423,7 @@ public:
     alg.setProperty("InputWorkspace2", groupWS2Name);
     alg.execute();
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);

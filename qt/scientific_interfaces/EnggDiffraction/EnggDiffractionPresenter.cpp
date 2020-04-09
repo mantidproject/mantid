@@ -60,9 +60,8 @@ EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(nullptr), m_calibFinishedOK(false),
       m_focusFinishedOK(false), m_rebinningFinishedOK(false), m_view(view),
       m_viewHasClosed(false),
-      m_vanadiumCorrectionsModel(
-          boost::make_shared<EnggVanadiumCorrectionsModel>(
-              m_view->currentCalibSettings(), m_view->currentInstrument())) {
+      m_vanadiumCorrectionsModel(std::make_shared<EnggVanadiumCorrectionsModel>(
+          m_view->currentCalibSettings(), m_view->currentInstrument())) {
   if (!m_view) {
     throw std::runtime_error(
         "Severe inconsistency found. Presenter created "

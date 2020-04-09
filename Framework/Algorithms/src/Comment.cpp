@@ -43,7 +43,7 @@ void Comment::init() {
                   "An InOut workspace that will store the new history comment");
 
   declareProperty("Text", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The text you want to store in the history of the workspace",
                   Direction::Input);
 

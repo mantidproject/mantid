@@ -85,7 +85,7 @@ const std::string VesuvioCalculateGammaBackground::category() const {
 
 void VesuvioCalculateGammaBackground::init() {
 
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>(false); // point data
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -404,14 +404,14 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
   // retrieveInputs ensures we will get a composite function and that each
   // member is a ComptonProfile
   // we can't static_cast though due to the virtual inheritance with IFunction
-  auto profileFunction = boost::dynamic_pointer_cast<CompositeFunction>(
+  auto profileFunction = std::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createInitialized(m_profileFunction));
 
   std::vector<double> correctedVals(inSpectrum);
 
   for (size_t i = 0; i < m_npeaks; ++i) {
     auto profile =
-        boost::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
+        std::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
             profileFunction->getFunction(i));
     profile->disableLogging();
     profile->setUpForFit();
@@ -448,11 +448,11 @@ void VesuvioCalculateGammaBackground::retrieveInputs() {
   IFunction_sptr profileFunction =
       FunctionFactory::Instance().createInitialized(m_profileFunction);
   if (auto composite =
-          boost::dynamic_pointer_cast<CompositeFunction>(profileFunction)) {
+          std::dynamic_pointer_cast<CompositeFunction>(profileFunction)) {
     m_npeaks = composite->nFunctions();
     for (size_t i = 0; i < m_npeaks; ++i) {
       auto single =
-          boost::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
+          std::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
               composite->getFunction(i));
       if (!single) {
         throw std::invalid_argument("Invalid function. Composite must contain "
@@ -510,7 +510,7 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   m_l1 = m_samplePos.distance(source->getPos());
 
   // foils
-  auto changer = boost::dynamic_pointer_cast<const Geometry::IObjComponent>(
+  auto changer = std::dynamic_pointer_cast<const Geometry::IObjComponent>(
       inst->getComponentByName("foil-changer"));
   if (!changer) {
     throw std::invalid_argument(
@@ -602,7 +602,7 @@ std::pair<double, double> VesuvioCalculateGammaBackground::calculateThetaRange(
     const Geometry::IComponent_const_sptr &foilComp, const double radius,
     const unsigned int horizDir) const {
   auto shapedObject =
-      boost::dynamic_pointer_cast<const Geometry::IObjComponent>(foilComp);
+      std::dynamic_pointer_cast<const Geometry::IObjComponent>(foilComp);
   if (!shapedObject) {
     throw std::invalid_argument("A foil has been defined without a shape. "
                                 "Please check instrument definition.");

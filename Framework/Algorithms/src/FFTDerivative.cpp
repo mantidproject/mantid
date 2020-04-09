@@ -35,7 +35,7 @@ void FFTDerivative::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "Workspace with result derivatives");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("Order", 1, mustBePositive, "The order of the derivative");
   // declareProperty("Transform",false,"Output the transform workspace");

@@ -12,7 +12,7 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include <QDialog>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //----------------------------------
 // Qt Forward declarations

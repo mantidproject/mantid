@@ -32,9 +32,9 @@ public:
   ConvToMDSelector(ConverterType tp = DEFAULT);
   /// function which selects the convertor depending on workspace type and
   /// (possibly, in a future) some workspace properties
-  boost::shared_ptr<ConvToMDBase>
+  std::shared_ptr<ConvToMDBase>
   convSelector(const API::MatrixWorkspace_sptr &inputWS,
-               boost::shared_ptr<ConvToMDBase> &currentSolver) const;
+               std::shared_ptr<ConvToMDBase> &currentSolver) const;
 
 private:
   ConverterType converterType;

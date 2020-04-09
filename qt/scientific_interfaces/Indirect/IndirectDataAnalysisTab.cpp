@@ -270,7 +270,7 @@ void IndirectDataAnalysisTab::updatePlot(
   // fitted spectrum.
   if (outputWS && index < outputWS->size()) {
     auto workspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
     updatePlot(workspace, fitPreviewPlot, diffPreviewPlot);
   } else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);

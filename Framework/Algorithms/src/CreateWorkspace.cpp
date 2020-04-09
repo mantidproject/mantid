@@ -46,7 +46,7 @@ void CreateWorkspace::init() {
                                                         Direction::Output),
                   "Name to be given to the created workspace.");
 
-  auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
+  auto required = std::make_shared<MandatoryValidator<std::vector<double>>>();
   declareProperty(std::make_unique<ArrayProperty<double>>("DataX", required),
                   "X-axis data values for workspace.");
   declareProperty(std::make_unique<ArrayProperty<double>>("DataY", required),
@@ -58,7 +58,7 @@ void CreateWorkspace::init() {
   declareProperty("UnitX", "", "The unit to assign to the XAxis");
 
   declareProperty("VerticalAxisUnit", "SpectraNumber",
-                  boost::make_shared<StringListValidator>(unitOptions),
+                  std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the second Axis (leave blank for "
                   "default Spectra number)");
   declareProperty(
@@ -84,7 +84,7 @@ void CreateWorkspace::init() {
       Parallel::toString(Parallel::StorageMode::MasterOnly)};
   declareProperty(
       "ParallelStorageMode", Parallel::toString(Parallel::StorageMode::Cloned),
-      boost::make_shared<StringListValidator>(propOptions),
+      std::make_shared<StringListValidator>(propOptions),
       "The parallel storage mode of the output workspace for MPI builds");
   setPropertySettings("ParallelStorageMode",
                       std::make_unique<InvisibleProperty>());
@@ -248,8 +248,8 @@ void CreateWorkspace::exec() {
   } catch (Exception::NotFoundError &) {
     outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = outputWS->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(unit);
+    std::shared_ptr<Units::Label> label =
+        std::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
 

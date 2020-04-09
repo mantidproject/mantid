@@ -102,7 +102,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
   // Get the number of monitor channels
   size_t nMonitors(0);
   size_t nXbins, nYbins;
-  boost::shared_ptr<const Instrument> instrument = workspace->getInstrument();
+  std::shared_ptr<const Instrument> instrument = workspace->getInstrument();
   std::vector<detid_t> monitors = instrument->getMonitors();
   nMonitors = monitors.size();
 

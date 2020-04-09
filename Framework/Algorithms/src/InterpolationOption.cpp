@@ -63,7 +63,7 @@ std::unique_ptr<Property> InterpolationOption::property() const {
   using StringProperty = Kernel::PropertyWithValue<std::string>;
 
   return std::make_unique<StringProperty>(
-      PROP_NAME, LINEAR_OPT, boost::make_shared<StringListValidator>(OPTIONS));
+      PROP_NAME, LINEAR_OPT, std::make_shared<StringListValidator>(OPTIONS));
 }
 
 /**

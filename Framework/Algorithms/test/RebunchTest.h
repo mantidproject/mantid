@@ -218,7 +218,7 @@ public:
   static void destroySuite(RebunchTestPerformance *suite) { delete suite; }
 
   void setUp() override {
-    input = boost::make_shared<Workspace2D>();
+    input = std::make_shared<Workspace2D>();
     input->initialize(100000, 3000, 2999);
     input->setDistribution(true);
     AnalysisDataService::Instance().add("input", input);

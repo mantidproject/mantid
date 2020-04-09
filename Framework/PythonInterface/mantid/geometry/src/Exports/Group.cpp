@@ -37,13 +37,13 @@ std::vector<std::string> getSymmetryOperationStrings(Group &self) {
 }
 
 Group_sptr constructGroupFromString(const std::string &initializerString) {
-  return boost::const_pointer_cast<Group>(
+  return std::const_pointer_cast<Group>(
       GroupFactory::create<Group>(initializerString));
 }
 
 Group_sptr
 constructGroupFromVector(const std::vector<SymmetryOperation> &symOps) {
-  return boost::const_pointer_cast<Group>(GroupFactory::create<Group>(symOps));
+  return std::const_pointer_cast<Group>(GroupFactory::create<Group>(symOps));
 }
 
 Group_sptr constructGroupFromPythonList(const boost::python::list &symOpList) {
@@ -54,7 +54,7 @@ Group_sptr constructGroupFromPythonList(const boost::python::list &symOpList) {
         boost::python::extract<SymmetryOperation>(symOpList[i]));
   }
 
-  return boost::const_pointer_cast<Group>(
+  return std::const_pointer_cast<Group>(
       GroupFactory::create<Group>(operations));
 }
 
@@ -70,7 +70,7 @@ bool isInvariantTolerance(Group &self, const boost::python::object &tensor,
 
 void export_Group() {
 
-  register_ptr_to_python<boost::shared_ptr<Group>>();
+  register_ptr_to_python<std::shared_ptr<Group>>();
 
   enum_<Group::CoordinateSystem>("CoordinateSystem")
       .value("Orthogonal", Group::Orthogonal)

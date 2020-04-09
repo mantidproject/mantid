@@ -32,14 +32,14 @@ public:
         m_creators(workspacePropertyNames.size()) {}
 
   /// Create a domain from the input workspace
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &ivalues,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &ivalues,
                     size_t i0 = 0) override;
   /// Create the output workspace
-  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+  std::shared_ptr<API::Workspace> createOutputWorkspace(
       const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
+      std::shared_ptr<API::FunctionDomain> domain,
+      std::shared_ptr<API::FunctionValues> values,
       const std::string &outputWorkspacePropertyName) override;
 
   /// Return the size of the domain to be created.
@@ -54,7 +54,7 @@ public:
 
 protected:
   /// Vector of creators.
-  std::vector<boost::shared_ptr<API::IDomainCreator>> m_creators;
+  std::vector<std::shared_ptr<API::IDomainCreator>> m_creators;
 };
 
 } // namespace CurveFitting

@@ -103,7 +103,7 @@ public:
 
     Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_const_sptr outWS =
-        boost::dynamic_pointer_cast<const MatrixWorkspace>(out);
+        std::dynamic_pointer_cast<const MatrixWorkspace>(out);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWS->y(0)[0], 300);
   }
@@ -120,7 +120,7 @@ public:
     TS_ASSERT(alg->execute());
 
     Workspace_sptr out = alg->getProperty("OutputWorkspace");
-    auto outWS = boost::dynamic_pointer_cast<ITableWorkspace>(out);
+    auto outWS = std::dynamic_pointer_cast<ITableWorkspace>(out);
     TS_ASSERT_EQUALS(outWS->rowCount(), 2);
     // TS_ASSERT_EQUALS( outWS->columnCount(), 4 );
     TS_ASSERT_EQUALS(outWS->Int(0, 0), 1);
@@ -140,7 +140,7 @@ public:
 
 private:
   IAlgorithm_sptr setupAlg(const std::string &logName) {
-    IAlgorithm_sptr alg = boost::make_shared<SumEventsByLogValue>();
+    IAlgorithm_sptr alg = std::make_shared<SumEventsByLogValue>();
     alg->initialize();
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", createWorkspace()));

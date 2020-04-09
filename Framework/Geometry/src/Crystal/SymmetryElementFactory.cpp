@@ -18,7 +18,7 @@ SymmetryElement_sptr SymmetryElementIdentityGenerator::generateElement(
     const SymmetryOperation &operation) const {
   UNUSED_ARG(operation);
 
-  return boost::make_shared<SymmetryElementIdentity>();
+  return std::make_shared<SymmetryElementIdentity>();
 }
 
 /// Checks that the SymmetryOperation has no translation and the matrix is of
@@ -33,7 +33,7 @@ bool SymmetryElementIdentityGenerator::canProcess(
 /// operation as translation vector.
 SymmetryElement_sptr SymmetryElementTranslationGenerator::generateElement(
     const SymmetryOperation &operation) const {
-  return boost::make_shared<SymmetryElementTranslation>(operation.vector());
+  return std::make_shared<SymmetryElementTranslation>(operation.vector());
 }
 
 /// Checks that the order of the matrix is 1 and the operation has a
@@ -48,7 +48,7 @@ bool SymmetryElementTranslationGenerator::canProcess(
 SymmetryElement_sptr SymmetryElementInversionGenerator::generateElement(
     const SymmetryOperation &operation) const {
 
-  return boost::make_shared<SymmetryElementInversion>(operation.vector() / 2);
+  return std::make_shared<SymmetryElementInversion>(operation.vector() / 2);
 }
 
 /// Checks that the matrix is identity matrix multiplied with -1.
@@ -195,8 +195,8 @@ SymmetryElement_sptr SymmetryElementRotationGenerator::generateElement(
       determineRotationSense(operation, axis);
   std::string symbol = determineSymbol(operation);
 
-  return boost::make_shared<SymmetryElementRotation>(symbol, axis, translation,
-                                                     rotationSense);
+  return std::make_shared<SymmetryElementRotation>(symbol, axis, translation,
+                                                   rotationSense);
 }
 
 /// Checks the trace and determinat of the matrix to determine if the matrix
@@ -281,7 +281,7 @@ SymmetryElement_sptr SymmetryElementMirrorGenerator::generateElement(
   V3R translation = determineTranslation(operation);
   std::string symbol = determineSymbol(operation);
 
-  return boost::make_shared<SymmetryElementMirror>(symbol, axis, translation);
+  return std::make_shared<SymmetryElementMirror>(symbol, axis, translation);
 }
 
 /// Checks that the trace of the matrix is 1 and the determinant is -1.

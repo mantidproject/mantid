@@ -236,8 +236,8 @@ void LoadDetectorsGroupingFile::setByComponents() {
           m_instrument->getComponentByName(name);
 
       // b) component -> component assembly --> children (more than detectors)
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
       std::vector<Geometry::IComponent_const_sptr> children;
       asmb->getChildren(children, true);
 
@@ -248,7 +248,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       for (const auto &child : children) {
         // c) convert component to detector
         Geometry::IDetector_const_sptr det =
-            boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
+            std::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
         if (det) {
           // Component is DETECTOR:

@@ -16,7 +16,7 @@
 #include "MantidKernel/ReadLock.h"
 
 #include <boost/pointer_cast.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qwt_color_map.h>
 #include <qwt_double_rect.h>
 
@@ -31,8 +31,8 @@ namespace {
 Mantid::Kernel::Logger g_log("ContourPreviewPlot");
 
 MatrixWorkspace_sptr
-convertToMatrixWorkspace(boost::shared_ptr<Workspace> const &workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+convertToMatrixWorkspace(std::shared_ptr<Workspace> const &workspace) {
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 template <typename T>
@@ -52,7 +52,7 @@ namespace MantidWidgets {
 
 ContourPreviewPlot::ContourPreviewPlot(QWidget *parent)
     : QWidget(parent), WorkspaceObserver(),
-      m_mdSettings(boost::make_shared<MdSettings>()), m_workspace(),
+      m_mdSettings(std::make_shared<MdSettings>()), m_workspace(),
       m_dimensions() {
   this->observePreDelete(true);
   m_spectrogram = std::make_unique<QwtPlotSpectrogram>();
@@ -146,7 +146,7 @@ void ContourPreviewPlot::handleSetTransparentZeros(bool const &transparent) {
  */
 void ContourPreviewPlot::preDeleteHandle(
     std::string const &workspaceName,
-    boost::shared_ptr<Workspace> const workspace) {
+    std::shared_ptr<Workspace> const &workspace) {
   UNUSED_ARG(workspaceName);
   auto const deletedWorkspace = convertToMatrixWorkspace(workspace);
   if (deletedWorkspace && deletedWorkspace == m_workspace)

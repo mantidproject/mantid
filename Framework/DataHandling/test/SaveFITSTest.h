@@ -93,7 +93,7 @@ public:
     const std::string filename = "./savefits_wont_work.fits";
 
     // auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
 
     SaveFITS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -110,12 +110,12 @@ public:
 
     // create with appropriate units
     auto ws = WorkspaceCreationHelper::create2DWorkspace(2, 2);
-    auto lbl = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+    auto lbl = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         Mantid::Kernel::UnitFactory::Instance().create("Label"));
     lbl->setLabel("width", "cm");
     ws->getAxis(0)->unit() = lbl;
 
-    lbl = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+    lbl = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         Mantid::Kernel::UnitFactory::Instance().create("Label"));
     lbl->setLabel("height", "cm");
     ws->getAxis(1)->unit() = lbl;

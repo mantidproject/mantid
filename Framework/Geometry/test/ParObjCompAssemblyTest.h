@@ -75,7 +75,7 @@ public:
     ObjCompAssembly pbank(&bank, pmap.get());
 
     TS_ASSERT_EQUALS(pbank.nelements(), 3);
-    boost::shared_ptr<IComponent> det1copy;
+    std::shared_ptr<IComponent> det1copy;
     det1copy = pbank[0];
 
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
@@ -84,7 +84,7 @@ public:
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
 
     pmap->addV3D(det2, "pos", V3D(1, 1, 1));
-    boost::shared_ptr<IComponent> det2copy;
+    std::shared_ptr<IComponent> det2copy;
     det2copy = pbank[1];
     TS_ASSERT_DIFFERS(det2->getPos(), det2copy->getPos());
   }
@@ -120,7 +120,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
-    boost::shared_ptr<IObject> s =
+    std::shared_ptr<IObject> s =
         Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
@@ -135,7 +135,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    boost::shared_ptr<IObject> shape = bank.createOutline();
+    std::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
     detail::ShapeInfo::GeometryShape otype;
@@ -148,11 +148,10 @@ public:
     TS_ASSERT_EQUALS(height, 0.6);
 
     ParameterMap_sptr pmap(new ParameterMap());
-    boost::shared_ptr<ObjCompAssembly> pcomp(
+    std::shared_ptr<ObjCompAssembly> pcomp(
         new ObjCompAssembly(&bank, pmap.get()));
-    boost::shared_ptr<Component> ic =
-        boost::dynamic_pointer_cast<Component>(pcomp);
-    boost::shared_ptr<ICompAssembly> ica =
-        boost::dynamic_pointer_cast<ICompAssembly>(ic);
+    std::shared_ptr<Component> ic = std::dynamic_pointer_cast<Component>(pcomp);
+    std::shared_ptr<ICompAssembly> ica =
+        std::dynamic_pointer_cast<ICompAssembly>(ic);
   }
 };

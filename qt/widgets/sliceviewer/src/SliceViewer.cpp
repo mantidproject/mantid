@@ -44,10 +44,10 @@
 #include "MantidQtWidgets/SliceViewer/SliceViewerFunctions.h"
 #include "MantidQtWidgets/SliceViewer/SnapToGridDialog.h"
 #include "MantidQtWidgets/SliceViewer/XYLimitsDialog.h"
-#include <boost/make_shared.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <iosfwd>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -99,9 +99,9 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"),
       m_firstNonOrthogonalWorkspaceOpen(true), m_nonOrthogonalDefault(false),
       m_oldDimNonOrthogonal(false), m_canSwitchScales(false),
-      m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
+      m_peaksPresenter(std::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
-          boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
+          std::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
       m_peaksSliderWidget(nullptr), m_lastRatioState(Guess),
       m_holdDisplayUpdates(false) {
 
@@ -199,11 +199,11 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // -------- Peak Overlay ----------------
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<PeakTransformHKLFactory>());
+      std::make_shared<PeakTransformHKLFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<PeakTransformQSampleFactory>());
+      std::make_shared<PeakTransformQSampleFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<PeakTransformQLabFactory>());
+      std::make_shared<PeakTransformQLabFactory>());
   this->setAcceptDrops(true);
 
   // --------- Rescaler --------------------
@@ -772,7 +772,7 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   m_data->setNormalization(initialDisplayNormalization);
 
   // Only allow perpendicular lines if looking at a matrix workspace.
-  bool matrix = bool(boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws));
+  bool matrix = bool(std::dynamic_pointer_cast<MatrixWorkspace>(m_ws));
   m_lineOverlay->setAngleSnapMode(matrix);
   m_lineOverlay->setAngleSnap(matrix ? 90 : 45);
 
@@ -790,7 +790,7 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   // For MDEventWorkspace, estimate the resolution and change the # of bins
   // accordingly
   IMDEventWorkspace_sptr mdew =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
   std::vector<coord_t> binSizes = m_ws->estimateResolution();
 
   // Copy the dimensions to this so they can be modified
@@ -859,7 +859,7 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   ui.frmMouseInfo->setVisible(false);
   if (m_ws->hasOriginalWorkspace()) {
     IMDWorkspace_sptr origWS =
-        boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
+        std::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
     auto toOrig = m_ws->getTransformToOriginal();
     if (toOrig) {
       ui.frmMouseInfo->setVisible(true);
@@ -893,11 +893,11 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
  *MatrixWorkspace
  */
 void SliceViewer::setWorkspace(const QString &wsName) {
-  IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+  IMDWorkspace_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   if (!ws)
     throw std::runtime_error("SliceViewer can only view MDWorkspaces.");
-  if (boost::dynamic_pointer_cast<MatrixWorkspace>(ws))
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(ws))
     throw std::runtime_error(
         "SliceViewer cannot view MatrixWorkspaces. "
         "Please select a MDEventWorkspace or a MDHistoWorkspace.");
@@ -1604,7 +1604,7 @@ void SliceViewer::showInfoAt(double x, double y) {
   // Now show the coords in the original workspace
   if (m_ws->hasOriginalWorkspace()) {
     IMDWorkspace_sptr origWS =
-        boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
+        std::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
     auto toOrig = m_ws->getTransformToOriginal();
     if (toOrig) {
       // Transform the coordinates
@@ -2601,14 +2601,14 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
     const size_t numberOfChildPresenters = m_peaksPresenter->size();
 
     // Peak View factory, displays peaks on a peak by peak basis
-    auto peakViewFactory = boost::make_shared<PeakViewFactory>(
+    auto peakViewFactory = std::make_shared<PeakViewFactory>(
         m_ws, peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
         m_spect->yAxis(), numberOfChildPresenters);
 
     try {
       m_peaksPresenter->addPeaksPresenter(
-          boost::make_shared<ConcretePeaksPresenter>(peakViewFactory, peaksWS,
-                                                     m_ws, transformFactory));
+          std::make_shared<ConcretePeaksPresenter>(peakViewFactory, peaksWS,
+                                                   m_ws, transformFactory));
     } catch (std::logic_error &ex) {
       // Incompatible PeaksWorkspace.
       disablePeakOverlays();
@@ -2726,7 +2726,7 @@ void SliceViewer::enablePeakOverlaysIfAppropriate() {
 /**
 Get the peaks proxy presenter.
 */
-boost::shared_ptr<ProxyCompositePeaksPresenter>
+std::shared_ptr<ProxyCompositePeaksPresenter>
 SliceViewer::getPeaksPresenter() const {
   return m_proxyPeaksPresenter;
 }
@@ -2765,7 +2765,7 @@ void SliceViewer::detach() { this->disablePeakOverlays(); }
 
 void SliceViewer::peakWorkspaceChanged(
     const std::string &wsName,
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS) {
+    std::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS) {
   // Tell the composite presenter about it
   m_peaksPresenter->notifyWorkspaceChanged(wsName, changedPeaksWS);
 }
@@ -2794,7 +2794,7 @@ void SliceViewer::dropEvent(QDropEvent *e) {
       int startIndex = text.indexOf("[\"", endIndex) + 2;
       endIndex = text.indexOf("\"]", startIndex);
       QString candidate = text.mid(startIndex, endIndex - startIndex);
-      if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
+      if (std::dynamic_pointer_cast<IPeaksWorkspace>(
               AnalysisDataService::Instance().retrieve(
                   candidate.toStdString()))) {
         wsNames.append(candidate);

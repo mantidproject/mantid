@@ -10,7 +10,6 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
-#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>
@@ -326,12 +325,12 @@ public:
   }
 
   void test_CloneFileBased() {
-    auto a = boost::make_shared<BoxController>(2);
+    auto a = std::make_shared<BoxController>(2);
     a->setMaxDepth(4);
     a->setSplitInto(10);
     a->setMaxDepth(10);
     a->setMaxId(123456);
-    boost::shared_ptr<IBoxControllerIO> pS(
+    std::shared_ptr<IBoxControllerIO> pS(
         new MantidTestHelpers::BoxControllerDummyIO(a.get()));
     TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS, "fakeFile"));
     TS_ASSERT(a->isFileBacked());
@@ -341,7 +340,7 @@ public:
     compareBoxControllers(*a, *b);
 
     TS_ASSERT(!b->isFileBacked());
-    boost::shared_ptr<IBoxControllerIO> pS2(
+    std::shared_ptr<IBoxControllerIO> pS2(
         new MantidTestHelpers::BoxControllerDummyIO(b.get()));
     TS_ASSERT_THROWS_NOTHING(b->setFileBacked(pS2, "fakeFile2"));
 
@@ -351,8 +350,8 @@ public:
   }
 
   void test_MRU_access() {
-    auto a = boost::make_shared<BoxController>(2);
-    boost::shared_ptr<IBoxControllerIO> pS(
+    auto a = std::make_shared<BoxController>(2);
+    std::shared_ptr<IBoxControllerIO> pS(
         new MantidTestHelpers::BoxControllerDummyIO(a.get()));
     a->setFileBacked(pS, "existingFakeFile");
     DiskBuffer *dbuf = a->getFileIO();
@@ -375,10 +374,10 @@ public:
   }
 
   void test_openCloseFileBacked() {
-    auto a = boost::make_shared<BoxController>(2);
+    auto a = std::make_shared<BoxController>(2);
     TS_ASSERT(!a->isFileBacked());
 
-    boost::shared_ptr<IBoxControllerIO> pS(
+    std::shared_ptr<IBoxControllerIO> pS(
         new MantidTestHelpers::BoxControllerDummyIO(a.get()));
     TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS, "fakeFile"));
 

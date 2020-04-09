@@ -12,7 +12,7 @@
 
 #include <stdexcept>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -67,7 +67,7 @@ protected:
   ProjectionUnit m_units[3];
 };
 
-using Projection_sptr = boost::shared_ptr<Projection>;
+using Projection_sptr = std::shared_ptr<Projection>;
 
 } // namespace API
 } // namespace Mantid

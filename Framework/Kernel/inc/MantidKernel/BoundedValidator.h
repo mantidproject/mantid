@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/TypedValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -107,7 +107,7 @@ public:
 
   /// Clone the current state
   IValidator_sptr clone() const override {
-    return boost::make_shared<BoundedValidator>(*this);
+    return std::make_shared<BoundedValidator>(*this);
   }
 
 private:

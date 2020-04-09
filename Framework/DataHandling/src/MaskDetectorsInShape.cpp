@@ -25,7 +25,7 @@ void MaskDetectorsInShape::init() {
       std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "The input workspace");
   declareProperty("ShapeXML", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the user defined shape.");
   declareProperty("IncludeMonitors", false,
                   "Whether to include monitors if "

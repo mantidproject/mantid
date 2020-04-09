@@ -90,7 +90,7 @@ public: // for the time being
   bool isQ3DMode() const;
   bool hasLattice() const;
 
-  boost::shared_ptr<Geometry::OrientedLattice> getLattice() const {
+  std::shared_ptr<Geometry::OrientedLattice> getLattice() const {
     return getOrientedLattice(m_InWS);
   }
   Kernel::Matrix<double> getGoniometerMatr() const;
@@ -136,7 +136,7 @@ public: // for the time being
                     const std::vector<std::string> &dimPropertyNames,
                     std::vector<coord_t> &AddCoord);
 
-  static boost::shared_ptr<Geometry::OrientedLattice>
+  static std::shared_ptr<Geometry::OrientedLattice>
   getOrientedLattice(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D);
 
   /// Set the special coordinate system if any.

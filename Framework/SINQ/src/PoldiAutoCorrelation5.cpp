@@ -17,7 +17,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Poldi {
@@ -54,7 +54,7 @@ void PoldiAutoCorrelation5::init() {
    * slightly different variants of the algorithm as they are implemented
    * in the original fortran analysis software.
    */
-  m_core = boost::shared_ptr<PoldiAutoCorrelationCore>(
+  m_core = std::shared_ptr<PoldiAutoCorrelationCore>(
       new PoldiAutoCorrelationCore(g_log));
 }
 
@@ -86,7 +86,7 @@ void PoldiAutoCorrelation5::exec() {
   PoldiAbstractChopper_sptr chopper = instrumentAdapter.chopper();
 
   PoldiAbstractDetector_sptr detector = instrumentAdapter.detector();
-  boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector(
+  std::shared_ptr<PoldiDeadWireDecorator> cleanDetector(
       new PoldiDeadWireDecorator(localWorkspace->detectorInfo(), detector));
 
   // log configuration information
@@ -101,7 +101,7 @@ void PoldiAutoCorrelation5::exec() {
         m_core->calculate(localWorkspace);
 
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(outputws));
+                std::dynamic_pointer_cast<Workspace>(outputws));
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when saving the PoldiIPP Results data to "
@@ -113,7 +113,7 @@ void PoldiAutoCorrelation5::exec() {
 }
 
 void PoldiAutoCorrelation5::logConfigurationInformation(
-    const boost::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
+    const std::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
     const PoldiAbstractChopper_sptr &chopper) {
   if (cleanDetector && chopper) {
     g_log.information()

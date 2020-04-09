@@ -48,7 +48,7 @@ void CombinePeaksWorkspaces::init() {
   declareProperty(
       "CombineMatchingPeaks", false,
       "Whether to combine peaks that are identical across the two workspaces");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   // N.B. Andrei reckons it should be delta_q/q
   declareProperty("Tolerance", EMPTY_DBL(), mustBePositive,

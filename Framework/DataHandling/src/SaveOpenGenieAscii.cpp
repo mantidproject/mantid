@@ -51,7 +51,7 @@ void SaveOpenGenieAscii::init() {
                   "Whether to include the header lines (default: true)");
   std::vector<std::string> header{"ENGIN-X Format"};
   declareProperty("OpenGenieFormat", "ENGIN-X Format",
-                  boost::make_shared<Kernel::StringListValidator>(header),
+                  std::make_shared<Kernel::StringListValidator>(header),
                   "The format required to successfully load the file to "
                   "OpenGenie: ENGIN-X Format (default)");
 }

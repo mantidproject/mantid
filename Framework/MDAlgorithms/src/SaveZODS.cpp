@@ -52,8 +52,7 @@ void SaveZODS::init() {
 void SaveZODS::exec() {
   IMDHistoWorkspace_sptr inWS = getProperty("InputWorkspace");
   std::string Filename = getPropertyValue("Filename");
-  MDHistoWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
+  MDHistoWorkspace_sptr ws = std::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
   if (!ws)
     throw std::runtime_error("InputWorkspace is not a MDHistoWorkspace");
   if (ws->getNumDims() != 3)

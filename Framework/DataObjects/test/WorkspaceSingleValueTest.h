@@ -7,8 +7,8 @@
 #pragma once
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <vector>
 
 #include "MantidDataObjects/WorkspaceSingleValue.h"

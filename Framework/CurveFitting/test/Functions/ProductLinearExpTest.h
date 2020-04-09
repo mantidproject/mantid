@@ -18,8 +18,7 @@
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -64,11 +63,11 @@ to check that the results are equal.
     func.setParameter("Lifetime", Lifetime);
 
     // Create the equivalent Product Function
-    IFunction_sptr linearFunction = boost::make_shared<LinearBackground>();
+    IFunction_sptr linearFunction = std::make_shared<LinearBackground>();
     linearFunction->initialize();
     linearFunction->setParameter("A0", A0);
     linearFunction->setParameter("A1", A1);
-    IFunction_sptr expFunction = boost::make_shared<ExpDecay>();
+    IFunction_sptr expFunction = std::make_shared<ExpDecay>();
     expFunction->initialize();
     expFunction->setParameter("Height", Height);
     expFunction->setParameter("Lifetime", Lifetime);
@@ -136,7 +135,7 @@ public:
         FunctionFactory::Instance().createFunction("ProductLinearExp");
     TS_ASSERT(func != nullptr);
     TS_ASSERT_EQUALS(func->name(), "ProductLinearExp");
-    TS_ASSERT(boost::dynamic_pointer_cast<ProductLinearExp>(func) != nullptr);
+    TS_ASSERT(std::dynamic_pointer_cast<ProductLinearExp>(func) != nullptr);
   }
 
   void test_set_parameters() {

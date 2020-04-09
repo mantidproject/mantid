@@ -188,7 +188,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         wkspOut = AnalysisDataService::Instance().retrieve(outputSpace));
     MatrixWorkspace_sptr data =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(wkspOut);
+        std::dynamic_pointer_cast<MatrixWorkspace>(wkspOut);
 
     // cleanup the input workspace
     AnalysisDataService::Instance().remove(testInput->getName());

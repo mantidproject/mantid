@@ -211,7 +211,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)
@@ -334,7 +334,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)

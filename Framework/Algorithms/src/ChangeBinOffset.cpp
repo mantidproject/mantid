@@ -28,7 +28,7 @@ void ChangeBinOffset::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
-  auto isDouble = boost::make_shared<BoundedValidator<double>>();
+  auto isDouble = std::make_shared<BoundedValidator<double>>();
   declareProperty("Offset", 0.0, isDouble,
                   "The amount to change each time bin by");
 
@@ -45,7 +45,7 @@ void ChangeBinOffset::exec() {
 
   const double offset = getProperty("Offset");
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputW);
+      std::dynamic_pointer_cast<EventWorkspace>(outputW);
   if (eventWS) {
     this->for_each<Indices::FromProperty>(
         *eventWS, std::make_tuple(EventWorkspaceAccess::eventList),

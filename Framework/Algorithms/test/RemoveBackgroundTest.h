@@ -206,7 +206,7 @@ public:
     }
     // Create zero background workspace
     // Create the workspace
-    auto bgWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+    auto bgWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1));
     auto binEdges = {0.0, 1.0};
     bgWS->setBinEdges(0, binEdges);

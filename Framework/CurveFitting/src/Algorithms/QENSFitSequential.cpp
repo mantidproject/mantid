@@ -59,7 +59,7 @@ MatrixWorkspace_sptr cloneWorkspace(const MatrixWorkspace_sptr &inputWorkspace,
                                     const std::string &outputName) {
   Workspace_sptr workspace = inputWorkspace->clone();
   AnalysisDataService::Instance().addOrReplace(outputName, workspace);
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 MatrixWorkspace_sptr
@@ -121,7 +121,7 @@ void extractFunctionNames(const CompositeFunction_sptr &composite,
 
 void extractFunctionNames(const IFunction_sptr &function,
                           std::vector<std::string> &names) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     extractFunctionNames(composite, names);
   else
@@ -139,7 +139,7 @@ void extractConvolvedNames(const CompositeFunction_sptr &composite,
 
 void extractConvolvedNames(const IFunction_sptr &function,
                            std::vector<std::string> &names) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite) {
     if (composite->name() == "Convolution" && composite->nFunctions() > 1 &&
         composite->getFunction(0)->name() == "Resolution")
@@ -364,7 +364,7 @@ void QENSFitSequential::init() {
       "The input workspace for the fit. This property will be ignored if "
       "'Input' is provided.");
 
-  auto boundedV = boost::make_shared<BoundedValidator<int>>();
+  auto boundedV = std::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
 
   declareProperty(
@@ -392,7 +392,7 @@ void QENSFitSequential::init() {
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
   declareProperty("ResultXAxisUnit", "MomentumTransfer",
-                  boost::make_shared<StringListValidator>(unitOptions),
+                  std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis of the result workspace, "
                   "defaults to MomentumTransfer");
 
@@ -439,7 +439,7 @@ void QENSFitSequential::init() {
   const std::vector<std::string> costFuncOptions =
       CostFunctionFactory::Instance().getKeys();
   declareProperty("CostFunction", "Least squares",
-                  boost::make_shared<StringListValidator>(costFuncOptions),
+                  std::make_shared<StringListValidator>(costFuncOptions),
                   "Cost functions to use for fitting. Cost functions available "
                   "are 'Least squares' and 'Ignore positive peaks'",
                   Direction::InOut);
@@ -564,7 +564,7 @@ void QENSFitSequential::exec() {
   deleteTemporaryWorkspaces(outputBaseName);
 
   addAdditionalLogs(resultWs);
-  copyLogs(boost::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
+  copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
            groupWs);
 
   setProperty("OutputWorkspace", resultWs);

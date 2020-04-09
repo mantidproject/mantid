@@ -20,7 +20,7 @@ EqualBinSizesValidator::EqualBinSizesValidator(const double errorLevel,
 
 /// Clone the current state
 Kernel::IValidator_sptr EqualBinSizesValidator::clone() const {
-  return boost::make_shared<EqualBinSizesValidator>(*this);
+  return std::make_shared<EqualBinSizesValidator>(*this);
 }
 
 /** Checks that the bin sizes of each histogram in the workspace are the same

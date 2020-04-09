@@ -84,7 +84,7 @@ public:
         ws_out =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
     Mantid::DataObjects::Workspace2D_sptr ws2d_out =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
     double tolerance(1e-03);
     TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0],
@@ -124,7 +124,7 @@ public:
         ws_out =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
     ws2d_out =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
     TS_ASSERT_DELTA(ws2d_out->x(1 + SANSInstrumentCreationHelper::nMonitors)[0],
                     1.0, tolerance);
@@ -201,7 +201,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 36866)
 
@@ -211,14 +211,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         ws_in = Mantid::API::AnalysisDataService::Instance().retrieve(inputWS));
     Mantid::DataObjects::Workspace2D_sptr ws2d_in =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_in);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_in);
 
     Mantid::API::Workspace_sptr ws_out;
     TS_ASSERT_THROWS_NOTHING(
         ws_out =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
     Mantid::DataObjects::Workspace2D_sptr ws2d_out =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
     // Number of monitors
     int nmon = Mantid::DataHandling::LoadSpice2D::nMonitors;

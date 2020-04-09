@@ -43,7 +43,7 @@ SphericalAbsorption::SphericalAbsorption()
 
 void SphericalAbsorption::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -55,7 +55,7 @@ void SphericalAbsorption::init() {
                                                         Direction::Output),
                   "Output workspace name");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
                   "The '''absorption''' cross-section, at 1.8 Angstroms, for "
@@ -126,7 +126,7 @@ void SphericalAbsorption::retrieveBaseProperties() {
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-    auto shape = boost::shared_ptr<IObject>(
+    auto shape = std::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInSphericalAbsorption", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);

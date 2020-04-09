@@ -125,7 +125,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
     }
     auto file = new ::NeXus::File(fileID, true);
     // clang-format off
-    m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
+    m_filehandle = std::shared_ptr< ::NeXus::File>(file);
     // clang-format on
   }
 
@@ -393,7 +393,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     // Fractional area for RebinnedOutput
     if (localworkspace->id() == "RebinnedOutput") {
       RebinnedOutput_const_sptr rebin_workspace =
-          boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+          std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
       name = "frac_area";
       NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,
                      m_nexuscompression, asize);
@@ -460,7 +460,7 @@ int NexusFileIO::writeNexusProcessedData2D(
             NX_CHAR);
 
   auto label =
-      boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
+      std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
   if (label) {
     NXputattr(fileID, "caption", label->caption().c_str(),
               static_cast<int>(label->caption().size()), NX_CHAR);
@@ -480,8 +480,8 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputattr(fileID, "units", sLabel.c_str(), static_cast<int>(sLabel.size()),
               NX_CHAR);
 
-    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-        sAxis->unit());
+    auto unitLabel =
+        std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
       NXputattr(fileID, "caption", unitLabel->caption().c_str(),
                 static_cast<int>(unitLabel->caption().size()), NX_CHAR);
@@ -502,8 +502,8 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputdata(fileID, textAxis.c_str());
     NXputattr(fileID, "units", "TextAxis", 8, NX_CHAR);
 
-    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-        sAxis->unit());
+    auto unitLabel =
+        std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
       NXputattr(fileID, "caption", unitLabel->caption().c_str(),
                 static_cast<int>(unitLabel->caption().size()), NX_CHAR);
@@ -641,10 +641,10 @@ int NexusFileIO::writeNexusTableWorkspace(
     const char *group_name) const {
   NXstatus status = NX_ERROR;
 
-  boost::shared_ptr<const TableWorkspace> tableworkspace =
-      boost::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
-  boost::shared_ptr<const PeaksWorkspace> peakworkspace =
-      boost::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
+  std::shared_ptr<const TableWorkspace> tableworkspace =
+      std::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
+  std::shared_ptr<const PeaksWorkspace> peakworkspace =
+      std::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
 
   if (!tableworkspace && !peakworkspace)
     return 3;

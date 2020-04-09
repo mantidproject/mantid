@@ -11,7 +11,7 @@
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 
 #include <Poco/Net/HTTPResponse.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::RemoteJobManagers;
 
@@ -32,8 +32,8 @@ public:
 
   void test_construct() {
     // can create
-    boost::shared_ptr<MantidWebServiceAPIHelper> help;
-    TS_ASSERT(help = boost::make_shared<MantidWebServiceAPIHelper>());
+    std::shared_ptr<MantidWebServiceAPIHelper> help;
+    TS_ASSERT(help = std::make_shared<MantidWebServiceAPIHelper>());
     // can cast to inherited interfaces and base classes
 
     MantidWebServiceAPIHelper h;

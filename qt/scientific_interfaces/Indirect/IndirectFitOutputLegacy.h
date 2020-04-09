@@ -32,7 +32,7 @@ struct ResultLocation {
   ResultLocation() : result(), index(0) {}
   ResultLocation(const Mantid::API::WorkspaceGroup_sptr &group, std::size_t i)
       : result(group), index(i) {}
-  boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
+  std::weak_ptr<Mantid::API::WorkspaceGroup> result;
   std::size_t index;
 };
 
@@ -117,8 +117,8 @@ private:
                                  const FitDataIteratorLegacy &fitDataBegin,
                                  const FitDataIteratorLegacy &fitDataEnd);
 
-  boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
-  boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
+  std::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
+  std::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
   std::unordered_map<IndirectFitDataLegacy const *, ParameterValues>
       m_parameters;
   std::unordered_map<IndirectFitDataLegacy const *, ResultLocations>

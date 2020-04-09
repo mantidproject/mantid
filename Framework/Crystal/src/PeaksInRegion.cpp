@@ -41,7 +41,7 @@ void PeaksInRegion::init() {
 
   this->initBaseProperties();
 
-  auto mandatoryExtents = boost::make_shared<
+  auto mandatoryExtents = std::make_shared<
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   std::vector<double> extents(2, 0);

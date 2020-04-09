@@ -47,7 +47,7 @@ public:
   }
 
   void test_Function_Has_One_Intensity_Coefficient() {
-    boost::shared_ptr<ComptonProfile> profile = createFunction();
+    std::shared_ptr<ComptonProfile> profile = createFunction();
 
     auto intensityIndices = profile->intensityParameterIndices();
     TS_ASSERT_EQUALS(1, intensityIndices.size());
@@ -88,7 +88,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<GaussianComptonProfile> createFunctionWithParamsSet() {
+  std::shared_ptr<GaussianComptonProfile> createFunctionWithParamsSet() {
     auto func = createFunction();
     func->setParameter("Mass", 30.0);
     func->setParameter("Intensity", 4.0);
@@ -97,8 +97,8 @@ private:
     return func;
   }
 
-  boost::shared_ptr<GaussianComptonProfile> createFunction() {
-    auto profile = boost::make_shared<GaussianComptonProfile>();
+  std::shared_ptr<GaussianComptonProfile> createFunction() {
+    auto profile = std::make_shared<GaussianComptonProfile>();
     profile->initialize();
     return profile;
   }

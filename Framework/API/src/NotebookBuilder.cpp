@@ -26,7 +26,7 @@ namespace {
 Mantid::Kernel::Logger g_log("NotebookBuilder");
 }
 
-NotebookBuilder::NotebookBuilder(const boost::shared_ptr<HistoryView> &view,
+NotebookBuilder::NotebookBuilder(const std::shared_ptr<HistoryView> &view,
                                  std::string versionSpecificity)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(std::move(versionSpecificity)),

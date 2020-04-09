@@ -8,7 +8,7 @@
 #include "MantidNexusGeometry/DllConfig.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -30,7 +30,7 @@ public:
   const Eigen::Vector3d &tubePosition() const;
   const std::vector<Eigen::Vector3d> &detPositions() const;
   const std::vector<int> &detIDs() const;
-  boost::shared_ptr<const Mantid::Geometry::IObject> shape() const;
+  std::shared_ptr<const Mantid::Geometry::IObject> shape() const;
   double tubeHeight() const;
   double tubeRadius() const;
   bool addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID);

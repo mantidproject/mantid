@@ -106,7 +106,7 @@ public:
   /// Return member variables
 
   /// Return the model
-  virtual boost::shared_ptr<AbstractTreeModel> getModel() = 0;
+  virtual std::shared_ptr<AbstractTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
 

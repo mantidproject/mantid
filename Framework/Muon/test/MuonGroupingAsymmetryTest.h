@@ -39,7 +39,7 @@ public:
 IAlgorithm_sptr
 algorithmWithWorkspacePropertiesSet(const std::string &inputWSName) {
 
-  auto alg = boost::make_shared<MuonGroupingAsymmetry>();
+  auto alg = std::make_shared<MuonGroupingAsymmetry>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
   alg->setProperty("OutputWorkspace", "__notUsed");
@@ -104,7 +104,7 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonGroupingAsymmetry>();
+    auto alg = std::make_shared<MuonGroupingAsymmetry>();
     alg->initialize();
 
     TS_ASSERT_THROWS_ANYTHING(
@@ -115,7 +115,7 @@ public:
 
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonGroupingAsymmetry>();
+    auto alg = std::make_shared<MuonGroupingAsymmetry>();
     alg->initialize();
 
     TS_ASSERT_THROWS_NOTHING(

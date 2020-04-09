@@ -43,7 +43,7 @@ class MuonAnalysisResultTableTab;
 
 struct GroupResult {
   bool usedExistGrouping;
-  boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
+  std::shared_ptr<Mantid::API::Grouping> groupingUsed;
 };
 } // namespace Muon
 
@@ -269,8 +269,8 @@ private:
   void inputFileChanged(const QStringList &filenames);
 
   /// Get grouping for the loaded workspace
-  boost::shared_ptr<Muon::GroupResult>
-  getGrouping(const boost::shared_ptr<Muon::LoadResult> &loadResult) const;
+  std::shared_ptr<Muon::GroupResult>
+  getGrouping(const std::shared_ptr<Muon::LoadResult> &loadResult) const;
 
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);

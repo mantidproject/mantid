@@ -87,7 +87,7 @@ void LoadSwans::init() {
 /** Execute the algorithm.
  */
 void LoadSwans::exec() {
-  m_ws = boost::make_shared<Mantid::DataObjects::EventWorkspace>();
+  m_ws = std::make_shared<Mantid::DataObjects::EventWorkspace>();
   // Load instrument here to get the necessary Parameters from the XML file
   loadInstrument();
   m_detector_size = getDetectorSize();
