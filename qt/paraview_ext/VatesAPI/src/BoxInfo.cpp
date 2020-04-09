@@ -18,9 +18,8 @@ boost::optional<int> findRecursionDepthForTopLevelSplitting(
   const int topLevelRecursionDepth = 1;
   boost::optional<int> recursionDepth;
   if (workspaceProvider.canProvideWorkspace(workspaceName)) {
-    auto workspace =
-        boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-            workspaceProvider.fetchWorkspace(workspaceName));
+    auto workspace = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+        workspaceProvider.fetchWorkspace(workspaceName));
     auto boxController = workspace->getBoxController();
     if (boxController->getSplitTopInto()) {
       recursionDepth = topLevelRecursionDepth;

@@ -16,13 +16,16 @@ PerThetaDefaults::PerThetaDefaults(
     TransmissionRunPair transmissionRuns,
     boost::optional<ProcessingInstructions> transmissionProcessingInstructions,
     RangeInQ qRange, boost::optional<double> scaleFactor,
-    boost::optional<ProcessingInstructions> processingInstructions)
+    boost::optional<ProcessingInstructions> processingInstructions,
+    boost::optional<ProcessingInstructions> backgroundProcessingInstructions)
     : m_theta(std::move(theta)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionProcessingInstructions(
           std::move(transmissionProcessingInstructions)),
-      m_processingInstructions(std::move(processingInstructions)) {}
+      m_processingInstructions(std::move(processingInstructions)),
+      m_backgroundProcessingInstructions(
+          std::move(backgroundProcessingInstructions)) {}
 
 TransmissionRunPair const &
 PerThetaDefaults::transmissionWorkspaceNames() const {
@@ -51,13 +54,20 @@ PerThetaDefaults::transmissionProcessingInstructions() const {
   return m_transmissionProcessingInstructions;
 }
 
+boost::optional<ProcessingInstructions>
+PerThetaDefaults::backgroundProcessingInstructions() const {
+  return m_backgroundProcessingInstructions;
+}
+
 bool operator==(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {
   return lhs.thetaOrWildcard() == rhs.thetaOrWildcard() &&
          lhs.qRange() == rhs.qRange() &&
          lhs.scaleFactor() == rhs.scaleFactor() &&
          lhs.transmissionProcessingInstructions() ==
              rhs.transmissionProcessingInstructions() &&
-         lhs.processingInstructions() == rhs.processingInstructions();
+         lhs.processingInstructions() == rhs.processingInstructions() &&
+         lhs.backgroundProcessingInstructions() ==
+             rhs.backgroundProcessingInstructions();
 }
 
 bool operator!=(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {
@@ -83,6 +93,8 @@ perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults) {
     result[7] = std::to_string(*perThetaDefaults.scaleFactor());
   if (perThetaDefaults.processingInstructions())
     result[8] = *perThetaDefaults.processingInstructions();
+  if (perThetaDefaults.backgroundProcessingInstructions())
+    result[9] = *perThetaDefaults.backgroundProcessingInstructions();
   return result;
 }
 } // namespace ISISReflectometry

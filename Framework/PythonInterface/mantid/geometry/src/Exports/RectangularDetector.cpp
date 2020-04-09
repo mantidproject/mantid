@@ -20,7 +20,7 @@ GET_POINTER_SPECIALIZATION(RectangularDetector)
  * appropriate Detector leaf type
  */
 void export_RectangularDetector() {
-  register_ptr_to_python<boost::shared_ptr<RectangularDetector>>();
+  register_ptr_to_python<std::shared_ptr<RectangularDetector>>();
 
   class_<RectangularDetector, bases<CompAssembly, IObjComponent>,
          boost::noncopyable>("RectangularDetector", no_init)

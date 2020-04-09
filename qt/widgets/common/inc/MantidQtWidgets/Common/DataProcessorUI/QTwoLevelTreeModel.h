@@ -10,8 +10,8 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace MantidQt {
@@ -149,7 +149,7 @@ void forEachRow(QTwoLevelTreeModel &model, Action act) {
 }
 
 /// Typedef for a shared pointer to \c QTwoLevelTreeModel
-using QTwoLevelTreeModel_sptr = boost::shared_ptr<QTwoLevelTreeModel>;
+using QTwoLevelTreeModel_sptr = std::shared_ptr<QTwoLevelTreeModel>;
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt

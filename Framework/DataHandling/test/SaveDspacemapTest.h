@@ -96,7 +96,7 @@ public:
     TS_ASSERT(load.isInitialized())
     TS_ASSERT_THROWS_NOTHING(load.setProperty(
         "InputWorkspace",
-        boost::dynamic_pointer_cast<MatrixWorkspace>(offsetsWS)));
+        std::dynamic_pointer_cast<MatrixWorkspace>(offsetsWS)));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("FileType", "POWGEN"));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", "dummy"));

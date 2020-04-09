@@ -267,8 +267,8 @@ void LoadPDFgetNFile::setUnit(const Workspace2D_sptr &ws) {
   } else if (xcolname == "r") {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = ws->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(unit);
+    std::shared_ptr<Units::Label> label =
+        std::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel("AtomicDistance", "Angstrom");
   } else {
     stringstream errss;
@@ -368,7 +368,7 @@ void LoadPDFgetNFile::generateDataWorkspace() {
   size_t size = numptsvec[0];
 
   // 2. Generate workspace2D object and set the unit
-  outWS = boost::dynamic_pointer_cast<Workspace2D>(
+  outWS = std::dynamic_pointer_cast<Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numsets, size,
                                                size));
 

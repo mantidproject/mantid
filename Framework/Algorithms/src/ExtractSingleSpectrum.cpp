@@ -26,7 +26,7 @@ void ExtractSingleSpectrum::init() {
                                                         Direction::Output),
                   "The name under which to store the output workspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", -1, mustBePositive,
                   "The workspace index number of the spectrum to extract.");

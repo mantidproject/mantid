@@ -86,7 +86,7 @@ void SaveNexusESS::exec() {
 
   API::Workspace_sptr ws = getProperty("InputWorkspace");
   const std::string filename = getProperty("Filename");
-  auto matrixWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
+  auto matrixWs = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
   if (!matrixWs)
     throw std::runtime_error("SaveNexusESS expects a MatrixWorkspace as input");
   SaveNexusProcessed::exec();

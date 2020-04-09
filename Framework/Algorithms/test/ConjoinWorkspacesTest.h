@@ -38,7 +38,7 @@ public:
         ws2Name("ConjoinWorkspacesTest_grp2") {}
 
   MatrixWorkspace_sptr getWSFromADS(const std::string &wsName) {
-    auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto out = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(wsName));
     TS_ASSERT(out);
     return out;
@@ -84,9 +84,9 @@ public:
       conj.initialize();
 
     // Get the two input workspaces for later
-    MatrixWorkspace_sptr in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr in1 = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("top"));
-    MatrixWorkspace_sptr in2 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr in2 = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("bottom"));
 
     // Mask a spectrum and check it is carried over

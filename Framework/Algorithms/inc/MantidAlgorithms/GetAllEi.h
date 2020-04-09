@@ -96,7 +96,7 @@ protected: // for testing, private otherwise.
   /**Auxiliary method to print guess chopper energies in debug mode*/
   void printDebugModeInfo(const std::vector<double> &guess_opening,
                           const std::pair<double, double> &TOF_range,
-                          boost::shared_ptr<Kernel::Unit> &destUnit);
+                          std::shared_ptr<Kernel::Unit> &destUnit);
   /// if true, take derivate of the filter log to identify interval when
   /// instrument is running.
   bool m_FilterWithDerivative;
@@ -111,7 +111,7 @@ protected: // for testing, private otherwise.
   // tof at chopper from recorded delay.
   double m_phase;
   // internal pointer to access to chopper
-  boost::shared_ptr<const Geometry::IComponent> m_chopper;
+  std::shared_ptr<const Geometry::IComponent> m_chopper;
   // internal pointer to access log, used for filtering
   Kernel::TimeSeriesProperty<double> *m_pFilterLog;
 };

@@ -273,7 +273,7 @@ Group_const_sptr operator*(const Group_const_sptr &lhs,
     throw std::invalid_argument("One of the operands is null. Aborting.");
   }
 
-  return boost::make_shared<const Group>((*lhs) * (*rhs));
+  return std::make_shared<const Group>((*lhs) * (*rhs));
 }
 
 /// Convenience operator* for getting a vector of V3D using shared pointers.

@@ -19,14 +19,14 @@ void NexusFileLoader::exec() {
   // execute the algorithm as normal
   execLoader();
 }
-boost::shared_ptr<Mantid::API::Algorithm> NexusFileLoader::createChildAlgorithm(
+std::shared_ptr<Mantid::API::Algorithm> NexusFileLoader::createChildAlgorithm(
     const std::string &name, const double startProgress,
     const double endProgress, const bool enableLogging, const int &version) {
   auto child = IFileLoader::createChildAlgorithm(
       name, startProgress, endProgress, enableLogging, version);
 
   // set the NexusHDF5Descriptor on the child algorithm
-  auto nfl = boost::dynamic_pointer_cast<NexusFileLoader>(child);
+  auto nfl = std::dynamic_pointer_cast<NexusFileLoader>(child);
   if (nfl) {
     nfl->setFileInfo(m_fileInfo);
   }
@@ -36,4 +36,14 @@ void NexusFileLoader::setFileInfo(
     std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo) {
   m_fileInfo = std::move(fileInfo);
 }
+
+const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor>
+NexusFileLoader::getFileInfo() const noexcept {
+  return m_fileInfo;
+}
+
+std::string NexusFileLoader::getFilenamePropertyName() const {
+  return "Filename";
+}
+
 } // namespace Mantid::API

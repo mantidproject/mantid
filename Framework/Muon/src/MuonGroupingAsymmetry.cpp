@@ -287,11 +287,11 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
 WorkspaceGroup_sptr MuonGroupingAsymmetry::createGroupWorkspace(
     const WorkspaceGroup_sptr &inputWS) {
   const std::vector<int> group = this->getProperty("Grouping");
-  auto groupedPeriods = boost::make_shared<WorkspaceGroup>();
+  auto groupedPeriods = std::make_shared<WorkspaceGroup>();
   // for each period
   for (auto &&workspace : *inputWS) {
     auto groupWS = groupDetectors(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), group);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace), group);
     groupedPeriods->addWorkspace(groupWS);
   }
   return groupedPeriods;

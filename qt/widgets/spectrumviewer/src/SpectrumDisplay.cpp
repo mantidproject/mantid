@@ -76,7 +76,7 @@ SpectrumDisplay::~SpectrumDisplay() { delete m_spectrumPlotItem; }
 
 bool SpectrumDisplay::hasData(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   return m_dataSource->hasData(wsName, ws);
 }
 
@@ -392,7 +392,7 @@ void SpectrumDisplay::setPointedAtXY(double x, double y, bool isFront) {
 
   if (isFront) {
     showInfoList(x, y);
-    foreach (boost::weak_ptr<SpectrumDisplay> sd, m_otherDisplays) {
+    foreach (std::weak_ptr<SpectrumDisplay> sd, m_otherDisplays) {
       if (auto display = sd.lock()) {
         display->setPointedAtXY(x, y, false);
       }
@@ -574,20 +574,19 @@ bool SpectrumDisplay::dataSourceRangeChanged() {
           m_totalXMax != m_dataSource->getXMax());
 }
 
-void SpectrumDisplay::addOther(
-    const boost::shared_ptr<SpectrumDisplay> &other) {
+void SpectrumDisplay::addOther(const std::shared_ptr<SpectrumDisplay> &other) {
   m_otherDisplays.append(other);
 }
 
 void SpectrumDisplay::addOthers(
-    const QList<boost::shared_ptr<SpectrumDisplay>> &others) {
-  foreach (boost::shared_ptr<SpectrumDisplay> sd, others) {
+    const QList<std::shared_ptr<SpectrumDisplay>> &others) {
+  foreach (std::shared_ptr<SpectrumDisplay> sd, others) {
     m_otherDisplays.append(sd);
   }
 }
 
 void SpectrumDisplay::removeOther(
-    const boost::shared_ptr<SpectrumDisplay> &other) {
+    const std::shared_ptr<SpectrumDisplay> &other) {
   QList<int> toRemove;
   for (int i = 0; i < m_otherDisplays.size(); ++i) {
     auto ds = m_otherDisplays[i].lock();

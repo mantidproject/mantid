@@ -43,7 +43,7 @@ private:
   PointGroup_sptr m_prototype;
 };
 
-using PointGroupGenerator_sptr = boost::shared_ptr<PointGroupGenerator>;
+using PointGroupGenerator_sptr = std::shared_ptr<PointGroupGenerator>;
 
 /**
   @class PointGroupFactory

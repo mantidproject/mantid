@@ -45,7 +45,7 @@ void InterpolatingRebin::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Params", boost::make_shared<RebinParamsValidator>()),
+          "Params", std::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
       "this can be followed by a comma and more widths and last boundary "

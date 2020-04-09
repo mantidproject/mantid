@@ -10,7 +10,7 @@
 #include "MantidKernel/TypedValidator.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #endif
 #include <map>
 #include <set>
@@ -62,7 +62,7 @@ public:
 
   /// Clone the validator
   IValidator_sptr clone() const override {
-    return boost::make_shared<ListValidator<TYPE>>(*this);
+    return std::make_shared<ListValidator<TYPE>>(*this);
   }
   /**
    * Returns the set of allowed values currently defined

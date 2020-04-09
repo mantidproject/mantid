@@ -13,7 +13,7 @@ namespace API {
 
 /// Clone the current state
 Kernel::IValidator_sptr IncreasingAxisValidator::clone() const {
-  return boost::make_shared<IncreasingAxisValidator>(*this);
+  return std::make_shared<IncreasingAxisValidator>(*this);
 }
 
 /**

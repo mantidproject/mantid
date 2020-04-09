@@ -437,7 +437,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes,
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       const size_t currentSpectrum = spec + i * m_numberOfPixelsPerTube + j;
       m_localWorkspace->setHistogram(
           currentSpectrum, m_localWorkspace->binEdges(0),

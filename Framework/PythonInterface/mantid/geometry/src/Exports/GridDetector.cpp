@@ -21,7 +21,7 @@ GET_POINTER_SPECIALIZATION(GridDetector)
  * appropriate Detector leaf type
  */
 void export_GridDetector() {
-  register_ptr_to_python<boost::shared_ptr<GridDetector>>();
+  register_ptr_to_python<std::shared_ptr<GridDetector>>();
 
   class_<GridDetector, bases<CompAssembly, IObjComponent>, boost::noncopyable>(
       "GridDetector", no_init)

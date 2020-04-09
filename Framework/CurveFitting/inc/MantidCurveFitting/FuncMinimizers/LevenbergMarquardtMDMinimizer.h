@@ -45,7 +45,7 @@ public:
 
 private:
   /// Pointer to the cost function.
-  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
+  std::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
   /// The tau parameter in the Levenberg-Marquardt method.
   double m_tau;
   /// The damping mu parameter in the Levenberg-Marquardt method.

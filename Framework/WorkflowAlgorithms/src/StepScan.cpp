@@ -32,7 +32,7 @@ void StepScan::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
           "InputWorkspace", "", Direction::Input,
-          boost::make_shared<WorkspaceUnitValidator>("TOF")),
+          std::make_shared<WorkspaceUnitValidator>("TOF")),
       "The input workspace. Must hold 'raw' (unweighted) events.");
   // Note that this algorithm may modify the input workspace (by masking and/or
   // cropping)
@@ -53,10 +53,10 @@ void StepScan::init() {
                   "than XMin.");
   // N.B. The choice of units is restricted by the upstream StepScan interface,
   // but in fact any convertible unit will work so is allowed here
-  declareProperty("RangeUnit", "TOF",
-                  boost::make_shared<StringListValidator>(
-                      UnitFactory::Instance().getKeys()),
-                  "The units in which XMin and XMax is being given.");
+  declareProperty(
+      "RangeUnit", "TOF",
+      std::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
+      "The units in which XMin and XMax is being given.");
 }
 
 void StepScan::exec() {
@@ -97,7 +97,7 @@ void StepScan::exec() {
   sumEvents->executeAsChildAlg();
 
   Workspace_sptr outputWS = sumEvents->getProperty("OutputWorkspace");
-  auto table = boost::dynamic_pointer_cast<ITableWorkspace>(outputWS);
+  auto table = std::dynamic_pointer_cast<ITableWorkspace>(outputWS);
   // Remove the scan_index=0 entry from the resulting table (unless it's the
   // only one)
   if (table->rowCount() > 1 && table->Int(0, 0) == 0) {
@@ -116,7 +116,7 @@ void StepScan::exec() {
 DataObjects::EventWorkspace_sptr
 StepScan::getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS) {
   // See if there's a monitor workspace inside the input one
-  return boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+  return std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
       inputWS->monitorWorkspace());
 }
 
@@ -127,7 +127,7 @@ StepScan::cloneInputWorkspace(const API::Workspace_sptr &inputWS) {
   clone->executeAsChildAlg();
 
   Workspace_sptr temp = clone->getProperty("OutputWorkspace");
-  return boost::static_pointer_cast<DataObjects::EventWorkspace>(temp);
+  return std::static_pointer_cast<DataObjects::EventWorkspace>(temp);
 }
 
 /** Runs MaskDetectors as a child algorithm on the input workspace.

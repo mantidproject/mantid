@@ -7,8 +7,8 @@
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/make_shared.hpp>
 #include <cmath>
+#include <memory>
 
 #include <gsl/gsl_multimin.h>
 

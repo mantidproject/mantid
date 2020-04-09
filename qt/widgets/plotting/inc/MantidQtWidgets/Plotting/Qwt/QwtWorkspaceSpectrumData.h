@@ -13,7 +13,7 @@
 #include "MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h"
 
 #include <QString>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //=================================================================================================
 //=================================================================================================

@@ -166,11 +166,10 @@ void LoadNGEM::init() {
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The output workspace");
 
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  auto mustBePositiveDbl =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositiveDbl = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.0);
 
   // Bin Width
@@ -389,8 +388,8 @@ void LoadNGEM::createCountWorkspace(
   std::string countsWorkspaceName(this->getProperty("OutputWorkspace"));
   countsWorkspaceName.append("_event_counts");
   countsWorkspace->setYUnit("Counts");
-  boost::shared_ptr<Kernel::Units::Label> XLabel =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> XLabel =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
   XLabel->setLabel("Frame");
   countsWorkspace->getAxis(0)->unit() = XLabel;

@@ -41,7 +41,7 @@ const std::string ClearInstrumentParameters::category() const {
 void ClearInstrumentParameters::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::InOut,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "Workspace whose instrument parameters are to be cleared.");
 }
 

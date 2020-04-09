@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QApplication>
 #include <QSpinBox>
@@ -57,7 +57,7 @@ MantidGLWidget::MantidGLWidget(QWidget *parent)
 
 MantidGLWidget::~MantidGLWidget() {}
 
-void MantidGLWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface) {
+void MantidGLWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()),
           Qt::QueuedConnection);
@@ -263,7 +263,7 @@ void MantidGLWidget::saveToFile(const QString &filename) {
  * Resets the widget for new instrument definition
  */
 void MantidGLWidget::resetWidget() {
-  // setActorCollection(boost::shared_ptr<GLActorCollection>(new
+  // setActorCollection(std::shared_ptr<GLActorCollection>(new
   // GLActorCollection()));
 }
 

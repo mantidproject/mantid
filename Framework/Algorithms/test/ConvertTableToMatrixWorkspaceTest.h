@@ -59,7 +59,7 @@ public:
 
     TS_ASSERT(m_converter->execute());
 
-    MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve("out"));
 
     TS_ASSERT(mws);
@@ -81,8 +81,8 @@ public:
       TS_ASSERT_EQUALS(e, E[i]);
     }
 
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
+    std::shared_ptr<Units::Label> label =
+        std::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
     TS_ASSERT(label);
     TS_ASSERT_EQUALS(label->caption(), "A");
     TS_ASSERT_EQUALS(mws->YUnitLabel(), "B");
@@ -135,7 +135,7 @@ public:
     tws->addColumn("double", "B");
 
     m_converter =
-        boost::make_shared<Mantid::Algorithms::ConvertTableToMatrixWorkspace>();
+        std::make_shared<Mantid::Algorithms::ConvertTableToMatrixWorkspace>();
     m_converter->setRethrows(true);
     m_converter->initialize();
     TS_ASSERT_THROWS_NOTHING(m_converter->setProperty("InputWorkspace", tws));
@@ -170,7 +170,7 @@ public:
 
     TS_ASSERT(m_converter->execute());
 
-    MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve("out"));
 
     TS_ASSERT(mws);
@@ -193,7 +193,7 @@ public:
     }
 
     auto label =
-        boost::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
+        std::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
     TS_ASSERT(label);
     TS_ASSERT_EQUALS(label->caption(), "A");
     TS_ASSERT_EQUALS(mws->YUnitLabel(), "B");

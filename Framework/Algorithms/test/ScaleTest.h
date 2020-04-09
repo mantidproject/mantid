@@ -44,10 +44,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("tomultiply")));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("multiplied")));
 
     testScaleFactorApplied(in, result, 2.5, true); // multiply=true
@@ -77,10 +77,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("toadd")));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("added")));
 
     testScaleFactorApplied(in, result, -100, false); // multiply=false

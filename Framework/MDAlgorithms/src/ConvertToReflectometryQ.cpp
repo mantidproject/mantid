@@ -30,7 +30,7 @@
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -196,10 +196,10 @@ const std::string ConvertToReflectometryQ::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToReflectometryQ::init() {
-  auto compositeValidator = boost::make_shared<CompositeValidator>();
+  auto compositeValidator = std::make_shared<CompositeValidator>();
   compositeValidator->add(
-      boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
-  compositeValidator->add(boost::make_shared<API::HistogramValidator>());
+      std::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
+  compositeValidator->add(std::make_shared<API::HistogramValidator>());
 
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -211,7 +211,7 @@ void ConvertToReflectometryQ::init() {
 
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
-      boost::make_shared<StringListValidator>(propOptions),
+      std::make_shared<StringListValidator>(propOptions),
       "What will be the dimensions of the output workspace?\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
       "  P (lab frame): Momentum in the sample frame.\n"
@@ -220,7 +220,7 @@ void ConvertToReflectometryQ::init() {
   std::vector<std::string> transOptions{centerTransform(), normPolyTransform()};
 
   declareProperty("Method", centerTransform(),
-                  boost::make_shared<StringListValidator>(transOptions),
+                  std::make_shared<StringListValidator>(transOptions),
                   "What method should be used for the axis transformation?\n"
                   "  Centre: Use center point rebinning.\n"
                   "  NormalisedPolygon: Use normalised polygon rebinning.");
@@ -337,25 +337,25 @@ void ConvertToReflectometryQ::exec() {
   const double dim1min = extents[2];
   const double dim1max = extents[3];
 
-  BoxController_sptr bc = boost::make_shared<BoxController>(2);
+  BoxController_sptr bc = std::make_shared<BoxController>(2);
   this->setBoxController(bc);
 
   // Select the transform strategy and an appropriate MDFrame
   ReflectometryTransform_sptr transform;
   Mantid::Geometry::MDFrame_uptr frame;
   if (outputDimensions == qSpaceTransform()) {
-    transform = boost::make_shared<ReflectometryTransformQxQz>(
+    transform = std::make_shared<ReflectometryTransformQxQz>(
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
     frame.reset(new Mantid::Geometry::QLab);
   } else if (outputDimensions == pSpaceTransform()) {
-    transform = boost::make_shared<ReflectometryTransformP>(
+    transform = std::make_shared<ReflectometryTransformP>(
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
     frame.reset(new Mantid::Geometry::GeneralFrame(
         "P", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   } else {
-    transform = boost::make_shared<ReflectometryTransformKiKf>(
+    transform = std::make_shared<ReflectometryTransformKiKf>(
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
     frame.reset(new Mantid::Geometry::GeneralFrame(
@@ -365,7 +365,7 @@ void ConvertToReflectometryQ::exec() {
   IMDWorkspace_sptr outputWS;
 
   TableWorkspace_sptr vertexes =
-      boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+      std::make_shared<Mantid::DataObjects::TableWorkspace>();
   Progress transSelectionProg(this, 0.0, 0.1, 2);
   if (outputAsMDWorkspace) {
     transSelectionProg.report("Choosing Transformation");

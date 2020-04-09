@@ -12,7 +12,7 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 #include <string>
 #include <tuple>
@@ -33,55 +33,53 @@ using StrVec = std::vector<std::string>;
  * The size of the Resultant ComponentInfo/DetectorInfo are set by the number of
  *position and rotation elements in the collections arguments.
  */
-std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
+std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>>
 makeFlatTree(PosVec detPositions, RotVec detRotations) {
   std::vector<std::pair<size_t, size_t>> componentRanges;
   auto rootIndex = detPositions.size();
   componentRanges.emplace_back(
       std::make_pair(0, 1)); // sub-assembly (contains root only)
   auto bankSortedDetectorIndices =
-      boost::make_shared<std::vector<size_t>>(detPositions.size());
+      std::make_shared<std::vector<size_t>>(detPositions.size());
   std::iota(bankSortedDetectorIndices->begin(),
             bankSortedDetectorIndices->end(), 0);
-  auto bankSortedComponentIndices =
-      boost::make_shared<const std::vector<size_t>>(
-          std::vector<size_t>{rootIndex});
-  auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+  auto bankSortedComponentIndices = std::make_shared<const std::vector<size_t>>(
+      std::vector<size_t>{rootIndex});
+  auto parentIndices = std::make_shared<const std::vector<size_t>>(
       std::vector<size_t>(detPositions.size() + 1, rootIndex));
   std::vector<std::pair<size_t, size_t>> detectorRanges(
       1, std::make_pair<size_t, size_t>(0, detPositions.size()));
-  auto positions = boost::make_shared<PosVec>(
+  auto positions = std::make_shared<PosVec>(
       1, Eigen::Vector3d{0, 0, 0}); // 1 position only for root
-  auto rotations = boost::make_shared<RotVec>(
+  auto rotations = std::make_shared<RotVec>(
       1,
       Eigen::Quaterniond::Identity()); // 1 rotation only for root
 
   // Component scale factors
-  auto scaleFactors = boost::make_shared<PosVec>(
+  auto scaleFactors = std::make_shared<PosVec>(
       PosVec(detPositions.size() + 1, Eigen::Vector3d{1, 1, 1}));
   // Component names
-  auto names = boost::make_shared<StrVec>();
+  auto names = std::make_shared<StrVec>();
   for (size_t detIndex = 0; detIndex < detPositions.size(); ++detIndex) {
     names->emplace_back("det" + std::to_string(detIndex));
   }
   names->emplace_back("root");
   auto detectorInfo =
-      boost::make_shared<DetectorInfo>(detPositions, detRotations);
+      std::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
   auto isRectangularBank =
-      boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+      std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
 
   std::vector<size_t> branch(detPositions.size());
   std::iota(branch.begin(), branch.end(), 0);
-  auto children =
-      boost::make_shared<std::vector<std::vector<size_t>>>(1, branch);
+  auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, branch);
 
-  auto componentInfo = boost::make_shared<ComponentInfo>(
+  auto componentInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           detectorRanges),
       bankSortedComponentIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
       parentIndices, children, positions, rotations, scaleFactors,
       isRectangularBank, names, -1, -1);
@@ -91,19 +89,19 @@ makeFlatTree(PosVec detPositions, RotVec detRotations) {
   return std::make_tuple(componentInfo, detectorInfo);
 }
 
-std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
+std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>>
 makeFlatTreeWithMonitor(PosVec detPositions, RotVec detRotations,
                         const std::vector<size_t> &monitorIndices) {
   auto flatTree = makeFlatTree(detPositions, detRotations);
-  auto detectorInfo = boost::make_shared<DetectorInfo>(
-      detPositions, detRotations, monitorIndices);
+  auto detectorInfo = std::make_shared<DetectorInfo>(detPositions, detRotations,
+                                                     monitorIndices);
   auto compInfo = std::get<0>(flatTree);
   compInfo->setDetectorInfo(detectorInfo.get());
   return std::make_tuple(compInfo, detectorInfo);
 }
 
-std::tuple<boost::shared_ptr<ComponentInfo>, PosVec, RotVec, PosVec, RotVec,
-           boost::shared_ptr<DetectorInfo>>
+std::tuple<std::shared_ptr<ComponentInfo>, PosVec, RotVec, PosVec, RotVec,
+           std::shared_ptr<DetectorInfo>>
 makeTreeExampleAndReturnGeometricArguments() {
 
   /*
@@ -123,13 +121,12 @@ makeTreeExampleAndReturnGeometricArguments() {
   RotVec detRotations(3, Eigen::Quaterniond(Eigen::AngleAxisd(
                              M_PI / 4, Eigen::Vector3d::UnitY())));
   auto detectorInfo =
-      boost::make_shared<DetectorInfo>(detPositions, detRotations);
+      std::make_shared<DetectorInfo>(detPositions, detRotations);
   auto bankSortedDetectorIndices =
-      boost::make_shared<const std::vector<size_t>>(
-          std::vector<size_t>{0, 2, 1});
+      std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0, 2, 1});
   auto bankSortedComponentIndices =
-      boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{3, 4});
-  auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+      std::make_shared<const std::vector<size_t>>(std::vector<size_t>{3, 4});
+  auto parentIndices = std::make_shared<const std::vector<size_t>>(
       std::vector<size_t>{3, 3, 4, 4, 4});
 
   std::vector<std::pair<size_t, size_t>> detectorRanges;
@@ -145,32 +142,32 @@ makeTreeExampleAndReturnGeometricArguments() {
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
   // Set non-detectors at different positions
-  auto compPositions = boost::make_shared<PosVec>();
+  auto compPositions = std::make_shared<PosVec>();
   compPositions->emplace_back(1, -1, 0);
   compPositions->emplace_back(1, -1, 0);
 
   // Set non-detectors at different rotations
-  auto compRotations = boost::make_shared<RotVec>();
+  auto compRotations = std::make_shared<RotVec>();
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
 
   // Component scale factors
   auto scaleFactors =
-      boost::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
+      std::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
   // Component names
-  auto names = boost::make_shared<StrVec>(5);
+  auto names = std::make_shared<StrVec>(5);
   // Rectangular bank flag
   auto isRectangularBank =
-      boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
-  auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+      std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+  auto children = std::make_shared<std::vector<std::vector<size_t>>>(
       2, std::vector<size_t>(2));
 
-  auto compInfo = boost::make_shared<ComponentInfo>(
+  auto compInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           detectorRanges),
       bankSortedComponentIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
       parentIndices, children, compPositions, compRotations, scaleFactors,
       isRectangularBank, names, -1, -1);
@@ -181,7 +178,7 @@ makeTreeExampleAndReturnGeometricArguments() {
                          *compRotations, detectorInfo);
 }
 
-std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
+std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>>
 makeTreeExample() {
   /*
    Detectors are marked with detector indices below.
@@ -198,11 +195,10 @@ makeTreeExample() {
   PosVec detPositions(3);
   RotVec detRotations(3);
   auto bankSortedDetectorIndices =
-      boost::make_shared<const std::vector<size_t>>(
-          std::vector<size_t>{0, 2, 1});
+      std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0, 2, 1});
   auto bankSortedComponentIndices =
-      boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{3, 4});
-  auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+      std::make_shared<const std::vector<size_t>>(std::vector<size_t>{3, 4});
+  auto parentIndices = std::make_shared<const std::vector<size_t>>(
       std::vector<size_t>{3, 3, 4, 4, 4});
   std::vector<std::pair<size_t, size_t>> detectorRanges;
   detectorRanges.emplace_back(std::make_pair(0, 2));
@@ -214,32 +210,32 @@ makeTreeExample() {
   componentRanges.emplace_back(std::make_pair(
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
-  auto positions = boost::make_shared<PosVec>(
+  auto positions = std::make_shared<PosVec>(
       2, Eigen::Vector3d{0, 0, 0}); // 2 positions provided. 2 non-detectors
-  auto rotations = boost::make_shared<RotVec>(
+  auto rotations = std::make_shared<RotVec>(
       2,
       Eigen::Quaterniond::Identity()); // 2 rotations provided. 2 non-detectors
 
   // Component scale factors
   auto scaleFactors =
-      boost::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
+      std::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
   // Component names
-  auto names = boost::make_shared<StrVec>(5);
+  auto names = std::make_shared<StrVec>(5);
   auto detectorInfo =
-      boost::make_shared<DetectorInfo>(detPositions, detRotations);
+      std::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
   auto isRectangularBank =
-      boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+      std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
 
-  auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+  auto children = std::make_shared<std::vector<std::vector<size_t>>>(
       2, std::vector<size_t>(2));
 
-  auto componentInfo = boost::make_shared<ComponentInfo>(
+  auto componentInfo = std::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           detectorRanges),
       bankSortedComponentIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+      std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
       parentIndices, children, positions, rotations, scaleFactors,
       isRectangularBank, names, -1, -1);
@@ -250,12 +246,12 @@ makeTreeExample() {
 }
 
 // Helper to clone and resync both Info objects
-std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
-cloneInfos(const std::tuple<boost::shared_ptr<ComponentInfo>,
-                            boost::shared_ptr<DetectorInfo>> &in) {
-  auto compInfo = boost::shared_ptr<ComponentInfo>(
+std::tuple<std::shared_ptr<ComponentInfo>, std::shared_ptr<DetectorInfo>>
+cloneInfos(const std::tuple<std::shared_ptr<ComponentInfo>,
+                            std::shared_ptr<DetectorInfo>> &in) {
+  auto compInfo = std::shared_ptr<ComponentInfo>(
       std::get<0>(in)->cloneWithoutDetectorInfo());
-  auto detInfo = boost::make_shared<DetectorInfo>(*std::get<1>(in));
+  auto detInfo = std::make_shared<DetectorInfo>(*std::get<1>(in));
   compInfo->setDetectorInfo(detInfo.get());
   return std::make_tuple(compInfo, detInfo);
 }
@@ -295,25 +291,25 @@ public:
      Imitate an instrument with 3 detectors and nothing more.
     */
     auto bankSortedDetectorIndices =
-        boost::make_shared<const std::vector<size_t>>(
+        std::make_shared<const std::vector<size_t>>(
             std::vector<size_t>{0, 1, 2});
     auto bankSortedComponentIndices =
-        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>(1));
-    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+        std::make_shared<const std::vector<size_t>>(std::vector<size_t>(1));
+    auto parentIndices = std::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9, 9}); // These indices are invalid, but
                                           // that's ok as not being tested here
     auto detectorRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             1, std::pair<size_t, size_t>{0, 2});
     auto componentRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{});
-    auto positions = boost::make_shared<PosVec>(1);
-    auto rotations = boost::make_shared<RotVec>(1);
-    auto scaleFactors = boost::make_shared<PosVec>(4);
-    auto names = boost::make_shared<StrVec>(4);
-    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(1);
-    auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+    auto positions = std::make_shared<PosVec>(1);
+    auto rotations = std::make_shared<RotVec>(1);
+    auto scaleFactors = std::make_shared<PosVec>(4);
+    auto names = std::make_shared<StrVec>(4);
+    auto isRectangularBank = std::make_shared<std::vector<ComponentType>>(1);
+    auto children = std::make_shared<std::vector<std::vector<size_t>>>(
         1, std::vector<size_t>(3));
 
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
@@ -328,34 +324,35 @@ public:
 
   void test_throw_if_positions_rotation_inputs_different_sizes() {
     auto detectorsInSubtree =
-        boost::make_shared<const std::vector<size_t>>(); // No detector indices
-                                                         // in this example!
+        std::make_shared<const std::vector<size_t>>(); // No detector indices
+                                                       // in this example!
 
     auto bankSortedComponentIndices =
-        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
-    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+        std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
+    auto parentIndices = std::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
     auto innerDetectorRanges = std::vector<std::pair<size_t, size_t>>{
         {0, 0}}; // One component with no detectors
     auto detectorRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::move(innerDetectorRanges));
 
     auto innerComponentRanges = std::vector<std::pair<size_t, size_t>>{
         {0, 0}}; // One component with no sub-components
     auto componentRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::move(innerComponentRanges));
-    auto positions = boost::make_shared<PosVec>(1); // 1 position provided
-    auto rotations = boost::make_shared<RotVec>(0); // 0 rotations provided
+    auto positions = std::make_shared<PosVec>(1); // 1 position provided
+    auto rotations = std::make_shared<RotVec>(0); // 0 rotations provided
 
-    auto scaleFactors = boost::make_shared<PosVec>();
-    auto names = boost::make_shared<StrVec>();
-    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
-        2, ComponentType::Generic);
-    auto children = boost::make_shared<
-        std::vector<std::vector<size_t>>>(); // invalid but not being tested
+    auto scaleFactors = std::make_shared<PosVec>();
+    auto names = std::make_shared<StrVec>();
+    auto isRectangularBank =
+        std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+    auto children =
+        std::make_shared<std::vector<std::vector<size_t>>>(); // invalid but not
+                                                              // being tested
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
@@ -374,31 +371,32 @@ public:
      * All vectors should be the same size.
      */
     auto detectorsInSubtree =
-        boost::make_shared<const std::vector<size_t>>(); // No detector indices
-                                                         // in this example!
+        std::make_shared<const std::vector<size_t>>(); // No detector indices
+                                                       // in this example!
 
     auto componentsInSubtree =
-        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
+        std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
 
-    auto detectorRanges = boost::make_shared<
+    auto detectorRanges = std::make_shared<
         const std::vector<std::pair<size_t, size_t>>>(); // Empty detectorRanges
 
-    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+    auto parentIndices = std::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
-    auto positions = boost::make_shared<PosVec>(1); // 1 position provided
-    auto rotations = boost::make_shared<RotVec>(1); // 1 rotation provided
+    auto positions = std::make_shared<PosVec>(1); // 1 position provided
+    auto rotations = std::make_shared<RotVec>(1); // 1 rotation provided
 
-    auto scaleFactors = boost::make_shared<PosVec>();
-    auto names = boost::make_shared<StrVec>();
+    auto scaleFactors = std::make_shared<PosVec>();
+    auto names = std::make_shared<StrVec>();
     // Only one component. So single empty component range.
     auto componentRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
-    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
-        2, ComponentType::Generic);
-    auto children = boost::make_shared<
-        std::vector<std::vector<size_t>>>(); // invalid but not being tested
+    auto isRectangularBank =
+        std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+    auto children =
+        std::make_shared<std::vector<std::vector<size_t>>>(); // invalid but not
+                                                              // being tested
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
@@ -417,32 +415,32 @@ public:
      * All vectors should be the same size.
      */
     auto detectorsInSubtree =
-        boost::make_shared<const std::vector<size_t>>(); // No detector indices
-                                                         // in this example!
+        std::make_shared<const std::vector<size_t>>(); // No detector indices
+                                                       // in this example!
 
     auto componentsInSubtree =
-        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
+        std::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
 
     auto detectorRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             1, std::pair<size_t, size_t>(0, 0));
 
-    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+    auto parentIndices = std::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
-    auto positions = boost::make_shared<PosVec>(1);
-    auto rotations = boost::make_shared<RotVec>(1);
+    auto positions = std::make_shared<PosVec>(1);
+    auto rotations = std::make_shared<RotVec>(1);
 
-    auto scaleFactors = boost::make_shared<PosVec>(1);
-    auto names = boost::make_shared<StrVec>(1);
+    auto scaleFactors = std::make_shared<PosVec>(1);
+    auto names = std::make_shared<StrVec>(1);
     // Only one component. So single empty component range.
     auto componentRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
     auto componentTypes =
-        boost::make_shared<std::vector<Mantid::Beamline::ComponentType>>(
+        std::make_shared<std::vector<Mantid::Beamline::ComponentType>>(
             1, Mantid::Beamline::ComponentType::Generic);
-    auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+    auto children = std::make_shared<std::vector<std::vector<size_t>>>(
         1, std::vector<size_t>{1, 2}); // invalid
 
     TS_ASSERT_THROWS(

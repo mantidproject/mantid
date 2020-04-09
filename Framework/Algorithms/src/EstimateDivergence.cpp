@@ -54,8 +54,7 @@ void EstimateDivergence::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to have divergence calculated from");
 
-  auto positiveParameter =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveParameter = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveParameter->setLower(0.);
   positiveParameter->setLowerExclusive(false); // zero is allowed
 

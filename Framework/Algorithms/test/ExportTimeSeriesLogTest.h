@@ -64,7 +64,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    EventWorkspace_sptr outws = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr outws = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("FastSineLogEventWS"));
     TS_ASSERT(outws);
 
@@ -95,7 +95,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
@@ -133,7 +133,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
@@ -173,7 +173,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
@@ -211,7 +211,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 

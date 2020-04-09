@@ -98,7 +98,7 @@ void SpecularReflectionPositionCorrect2::init() {
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
   auto correctionTypeValidator =
-      boost::make_shared<StringListValidator>(correctionType);
+      std::make_shared<StringListValidator>(correctionType);
   declareProperty(
       "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
       "Whether detectors should be shifted vertically or rotated around the "
@@ -109,7 +109,7 @@ void SpecularReflectionPositionCorrect2::init() {
       std::make_unique<PropertyWithValue<std::string>>("DetectorComponentName",
                                                        "", Direction::Input),
       "Name of the detector component to correct, for example point-detector");
-  auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto nonNegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
   declareProperty("DetectorID", EMPTY_INT(), nonNegativeInt,
                   "The ID of the detector to correct; if both "
@@ -128,14 +128,13 @@ void SpecularReflectionPositionCorrect2::init() {
   declareProperty("DetectorFacesSample", false,
                   "If true, a normal vector at the centre of the detector "
                   "always points towards the sample.");
-  auto nonNegativeDouble =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto nonNegativeDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   nonNegativeDouble->setLower(0.);
   declareProperty("LinePosition", EMPTY_DBL(), nonNegativeDouble,
                   "A fractional workspace index for the specular line centre.");
   declareProperty("DirectLinePosition", EMPTY_DBL(), nonNegativeDouble,
                   "A fractional workspace index for the direct line centre.");
-  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   nonNegativeDouble->setLowerExclusive(0.);
   declareProperty("PixelSize", EMPTY_DBL(), positiveDouble,
                   "Size of a detector pixel, in metres.");

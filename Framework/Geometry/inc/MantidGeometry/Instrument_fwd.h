@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -18,9 +18,9 @@ namespace Geometry {
 class Instrument;
 
 /// Shared pointer to an instrument object
-using Instrument_sptr = boost::shared_ptr<Instrument>;
+using Instrument_sptr = std::shared_ptr<Instrument>;
 /// Shared pointer to an const instrument object
-using Instrument_const_sptr = boost::shared_ptr<const Instrument>;
+using Instrument_const_sptr = std::shared_ptr<const Instrument>;
 /// unique pointer to an instrument
 using Instrument_uptr = std::unique_ptr<Instrument>;
 /// unique pointer to an instrument (const version)

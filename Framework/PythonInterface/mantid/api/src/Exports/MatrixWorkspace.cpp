@@ -102,7 +102,7 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
 void setMonitorWorkspace(MatrixWorkspace &self,
                          const boost::python::object &value) {
 
-  MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr monWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       Mantid::PythonInterface::ExtractWorkspace(value)());
   self.setMonitorWorkspace(monWS);
 }
@@ -111,8 +111,8 @@ void setMonitorWorkspace(MatrixWorkspace &self,
  *
  *@return weak pointer to monitor workspace used by python
  */
-boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
-  return boost::weak_ptr<Workspace>(self.monitorWorkspace());
+std::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
+  return std::weak_ptr<Workspace>(self.monitorWorkspace());
 }
 /**
  * Clear monitor workspace attached to for current workspace.

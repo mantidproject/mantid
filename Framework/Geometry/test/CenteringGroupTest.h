@@ -77,7 +77,7 @@ private:
     }
 
     CenteringGroup_const_sptr centeringGroup =
-        boost::dynamic_pointer_cast<const CenteringGroup>(group);
+        std::dynamic_pointer_cast<const CenteringGroup>(group);
     TSM_ASSERT("Could not cast to pointer in " + symbol, centeringGroup);
     TSM_ASSERT_EQUALS("CenteringType did not match for " + symbol,
                       centeringGroup->getType(), expectedCenteringType);

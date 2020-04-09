@@ -95,7 +95,7 @@ public:
 private:
   IAlgorithm_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
                                bool mscatOn) {
-    auto alg = boost::make_shared<MayersSampleCorrection>();
+    auto alg = std::make_shared<MayersSampleCorrection>();
     // Don't put output in ADS by default
     alg->setChild(true);
     alg->setRethrows(true);

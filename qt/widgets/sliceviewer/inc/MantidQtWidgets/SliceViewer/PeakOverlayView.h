@@ -14,7 +14,7 @@
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include <QPointF>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -81,7 +81,7 @@ public:
   virtual ~PeakOverlayView() {}
 };
 
-using PeakOverlayView_const_sptr = boost::shared_ptr<const PeakOverlayView>;
-using PeakOverlayView_sptr = boost::shared_ptr<PeakOverlayView>;
+using PeakOverlayView_const_sptr = std::shared_ptr<const PeakOverlayView>;
+using PeakOverlayView_sptr = std::shared_ptr<PeakOverlayView>;
 } // namespace SliceViewer
 } // namespace MantidQt

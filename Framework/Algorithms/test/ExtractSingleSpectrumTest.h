@@ -77,7 +77,7 @@ public:
     MatrixWorkspace_sptr output = runAlgorithm(eventWS, wsIndex);
 
     EventWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(output);
+        std::dynamic_pointer_cast<EventWorkspace>(output);
     TSM_ASSERT("Output should be an event workspace", outputWS);
     const size_t numEvents = outputWS->getNumberEvents();
     TS_ASSERT_EQUALS(numEvents, eventsPerPixel);

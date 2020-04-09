@@ -34,10 +34,10 @@ void GetDetectorOffsets::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
+                      std::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D workspace with X values of d-spacing");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
   declareProperty("Step", 0.001, mustBePositive,
@@ -65,7 +65,7 @@ void GetDetectorOffsets::init() {
   // Only keep peaks
   declareProperty(
       "PeakFunction", "Gaussian",
-      boost::make_shared<StringListValidator>(
+      std::make_shared<StringListValidator>(
           FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
       "The function type for fitting the peaks.");
   declareProperty("MaxOffset", 1.0,
@@ -74,7 +74,7 @@ void GetDetectorOffsets::init() {
   std::vector<std::string> modes{"Relative", "Absolute"};
 
   declareProperty("OffsetMode", "Relative",
-                  boost::make_shared<StringListValidator>(modes),
+                  std::make_shared<StringListValidator>(modes),
                   "Whether to calculate a relative or absolute offset");
   declareProperty("DIdeal", 2.0, mustBePositive,
                   "The known peak centre value from the NIST standard "
@@ -107,9 +107,9 @@ void GetDetectorOffsets::exec() {
 
   int64_t nspec = inputW->getNumberHistograms();
   // Create the output OffsetsWorkspace
-  auto outputW = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
+  auto outputW = std::make_shared<OffsetsWorkspace>(inputW->getInstrument());
   // Create the output MaskWorkspace
-  auto maskWS = boost::make_shared<MaskWorkspace>(inputW->getInstrument());
+  auto maskWS = std::make_shared<MaskWorkspace>(inputW->getInstrument());
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
       maskWS->getDetectorIDToWorkspaceIndexMap(true);
@@ -243,7 +243,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
                                                   const double peakLoc) {
   FunctionFactoryImpl &creator = FunctionFactory::Instance();
   auto background = creator.createFunction("LinearBackground");
-  auto peak = boost::dynamic_pointer_cast<IPeakFunction>(
+  auto peak = std::dynamic_pointer_cast<IPeakFunction>(
       creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
@@ -254,7 +254,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   fitFunc->addFunction(background);
   fitFunc->addFunction(peak);
 
-  return boost::shared_ptr<IFunction>(fitFunc);
+  return std::shared_ptr<IFunction>(fitFunc);
 }
 
 } // namespace Algorithms

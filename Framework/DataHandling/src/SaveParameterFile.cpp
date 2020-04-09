@@ -52,7 +52,7 @@ const std::string SaveParameterFile::category() const {
 void SaveParameterFile::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "Workspace to save the instrument parameters from.");
 
   declareProperty(

@@ -41,8 +41,8 @@ public:
   void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
   void setWorkspaceIndex(size_t workspaceIndex);
 
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
 
   size_t getDomainSize() const override;

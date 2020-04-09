@@ -57,10 +57,10 @@ const std::string NormaliseByDetector::category() const {
 /** Initialize the algorithm's properties.
  */
 void NormaliseByDetector::init() {
-  auto compositeValidator = boost::make_shared<CompositeValidator>();
+  auto compositeValidator = std::make_shared<CompositeValidator>();
   compositeValidator->add(
-      boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
-  compositeValidator->add(boost::make_shared<API::HistogramValidator>());
+      std::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
+  compositeValidator->add(std::make_shared<API::HistogramValidator>());
 
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -176,7 +176,7 @@ NormaliseByDetector::processHistograms(const MatrixWorkspace_sptr &inWS) {
   cloneAlg->executeAsChildAlg();
   Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr denominatorWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
   // Choose between parallel execution and sequential execution then, process
   // histograms accordingly.

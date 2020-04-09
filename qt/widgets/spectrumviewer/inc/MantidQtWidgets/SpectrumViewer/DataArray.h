@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 
@@ -109,8 +109,8 @@ private:
   std::vector<float> m_data;
 };
 
-using DataArray_sptr = boost::shared_ptr<DataArray>;
-using DataArray_const_sptr = boost::shared_ptr<const DataArray>;
+using DataArray_sptr = std::shared_ptr<DataArray>;
+using DataArray_const_sptr = std::shared_ptr<const DataArray>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

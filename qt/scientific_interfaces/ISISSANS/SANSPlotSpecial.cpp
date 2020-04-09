@@ -52,7 +52,7 @@ void SANSPlotSpecial::rangeChanged(double low, double high) {
     return;
   }
 
-  m_workspaceLinear = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  m_workspaceLinear = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(
           "__sans_isis_display_linear_Workspace"));
   m_linearCurve = plotMiniplot(m_linearCurve, m_workspaceLinear, 1);
@@ -316,7 +316,7 @@ Mantid::API::MatrixWorkspace_sptr SANSPlotSpecial::runIQTransform() {
   iqt->execute();
 
   Mantid::API::MatrixWorkspace_sptr result =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               "__sans_isis_display_iqt"));
   return result;
@@ -474,7 +474,7 @@ void SANSPlotSpecial::setupTable() {
 
 QwtPlotCurve *SANSPlotSpecial::plotMiniplot(
     QwtPlotCurve *curve,
-    const boost::shared_ptr<Mantid::API::MatrixWorkspace> &workspace,
+    const std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace,
     size_t workspaceIndex) {
   bool data = (curve == m_dataCurve);
 

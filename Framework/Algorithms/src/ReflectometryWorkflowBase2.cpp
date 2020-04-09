@@ -104,14 +104,14 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
   // Summation type
   std::vector<std::string> summationTypes = {"SumInLambda", "SumInQ"};
   declareProperty("SummationType", "SumInLambda",
-                  boost::make_shared<StringListValidator>(summationTypes),
+                  std::make_shared<StringListValidator>(summationTypes),
                   "The type of summation to perform.", Direction::Input);
 
   // Reduction type
   std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
                                              "NonFlatSample"};
   declareProperty("ReductionType", "Normal",
-                  boost::make_shared<StringListValidator>(reductionTypes),
+                  std::make_shared<StringListValidator>(reductionTypes),
                   "The type of reduction to perform when summing in Q.",
                   Direction::Input);
   setPropertySettings("ReductionType",
@@ -220,7 +220,7 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
       "First transmission run, or the low wavelength transmission run if "
       "SecondTransmissionRun is also provided.");
 
-  auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+  auto inputValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator),
@@ -277,7 +277,7 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Params", boost::make_shared<RebinParamsValidator>(true)),
+          "Params", std::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
@@ -315,7 +315,7 @@ void ReflectometryWorkflowBase2::initAlgorithmicProperties(bool autoDetect) {
   }
 
   declareProperty("CorrectionAlgorithm", defaultCorrection,
-                  boost::make_shared<StringListValidator>(correctionAlgorithms),
+                  std::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Polynomial"),

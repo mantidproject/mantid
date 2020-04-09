@@ -10,8 +10,8 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
-#include <boost/shared_ptr.hpp>
 #include <limits>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {

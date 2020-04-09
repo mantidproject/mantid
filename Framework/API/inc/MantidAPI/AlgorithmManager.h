@@ -44,8 +44,8 @@ public:
   /// Creates a managed algorithm with the option of choosing a version
   IAlgorithm_sptr create(const std::string &algName, const int &version = -1);
   /// Creates an unmanaged algorithm with the option of choosing a version
-  boost::shared_ptr<Algorithm> createUnmanaged(const std::string &algName,
-                                               const int &version = -1) const;
+  std::shared_ptr<Algorithm> createUnmanaged(const std::string &algName,
+                                             const int &version = -1) const;
 
   std::size_t size() const;
 

@@ -99,7 +99,7 @@ public:
   /// Set new current function
   void setCurrentFunction(PropertyHandler *h) const;
   /// Get the current function
-  boost::shared_ptr<const Mantid::API::IFunction> theFunction() const;
+  std::shared_ptr<const Mantid::API::IFunction> theFunction() const;
   /// Update the function parameters
   void updateParameters();
   /// Update the function attributes
@@ -118,7 +118,7 @@ public:
   virtual void removeFunction(PropertyHandler *handler);
 
   /// Get Composite Function
-  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
+  std::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
     return m_compositeFunction;
   }
 
@@ -142,7 +142,7 @@ public:
   void setDefaultBackgroundType(const std::string &fnType);
 
   /// Get the workspace
-  boost::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
+  std::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
   /// Get the input workspace name
   std::string workspaceName() const;
   /// Set the input workspace name
@@ -271,7 +271,7 @@ public:
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void addHandle(const std::string &wsName,
-                 const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                 const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Called when the Fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
@@ -466,7 +466,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(const boost::shared_ptr<Mantid::API::IFunction> &f) const;
+  void setWorkspace(const std::shared_ptr<Mantid::API::IFunction> &f) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
   /// Adds the workspace index property to the browser.
@@ -527,7 +527,7 @@ protected:
   QList<QtProperty *> m_minimizerProperties;
 
   /// A copy of the edited function
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  std::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
 
   QtTreePropertyBrowser *m_browser;
 

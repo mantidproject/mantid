@@ -10,8 +10,8 @@
 #include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -26,13 +26,12 @@ public:
   Cluster(const size_t &label);
 
   /// integrate the cluster
-  ClusterIntegratedValues
-  integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws)
-      const override;
+  ClusterIntegratedValues integrate(
+      std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Apply labels to the workspace
   void
-  writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
+  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Get the cluster label
   size_t getLabel() const override;

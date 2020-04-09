@@ -153,12 +153,12 @@ public:
   }
 
   void test_has_parameter() {
-    auto composite = boost::make_shared<CompositeFunction>();
-    auto gauss = boost::make_shared<CurveFittingGauss>();
-    auto gauss1 = boost::make_shared<CurveFittingGauss>();
-    auto gauss2 = boost::make_shared<CurveFittingGauss>();
-    auto linear = boost::make_shared<CurveFittingLinear>();
-    auto innerComposite = boost::make_shared<CompositeFunction>();
+    auto composite = std::make_shared<CompositeFunction>();
+    auto gauss = std::make_shared<CurveFittingGauss>();
+    auto gauss1 = std::make_shared<CurveFittingGauss>();
+    auto gauss2 = std::make_shared<CurveFittingGauss>();
+    auto linear = std::make_shared<CurveFittingLinear>();
+    auto innerComposite = std::make_shared<CompositeFunction>();
 
     composite->addFunction(linear);
     composite->addFunction(gauss);
@@ -178,14 +178,14 @@ public:
   }
 
   void testFit() {
-    boost::shared_ptr<CompositeFunction> mfun =
-        boost::make_shared<CompositeFunction>();
-    boost::shared_ptr<CurveFittingGauss> g1 =
-        boost::make_shared<CurveFittingGauss>();
-    boost::shared_ptr<CurveFittingGauss> g2 =
-        boost::make_shared<CurveFittingGauss>();
-    boost::shared_ptr<CurveFittingLinear> bk =
-        boost::make_shared<CurveFittingLinear>();
+    std::shared_ptr<CompositeFunction> mfun =
+        std::make_shared<CompositeFunction>();
+    std::shared_ptr<CurveFittingGauss> g1 =
+        std::make_shared<CurveFittingGauss>();
+    std::shared_ptr<CurveFittingGauss> g2 =
+        std::make_shared<CurveFittingGauss>();
+    std::shared_ptr<CurveFittingLinear> bk =
+        std::make_shared<CurveFittingLinear>();
 
     mfun->addFunction(bk);
     mfun->addFunction(g1);
@@ -223,7 +223,7 @@ public:
     Fit alg;
     alg.initialize();
 
-    alg.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mfun));
+    alg.setProperty("Function", std::dynamic_pointer_cast<IFunction>(mfun));
     alg.setPropertyValue("InputWorkspace", "mfun");
     alg.setPropertyValue("WorkspaceIndex", "0");
     alg.setProperty("CreateOutput", true);
@@ -324,22 +324,22 @@ public:
     values->setFitData(y);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<CompositeFunction> mfun =
-        boost::make_shared<CompositeFunction>();
+    std::shared_ptr<CompositeFunction> mfun =
+        std::make_shared<CompositeFunction>();
 
-    boost::shared_ptr<UserFunction> fun1 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun1 = std::make_shared<UserFunction>();
     fun1->setAttributeValue("Formula", "a*x");
     fun1->setParameter("a", 1.1);
 
-    boost::shared_ptr<UserFunction> fun2 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun2 = std::make_shared<UserFunction>();
     fun2->setAttributeValue("Formula", "0*x + b");
     fun2->setParameter("b", 2.2);
 
     mfun->addFunction(fun1);
     mfun->addFunction(fun2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(mfun, domain, values);
 
     SimplexMinimizer s;
@@ -363,14 +363,14 @@ public:
     values->setFitData(y);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<CompositeFunction> mfun =
-        boost::make_shared<CompositeFunction>();
+    std::shared_ptr<CompositeFunction> mfun =
+        std::make_shared<CompositeFunction>();
 
-    boost::shared_ptr<UserFunction> fun1 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun1 = std::make_shared<UserFunction>();
     fun1->setAttributeValue("Formula", "a*x");
     fun1->setParameter("a", 1.1);
 
-    boost::shared_ptr<UserFunction> fun2 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun2 = std::make_shared<UserFunction>();
     fun2->setAttributeValue("Formula", "c*x^2 + b");
     fun2->setParameter("c", 0.00);
     fun2->setParameter("b", 2.2);
@@ -378,8 +378,8 @@ public:
     mfun->addFunction(fun1);
     mfun->addFunction(fun2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(mfun, domain, values);
 
     BFGS_Minimizer s;
@@ -406,14 +406,14 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<CompositeFunction> mfun =
-        boost::make_shared<CompositeFunction>();
+    std::shared_ptr<CompositeFunction> mfun =
+        std::make_shared<CompositeFunction>();
 
-    boost::shared_ptr<UserFunction> fun1 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun1 = std::make_shared<UserFunction>();
     fun1->setAttributeValue("Formula", "a*x");
     fun1->setParameter("a", 1.1);
 
-    boost::shared_ptr<UserFunction> fun2 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun2 = std::make_shared<UserFunction>();
     fun2->setAttributeValue("Formula", "c*x^2 + b");
     fun2->setParameter("c", 0.00);
     fun2->setParameter("b", 2.2);
@@ -421,8 +421,8 @@ public:
     mfun->addFunction(fun1);
     mfun->addFunction(fun2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(mfun, domain, values);
 
     LevenbergMarquardtMDMinimizer s;

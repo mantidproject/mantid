@@ -59,7 +59,7 @@ double stringToRoundedNumber(const std::string &s) {
  */
 bool isValidPropertyValue(Mantid::Kernel::Property *prop,
                           const std::string &value) {
-  const auto guineaPig = boost::shared_ptr<Property>(prop->clone());
+  const auto guineaPig = std::shared_ptr<Property>(prop->clone());
   return guineaPig->setValue(value).empty();
 }
 

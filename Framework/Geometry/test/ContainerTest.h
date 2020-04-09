@@ -13,7 +13,7 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::Geometry::Container;
 
@@ -109,7 +109,7 @@ public:
 
 private:
   Mantid::Geometry::Container_sptr createTestCan() {
-    return boost::make_shared<Container>(
+    return std::make_shared<Container>(
         "<type name=\"usertype\"><cylinder>"
         "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" />"
         "<axis x=\"0.0\" y=\"1.0\" z=\"0\" />"

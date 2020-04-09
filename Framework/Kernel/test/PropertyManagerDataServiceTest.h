@@ -109,5 +109,5 @@ public:
   }
 
 private:
-  boost::shared_ptr<PropertyManager> inst1, inst2;
+  std::shared_ptr<PropertyManager> inst1, inst2;
 };

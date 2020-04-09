@@ -120,7 +120,7 @@ template <typename WSType> void storeWS(const std::string &name, WSType &ws) {
 /// Deletes a workspace
 void removeWS(const std::string &name);
 /// Returns a workspace of a given type
-template <typename T> boost::shared_ptr<T> getWS(const std::string &name) {
+template <typename T> std::shared_ptr<T> getWS(const std::string &name) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(name);
 }
 
@@ -213,7 +213,7 @@ create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
     throw std::invalid_argument(
         "Number of bins <=0. Cannot create an empty workspace");
 
-  auto ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+  auto ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
       Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nSpec, nX,
                                                        nY));
 
@@ -394,17 +394,17 @@ void populateWsWithInitList(T &destination, size_t startingIndex,
                             const std::initializer_list<double> &values);
 
 /// Create a simple peaks workspace containing the given number of peaks
-boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
+std::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
 createPeaksWorkspace(const int numPeaks,
                      const bool createOrientedLattice = false);
 /// Create a simple peaks workspace containing the given number of peaks and UB
 /// matrix
-boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
+std::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
 createPeaksWorkspace(const int numPeaks,
                      const Mantid::Kernel::DblMatrix &ubMat);
 /**Build table workspace with preprocessed detectors for existing workspace with
  * instrument */
-boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
+std::shared_ptr<Mantid::DataObjects::TableWorkspace>
 buildPreprocessedDetectorsWorkspace(
     const Mantid::API::MatrixWorkspace_sptr &ws);
 // create range of angular detectors positions

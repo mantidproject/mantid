@@ -95,7 +95,7 @@ protected:
     mdworkspaceAlg->execute();
     Workspace_sptr temp = mdworkspaceAlg->getProperty("OutputWorkspace");
     IMDEventWorkspace_sptr mdws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
+        std::dynamic_pointer_cast<IMDEventWorkspace>(temp);
 
     // --- Set speical coordinates on fake mdworkspace --
     auto coordsAlg =
@@ -162,7 +162,7 @@ protected:
 
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
     IMDHistoWorkspace_sptr outMDWS =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
     return MDHistoPeaksWSTuple(outMDWS, mdew_peak.get<1>());
   }
 

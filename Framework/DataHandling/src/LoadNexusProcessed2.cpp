@@ -123,7 +123,7 @@ void LoadNexusProcessed2::extractMappingInfoNew(
         continue;
       }
       const size_t nSpecEntries = spectra_block.dim0();
-      auto data = spectra_block.sharedBuffer();
+      auto data = spectra_block.vecBuffer();
       size_t currentSize = spectrumNumbers.size();
       spectrumNumbers.resize(currentSize + nSpecEntries, 0);
       // Append spectrum numbers
@@ -135,7 +135,7 @@ void LoadNexusProcessed2::extractMappingInfoNew(
       det_index.load();
       size_t nDetEntries = det_index.dim0();
       currentSize = detectorIds.size();
-      data = det_index.sharedBuffer();
+      data = det_index.vecBuffer();
       detectorIds.resize(currentSize + nDetEntries, 0);
       for (size_t i = 0; i < nDetEntries; ++i) {
         detectorIds[i + currentSize] = data[i];
@@ -146,7 +146,7 @@ void LoadNexusProcessed2::extractMappingInfoNew(
       det_counts.load();
       size_t nDetCounts = det_counts.dim0();
       currentSize = detectorCounts.size();
-      data = det_counts.sharedBuffer();
+      data = det_counts.vecBuffer();
       detectorCounts.resize(currentSize + nDetCounts, 0);
       size_t dataSum = 0;
       for (size_t i = 0; i < nDetCounts; ++i) {

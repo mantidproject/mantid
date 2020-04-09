@@ -50,7 +50,7 @@ void SetSampleMaterial::init() {
   declareProperty("AtomicNumber", 0, "The atomic number");
   declareProperty("MassNumber", 0,
                   "Mass number if ion (use 0 for default mass number)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "SampleNumberDensity", EMPTY_DBL(), mustBePositive,
@@ -93,7 +93,7 @@ void SetSampleMaterial::init() {
       "to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
   declareProperty("NumberDensityUnit", units.front(),
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
@@ -190,7 +190,7 @@ void SetSampleMaterial::exec() {
   Workspace_sptr workspace = getProperty("InputWorkspace");
   // an ExperimentInfo object has a sample
   ExperimentInfo_sptr expInfo =
-      boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
+      std::dynamic_pointer_cast<ExperimentInfo>(workspace);
   if (!expInfo) {
     throw std::runtime_error("InputWorkspace does not have a sample object");
   }
@@ -210,7 +210,7 @@ void SetSampleMaterial::exec() {
     normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
-  auto shapeObject = boost::shared_ptr<Geometry::IObject>(
+  auto shapeObject = std::shared_ptr<Geometry::IObject>(
       expInfo->sample().getShape().cloneWithMaterial(*material));
   expInfo->mutableSample().setShape(shapeObject);
   g_log.information() << "Sample number density ";

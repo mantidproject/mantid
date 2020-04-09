@@ -21,7 +21,7 @@ using namespace Geometry;
  * @param endX :: The upper bin index
  */
 void IFunctionMW::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
     double startX, double endX) {
   m_workspace = workspace;
   m_workspaceIndex = wi;
@@ -32,7 +32,7 @@ void IFunctionMW::setMatrixWorkspace(
 /**
  * Get a shared pointer to the saved matrix workspace.
  */
-boost::shared_ptr<const API::MatrixWorkspace>
+std::shared_ptr<const API::MatrixWorkspace>
 IFunctionMW::getMatrixWorkspace() const {
   return m_workspace.lock();
 }

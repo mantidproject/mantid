@@ -125,7 +125,7 @@ IndirectFittingModelLegacy *createModelWithSingleInstrumentWorkspace(
 
 IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
                                   std::string const &functionString) {
-  auto alg = boost::make_shared<ConvolutionFitSequential>();
+  auto alg = std::make_shared<ConvolutionFitSequential>();
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);

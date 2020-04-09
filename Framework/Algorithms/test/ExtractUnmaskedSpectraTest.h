@@ -125,7 +125,7 @@ private:
       alg->initialize();
       alg->setProperty(
           "Workspace",
-          boost::dynamic_pointer_cast<Mantid::API::Workspace>(workspace));
+          std::dynamic_pointer_cast<Mantid::API::Workspace>(workspace));
       alg->setProperty("WorkspaceIndexList", indices);
       alg->execute();
     }

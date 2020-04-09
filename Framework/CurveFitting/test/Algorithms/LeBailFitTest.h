@@ -286,7 +286,7 @@ API::MatrixWorkspace_sptr generateSeparateTwoPeaksData2() {
   const size_t size = 127;
 
   // b) Get workspace
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -322,7 +322,7 @@ API::MatrixWorkspace_sptr generateTwinPeakData() {
   const size_t size = 23;
 
   // b) Get workspace
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -380,7 +380,7 @@ API::MatrixWorkspace_sptr generate1PeakDataPlusBackground() {
 
   // b) Get workspace
   const size_t size = 73;
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -415,7 +415,7 @@ API::MatrixWorkspace_sptr generateArgSiPeak220() {
 
   // b) Get workspace
   size_t size = 26;
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -650,7 +650,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -752,7 +752,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -853,7 +853,7 @@ public:
 
     // 5. Get output & Test
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
 
@@ -950,7 +950,7 @@ public:
 
     // 4. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FitResultWS"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -964,7 +964,7 @@ public:
 
     // 5. Check fit result
     DataObjects::TableWorkspace_sptr paramws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParameters"));
     TS_ASSERT(paramws);
     if (!paramws) {
@@ -1091,7 +1091,7 @@ public:
     // 5. Exam
     // Take the output data:
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedData"));
     TS_ASSERT(outws);
     if (!outws)
@@ -1102,7 +1102,7 @@ public:
 
     // Peaks table
     DataObjects::TableWorkspace_sptr peakparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedPeaks"));
     TS_ASSERT(peakparamws);
     if (!peakparamws) {
@@ -1115,7 +1115,7 @@ public:
 
     // Parameters table
     DataObjects::TableWorkspace_sptr instrparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedParameters"));
     TS_ASSERT(instrparamws);
     if (!instrparamws)
@@ -1207,7 +1207,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("RefinedBackground"));
     TS_ASSERT(outws);
     if (!outws) {

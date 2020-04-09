@@ -11,7 +11,7 @@
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <utility>
 
 using Mantid::Geometry::MDGeometryXMLDefinitions;
@@ -22,7 +22,7 @@ VatesKnowledgeSerializer::VatesKnowledgeSerializer()
     : m_wsLocationXML(""), m_wsNameXML(""), m_wsName(""), m_geomXML("") {}
 
 void VatesKnowledgeSerializer::setImplicitFunction(
-    boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction) {
+    std::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction) {
   this->m_spFunction = std::move(spFunction);
 }
 

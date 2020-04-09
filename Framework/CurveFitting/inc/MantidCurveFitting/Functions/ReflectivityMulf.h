@@ -43,7 +43,7 @@ private:
   int m_nlayer, m_nlayer_old;
 };
 
-using ReflectivityMulf_sptr = boost::shared_ptr<ReflectivityMulf>;
+using ReflectivityMulf_sptr = std::shared_ptr<ReflectivityMulf>;
 
 } // namespace Functions
 } // namespace CurveFitting

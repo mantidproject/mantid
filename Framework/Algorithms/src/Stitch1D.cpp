@@ -139,7 +139,7 @@ void Stitch1D::init() {
                       "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "End overlap x-value in units of x-axis.");
   declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Params", boost::make_shared<RebinParamsValidator>(true)),
+                      "Params", std::make_shared<RebinParamsValidator>(true)),
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
@@ -151,7 +151,7 @@ void Stitch1D::init() {
                       "UseManualScaleFactor", false, Direction::Input),
                   "True to use a provided value for the scale factor.");
   auto manualScaleFactorValidator =
-      boost::make_shared<BoundedValidator<double>>();
+      std::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
   manualScaleFactorValidator->setExclusive(true);
   declareProperty(std::make_unique<PropertyWithValue<double>>(
@@ -421,7 +421,7 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
   Mantid::API::AnalysisDataService::Instance().remove(in1);
   Mantid::API::AnalysisDataService::Instance().remove(in2);
   API::Workspace_sptr ws = conjoinX->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 }
 
 /** Runs the CreateSingleValuedWorkspace Algorithm as a child

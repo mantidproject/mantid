@@ -69,7 +69,7 @@ protected: // for testing, otherwise private:
   Mantid::API::MatrixWorkspace_sptr m_InWS2D;
   // TODO: This will eventually go. ///The pointer to class which keeps output
   // MD workspace and is responsible for adding data to N-dimensional workspace;
-  boost::shared_ptr<MDAlgorithms::MDEventWSWrapper> m_OutWSWrapper;
+  std::shared_ptr<MDAlgorithms::MDEventWSWrapper> m_OutWSWrapper;
 
   // Workflow helpers:
   /**Check if target workspace new or existing one and we need to create new

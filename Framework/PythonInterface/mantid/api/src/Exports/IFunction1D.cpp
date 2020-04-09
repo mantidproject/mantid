@@ -15,10 +15,10 @@ using namespace boost::python;
 
 void export_IFunction1D() {
   /**
-   * The Python held type, boost::shared_ptr<IFunction1DAdapter>, allows
+   * The Python held type, std::shared_ptr<IFunction1DAdapter>, allows
    * the class' virtual functions to be overridden in Python
    */
-  class_<IFunction1D, bases<IFunction>, boost::shared_ptr<IFunction1DAdapter>,
+  class_<IFunction1D, bases<IFunction>, std::shared_ptr<IFunction1DAdapter>,
          boost::noncopyable>("IFunction1D", "Base class for 1D Fit functions")
       .def("function1D",
            (object(IFunction1DAdapter::*)(const object &) const) &

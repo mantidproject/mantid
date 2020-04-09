@@ -772,8 +772,7 @@ void LoadILLSANS::setPixelSize() {
       (m_instrumentName == "D33") ? "back_detector" : "detector";
   auto detector = instrument->getComponentByName(component);
   auto rectangle =
-      boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
-          detector);
+      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(detector);
   if (rectangle) {
     const double dx = rectangle->xstep();
     const double dy = rectangle->ystep();

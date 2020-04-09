@@ -31,8 +31,8 @@
 #include <vector>
 
 // Boost
-#include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
+#include <memory>
 
 // Poco
 #include <Poco/DOM/DOMParser.h>

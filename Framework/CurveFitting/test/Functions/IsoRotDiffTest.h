@@ -18,7 +18,7 @@
 #include "MantidAPI/IFunction.h"
 #include <cxxtest/TestSuite.h>
 // third party library headers
-#include <boost/make_shared.hpp>
+#include <memory>
 // standard library headers (n/a)
 #include <limits>
 
@@ -59,8 +59,8 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableIsoRotDiff> createTestIsoRotDiff() {
-    auto func = boost::make_shared<TestableIsoRotDiff>();
+  std::shared_ptr<TestableIsoRotDiff> createTestIsoRotDiff() {
+    auto func = std::make_shared<TestableIsoRotDiff>();
     func->initialize();
     func->setParameter("Height", 0.88);
     func->setParameter("Radius", 1.06); // Angstrom

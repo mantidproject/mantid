@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionValues.h"
 #include <algorithm>
+#include <functional>
 
 namespace Mantid {
 namespace API {

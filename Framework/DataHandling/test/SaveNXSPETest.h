@@ -19,7 +19,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "boost/tuple/tuple.hpp"
-#include <boost/shared_array.hpp>
+#include <memory>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>
@@ -171,9 +171,8 @@ private:
     return inputWS;
   }
 
-  using DataHolder =
-      boost::tuple<boost::shared_array<hsize_t>, boost::shared_array<double>,
-                   boost::shared_array<double>>;
+  using DataHolder = boost::tuple<std::vector<hsize_t>, std::vector<double>,
+                                  std::vector<double>>;
 
   DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr &inputWS) {
     SaveNXSPE saver;
@@ -192,9 +191,8 @@ private:
 
     TS_ASSERT(Poco::File(outputFile).exists());
     if (!Poco::File(outputFile).exists()) {
-      return boost::make_tuple(boost::shared_array<hsize_t>(),
-                               boost::shared_array<double>(),
-                               boost::shared_array<double>());
+      return boost::make_tuple(std::vector<hsize_t>(), std::vector<double>(),
+                               std::vector<double>());
     }
 
     auto h5file = H5Fopen(outputFile.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -204,23 +202,22 @@ private:
     TS_ASSERT_EQUALS(0, status);
     TS_ASSERT_EQUALS(2, rank);
 
-    boost::shared_array<hsize_t> dims(new hsize_t[rank]);
+    std::vector<hsize_t> dims(rank);
     H5T_class_t classId(H5T_NO_CLASS);
     size_t typeSize(0);
     status =
-        H5LTget_dataset_info(h5file, dset, dims.get(), &classId, &typeSize);
+        H5LTget_dataset_info(h5file, dset, dims.data(), &classId, &typeSize);
     TS_ASSERT_EQUALS(0, status);
     TS_ASSERT_EQUALS(H5T_FLOAT, classId);
     TS_ASSERT_EQUALS(8, typeSize);
 
     size_t bufferSize(dims[0] * dims[1]);
-    boost::shared_array<double> signal(new double[bufferSize]),
-        error(new double[bufferSize]);
-    status = H5LTread_dataset_double(h5file, dset, signal.get());
+    std::vector<double> signal(bufferSize), error(bufferSize);
+    status = H5LTread_dataset_double(h5file, dset, signal.data());
     TS_ASSERT_EQUALS(0, status);
 
     const char *dsetErr = "/mantid_workspace/data/error";
-    status = H5LTread_dataset_double(h5file, dsetErr, error.get());
+    status = H5LTread_dataset_double(h5file, dsetErr, error.data());
     TS_ASSERT_EQUALS(0, status);
     H5Fclose(h5file);
     // Poco::File(outputFile).remove();

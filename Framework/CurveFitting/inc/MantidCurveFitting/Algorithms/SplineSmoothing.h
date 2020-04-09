@@ -96,7 +96,7 @@ private:
   convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
   /// CubicSpline member used to perform smoothing
-  boost::shared_ptr<Functions::BSpline> m_cspline;
+  std::shared_ptr<Functions::BSpline> m_cspline;
   /// pointer to the input workspace
   API::MatrixWorkspace_sptr m_inputWorkspace;
   /// pointer to the input workspace converted to point data

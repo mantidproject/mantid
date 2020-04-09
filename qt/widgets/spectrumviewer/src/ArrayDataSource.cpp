@@ -45,7 +45,7 @@ ArrayDataSource::~ArrayDataSource() {}
 
 bool ArrayDataSource::hasData(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(wsName);
   UNUSED_ARG(ws);
   return false;

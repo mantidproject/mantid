@@ -41,7 +41,7 @@ void CreateCalFileByNames::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "InstrumentWorkspace", "", Direction::Input,
-          boost::make_shared<InstrumentValidator>()),
+          std::make_shared<InstrumentValidator>()),
       "A workspace that contains a reference to the instrument of interest. "
       "You can use LoadEmptyInstrument to create such a workspace.");
   declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
@@ -94,12 +94,12 @@ void CreateCalFileByNames::exec() {
   vgroups.clear();
 
   // Find Detectors that belong to groups
-  using sptr_ICompAss = boost::shared_ptr<const Geometry::ICompAssembly>;
-  using sptr_IComp = boost::shared_ptr<const Geometry::IComponent>;
-  using sptr_IDet = boost::shared_ptr<const Geometry::IDetector>;
+  using sptr_ICompAss = std::shared_ptr<const Geometry::ICompAssembly>;
+  using sptr_IComp = std::shared_ptr<const Geometry::IComponent>;
+  using sptr_IDet = std::shared_ptr<const Geometry::IDetector>;
   std::queue<std::pair<sptr_ICompAss, int>> assemblies;
   sptr_ICompAss current =
-      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
+      std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
   sptr_IDet currentDet;
   sptr_IComp currentIComp;
   sptr_ICompAss currentchild;
@@ -127,8 +127,8 @@ void CreateCalFileByNames::exec() {
     if (nchilds != 0) {
       for (int i = 0; i < nchilds; ++i) {
         currentIComp = (*(current.get()))[i]; // Get child
-        currentDet = boost::dynamic_pointer_cast<const Geometry::IDetector>(
-            currentIComp);
+        currentDet =
+            std::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
         if (currentDet.get()) // Is detector
         {
           if (overwrite) // Map will contains udet as the key
@@ -140,7 +140,7 @@ void CreateCalFileByNames::exec() {
         } else // Is an assembly, push in the queue
         {
           currentchild =
-              boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+              std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
                   currentIComp);
           if (currentchild.get()) {
             child_group = group_map[currentchild->getName()];

@@ -21,7 +21,7 @@ namespace {
  * @return ConvertToYSpace alg
  */
 IAlgorithm_sptr createAlgorithm() {
-  IAlgorithm_sptr alg = boost::make_shared<ConvertToYSpace>();
+  IAlgorithm_sptr alg = std::make_shared<ConvertToYSpace>();
   alg->initialize();
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__UNUSED__");

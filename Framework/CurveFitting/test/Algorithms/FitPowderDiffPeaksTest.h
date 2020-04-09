@@ -85,7 +85,7 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
   }
 
   // 2. Get workspace
-  MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr dataws = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(datawsname));
   if (!dataws) {
     throw runtime_error("Failed to retrieve data workspace from LoadAsii.");
@@ -437,7 +437,7 @@ public:
 
     // 3. Check result
     DataObjects::Workspace2D_sptr peakdataws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedPeaks"));
     TS_ASSERT(peakdataws);
     if (!peakdataws) {
@@ -458,7 +458,7 @@ public:
 
     // Output Bragg peaks parameters
     DataObjects::TableWorkspace_sptr outbraggws =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             AnalysisDataService::Instance().retrieve("PeaksParameterTable"));
     TS_ASSERT(outbraggws);
     if (!outbraggws) {

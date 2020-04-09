@@ -17,9 +17,9 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -38,7 +38,7 @@ LoadRawBin0::LoadRawBin0()
 /// Initialisation method.
 void LoadRawBin0::init() {
   LoadRawHelper::init();
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("SpectrumMin", 1, mustBePositive,
                   "The number of the first spectrum to read.");
@@ -90,7 +90,7 @@ void LoadRawBin0::exec() {
   m_total_specs = calculateWorkspaceSize();
 
   // no real X values for bin 0,so initialize this to zero
-  auto channelsVec = boost::make_shared<HistogramData::HistogramX>(1, 0);
+  auto channelsVec = std::make_shared<HistogramData::HistogramX>(1, 0);
   m_timeChannelsVec.emplace_back(channelsVec);
 
   auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);

@@ -74,7 +74,7 @@ public:
                      const std::runtime_error &);
 
     // Wrong number of frames
-    TS_ASSERT_THROWS(!FrameworkManager::Instance().exec(
+    TS_ASSERT_THROWS(FrameworkManager::Instance().exec(
                          "CreateMDWorkspace", 12, "OutputWorkspace",
                          "simple_md", "Dimensions", "3", "Extents",
                          "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
@@ -126,7 +126,7 @@ public:
     // Get it from data service
     IMDEventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve(wsName)));
     TS_ASSERT(ws);
 
@@ -153,14 +153,14 @@ public:
 
     if (lean) {
       MDEventWorkspace3Lean::sptr ews =
-          boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
+          std::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
       TS_ASSERT(ews);
       if (!ews)
         return;
       bc = ews->getBoxController();
     } else {
       MDEventWorkspace3::sptr ews =
-          boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);
+          std::dynamic_pointer_cast<MDEventWorkspace3>(ws);
       TS_ASSERT(ews);
       if (!ews)
         return;

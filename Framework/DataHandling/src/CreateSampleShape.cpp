@@ -60,7 +60,7 @@ void CreateSampleShape::init() {
                       "InputWorkspace", "", Direction::Input),
                   "The workspace with which to associate the sample ");
   declareProperty("ShapeXML", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The XML that describes the shape");
 }
 

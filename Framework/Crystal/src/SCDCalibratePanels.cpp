@@ -183,7 +183,7 @@ void SCDCalibratePanels::exec() {
 
   // Use new instrument for PeaksWorkspace
   Geometry::Instrument_sptr inst2 =
-      boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
+      std::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
   Geometry::OrientedLattice lattice0 =
       peaksWs->mutableSample().getOrientedLattice();
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
@@ -290,7 +290,7 @@ void SCDCalibratePanels::saveNexus(const std::string &outputFile,
 
 void SCDCalibratePanels::findL1(
     int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
-  MatrixWorkspace_sptr L1WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr L1WS = std::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
                                                3 * nPeaks));
 
@@ -331,7 +331,7 @@ void SCDCalibratePanels::findL1(
 
 void SCDCalibratePanels::findT0(
     int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
-  MatrixWorkspace_sptr T0WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr T0WS = std::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
                                                3 * nPeaks));
 
@@ -441,7 +441,7 @@ void SCDCalibratePanels::findU(
  * @param filename     -The name of the DetCal file to save the results to
  */
 void SCDCalibratePanels::saveIsawDetCal(
-    boost::shared_ptr<Instrument> &instrument,
+    std::shared_ptr<Instrument> &instrument,
     boost::container::flat_set<string> &AllBankName, double T0,
     const string &filename) {
   // having a filename triggers doing the work
@@ -453,7 +453,7 @@ void SCDCalibratePanels::saveIsawDetCal(
   // create a workspace to pass to SaveIsawDetCal
   const size_t number_spectra = instrument->getNumberDetectors();
   DataObjects::Workspace2D_sptr wksp =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", number_spectra, 2,
                                               1));
   wksp->setInstrument(instrument);
@@ -476,7 +476,7 @@ void SCDCalibratePanels::init() {
                       "PeakWorkspace", "", Kernel::Direction::InOut),
                   "Workspace of Indexed Peaks");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty("a", EMPTY_DBL(), mustBePositive,
@@ -578,7 +578,7 @@ void SCDCalibratePanels::saveXmlFile(
     if (instrument.getName().compare("CORELLI") == 0.0)
       bankName.append("/sixteenpack");
     oss3 << "<component-link name=\"" << bankName << "\">\n";
-    boost::shared_ptr<const IComponent> bank =
+    std::shared_ptr<const IComponent> bank =
         instrument.getComponentByName(bankName);
 
     Quat relRot = bank->getRelativeRot();
@@ -673,7 +673,7 @@ void SCDCalibratePanels::findL2(
       continue;
     }
 
-    MatrixWorkspace_sptr q3DWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr q3DWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         API::WorkspaceFactory::Instance().create(
             "Workspace2D", 1, 3 * nBankPeaks, 3 * nBankPeaks));
 
@@ -736,8 +736,8 @@ void SCDCalibratePanels::findL2(
     // Scaling only implemented for Rectangular Detectors
     Geometry::IComponent_const_sptr comp =
         peaksWs->getInstrument()->getComponentByName(iBank);
-    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
     if (rectDet && changeSize) {
       IAlgorithm_sptr fit2_alg;
       try {

@@ -86,7 +86,7 @@ void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
   Workspace_sptr ws_ptr =
       AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      std::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
   const auto xMin = *min_element(xData.begin(), xData.end());
@@ -1181,11 +1181,11 @@ void MuonAnalysis::handleInputFileChanges() {
  * @param loadResult :: Various loaded parameters as returned by load()
  * @return Used grouping for populating grouping table
  */
-boost::shared_ptr<GroupResult> MuonAnalysis::getGrouping(
-    const boost::shared_ptr<LoadResult> &loadResult) const {
-  auto result = boost::make_shared<GroupResult>();
+std::shared_ptr<GroupResult>
+MuonAnalysis::getGrouping(const std::shared_ptr<LoadResult> &loadResult) const {
+  auto result = std::make_shared<GroupResult>();
 
-  boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
+  std::shared_ptr<Mantid::API::Grouping> groupingToUse;
   Instrument_const_sptr instr =
       firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
@@ -1203,7 +1203,7 @@ boost::shared_ptr<GroupResult> MuonAnalysis::getGrouping(
   if (!reloadNecessary && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
-    groupingToUse = boost::make_shared<Mantid::API::Grouping>(
+    groupingToUse = std::make_shared<Mantid::API::Grouping>(
         m_groupingHelper.parseGroupingTable());
   } else {
     // Need to load a new grouping
@@ -1222,15 +1222,14 @@ boost::shared_ptr<GroupResult> MuonAnalysis::getGrouping(
         g_log.warning("Using grouping loaded from NeXus file.");
         ITableWorkspace_sptr groupingTable;
 
-        if (!(groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+        if (!(groupingTable = std::dynamic_pointer_cast<ITableWorkspace>(
                   loadResult->loadedGrouping))) {
-          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+          auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
               loadResult->loadedGrouping);
           groupingTable =
-              boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+              std::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
         }
-        groupingToUse =
-            boost::make_shared<Mantid::API::Grouping>(groupingTable);
+        groupingToUse = std::make_shared<Mantid::API::Grouping>(groupingTable);
         groupingToUse->description = "Grouping from Nexus file";
       } else {
         g_log.warning(
@@ -1266,14 +1265,14 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   m_updating = true;
   m_uiForm.tabWidget->setTabEnabled(3, false);
 
-  boost::shared_ptr<LoadResult> loadResult;
-  boost::shared_ptr<GroupResult> groupResult;
+  std::shared_ptr<LoadResult> loadResult;
+  std::shared_ptr<GroupResult> groupResult;
   ITableWorkspace_sptr deadTimes;
   Workspace_sptr correctedGroupedWS;
 
   try {
     // Load the new file(s)
-    loadResult = boost::make_shared<LoadResult>(m_dataLoader.loadFiles(files));
+    loadResult = std::make_shared<LoadResult>(m_dataLoader.loadFiles(files));
 
     try // to get the dead time correction
     {
@@ -1941,7 +1940,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   Workspace_const_sptr ws_ptr =
       AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_const_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
   auto lower = m_uiForm.timeAxisStartAtInput->text().toDouble();

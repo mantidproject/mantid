@@ -143,7 +143,7 @@ private:
 
   template <typename ValueType>
   void checkArrayPropertyValue(
-      boost::shared_ptr<PropertyWithValue<std::vector<ValueType>>> valueProp,
+      std::shared_ptr<PropertyWithValue<std::vector<ValueType>>> valueProp,
       const boost::python::object &expectedValue) {
     const auto srcValue = PySequenceToVector<ValueType>(expectedValue)();
     const auto propValue = (*valueProp)();

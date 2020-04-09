@@ -25,8 +25,8 @@ GET_POINTER_SPECIALIZATION(WorkspaceFactoryImpl)
 namespace {
 /**
  * Creates from workspace using an existing one as a template.
- * The C++ implementation accepts a boost::shared<const MatrixWorkspace> which
- * we cannot currently handle. This allows a boost::shared<MatrixWorkspace> to
+ * The C++ implementation accepts a std::shared<const MatrixWorkspace> which
+ * we cannot currently handle. This allows a std::shared<MatrixWorkspace> to
  *be passed
  * in an converted. See MantidPythonInterface/core/Policies/RemoveConst for
  *the full

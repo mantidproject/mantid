@@ -30,7 +30,7 @@ void StartRemoteTransaction::init() {
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer where the new transaction "
                   "will be created",
                   Direction::Input);
@@ -41,12 +41,12 @@ void StartRemoteTransaction::init() {
 }
 
 void StartRemoteTransaction::exec() {
-  boost::shared_ptr<RemoteJobManager> jobManager =
+  std::shared_ptr<RemoteJobManager> jobManager =
       Mantid::Kernel::ConfigService::Instance()
           .getFacility()
           .getRemoteJobManager(getPropertyValue("ComputeResource"));
 
-  // jobManager is a boost::shared_ptr...
+  // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??

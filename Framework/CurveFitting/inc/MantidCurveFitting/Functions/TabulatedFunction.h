@@ -88,7 +88,7 @@ private:
   void loadWorkspace(const std::string &wsName) const;
 
   /// Load the points from a MatrixWorkspace
-  void loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) const;
+  void loadWorkspace(std::shared_ptr<API::MatrixWorkspace> ws) const;
 
   /// Size of the data
   size_t size() const { return m_yData.size(); }
@@ -107,7 +107,7 @@ private:
   static const int defaultIndexValue;
 
   /// Temporary workspace holder
-  mutable boost::shared_ptr<API::MatrixWorkspace> m_workspace;
+  mutable std::shared_ptr<API::MatrixWorkspace> m_workspace;
 
   /// Stores x-values
   mutable std::vector<double> m_xData;

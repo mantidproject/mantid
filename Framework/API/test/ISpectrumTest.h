@@ -100,7 +100,7 @@ public:
     // setDX vesion 2
     SpectrumTester s4(Histogram::XMode::Points, Histogram::YMode::Counts);
     auto Dx_vec_ptr_type =
-        boost::make_shared<Mantid::HistogramData::HistogramDx>(0);
+        std::make_shared<Mantid::HistogramData::HistogramDx>(0);
     s4.setSharedDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 

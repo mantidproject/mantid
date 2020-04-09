@@ -39,7 +39,7 @@ using namespace Kernel;
 using namespace API;
 
 IQTransform::IQTransform()
-    : API::Algorithm(), m_label(boost::make_shared<Units::Label>()) {
+    : API::Algorithm(), m_label(std::make_shared<Units::Label>()) {
   /* Just for fun, this is implemented as follows....
    * We fill a map below with the transformation name as the key and
    * a function pointer to the method that does the transformation as
@@ -59,7 +59,7 @@ IQTransform::IQTransform()
 }
 
 void IQTransform::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   // Require the input to be in units of Q and to be a distribution
   // (which the result of a SANS reduction in Mantid will be)
   wsValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
@@ -81,12 +81,12 @@ void IQTransform::init() {
     plottype.insert(it->first);
   }
   declareProperty(
-      "TransformType", "", boost::make_shared<StringListValidator>(plottype),
+      "TransformType", "", std::make_shared<StringListValidator>(plottype),
       "The name of the transformation to be performed on the workspace");
 
   // A background to be subtracted can be a value or a workspace. Both
   // properties are optional.
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "BackgroundValue", 0.0, mustBePositive,

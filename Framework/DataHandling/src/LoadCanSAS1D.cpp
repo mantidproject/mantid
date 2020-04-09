@@ -142,7 +142,7 @@ void LoadCanSAS1D::exec() {
     outputWork = WS;
     break;
   default:
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     for (unsigned int i = 0; i < numEntries; ++i) {
       std::string run;
       MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), run);

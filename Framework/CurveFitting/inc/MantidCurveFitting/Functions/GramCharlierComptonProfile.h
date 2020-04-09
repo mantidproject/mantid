@@ -57,9 +57,8 @@ private:
   void convoluteVoigt(double *result, const size_t nData,
                       const std::vector<double> &profile) const;
   /// Called by the framework when a workspace is set
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
   /// Pre-calculate the Y-space values
   void cacheYSpaceValues(const HistogramData::Points &tseconds,
                          const Algorithms::DetectorParams &detpar) override;

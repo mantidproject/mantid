@@ -15,6 +15,7 @@ Powder Diffraction
 - Polaris.create_total_scattering_pdf output workspaces now have the run number in the names.
 - Polaris.create_total_scattering_pdf no longer takes `output_binning` as a parameter, instead binning of the output pdf can be controlled with `delta_r`
 - Polaris.create_total_scattering_pdf can rebin the Q space workspace before calculating the PDF by being given an input `delta_q`
+- :ref:`LoadWAND <algm-LoadWAND>` now adds `duration` log to the workspace
 
 Engineering Diffraction
 -----------------------

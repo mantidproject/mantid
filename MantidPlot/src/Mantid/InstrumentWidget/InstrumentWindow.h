@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <MdiSubWindow.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ApplicationWindow;
 class MantidUI;

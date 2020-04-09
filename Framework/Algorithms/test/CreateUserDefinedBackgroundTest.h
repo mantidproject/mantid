@@ -282,7 +282,7 @@ private:
 
   /// Create table containing user-selected background points
   ITableWorkspace_sptr createTable(bool isDistribution = false) {
-    auto table = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    auto table = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     table->addColumn("double", "X");
     table->addColumn("double", "Y");
     double width = 0.1;

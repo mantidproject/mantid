@@ -113,7 +113,7 @@ void LoadIsawPeaks::exec() {
   this->appendFile(ws, getPropertyValue("Filename"));
 
   // Save it in the output
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(ws));
 
   this->checkNumberPeaks(ws, getPropertyValue("Filename"));
 }
@@ -359,26 +359,26 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS,
 //----------------------------------------------------------------------------------------------
 int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst,
                                const std::string &bankName, int col, int row) {
-  boost::shared_ptr<const IComponent> parent =
+  std::shared_ptr<const IComponent> parent =
       getCachedBankByName(std::move(bankName), inst);
 
   if (!parent)
     return -1; // peak not in any detector.
 
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+    std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getID();
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-          children[0]);
+      asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
@@ -386,14 +386,14 @@ int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst,
     // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     Geometry::IComponent_const_sptr first = grandchildren[row - 1];
     Geometry::IDetector_const_sptr det =
-        boost::dynamic_pointer_cast<const Geometry::IDetector>(first);
+        std::dynamic_pointer_cast<const Geometry::IDetector>(first);
     return det->getID();
   }
 }
@@ -601,9 +601,9 @@ void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS,
  * @return A shared pointer to the request bank (empty shared pointer if not
  *found)
  */
-boost::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(
+std::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(
     const std::string &bankname,
-    const boost::shared_ptr<const Geometry::Instrument> &inst) {
+    const std::shared_ptr<const Geometry::Instrument> &inst) {
   if (m_banks.count(bankname) == 0)
     m_banks[bankname] = inst->getComponentByName(bankname);
   return m_banks[bankname];

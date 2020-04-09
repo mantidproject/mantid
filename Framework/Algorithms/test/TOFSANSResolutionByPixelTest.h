@@ -51,7 +51,7 @@ createTestInstrument(const Mantid::detid_t id,
                      V3D samplePosition = V3D(0.0, 0.0, 0.0)) {
 
   // Requires an instrument.
-  auto inst = boost::make_shared<Instrument>();
+  auto inst = std::make_shared<Instrument>();
   inst->setName("TestName");
 
   // Source/sample
@@ -240,7 +240,7 @@ public:
     // Assert
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
     const auto &xOUT = result->x(0);

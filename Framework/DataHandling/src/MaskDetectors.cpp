@@ -84,7 +84,7 @@ void MaskDetectors::init() {
       std::make_unique<EnabledWhenProperty>(
           "MaskedWorkspace", ePropertyCriterion::IS_NOT_DEFAULT));
 
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "StartWorkspaceIndex", 0, mustBePosInt,
@@ -110,21 +110,20 @@ void MaskDetectors::init() {
 void MaskDetectors::exec() {
   // Get the input workspace
   Workspace_sptr propWS = getProperty("Workspace");
-  MatrixWorkspace_sptr WS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(propWS);
+  MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(propWS);
   PeaksWorkspace_sptr peaksWS =
-      boost::dynamic_pointer_cast<PeaksWorkspace>(propWS);
+      std::dynamic_pointer_cast<PeaksWorkspace>(propWS);
   if (peaksWS) {
     execPeaks(peaksWS);
     return;
   }
 
   // Is it an event workspace?
-  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(WS);
 
   // Is it a Mask Workspace ?
   MaskWorkspace_sptr inputAsMaskWS =
-      boost::dynamic_pointer_cast<MaskWorkspace>(WS);
+      std::dynamic_pointer_cast<MaskWorkspace>(WS);
   const auto isMaskWS = static_cast<bool>(inputAsMaskWS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
@@ -164,7 +163,7 @@ void MaskDetectors::exec() {
   }
 
   auto maskWS =
-      boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+      std::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
   if (maskWS && prevMasking) { // is a mask workspace
     handleMaskByMaskWorkspace(maskWS, WS, detectorList, indexList, ranges_info);
   } else if (prevMasking) { // is not a mask workspace
@@ -423,7 +422,7 @@ void MaskDetectors::execPeaks(const PeaksWorkspace_sptr &WS) {
   // If we have a workspace that could contain masking,copy that in too
   if (prevMasking) {
     DataObjects::MaskWorkspace_sptr maskWS =
-        boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+        std::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
     if (maskWS) {
       const auto &maskDetInfo = maskWS->detectorInfo();
       if (detInfo.size() != maskDetInfo.size()) {
@@ -623,7 +622,7 @@ void MaskDetectors::appendToDetectorListFromComponentList(
     instrument->getDetectorsInBank(dets, compName);
     if (dets.empty()) {
       const auto component = instrument->getComponentByName(compName);
-      const auto det = boost::dynamic_pointer_cast<const IDetector>(component);
+      const auto det = std::dynamic_pointer_cast<const IDetector>(component);
       if (!det) {
         g_log.warning() << "No detectors found in component '" << compName
                         << "'\n";

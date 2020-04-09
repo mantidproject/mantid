@@ -51,12 +51,12 @@ void PaddingAndApodization::init() {
           "OutputWorkspace", "", Direction::Output),
       "The name of the output 2D workspace.");
   declareProperty("ApodizationFunction", "None",
-                  boost::make_shared<Mantid::Kernel::StringListValidator>(
+                  std::make_shared<Mantid::Kernel::StringListValidator>(
                       std::vector<std::string>{"None", "Lorentz", "Gaussian"}),
                   "The apodization function to apply to the data");
   declareProperty("DecayConstant", 1.5,
                   "The decay constant for the apodization function.");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "Padding", 0, mustBePositive,

@@ -49,11 +49,11 @@ FindSXPeaks::FindSXPeaks()
  *
  */
 void FindSXPeaks::init() {
-  auto wsValidation = boost::make_shared<CompositeValidator>();
+  auto wsValidation = std::make_shared<CompositeValidator>();
   wsValidation->add<HistogramValidator>();
 
   auto unitValidation =
-      boost::make_shared<CompositeValidator>(CompositeRelation::OR);
+      std::make_shared<CompositeValidator>(CompositeRelation::OR);
   unitValidation->add<WorkspaceUnitValidator>("TOF");
   unitValidation->add<WorkspaceUnitValidator>("dSpacing");
 
@@ -66,7 +66,7 @@ void FindSXPeaks::init() {
                   "The X value to search from (default 0)");
   declareProperty("RangeUpper", EMPTY_DBL(),
                   "The X value to search to (default total number of bins)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "Start workspace index (default 0)");
@@ -77,14 +77,14 @@ void FindSXPeaks::init() {
   // ---------------------------------------------------------------
   // Peak strategies + Threshold
   // ---------------------------------------------------------------
-  auto mustBePositiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDouble = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDouble->setLower(0.0);
 
   std::vector<std::string> peakFindingStrategy = {strongestPeakStrategy,
                                                   allPeaksStrategy};
   declareProperty(
       "PeakFindingStrategy", strongestPeakStrategy,
-      boost::make_shared<StringListValidator>(peakFindingStrategy),
+      std::make_shared<StringListValidator>(peakFindingStrategy),
       "Different options for peak finding."
       "1. StrongestPeakOnly: Looks only for the the strongest peak in each "
       "spectrum (provided there is "
@@ -136,7 +136,7 @@ void FindSXPeaks::init() {
   std::vector<std::string> resolutionStrategy = {
       relativeResolutionStrategy, absoluteResolutionPeaksStrategy};
   declareProperty("ResolutionStrategy", relativeResolutionStrategy,
-                  boost::make_shared<StringListValidator>(resolutionStrategy),
+                  std::make_shared<StringListValidator>(resolutionStrategy),
                   "Different options for the resolution."
                   "1. RelativeResolution: This defines a relative tolerance "
                   "needed to avoid peak duplication in number of pixels. "

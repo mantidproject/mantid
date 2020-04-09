@@ -37,7 +37,7 @@ std::vector<double> extractQValues(const MatrixWorkspace_sptr &workspace,
   auto axis_ptr =
       dynamic_cast<Mantid::API::NumericAxis *>(workspace->getAxis(1));
   if (axis_ptr) {
-    const boost::shared_ptr<Mantid::Kernel::Unit> &unit_ptr = axis_ptr->unit();
+    const std::shared_ptr<Mantid::Kernel::Unit> &unit_ptr = axis_ptr->unit();
     if (unit_ptr->unitID() == "MomentumTransfer") {
       for (auto spectrum : spectra) {
         qs.emplace_back(axis_ptr->operator()(spectrum.value));

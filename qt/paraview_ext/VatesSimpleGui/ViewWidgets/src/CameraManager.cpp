@@ -12,7 +12,7 @@
 #pragma warning disable 1170
 #endif
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <pqActiveObjects.h>
 #include <pqView.h>
 #include <vtkCamera.h>
@@ -82,7 +82,7 @@ Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum() {
   }
 
   Mantid::VATES::ViewFrustum_const_sptr frustum =
-      boost::make_shared<const Mantid::VATES::ViewFrustum>(
+      std::make_shared<const Mantid::VATES::ViewFrustum>(
           Mantid::VATES::LeftPlane(left[0], left[1], left[2], left[3]),
           Mantid::VATES::RightPlane(right[0], right[1], right[2], right[3]),
           Mantid::VATES::BottomPlane(bottom[0], bottom[1], bottom[2],

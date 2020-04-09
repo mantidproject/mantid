@@ -27,7 +27,7 @@ GET_POINTER_SPECIALIZATION(Sample)
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
-  register_ptr_to_python<boost::shared_ptr<Sample>>();
+  register_ptr_to_python<std::shared_ptr<Sample>>();
 
   class_<Sample, boost::noncopyable>("Sample")
       .def("getName", &Sample::getName,

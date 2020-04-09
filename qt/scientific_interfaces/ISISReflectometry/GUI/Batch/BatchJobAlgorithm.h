@@ -40,7 +40,7 @@ private:
   UpdateFunction m_updateFunction;
 };
 
-using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;
+using BatchJobAlgorithm_sptr = std::shared_ptr<BatchJobAlgorithm>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

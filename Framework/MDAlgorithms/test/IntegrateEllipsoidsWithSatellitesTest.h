@@ -15,9 +15,9 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -105,7 +105,7 @@ createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 40,
           0.01, 1.0);
 
   // Create a peaks workspace
-  auto peaksWS = boost::make_shared<PeaksWorkspace>();
+  auto peaksWS = std::make_shared<PeaksWorkspace>();
   // Set the instrument to be the fake rectangular bank above.
   peaksWS->setInstrument(inst);
   // Set the oriented lattice for a cubic crystal
@@ -121,7 +121,7 @@ createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 40,
   peaksWS->mutableSample().setOrientedLattice(std::move(lattice));
 
   // Make an event workspace and add fake peak data
-  auto eventWS = boost::make_shared<EventWorkspace>();
+  auto eventWS = std::make_shared<EventWorkspace>();
   eventWS->setInstrument(inst);
   eventWS->initialize(nPixels * nPixels /*n spectra*/, 3 /* x-size */,
                       3 /* y-size */);
@@ -287,7 +287,7 @@ public:
   }
 
   void test_ws_has_instrument() {
-    auto inputWorkspaceNoInstrument = boost::make_shared<EventWorkspace>();
+    auto inputWorkspaceNoInstrument = std::make_shared<EventWorkspace>();
 
     IntegrateEllipsoids alg;
     alg.setChild(true);
@@ -362,7 +362,7 @@ public:
     cloneWorkspace->setPropertyValue("OutputWorkspace", "dist_workspace");
     cloneWorkspace->execute();
     Workspace_sptr temp = cloneWorkspace->getProperty("OutputWorkspace");
-    auto distWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    auto distWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     auto convertToDist = algManager.createUnmanaged("ConvertToDistribution");
     convertToDist->setChild(true);

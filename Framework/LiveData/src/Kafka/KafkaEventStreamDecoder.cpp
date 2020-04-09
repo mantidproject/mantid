@@ -203,7 +203,7 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
     std::swap(m_localEvents.front(), temp);
     return temp;
   } else if (m_localEvents.size() > 1) {
-    auto group = boost::make_shared<API::WorkspaceGroup>();
+    auto group = std::make_shared<API::WorkspaceGroup>();
     size_t index(0);
     for (auto &filledBuffer : m_localEvents) {
       auto temp = createBufferWorkspace<DataObjects::EventWorkspace>(
@@ -578,7 +578,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
     const auto nspec = ws->getInstrument()->getNumberDetectors();
 
     // Create buffer
-    eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+    eventBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
                                                  1));
     eventBuffer->setInstrument(ws->getInstrument());

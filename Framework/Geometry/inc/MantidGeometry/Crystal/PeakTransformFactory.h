@@ -8,7 +8,7 @@
 
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -26,6 +26,6 @@ public:
 };
 
 /// Factory Shared Pointer typedef.
-using PeakTransformFactory_sptr = boost::shared_ptr<PeakTransformFactory>;
+using PeakTransformFactory_sptr = std::shared_ptr<PeakTransformFactory>;
 } // namespace Geometry
 } // namespace Mantid

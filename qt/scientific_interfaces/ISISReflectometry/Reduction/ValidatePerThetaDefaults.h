@@ -42,6 +42,9 @@ private:
   parseOptions(PerThetaDefaults::ValueArray const &cellText);
   boost::optional<boost::optional<std::string>>
   parseProcessingInstructions(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<boost::optional<std::string>>
+  parseBackgroundProcessingInstructions(
+      PerThetaDefaults::ValueArray const &cellText);
 
   std::vector<int> m_invalidColumns;
 };

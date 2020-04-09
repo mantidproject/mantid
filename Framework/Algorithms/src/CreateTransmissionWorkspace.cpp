@@ -42,7 +42,7 @@ const std::string CreateTransmissionWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateTransmissionWorkspace::init() {
-  auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+  auto inputValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,

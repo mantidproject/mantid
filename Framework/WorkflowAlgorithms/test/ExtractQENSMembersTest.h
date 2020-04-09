@@ -100,7 +100,7 @@ private:
                           const std::string &outputName, size_t numSpectra,
                           const std::vector<double> &dataX) const {
     for (auto i = 0u; i < members.size(); ++i) {
-      auto memberWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      auto memberWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
           membersWorkspace->getItem(i));
       const auto &memberName = memberWorkspace->getName();
       const auto expectedName = outputName + "_" + members[i];
@@ -227,7 +227,7 @@ private:
     auto loadAlgorithm = loadWorkspaceAlgorithm(fileName);
     loadAlgorithm->execute();
     Workspace_sptr workspace = loadAlgorithm->getProperty("OutputWorkspace");
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
   }
 
   IAlgorithm_sptr loadWorkspaceAlgorithm(const std::string &fileName) {

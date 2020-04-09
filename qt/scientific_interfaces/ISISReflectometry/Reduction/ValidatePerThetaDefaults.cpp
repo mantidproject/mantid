@@ -106,6 +106,16 @@ PerThetaDefaultsValidator::parseProcessingInstructions(
   return optionalInstructionsOrNoneIfError;
 }
 
+boost::optional<boost::optional<std::string>>
+PerThetaDefaultsValidator::parseBackgroundProcessingInstructions(
+    CellText const &cellText) {
+  auto optionalInstructionsOrNoneIfError = ::MantidQt::CustomInterfaces::
+      ISISReflectometry::parseProcessingInstructions(cellText[9]);
+  if (!optionalInstructionsOrNoneIfError.is_initialized())
+    m_invalidColumns.emplace_back(9);
+  return optionalInstructionsOrNoneIfError;
+}
+
 ValidationResult<PerThetaDefaults, std::vector<int>> PerThetaDefaultsValidator::
 operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
@@ -115,10 +125,12 @@ operator()(CellText const &cellText) {
   auto maybeQRange = parseQRange(cellText);
   auto maybeScaleFactor = parseScaleFactor(cellText);
   auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
+  auto maybeBackgroundProcessingInstructions =
+      parseBackgroundProcessingInstructions(cellText);
   auto maybeDefaults = makeIfAllInitialized<PerThetaDefaults>(
       maybeTheta, maybeTransmissionRuns,
       maybeTransmissionProcessingInstructions, maybeQRange, maybeScaleFactor,
-      maybeProcessingInstructions);
+      maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
 
   if (maybeDefaults.is_initialized())
     return ValidationResult<PerThetaDefaults, std::vector<int>>(

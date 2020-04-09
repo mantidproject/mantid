@@ -250,7 +250,7 @@ private:
     constexpr int nBins{10};
     auto inputWS = make_ws(0.5 * deg2rad, nBins, logValues);
     const std::vector<int> foreground(2, 0);
-    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    auto alg = std::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
@@ -285,7 +285,7 @@ private:
   static API::Algorithm_sptr make_alg(const API::MatrixWorkspace_sptr &inputWS,
                                       const std::string &sumType,
                                       const std::vector<int> &foreground) {
-    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    auto alg = std::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
@@ -495,7 +495,7 @@ private:
   static API::IAlgorithm_sptr
   makeAlgorithm(API::MatrixWorkspace_sptr &reflectedWS) {
     std::vector<int> foreground(2, 0);
-    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    auto alg = std::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();

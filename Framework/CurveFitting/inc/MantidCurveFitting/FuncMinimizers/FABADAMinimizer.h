@@ -114,7 +114,7 @@ private:
   /// Pointer to the cost function. Must be the least squares.
   // Intentar encontrar una manera de sacar aqui el numero de parametros  que
   // no sea necesaria la cost function
-  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
+  std::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// Pointer to the Fitting Function (IFunction) inside the cost function.
   API::IFunction_sptr m_fitFunction;
   /// The number of iterations done (restarted at each phase).

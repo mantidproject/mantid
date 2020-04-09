@@ -335,7 +335,7 @@ void OptimizeCrystalPlacement::exec() {
 
   //--------------------- set up Fit algorithm call-----------------
 
-  boost::shared_ptr<Algorithm> fit_alg =
+  std::shared_ptr<Algorithm> fit_alg =
       createChildAlgorithm("Fit", .1, .93, true);
 
   fit_alg->setProperty("Function", FuncArg);
