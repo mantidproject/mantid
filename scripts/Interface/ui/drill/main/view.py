@@ -365,6 +365,8 @@ class DrillView(QMainWindow):
         elif columns:
             # if model is empty but the instrument is supported, add an empty row
             self.add_row_after()
+        table_header = self.table.horizontalHeader()
+        table_header.setSectionResizeMode(QHeaderView.Interactive)
 
     def set_technique(self, technique):
         self.technique = technique
