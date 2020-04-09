@@ -12,7 +12,7 @@ from mantid.simpleapi import *
 import numpy as np
 
 
-class FindGonioFromUB_Test(unittest.TestCase):
+class FindGoniometerFromUB_Test(unittest.TestCase):
 
     def runTest(self):
 
@@ -24,8 +24,8 @@ class FindGonioFromUB_Test(unittest.TestCase):
         dOmega = 0
         omegaHand = 1
 
-        tab = FindGonioFromUB(UBfiles=",".join(ubList), chi=chiRef, chiTol=chiTol, phiTol=phiTol,
-                              phiHand=phiHand, dOmega=dOmega, omegaHand=omegaHand)
+        tab = FindGoniometerFromUB(UBfiles=",".join(ubList), chi=chiRef, chiTol=chiTol, phiTol=phiTol,
+                                   phiHand=phiHand, dOmega=dOmega, omegaHand=omegaHand)
 
         # compare the table values with expected
         chi = [46.02283477783203, 43.43744659423828]
@@ -61,7 +61,7 @@ class FindGonioFromUB_Test(unittest.TestCase):
             aUB = tmpWS.sample().getOrientedLattice().getUB()
             for ii in range(0, 3):
                 for jj in range(0, 3):
-                    self.assertAlmostEqual(aUB[ii, jj], correctUB[irun-1][ii, jj], delta=1e-5,
+                    self.assertAlmostEqual(aUB[ii, jj], correctUB[irun - 1][ii, jj], delta=1e-5,
                                            msg="Discrepancy in UB file {}".format(ubList[irun]))
 
     def doValidation(self):

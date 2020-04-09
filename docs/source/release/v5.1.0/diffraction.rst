@@ -17,7 +17,7 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
-- New algorithm :ref:`FindGonioFromUB <algm-FindGonioFromUB>` for making UBs for runs at different goniometer angles share common indexing and determine the goniometer axis and rotation required to match UBs to a reference.
+- New algorithm :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` for making UBs for runs at different goniometer angles share common indexing and determine the goniometer axis and rotation required to match UBs to a reference.
 
 Imaging
 -------

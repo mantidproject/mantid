@@ -15,10 +15,10 @@ from os import path
 import warnings
 
 
-class FindGonioFromUB(DataProcessorAlgorithm):
+class FindGoniometerFromUB(DataProcessorAlgorithm):
 
     def name(self):
-        return "FindGonioFromUB"
+        return "FindGoniometerFromUB"
 
     def category(self):
         return "Diffraction\\Reduction"
@@ -27,11 +27,10 @@ class FindGonioFromUB(DataProcessorAlgorithm):
         return ["SetGoniometer", "CalculateUMatrix"]
 
     def summary(self):
-        return "Takes a series of exported UB (from SaveISawUB) and using the first UB supplied as a reference " \
-               "(to make UB corresponding to omega = 0) saves UB files that share common indexing " \
-               "(i.e. no inversion or swapping of crystallographic axes relative to the reference UB) in the " \
-               "default save directory and produces a table of the goniometer angle (phi) and the unit vector " \
-               "of the gonometer axis for each run (excl. the reference)."
+        return "Takes a series of exported UB (from SaveISawUB) and using the first UB supplied as a reference" \
+               " saves UB files that share common indexing (i.e. no inversion or swapping of crystallographic axes " \
+               "relative to the reference UB) in the default save directory and produces a table of the goniometer" \
+               " angle (phi) and the unit vector of the goniometer axis for each run (excl. the reference)."
 
     def PyInit(self):
         # Input
@@ -170,7 +169,7 @@ class FindGonioFromUB(DataProcessorAlgorithm):
             if abs(chi - chiRef) > chiTol and abs(phi - dPhiRef[irun]) > phiTol:
                 # generate predicted UB to find axes permutation
                 self.log().information("The following UB\n{}\nis not consistent with the reference, attempting to "
-                                       "find an axes swap/inversion thst make it consistent.")
+                                       "find an axes swap/inversion that make it consistent.")
                 # nominal goniometer axis
                 gonio = self.getR(omegaHand * dOmega, [0, 0, 1]) @ self.getR(-chiRef, [1, 0, 0]) @ [0, 0, 1]
                 predictedUB = self.getR(omega[irun], [0, 0, 1]) @ self.getR(dPhiRef[irun], gonio) @ zeroUB
@@ -291,4 +290,4 @@ class FindGonioFromUB(DataProcessorAlgorithm):
 
 
 # register algorithm with mantid
-AlgorithmFactory.subscribe(FindGonioFromUB)
+AlgorithmFactory.subscribe(FindGoniometerFromUB)
