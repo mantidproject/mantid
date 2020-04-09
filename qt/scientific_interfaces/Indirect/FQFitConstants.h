@@ -19,25 +19,35 @@ enum class DataType {
   ALL,
 };
 
-static const std::map<std::string, std::string>
-    widthFits({{"ChudleyElliot", "name=ChudleyElliot"},
-               {"HallRoss", "name=Hallross"},
-               {"FickDiffusion", "name=FickDiffusion"},
-               {"TeixeiraWater", "name=TeixeiraWater"}});
+static const std::map<std::string, std::string> widthFits(
+    {{"ChudleyElliot",
+      "name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)"},
+     {"HallRoss", "name=Hallross, Tau=1, L=0.2, constraints=(Tau>0, L>0)"},
+     {"FickDiffusion", "name=FickDiffusion, D=1, constraints=(D>0)"},
+     {"TeixeiraWater",
+      "name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)"}});
 
-static const std::map<std::string, std::string>
-    EISFFits({{"EISFDiffCylinder", "name=EISFDiffCylinder"},
-              {"EISFDiffSphere", "name=EISFDiffSphere"},
-              {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl"}});
+static const std::map<std::string, std::string> EISFFits(
+    {{"EISFDiffCylinder",
+      "name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)"},
+     {"EISFDiffSphere",
+      "name=EISFDiffSphere, A=1, R=1, constraints=(A>0, R>0)"},
+     {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl, A=1, Rmin=1, Rmax=2, "
+                             "constraints=(A>0, Rmin>0, Rmax>0)"}});
 
-static const std::map<std::string, std::string>
-    AllFits({{"ChudleyElliot", "name=ChudleyElliot"},
-             {"HallRoss", "name=Hallross"},
-             {"FickDiffusion", "name=FickDiffusion"},
-             {"TeixeiraWater", "name=TeixeiraWater"},
-             {"EISFDiffCylinder", "name=EISFDiffCylinder"},
-             {"EISFDiffSphere", "name=EISFDiffSphere"},
-             {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl"}});
+static const std::map<std::string, std::string> AllFits(
+    {{"ChudleyElliot",
+      "name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)"},
+     {"HallRoss", "name=Hallross, Tau=1, L=0.2, constraints=(Tau>0, L>0)"},
+     {"FickDiffusion", "name=FickDiffusion, D=1, constraints=(D>0)"},
+     {"TeixeiraWater",
+      "name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)"},
+     {"EISFDiffCylinder",
+      "name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)"},
+     {"EISFDiffSphere",
+      "name=EISFDiffSphere, A=1, R=1, constraints=(A>0, R>0)"},
+     {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl, A=1, Rmin=1, Rmax=2, "
+                             "constraints=(A>0, Rmin>0, Rmax>0)"}});
 
 static const std::unordered_map<DataType, std::map<std::string, std::string>>
     availableFits({{DataType::WIDTH, widthFits},
