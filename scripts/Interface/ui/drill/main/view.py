@@ -16,6 +16,7 @@ from mantidqt.widgets import (manageuserdirectories, instrumentselector)
 from mantidqt import icons
 from mantid.kernel import UsageService, FeatureType, config, logger
 from .specifications import RundexSettings
+from .DrillHeaderView import DrillHeaderView
 
 
 class DrillEventListener(with_metaclass(ABCMeta, object)):
@@ -123,9 +124,11 @@ class DrillView(QMainWindow):
         self.stop.clicked.connect(self.process_stop)
 
     def setup_table(self):
+        header = DrillHeaderView()
+        self.table.setHorizontalHeader(header)
         table_header = self.table.horizontalHeader()
-        table_header.setSectionResizeMode(QHeaderView.ResizeToContents)
         table_header.setDefaultAlignment(Qt.AlignLeft)
+        table_header.setSectionResizeMode(QHeaderView.Interactive)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.cellChanged.connect(
                 lambda row, column : self.data_changed(row, column)
@@ -202,7 +205,6 @@ class DrillView(QMainWindow):
         for txt in contents:
             self.set_cell_contents(row, column, txt)
             column += 1
-
 
     ###########################################################################
     # actions                                                                 #
@@ -353,6 +355,7 @@ class DrillView(QMainWindow):
         self.table.setRowCount(0)
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
+        self.table.resizeColumnsToContents()
         if rows_contents:
             self.table.setRowCount(len(rows_contents))
             self.table.cellChanged.disconnect()
@@ -365,8 +368,6 @@ class DrillView(QMainWindow):
         elif columns:
             # if model is empty but the instrument is supported, add an empty row
             self.add_row_after()
-        table_header = self.table.horizontalHeader()
-        table_header.setSectionResizeMode(QHeaderView.Interactive)
 
     def set_technique(self, technique):
         self.technique = technique
