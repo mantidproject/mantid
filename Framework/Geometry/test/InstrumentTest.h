@@ -208,7 +208,7 @@ public:
     TS_ASSERT_EQUALS(i.getDetectorIDs(false).size(), 1);
     TS_ASSERT_EQUALS(i.nelements(), 1);
     TS_ASSERT_THROWS_NOTHING(i.removeDetector(d));
-    TS_ASSERT_THROWS(i.getDetector(1).get(), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(i.getDetector(1), const Exception::NotFoundError &);
     TS_ASSERT_EQUALS(i.nelements(), 0);
 
     // Now check it does the right thing for a monitor as well
