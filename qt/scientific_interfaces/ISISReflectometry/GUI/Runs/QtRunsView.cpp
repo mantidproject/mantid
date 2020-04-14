@@ -227,7 +227,7 @@ ISearchModel const &QtRunsView::searchResults() { return m_searchModel; }
 ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
 
 /**
-This slot notifies the presenter that the ICAT search was completed
+This slot notifies the presenter that the search was completed
 */
 void QtRunsView::onSearchComplete() {
   m_searchNotifyee->notifySearchComplete();

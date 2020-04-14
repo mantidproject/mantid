@@ -98,6 +98,7 @@ public:
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
+  virtual std::string getSearchCycle() const = 0;
   virtual int getLiveDataUpdateInterval() const = 0;
 
   virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>

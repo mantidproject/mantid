@@ -51,7 +51,8 @@ public:
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
-        m_searchString("test search string"), m_searchResult("", "") {
+        m_searchString("test search string"), m_searchResult("", ""),
+        m_instrument("INTER"), m_cycle("19_4") {
     Mantid::API::FrameworkManager::Instance();
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
@@ -124,9 +125,11 @@ public:
     auto presenter = makePresenter();
     auto searchString = std::string("test search string");
     auto instrument = std::string("test instrument");
+    auto cycle = std::string("test cycle");
     expectSearchString(searchString);
     expectSearchInstrument(instrument);
-    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument,
+    expectSearchCycle(cycle);
+    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument, cycle,
                                               ISearcher::SearchType::MANUAL))
         .Times(1);
     presenter.notifySearch();
@@ -137,28 +140,28 @@ public:
     auto presenter = makePresenter();
     auto searchString = std::string("");
     expectSearchString(searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _, _)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
 
-  void testSearchCatalogLoginFails() {
+  void testStartingSearchFails() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _, _))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler,
-                giveUserCritical("Catalog login failed", "Error"))
+                giveUserCritical("Error starting search", "Error"))
         .Times(1);
     presenter.notifySearch();
     verifyAndClear();
   }
 
-  void testSearchSucceeds() {
+  void testStartingSearchSucceeds() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _, _))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -772,13 +775,13 @@ private:
 
   void expectAutoreductionSettingsChanged() {
     EXPECT_CALL(*m_searcher,
-                searchSettingsChanged(_, _, ISearcher::SearchType::AUTO))
+                searchSettingsChanged(_, _, _, ISearcher::SearchType::AUTO))
         .WillOnce(Return(true));
   }
 
   void expectAutoreductionSettingsUnchanged() {
     EXPECT_CALL(*m_searcher,
-                searchSettingsChanged(_, _, ISearcher::SearchType::AUTO))
+                searchSettingsChanged(_, _, _, ISearcher::SearchType::AUTO))
         .WillOnce(Return(false));
   }
 
@@ -812,11 +815,12 @@ private:
 
   void expectCheckForNewRuns() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-    EXPECT_CALL(m_view, getSearchString())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(m_searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _,
-                                              ISearcher::SearchType::AUTO))
+    expectSearchInstrument(m_instrument);
+    expectSearchString(m_searchString);
+    expectSearchCycle(m_cycle);
+    EXPECT_CALL(*m_searcher,
+                startSearchAsync(m_searchString, m_instrument, m_cycle,
+                                 ISearcher::SearchType::AUTO))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -824,7 +828,7 @@ private:
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _, _)).Times(0);
   }
 
   void expectGetValidSearchRowSelection() {
@@ -1028,6 +1032,12 @@ private:
         .WillRepeatedly(Return(searchString));
   }
 
+  void expectSearchCycle(std::string const &cycle) {
+    EXPECT_CALL(m_view, getSearchCycle())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(cycle));
+  }
+
   void expectGetUpdateInterval(int const &updateInterval) {
     EXPECT_CALL(m_view, getLiveDataUpdateInterval())
         .Times(AtLeast(1))
@@ -1102,4 +1112,6 @@ private:
   RunsTable m_runsTable;
   std::string m_searchString;
   SearchResult m_searchResult;
+  std::string m_instrument;
+  std::string m_cycle;
 };
