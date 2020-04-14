@@ -9,7 +9,7 @@ from itertools import chain
 import logging
 import os
 import re
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Iterator, Optional, Union
 from xml.etree import ElementTree
 
 import mantid.kernel
@@ -227,21 +227,33 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
 
         root = ElementTree.parse(filename).getroot()
 
-        def _find_or_error(etree: ElementTree.Element,
-                           tag: str,
-                           name: Optional[str] = None,
-                           message: Optional[str] = None) -> ElementTree.Element:
+        def _iter_find_or_error(etree: ElementTree.Element,
+                                tag: str,
+                                name: Optional[str] = None,
+                                message: Optional[str] = None) -> Iterator[ElementTree.Element]:
+            found = False
             for element in etree.findall(tag):
                 if name is None:
-                    return element
+                    found = True
+                    yield element
                 elif name == element.get('name'):
-                    return element
+                    found = True
+                    yield element
             else:
+                if found:
+                    raise StopIteration
+
                 if message is None:
                     raise ValueError("Could not find {tag}{name} in {parent} section of VASP XML file.".format(
                         tag=tag, name=(f' (name={name})' if name else ''), parent=etree.tag))
                 else:
                     raise ValueError(message)
+
+        def _find_or_error(etree: ElementTree.Element,
+                           tag: str,
+                           name: Optional[str] = None,
+                           message: Optional[str] = None) -> ElementTree.Element:
+            return next(_iter_find_or_error(etree, tag, name=name, message=message))
 
         def _to_text(item: ElementTree.Element) -> str:
             """wraps the  Element.text property to avoid confusing type errors"""
@@ -288,8 +300,16 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                         "mass": mass}
             file_data["atoms"].update({f"atom_{i}": ion_data})
 
-        calculation = _find_or_error(root, 'calculation')
-        dynmat = _find_or_error(calculation, 'dynmat')
+        dynmat = None
+        for calculation in _iter_find_or_error(root, 'calculation'):
+            try:
+                dynmat = _find_or_error(calculation, 'dynmat')
+            except ValueError:
+                pass
+
+        if dynmat is None:
+            raise ValueError("Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file.")
+
         # vasprun.xml reports raw eigenvectors in atomic units: convert to frequencies in cm-1
         eigenvalues = _to_text(_find_or_error(dynmat, 'v', name='eigenvalues')).split()
         frequencies = np.sqrt(-np.asarray(list(map(float, eigenvalues)),
