@@ -80,7 +80,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "Name_HWHM_FofQFit_ChudleyElliots");
+                     "Name_HWHM_FofQFit_seq_ChudleyElliots");
   }
 
   void
@@ -91,7 +91,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "Name_HWHM_FofQFit_ChudleyElliots");
+                     "Name_HWHM_FofQFit_sim_ChudleyElliots");
   }
 
   void test_that_zeroWidths_returns_false_if_the_workspace_contains_widths() {
@@ -270,7 +270,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "MultiFofQFit_ChudleyElliot_Results");
+                     "MultiFofQFit_seqChudleyElliot_Results");
   }
 
   void
@@ -283,7 +283,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "MultiFofQFit_ChudleyElliot_Results");
+                     "MultiFofQFit_simChudleyElliot_Results");
   }
 
   void

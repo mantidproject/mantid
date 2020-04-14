@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <map>
+
 class IFQFitObserver {
 public:
   virtual ~IFQFitObserver() = default;
