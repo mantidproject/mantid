@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
-
+#include "KafkaTestThreadHelper.h"
 #include "KafkaTesting.h"
+
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/FixedLengthVector.h"
@@ -18,20 +18,15 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
+
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::LiveData::KafkaHistoStreamDecoder;
 using namespace KafkaTesting;
 
 class KafkaHistoStreamDecoderTest : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static KafkaHistoStreamDecoderTest *createSuite() {
-    return new KafkaHistoStreamDecoderTest();
-  }
-  static void destroySuite(KafkaHistoStreamDecoderTest *suite) { delete suite; }
-
   void setUp() override {
     // Temporarily change the instrument directory to the testing one
     using Mantid::Kernel::ConfigService;
@@ -68,18 +63,25 @@ public:
         .WillOnce(Return(new FakeHistoSubscriber()))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    TSM_ASSERT("Decoder should not have create data buffers yet",
-               !decoder->hasData());
-    startCapturing(*decoder, 1);
 
+    KafkaHistoStreamDecoder testInstance(mockBroker, "", "", "", "", "");
+    KafkaTestThreadHelper<KafkaHistoStreamDecoder> testHolder(
+        std::move(testInstance));
+
+    testHolder.runKafkaOneStep(); // Init step
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !testHolder->hasData());
+
+    testHolder.runKafkaOneStep(); // Processing data step
     // Checks
     Workspace_sptr workspace;
     TSM_ASSERT("Decoder's data buffers should be created now",
-               decoder->hasData());
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+               testHolder->hasData());
+    TS_ASSERT_THROWS_NOTHING(workspace = testHolder->extractData());
+
+    // Shut down
+    testHolder.stopCapture();
+    TS_ASSERT(!testHolder->isCapturing());
 
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
@@ -94,63 +96,6 @@ public:
   }
 
 private:
-  std::unique_ptr<Mantid::LiveData::KafkaHistoStreamDecoder> createTestDecoder(
-      const std::shared_ptr<Mantid::LiveData::IKafkaBroker> &broker) {
-    using namespace Mantid::LiveData;
-    return std::make_unique<KafkaHistoStreamDecoder>(broker, "", "", "", "",
-                                                     "");
-  }
-
-  // Start decoding and wait until we have gathered enough data to test
-  void startCapturing(Mantid::LiveData::KafkaHistoStreamDecoder &decoder,
-                      uint8_t maxIterations) {
-    // Register callback to know when a whole loop as been iterated through
-    m_maxIterations = maxIterations;
-    m_niterations = 0;
-    decoder.registerIterationEndCb([this]() { this->iterationCallback(); });
-
-    decoder.registerErrorCb([this, &decoder]() { errCallback(decoder); });
-    TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
-    continueCapturing(decoder, maxIterations);
-  }
-
-  void iterationCallback() {
-    std::unique_lock<std::mutex> lock(this->m_callbackMutex);
-    this->m_niterations++;
-    if (this->m_niterations == m_maxIterations) {
-      lock.unlock();
-      this->m_callbackCondition.notify_one();
-    }
-  }
-
-  void errCallback(KafkaHistoStreamDecoder &decoder) {
-    try {
-      // Get the stored exception by calling extract data again
-      decoder.extractData();
-    } catch (std::exception &e) {
-      // We could try to port the exception from this child thread to the main
-      // thread, or just print it here which is significantly easier
-      std::cerr << "Exception: " << e.what() << "\n";
-      // Always keep incrementing so we don't deadlock
-      iterationCallback();
-    }
-  }
-
-  void continueCapturing(KafkaHistoStreamDecoder &decoder,
-                         uint8_t maxIterations) {
-    m_maxIterations = maxIterations;
-
-    // Re-register callback with the (potentially) new value of maxIterations
-    decoder.registerIterationEndCb([this]() { this->iterationCallback(); });
-    decoder.registerErrorCb([this, &decoder]() { errCallback(decoder); });
-
-    {
-      std::unique_lock<std::mutex> lk(m_callbackMutex);
-      this->m_callbackCondition.wait(
-          lk, [this]() { return this->m_niterations == m_maxIterations; });
-    }
-  }
-
   void
   checkWorkspaceMetadata(const Mantid::DataObjects::Workspace2D &histoWksp) {
     TS_ASSERT(histoWksp.getInstrument());
@@ -189,10 +134,4 @@ private:
     data = histoWksp.histogram(4);
     TS_ASSERT_EQUALS(data.y().rawData(), (std::vector<double>{20, 4}));
   }
-
-private:
-  std::mutex m_callbackMutex;
-  std::condition_variable m_callbackCondition;
-  uint8_t m_niterations = 0;
-  std::atomic<uint8_t> m_maxIterations = 0;
 };

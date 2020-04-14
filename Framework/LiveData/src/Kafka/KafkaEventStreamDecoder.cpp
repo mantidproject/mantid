@@ -157,6 +157,17 @@ KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {
   stopCapture();
 }
 
+KafkaEventStreamDecoder::KafkaEventStreamDecoder(
+    KafkaEventStreamDecoder &&o) noexcept
+    : IKafkaStreamDecoder(std::move(o)),
+      m_intermediateBufferFlushThreshold(o.m_intermediateBufferFlushThreshold) {
+
+  std::scoped_lock lck(m_intermediateBufferMutex, m_mutex);
+  m_localEvents = std::move(o.m_localEvents);
+  m_receivedEventBuffer = std::move(o.m_receivedEventBuffer);
+  m_receivedPulseBuffer = std::move(o.m_receivedPulseBuffer);
+}
+
 /**
  * Check if there is data available to extract
  * @return True if data has been accumulated so that extractData()

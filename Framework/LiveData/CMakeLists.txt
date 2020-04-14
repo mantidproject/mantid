@@ -87,7 +87,8 @@ if(LIBRDKAFKA_FOUND)
       ${TEST_FILES}
       KafkaEventStreamDecoderTest.h
       KafkaHistoStreamDecoderTest.h
-      KafkaTopicSubscriberTest.h)
+      KafkaTopicSubscriberTest.h
+      )
 endif()
 
 if(COVERALLS)

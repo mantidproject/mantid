@@ -36,7 +36,15 @@ public:
     using FnType = std::function<void()>;
 
     Callback(const Callback::FnType &callback) : m_mutex(), m_callback() {
-      setFunction(std::move(callback));
+      setFunction(callback);
+    }
+
+    Callback(Callback &&other) {
+      {
+        // We must lock the other obj - not ourself
+        std::lock_guard lck(other.m_mutex);
+        m_callback = std::move(other.m_callback);
+      }
     }
 
     inline void operator()() {
@@ -64,6 +72,8 @@ public:
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
+
+  IKafkaStreamDecoder(IKafkaStreamDecoder &&) noexcept;
 
 public:
   ///@name Start/stop
