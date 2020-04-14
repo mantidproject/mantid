@@ -469,13 +469,13 @@ public:
 
     model->addWorkspace("WorkspaceEmpty", Spectra(""));
 
-    TS_ASSERT(model->getSpectra(TableDatasetIndex(0)).size() == 0);
+    TS_ASSERT_EQUALS(model->getSpectra(TableDatasetIndex(0)).size(), 0);
   }
 
   void
   test_that_number_of_spectra_is_not_zero_if_workspace_contains_one_or_more_spectra() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
-    TS_ASSERT(model->getSpectra(TableDatasetIndex(0)).size() != 0);
+    TS_ASSERT_DIFFERS(model->getSpectra(TableDatasetIndex(0)).size(), 0);
   }
 
   void

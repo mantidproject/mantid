@@ -217,7 +217,7 @@ public:
         Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9});
     Spectra const storedSpectra = model.getSpectra();
 
-    TS_ASSERT(storedSpectra == spectra);
+    TS_ASSERT_EQUALS(storedSpectra, spectra);
   }
 
   void
