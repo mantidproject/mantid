@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -8,8 +8,7 @@ import abc
 from typing import List
 
 
-class PlottingCanvasPresenterInterface(object):
-    __metaclass__ = abc.ABCMeta
+class PlottingCanvasPresenterInterface(abc.ABC):
 
     @abc.abstractmethod
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int],
