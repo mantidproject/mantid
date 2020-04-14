@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QHeaderView, QPushButton, QStyle, QStyleOptionButton
+from qtpy.QtWidgets import QHeaderView, QPushButton, QStyle, \
+                           QStyleOptionButton, QStyleOptionHeader
 from qtpy.QtCore import *
 
 class DrillHeaderView(QHeaderView):
@@ -96,29 +97,42 @@ class DrillHeaderView(QHeaderView):
         self.buttonsRectangles[logicalIndex].moveCenter(rect.center())
         self.buttonsRectangles[logicalIndex].moveRight(
                 rect.right() - self.BUTTON_MARGIN)
-        option = QStyleOptionButton()
-        option.rect = self.buttonsRectangles[logicalIndex]
-        option.features = QStyleOptionButton.AutoDefaultButton
+        buttonOption = QStyleOptionButton()
+        buttonOption.rect = self.buttonsRectangles[logicalIndex]
+        buttonOption.features = QStyleOptionButton.AutoDefaultButton
 
         # button state
         if self.isButtonPressed(logicalIndex):
-            option.state = QStyle.State_On
+            buttonOption.state = QStyle.State_On
         else:
-            option.state = QStyle.State_Off
+            buttonOption.state = QStyle.State_Off
 
         # section state
         if not self.isSectionFolded(logicalIndex):
-            option.text = self.BUTTON_TEXT_UNFOLDED
+            buttonOption.text = self.BUTTON_TEXT_UNFOLDED
         else:
-            option.text = self.BUTTON_TEXT_FOLDED
+            buttonOption.text = self.BUTTON_TEXT_FOLDED
+
+        # button background
+        buttonBackOption = QStyleOptionHeader()
+        self.initStyleOption(buttonBackOption)
+        buttonBackOption.rect = rect
+        buttonBackOption.rect.setWidth(
+                self.BUTTON_X_SIZE + 2 * self.BUTTON_MARGIN)
+        buttonBackOption.rect.moveCenter(buttonOption.rect.center())
 
         # call QTableView function
         painter.save()
         super(DrillHeaderView, self).paintSection(painter, rect, logicalIndex)
         painter.restore()
 
+        # paint the push button background
+        painter.save()
+        self.style().drawControl(QStyle.CE_Header, buttonBackOption, painter)
+        painter.restore()
+
         # paint the push button
-        self.style().drawControl(QStyle.CE_PushButton, option, painter)
+        self.style().drawControl(QStyle.CE_PushButton, buttonOption, painter)
 
     def mousePressEvent(self, event):
         """
