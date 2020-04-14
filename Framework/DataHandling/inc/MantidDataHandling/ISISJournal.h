@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/System.h"
 
 #include <Poco/AutoPtr.h>
@@ -19,12 +20,8 @@ class Document;
 }
 
 namespace Mantid {
-namespace Kernel {
-class InternetHelper;
-}
 
 namespace DataHandling {
-namespace ISISJournal {
 /**
  * ISISJournal: Helper class to aid in fetching ISIS specific run information
  * from journal files
@@ -60,6 +57,5 @@ private:
 
   std::string getURLContents(std::string const &url);
 };
-} // namespace ISISJournal
 } // namespace DataHandling
 } // namespace Mantid
