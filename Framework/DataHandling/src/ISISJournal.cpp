@@ -7,7 +7,6 @@
 // Includes
 #include "MantidDataHandling/ISISJournal.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/InternetHelper.h"
 
 #include "Poco/SAX/SAXException.h"
 #include <Poco/DOM/DOMParser.h>
@@ -22,7 +21,6 @@
 
 namespace Mantid {
 namespace DataHandling {
-namespace ISISJournal {
 
 using Kernel::InternetHelper;
 using Poco::XML::Document;
@@ -305,15 +303,23 @@ ISISJournal::getRuns(std::vector<std::string> const &valuesToLookup,
  */
 std::string ISISJournal::getURLContents(std::string const &url) {
   std::ostringstream serverReply;
-  auto const statusCode = m_internetHelper->sendRequest(url, serverReply);
+  int statusCode;
+  try {
+    statusCode = m_internetHelper->sendRequest(url, serverReply);
+  } catch (Kernel::Exception::InternetError const &) {
+    std::ostringstream msg;
+    msg << "Failed to access file " << url
+        << "\nCheck that the cycle name is valid.";
+    throw Kernel::Exception::InternetError(msg.str());
+  }
+
   if (statusCode != Poco::Net::HTTPResponse::HTTP_OK) {
-    throw Kernel::Exception::InternetError(
-        std::string("Failed to access journal file: HTTP Code: ") +
-        std::to_string(statusCode));
+    std::ostringstream msg;
+    msg << "Failed to access file " << url << "\nHTTP Code: " << statusCode
+        << "\nCheck that the cycle name is valid.";
+    throw Kernel::Exception::InternetError(msg.str());
   }
   return serverReply.str();
 }
-
-} // namespace ISISJournal
 } // namespace DataHandling
 } // namespace Mantid
