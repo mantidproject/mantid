@@ -165,12 +165,6 @@ class DrillView(QMainWindow):
         for column in range(self.table.columnCount()):
             self.table.takeItem(position, column)
 
-    def erase_rows(self, positions):
-        for position in positions:
-            for column in range(self.table.columnCount()):
-                if self.table.item(position, column) is not None:
-                    self.table.item(position, column).setText("")
-
     def get_selected_rows(self):
         selected_rows = self.table.selectionModel().selectedRows()
         rows = [row.row() for row in selected_rows]
