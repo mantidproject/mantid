@@ -138,6 +138,7 @@ void QtRunsView::setInstrumentComboEnabled(bool enabled) {
 void QtRunsView::setSearchTextEntryEnabled(bool enabled) {
 
   m_ui.textSearch->setEnabled(enabled);
+  m_ui.textCycle->setEnabled(enabled);
 }
 
 /**
@@ -361,6 +362,14 @@ Get the string the user wants to search for.
 */
 std::string QtRunsView::getSearchString() const {
   return m_ui.textSearch->text().toStdString();
+}
+
+/**
+Get the string the user wants to search for.
+@returns The search string
+*/
+std::string QtRunsView::getSearchCycle() const {
+  return m_ui.textCycle->text().toStdString();
 }
 
 /**
