@@ -76,16 +76,14 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         In then replots the existing data on the new tiles"""
         workspaces, indices = self._view.plotted_workspaces_and_indices
         self.create_tiled_plot(keys, tiled_by)
-        # Replot data on new axis
-        self.plot_workspaces(workspaces, indices, False, False)
+        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
 
     def convert_plot_to_single_plot(self):
         """Converts the current plot into a single plot
         In then replots the existing data on the new tiles"""
         workspaces, indices = self._view.plotted_workspaces_and_indices
         self.create_single_plot()
-        # Replot data on new axis
-        self.plot_workspaces(workspaces, indices, False, False)
+        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
 
     def create_tiled_plot(self, keys, tiled_by):
         """Creates a blank tiled plot specified by the keys and tiled by type"""
@@ -113,13 +111,17 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.redraw_figure()
 
     def set_axis_limits(self, ax_num, xlims, ylims):
-        "Sets the x and y limits for a specified axis in the figure"
+        """Sets the x and y limits for a specified axis in the figure"""
         self._view.set_axis_xlimits(ax_num, xlims)
         self._view.set_axis_ylimits(ax_num, ylims)
 
     def set_axis_title(self, ax_num, title):
-        "Sets the title for a specified axis in the figure"
-        self._view.set_titles(self._model.create_axes_titles())
+        """Sets the title for a specified axis in the figure"""
+        self._view.set_title(ax_num, title)
+
+    def get_fig_axes(self):
+        """Returns the matplotlib axes - needed for the external plot button"""
+        return self._view.fig.axes
 
     # Implementation of QuickEdit widget
     def _update_quickedit_widget(self):
@@ -152,11 +154,15 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def handle_autoscale_requested_in_quick_edit_options(self):
         selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
-
         if len(selected_subplots) == 1:
             self.autoscale_selected_y_axis(selected_subplots[0])
+
         else:
             self.autoscale_y_axes()
+
+        xmin, xmax, ymin, ymax = self._view.get_axis_limits(selected_subplots[0])
+        self._options_presenter.set_plot_x_range([xmin, xmax])
+        self._options_presenter.set_plot_y_range([ymin, ymax])
 
     def handle_error_selection_changed(self):
         plotted_workspaces, _ = self._view.plotted_workspaces_and_indices

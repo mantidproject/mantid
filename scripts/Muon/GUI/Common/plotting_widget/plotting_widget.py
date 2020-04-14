@@ -5,17 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plotting_widget.plotting_canvas_widget import PlottingCanvasWidget
-from Muon.GUI.Common.plotting_widget.plotting_widget_presenter1 import PlotWidgetPresenterCommmon
+from Muon.GUI.Common.plotting_widget.plotting_widget_presenter1 import PlotWidgetPresenterCommon
 from Muon.GUI.Common.plotting_widget.plotting_widget_view import PlotWidgetView
 from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
-from Muon.GUI.Common.plotting_widget.plotting_widget_model import PlotWidgetModel
+from Muon.GUI.Common.plotting_widget.plotting_widget_model1 import PlotWidgetModel as PlotWidgetModel
+from Muon.GUI.Common.plotting_widget.plotting_widget_model import PlotWidgetModel as PlotWidgetModel2
 from Muon.GUI.Common.plotting_widget.plotting_widget_view1 import PlotWidgetView1
 
 
 class PlottingWidget(object):
     def __init__(self, context=None, parent=None):
         self.view = PlotWidgetView(parent=parent)
-        self.model = PlotWidgetModel()
+        self.model = PlotWidgetModel2()
         self.presenter = PlotWidgetPresenter(self.view,
                                              self.model,
                                              context)
@@ -34,9 +35,9 @@ class PlottingWidget1(object):
         # The UI view
         self.view = PlotWidgetView1(parent)
         self.view.add_canvas_widget(self.plotting_canvas_widget.widget)
-        self.model = None
+        self.model = PlotWidgetModel(context)
         # generate the presenter
-        self.presenter = PlotWidgetPresenterCommmon(self.view,
+        self.presenter = PlotWidgetPresenterCommon(self.view,
                                                     self.model,
                                                     context,
                                                     self.plotting_canvas_widget.presenter)

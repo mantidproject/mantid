@@ -10,6 +10,7 @@ from matplotlib.container import ErrorbarContainer
 from qtpy import QtWidgets
 from Muon.GUI.Common.plotting_widget.dockable_plot_toolbar import DockablePlotToolbar
 from Muon.GUI.Common.plotting_widget.plotting_canvas_model import WorkspacePlotInformation
+from Muon.GUI.Common.plotting_widget.plotting_canvas_view_interface import PlottingCanvasViewInterface, PlottingViewMeta
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable, MantidAxes
 from mantid.plots.plotfunctions import get_plot_fig
@@ -33,7 +34,7 @@ def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
     plot_fn(workspace, **plot_kwargs)
 
 
-class PlottingCanvasView(QtWidgets.QWidget):
+class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -94,6 +95,8 @@ class PlottingCanvasView(QtWidgets.QWidget):
         """Clears all workspaces from the plot"""
         for ax in self.fig.axes:
             ax.cla()
+            ax.tracked_workspaces.clear()
+            ax.set_prop_cycle(None)
         self._plot_information_list = []
 
     def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
@@ -187,16 +190,9 @@ class PlottingCanvasView(QtWidgets.QWidget):
 
         return xmin, xmax, ymin, ymax
 
-    def _get_color_index(self, ax_number):
-        ax = self.fig.axes[ax_number]
-        num_artists = len(ax.get_tracked_artists())
-        index = num_artists
-        return 'C' + str(index)
-
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
-        color = self._get_color_index(workspace_info.axis)
         label = workspace_info.label
-        plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'color': color, 'label': label}
+        plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
         return plot_kwargs
 
     def autoscale_selected_y_axis(self, axis_number):

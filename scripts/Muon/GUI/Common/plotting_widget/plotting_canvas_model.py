@@ -4,11 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import time
 from typing import NamedTuple, List
-import numpy as np
-
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name, get_group_or_pair_from_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 
 DEFAULT_X_LIMITS = [0, 15]
@@ -81,22 +78,36 @@ class PlottingCanvasModel(object):
             self._axes_workspace_map[key] = axis_number
 
     def create_plot_information(self, workspace_name, index, axis, errors):
-        label = self._create_workspace_label(workspace_name)
+        label = self._create_workspace_label(workspace_name, index)
         return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
                                         normalised=self._normalised,
                                         errors=errors, label=label)
 
-    def _create_workspace_label(self, workspace_name):
-        label = ''
+    def _create_workspace_label(self, workspace_name, index):
         group = str(get_group_or_pair_from_name(workspace_name))
         run = str(get_run_number_from_workspace_name(workspace_name, self._context.data_context.instrument))
         instrument = self._context.data_context.instrument
+        fft_label = self._get_freq_label()
+        fit_label = self._get_fit_label(workspace_name, index)
+        rebin_label = self._get_rebin_label(workspace_name)
         if not self._is_tiled:
-            return label.join([instrument, run, ';', group])
+            return "".join([instrument, run, ';', group, rebin_label])
         if self._tiled_by == "Group/Pair":
-            return label.join([run])
+            return "".join([run, ';', self._get_rebin_label(workspace_name)])
         else:
-            return label.join([group])
+            return "".join([group, ';', self._get_rebin_label(workspace_name)])
+
+    def _get_freq_label(self):
+        return ''
+
+    def _get_rebin_label(self, workspace_name):
+        if REBIN_STR in workspace_name:
+            return ''.join([';', REBIN_STR])
+        else:
+            return ''
+
+    def _get_fit_label(self, workspace_name, index):
+        return ''
 
     def create_axes_titles(self):
         if not self._is_tiled:

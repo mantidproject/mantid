@@ -10,6 +10,7 @@ group_str = "; Group; "
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad'
 TF_ASYMMETRY_PREFIX = "TFAsymmetry"
+REBIN_STR = 'Rebin'
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
@@ -30,12 +31,12 @@ def _base_run_name(instrument, run=None):
 def get_group_data_workspace_name(context, group_name, run, rebin):
     if context.data_context.is_multi_period():
         name = context.data_context._base_run_name(run) + group_str + group_name + \
-               "; Counts; Periods; " + context.gui_context.period_string(run) + ";"
+               "; Counts; Periods; " + context.gui_context.period_string(run) + "; "
     else:
-        name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
+        name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts; "
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([REBIN_STR, ';'])
 
     name += context.workspace_suffix
 
@@ -45,12 +46,12 @@ def get_group_data_workspace_name(context, group_name, run, rebin):
 def get_group_asymmetry_name(context, group_name, run, rebin):
     if context.data_context.is_multi_period():
         name = context.data_context._base_run_name(run) + group_str + group_name + \
-               "; Asymmetry; Periods; " + context.gui_context.period_string(run) + ";"
+               "; Asymmetry; Periods; " + context.gui_context.period_string(run) + "; "
     else:
-        name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
+        name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry; "
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([REBIN_STR, ';'])
 
     name += context.workspace_suffix
     return name
@@ -64,7 +65,7 @@ def get_pair_asymmetry_name(context, pair_name, run, rebin):
         name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([REBIN_STR, ';'])
 
     name += context.workspace_suffix
     return name
@@ -96,7 +97,7 @@ def get_pair_data_workspace_name(context, pair_name, run, rebin):
         name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
     if rebin:
-        name += ' Rebin;'
+        name += "".join([REBIN_STR, ';'])
 
     name += context.workspace_suffix
 
