@@ -266,8 +266,10 @@ bool RunsPresenter::search(ISearcher::SearchType searchType) {
   if (searchString.empty())
     return false;
 
+  auto const cycle = m_view->getSearchCycle();
+
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
-                                    searchType)) {
+                                    cycle, searchType)) {
     m_messageHandler->giveUserCritical("Catalog login failed", "Error");
     return false;
   }
