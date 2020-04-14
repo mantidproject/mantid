@@ -17,6 +17,7 @@ from mantidqt import icons
 from mantid.kernel import UsageService, FeatureType, config, logger
 from .specifications import RundexSettings
 from .DrillHeaderView import DrillHeaderView
+from .DrillItemDelegate import DrillItemDelegate
 
 
 class DrillEventListener(with_metaclass(ABCMeta, object)):
@@ -129,6 +130,8 @@ class DrillView(QMainWindow):
         table_header = self.table.horizontalHeader()
         table_header.setDefaultAlignment(Qt.AlignLeft)
         table_header.setSectionResizeMode(QHeaderView.Interactive)
+        delegate = DrillItemDelegate(self.table)
+        self.table.setItemDelegate(delegate)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.cellChanged.connect(
                 lambda row, column : self.data_changed(row, column)
