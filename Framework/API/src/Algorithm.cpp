@@ -660,10 +660,6 @@ bool Algorithm::executeInternal() {
       if (m_alwaysStoreInADS)
         this->store();
 
-      // just cache the value internally, it is set at the very end of this
-      // method
-      algIsExecuted = true;
-
       // Log that execution has completed.
       getLogger().debug(
           "Time to validate properties: " +
@@ -741,11 +737,9 @@ bool Algorithm::executeInternal() {
 
   // Only gets to here if algorithm ended normally
   notificationCenter().postNotification(
-      new FinishedNotification(this, algIsExecuted));
-  if (algIsExecuted) {
-    setResultState(ResultState::Success);
-  }
-  return algIsExecuted;
+      new FinishedNotification(this, true));
+  setResultState(ResultState::Success);
+  return true;
 }
 
 //---------------------------------------------------------------------------------------------
