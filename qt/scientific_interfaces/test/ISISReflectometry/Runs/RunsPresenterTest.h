@@ -124,9 +124,7 @@ public:
     auto presenter = makePresenter();
     auto searchString = std::string("test search string");
     auto instrument = std::string("test instrument");
-    EXPECT_CALL(m_view, getSearchString())
-        .Times(1)
-        .WillOnce(Return(searchString));
+    expectSearchString(searchString);
     expectSearchInstrument(instrument);
     EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument,
                                               ISearcher::SearchType::MANUAL))
@@ -138,9 +136,7 @@ public:
   void testSearchWithEmptyStringDoesNotStartSearch() {
     auto presenter = makePresenter();
     auto searchString = std::string("");
-    EXPECT_CALL(m_view, getSearchString())
-        .Times(1)
-        .WillOnce(Return(searchString));
+    expectSearchString(searchString);
     EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
@@ -148,9 +144,7 @@ public:
 
   void testSearchCatalogLoginFails() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString())
-        .Times(1)
-        .WillOnce(Return(m_searchString));
+    expectSearchString(m_searchString);
     EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
         .Times(1)
         .WillOnce(Return(false));
@@ -163,9 +157,7 @@ public:
 
   void testSearchSucceeds() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString())
-        .Times(1)
-        .WillOnce(Return(m_searchString));
+    expectSearchString(m_searchString);
     EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
         .Times(1)
         .WillOnce(Return(true));
@@ -1028,6 +1020,12 @@ private:
     EXPECT_CALL(m_view, getSearchInstrument())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(instrument));
+  }
+
+  void expectSearchString(std::string const &searchString) {
+    EXPECT_CALL(m_view, getSearchString())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(searchString));
   }
 
   void expectGetUpdateInterval(int const &updateInterval) {
