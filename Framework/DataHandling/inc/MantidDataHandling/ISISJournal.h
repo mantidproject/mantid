@@ -44,7 +44,7 @@ public:
   /// Get the list of cycle names
   std::vector<std::string> getCycleNames();
   /// Get data for runs that match the given filters
-  std::vector<RunData>
+  virtual std::vector<RunData>
   getRuns(std::vector<std::string> const &valuesToLookup = {},
           RunData const &filters = RunData());
 
