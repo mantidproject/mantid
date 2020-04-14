@@ -324,7 +324,7 @@ class FittingTabPresenter(object):
         self.clear_fit_information()
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(False)
-        self.context.fitting_context.remove_latest_fit(self._number_of_fits_cached)
+        self.context.fitting_context.remove_latest_fit()
         self._number_of_fits_cached = 0
 
     def handle_fit_by_changed(self):

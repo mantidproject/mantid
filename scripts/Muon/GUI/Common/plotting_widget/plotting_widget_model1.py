@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
+from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
 
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
@@ -124,6 +125,22 @@ class PlotWidgetModel(object):
             return workspace_list
         except AttributeError:
             return []
+
+    def get_fit_workspace_and_indices(self, fit):
+        workspaces = []
+        indices = []
+        for workspace_name in fit.output_workspace_names:
+            first_fit_index = 1  # calc
+            if TF_ASYMMETRY_PREFIX in workspace_name:
+                first_fit_index = 3
+            second_fit_index = 2  # Diff
+
+            workspaces.append(workspace_name)
+            indices.append(first_fit_index)
+            workspaces.append(workspace_name)
+            indices.append(second_fit_index)
+
+        return workspaces, indices
 
     def create_tiled_keys(self, tiled_by):
         if tiled_by == TILED_BY_GROUP_TYPE:

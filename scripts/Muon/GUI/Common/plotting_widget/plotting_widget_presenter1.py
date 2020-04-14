@@ -48,12 +48,15 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view.setup_tiled_by_options(tiled_types)
 
     def _setup_gui_observers(self):
+        """"Setup GUI observers, e.g fit observers"""
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
         self.added_group_or_pair_observer = GenericObserverWithArgPassing(
             self.handle_added_or_removed_group_or_pair_to_plot)
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
+        self.fit_observer = GenericObserverWithArgPassing(self.handle_fit_completed)
+        self.fit_removed_observer = GenericObserverWithArgPassing(self.handle_fit_removed)
 
     def _setup_view_connections(self):
         self._view.on_plot_tiled_checkbox_changed(self.handle_plot_tiled_state_changed)
@@ -206,6 +209,25 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         Handles the instrument being changed by creating a blank plot window
         """
         self._figure_presenter.create_single_plot()
+
+    def handle_fit_completed(self, fit):
+        """
+        Handles a completed fit which is given as an input to the function
+        """
+        if fit is None:
+            return
+        workspace_list, indices = self._model.get_fit_workspace_and_indices(fit)
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
+
+    def handle_fit_removed(self, fits):
+        """
+        Handles the removal of a fit which is given as an input to the function
+        """
+        fit_workspaces_to_remove = []
+        for fit in fits:
+            fit_workspaces_to_remove.extend(fit.output_workspace_names)
+
+        self._figure_presenter.remove_workspace_names_from_plot(fit_workspaces_to_remove)
 
     def _check_if_counts_and_groups_selected(self):
         if len(self.context.group_pair_context.selected_pairs) != 0 and \

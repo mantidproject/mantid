@@ -91,11 +91,11 @@ class PlottingCanvasModel(object):
         fit_label = self._get_fit_label(workspace_name, index)
         rebin_label = self._get_rebin_label(workspace_name)
         if not self._is_tiled:
-            return "".join([instrument, run, ';', group, rebin_label])
+            return "".join([instrument, run, ';', group, fit_label, rebin_label])
         if self._tiled_by == "Group/Pair":
-            return "".join([run, ';', self._get_rebin_label(workspace_name)])
+            return "".join([run, fit_label, rebin_label])
         else:
-            return "".join([group, ';', self._get_rebin_label(workspace_name)])
+            return "".join([group, fit_label, rebin_label])
 
     def _get_freq_label(self):
         return ''
@@ -107,7 +107,15 @@ class PlottingCanvasModel(object):
             return ''
 
     def _get_fit_label(self, workspace_name, index):
-        return ''
+        label = ''
+        fit_function_name = get_fit_function_name_from_workspace(workspace_name)
+        if fit_function_name:
+            if index == 1 or index == 3:
+                workspace_type = 'Calc'
+            elif index == 2:
+                workspace_type = 'Diff'
+            label = ''.join([';', fit_function_name, ';', workspace_type])
+        return label
 
     def create_axes_titles(self):
         if not self._is_tiled:

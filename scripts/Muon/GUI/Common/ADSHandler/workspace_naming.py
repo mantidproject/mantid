@@ -200,6 +200,15 @@ def create_fitted_workspace_name(input_workspace_name, function_name):
     return name, directory
 
 
+def get_fit_function_name_from_workspace(workspace_name):
+    workspace_labels = workspace_name.split(';')
+    try:
+        fitted_index = workspace_labels.index(" Fitted")
+        function_name = workspace_labels[fitted_index + 1]
+        return function_name.strip()
+    except ValueError:
+        return None
+
 def create_multi_domain_fitted_workspace_name(input_workspace, function_name):
     directory = input_workspace + '; Fitted;' + function_name + '/'
     name = input_workspace + '+ ...; Fitted;' + function_name

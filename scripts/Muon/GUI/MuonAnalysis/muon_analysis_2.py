@@ -316,9 +316,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.new_fit_plotting_notifier.add_subscriber(self.dockable_plot_widget.presenter.fit_observer)
+        self.fitting_context.new_fit_plotting_notifier.add_subscriber(self.plot_widget.presenter.fit_observer)
 
-        self.fitting_context.fit_removed_notifier.add_subscriber(self.dockable_plot_widget.presenter.
+        self.fitting_context.fit_removed_notifier.add_subscriber(self.plot_widget.presenter.
                                                                  fit_removed_observer)
 
         self.fitting_context.plot_guess_notifier.add_subscriber(
