@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 # 3rd party imports
+from cycler import cycler
 from mantid.api import AnalysisDataService, SpecialCoordinateSystem
 from mantid.kernel import logger
 
@@ -16,7 +17,14 @@ from mantidqt.widgets.workspacedisplay.table.model \
 from .representation import create_peakrepresentation
 
 # constants
-DEFAULT_MARKER_COLOR = 'red'
+# cycle colors for each peaks workspace - it is unlikely there will be more than 3
+FG_COLORS = cycler(fg_color=[
+    '#d62728',  # ~red,
+    '#e9f02e',  # ~yellow
+    '#17becf',  # ~cyan
+    '#03ad06',  # ~green
+    '#e377c2'  # ~pink
+])()
 DEFAULT_BG_COLOR = '0.75'
 # map coordinate system to correct Peak getter
 FRAME_TO_PEAK_CENTER_ATTR = {
@@ -31,21 +39,27 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     Extends PeaksWorkspace functionality to include color selection
     """
 
-    def __init__(self, peaks_ws):
+    def __init__(self, peaks_ws, fg_color, bg_color):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
+        :param fg_color: Color of the glyphs marking the signal region
+        :param bg_color: Color of the glyphs marking the background region
         """
         if not hasattr(peaks_ws, 'getNumberPeaks'):
             raise ValueError("Expected a PeaksWorkspace type but found a {}".format(type(peaks_ws)))
 
         super().__init__(peaks_ws)
-        self._marker_color = DEFAULT_MARKER_COLOR
-        self._bg_color = DEFAULT_BG_COLOR
+        self._fg_color = fg_color
+        self._bg_color = bg_color
         self._visible_peaks = []
 
     @property
-    def marker_color(self):
-        return self._marker_color
+    def bg_color(self):
+        return self._bg_color
+
+    @property
+    def fg_color(self):
+        return self._fg_color
 
     @property
     def peaks_workspace(self):
@@ -76,7 +90,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
             x, y, z = qframe[diminfo[0]], qframe[diminfo[1]], qframe[diminfo[2]]
             info.append(
                 create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak.getPeakShape(),
-                                          self.marker_color, self._bg_color))
+                                          self.fg_color, self.bg_color))
         self._visible_peaks = info
         return info
 
@@ -117,7 +131,10 @@ def create_peaksviewermodel(peaks_ws_name):
     :return: A new PeaksViewerModel object
     :raises ValueError: if the workspace referred to by the name is not a PeaksWorkspace
     """
-    return PeaksViewerModel(_get_peaksworkspace(peaks_ws_name))
+    return PeaksViewerModel(
+        _get_peaksworkspace(peaks_ws_name),
+        fg_color=next(FG_COLORS)['fg_color'],
+        bg_color=DEFAULT_BG_COLOR)
 
 
 # Private

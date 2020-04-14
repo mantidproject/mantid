@@ -21,14 +21,16 @@ class NonIntegratedPeakRepresentationTest(unittest.TestCase, PeakRepresentationM
     REPR_CLS = NonIntegratedPeakRepresentation
 
     def create_test_object(self):
-        self.x, self.y, self.z, self.alpha, shape, self.fg_color = 0.0, 1.0, -1.0, 0.5, None, 'b'
+        self.x, self.y, self.z, self.alpha, shape, \
+            self.fg_color, self.bg_color = 0.0, 1.0, -1.0, 0.5, None, 'b', 'w'
 
-        return self.REPR_CLS.create(self.x, self.y, self.z, self.alpha, shape, self.fg_color)
+        return self.REPR_CLS.create(self.x, self.y, self.z, self.alpha, shape, self.fg_color,
+                                    self.bg_color)
 
     def test_noshape_representation_draw_creates_cross(self):
-        x, y, z, alpha, marker_color = 0.0, 1.0, -1.0, 0.5, 'b'
+        x, y, z, alpha, fg_color = 0.0, 1.0, -1.0, 0.5, 'b'
         drawables = [MagicMock()]
-        no_shape = NonIntegratedPeakRepresentation(x, y, z, alpha, marker_color, drawables)
+        no_shape = NonIntegratedPeakRepresentation(x, y, z, alpha, fg_color, drawables)
         painter = MagicMock()
 
         no_shape.draw(painter)

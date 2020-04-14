@@ -23,7 +23,7 @@ def create_test_model(name):
     """Create a test model object from a mock workspace"""
     mock_ws = create_autospec(PeaksWorkspace)
     mock_ws.name.return_value = name
-    return PeaksViewerModel(mock_ws)
+    return PeaksViewerModel(mock_ws, 'r', 'b')
 
 
 def create_mock_model(name):

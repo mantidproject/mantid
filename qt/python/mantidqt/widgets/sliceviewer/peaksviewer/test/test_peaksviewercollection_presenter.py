@@ -28,7 +28,7 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
     # -------------------- success tests -----------------------------
     @patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter")
     def test_append_constructs_PeaksViewerPresenter(self, mock_single_presenter):
-        peaks_workspace = PeaksViewerModel(create_mock_peaks_workspace())
+        peaks_workspace = PeaksViewerModel(create_mock_peaks_workspace(), 'r', 'b')
         mock_collection_view = MagicMock()
         mock_peaks_view = MagicMock()
         mock_collection_view.append_peaksviewer.return_value = mock_peaks_view
@@ -40,7 +40,8 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         self.assertEqual(1, presenter.view.append_peaksviewer.call_count)
 
     def test_notify_called_for_each_subpresenter(self):
-        peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace()) for _ in range(2))
+        peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace(), 'r', 'b')
+                           for _ in range(2))
         with patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter"
                    ) as presenter_mock:
             presenter, child_presenters = self._create_collection_presenter(
@@ -51,7 +52,8 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
 
     def test_workspace_names_returns_all_displayed_names(self):
         names = ("peaks1", "peaks2")
-        peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace(name)) for name in names)
+        peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace(name), 'r', 'b')
+                           for name in names)
         with patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter"
                    ) as presenter_mock:
             presenter, child_presenters = self._create_collection_presenter(
