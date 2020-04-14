@@ -33,14 +33,17 @@ public:
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
   SearchResults search(const std::string &text, const std::string &instrument,
+                       const std::string &cycle,
                        SearchType searchType) override;
   bool startSearchAsync(const std::string &text, const std::string &instrument,
+                        const std::string &cycle,
                         SearchType searchType) override;
   bool searchInProgress() const override;
   SearchResult const &getSearchResult(int index) const override;
   void reset() override;
   bool searchSettingsChanged(const std::string &text,
                              const std::string &instrument,
+                             const std::string &cycle,
                              SearchType searchType) const override;
 
   // RunsViewSearchSubscriber overrides
@@ -59,6 +62,7 @@ private:
   SearcherSubscriber *m_notifyee;
   std::string m_searchText;
   std::string m_instrument;
+  std::string m_cycle;
   SearchType m_searchType;
   bool m_searchInProgress;
 
@@ -66,11 +70,16 @@ private:
   void logInToCatalog();
   void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);
   std::string activeSessionId() const;
-  Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
+  Mantid::API::IAlgorithm_sptr createSearchAlgorithm();
   ISearchModel &results() const;
   void searchAsync();
   SearchResults
   convertTableToSearchResults(Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  SearchResults convertICatResultsTableToSearchResults(
+      Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  SearchResults convertJournalResultsTableToSearchResults(
+      Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  bool requiresICat() const;
 };
 bool hasActiveCatalogSession();
 } // namespace ISISReflectometry

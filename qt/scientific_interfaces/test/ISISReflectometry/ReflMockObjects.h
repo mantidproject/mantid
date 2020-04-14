@@ -193,16 +193,17 @@ public:
 class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
-  MOCK_METHOD3(search, SearchResults(const std::string &, const std::string &,
-                                     SearchType searchType));
-  MOCK_METHOD3(startSearchAsync,
-               bool(const std::string &, const std::string &, SearchType));
+  MOCK_METHOD4(search,
+               SearchResults(const std::string &, const std::string &,
+                             const std::string &, SearchType searchType));
+  MOCK_METHOD4(startSearchAsync, bool(const std::string &, const std::string &,
+                                      const std::string &, SearchType));
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
   MOCK_METHOD0(reset, void());
-  MOCK_CONST_METHOD3(searchSettingsChanged,
+  MOCK_CONST_METHOD4(searchSettingsChanged,
                      bool(const std::string &, const std::string &,
-                          SearchType));
+                          const std::string &, SearchType));
 };
 
 class MockRunNotifier : public IRunNotifier {
