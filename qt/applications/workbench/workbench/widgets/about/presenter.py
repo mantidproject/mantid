@@ -42,14 +42,14 @@ class AboutPresenter(object):
 
         # set chkAllowUsageData
         isUsageReportEnabled = ConfigService.getString(self.USAGE_REPORTING, True)
-        if isUsageReportEnabled:
+        if isUsageReportEnabled == "0":
             self.view.chkAllowUsageData.setChecked(False)
         self.view.chkAllowUsageData.stateChanged.connect(self.action_usage_data_changed)
 
         # set do not show
         qSettings = QSettings()
         qSettings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease = int(qSettings.value(self.DO_NOT_SHOW, '0'))
+        doNotShowUntilNextRelease = int(qSettings.value(self.DO_NOT_SHOW, "0"))
         qSettings.endGroup()
         self.view.chkDoNotShowUntilNextRelease.setChecked(doNotShowUntilNextRelease)
         self.view.chkDoNotShowUntilNextRelease.stateChanged.connect(self.action_do_not_show_until_next_release)
@@ -166,7 +166,10 @@ class AboutPresenter(object):
             if not response:
                 # No was clicked, or no button was clicked
                 # set the checkbox back to checked
-                self.view.chkAllowUsageData.setCheckState(Qt.Checked)
+                checkedState = Qt.Checked
+                self.view.chkAllowUsageData.setCheckState(checkedState)
+
+        ConfigService.setString(self.USAGE_REPORTING, "1" if checkedState == Qt.Checked else "0")
 
     def action_do_not_show_until_next_release(self, checkedState):
         settings = QSettings()
@@ -181,4 +184,6 @@ class AboutPresenter(object):
         settings.setValue(self.LAST_VERSION, release_notes_url())
         settings.endGroup()
 
+        ConfigService.saveConfig(ConfigService.getUserFilename())
+        self.parent.config_updated()
         self.view.close()

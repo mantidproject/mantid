@@ -169,7 +169,6 @@ font-size: 28px</string>
            </property>
            <property name="font">
             <font>
-             <family>Segoe UI</family>
              <pointsize>10</pointsize>
              <weight>50</weight>
              <italic>false</italic>
@@ -213,7 +212,6 @@ font-size: 28px</string>
            </property>
            <property name="font">
             <font>
-             <family>Segoe UI</family>
              <pointsize>10</pointsize>
              <weight>50</weight>
              <italic>false</italic>
@@ -248,7 +246,6 @@ font-size: 28px</string>
           <widget class="QCommandLinkButton" name="clbPythonInMantid">
            <property name="font">
             <font>
-             <family>Segoe UI</family>
              <pointsize>10</pointsize>
              <weight>50</weight>
              <italic>false</italic>
@@ -283,7 +280,6 @@ font-size: 28px</string>
           <widget class="QCommandLinkButton" name="clbPythonIntroduction">
            <property name="font">
             <font>
-             <family>Segoe UI</family>
              <pointsize>10</pointsize>
              <weight>50</weight>
              <italic>false</italic>
@@ -318,7 +314,6 @@ font-size: 28px</string>
           <widget class="QCommandLinkButton" name="clbMantidIntroduction">
            <property name="font">
             <font>
-             <family>Segoe UI</family>
              <pointsize>10</pointsize>
              <weight>50</weight>
              <italic>false</italic>
@@ -536,8 +531,7 @@ font-size: 18px;</string>
               <item row="0" column="1">
                <widget class="QComboBox" name="cbFacility">
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(0, 0, 0);
-background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(240, 240, 240, 255),stop:1 rgba(255, 255, 255, 255));</string>
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
@@ -624,9 +618,6 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
                 </property>
                 <item>
                  <widget class="QCheckBox" name="chkAllowUsageData">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
                   <property name="styleSheet">
                    <string notr="true">padding: 4px;</string>
                   </property>
@@ -683,8 +674,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
                  </font>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(0, 0, 0);
-background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(240, 240, 240, 255),stop:1 rgba(255, 255, 255, 255));</string>
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
