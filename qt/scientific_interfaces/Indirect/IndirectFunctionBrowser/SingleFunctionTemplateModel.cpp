@@ -49,9 +49,16 @@ void SingleFunctionTemplateModel::setFunction(IFunction_sptr fun) {
     return;
   if (fun->nFunctions() == 0) {
     const auto name = fun->name();
-    const auto &functionNameList = m_functionStore.keys();
-    if (functionNameList.contains(QString::fromStdString(name))) {
-      setFitType(QString::fromStdString(name));
+    std::vector<std::string> functionNameList;
+    std::unordered_map<std::string, QString> functionNameToDisplayNameMap;
+    for (auto functionKey : m_functionStore.keys()) {
+      auto functionName = m_functionStore[functionKey]->name();
+      functionNameList.emplace_back(functionName);
+      functionNameToDisplayNameMap.emplace(functionName, functionKey);
+    }
+    if (std::find(functionNameList.cbegin(), functionNameList.cend(), name) !=
+        functionNameList.cend()) {
+      setFitType(functionNameToDisplayNameMap.at(name));
     } else {
       throw std::runtime_error("Cannot set function " + name);
     }
