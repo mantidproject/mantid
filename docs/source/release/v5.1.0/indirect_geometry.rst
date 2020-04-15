@@ -15,6 +15,13 @@ Improvements
   ``abins``. These changes should make the library more approachable and maintainable.
   They should not impact functionality of the Abins Algorithm, but will break any user python scripts
   that import ``AbinsModules``.
+- Vibrational calculations performed within the VASP quantum chemistry
+  package are now supported by Abins. When the IBRION parameter of
+  VASP is set to an integer from 5-8, Gamma-point vibrational
+  frequencies are written to the vasprun.xml output file which may be
+  loaded into Abins. Results for crystalline benzene were validated
+  against data from CASTEP and found to give fairly similar
+  frequencies and intensities.
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work also for ILL fixed window scan reduced data, in which case the correction will be calculated for elastic wavelength.
 
 
@@ -23,5 +30,6 @@ Bug Fixes
 
 - FQ and Msd tabs now label output workspaces with the fitting function.
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work correctly for annular sample in a container.
+
 
 :ref:`Release 5.1.0 <v5.1.0>`
