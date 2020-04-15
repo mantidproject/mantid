@@ -59,25 +59,6 @@ class TableWorkspaceDataPresenter(object):
 
         self.view.setHorizontalHeaderLabels(column_headers)
 
-    def update_column_headers(self):
-        """
-        :param extra_labels: Extra labels to be appended to the column headers.
-                             Expected format: [(id, label), (2, "X"),...]
-        :type extra_labels: List[Tuple[int, str]]
-        :return:
-        """
-        # deep copy the original headers so that they are not changed by the appending of the label
-        column_headers = self.model.original_column_headers()
-        num_headers = len(column_headers)
-        self.view.setColumnCount(num_headers)
-
-        extra_labels = self.model.build_current_labels()
-        if len(extra_labels) > 0:
-            for index, label in extra_labels:
-                column_headers[index] += str(label)
-
-        self.view.setHorizontalHeaderLabels(column_headers)
-
     def load_data(self, table):
         num_rows = self.model.get_number_of_rows()
         table.setRowCount(num_rows)

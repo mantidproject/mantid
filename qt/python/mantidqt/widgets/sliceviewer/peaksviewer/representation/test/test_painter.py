@@ -54,6 +54,7 @@ class MplPainterTest(unittest.TestCase):
         artist = painter.cross(x, y, half_width)
 
         axes.add_patch.assert_called_once()
+        self.assertTrue(artist is not None)
         self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=4, alpha=None)
 
     def test_cross_passes_kwargs_to_mpl(self):

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 # std imports
-from collections import namedtuple
 from json import loads as json_loads
 
 # 3rdparty imports
