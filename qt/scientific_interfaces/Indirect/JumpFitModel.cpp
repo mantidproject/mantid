@@ -370,13 +370,13 @@ JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
 std::string JumpFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiFofQFit_seq" + m_fitType + "_Results";
-  return constructOutputName("seq");
+  return constructOutputName("Seq");
 }
 
 std::string JumpFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiFofQFit_sim" + m_fitType + "_Results";
-  return constructOutputName("sim");
+  return constructOutputName("Sim");
 }
 
 std::string JumpFitModel::singleFitOutputName(TableDatasetIndex index,
