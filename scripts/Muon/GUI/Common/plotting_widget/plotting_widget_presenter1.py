@@ -4,13 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import Dict
+
+from Muon.GUI.Common.contexts.fitting_context import FitInformation
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.plotting_widget.external_plotting_model import ExternalPlottingModel
 from Muon.GUI.Common.plotting_widget.external_plotting_view import ExternalPlottingView
 from Muon.GUI.Common.plotting_widget.plotting_canvas_presenter_interface import PlottingCanvasPresenterInterface
 from Muon.GUI.Common.plotting_widget.plotting_widget_model1 import PlotWidgetModel
 from Muon.GUI.Common.plotting_widget.plotting_widget_view_interface import PlottingWidgetViewInterface
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
+from mantid.dataobjects import Workspace2D
 
 
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
@@ -79,18 +83,20 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
 
-    def handle_workspace_deleted_from_ads(self, workspace):
+    def handle_workspace_deleted_from_ads(self, workspace: Workspace2D):
         """
         Handles a workspace being deleted from ads by removing the workspace from the plot
+        :param workspace: workspace 2D object
         """
         workspace_name = workspace.name()
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         if workspace_name in plotted_workspaces:
             self._figure_presenter.remove_workspace_from_plot(workspace)
 
-    def handle_workspace_replaced_in_ads(self, workspace):
+    def handle_workspace_replaced_in_ads(self, workspace: Workspace2D):
         """
         Handles the use raw workspaces being changed (e.g rebinned) in the ADS.
+        :param workspace: workspace 2D object
         """
         workspace_name = workspace.name()
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
@@ -152,10 +158,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                                                                                      self._view.get_plot_type())
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
 
-    def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info):
+    def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info: Dict):
         """
         Handles a group or pair being added or removed from
         the grouping widget analysis table
+        :param group_pair_info: A dictionary continue information on the removed group/pair
         """
         is_added = group_pair_info["is_added"]
         name = group_pair_info["name"]
@@ -164,9 +171,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         else:
             self.handle_removed_group_or_pair_to_plot(name)
 
-    def handle_added_group_or_pair_to_plot(self, group_or_pair_name):
+    def handle_added_group_or_pair_to_plot(self, group_or_pair_name: str):
         """
         Handles a group or pair being added from the view
+        :param group_or_pair_name: The group or pair name that was added to the analysis
         """
         self._check_if_counts_and_groups_selected()
         # if tiled by group, we will need to recreate the tiles
@@ -179,9 +187,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             (group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
 
-    def handle_removed_group_or_pair_to_plot(self, group_or_pair_name):
+    def handle_removed_group_or_pair_to_plot(self, group_or_pair_name: str):
         """
         Handles a group or pair being removed in grouping widget analysis table
+        :param group_or_pair_name: The group or pair name that was removed from the analysis
         """
         # tiled by group, we will need to recreate the tiles
         if self._view.is_tiled_plot() and self._view.tiled_by() == self._model.tiled_by_group:
@@ -210,18 +219,20 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         self._figure_presenter.create_single_plot()
 
-    def handle_fit_completed(self, fit):
+    def handle_fit_completed(self, fit: FitInformation):
         """
         Handles a completed fit which is given as an input to the function
+        :param fit: The completed fit
         """
         if fit is None:
             return
         workspace_list, indices = self._model.get_fit_workspace_and_indices(fit)
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
 
-    def handle_fit_removed(self, fits):
+    def handle_fit_removed(self, fits: list[FitInformation]):
         """
         Handles the removal of a fit which is given as an input to the function
+        :param fits: A list of fits to remove from the plot
         """
         fit_workspaces_to_remove = []
         for fit in fits:

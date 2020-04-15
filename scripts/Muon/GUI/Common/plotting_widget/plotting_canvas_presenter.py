@@ -32,7 +32,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
 
     # Interface implementation
-    def plot_workspaces(self, workspace_names, workspace_indices, hold_on, autoscale=False):
+    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
+                        autoscale: bool):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
 
@@ -59,8 +60,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.redraw_figure()
 
     def remove_workspace_from_plot(self, workspace):
-        """Removes all references to the input workspace from the plot
-           The workspace deleted ads observer has to call this function directly"""
+        """Removes all references to the input workspace from the plot"""
         self._view.remove_workspace_from_plot(workspace)
 
     def replace_workspace_in_plot(self, workspace):
