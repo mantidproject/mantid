@@ -51,7 +51,7 @@ Required import:
 
 .. code-block:: python
 
-    SaveAscii(InputWorkspace=ws1,Filename=savefile,Separator="Comma")
+    SaveAscii(InputWorkspace=ws1,Filename=savefile,Separator="CSV")
 
 :ref:`Save a Workspace in Nexus format <algm-SaveNexus>`:
 
@@ -107,7 +107,7 @@ Top Tip
 
 *Unsure how to script a certain process*?
 
-* Run the algorithm you want, maybe by clicking the appropriate button in the Workspaces Toolbox (Load, Save...)
+* Run the algorithm you want, maybe by clicking the appropriate button in the Workspaces Toolbox (e.g. Load)
 * Right-click on the output workspace > Show History
 * Save a script for this process to File or Clipboard
 
