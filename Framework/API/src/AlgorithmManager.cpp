@@ -193,7 +193,7 @@ size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
   std::copy_if(
       m_managed_algs.cbegin(), m_managed_algs.cend(),
       std::back_inserter(theCompletedInstances), [](const auto &algorithm) {
-        return (algorithm->executionState() == ExecutionState::Finished);
+        return (algorithm->isReadyForGarbageCollection());
       });
   for (auto completedAlg : theCompletedInstances) {
     auto itend = m_managed_algs.end();
