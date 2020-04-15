@@ -50,8 +50,8 @@ namespace {
 /// Separator for workspace types in workspaceMethodOnTypes member
 const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
-/// The minimum number of seconds after execution that the algorithm should be kept alive
-/// before garbage collection
+/// The minimum number of seconds after execution that the algorithm should be
+/// kept alive before garbage collection
 const size_t DELAY_BEFORE_GC = 5;
 
 class WorkspacePropertyValueIs {
@@ -111,7 +111,7 @@ Algorithm::Algorithm()
       m_communicator(std::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
- Algorithm::~Algorithm() {}
+Algorithm::~Algorithm() {}
 
 //=============================================================================================
 //================================== Simple Getters/Setters
@@ -200,12 +200,12 @@ bool Algorithm::isRunning() const {
 }
 
 /// True if the algorithm is ready for garbage collection.
-bool Algorithm::isReadyForGarbageCollection() const { 
-    if ((executionState() == ExecutionState::Finished) && 
-        (Mantid::Types::Core::DateAndTime::getCurrentTime() > m_gcTime)) {
-        return true; 
-    }
-    return false; 
+bool Algorithm::isReadyForGarbageCollection() const {
+  if ((executionState() == ExecutionState::Finished) &&
+      (Mantid::Types::Core::DateAndTime::getCurrentTime() > m_gcTime)) {
+    return true;
+  }
+  return false;
 }
 
 //---------------------------------------------------------------------------------------------
