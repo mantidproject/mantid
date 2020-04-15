@@ -15,15 +15,25 @@ ISIS Reflectometry Interface
 New
 ---
 
+- **Background subtraction** options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+
 .. figure:: ../../images/ISISReflectometryInterface/background_subtraction.png
   :class: screenshot
-  :width: 700px
+  :width: 500px
   :align: right
   :alt: Background subtraction on the ISIS Reflectometry Interface
 
   *Background subtraction on the ISIS Reflectometry Interface*
 
-- Background subtraction options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+- **More reliable search** has been added - specify the cycle name in the search inputs to use journal file search instead of ICat. This is currently recommended due to ICat instability. However, ICat can still be used if the cycle number is not known/provided.
+
+.. figure:: ../../images/Reflectometry-GUI-release5.1-search.png
+  :class: screenshot
+  :width: 200px
+  :align: right
+  :alt: Specify the cycle name in the search interface to get more reliable search results
+
+  *Provide cycle name for more reliable search results*
 
 Bug fixes
 ---------
