@@ -765,10 +765,10 @@ bool Algorithm::executeInternal() {
   m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
       (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
   if (algIsExecuted) {
-      setResultState(ResultState::Success);
-      // Only gets to here if algorithm ended normally
-      notificationCenter().postNotification(
-          new FinishedNotification(this, isExecuted()));
+    setResultState(ResultState::Success);
+    // Only gets to here if algorithm ended normally
+    notificationCenter().postNotification(
+        new FinishedNotification(this, isExecuted()));
   }
   return isExecuted();
 }
