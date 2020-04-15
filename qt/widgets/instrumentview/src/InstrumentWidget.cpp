@@ -161,8 +161,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   m_isMonochromatic =
       (isHistogram && binCount <= 2) || (!isHistogram && binCount <= 1);
+  m_xIntegration = new XIntegrationControl(this, m_isMonochromatic);
   if (!m_isMonochromatic) {
-    m_xIntegration = new XIntegrationControl(this);
     mainLayout->addWidget(m_xIntegration);
     connect(m_xIntegration, SIGNAL(changed(double, double)), this,
             SLOT(setIntegrationRange(double, double)));

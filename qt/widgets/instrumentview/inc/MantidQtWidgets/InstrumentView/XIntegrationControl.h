@@ -59,7 +59,8 @@ private:
 class XIntegrationControl : public QFrame {
   Q_OBJECT
 public:
-  explicit XIntegrationControl(InstrumentWidget *instrWindow);
+  explicit XIntegrationControl(InstrumentWidget *instrWindow,
+                               bool hidden = false);
   void setTotalRange(double minimum, double maximum);
   void setUnits(const QString &units);
   void setRange(double minimum, double maximum);
@@ -88,6 +89,7 @@ private:
   double m_totalMaximum;
   double m_minimum;
   double m_maximum;
+  bool m_hidden;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
