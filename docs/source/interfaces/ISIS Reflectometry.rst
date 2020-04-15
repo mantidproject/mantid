@@ -605,7 +605,7 @@ Live Data Monitoring
 ^^^^^^^^^^^^^^^^^^^^
 .. figure:: /images/ISISReflectometryInterface/live_data_section.png
   :class: screenshot
-  :width: 800px
+  :width: 400px
   :align: center
   :alt: The event handling tab
 
