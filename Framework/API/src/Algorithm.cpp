@@ -672,6 +672,10 @@ bool Algorithm::executeInternal() {
       if (m_alwaysStoreInADS)
         this->store();
 
+      // just cache the value internally, it is set at the very end of this
+      // method
+      algIsExecuted = true;
+
       // Log that execution has completed.
       getLogger().debug(
           "Time to validate properties: " +
@@ -698,12 +702,13 @@ bool Algorithm::executeInternal() {
       }
 
     } catch (std::logic_error &ex) {
+      m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+          (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
       setResultState(ResultState::Failed);
       this->unlockWorkspaces();
-      m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
-          (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
@@ -714,10 +719,10 @@ bool Algorithm::executeInternal() {
     }
   } catch (CancelException &ex) {
     m_runningAsync = false;
+    getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
-    getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
@@ -726,16 +731,15 @@ bool Algorithm::executeInternal() {
   }
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (std::exception &ex) {
-    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
-        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
-    setResultState(ResultState::Failed);
     m_runningAsync = false;
-
-    notificationCenter().postNotification(
-        new ErrorNotification(this, ex.what()));
     getLogger().error() << "Error in execution of algorithm " << this->name()
                         << ":\n"
                         << ex.what() << "\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
+    notificationCenter().postNotification(
+        new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
     throw;
   }
@@ -760,11 +764,13 @@ bool Algorithm::executeInternal() {
 
   m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
       (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
-  setResultState(ResultState::Success);
-  // Only gets to here if algorithm ended normally
-  notificationCenter().postNotification(new FinishedNotification(this, true));
-
-  return true;
+  if (algIsExecuted) {
+      setResultState(ResultState::Success);
+      // Only gets to here if algorithm ended normally
+      notificationCenter().postNotification(
+          new FinishedNotification(this, isExecuted()));
+  }
+  return isExecuted();
 }
 
 //---------------------------------------------------------------------------------------------
