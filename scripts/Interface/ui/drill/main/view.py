@@ -21,14 +21,15 @@ from .DrillItemDelegate import DrillItemDelegate
 
 class DrillView(QMainWindow):
 
-    instrument_changed = Signal(str)
-    row_added = Signal(int)
-    row_deleted = Signal(int)
-    data_changed = Signal(int, int)
-    process = Signal(list)
+    # Signals that the view can send and data that they include
+    instrument_changed = Signal(str)  # the instrument
+    row_added = Signal(int)           # the row index
+    row_deleted = Signal(int)         # the row index
+    data_changed = Signal(int, int)   # the row and column indexes
+    process = Signal(list)            # the list of row indexes
     process_stopped = Signal()
-    rundex_loaded = Signal(str)
-    rundex_saved = Signal(str)
+    rundex_loaded = Signal(str)       # the path and filename
+    rundex_saved = Signal(str)        # the path and filename
 
     def __init__(self):
         super(DrillView, self).__init__()
@@ -40,6 +41,9 @@ class DrillView(QMainWindow):
         self.setup_table()
 
     def setup_header(self):
+        """
+        Setup the window header. Set the buttons icons and connect the signals.
+        """
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
         self.headerLeft.addWidget(self.instrumentselector, 0, Qt.AlignLeft)
         self.instrumentselector.instrumentSelectionChanged.connect(
@@ -91,6 +95,9 @@ class DrillView(QMainWindow):
                 )
 
     def setup_table(self):
+        """
+        Setup the main table widget.
+        """
         header = DrillHeaderView()
         self.table.setHorizontalHeader(header)
         table_header = self.table.horizontalHeader()
@@ -108,24 +115,54 @@ class DrillView(QMainWindow):
     ###########################################################################
 
     def add_row(self, position):
+        """
+        Add a row in the table at a given postion.
+
+        Args:
+            position (int): row index
+        """
         self.table.insertRow(position)
         self.row_added.emit(position)
 
     def del_row(self, position):
+        """
+        Delete a row at a given position.
+
+        Args:
+            position(int): row index
+        """
         self.table.removeRow(position)
         self.row_deleted.emit(position)
 
     def erase_row(self, position):
+        """
+        Erase the contents of a whole row.
+
+        Args:
+            position (int): row index
+        """
         for column in range(self.table.columnCount()):
             self.table.takeItem(position, column)
             self.data_changed.emit(position, column)
 
     def get_selected_rows(self):
+        """
+        Get the list of currently selected rows.
+
+        Returns:
+            list(int): list of selected rows indexes
+        """
         selected_rows = self.table.selectionModel().selectedRows()
         rows = [row.row() for row in selected_rows]
         return rows
 
     def get_last_selected_row(self):
+        """
+        Get the further down selected row.
+
+        Returns:
+            int: the row index
+        """
         rows = self.get_selected_rows()
         if rows:
             return rows[-1]
@@ -133,9 +170,25 @@ class DrillView(QMainWindow):
             return -1
 
     def get_all_rows(self):
+        """
+        Get the list of all rows indexes.
+
+        Returns:
+            list(int): list of rows indexes
+        """
         return range(self.table.rowCount())
 
     def get_cell_contents(self, row, column):
+        """
+        Get the contents of a given cell as a string.
+
+        Args:
+            row (int): row index
+            column (int): column index
+
+        Returns:
+            str: cell contents
+        """
         cell = self.table.item(row, column)
         if cell:
             return cell.text()
@@ -143,16 +196,40 @@ class DrillView(QMainWindow):
             return ""
 
     def set_cell_contents(self, row, column, contents):
+        """
+        Set the content of a cell.
+
+        Args:
+            row (int): row index
+            column (int): column index
+            contents (str): cell contents
+        """
         cell = QTableWidgetItem(contents)
         self.table.setItem(row, column, cell)
 
     def get_row_contents(self, row):
+        """
+        Get the contents of a whole row.
+
+        Args:
+            row (int): row index
+
+        Returns:
+            list(str): the row contents
+        """
         contents = list()
         for column in range(self.table.columnCount()):
             contents.append(self.get_cell_contents(row, column))
         return contents
 
     def set_row_contents(self, row, contents):
+        """
+        Set the content of a row.
+
+        Args:
+            row (int): row index
+            contents (list(str)): contents
+        """
         column = 0
         for txt in contents:
             self.set_cell_contents(row, column, txt)
@@ -163,11 +240,17 @@ class DrillView(QMainWindow):
     ###########################################################################
 
     def show_settings(self):
+        """
+        Show settings window.
+        """
         settings = QMainWindow(self)
         uic.loadUi(os.path.join(self.here, self.technique + '_settings.ui'), settings)
         settings.show()
 
     def copy_selected_rows(self):
+        """
+        Copy the selected rows in a local buffer.
+        """
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Copy rows button"], False)
         rows = self.get_selected_rows()
@@ -178,6 +261,9 @@ class DrillView(QMainWindow):
             self.buffer.append(self.get_row_contents(row))
 
     def cut_selected_rows(self):
+        """
+        Cut the selected rows.
+        """
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Cut rows button"], False)
         rows = self.get_selected_rows()
@@ -189,6 +275,9 @@ class DrillView(QMainWindow):
         self.del_selected_rows()
 
     def paste_rows(self):
+        """
+        Paste the buffer in new rows.
+        """
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Paste rows button"], False)
         position = self.get_last_selected_row() + 1
@@ -198,31 +287,49 @@ class DrillView(QMainWindow):
             position += 1
 
     def add_row_after(self):
+        """
+        Add a row after the selected ones.
+        """
         position = self.get_last_selected_row() + 1
         self.add_row(position)
 
     def del_selected_rows(self):
+        """
+        Delete the selected rows.
+        """
         rows = self.get_selected_rows()
         rows = sorted(rows, reverse=True)
         for row in rows:
             self.del_row(row)
 
     def erase_selected_rows(self):
+        """
+        Erase the contents of the selected rows.
+        """
         rows = self.get_selected_rows()
         for row in rows:
             self.erase_row(row)
 
     def process_selected_rows(self):
+        """
+        Ask for the processing of the selected rows.
+        """
         rows = self.get_selected_rows()
         if rows:
             self.process.emit(rows)
 
     def process_all_rows(self):
+        """
+        Ask for the processing of all the rows.
+        """
         rows = self.get_all_rows()
         if rows:
             self.process.emit(rows)
 
     def load_rundex(self):
+        """
+        Ask for the loading of a rundex file.
+        """
         filename = QFileDialog.getOpenFileName(
                 self, 'Load rundex', '.', "Rundex (*.mrd);;All files (*.*)"
                 )
@@ -231,6 +338,9 @@ class DrillView(QMainWindow):
         self.rundex_loaded.emit(filename[0])
 
     def save_rundex(self):
+        """
+        Ask for the saving of the table in a rundex file.
+        """
         filename = QFileDialog.getSaveFileName(
                 self, 'Save rundex', '.', "Rundex (*.mrd)"
                 )
@@ -242,6 +352,12 @@ class DrillView(QMainWindow):
         pass
 
     def keyPressEvent(self, event):
+        """
+        Deal with key pressed events.
+
+        Args:
+            event (QPressEvent): the key event
+        """
         if (event.key() == Qt.Key_C
                 and event.modifiers() == Qt.ControlModifier):
             self.copy_selected_rows()
@@ -255,6 +371,9 @@ class DrillView(QMainWindow):
             self.del_selected_rows()
 
     def show_directory_manager(self):
+        """
+        Open the Mantid user directories manager.
+        """
         manageuserdirectories.ManageUserDirectories(self).exec_()
 
     ###########################################################################
@@ -262,9 +381,31 @@ class DrillView(QMainWindow):
     ###########################################################################
 
     def set_available_instruments(self, techniques):
+        """
+        Change the available instruments in the comboxbox based on the
+        supported techniques.
+
+        Args:
+            techniques (list(str)): list of supported techniques
+        """
         self.instrumentselector.setTechniques(techniques)
 
+    def set_available_techniques(self, techniques):
+        """
+        Set the available techniques in the comboxbox.
+
+        Args:
+            techniques (list(str)): list of techniques
+        """
+        pass
+
     def set_table(self, columns):
+        """
+        Set the table header.
+
+        Args:
+            columns (list(str)): list of columns titles
+        """
         self.table.clear()
         self.table.setRowCount(0)
         self.table.setColumnCount(len(columns))
@@ -272,6 +413,12 @@ class DrillView(QMainWindow):
         self.table.resizeColumnsToContents()
 
     def fill_table(self, rows_contents):
+        """
+        Fill the table.
+
+        Args:
+            rows_contents (list(list(str))): list of rows contents
+        """
         self.table.setRowCount(len(rows_contents))
         for row in range(len(rows_contents)):
             self.set_row_contents(row, rows_contents[row])
@@ -280,10 +427,24 @@ class DrillView(QMainWindow):
         self.technique = technique
 
     def set_progress(self, n, nmax):
+        """
+        Update the progress bar.
+
+        Args:
+            n (int): current value to display
+            nmax (int): max value of the progress bar
+        """
         self.progressBar.setMaximum(nmax)
         self.progressBar.setValue(n)
 
     def set_disabled(self, state):
+        """
+        Disable the drill interface to avoid modifying the input table during
+        a processing.
+
+        Args:
+            state (bool): 'True' to disable, 'False' to enable again
+        """
         self.instrumentselector.setDisabled(state)
         self.datadirs.setDisabled(state)
         self.load.setDisabled(state)
