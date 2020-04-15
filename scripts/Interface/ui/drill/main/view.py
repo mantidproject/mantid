@@ -177,7 +177,7 @@ class DrillView(QMainWindow):
         Returns:
             list(int): list of rows indexes
         """
-        return range(self.table.rowCount())
+        return list(range(self.table.rowCount()))
 
     def get_cell_contents(self, row, column):
         """
