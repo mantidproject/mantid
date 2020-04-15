@@ -23,23 +23,6 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 namespace { // unnamed
-void removeResultsWithoutFilenameExtension(
-    const ITableWorkspace_sptr &results) {
-  std::set<size_t> toRemove;
-  for (size_t i = 0; i < results->rowCount(); ++i) {
-    std::string &run = results->String(i, 0);
-
-    // Too short to be more than ".raw or .nxs"
-    if (run.size() < 5) {
-      toRemove.insert(i);
-    }
-  }
-
-  // Sets are sorted so if we go from back to front we won't trip over ourselves
-  for (auto row = toRemove.rbegin(); row != toRemove.rend(); ++row)
-    results->removeRow(*row);
-}
-
 bool runHasCorrectInstrument(std::string const &run,
                              std::string const &instrument) {
   // Return false if the run appears to be from another instruement
@@ -93,18 +76,23 @@ SearchResults QtCatalogSearcher::search(const std::string &text,
   m_searchType = searchType;
   auto algSearch = createSearchAlgorithm();
   algSearch->execute();
-  ITableWorkspace_sptr resultsTable = algSearch->getProperty("OutputWorkspace");
-  removeResultsWithoutFilenameExtension(resultsTable);
-  auto searchResults = convertTableToSearchResults(resultsTable);
+  auto resultsTable = getSearchAlgorithmResultsTable(algSearch);
+  auto searchResults = convertResultsTableToSearchResults(resultsTable);
   return searchResults;
 }
 
-SearchResults QtCatalogSearcher::convertTableToSearchResults(
-    ITableWorkspace_sptr tableWorkspace) {
+ITableWorkspace_sptr
+QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorithm_sptr algSearch) {
+  ITableWorkspace_sptr resultsTable = algSearch->getProperty("OutputWorkspace");
+  return resultsTable;
+}
+
+SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(
+    ITableWorkspace_sptr resultsTable) {
   if (requiresICat())
-    return convertICatResultsTableToSearchResults(tableWorkspace);
+    return convertICatResultsTableToSearchResults(resultsTable);
   else
-    return convertJournalResultsTableToSearchResults(tableWorkspace);
+    return convertJournalResultsTableToSearchResults(resultsTable);
 }
 
 SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(
@@ -199,10 +187,9 @@ void QtCatalogSearcher::notifySearchComplete() {
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
 
   if (searchAlg->isExecuted()) {
-    ITableWorkspace_sptr resultsTable =
-        searchAlg->getProperty("OutputWorkspace");
-    auto resultsList = convertTableToSearchResults(resultsTable);
-    results().mergeNewResults(resultsList);
+    auto resultsTable = getSearchAlgorithmResultsTable(searchAlg);
+    auto searchResults = convertResultsTableToSearchResults(resultsTable);
+    results().mergeNewResults(searchResults);
   }
 
   m_notifyee->notifySearchComplete();
@@ -229,7 +216,7 @@ bool QtCatalogSearcher::searchSettingsChanged(const std::string &text,
          m_cycle != cycle || searchType != m_searchType;
 }
 
-bool hasActiveCatalogSession() {
+bool QtCatalogSearcher::hasActiveCatalogSession() const {
   auto sessions = CatalogManager::Instance().getActiveSessions();
   return !sessions.empty();
 }

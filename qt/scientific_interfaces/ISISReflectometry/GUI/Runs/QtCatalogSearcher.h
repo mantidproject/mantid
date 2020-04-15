@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/DllConfig.h"
 #include "GUI/Runs/IRunsView.h"
 #include "ISearcher.h"
 #include "MantidAPI/AlgorithmObserver.h"
@@ -21,14 +22,15 @@ namespace ISISReflectometry {
 QtCatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class QtCatalogSearcher : public QObject,
-                          public ISearcher,
-                          public RunsViewSearchSubscriber,
-                          public Mantid::API::AlgorithmObserver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtCatalogSearcher
+    : public QObject,
+      public ISearcher,
+      public RunsViewSearchSubscriber,
+      public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 public:
-  explicit QtCatalogSearcher(IRunsView *m_view);
-  ~QtCatalogSearcher() override{};
+  explicit QtCatalogSearcher(IRunsView *view);
+  virtual ~QtCatalogSearcher() = default;
 
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
@@ -53,6 +55,12 @@ protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   void errorHandle(const Mantid::API::IAlgorithm *alg,
                    const std::string &what) override;
+  virtual bool hasActiveCatalogSession() const;
+  virtual Mantid::API::IAlgorithm_sptr createSearchAlgorithm();
+  virtual Mantid::API::ITableWorkspace_sptr
+  getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm_sptr searchAlg);
+  bool requiresICat() const;
+  virtual void logInToCatalog();
 
 private slots:
   void dialogClosed();
@@ -66,22 +74,17 @@ private:
   SearchType m_searchType;
   bool m_searchInProgress;
 
-  bool hasActiveSession() const;
-  void logInToCatalog();
   void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);
   std::string activeSessionId() const;
-  Mantid::API::IAlgorithm_sptr createSearchAlgorithm();
   ISearchModel &results() const;
   void searchAsync();
-  SearchResults
-  convertTableToSearchResults(Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  SearchResults convertResultsTableToSearchResults(
+      Mantid::API::ITableWorkspace_sptr resultsTable);
   SearchResults convertICatResultsTableToSearchResults(
       Mantid::API::ITableWorkspace_sptr tableWorkspace);
   SearchResults convertJournalResultsTableToSearchResults(
       Mantid::API::ITableWorkspace_sptr tableWorkspace);
-  bool requiresICat() const;
 };
-bool hasActiveCatalogSession();
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

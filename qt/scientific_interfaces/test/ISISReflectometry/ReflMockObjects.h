@@ -206,6 +206,12 @@ public:
                           const std::string &, SearchType));
 };
 
+class MockSearcherSubscriber : public SearcherSubscriber {
+public:
+  MOCK_METHOD0(notifySearchComplete, void());
+  MOCK_METHOD0(notifySearchFailed, void());
+};
+
 class MockRunNotifier : public IRunNotifier {
 public:
   MOCK_METHOD1(subscribe, void(RunNotifierSubscriber *));
