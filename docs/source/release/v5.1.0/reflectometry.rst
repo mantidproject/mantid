@@ -15,21 +15,27 @@ ISIS Reflectometry Interface
 New
 ---
 
+- **Background subtraction** options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+
 .. figure:: ../../images/ISISReflectometryInterface/background_subtraction.png
   :class: screenshot
-  :width: 700px
+  :width: 500px
   :align: right
   :alt: Background subtraction on the ISIS Reflectometry Interface
 
   *Background subtraction on the ISIS Reflectometry Interface*
 
-- Background subtraction options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+- **More reliable search** has been added - specify the cycle name in the search inputs to use journal file search instead of ICat. This is currently recommended due to ICat instability. However, ICat can still be used if the cycle number is not known/provided.
+
+.. figure:: ../../images/Reflectometry-GUI-release5.1-search.png
+  :class: screenshot
+  :width: 200px
+  :align: right
+  :alt: Specify the cycle name in the search interface to get more reliable search results
+
+  *Provide cycle name for more reliable search results*
+
 - The **Options** dialog can now be accessed from the Tools menu, controlling the display of warnings and rounding precision.
-
-Improvements
-------------
-
-- Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
 
 Bug fixes
 ---------
@@ -40,8 +46,13 @@ Bug fixes
   - A bug has been fixed where creating a new Batch would result in the Experiment/Instrument settings of all batches being reset to their defaults.
   - A bug has been fixed where clicking Restore Defaults on an Experiment/Instrument tab would cause all Experiment and Instrument tabs in every batch to be reset to defaults. Now, only the tab where you click Restore Defaults is changed.
 
+Algorithms
+##########
+
 Improvements
 ------------
+
+- Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
 - Sample waviness term is removed from resolution calculation in incoherent mode in :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 
 :ref:`Release 5.1.0 <v5.1.0>`
