@@ -4,18 +4,19 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import (QMainWindow, QFileDialog, QHeaderView, QAbstractItemView, QTableWidgetItem)
+
+import os
+
+from qtpy.QtWidgets import QMainWindow, QFileDialog, QHeaderView, \
+                           QAbstractItemView, QTableWidgetItem
 from qtpy.QtGui import QIcon
 from qtpy.QtCore import *
 from qtpy import uic
-import os
-from abc import ABCMeta, abstractmethod
-from six import with_metaclass
 
-from mantidqt.widgets import (manageuserdirectories, instrumentselector)
-from mantidqt import icons
+from mantidqt.widgets import manageuserdirectories, instrumentselector
 from mantid.kernel import UsageService, FeatureType, config, logger
-from .specifications import RundexSettings
+from mantidqt import icons
+
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
 
