@@ -152,6 +152,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         chemical_formula_two_char_element = 'Si'
         chemical_formula_complex = 'V Si'  # Yes, this isn't a sensible input but for our tests it will do
         number_density_sample = 1.234
+        crystal_density_sample = 2.345
 
         material_obj_one_char = sample_details._Material(chemical_formula=chemical_formula_one_char_element)
         self.assertIsNotNone(material_obj_one_char)
@@ -169,10 +170,17 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(material_obj_two_char.chemical_formula, chemical_formula_two_char_element)
         self.assertIsNone(material_obj_two_char.number_density)
 
-        # Check it stores number density if passed
+        # Check it stores number density if passed and use it as crystal density when crystal_density is not passed
         material_obj_number_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
                                                                number_density=number_density_sample)
         self.assertEqual(material_obj_number_density.number_density, number_density_sample)
+        self.assertEqual(material_obj_number_density.crystal_density, number_density_sample)
+
+        # Check it stores crystal density if passed
+        material_obj_crystal_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
+                                                                number_density=number_density_sample,
+                                                                crystal_density=crystal_density_sample)
+        self.assertEqual(material_obj_crystal_density.crystal_density, crystal_density_sample)
 
         # Check that it raises an error if we have a non-elemental formula without number density
         with self.assertRaisesRegex(ValueError, "A number density formula must be set on a chemical formula"):

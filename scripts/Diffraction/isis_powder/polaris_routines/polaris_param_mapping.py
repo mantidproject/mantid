@@ -11,6 +11,7 @@ from isis_powder.polaris_routines.polaris_enums import POLARIS_CHOPPER_MODES
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
+    ParamMapEntry(ext_name="bw_order", int_name="bw_order", optional=True),
     ParamMapEntry(ext_name="calibration_directory", int_name="calibration_dir"),
     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
     ParamMapEntry(ext_name="config_file", int_name="config_file"),

@@ -52,6 +52,23 @@ public:
   const std::map<std::string, std::set<std::string>> &getAllEntries() const
       noexcept;
 
+  /**
+   * Checks if a full-path entry exists for a particular groupClass in a Nexus
+   * dataset
+   * @param groupClass e.g. NxLog , Nexus entry attribute
+   * @param entryName full path for an entry name /entry/NXlogs
+   * @return true: entryName exists for a groupClass, otherwise false
+   */
+  bool isEntry(const std::string &entryName,
+               const std::string &groupClass) const noexcept;
+
+  /**
+   * Checks if a full-path entry exists in a Nexus dataset
+   * @param entryName full path for an entry name /entry/NXlogs
+   * @return true: entryName exists, otherwise false
+   */
+  bool isEntry(const std::string &entryName) const noexcept;
+
 private:
   /**
    * Sets m_allEntries, called in HDF5 constructor.
@@ -70,7 +87,7 @@ private:
    *          (e.g. /entry/log)
    * </pre>
    */
-  std::map<std::string, std::set<std::string>> m_allEntries;
+  const std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
 } // namespace Mantid::Kernel

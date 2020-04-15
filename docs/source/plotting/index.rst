@@ -4,8 +4,22 @@
 Matplotlib in Mantid
 ====================
 
+.. toctree::
+   :hidden:
+   :glob:
+   :maxdepth: 1
+
+   scripting_plots
+
+**Other Plotting Documentation**
+
+* :ref:`scripting_plots`
+* :ref:`06_formatting_plots`
+
+
 .. contents:: Table of contents
     :local:
+
 
 Introduction
 ------------

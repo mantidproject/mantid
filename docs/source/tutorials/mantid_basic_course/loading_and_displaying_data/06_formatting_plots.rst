@@ -1,86 +1,92 @@
 .. _06_formatting_plots:
 
-================
-Formatting Plots 
-================
+========================================
+Formatting Plots with the User Interface
+========================================
+
+.. TO UPDATE find these images in a .pptx file at https://github.com/mantidproject/documents/blob/master/Images/Images_for_Docs/formatting_plots.pptx
+
+|
+|
 
 Plot Toolbar
 ============
 
-The usual buttons on the Plot Toolbar: |PlotToolbar.png|
+.. figure:: /images/PlotToolbar.png
+   :alt: Plot Toolbar
+   :align: center
 
-- Home: Rescales the Axes on the plot
-- Arrows: move back and forward between zoom levels (only activated after zooming or moving)
-- Move: Interactively move the curve within the plot
-- Zoom: Select an area to zoom in on
-- Grid: Add gridlines
-- Save: Save the image to file
-- Print: Print the image!
-- Gear: Open the Plot Options Menu
-- Script: Generate a Script to reproduce this plot!
-- Fit: Open the Fitting Tab
-
-We will cover use of the Fitting Tab later...
-
+|
+| We will cover use of the Fitting Tab later...
+|
+|
 
 Plots Toolbox
 =============
 
 .. figure:: /images/PlotsWindow.png
-   :align: center
-   :alt: Plots Window
-
-To show this window you may have to click on the Plots tab highlighted in Red.
-
-The Plots Window great tool for organising your plots. It allows you to Show, Rename, Delete, Search for and Export Plots. It becomes very useful when you produce many plots and are struggling to find the one that you want!
-
-.. figure:: /images/1DPlotmarkers.png
-   :alt: Plot markers
-   :align: right
-   :width: 500px
-
-Quickly adjusting 1D Plots
-==========================
-
-Many aspects of these graphs can be adjusted to fit how you want to
-display the data. 
-
-Double-click on the item you want to change can edit:
-
--  The graph title (Label).
--  The axes labels.
--  The axes themselves. You can change the range, scaling and gridlines.
-
-Right-clicking on the centre of the Plot you can:
-
-- Change the axes scale
-- Toggle on/off the Normalization
-- Add or remove Error bars
-- Add Markers
-
-Plot a 1D spectrum from the MARI or EMU workspaces we have used before and 
-have a go at adjusting these plotting options. If you create a marker, have a go at dragging it and editing it!
-
-
-Figure Options Menu
-===================
-
-.. figure:: /images/PlotOptions.png
-   :alt: Plot Options
+   :alt: Plot Toolbox
    :align: center
    :width: 800px
 
-You have already seen the Figure Options Menu for Colorfill plots. For both 
-Colorfill and normal 1D plots, you can use the Axes tab to edit the labels 
-and Scales of the different Axes. Just as the "Images" tab was the most 
-useful menu for Colorfill plots, for 1D plots this is the "Curves" tab. As 
-shown above it is possible to edit the Color, Style and Width of a Line, add 
-Markers and change their size and color, and show Error bars with options 
-such as Capsize and Frequency of Errorbars (Error every how many points).
+|
+|
 
-Please have a play with these options to see what you can do. For instance 
-if you wish to change the label of a curve in the Legend, then edit the "Set 
-curve label" entry on the Curves tab. Then on the Legend tab you will see 
-Color and Font options.
+Click Menus
+===========
 
-.. |PlotToolbar.png| image:: /images/PlotToolbar.png
+.. figure:: /images/PlotClickMenus.png
+   :alt: Click Menus
+   :align: center
+   :width: 1500px
+
+|
+|
+
+|FigureOptionsGear.png| ptions Menu
+===================================
+
+
+.. figure:: /images/PlotOptions.png
+   :alt: Plot Options Axes Legend
+   :align: center
+
+
+| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+  Then on the Legend tab there are Color and Font options.
+|
+|
+
+.. figure:: /images/PlotOptionsCurves.png
+   :alt: Plot Options Axes Legend
+   :align: center
+
+.. figure:: /images/PlotOptionsColorfill.png
+   :alt: Plot Options Colorfill
+   :align: center
+   :width: 750px
+
+|
+|
+
+File > Settings
+===============
+
+|
+|
+
+.. figure:: /images/PlotSettings.png
+   :alt: Plot Settings
+   :align: center
+   :width: 850px
+
+|
+|
+
+**Other Plotting Documentation**
+
+* :ref:`scripting_plots`
+* :ref:`plotting`
+
+.. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
+   :width: 150px
