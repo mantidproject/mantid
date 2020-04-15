@@ -48,6 +48,9 @@
        <layout class="QVBoxLayout" name="headerLeft"/>
       </item>
       <item>
+       <widget class="QComboBox" name="techniqueSelector"/>
+      </item>
+      <item>
        <widget class="QToolButton" name="datadirs">
         <property name="toolTip">
          <string>Manage Data Directories</string>

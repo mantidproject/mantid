@@ -23,6 +23,7 @@ class DrillPresenter:
 
     def connect_view_signals(self):
         self.view.instrument_changed.connect(self.on_instrument_changed)
+        self.view.technique_changed.connect(self.on_technique_changed)
         self.view.row_added.connect(self.on_add_row)
         self.view.row_deleted.connect(self.on_del_row)
         self.view.data_changed.connect(self.on_data_changed)
@@ -33,6 +34,7 @@ class DrillPresenter:
 
     def disconnect_view_signals(self):
         self.view.instrument_changed.disconnect()
+        self.view.technique_changed.disconnect()
         self.view.row_added.disconnect()
         self.view.row_deleted.disconnect()
         self.view.data_changed.disconnect()
@@ -65,6 +67,10 @@ class DrillPresenter:
         self.model.set_instrument(instrument)
         self.update_view_from_model()
 
+    def on_technique_changed(self, technique):
+        self.model.set_technique(technique)
+        self.update_view_from_model()
+
     def on_rundex_loaded(self, filename):
         self.model.set_rundex_data(filename)
         self.update_view_from_model()
@@ -80,6 +86,9 @@ class DrillPresenter:
         self.view.set_disabled(False)
 
     def update_view_from_model(self):
+        self.view.set_available_techniques(
+                self.model.get_available_techniques())
+        self.view.set_technique(self.model.get_technique())
         # set table header
         self.view.set_table(self.model.get_columns())
 

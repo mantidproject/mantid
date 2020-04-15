@@ -8,13 +8,13 @@
 
 class RundexSettings(object):
 
-    TECHNIQUE_MAP = {
-            'D11':    'SANS',
-            'D16':    'SANS',
-            'D22':    'SANS',
-            'D33':    'SANS',
-            'D17':    'Reflectometry',
-            'FIGARO': 'Reflectometry'
+    TECHNIQUES = {
+            'D11':    ['SANS'],
+            'D16':    ['SANS'],
+            'D22':    ['SANS'],
+            'D33':    ['SANS'],
+            'D17':    ['Reflectometry'],
+            'FIGARO': ['Reflectometry']
             }
 
     COLUMNS = {
@@ -45,9 +45,3 @@ class RundexSettings(object):
             'Reflectometry': "ReflectometryILLAutoProcess"
             }
 
-    @staticmethod
-    def get_technique(instrument):
-        if instrument in RundexSettings.TECHNIQUE_MAP.keys():
-            return RundexSettings.TECHNIQUE_MAP[instrument]
-        else:
-            raise RuntimeError('Instrument {0} is not yet supported.'.format(instrument))

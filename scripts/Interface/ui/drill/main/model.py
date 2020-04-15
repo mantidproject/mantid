@@ -96,12 +96,10 @@ class DrillModel(QObject):
 
     def set_instrument(self, instrument):
         self.samples = list()
-        if (instrument in RundexSettings.TECHNIQUE_MAP):
+        if (instrument in RundexSettings.TECHNIQUES):
             config['default.instrument'] = instrument
             self.instrument = instrument
-            self.technique = RundexSettings.get_technique(self.instrument)
-            self.columns = RundexSettings.COLUMNS[self.technique]
-            self.algorithm = RundexSettings.ALGORITHMS[self.technique]
+            self.set_technique(0)
         else:
             logger.error('Instrument {0} is not supported yet.'
                     .format(instrument))
@@ -110,11 +108,20 @@ class DrillModel(QObject):
             self.columns = None
             self.algorithm = None
 
+    def set_technique(self, technique):
+        self.samples = list()
+        self.technique = RundexSettings.TECHNIQUES[self.instrument][technique]
+        self.columns = RundexSettings.COLUMNS[self.technique]
+        self.algorithm = RundexSettings.ALGORITHMS[self.technique]
+
     def get_columns(self):
         return self.columns if self.columns is not None else list()
 
     def get_technique(self):
-        return self.technique
+        return RundexSettings.TECHNIQUES[self.instrument].index(self.technique)
+
+    def get_available_techniques(self):
+        return RundexSettings.TECHNIQUES[self.instrument]
 
     def add_row(self, position):
         self.samples.insert(position, dict())
@@ -139,9 +146,7 @@ class DrillModel(QObject):
             json_data = json.load(json_file)
 
         self.samples = list()
-        self.instrument = json_data["Instrument"]
-        self.technique = RundexSettings.get_technique(self.instrument)
-        self.columns = RundexSettings.COLUMNS[self.technique]
+        self.set_instrument(json_data["Instrument"])
 
         for sample in json_data["Samples"]:
             self.samples.append(sample)

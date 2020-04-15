@@ -24,6 +24,7 @@ class DrillView(QMainWindow):
 
     # Signals that the view can send and data that they include
     instrument_changed = Signal(str)  # the instrument
+    technique_changed = Signal(int)   # the technique index
     row_added = Signal(int)           # the row index
     row_deleted = Signal(int)         # the row index
     data_changed = Signal(int, int)   # the row and column indexes
@@ -49,6 +50,10 @@ class DrillView(QMainWindow):
         self.headerLeft.addWidget(self.instrumentselector, 0, Qt.AlignLeft)
         self.instrumentselector.instrumentSelectionChanged.connect(
                 lambda i : self.instrument_changed.emit(i)
+                )
+
+        self.techniqueSelector.activated.connect(
+                lambda t : self.technique_changed.emit(t)
                 )
 
         self.datadirs.setIcon(icons.get_icon("mdi.folder"))
@@ -242,10 +247,11 @@ class DrillView(QMainWindow):
 
     def show_settings(self):
         """
-        Show settings window.
+        Show settings window according to the selected technique.
         """
         settings = QMainWindow(self)
-        uic.loadUi(os.path.join(self.here, self.technique + '_settings.ui'), settings)
+        technique = self.techniqueSelector.currentText()
+        uic.loadUi(os.path.join(self.here, technique + '_settings.ui'), settings)
         settings.show()
 
     def copy_selected_rows(self):
@@ -398,7 +404,11 @@ class DrillView(QMainWindow):
         Args:
             techniques (list(str)): list of techniques
         """
-        pass
+        self.techniqueSelector.clear()
+        self.techniqueSelector.addItems(techniques)
+
+    def set_technique(self, technique):
+        self.techniqueSelector.setCurrentIndex(technique)
 
     def set_table(self, columns):
         """
@@ -423,9 +433,6 @@ class DrillView(QMainWindow):
         self.table.setRowCount(len(rows_contents))
         for row in range(len(rows_contents)):
             self.set_row_contents(row, rows_contents[row])
-
-    def set_technique(self, technique):
-        self.technique = technique
 
     def set_progress(self, n, nmax):
         """
