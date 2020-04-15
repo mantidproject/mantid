@@ -5,20 +5,25 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-
 class RundexSettings(object):
 
+    # techniques names
+    SANS = "SANS"
+    REFL = "Reflectometry"
+
+    # correspondance between instruments and technique(s)
     TECHNIQUES = {
-            'D11':    ['SANS'],
-            'D16':    ['SANS'],
-            'D22':    ['SANS'],
-            'D33':    ['SANS'],
-            'D17':    ['Reflectometry'],
-            'FIGARO': ['Reflectometry']
+            'D11':    [SANS],
+            'D16':    [SANS],
+            'D22':    [SANS],
+            'D33':    [SANS],
+            'D17':    [REFL],
+            'FIGARO': [REFL]
             }
 
+    # parameters for each techniques
     COLUMNS = {
-            'SANS': [
+            SANS: [
                 "SampleRuns",
                 "SampleTransmissionRuns",
                 "AbsorberRuns",
@@ -32,7 +37,7 @@ class RundexSettings(object):
                 "ReferenceFiles",
                 "CustomOptions"
                 ],
-            'Reflectometry': [
+            REFL: [
                 "DirectBeam",
                 "ReflectedBeam",
                 "AngleOption",
@@ -40,8 +45,9 @@ class RundexSettings(object):
                 ]
             }
 
+    # algo name for each techniques
     ALGORITHMS = {
-            'SANS':          "SANSILLAutoProcess",
-            'Reflectometry': "ReflectometryILLAutoProcess"
+            SANS: "SANSILLAutoProcess",
+            REFL: "ReflectometryILLAutoProcess"
             }
 
