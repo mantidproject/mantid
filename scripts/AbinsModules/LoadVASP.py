@@ -240,14 +240,12 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                     found = True
                     yield element
             else:
-                if found:
-                    raise StopIteration
-
-                if message is None:
-                    raise ValueError("Could not find {tag}{name} in {parent} section of VASP XML file.".format(
-                        tag=tag, name=(f' (name={name})' if name else ''), parent=etree.tag))
-                else:
-                    raise ValueError(message)
+                if not found:
+                    if message is None:
+                        raise ValueError("Could not find {tag}{name} in {parent} section of VASP XML file.".format(
+                            tag=tag, name=(f' (name={name})' if name else ''), parent=etree.tag))
+                    else:
+                        raise ValueError(message)
 
         def _find_or_error(etree: ElementTree.Element,
                            tag: str,
