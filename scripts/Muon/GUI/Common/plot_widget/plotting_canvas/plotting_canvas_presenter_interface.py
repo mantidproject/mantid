@@ -39,7 +39,7 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def create_tiled_plot(self, keys: list[str], tiled_by: str):
+    def create_tiled_plot(self, keys: List[str], tiled_by: str):
         """Creates a blank tiled plot specified by the keys and tiled by type
         :param keys: A list of keys which will be used to label and categorize each tile
         :param tiled_by: A string which states how the tiles are arranged (can be either by Groups or Runs)

@@ -7,9 +7,9 @@
 from typing import List
 
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-from Muon.GUI.Common.plotting_widget.plotting_canvas_model import PlottingCanvasModel
-from Muon.GUI.Common.plotting_widget.plotting_canvas_presenter import PlottingCanvasPresenter
-from Muon.GUI.Common.plotting_widget.plotting_canvas_view import PlottingCanvasView
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import PlottingCanvasView
 
 
 class PlottingCanvasWidget(object):

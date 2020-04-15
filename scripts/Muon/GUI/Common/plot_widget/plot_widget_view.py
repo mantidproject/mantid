@@ -7,13 +7,13 @@
 from qtpy import QtWidgets
 
 from mantidqt.utils.qt import load_ui
-from Muon.GUI.Common.plotting_widget.plotting_widget_view_interface import PlottingWidgetViewInterface
+from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
 import Muon.GUI.Common.message_box as message_box
 
 ui_plotting_view, _ = load_ui(__file__, "plotting_widget_view.ui")
 
 
-class PlotWidgetView1(QtWidgets.QWidget, PlottingWidgetViewInterface, ui_plotting_view):
+class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_view):
 
     @staticmethod
     def warning_popup(message):

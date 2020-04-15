@@ -6,10 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import abc
 from typing import List
-
 from qtpy import QtWidgets
-
-from Muon.GUI.Common.plotting_widget.plotting_canvas_model import WorkspacePlotInformation
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 
 
 # This metaclass is required in order to implement the (strict) interface for the QtWidget

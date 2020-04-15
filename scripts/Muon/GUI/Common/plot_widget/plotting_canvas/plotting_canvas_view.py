@@ -8,9 +8,9 @@ from typing import List
 
 from matplotlib.container import ErrorbarContainer
 from qtpy import QtWidgets
-from Muon.GUI.Common.plotting_widget.dockable_plot_toolbar import DockablePlotToolbar
-from Muon.GUI.Common.plotting_widget.plotting_canvas_model import WorkspacePlotInformation
-from Muon.GUI.Common.plotting_widget.plotting_canvas_view_interface import PlottingCanvasViewInterface, PlottingViewMeta
+from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable, MantidAxes
 from mantid.plots.plotfunctions import get_plot_fig
@@ -42,7 +42,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
-        self.toolBar = DockablePlotToolbar(self.fig.canvas, self)
+        self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1,

@@ -15,7 +15,7 @@ class PlottingWidgetViewMeta(type(QtWidgets.QWidget), ABCMeta):
     pass
 
 
-class PlottingWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
+class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
 
     @abstractmethod
     def setup_plot_type_options(self, options: List[str]):

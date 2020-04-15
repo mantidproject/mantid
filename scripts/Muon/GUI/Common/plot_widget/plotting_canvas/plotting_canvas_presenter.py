@@ -5,17 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import List
-
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
-from Muon.GUI.Common.plotting_widget.plotting_canvas_model import PlottingCanvasModel
-from Muon.GUI.Common.plotting_widget.plotting_canvas_presenter_interface import PlottingCanvasPresenterInterface
-from Muon.GUI.Common.plotting_widget.plotting_canvas_view import PlottingCanvasView
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
+    PlottingCanvasPresenterInterface
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantid import AnalysisDataService
 
 
 class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
-    def __init__(self, view: PlottingCanvasView, model: PlottingCanvasModel, options_presenter: QuickEditPresenter):
+    def __init__(self, view: PlottingCanvasViewInterface, model: PlottingCanvasModel,
+                 options_presenter: QuickEditPresenter):
         self._view = view
         self._model = model
         self._options_view = None

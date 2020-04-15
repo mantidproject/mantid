@@ -4,27 +4,29 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict
+from typing import Dict, List
 
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from Muon.GUI.Common.plotting_widget.external_plotting_model import ExternalPlottingModel
-from Muon.GUI.Common.plotting_widget.external_plotting_view import ExternalPlottingView
-from Muon.GUI.Common.plotting_widget.plotting_canvas_presenter_interface import PlottingCanvasPresenterInterface
-from Muon.GUI.Common.plotting_widget.plotting_widget_model1 import PlotWidgetModel
-from Muon.GUI.Common.plotting_widget.plotting_widget_view_interface import PlottingWidgetViewInterface
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
+from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
+from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
+    PlottingCanvasPresenterInterface
+from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
+from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantid.dataobjects import Workspace2D
 
 
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
-    def __init__(self, view: PlottingWidgetViewInterface, model: PlotWidgetModel, context,
+    def __init__(self, view: PlotWidgetViewInterface, model: PlotWidgetModel, context,
                  figure_presenter: PlottingCanvasPresenterInterface):
         """
         :param view: A reference to the QWidget object for plotting
         :param model: A reference to a model which contains the plotting logic
         :param context: A reference to the Muon context object
+        :param figure_presenter: A reference to a figure presenter, which is used as an interface to plotting
         """
         if not isinstance(figure_presenter, PlottingCanvasPresenterInterface):
             raise TypeError("Parameter figure_presenter must be of type PlottingCanvasPresenterInterface")
@@ -39,9 +41,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
         # gui observers
         self._setup_gui_observers()
-        # Connect to the view
         self._setup_view_connections()
-        # setup view options
+
         self.update_view_from_model()
 
     def update_view_from_model(self):
@@ -61,6 +62,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
         self.fit_observer = GenericObserverWithArgPassing(self.handle_fit_completed)
         self.fit_removed_observer = GenericObserverWithArgPassing(self.handle_fit_removed)
+        self.plot_guess_observer = GenericObserverWithArgPassing(self.handle_fit_completed)
+        self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
+        self.plot_type_changed_notifier = GenericObservable()
 
     def _setup_view_connections(self):
         self._view.on_plot_tiled_checkbox_changed(self.handle_plot_tiled_state_changed)
@@ -112,6 +116,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=True)
+        self.plot_type_changed_notifier.notify_subscribers(self._view.get_plot_type())
 
     def handle_plot_tiled_state_changed(self):
         """
@@ -182,9 +187,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             tiled_by = self._view.tiled_by()
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
+            workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
+                                                                                         self._view.get_plot_type())
+            self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+            return
 
-        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair \
-            (group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
+        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair(
+            group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
 
     def handle_removed_group_or_pair_to_plot(self, group_or_pair_name: str):
@@ -197,9 +206,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             tiled_by = self._view.tiled_by()
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
+            workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
+                                                                                         self._view.get_plot_type())
+            self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+            return
 
-        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair \
-                (group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
+        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair(
+            group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
         self._figure_presenter.remove_workspace_names_from_plot(workspace_list)
 
     def handle_external_plot_requested(self):
@@ -229,7 +242,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_fit_workspace_and_indices(fit)
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
 
-    def handle_fit_removed(self, fits: list[FitInformation]):
+    def handle_fit_removed(self, fits: List[FitInformation]):
         """
         Handles the removal of a fit which is given as an input to the function
         :param fits: A list of fits to remove from the plot
