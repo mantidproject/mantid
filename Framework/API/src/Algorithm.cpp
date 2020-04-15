@@ -769,7 +769,7 @@ bool Algorithm::executeInternal() {
   }
   // Only gets to here if algorithm ended normally
   notificationCenter().postNotification(
-    new FinishedNotification(this, isExecuted()));
+      new FinishedNotification(this, isExecuted()));
 
   return isExecuted();
 }
