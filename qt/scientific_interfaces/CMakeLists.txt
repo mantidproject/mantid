@@ -56,6 +56,7 @@ set(TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
     test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
     test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
+    test/ISISReflectometry/Runs/QtCatalogSearcherTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
     test/ISISReflectometry/Options/OptionsDialogPresenterTest.h
