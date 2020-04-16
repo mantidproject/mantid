@@ -917,6 +917,9 @@ std::string SetSample::createFlatPlateHolderXML(
   }
   const auto pointingAlongBeam = refFrame.pointingAlongBeam();
   const auto pointingHorizontal = refFrame.pointingHorizontal();
+  const auto handedness = refFrame.getHandedness();
+  const int signHorizontal =
+      (handedness == Mantid::Geometry::Handedness::Right) ? 1 : -1;
 
   auto frontPlate = args;
   frontPlate.setProperty(ShapeArgs::THICK, frontPlateThickness);
@@ -924,7 +927,8 @@ std::string SetSample::createFlatPlateHolderXML(
   const double frontCentreOffset =
       (frontPlateThickness + sampleThickness) * 0.5;
   frontCentre[pointingAlongBeam] -= frontCentreOffset * std::cos(angle);
-  frontCentre[pointingHorizontal] -= frontCentreOffset * std::sin(angle);
+  frontCentre[pointingHorizontal] -=
+      signHorizontal * frontCentreOffset * std::sin(angle);
   if (!frontPlate.existsProperty(ShapeArgs::CENTER)) {
     frontPlate.declareProperty(ShapeArgs::CENTER, frontCentre);
   }
@@ -937,7 +941,8 @@ std::string SetSample::createFlatPlateHolderXML(
   auto backCentre = centre;
   const double backCentreOffset = (backPlateThickness + sampleThickness) * 0.5;
   backCentre[pointingAlongBeam] += backCentreOffset * std::cos(angle);
-  backCentre[pointingHorizontal] += backCentreOffset * std::sin(angle);
+  backCentre[pointingHorizontal] +=
+      signHorizontal * backCentreOffset * std::sin(angle);
   if (!backPlate.existsProperty(ShapeArgs::CENTER)) {
     backPlate.declareProperty(ShapeArgs::CENTER, backCentre);
   }

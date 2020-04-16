@@ -529,9 +529,7 @@ public:
                      createHollowCylinderWithIndexedAxisGeometryProps());
   }
 
-  void test_flat_plate_holder() {
-
-  }
+  void test_flat_plate_holder() {}
 
   //----------------------------------------------------------------------------
   // Failure tests
