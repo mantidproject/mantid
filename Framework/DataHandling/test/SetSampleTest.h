@@ -391,6 +391,38 @@ public:
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
+  void test_Setting_Geometry_As_HollowCylinderHolder_WithCenter() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setStandardReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createHollowCylinderHolderGeometryProps(
+                                     {3, 5, 7}));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    const auto &sample = inputWS->sample();
+    const auto &sampleShape = sample.getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    const auto xml =
+        dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+            .getShapeXML();
+    std::stringstream expectedXML;
+    expectedXML
+        << "<type name=\"userShape\"> <hollow-cylinder id=\"inner\"> "
+           "<centre-of-bottom-base x=\"0.03\" y=\"0.045\" z=\"0.07\"/> "
+           "<axis x=\"0\" y=\"1\" z=\"0\"/> <height val=\"0.01\"/> "
+           "<inner-radius val=\"0.001\"/><outer-radius "
+           "val=\"0.002\"/></hollow-cylinder><hollow-cylinder "
+           "id=\"outer\"> <centre-of-bottom-base x=\"0.03\" y=\"0.045\" "
+           "z=\"0.07\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
+           "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
+           "val=\"0.004\"/></hollow-cylinder><algebra "
+           "val=\"inner:outer\"/> </type>";
+    TS_ASSERT_EQUALS(xml, expectedXML.str());
+  }
+
   void test_Setting_Geometry_As_Cylinder() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
