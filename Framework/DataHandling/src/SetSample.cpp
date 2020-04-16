@@ -913,38 +913,35 @@ std::string SetSample::createFlatPlateHolderXML(
       getPropertyAsDouble(args, ShapeArgs::BACK_THICK);
   double angle = 0.;
   if (args.existsProperty(ShapeArgs::ANGLE)) {
-    degToRad(getPropertyAsDouble(args, ShapeArgs::ANGLE));
+    angle = degToRad(getPropertyAsDouble(args, ShapeArgs::ANGLE));
   }
   const auto pointingAlongBeam = refFrame.pointingAlongBeam();
   const auto pointingHorizontal = refFrame.pointingHorizontal();
-  const int horizontalSign = (centre[pointingHorizontal] > 0) ? -1 : 1;
-  const double horizontalProjection = std::fabs(std::sin(angle));
-  const double alongBeamProjection = std::fabs(std::cos(angle));
 
   auto frontPlate = args;
+  frontPlate.setProperty(ShapeArgs::THICK, frontPlateThickness);
   auto frontCentre = centre;
   const double frontCentreOffset =
       (frontPlateThickness + sampleThickness) * 0.5;
-  frontCentre[pointingAlongBeam] -= frontCentreOffset * alongBeamProjection;
-  frontCentre[pointingHorizontal] +=
-      frontCentreOffset * horizontalProjection * horizontalSign;
+  frontCentre[pointingAlongBeam] -= frontCentreOffset * std::cos(angle);
+  frontCentre[pointingHorizontal] -= frontCentreOffset * std::sin(angle);
   if (!frontPlate.existsProperty(ShapeArgs::CENTER)) {
     frontPlate.declareProperty(ShapeArgs::CENTER, frontCentre);
-    frontPlate.setProperty(ShapeArgs::CENTER, frontCentre);
   }
+  frontPlate.setProperty(ShapeArgs::CENTER, frontCentre);
   const std::string frontPlateXML =
       createFlatPlateXML(frontPlate, refFrame, "front");
 
   auto backPlate = args;
+  backPlate.setProperty(ShapeArgs::THICK, backPlateThickness);
   auto backCentre = centre;
   const double backCentreOffset = (backPlateThickness + sampleThickness) * 0.5;
-  backCentre[pointingAlongBeam] += backCentreOffset * alongBeamProjection;
-  backCentre[pointingHorizontal] -=
-      backCentreOffset * horizontalProjection * horizontalSign;
+  backCentre[pointingAlongBeam] += backCentreOffset * std::cos(angle);
+  backCentre[pointingHorizontal] += backCentreOffset * std::sin(angle);
   if (!backPlate.existsProperty(ShapeArgs::CENTER)) {
     backPlate.declareProperty(ShapeArgs::CENTER, backCentre);
-    backPlate.setProperty(ShapeArgs::CENTER, backCentre);
   }
+  backPlate.setProperty(ShapeArgs::CENTER, backCentre);
   const std::string backPlateXML =
       createFlatPlateXML(backPlate, refFrame, "back");
 
