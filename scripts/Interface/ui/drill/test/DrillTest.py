@@ -25,13 +25,24 @@ class DrillTest(unittest.TestCase):
         self.presenter = DrillPresenter(self.model, self.view)
 
     def select_cell(self, row, column, modifier):
-        y = self.view.table.rowViewportPosition(row) + 1
-        x = self.view.table.columnViewportPosition(column) + 1
+        # find the middle of the cell
+        y = self.view.table.rowViewportPosition(row) \
+            + self.view.table.rowHeight(row) / 2
+        x = self.view.table.columnViewportPosition(column) \
+            + self.view.table.columnWidth(column) / 2
+
         QTest.mouseClick(self.view.table.viewport(),
                          Qt.LeftButton, modifier, QPoint(x, y))
 
     def select_row(self, row, modifier):
-        self.select_cell(row, 0, modifier)
+        # find the middle of the row header
+        vertical_header = self.view.table.verticalHeader()
+        x = 0 + vertical_header.length() / 2
+        y = vertical_header.sectionPosition(row) \
+            + vertical_header.sectionSize(row) / 2
+
+        QTest.mouseClick(vertical_header.viewport(),
+                         Qt.LeftButton, modifier, QPoint(x, y))
 
     def edit_cell(self, row, column):
         y = self.view.table.rowViewportPosition(row) + 1
