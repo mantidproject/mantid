@@ -112,6 +112,20 @@ public:
     TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
   }
 
+  void test_Setting_Container_Material() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("ContainerMaterial", createMaterialProps());
+    alg->setProperty("ContainerGeometry", createFlatPlateHolderGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    const auto &container = inputWS->sample().getEnvironment().getContainer();
+    const auto &material = container.material();
+    TS_ASSERT_EQUALS("V", material.name());
+    TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
+  }
+
   void test_Setting_Geometry_With_Material_Already_Set_Keeps_Material() {
     using Mantid::Kernel::Material;
     using Mantid::PhysicalConstants::getNeutronAtom;
@@ -295,6 +309,38 @@ public:
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
+  void test_Setting_Container_Geometry_As_FlatPlateHolder() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setStandardReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("ContainerGeometry", createFlatPlateHolderGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    const auto &sample = inputWS->sample();
+    const auto &environment = sample.getEnvironment();
+    const auto &can = environment.getContainer();
+    const auto &canShape = can.getShape();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape)
+                         .getShapeXML();
+    std::stringstream expectedXML;
+    expectedXML
+        << "<type name=\"userShape\">  <cuboid id=\"front\"> "
+           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.009\"/> "
+           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"-0.009\"/> "
+           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.005\"/> "
+           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
+           "z=\"-0.009\"/> </cuboid> <cuboid id=\"back\"> "
+           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
+           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
+           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
+           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
+           "</cuboid><algebra val=\"back:front\"/> </type>";
+    TS_ASSERT_EQUALS(xml, expectedXML.str());
+  }
+
   void test_Setting_Geometry_As_FlatPlateHolder_WithCenter() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
@@ -420,6 +466,64 @@ public:
            "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
            "val=\"0.004\"/></hollow-cylinder><algebra "
            "val=\"inner:outer\"/> </type>";
+    TS_ASSERT_EQUALS(xml, expectedXML.str());
+  }
+
+  void test_Setting_Container_Geometry_As_HollowCylinderHolder() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setStandardReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("ContainerGeometry",
+                     createHollowCylinderHolderGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    const auto &sample = inputWS->sample();
+    const auto &environment = sample.getEnvironment();
+    const auto &can = environment.getContainer();
+    const auto &canShape = can.getShape();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape)
+                         .getShapeXML();
+    std::stringstream expectedXML;
+    expectedXML << "<type name=\"userShape\"> <hollow-cylinder id=\"inner\"> "
+                   "<centre-of-bottom-base x=\"0\" y=\"-0.005\" z=\"0\"/> "
+                   "<axis x=\"0\" y=\"1\" z=\"0\"/> <height val=\"0.01\"/> "
+                   "<inner-radius val=\"0.001\"/><outer-radius "
+                   "val=\"0.002\"/></hollow-cylinder><hollow-cylinder "
+                   "id=\"outer\"> <centre-of-bottom-base x=\"0\" y=\"-0.005\" "
+                   "z=\"0\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
+                   "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
+                   "val=\"0.004\"/></hollow-cylinder><algebra "
+                   "val=\"inner:outer\"/> </type>";
+    TS_ASSERT_EQUALS(xml, expectedXML.str());
+  }
+
+  void test_Setting_Container_Geometry_As_HollowCylinder() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setStandardReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("ContainerGeometry",
+                     createHollowCylinderGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    const auto &sample = inputWS->sample();
+    const auto &environment = sample.getEnvironment();
+    const auto &can = environment.getContainer();
+    const auto &canShape = can.getShape();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape)
+                         .getShapeXML();
+    std::stringstream expectedXML;
+    expectedXML
+        << "<type name=\"userShape\"> <hollow-cylinder id=\"sample-shape\"> "
+           "<centre-of-bottom-base x=\"0\" y=\"-0.01\" z=\"0.01\"/> <axis "
+           "x=\"0\" y=\"1\" z=\"0\"/><height val=\"0.02\"/> <inner-radius "
+           "val=\"0.03\"/><outer-radius val=\"0.04\"/></hollow-cylinder> "
+           "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
