@@ -1,7 +1,7 @@
-.. _GuiDesignGuidelines:
+.. _MVPDesign:
 
 =====================
-GUI Design Guidelines
+MVP Design
 =====================
 
 .. contents::
@@ -14,7 +14,7 @@ This page describes guidelines that should be followed when
 implementing an interface in MantidPlot. The aim is to encourage a
 consistent approach to developing interfaces.
 
-.. _GuiDesignGuidelinesMVPIntro:
+.. _MVPDesignIntro:
 
 MVP (Model View Presenter)
 ##########################
@@ -57,7 +57,7 @@ maintenance easier.
 It is important to note that the values used in the calculations
 should be received from the presenter (more of which below).
 
-.. _GuiDesignGuidelinesMVPView:
+.. _MVPDesignView:
 
 View
 ----

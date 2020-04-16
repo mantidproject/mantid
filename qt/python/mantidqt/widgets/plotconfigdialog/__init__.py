@@ -74,7 +74,7 @@ def image_in_figure(fig):
 def legend_in_figure(fig):
     """Return True if there's a legend in the Figure object"""
     for ax in fig.get_axes():
-        if ax.get_legend() or ax.legend_:
+        if ax.get_legend() and ax.get_legend().get_texts():
             return True
     return False
 

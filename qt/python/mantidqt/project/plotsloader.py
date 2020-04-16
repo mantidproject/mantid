@@ -223,7 +223,9 @@ class PlotsLoader(object):
         if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
-        LegendProperties.create_legend(legend, ax)
+
+        if legend["exists"]:
+            LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
         ax.set_position(properties["bounds"])
