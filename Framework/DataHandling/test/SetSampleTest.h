@@ -443,8 +443,8 @@ public:
     setStandardReferenceFrame(inputWS);
 
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Geometry", createHollowCylinderHolderGeometryProps(
-                                     {3, 5, 7}));
+    alg->setProperty("Geometry",
+                     createHollowCylinderHolderGeometryProps({3, 5, 7}));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -506,8 +506,7 @@ public:
     setStandardReferenceFrame(inputWS);
 
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("ContainerGeometry",
-                     createHollowCylinderGeometryProps());
+    alg->setProperty("ContainerGeometry", createHollowCylinderGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -1045,7 +1044,8 @@ private:
   }
 
   Mantid::Kernel::PropertyManager_sptr createHollowCylinderHolderGeometryProps(
-          std::vector<double> center = {0., 0., 0.}, std::vector<double> axis = {0, 1, 0}) {
+      std::vector<double> center = {0., 0., 0.},
+      std::vector<double> axis = {0, 1, 0}) {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
@@ -1054,17 +1054,18 @@ private:
     props->declareProperty(
         std::make_unique<StringProperty>("Shape", "HollowCylinderHolder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 1.), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("InnerRadius", 0.1), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("InnerOuterRadius", 0.2),
+    props->declareProperty(std::make_unique<DoubleProperty>("InnerRadius", 0.1),
                            "");
-    props->declareProperty(std::make_unique<DoubleProperty>("OuterInnerRadius", 0.3),
-                           "");
+    props->declareProperty(
+        std::make_unique<DoubleProperty>("InnerOuterRadius", 0.2), "");
+    props->declareProperty(
+        std::make_unique<DoubleProperty>("OuterInnerRadius", 0.3), "");
     props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 0.4),
                            "");
     props->declareProperty(
         std::make_unique<DoubleArrayProperty>("Center", center), "");
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Axis", axis), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
+                           "");
     return props;
   }
 
