@@ -8,8 +8,10 @@ import unittest
 import mantid  # has to be imported so that AbinsModules can be found
 import AbinsModules
 
-
 class AbinsLoadVASPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
+    def tearDown(self):
+        # Remove ref files from .check() calls
+        AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadVASP"])
 
     def test_non_existing_file(self):
         with self.assertRaises(IOError):
@@ -19,8 +21,15 @@ class AbinsLoadVASPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTeste
         with self.assertRaises(ValueError):
             _ = AbinsModules.LoadVASP(input_ab_initio_filename=1)
 
-    def tearDown(self):
-        AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadVASP"])
+
+    # Not a real vibration calc; check the appropriate error is raised
+    def test_singlepoint_input(self):
+        filename = AbinsModules.AbinsTestHelpers.find_file("ethane_singlepoint.xml")
+        bad_vasp_reader = AbinsModules.LoadVASP(input_ab_initio_filename=filename)
+        with self.assertRaisesRegexp(ValueError,
+                                     "Could not find a 'calculation' block containing a "
+                                     "'dynmat' block in VASP XML file\."):
+            bad_vasp_reader.read_vibrational_or_phonon_data()
 
     # IBRION=8 from optimised structure
     def test_xml_dfpt(self):
