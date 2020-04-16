@@ -517,8 +517,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
   }
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  std::vector<long unsigned int> detectorId{
-      static_cast<long unsigned int>(pickID)};
+  std::vector<size_t> detectorId{pickID};
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   auto wsMask = actor.getMaskWorkspace();
   if (m_pixel->isChecked()) {
