@@ -48,6 +48,10 @@ class FittingTabModel(object):
         else:
             self._function_name = ''
 
+    @property
+    def stored_fit_functions(self):
+        return list(self.ws_fit_function_map.values())
+
     def get_function_name(self, function):
         if function is None:
             return ''
@@ -386,6 +390,26 @@ class FittingTabModel(object):
             if AnalysisDataService.doesExist(guess_ws_name):
                 self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
 
+    def update_plot_guess(self, fit_function, workspace_name):
+
+        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
+            guess_ws_name = MUON_ANALYSIS_GUESS_WS
+        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
+            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
+        else:
+            guess_ws_name = '__unknown_interface_fitting_guess'
+        try:
+            EvaluateFunction(InputWorkspace=workspace_name,
+                             Function=fit_function,
+                             StartX=self.startX,
+                             EndX=self.endX,
+                             OutputWorkspace=guess_ws_name)
+        except RuntimeError:
+            mantid.logger.error('Could not evaluate the function.')
+            return
+        if AnalysisDataService.doesExist(guess_ws_name):
+            self.context.fitting_context.notify_plot_guess_changed(True, guess_ws_name)
+
     # update model information
     def update_stored_fit_function(self, fit_function):
         self.fit_function = fit_function
@@ -443,9 +467,9 @@ class FittingTabModel(object):
         return equiv_workspace_list
 
     def update_ws_fit_function_parameters(self, workspace, params):
-        workspace_hash = self.create_equivalent_workspace_name(workspace)
+        equiv_workspace_name = self.create_equivalent_workspace_name(workspace)
         try:
-            fit_function = self.ws_fit_function_map[workspace_hash]
+            fit_function = self.ws_fit_function_map[equiv_workspace_name]
         except KeyError:
             return
         self.set_fit_function_parameter_values(fit_function, params)
@@ -500,9 +524,9 @@ class FittingTabModel(object):
         return freq
 
     def get_ws_fit_function(self, workspaces):
-        workspace_hash = self.create_equivalent_workspace_name(workspaces)
+        equiv_workspace_name = self.create_equivalent_workspace_name(workspaces)
         try:
-            return self.ws_fit_function_map[workspace_hash]
+            return self.ws_fit_function_map[equiv_workspace_name]
         except KeyError:
             pass
 

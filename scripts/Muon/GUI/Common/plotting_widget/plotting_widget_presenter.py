@@ -48,6 +48,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
+        self.plot_sequential_fit_observer = GenericObserverWithArgPassing(self.handle_plot_single_sequential_fit)
+        self.plot_selected_workspaces_observer = GenericObserverWithArgPassing(self.plot_all_selected_workspaces)
+
         self.plot_type_changed_notifier = GenericObservable()
 
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
@@ -138,7 +141,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if workspace in self._model.plotted_workspaces or workspace in self._model.plotted_fit_workspaces:
             ax = self.get_workspace_plot_axis(workspace)
             self._model.replace_workspace_plot(workspace, ax)
-            self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
             self._view.force_redraw()
 
     def handle_use_raw_workspaces_changed(self):
@@ -239,16 +241,16 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the plot tiled checkbox being changed in the view
         """
+        data_workspaces = self._model.plotted_workspaces
+        fit_workspaces = self._model.plotted_fit_workspaces
         if state == 2:  # tiled plot
             self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces(autoscale=True)
+            self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
         if state == 0:  # not tiled plot
             self.new_plot_figure(num_axes=1)
             self._model.number_of_axes = 1
-            self.plot_all_selected_workspaces(autoscale=True)
-
-        self._model.plotted_fit_workspaces = []
+            self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
 
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
         self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
@@ -323,7 +325,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
             label = self.get_workspace_legend_label(workspace_name)
             ax = self.get_workspace_plot_axis(workspace_name)
-            fit_function = fit.fit_function_name
+            fit_function = self.context.fitting_context.fit_function_names()[0]
 
             self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
 
@@ -340,6 +342,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                               errors=False,
                                               plot_kwargs={'distribution': True, 'autoscale_on_update': False,
                                                            'label': label + fit_function + ': Diff'})
+
         self._view.force_redraw()
 
     def handle_fit_removed(self, fits):
@@ -357,13 +360,13 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._view.set_raw_checkbox_state(True)
 
     def handle_tiled_by_changed_on_view(self, index):
+        # grab the plotted workspaces from the previous axis
+        data_workspaces = self._model.plotted_workspaces
+        fit_workspaces = self._model.plotted_fit_workspaces
         if self._view.is_tiled_plot():
-            if index == 0:
-                self.update_model_tile_plot_positions()
-            else:
-                self.update_model_tile_plot_positions()
+            self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces(autoscale=True)
+            self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
 
@@ -371,7 +374,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.new_plot_figure(num_axes=1)
 
     def handle_plot_guess_changed(self):
-
         for guess in [ws for ws in self._model.plotted_fit_workspaces if '_guess' in ws]:
             self._model.remove_workspace_from_plot(guess, self._view.get_axes())
 
@@ -395,7 +397,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Plotting controls
     # ------------------------------------------------------------------------------------------------------------------
-
     def plot_all_selected_workspaces(self, autoscale=False):
         """
         Plots all the selected workspaces (from grouping tab) in the plot window,
@@ -406,7 +407,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.workspace_finder.get_workspace_list_to_plot(self._view.if_raw(),
                                                                           self._view.get_selected())
 
-        for ws in self._model.plotted_workspaces:
+        for ws in self._model.plotted_workspaces + self._model.plotted_fit_workspaces:
             if ws not in workspace_list:
                 self._model.remove_workspace_from_plot(ws, self._view.get_axes())
 
@@ -429,6 +430,113 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
             for workspace in workspace_list
             if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
+
+    def plot_data_and_fit_workspaces(self, workspace_list, fit_workspace_list):
+        errors = self._view.plot_options.get_errors()
+
+        for workspace in workspace_list:
+            if workspace not in self._model.plotted_workspaces:
+                ax = self.get_workspace_plot_axis(workspace)
+                label = self.get_workspace_legend_label(workspace)
+                self._model.add_workspace_to_plot(ax, workspace, [0], errors=errors,
+                                                  plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                               'label': label})
+                self._model.add_workspace_to_plotted_workspaces(workspace)
+
+        for workspace_name in fit_workspace_list:
+            if workspace_name in self._model.plotted_fit_workspaces:
+                continue
+
+            label = self.get_workspace_legend_label(workspace_name)
+            ax = self.get_workspace_plot_axis(workspace_name)
+            # Get fit function name, as we are only ever storing 1 fit in this context
+            # we can take the first entry
+            fit_function = self.context.fitting_context.fit_function_names()[0]
+
+            self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
+
+            # handle tf asymmetry fits
+            first_fit_index = 1
+            if TF_ASYMMETRY_PREFIX in workspace_name:
+                first_fit_index = 3
+
+            self._model.add_workspace_to_plot(ax, workspace_name, [first_fit_index],
+                                              errors=False,
+                                              plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                           'label': label + fit_function + ': Fit'})
+            self._model.add_workspace_to_plot(ax, workspace_name, [2],
+                                              errors=False,
+                                              plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                           'label': label + fit_function + ': Diff'})
+
+        # Redraw the axis
+        self._set_axis_limits(False)
+        self._view.set_fig_titles(self.get_plot_title())
+        self.update_options_view_from_model()
+        self._view.force_redraw()
+
+    def handle_plot_single_sequential_fit(self, selected_workspaces):
+        if not selected_workspaces:  # check selected_workspaces is empty
+            return
+
+        errors = self._view.plot_options.get_errors()
+        fitted_workspace_list = []
+        workspace_list = []
+        # get corresponding fit for the workspace_list, if it exists
+        for _, workspaces in selected_workspaces.items():
+            workspace_list += workspaces
+            fit = self.context.fitting_context.find_fit_for_input_workspace_list(workspaces)
+            if fit is not None:
+                fitted_workspace_list += fit.output_workspace_names
+            else:
+                fitted_workspace_list += []
+
+        for ws in self._model.plotted_workspaces:
+            if ws not in workspace_list:
+                self._model.remove_workspace_from_plot(ws, self._view.get_axes())
+
+        for ws in self._model.plotted_fit_workspaces:
+            if ws not in fitted_workspace_list:
+                self._model.remove_workspace_from_plot(ws, self._view.get_axes())
+
+        for workspace in workspace_list:
+            if workspace not in self._model.plotted_workspaces:
+                ax = self.get_workspace_plot_axis(workspace)
+                label = self.get_workspace_legend_label(workspace)
+                self._model.add_workspace_to_plot(ax, workspace, [0], errors=errors,
+                                                  plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                               'label': label})
+                self._model.add_workspace_to_plotted_workspaces(workspace)
+
+        for workspace_name in fitted_workspace_list:
+            if workspace_name in self._model.plotted_fit_workspaces:
+                continue
+
+            label = self.get_workspace_legend_label(workspace_name)
+            ax = self.get_workspace_plot_axis(workspace_name)
+            # Get fit function name, as we are only ever storing 1 fit in this context
+            # we can take the first entry
+            fit_function = self.context.fitting_context.fit_function_names()[0]
+            self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
+
+            # handle tf asymmetry fits
+            first_fit_index = 1
+            if TF_ASYMMETRY_PREFIX in workspace_name:
+                first_fit_index = 3
+
+            self._model.add_workspace_to_plot(ax, workspace_name, [first_fit_index],
+                                              errors=False,
+                                              plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                           'label': label + fit_function + ': Fit'})
+            self._model.add_workspace_to_plot(ax, workspace_name, [2],
+                                              errors=False,
+                                              plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                           'label': label + fit_function + ': Diff'})
+
+        # Redraw the axis
+        self._set_axis_limits(False)
+        self.update_options_view_from_model()
+        self._view.force_redraw()
 
     def update_model_tile_plot_positions(self):
         """
@@ -476,8 +584,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             else:
                 for grouppair in self.context.group_pair_context.selected_groups + \
                                  self.context.group_pair_context.selected_pairs:
-                    title = self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + \
-                            ' ' + str(grouppair)
+                    title = self.context.data_context.instrument + ' ' + str(grouppair)
                     plot_titles.append(title)
             return plot_titles
         else:
@@ -560,7 +667,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             selected_axes = [self._view.get_axes()[index] for index in indices]
             return selected_axes
         else:
-            return []  # no subplots are avaiable
+            return []  # no subplots are available
 
     def _set_axis_limits(self, autoscale):
         if autoscale:  # autoscale the axes
