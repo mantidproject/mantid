@@ -107,6 +107,8 @@ class DrillView(QMainWindow):
         Setup the main table widget.
         """
         header = DrillHeaderView()
+        header.setSectionsClickable(True)
+        header.setHighlightSections(True)
         self.table.setHorizontalHeader(header)
         table_header = self.table.horizontalHeader()
         table_header.setDefaultAlignment(Qt.AlignLeft)
