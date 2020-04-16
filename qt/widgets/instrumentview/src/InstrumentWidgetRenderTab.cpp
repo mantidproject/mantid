@@ -53,7 +53,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
 
   setupSurfaceTypeOptions();
 
-  //Reset view button
+  // Reset view button
   m_resetView = new QPushButton(tr("Reset View"));
   m_resetView->setToolTip("Reset the instrument view to default");
   connect(m_resetView, SIGNAL(clicked()), this, SLOT(resetView()));
@@ -614,9 +614,9 @@ void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
 /**
  * Resets the render tab view to its default position and zoom.
  */
-void InstrumentWidgetRenderTab::resetView(){
-    // just recreate the surface from scratch
-    m_instrWidget->setSurfaceType(int(m_instrWidget->getSurfaceType()));
+void InstrumentWidgetRenderTab::resetView() {
+  // just recreate the surface from scratch
+  m_instrWidget->setSurfaceType(int(m_instrWidget->getSurfaceType()));
 }
 
 /**
