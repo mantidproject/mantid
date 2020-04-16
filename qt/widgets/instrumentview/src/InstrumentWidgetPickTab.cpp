@@ -294,7 +294,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
  * collapsed
  */
 void InstrumentWidgetPickTab::collapsePlotPanel() {
-  if (m_instrWidget->getIsMonochromatic()) {
+  if (!m_instrWidget->isIntegrable()) {
     m_plotPanel->collapse();
   }
 }

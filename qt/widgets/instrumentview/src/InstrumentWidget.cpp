@@ -156,13 +156,18 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   m_instrumentActor.reset(
       new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
 
-  bool isHistogram = m_instrumentActor->getWorkspace()->isHistogramData();
-  size_t binCount = m_instrumentActor->getWorkspace()->x(0).size();
+  try {
+    size_t blockSize = m_instrumentActor->getWorkspace()->blocksize();
 
-  m_isMonochromatic =
-      (isHistogram && binCount <= 2) || (!isHistogram && binCount <= 1);
-  m_xIntegration = new XIntegrationControl(this, m_isMonochromatic);
-  if (!m_isMonochromatic) {
+    m_shouldIntegrate =
+        (blockSize > 1 ||
+         m_instrumentActor->getWorkspace()->id() == "EventWorkspace");
+  } catch (...) {
+    m_shouldIntegrate = true;
+  }
+
+  m_xIntegration = new XIntegrationControl(this, !m_shouldIntegrate);
+  if (m_shouldIntegrate) {
     mainLayout->addWidget(m_xIntegration);
     connect(m_xIntegration, SIGNAL(changed(double, double)), this,
             SLOT(setIntegrationRange(double, double)));
@@ -302,7 +307,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
         new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  if (!m_isMonochromatic) {
+  if (m_shouldIntegrate) {
     m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
                                   m_instrumentActor->maxBinValue());
     m_xIntegration->setUnits(QString::fromStdString(
@@ -1251,7 +1256,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_maskTab = new InstrumentWidgetMaskTab(this);
   connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
-  if (!m_isMonochromatic) {
+  if (m_shouldIntegrate) {
     connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
             SLOT(changedIntegrationRange(double, double)));
   }

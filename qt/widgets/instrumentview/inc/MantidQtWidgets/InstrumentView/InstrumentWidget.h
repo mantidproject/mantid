@@ -160,7 +160,7 @@ public:
   void addTab(const std::string &tabName);
   void hideHelp();
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
-  bool getIsMonochromatic() { return m_isMonochromatic; }
+  bool isIntegrable() { return m_shouldIntegrate; }
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -315,7 +315,7 @@ protected:
   std::vector<std::pair<std::string, bool>> m_stateOfTabs;
 
   /// Is the workspace monochromatic ?
-  bool m_isMonochromatic;
+  bool m_shouldIntegrate;
 
 private:
   /// ADS notification handlers
