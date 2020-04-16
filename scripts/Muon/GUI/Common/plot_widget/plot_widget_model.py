@@ -127,6 +127,8 @@ class PlotWidgetModel(object):
             return []
 
     def get_fit_workspace_and_indices(self, fit):
+        if fit is None:
+            return [], []
         workspaces = []
         indices = []
         for workspace_name in fit.output_workspace_names:

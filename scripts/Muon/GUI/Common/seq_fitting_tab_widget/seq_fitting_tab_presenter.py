@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
@@ -31,7 +32,6 @@ class SeqFittingTabPresenter(object):
         self.fit_parameter_updated_observer = GenericObserver(self.handle_fit_function_parameter_changed)
         self.fit_parameter_changed_in_view = GenericObserverWithArgPassing(self.handle_updated_fit_parameter_in_table)
         self.selected_sequential_fit_notifier = GenericObservable()
-        self.leaving_sequential_table_notifer = GenericObservable()
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
@@ -39,7 +39,6 @@ class SeqFittingTabPresenter(object):
 
     def handle_fit_function_updated(self):
         if self.model.fit_function is None:
-            self.model.clear_fit_information()
             self.view.fit_table.clear_fit_parameters()
             self.view.fit_table.reset_fit_quality()
             return
@@ -97,8 +96,7 @@ class SeqFittingTabPresenter(object):
             workspace_names += [self.get_workspaces_for_row_in_fit_table(row)]
 
         calculation_function = functools.partial(
-            self.model.evaluate_sequential_fit, workspace_names, False,
-            self.view.use_initial_values_for_fits())
+            self.model.evaluate_sequential_fit, workspace_names, self.view.use_initial_values_for_fits())
         self.calculation_thread = self.create_thread(
             calculation_function)
 
@@ -136,11 +134,14 @@ class SeqFittingTabPresenter(object):
 
     def handle_fit_selected_in_table(self):
         rows = self.view.fit_table.get_selected_rows()
-        workspaces = defaultdict(list)
+        fit_information = []
         for i, row in enumerate(rows):
-            workspaces[i] = self.get_workspaces_for_row_in_fit_table(row)
+            workspaces = self.get_workspaces_for_row_in_fit_table(row)
+            fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(
+                workspaces, self.model.function_name)
+            fit_information += [FitPlotInformation(input_workspaces=workspaces, fit=fit)]
 
-        self.selected_sequential_fit_notifier.notify_subscribers(workspaces)
+        self.selected_sequential_fit_notifier.notify_subscribers(fit_information)
 
     def get_workspaces_for_row_in_fit_table(self, row):
         runs, group_and_pairs = self.view.fit_table.get_workspace_info_from_row(row)

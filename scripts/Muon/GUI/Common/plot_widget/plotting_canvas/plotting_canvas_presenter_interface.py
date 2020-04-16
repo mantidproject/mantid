@@ -71,3 +71,8 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         """Returns the workspace names and indices which are plotted in the figure
         :return: A tuple of workspace_names and workspace indices"""
         pass
+
+    @abc.abstractmethod
+    def plot_guess_workspace(self, guess_ws_name: str):
+        """Plots the guess workspace from a fit"""
+        pass

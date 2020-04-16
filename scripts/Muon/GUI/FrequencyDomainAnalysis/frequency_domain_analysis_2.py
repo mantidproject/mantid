@@ -33,8 +33,10 @@ from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidg
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.plot_widget.plot_widget import PlotWidget
 from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
+from mantidqt.utils.observer_pattern import GenericObserver
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
+TAB_ORDER = ["Home", "Grouping", "Phase Table", "Transform", "Fitting", "Sequential Fitting", "Results"]
 
 
 def check_facility():
@@ -155,8 +157,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
         self.transform.new_data_observer(
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
-        self.transform.new_data_observer(
-            self.plot_widget.presenter.input_workspace_observer)
 
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)
@@ -177,6 +177,17 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
+        self.current_tab_observer = GenericObserver(self.update_plot_based_on_current_tab)
+        self.tabs.set_slot_for_tab_changed(self.update_plot_based_on_current_tab)
+
+    def update_plot_based_on_current_tab(self):
+        index = self.tabs.currentIndex()
+        if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table", "Transform"]:  # Plot all the selected data
+            self.plot_widget.presenter.handle_data_updated()
+        elif TAB_ORDER[index] == "Fitting":  # Plot the displayed workspace
+            self.plot_widget.presenter.handle_plot_selected_fits(
+                self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces()
+            )
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -190,9 +201,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.run_change_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.plot_widget.presenter.input_workspace_observer)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
@@ -219,6 +227,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.plot_widget.presenter.plot_type_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_plot_type_observer)
+
+        self.fitting_tab.fitting_tab_presenter.selected_single_fit_notifier.add_subscriber(
+            self.plot_widget.presenter.plot_selected_fit_observer)
 
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
@@ -291,10 +302,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.plot_widget.presenter.input_workspace_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.plot_widget.presenter.rebin_options_set_observer)
+            self.current_tab_observer
+        )
 
     def setup_phase_quad_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phase_quad_calculation_complete_nofifier.add_subscriber(
@@ -308,11 +317,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         """Connect fitting and results tabs to inform of new fits"""
         self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
-
-        self.fitting_context.new_fit_plotting_notifier.add_subscriber(self.plot_widget.presenter.fit_observer)
-
-        self.fitting_context.fit_removed_notifier.add_subscriber(self.plot_widget.presenter.
-                                                                 fit_removed_observer)
 
         self.fitting_context.plot_guess_notifier.add_subscriber(self.plot_widget.presenter.plot_guess_observer)
 

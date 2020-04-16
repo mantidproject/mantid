@@ -166,9 +166,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
     def update_plot_based_on_current_tab(self):
         index = self.tabs.currentIndex()
         if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
-            self.dockable_plot_widget.presenter.handle_data_updated()
+            self.plot_widget.presenter.handle_data_updated()
         elif TAB_ORDER[index] == "Fitting":  # Plot the displayed workspace
-            self.dockable_plot_widget.presenter.handle_plot_single_sequential_fit(
+            self.plot_widget.presenter.handle_plot_selected_fits(
                 self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces()
             )
 
@@ -219,13 +219,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_type_changed_observer)
 
         self.fitting_tab.fitting_tab_presenter.selected_single_fit_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.plot_sequential_fit_observer)
+            self.plot_widget.presenter.plot_selected_fit_observer)
 
         self.seq_fitting_tab.seq_fitting_tab_presenter.selected_sequential_fit_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.plot_sequential_fit_observer)
-
-        self.seq_fitting_tab.seq_fitting_tab_presenter.leaving_sequential_table_notifer.add_subscriber(
-            self.dockable_plot_widget.presenter.plot_selected_workspaces_observer)
+            self.plot_widget.presenter.plot_selected_fit_observer)
 
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
@@ -298,10 +295,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.plot_widget.presenter.input_workspace_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.plot_widget.presenter.rebin_options_set_observer)
+            self.current_tab_observer
+        )
 
     def setup_phase_quad_changed_notifier(self):
         pass
@@ -313,11 +308,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         """Connect fitting and results tabs to inform of new fits"""
         self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
-
-        self.fitting_context.new_fit_plotting_notifier.add_subscriber(self.plot_widget.presenter.fit_observer)
-
-        self.fitting_context.fit_removed_notifier.add_subscriber(self.plot_widget.presenter.
-                                                                 fit_removed_observer)
 
         self.fitting_context.plot_guess_notifier.add_subscriber(
             self.plot_widget.presenter.plot_guess_observer)

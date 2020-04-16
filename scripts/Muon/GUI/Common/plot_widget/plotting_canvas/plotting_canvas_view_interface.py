@@ -29,6 +29,12 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
         """Number of axes present in the figure"""
         pass
 
+    @property
+    @abc.abstractmethod
+    def plotted_workspaces_and_indices(self):
+        """Returns plotted workspaces and indices"""
+        pass
+
     @abc.abstractmethod
     def create_new_plot_canvas(self, num_axes):
         """Creates a new blank plotting canvas"""

@@ -4,9 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, List
+from typing import Dict, List, DefaultDict
 
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
@@ -54,15 +55,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
     def _setup_gui_observers(self):
         """"Setup GUI observers, e.g fit observers"""
-        self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
         self.added_group_or_pair_observer = GenericObserverWithArgPassing(
             self.handle_added_or_removed_group_or_pair_to_plot)
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
-        self.fit_observer = GenericObserverWithArgPassing(self.handle_fit_completed)
-        self.fit_removed_observer = GenericObserverWithArgPassing(self.handle_fit_removed)
-        self.plot_guess_observer = GenericObserverWithArgPassing(self.handle_fit_completed)
+        self.plot_selected_fit_observer = GenericObserverWithArgPassing(self.handle_plot_selected_fits)
+        self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
         self.plot_type_changed_notifier = GenericObservable()
 
@@ -75,7 +74,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
     def handle_data_updated(self):
         """
-        Handles the group, pair calculation finishing
+        Handles the group and pairs calculation finishing by plotting the loaded groups and pairs.
         """
         if self._view.is_tiled_plot():
             tiled_by = self._view.tiled_by()
@@ -232,26 +231,30 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         self._figure_presenter.create_single_plot()
 
-    def handle_fit_completed(self, fit: FitInformation):
-        """
-        Handles a completed fit which is given as an input to the function
-        :param fit: The completed fit
-        """
-        if fit is None:
+    def handle_plot_selected_fits(self, fit_information_list: List[FitPlotInformation]):
+        """Plots a list of selected fit workspaces (attained from fit and seq fit tabs.
+        :param fit_information_list: List of named tuples each entry of the form (fit, input_workspaces)"""
+        if not fit_information_list:
             return
-        workspace_list, indices = self._model.get_fit_workspace_and_indices(fit)
-        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
+        workspace_list = []
+        indices = []
+        for fit_information in fit_information_list:
+            fit = fit_information.fit
+            fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit)
+            workspace_list += fit_information.input_workspaces + fit_workspaces
+            indices += [0] * len(fit_information.input_workspaces) + fit_indices
 
-    def handle_fit_removed(self, fits: List[FitInformation]):
-        """
-        Handles the removal of a fit which is given as an input to the function
-        :param fits: A list of fits to remove from the plot
-        """
-        fit_workspaces_to_remove = []
-        for fit in fits:
-            fit_workspaces_to_remove.extend(fit.output_workspace_names)
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
 
-        self._figure_presenter.remove_workspace_names_from_plot(fit_workspaces_to_remove)
+    def handle_plot_guess_changed(self):
+        if self.context.fitting_context.guess_ws is None:
+            return
+
+        if self.context.fitting_context.plot_guess:
+            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_ws)
+        else:
+            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_ws])
+
 
     def _check_if_counts_and_groups_selected(self):
         if len(self.context.group_pair_context.selected_pairs) != 0 and \

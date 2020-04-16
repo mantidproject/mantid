@@ -101,6 +101,12 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         plotted_workspaces, indices = self._view.plotted_workspaces_and_indices
         return plotted_workspaces, indices
 
+    def plot_guess_workspace(self, guess_ws_name: str):
+        """Plots the guess workspace """
+        fit_plot_information = self._model.create_plot_information_for_guess_ws(guess_ws_name)
+        self._view.add_workspaces_to_plot([fit_plot_information])
+        self._view.redraw_figure()
+
     def autoscale_y_axes(self):
         """Autoscales all y-axes in the figure using the existing x axis"""
         self._view.autoscale_y_axes()

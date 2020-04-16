@@ -61,7 +61,7 @@ class PlottingCanvasModel(object):
 
         return workspaces_plot_information_to_add
 
-    def _get_workspace_plot_axis(self, workspace_name):
+    def _get_workspace_plot_axis(self, workspace_name: str):
         if not self._is_tiled:
             return 0
         for axis, key in enumerate(self._axes_workspace_map):
@@ -77,17 +77,22 @@ class PlottingCanvasModel(object):
         for axis_number, key in enumerate(tiled_keys):
             self._axes_workspace_map[key] = axis_number
 
-    def create_plot_information(self, workspace_name, index, axis, errors):
+    def create_plot_information(self, workspace_name: str, index: int, axis: int,
+                                errors: bool) -> WorkspacePlotInformation:
         label = self._create_workspace_label(workspace_name, index)
         return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
                                         normalised=self._normalised,
                                         errors=errors, label=label)
 
+    def create_plot_information_for_guess_ws(self, guess_ws_name: str) -> WorkspacePlotInformation:
+        return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=0,
+                                        normalised=self._normalised,
+                                        errors=False, label="Fit function guess")
+
     def _create_workspace_label(self, workspace_name, index):
         group = str(get_group_or_pair_from_name(workspace_name))
         run = str(get_run_number_from_workspace_name(workspace_name, self._context.data_context.instrument))
         instrument = self._context.data_context.instrument
-        fft_label = self._get_freq_label()
         fit_label = self._get_fit_label(workspace_name, index)
         rebin_label = self._get_rebin_label(workspace_name)
         if not self._is_tiled:
@@ -96,9 +101,6 @@ class PlottingCanvasModel(object):
             return "".join([run, fit_label, rebin_label])
         else:
             return "".join([group, fit_label, rebin_label])
-
-    def _get_freq_label(self):
-        return ''
 
     def _get_rebin_label(self, workspace_name):
         if REBIN_STR in workspace_name:
