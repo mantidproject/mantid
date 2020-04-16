@@ -9,15 +9,15 @@ from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
 
 
 class TomlParser(object):
-    def __init__(self, toml_reader = None):
+    def __init__(self, toml_reader=None):
         self._lib_impl = toml_reader if toml_reader else TomlReader()
 
-    def get_toml_parser(self, toml_file_path):
+    def get_toml_parser(self, toml_file_path, data_info):
         parsed_dict = self._lib_impl.get_user_file_dict(toml_file_path)
-        return self.get_versioned_parser(parsed_dict)
+        return self.get_versioned_parser(parsed_dict, data_info=data_info)
 
     @staticmethod
-    def get_versioned_parser(toml_dict):
+    def get_versioned_parser(toml_dict, data_info):
         """
         Allows us to substitute in different parsers with language specs if we need to update the syntax
         by returning a parser object specific to the current version.
@@ -26,6 +26,6 @@ class TomlParser(object):
         """
         version = toml_dict["format_version"]
         if version == 0:
-            return TomlV1Parser(toml_dict)
+            return TomlV1Parser(toml_dict, data_info=data_info)
         else:
             raise NotImplementedError("Version {0} of the SANS Toml Format is not supported".format(version))

@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
 
-import six
-
 
 class TomlSchemaV1Validator(object):
     # As of the current TOML release there is no way to validate a schema so
@@ -63,7 +61,8 @@ class TomlSchemaV1Validator(object):
                                                       "front_x_tilt", "front_y_tilt", "front_z_tilt",
                                                       "rear_x", "rear_y", "rear_z",
                                                       "rear_rot", "rear_radius", "rear_side",
-                                                      "rear_x_tilt", "rear_y_tilt", "rear_z_tilt"}}}
+                                                      "rear_x_tilt", "rear_y_tilt", "rear_z_tilt"}},
+                         "radius_limit": {"min", "max"}}
 
         binning_keys = {"wavelength": {"start", "step", "stop", "type"},
                         "1d_reduction": {"binning"},
@@ -114,7 +113,7 @@ class TomlSchemaV1Validator(object):
         def make_path(current_path, new_key):
             return current_path + "." + new_key if current_path else new_key
 
-        for key, v in six.iteritems(d):
+        for key, v in d.items():
             new_path = make_path(path, key)
             if isinstance(v, dict):
                 # Recurse into dict

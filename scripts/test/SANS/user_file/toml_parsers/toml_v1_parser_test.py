@@ -155,11 +155,13 @@ class TomlV1ParserTest(unittest.TestCase):
 
         self.assertEqual(state_reduction.merge_fit_mode, FitModeForMerge.BOTH)
 
-    def test_detector_calibration(self):
+    def test_detector_parsed(self):
         top_level_dict = {"detector": {"calibration": {"direct": {},
                                                        "flat": {},
                                                        "tube": {},
-                                                       "position": {}}}}
+                                                       "position": {}},
+                                       "radius_limit" : {"min" : None,
+                                                         "max" : None}}}
 
         calibration_dict = top_level_dict["detector"]["calibration"]
 
@@ -176,6 +178,10 @@ class TomlV1ParserTest(unittest.TestCase):
         tube_file = mock.NonCallableMock()
         calibration_dict["tube"]["file"] = tube_file
 
+        radius_limit = top_level_dict["detector"]["radius_limit"]
+        radius_limit["min"] = 100
+        radius_limit["max"] = 200
+
         parser = self._setup_parser(top_level_dict)
         wavelength_state = parser.get_state_wavelength_and_pixel_adjustment()
 
@@ -191,6 +197,11 @@ class TomlV1ParserTest(unittest.TestCase):
                          flat_front)
 
         self.assertEqual(parser.get_state_adjustment().calibration, tube_file)
+
+        mask = parser.get_state_mask()
+        self.assertIsInstance(mask, StateMask)
+        self.assertEqual(100, mask.radius_min)
+        self.assertEqual(200, mask.radius_max)
 
     def test_detector_calibration_position(self):
         top_level_dict = {"detector": {"calibration": {"position": {}}}}

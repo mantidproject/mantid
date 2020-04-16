@@ -88,7 +88,7 @@ class _TomlV1ParserImpl(object):
 
     def parse_all(self):
         self._parse_binning()
-        self._parse_detector_calibration()
+        self._parse_detector()
         self._parse_detector_configuration()
         self._parse_gravity()
         self._parse_instrument_configuration()
@@ -151,8 +151,12 @@ class _TomlV1ParserImpl(object):
         update_translations(DetectorType.HAB, self._get_val("front_centre", det_config_dict))
         update_translations(DetectorType.LAB, self._get_val("rear_centre", det_config_dict))
 
-    def _parse_detector_calibration(self):
-        calibration_dict = self._get_val(["detector", "calibration"])
+    def _parse_detector(self):
+        detector_dict = self._get_val("detector")
+        self.mask.radius_min = self._get_val(["radius_limit", "min"], detector_dict)
+        self.mask.radius_max = self._get_val(["radius_limit", "max"], detector_dict)
+
+        calibration_dict = self._get_val("calibration", detector_dict)
 
         lab_adjustment = self.wavelength_and_pixel.adjustment_files[DetectorType.LAB.value]
         hab_adjustment = self.wavelength_and_pixel.adjustment_files[DetectorType.HAB.value]
@@ -385,7 +389,6 @@ class _TomlV1ParserImpl(object):
             for mask_pair in tof_masks:
                 self.mask.bin_mask_general_start.append(mask_pair["start"])
                 self.mask.bin_mask_general_stop.append(mask_pair["stop"])
-
 
     @staticmethod
     def _convert_1d_binning_string(one_d_binning: str):
