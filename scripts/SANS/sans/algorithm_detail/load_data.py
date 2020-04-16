@@ -737,7 +737,7 @@ class SANSLoadDataISIS(SANSLoadData):
                 workspace_monitors.update(workspace_monitors_pack)
 
         # Apply the calibration if any exists.
-        if data_info.calibration:
+        if calibration_file:
             report_message = "Applying calibration."
             progress.report(report_message)
             apply_calibration(calibration_file, workspaces, workspace_monitors, use_cached, publish_to_ads, parent_alg)

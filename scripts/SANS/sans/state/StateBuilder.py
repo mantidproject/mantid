@@ -12,7 +12,7 @@ from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapt
 class StateBuilder(IStateParser):
     @staticmethod
     def new_instance(file_information, instrument, user_filename):
-        run_data = RunDataStateBuilder(file_information=file_information)
+        run_data = StateRunDataBuilder(file_information=file_information)
         user_file = UserFileReaderAdapter(instrument=instrument, user_file_name=user_filename)
         return StateBuilder(run_data_builder=run_data, i_state_parser=user_file)
 

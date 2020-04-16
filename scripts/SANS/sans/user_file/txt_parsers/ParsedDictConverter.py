@@ -69,29 +69,29 @@ class ParsedDictConverter(IStateParser):
         return state
 
     def get_state_calculate_transmission(self):  # -> StateCalculateTransmission:
-        state_builder = get_calculate_transmission(instrument=self._data_info.instrument)
+        state = get_calculate_transmission(instrument=self._data_info.instrument)
 
-        self._set_single_entry(state_builder.state, "transmission_radius_on_detector", TransId.RADIUS,
+        self._set_single_entry(state, "transmission_radius_on_detector", TransId.RADIUS,
                                apply_to_value=_convert_mm_to_m)
 
         # List of transmission roi files
         if TransId.ROI in self._input_dict:
             trans_roi = self._input_dict[TransId.ROI]
-            state_builder.set_transmission_roi_files(trans_roi)
+            state.transmission_roi_files = trans_roi
 
         # List of transmission mask files
         if TransId.MASK in self._input_dict:
             trans_mask = self._input_dict[TransId.MASK]
-            state_builder.set_transmission_mask_files(trans_mask)
+            state.transmission_mask_files = trans_mask
 
         # The prompt peak correction values
-        _set_prompt_peak_correction(state_builder.state, self._input_dict)
+        _set_prompt_peak_correction(state, self._input_dict)
 
         # The transmission spectrum
         if TransId.SPEC in self._input_dict:
             trans_spec = self._input_dict[TransId.SPEC]
             trans_spec = trans_spec[-1]
-            state_builder.set_transmission_monitor(trans_spec)
+            state.transmission_monitor = trans_spec
 
         # The incident monitor spectrum for transmission calculation
         if MonId.SPECTRUM in self._input_dict:
@@ -100,25 +100,25 @@ class ParsedDictConverter(IStateParser):
             if mon_spec:
                 mon_spec = mon_spec[-1]
                 rebin_type = RebinType.INTERPOLATING_REBIN if mon_spec.interpolate else RebinType.REBIN
-                state_builder.set_rebin_type(rebin_type)
+                state.rebin_type = rebin_type
 
                 # We have to check if the spectrum is None, this can be the case when the user wants to use the
                 # default incident monitor spectrum
                 if mon_spec.spectrum:
-                    state_builder.set_incident_monitor(mon_spec.spectrum)
+                    state.incident_monitor = mon_spec.spectrum
 
         # The general background settings
-        _set_background_tof_general(state_builder.state, self._input_dict)
+        _set_background_tof_general(state, self._input_dict)
 
         # The monitor-specific background settings
-        _set_background_tof_monitor(state_builder.state, self._input_dict)
+        _set_background_tof_monitor(state, self._input_dict)
 
         # The roi-specific background settings
         if BackId.TRANS in self._input_dict:
             back_trans = self._input_dict[BackId.TRANS]
             back_trans = back_trans[-1]
-            state_builder.set_background_TOF_roi_start(back_trans.start)
-            state_builder.set_background_TOF_roi_stop(back_trans.stop)
+            state.background_TOF_roi_start = back_trans.start
+            state.background_TOF_roi_stop = back_trans.stop
 
         # Set the fit settings
         if FitId.GENERAL in self._input_dict:
@@ -139,50 +139,49 @@ class ParsedDictConverter(IStateParser):
             if clear_settings:
                 clear_settings = clear_settings[-1]
                 # Will set the fitting to NoFit
-                state_builder.set_sample_fit_type(clear_settings.fit_type)
-                state_builder.set_can_fit_type(clear_settings.fit_type)
+                state.sample_fit_type = clear_settings.fit_type
+                state.can_fit_type = clear_settings.fit_type
 
             # 2. General settings
             general_settings = [item for item in fit_general if item.data_type is None
                                 and item.fit_type is not FitType.NO_FIT]
             if general_settings:
                 general_settings = general_settings[-1]
-                state_builder.set_sample_fit_type(general_settings.fit_type)
-                state_builder.set_sample_polynomial_order(general_settings.polynomial_order)
-                state_builder.set_sample_wavelength_low(general_settings.start)
-                state_builder.set_sample_wavelength_high(general_settings.stop)
-                state_builder.set_can_fit_type(general_settings.fit_type)
-                state_builder.set_can_polynomial_order(general_settings.polynomial_order)
-                state_builder.set_can_wavelength_low(general_settings.start)
-                state_builder.set_can_wavelength_high(general_settings.stop)
+                state.sample_fit_type = general_settings.fit_type
+                state.sample_polynomial_order = general_settings.polynomial_order
+                state.sample_wavelength_low = general_settings.start
+                state.sample_wavelength_high = general_settings.stop
+                state.can_fit_type = general_settings.fit_type
+                state.can_polynomial_order = general_settings.polynomial_order
+                state.can_wavelength_low = general_settings.start
+                state.can_wavelength_high = general_settings.stop
 
             # 3. Sample settings
             sample_settings = [item for item in fit_general if item.data_type is DataType.SAMPLE]
             if sample_settings:
                 sample_settings = sample_settings[-1]
-                state_builder.set_sample_fit_type(sample_settings.fit_type)
-                state_builder.set_sample_polynomial_order(sample_settings.polynomial_order)
-                state_builder.set_sample_wavelength_low(sample_settings.start)
-                state_builder.set_sample_wavelength_high(sample_settings.stop)
+                state.sample_fit_type = sample_settings.fit_type
+                state.sample_polynomial_order = sample_settings.polynomial_order
+                state.sample_wavelength_low = sample_settings.start
+                state.sample_wavelength_high = sample_settings.stop
 
             # 4. Can settings
             can_settings = [item for item in fit_general if item.data_type is DataType.CAN]
             if can_settings:
                 can_settings = can_settings[-1]
-                state_builder.set_can_fit_type(can_settings.fit_type)
-                state_builder.set_can_polynomial_order(can_settings.polynomial_order)
-                state_builder.set_can_wavelength_low(can_settings.start)
-                state_builder.set_can_wavelength_high(can_settings.stop)
+                state.can_fit_type = can_settings.fit_type
+                state.can_polynomial_order = can_settings.polynomial_order
+                state.can_wavelength_low = can_settings.start
+                state.can_wavelength_high = can_settings.stop
 
         # Set the wavelength default configuration
-        _set_wavelength_limits(state_builder.state, self._input_dict)
+        _set_wavelength_limits(state, self._input_dict)
 
         # Set the full wavelength range. Note that this can currently only be set from the ISISCommandInterface
         if OtherId.USE_FULL_WAVELENGTH_RANGE in self._input_dict:
             use_full_wavelength_range = self._input_dict[OtherId.USE_FULL_WAVELENGTH_RANGE]
             use_full_wavelength_range = use_full_wavelength_range[-1]
-            state_builder.set_use_full_wavelength_range(use_full_wavelength_range)
-        state = state_builder.build()
+            state.use_full_wavelength_range = use_full_wavelength_range
         return state
 
     def get_state_compatibility(self):  # -> StateCompatibility:
@@ -381,9 +380,6 @@ class ParsedDictConverter(IStateParser):
         # ---------------------------------
         # 8. Vertical single strip
         # ---------------------------------
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
-
         if MaskId.VERTICAL_SINGLE_STRIP_MASK in self._input_dict:
             single_vertical_strip_masks = self._input_dict[MaskId.VERTICAL_SINGLE_STRIP_MASK]
             entry_hab = []

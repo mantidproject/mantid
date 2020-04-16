@@ -36,6 +36,7 @@ class IStateParser(metaclass=ABCMeta):
         all_states.adjustment = self.get_state_adjustment()
         all_states.convert_to_q = self.get_state_convert_to_q()
         all_states.compatibility = self.get_state_compatibility()
+        all_states.data = self.get_state_data()
         return all_states
 
     @abstractmethod
