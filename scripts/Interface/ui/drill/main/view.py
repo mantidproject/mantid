@@ -42,6 +42,8 @@ class DrillView(QMainWindow):
         self.setup_header()
         self.setup_table()
 
+        self.buffer = list()  # for copy-paste actions
+
     def setup_header(self):
         """
         Setup the window header. Set the buttons icons and connect the signals.
