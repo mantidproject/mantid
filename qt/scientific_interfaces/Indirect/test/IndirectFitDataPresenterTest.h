@@ -254,31 +254,6 @@ public:
   }
 
   void
-  test_that_setStartX_will_alter_the_relevant_startX_column_in_the_data_table() {
-    TableItem const startX(2.3);
-    EXPECT_CALL(*m_model, numberOfWorkspaces())
-        .WillRepeatedly(Return(TableDatasetIndex{1}));
-    m_presenter->addData("Workspace1", "1");
-
-    m_presenter->setStartX(startX.asDouble(), TableDatasetIndex{0},
-                           IDA::WorkspaceIndex{0});
-    TS_ASSERT_EQUALS(startX.asString(), getTableItem(0, START_X_COLUMN));
-  }
-
-  void
-  test_that_setEndX_will_alter_the_relevant_endX_column_in_the_data_table() {
-    TableItem const endX(5.5);
-    EXPECT_CALL(*m_model, numberOfWorkspaces())
-        .WillRepeatedly(Return(TableDatasetIndex{1}));
-    m_presenter->addData("Workspace1", "1");
-
-    m_presenter->setEndX(endX.asDouble(), TableDatasetIndex{0},
-                         IDA::WorkspaceIndex{0});
-
-    TS_ASSERT_EQUALS(endX.asString(), getTableItem(0, END_X_COLUMN));
-  }
-
-  void
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     TableItem const excludeRegion("2-3");
 
