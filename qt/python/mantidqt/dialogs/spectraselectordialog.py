@@ -156,7 +156,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 ui.plotType.addItem(CONTOUR)
             self.setWindowTitle("Plot Advanced")
 
-
         self._ui = ui
         ui.colorfillButton.setVisible(self._show_colorfill_button)
         # overwrite the "Yes to All" button text
