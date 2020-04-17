@@ -11,7 +11,6 @@ from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator
 from mantid import mtd, logger
 
 import numpy as np
-import scipy.signal
 
 
 class FindPeaksAutomatic(DataProcessorAlgorithm):
@@ -372,10 +371,11 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
 
         # Find all the peaks. find_peaks was introduced in scipy 1.1.0, if using an older version use find_peaks_cwt
         # however this will not do an equally good job as it cannot sort by prominence (also added in 1.1.0)
-        major, minor, _ = scipy.__version__.split('.')
-        if int(major) >= 1 and int(minor) >= 1:
-            raw_peaks, _ = scipy.signal.find_peaks(raw_yvals)
-            flat_peaks, params = scipy.signal.find_peaks(flat_yvals, prominence=(None, None))
+        from distutils.version import LooseVersion
+        if LooseVersion(scipy.__version__) > LooseVersion('1.1.0'):
+            from scipy.signal import find_peaks
+            raw_peaks, _ = find_peaks(raw_yvals)
+            flat_peaks, params = find_peaks(flat_yvals, prominence=(None, None))
             prominence = params['prominences']
             flat_peaks = sorted(zip(flat_peaks, prominence), key=lambda x: x[1], reverse=True)
             if fit_to_baseline:
@@ -383,7 +383,8 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
             else:
                 flat_peaks = [peak_idx for peak_idx, prom in flat_peaks if peak_idx in raw_peaks]
         else:
-            flat_peaks = scipy.signal.find_peaks_cwt(flat_yvals, widths=np.array([0.1]))
+            from scipy.signal import find_peaks_cwt
+            flat_peaks = find_peaks_cwt(flat_yvals, widths=np.array([0.1]))
             flat_peaks = sorted(flat_peaks, key=lambda peak_idx: flat_yvals[peak_idx], reverse=True)
 
         return self.find_good_peaks(raw_xvals,
