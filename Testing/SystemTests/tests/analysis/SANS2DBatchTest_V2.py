@@ -28,6 +28,8 @@ class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
 
         csv_file = FileFinder.getFullPath('SANS2D_periodTests.csv')
 
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
         BatchReduce(csv_file, 'nxs', plotresults=False, saveAlgs={'SaveCanSAS1D': 'xml', 'SaveNexus': 'nxs'})
         os.remove(os.path.join(config['defaultsave.directory'], '5512p7_SANS2DBatch_p7rear_1D_2.0_14.0Phi-45.0_45.0.xml'))
 

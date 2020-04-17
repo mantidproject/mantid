@@ -84,16 +84,16 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         file_information = file_information_factory.create_sans_file_information("SANS2D00034484")
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00034484")
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_state,
+                                                       data_info=data_state,
                                                        user_filename=user_file)
         state = user_file_director.get_all_states()
         state.compatibility.use_compatibility_mode = True
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
 
         # Act
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
@@ -109,17 +109,17 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         file_information = file_information_factory.create_sans_file_information("LARMOR00013065")
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("LARMOR00013065")
-        data_builder.set_calibration("80tubeCalibration_1-05-2015_r3157-3160.nxs")
+
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt"
-        user_file_director = StateBuilder.new_instance(data_information=data_state,
+        user_file_director = StateBuilder.new_instance(data_info=data_state,
                                                        file_information=file_information,
                                                        user_filename=user_file)
-
         # Construct the final state
         state = user_file_director.get_all_states()
+        state.adjustment.calibration = "80tubeCalibration_1-05-2015_r3157-3160.nxs"
 
         # Act
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)

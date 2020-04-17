@@ -7,6 +7,7 @@
 from enum import Enum
 from sans.common.enums import DataType
 from sans.common.file_information import SANSFileInformationFactory
+from sans.state.AllStates import AllStates
 from sans.state.StateRunDataBuilder import StateRunDataBuilder
 from sans.state.StateBuilder import StateBuilder
 from sans.state.StateObjects.StateData import get_data_builder
@@ -14,6 +15,7 @@ from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, Samp
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
                                           simple_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
+from sans.user_file.toml_parsers.toml_parser import TomlParser
 from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
 
 from sans.user_file.user_file_parser import (UserFileParser)
@@ -76,6 +78,7 @@ class DataCommand(Command):
     """
     A command which is associated with setting data information.
     """
+
     def __init__(self, command_id, file_name, period=None):
         super(DataCommand, self).__init__(command_id)
         self.file_name = file_name
@@ -86,6 +89,7 @@ class NParameterCommand(Command):
     """
     A command which has n parameters in a list.
     """
+
     def __init__(self, command_id, values):
         super(NParameterCommand, self).__init__(command_id)
         self.values = values
@@ -96,6 +100,7 @@ class FitData(object):
     Describes the fit mode. This is not part of the SANSType module since we only need it here. It is slightly
     inconsistent but it is very localized.
     """
+
     class Sample(object):
         pass
 
@@ -123,8 +128,10 @@ class CommandInterfaceStateDirector(object):
         super(CommandInterfaceStateDirector, self).__init__()
         self._commands = []
         self._state_director = None
+        self._data_info = None
 
         self._processed_state_settings = {}
+        self._processed_state_obj : AllStates = None
 
         self._facility = facility
         self._method_map = None
@@ -150,10 +157,10 @@ class CommandInterfaceStateDirector(object):
         @returns a list of valid SANSState object which can be used for data reductions or raises an exception.
         """
         # 1. Get a SANSStateData object.
-        data_state = self._get_data_state()
+        self._data_info = self._get_data_state()
 
         # 2. Go through
-        state = self._process_command_queue(data_state)
+        state = self._process_command_queue()
 
         # 3. Leave commands in place put clear the list of processed commands, else they will be reused.
         self._processed_state_settings = {}
@@ -240,14 +247,14 @@ class CommandInterfaceStateDirector(object):
         """
         return [element for element in command_list if element.command_id is command_id]
 
-    def _process_command_queue(self, data_state):
+    def _process_command_queue(self):
         """
         Process the command queue sequentially as FIFO structure
 
         @param data_state: the data state.
         @return: a SANSState object.
         """
-        file_name = data_state.sample_scatter
+        file_name = self._data_info.sample_scatter
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information(file_name)
 
@@ -259,16 +266,22 @@ class CommandInterfaceStateDirector(object):
         for command in self._commands:
             if isinstance(command, DataCommand):
                 continue
+
             command_id = command.command_id
+            if NParameterCommandId.USER_FILE in command_id:
+                self._processed_state_obj = self._process_user_file(command, file_information=file_information)
+                continue
+
             process_function = self._method_map[command_id]
             process_function(command)
 
-        user_commands = CommandInterfaceAdapter(data_info=data_state,
-                                                processed_state=self._processed_state_settings)
+        state_builder_adapter = CommandInterfaceAdapter(data_info=self._data_info,
+                                                        processed_state=self._processed_state_settings,
+                                                        existing_state_obj=self._processed_state_obj)
         run_data_parser = StateRunDataBuilder(file_information=file_information)
+        self._state_director = StateBuilder(i_state_parser=state_builder_adapter,
+                                            run_data_builder=run_data_parser)
 
-        self._state_director = StateBuilder(i_state_parser=user_commands, run_data_builder=run_data_parser)
-        
         return self._state_director.get_all_states()
 
     def _set_up_method_map(self):
@@ -348,16 +361,27 @@ class CommandInterfaceStateDirector(object):
             else:
                 self._processed_state_settings.update({key: [value]})
 
-    def _process_user_file(self, command):
+    def _process_user_file(self, command, file_information):
         """
         Processes a user file and retain the parased tags
 
         @param command: the command with the user file path
         """
         file_name = command.values[0]
-        user_file_reader = UserFileReader(file_name)
-        new_state_entries = user_file_reader.read_user_file()
-        self.add_to_processed_state_settings(new_state_entries)
+
+        if file_name.casefold().endswith(".toml".casefold()):
+            toml_file_reader = TomlParser()
+            new_state_entries = toml_file_reader.parse_toml_file(toml_file_path=file_name, data_info=self._data_info)
+        else:
+            # Now comes the fun part where we try to coerce this to put out a State* object
+            user_file_reader = UserFileReader(file_name)
+            old_param_mapping = user_file_reader.read_user_file()
+            command_adapter = CommandInterfaceAdapter(data_info=self._data_info, processed_state=old_param_mapping)
+            run_data_parser = StateRunDataBuilder(file_information=file_information)
+            builder = StateBuilder(i_state_parser=command_adapter, run_data_builder=run_data_parser)
+            new_state_entries = builder.get_all_states()
+
+        return new_state_entries
 
     def _process_mask(self, command):
         """
@@ -391,7 +415,7 @@ class CommandInterfaceStateDirector(object):
                 index_first_clean_command = index
                 break
         if index_first_clean_command is not None:
-            del(self._commands[0:(index_first_clean_command + 1)])
+            del (self._commands[0:(index_first_clean_command + 1)])
             self._processed_state_settings = {}
 
     def _process_clean(self, command):
@@ -520,13 +544,13 @@ class CommandInterfaceStateDirector(object):
         # is not nice but the command interface forces us to do so. We take a copy of the last LimitsId.wavelength
         # entry, we copy it and then change the desired settings. This means it has to be set at this point, else
         # something is wrong
-        if LimitsId.WAVELENGTH in self._processed_state_settings:
-            last_entry = self._processed_state_settings[LimitsId.WAVELENGTH][-1]
-
-            new_wavelength_low = wavelength_low if wavelength_low is not None else last_entry.start
-            new_wavelength_high = wavelength_high if wavelength_high is not None else last_entry.stop
-            new_range = simple_range(start=new_wavelength_low, stop=new_wavelength_high, step=last_entry.step,
-                                     step_type=last_entry.step_type)
+        if self._processed_state_obj and self._processed_state_obj.wavelength:
+            existing_wavelength = self._processed_state_obj.wavelength
+            new_wavelength_low = wavelength_low if wavelength_low else existing_wavelength.wavelength_low
+            new_wavelength_high = wavelength_high if wavelength_high else existing_wavelength.wavelength_high
+            new_range = simple_range(start=new_wavelength_low, stop=new_wavelength_high,
+                                     step=existing_wavelength.wavelength_step,
+                                     step_type=existing_wavelength.wavelength_step_type)
 
             if wavelength_low is not None or wavelength_high is not None:
                 copied_entry = {LimitsId.WAVELENGTH: new_range}
@@ -589,7 +613,7 @@ class CommandInterfaceStateDirector(object):
         save_as_zero_error_free = command.values[1]
         new_state_entries = {OtherId.SAVE_TYPES: save_algorithms,
                              OtherId.SAVE_AS_ZERO_ERROR_FREE: save_as_zero_error_free}
-        self.add_to_processed_state_settings(new_state_entries,  treat_list_as_element=True)
+        self.add_to_processed_state_settings(new_state_entries, treat_list_as_element=True)
 
     def _process_user_specified_output_name(self, command):
         user_specified_output_name = command.values[0]
@@ -662,7 +686,7 @@ class CommandInterfaceStateDirector(object):
                 index_to_remove = index
                 break
         if index_to_remove is not None:
-            del(self._commands[index_to_remove])
+            del (self._commands[index_to_remove])
         else:
             raise RuntimeError("Tried to delete the last instance of {0}, but none was present in the list of "
                                "commands".format(command_id))

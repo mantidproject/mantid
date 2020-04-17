@@ -156,18 +156,18 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
 
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_file)
 
         state = user_file_director.get_all_states()
         # Set the reduction mode to LAB
         state.reduction.reduction_mode = ReductionMode.LAB
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
 
         # Since we are dealing with event based data but we want to compare it with histogram data from the
         # old reduction system we need to enable the compatibility mode
@@ -222,17 +222,17 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
 
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_file)
         state = user_file_director.get_all_states()
         state.reduction.reduction_mode = ReductionMode.HAB
         state.compatibility.use_compatibility_mode = True
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor,\
@@ -268,16 +268,16 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
 
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_file)
 
         state = user_file_director.get_all_states()
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.reduction.reduction_mode = ReductionMode.MERGED
         state.reduction.merge_fit_mode = FitModeForMerge.BOTH
         state.reduction.merge_scale = 1.0
@@ -328,19 +328,19 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
 
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_file)
 
         state = user_file_director.get_all_states()
 
         # Set the reduction mode to LAB
         state.reduction.reduction_mode = ReductionMode.LAB
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.reduction.reduction_dimensionality = ReductionDimensionality.TWO_DIM
         state.convert_to_q.reduction_dimensionality = ReductionDimensionality.TWO_DIM
 
@@ -392,18 +392,18 @@ class SANSSingleReduction2Test(SingleReductionTest):
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
 
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_file)
         state = user_file_director.get_all_states()
         # Set the reduction mode to HAB
         state.reduction.reduction_mode = ReductionMode.HAB
         state.compatibility.use_compatibility_mode = False
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
 
         # Add some event slices
         state.slice.start_time = [0.00, 300.00]
@@ -515,16 +515,16 @@ class SANSSingleReduction2Test(SingleReductionTest):
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
 
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_file)
         # Set the reduction mode to LAB
         state = user_file_director.get_all_states()
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.reduction.reduction_mode = ReductionMode.LAB
         state.compatibility.use_compatibility_mode = False
 

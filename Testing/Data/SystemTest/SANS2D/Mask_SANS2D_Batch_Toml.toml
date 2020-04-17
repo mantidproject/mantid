@@ -1,0 +1,49 @@
+toml_file_version = 0  # Beta version
+
+[metadata]
+  original_file = "MASKSANS2D.091A"
+  mantid_interface = "SANS v2"
+  name = "SANS Batch System Test file"
+  created = "2020-04-16"
+
+[instrument]
+  name = "SANS2D"
+
+[detector.configuration]
+  rear_centre = {x=84.2, y=-196.5}
+  rear_scale = 1.497
+
+[binning]
+  #type can only be "Lin", "Log"
+  wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
+
+  [1d_reduction]
+    # Negative indicates log
+    binning = ".02, -0.2, 1.0"
+
+  [2d_reduction]
+    #binning MUST start at 0.0
+    #type can be "Lin" or "Log"
+    step = 0.002
+    stop = 0.1
+    type = "Lin"
+
+[detector]
+  radius_limit = {min = 38, max = -1}
+
+  [calibration.direct]
+    #Detector direct beam function files
+    rear_file = "DIRECT_RUN524.dat"
+    front_file = ""
+  
+  [calibration.position]
+    ###Not used on LOQ, but put here as an illustration
+    #Corrections to encoders in mm 
+    front_x = -33
+    front_y = -20
+    front_z = -47
+    front_rot = 0.0
+    rear_x = 0.0
+    rear_z = 58.0
+
+#END OF FILE

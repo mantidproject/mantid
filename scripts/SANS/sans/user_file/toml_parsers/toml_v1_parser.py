@@ -15,9 +15,11 @@ from sans.state.StateObjects.StateCompatibility import StateCompatibility
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor, get_normalize_to_monitor_builder
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateScale import StateScale
+from sans.state.StateObjects.StateSave import StateSave
+from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator
@@ -58,19 +60,19 @@ class TomlV1Parser(IStateParser):
         return self._implementation.move
 
     def get_state_normalize_to_monitor(self):
-        pass
+        return self._implementation.normalize_to_monitor
 
     def get_state_reduction_mode(self):
         return self._implementation.reduction_mode
 
     def get_state_save(self):
-        pass
+        return StateSave()
 
     def get_state_scale(self):
         return self._implementation.scale
 
     def get_state_slice_event(self):
-        pass
+        return StateSliceEvent()
 
     def get_state_wavelength(self):
         return self._implementation.wavelength
@@ -116,11 +118,16 @@ class _TomlV1ParserImpl(object):
         self.calculate_transmission = get_calculate_transmission(instrument=self.instrument)
         self.mask = get_mask_builder(data_info=self.data_info).build()
         self.move = get_move_builder(data_info=self.data_info).build()
-        self.normalize_to_monitor = StateNormalizeToMonitor()
+        self.normalize_to_monitor = get_normalize_to_monitor_builder(data_info=self.data_info).build()
         self.reduction_mode = StateReductionMode()
         self.scale = StateScale()
         self.wavelength = StateWavelength()
         self.wavelength_and_pixel = StateWavelengthAndPixelAdjustment()
+
+        # Ensure they are linked up correctly
+        self.adjustment.calculate_transmission = self.calculate_transmission
+        self.adjustment.normalize_to_monitor = self.normalize_to_monitor
+        self.adjustment.wavelength_and_pixel_adjustment = self.wavelength_and_pixel
 
     def _parse_instrument_configuration(self):
         inst_config_dict = self._get_val(["instrument", "configuration"])
@@ -129,10 +136,10 @@ class _TomlV1ParserImpl(object):
         self.calculate_transmission.transmission_monitor = self._get_val("trans_monitor", inst_config_dict)
 
         self.convert_to_q.q_resolution_collimation_length = self._get_val("collimation_length", inst_config_dict)
-        self.convert_to_q.gravity_extra_length = self._get_val("gravity_extra_length", inst_config_dict)
+        self.convert_to_q.gravity_extra_length = self._get_val("gravity_extra_length", inst_config_dict, 0.0)
         self.convert_to_q.q_resolution_a2 = self._get_val("sample_aperture_diameter", inst_config_dict)
 
-        self.move.sample_offset = self._get_val("sample_offset", inst_config_dict)
+        self.move.sample_offset = self._get_val("sample_offset", inst_config_dict, 0.0)
 
     def _parse_detector_configuration(self):
         det_config_dict = self._get_val(["detector", "configuration"])
@@ -186,22 +193,36 @@ class _TomlV1ParserImpl(object):
         for toml_suffix, attr_name in name_attr_pairs.items():
             assert hasattr(lab_move, attr_name)
             assert hasattr(hab_move, attr_name)
-            setattr(lab_move, attr_name, self._get_val("rear" + toml_suffix, position_dict))
-            setattr(hab_move, attr_name, self._get_val("front" + toml_suffix, position_dict))
+            setattr(lab_move, attr_name, self._get_val("rear" + toml_suffix, position_dict, 0.0))
+            setattr(hab_move, attr_name, self._get_val("front" + toml_suffix, position_dict, 0.0))
 
     def _parse_binning(self):
         binning_dict = self._get_val(["binning"])
 
-        self.wavelength.wavelength_low = self._get_val(["wavelength", "start"], binning_dict)
-        self.wavelength.wavelength_step = self._get_val(["wavelength", "step"], binning_dict)
-        self.wavelength.wavelength_high = self._get_val(["wavelength", "stop"], binning_dict)
+        def set_wavelength(state_obj):
+            wavelength_start = self._get_val(["wavelength", "start"], binning_dict)
+            if wavelength_start:
+                state_obj.wavelength_low = [wavelength_start]
+            wavelength_stop = self._get_val(["wavelength", "stop"], binning_dict)
+            if wavelength_stop:
+                state_obj.wavelength_high = [wavelength_stop]
 
-        step_str = self._get_val(["wavelength", "type"], binning_dict)
-        if step_str:
-            self.wavelength.wavelength_step_type = RangeStepType(step_str)
+            state_obj.wavelength_step = self._get_val(["wavelength", "step"], binning_dict, 0.0)
+
+            step_str = self._get_val(["wavelength", "type"], binning_dict)
+            if step_str:
+                state_obj.wavelength_step_type = RangeStepType(step_str)
+
+        # TODO we should not have to set the same attributes on all of these things
+        set_wavelength(self.calculate_transmission)
+        set_wavelength(self.normalize_to_monitor)
+        set_wavelength(self.wavelength)
+        set_wavelength(self.wavelength_and_pixel)
 
         one_d_binning = self._get_val(["1d_reduction", "binning"], binning_dict)
         if one_d_binning:
+            import pydevd_pycharm
+            pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
             q_min, q_rebin, q_max = self._convert_1d_binning_string(one_d_binning)
             self.convert_to_q.q_min = q_min
             self.convert_to_q.q_1d_rebin_string = q_rebin
@@ -404,7 +425,7 @@ class _TomlV1ParserImpl(object):
         else:
             raise ValueError("Three or five comma seperated binning values are needed, got {0}".format(one_d_binning))
 
-    def _get_val(self, keys, dict_to_parse=None):
+    def _get_val(self, keys, dict_to_parse=None, default_return=None):
         """
         Gets a nested value within the specified dictionary
         :param keys: A list of keys to iterate through the dictionary
@@ -417,7 +438,7 @@ class _TomlV1ParserImpl(object):
         try:
             return self._get_val_impl(keys=keys, dict_to_parse=dict_to_parse)
         except KeyError:
-            return None
+            return default_return
 
     def _get_val_impl(self, keys, dict_to_parse):
         if dict_to_parse is None:

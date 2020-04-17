@@ -7,6 +7,12 @@
 import re
 
 
+class TomlValidationError(Exception):
+    # A key error would be more appropriate, but there is special
+    # handling on KeyError which escapes any new lines making it un-readable
+    pass
+
+
 class TomlSchemaV1Validator(object):
     # As of the current TOML release there is no way to validate a schema so
     # we must provide an implementation
@@ -20,6 +26,7 @@ class TomlSchemaV1Validator(object):
         self._to_validate_list = self._build_nested_keys(dict_to_validate)
 
     def validate(self):
+        self._to_validate_list = filter(lambda s: not s.startswith("metadata"), self._to_validate_list)
         unrecognised = set(self._to_validate_list).difference(self._expected_list)
 
         if not unrecognised:
@@ -32,8 +39,8 @@ class TomlSchemaV1Validator(object):
 
         if len(unrecognised) > 0:
             err = "The following keys were not recognised\n:"
-            err += "".join("{0}\n".format(k) for k in unrecognised)
-            raise KeyError(err)
+            err += "".join("{0} \n".format(k) for k in unrecognised)
+            raise TomlValidationError(err)
 
     @staticmethod
     def _reference_schema():
@@ -94,7 +101,9 @@ class TomlSchemaV1Validator(object):
                                  "front": {"detector_columns", "detector_rows",
                                            "detector_column_ranges", "detector_row_ranges"}}}
 
-        return {"binning": binning_keys,
+        return {"toml_file_version": None,
+                "binning": binning_keys,
+                "metadata": ".*",
                 "detector": detector_keys,
                 "gravity": gravity_keys,
                 "mask": mask_keys,

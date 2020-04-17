@@ -147,16 +147,16 @@ class SANSReductionCoreTest(unittest.TestCase):
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_sample_transmission("SANS2D00034505")
         data_builder.set_sample_direct("SANS2D00034461")
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_state,
+                                                       data_info=data_state,
                                                        user_filename=user_file)
         state = user_file_director.get_all_states()
 
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.compatibility.use_compatibility_mode = True
 
         # Load the sample workspaces
@@ -187,7 +187,6 @@ class SANSReductionCoreTest(unittest.TestCase):
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_sample_transmission("SANS2D00034505")
         data_builder.set_sample_direct("SANS2D00034461")
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_state = data_builder.build()
 
         ################################################################################################################
@@ -196,10 +195,11 @@ class SANSReductionCoreTest(unittest.TestCase):
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_state,
+                                                       data_info=data_state,
                                                        user_filename=user_file)
 
         state = user_file_director.get_all_states()
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.compatibility.use_compatibility_mode = True
 
         # Load the sample workspaces
@@ -215,7 +215,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         ################################################################################################################
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_state,
+                                                       data_info=data_state,
                                                        user_filename=user_file)
         state = user_file_director.get_all_states()
         state.compatibility.use_compatibility_mode = False

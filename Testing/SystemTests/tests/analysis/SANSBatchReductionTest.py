@@ -75,19 +75,17 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_builder.set_can_scatter("SANS2D00034481")
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
-
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
-
         data_info = data_builder.build()
 
         user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
 
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_filename)
 
         # Get the rest of the state from the user file
         state = user_file_director.get_all_states()
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
 
         # Set the reduction mode to LAB
         state.reduction.reduction_mode = ReductionMode.LAB
@@ -121,7 +119,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         # Get the rest of the state from the user file
         user_filename = "MASKSANS2Doptions.091A"
         user_file_parser = StateBuilder.new_instance(file_information=file_information,
-                                                     data_information=data_info,
+                                                     data_info=data_info,
                                                      user_filename=user_filename)
         state = user_file_parser.get_all_states()
         # Set the reduction mode to LAB
@@ -156,14 +154,12 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
 
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
-
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_filename)
 
         state = user_file_director.get_all_states()
@@ -172,6 +168,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
         state.slice.start_time = [1.0,3.0]
         state.slice.end_time = [3.0,5.0]
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
 
         # Act
         states = [state]
@@ -202,20 +199,17 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_builder.set_can_scatter("SANS2D00034481")
         data_builder.set_can_transmission("SANS2D00034502")
         data_builder.set_can_direct("SANS2D00034461")
-
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
-
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
         user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_filename)
 
         # Set the reduction mode to LAB
         state = user_file_director.get_all_states()
-
+        state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.reduction.reduction_mode = ReductionMode.LAB
         state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
 
@@ -265,7 +259,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         # Get the rest of the state from the user file
         user_filename = "MASKSANS2Doptions.091A"
         user_file_director = StateBuilder.new_instance(file_information=file_information,
-                                                       data_information=data_info,
+                                                       data_info=data_info,
                                                        user_filename=user_filename)
 
         state = user_file_director.get_all_states()

@@ -10,6 +10,7 @@ import collections
 from sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge, SANSInstrument
 from sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, \
     get_ranges_for_rebin_array
+from sans.state.AllStates import AllStates
 from sans.state.IStateParser import IStateParser
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
 from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
@@ -31,13 +32,14 @@ from sans.user_file.settings_tags import TubeCalibrationFileId, MaskId, LimitsId
 
 
 class ParsedDictConverter(IStateParser):
-    def __init__(self, data_info):
+    def __init__(self, data_info, existing_all_states: AllStates = None):
         super(ParsedDictConverter, self).__init__()
-        assert isinstance(data_info, StateData),\
+        assert isinstance(data_info, StateData), \
             "Expected StateData, got %r" % data_info
 
         self._cached_result = None
         self._data_info = data_info
+        self._all_states = existing_all_states
 
     @property
     def _input_dict(self):
@@ -48,15 +50,15 @@ class ParsedDictConverter(IStateParser):
         return self._cached_result
 
     @abc.abstractmethod
-    def _get_input_dict(self):  # -> dict:
+    def _get_input_dict(self):
         """
         Gets the dictionary to translate as an input dictionary from the inheriting adapter
         :return: Dictionary to translate
         """
         pass
 
-    def get_state_adjustment(self):  # -> StateAdjustment:
-        state = StateAdjustment()
+    def get_state_adjustment(self):
+        state = self._all_states.adjustment if self._all_states else StateAdjustment()
         # Get the wide angle correction setting
         self._set_single_entry(state, "wide_angle_correction", SampleId.PATH)
 
@@ -64,12 +66,14 @@ class ParsedDictConverter(IStateParser):
         state.normalize_to_monitor = self.get_state_normalize_to_monitor()
         state.wavelength_and_pixel_adjustment = self.get_state_wavelength_and_pixel_adjustment()
 
-        state.calibration = _get_last_element(self._input_dict.get(TubeCalibrationFileId.FILE))
+        if TubeCalibrationFileId.FILE in self._input_dict:
+            state.calibration = _get_last_element(self._input_dict.get(TubeCalibrationFileId.FILE))
 
         return state
 
-    def get_state_calculate_transmission(self):  # -> StateCalculateTransmission:
-        state = get_calculate_transmission(instrument=self._data_info.instrument)
+    def get_state_calculate_transmission(self):
+        state = self._all_states.adjustment.calculate_transmission if self._all_states else\
+            get_calculate_transmission(instrument=self._data_info.instrument)
 
         self._set_single_entry(state, "transmission_radius_on_detector", TransId.RADIUS,
                                apply_to_value=_convert_mm_to_m)
@@ -96,16 +100,12 @@ class ParsedDictConverter(IStateParser):
         # The incident monitor spectrum for transmission calculation
         if MonId.SPECTRUM in self._input_dict:
             mon_spectrum = self._input_dict[MonId.SPECTRUM]
-            mon_spec = [spec for spec in mon_spectrum if spec.is_trans]
-            if mon_spec:
-                mon_spec = mon_spec[-1]
-                rebin_type = RebinType.INTERPOLATING_REBIN if mon_spec.interpolate else RebinType.REBIN
+            for spec in mon_spectrum:
+                rebin_type = RebinType.INTERPOLATING_REBIN if spec.interpolate else RebinType.REBIN
                 state.rebin_type = rebin_type
 
-                # We have to check if the spectrum is None, this can be the case when the user wants to use the
-                # default incident monitor spectrum
-                if mon_spec.spectrum:
-                    state.incident_monitor = mon_spec.spectrum
+                if not spec.is_trans:  # Ignore MON/TRANS as per past behaviour
+                    state.incident_monitor = spec.spectrum
 
         # The general background settings
         _set_background_tof_general(state, self._input_dict)
@@ -131,6 +131,8 @@ class ParsedDictConverter(IStateParser):
             # 4. Can settings
             # We first apply the general settings. Specialized settings for can or sample override the general settings
             # As usual if there are multiple settings for a specific case, then the last in the list is used.
+            can = state.fit[DataType.CAN.value]
+            sample = state.fit[DataType.SAMPLE.value]
 
             # 1 Fit type settings
             clear_settings = [item for item in fit_general if item.data_type is None
@@ -139,40 +141,42 @@ class ParsedDictConverter(IStateParser):
             if clear_settings:
                 clear_settings = clear_settings[-1]
                 # Will set the fitting to NoFit
-                state.sample_fit_type = clear_settings.fit_type
-                state.can_fit_type = clear_settings.fit_type
+                sample.fit_type = clear_settings.fit_type
+                can.fit_type = clear_settings.fit_type
 
             # 2. General settings
             general_settings = [item for item in fit_general if item.data_type is None
                                 and item.fit_type is not FitType.NO_FIT]
             if general_settings:
                 general_settings = general_settings[-1]
-                state.sample_fit_type = general_settings.fit_type
-                state.sample_polynomial_order = general_settings.polynomial_order
-                state.sample_wavelength_low = general_settings.start
-                state.sample_wavelength_high = general_settings.stop
-                state.can_fit_type = general_settings.fit_type
-                state.can_polynomial_order = general_settings.polynomial_order
-                state.can_wavelength_low = general_settings.start
-                state.can_wavelength_high = general_settings.stop
+
+                sample.fit_type = general_settings.fit_type
+                sample.polynomial_order = general_settings.polynomial_order
+                sample.wavelength_low = general_settings.start
+                sample.wavelength_high = general_settings.stop
+
+                can.fit_type = general_settings.fit_type
+                can.polynomial_order = general_settings.polynomial_order
+                can.wavelength_low = general_settings.start
+                can.wavelength_high = general_settings.stop
 
             # 3. Sample settings
             sample_settings = [item for item in fit_general if item.data_type is DataType.SAMPLE]
             if sample_settings:
                 sample_settings = sample_settings[-1]
-                state.sample_fit_type = sample_settings.fit_type
-                state.sample_polynomial_order = sample_settings.polynomial_order
-                state.sample_wavelength_low = sample_settings.start
-                state.sample_wavelength_high = sample_settings.stop
+                sample.fit_type = sample_settings.fit_type
+                sample.polynomial_order = sample_settings.polynomial_order
+                sample.wavelength_low = sample_settings.start
+                sample.wavelength_high = sample_settings.stop
 
             # 4. Can settings
             can_settings = [item for item in fit_general if item.data_type is DataType.CAN]
             if can_settings:
                 can_settings = can_settings[-1]
-                state.can_fit_type = can_settings.fit_type
-                state.can_polynomial_order = can_settings.polynomial_order
-                state.can_wavelength_low = can_settings.start
-                state.can_wavelength_high = can_settings.stop
+                can.fit_type = can_settings.fit_type
+                can.polynomial_order = can_settings.polynomial_order
+                can.wavelength_low = can_settings.start
+                can.wavelength_high = can_settings.stop
 
         # Set the wavelength default configuration
         _set_wavelength_limits(state, self._input_dict)
@@ -184,8 +188,8 @@ class ParsedDictConverter(IStateParser):
             state.use_full_wavelength_range = use_full_wavelength_range
         return state
 
-    def get_state_compatibility(self):  # -> StateCompatibility:
-        state = StateCompatibility()
+    def get_state_compatibility(self):
+        state = self._all_states.compatibility if self._all_states else StateCompatibility()
         if LimitsId.EVENTS_BINNING in self._input_dict:
             events_binning = self._input_dict[LimitsId.EVENTS_BINNING]
             events_binning = events_binning[-1]
@@ -203,8 +207,8 @@ class ParsedDictConverter(IStateParser):
 
         return state
 
-    def get_state_convert_to_q(self):  # -> StateConvertToQ:
-        state = StateConvertToQ()
+    def get_state_convert_to_q(self):
+        state = self._all_states.convert_to_q if self._all_states else StateConvertToQ()
         # Get the radius cut off if any is present
         self._set_single_entry(state, "radius_cutoff", LimitsId.RADIUS_CUT, apply_to_value=_convert_mm_to_m)
 
@@ -256,13 +260,17 @@ class ParsedDictConverter(IStateParser):
         self._set_single_entry(state, "reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY)
         return state
 
-    def get_state_data(self):  # -> StateData:
+    def get_state_data(self):
         assert isinstance(self._data_info, StateData)
         return self._data_info
 
     # We have taken the implementation originally provided, so we can't help the complexity
     def get_state_mask(self):  # noqa: C901
         state_builder = get_mask_builder(data_info=self._data_info)
+
+        # We have to inject an existing state object here, this is wrong but legacy code *shrug*
+        if self._all_states:
+            state_builder.state = self._all_states.mask
 
         if MaskId.LINE in self._input_dict:
             mask_lines = self._input_dict[MaskId.LINE]
@@ -591,6 +599,9 @@ class ParsedDictConverter(IStateParser):
     def get_state_move(self):  # noqa : C901
         state_builder = get_move_builder(data_info=self._data_info)
 
+        if self._all_states:
+            state_builder.state = self._all_states.move
+
         if DetectorId.CORRECTION_X in self._input_dict:
             corrections_in_x = self._input_dict[DetectorId.CORRECTION_X]
             for correction_x in corrections_in_x:
@@ -670,6 +681,8 @@ class ParsedDictConverter(IStateParser):
         # Tilt
         # ---------------------------
         if DetectorId.CORRECTION_X_TILT in self._input_dict:
+            import pydevd_pycharm
+            pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
             tilt_correction = self._input_dict[DetectorId.CORRECTION_X_TILT]
             tilt_correction = tilt_correction[-1]
             if tilt_correction.detector_type is DetectorType.HAB:
@@ -749,6 +762,10 @@ class ParsedDictConverter(IStateParser):
 
     def get_state_normalize_to_monitor(self):  # -> StateNormalizeToMonitor:
         builder = get_normalize_to_monitor_builder(self._data_info)
+
+        if self._all_states:
+            builder.state = self._all_states.adjustment.normalize_to_monitor
+
         state = builder.state
         # Extract the incident monitor and which type of rebinning to use (interpolating or normal)
         if MonId.SPECTRUM in self._input_dict:
@@ -780,7 +797,7 @@ class ParsedDictConverter(IStateParser):
 
     # We have taken the implementation originally provided, so we can't help the complexity
     def get_state_reduction_mode(self):  # noqa: C901
-        state = StateReductionMode()
+        state = self._all_states.reduction if self._all_states else StateReductionMode()
 
         self._set_single_entry(state, "reduction_mode", DetectorId.REDUCTION_MODE)
 
@@ -881,8 +898,8 @@ class ParsedDictConverter(IStateParser):
         self._set_single_entry(state, "reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY)
         return state
 
-    def get_state_save(self):  # -> StateSave:
-        state = StateSave()
+    def get_state_save(self):
+        state = self._all_states.save if self._all_states else StateSave()
         if OtherId.SAVE_TYPES in self._input_dict:
             save_types = self._input_dict[OtherId.SAVE_TYPES]
             save_types = save_types[-1]
@@ -909,8 +926,8 @@ class ParsedDictConverter(IStateParser):
             state.use_reduction_mode_as_suffix = use_reduction_mode_as_suffix
         return state
 
-    def get_state_scale(self):  # -> StateScale:
-        state = StateScale()
+    def get_state_scale(self):
+        state = self._all_states.scale if self._all_states else StateScale()
 
         # We only extract the first entry here, ie the s entry. Although there are other entries which a user can
         # specify such as a, b, c, d they seem to be
@@ -943,7 +960,7 @@ class ParsedDictConverter(IStateParser):
         return state
 
     def get_state_slice_event(self):  # -> StateSliceEvent:
-        state = StateSliceEvent()
+        state = self._all_states.slice if self._all_states else StateSliceEvent()
 
         # Setting up the slice limits is current
         if OtherId.EVENT_SLICES in self._input_dict:
@@ -967,12 +984,13 @@ class ParsedDictConverter(IStateParser):
         return state
 
     def get_state_wavelength(self):  # -> StateWavelength():
-        state = StateWavelength()
+        state = self._all_states.wavelength if self._all_states else StateWavelength()
         _set_wavelength_limits(state, self._input_dict)
         return state
 
     def get_state_wavelength_and_pixel_adjustment(self):  # -> StateWavelengthAndPixelAdjustment:
-        state = StateWavelengthAndPixelAdjustment()
+        state = self._all_states.adjustment.wavelength_and_pixel_adjustment if self._all_states \
+            else StateWavelengthAndPixelAdjustment()
         # Get the flat/flood files. There can be entries for LAB and HAB.
         if MonId.FLAT in self._input_dict:
             mon_flat = self._input_dict[MonId.FLAT]

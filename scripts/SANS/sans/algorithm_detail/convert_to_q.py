@@ -64,6 +64,9 @@ def _run_q_1d(workspace, output_summed_parts, conv_to_q_state, wavelength_adj_ws
     radius_cutoff = conv_to_q_state.radius_cutoff * 1000.  # Q1D2 expects the radius cutoff to be in mm
     wavelength_cutoff = conv_to_q_state.wavelength_cutoff
 
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
+
     q1d_name = "Q1D"
     q1d_options = {"DetBankWorkspace": workspace,
                    "OutputWorkspace": EMPTY_NAME,

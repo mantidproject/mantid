@@ -175,7 +175,6 @@ class StateNormalizeToMonitorBuilder(object):
         set_default_incident_monitor(self.state, self._data)
 
     def build(self):
-        self.state.validate()
         return copy.copy(self.state)
 
     def set_wavelength_step_type(self, val):
