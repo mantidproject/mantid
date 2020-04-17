@@ -189,6 +189,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             return str(div)
 
     def toScatterAndLabels(self, wksp, spectraNames):
+        import plotly.graph_objs as go
         data = []
         for i in range(wksp.getNumberHistograms()):
             if len(spectraNames) > i:
