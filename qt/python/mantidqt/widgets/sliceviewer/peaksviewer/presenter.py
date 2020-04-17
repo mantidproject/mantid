@@ -59,12 +59,10 @@ class PeaksViewerPresenter(object):
         :param event:
         """
         PresenterEvent = PeaksViewerPresenter.Event
-        if event == PresenterEvent.SlicePointChanged:
-            self._update_peaks()
+        if event == PresenterEvent.SlicePointChanged or event == PresenterEvent.OverlayPeaks:
+            self._overlay_peaks()
         elif event == PresenterEvent.PeakSelectionChanged:
             self._peak_selection_changed()
-        elif event == PresenterEvent.OverlayPeaks:
-            self._overlay_peaks()
         elif event == PresenterEvent.PeaksListChanged:
             self._peaks_table_presenter.refresh()
         elif event == PresenterEvent.ClearPeaks:
@@ -75,7 +73,7 @@ class PeaksViewerPresenter(object):
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
-        self._view.clear_peaks(self.model.take_peak_representations())
+        self.model.clear_peak_representations()
 
     def _overlay_peaks(self):
         """
@@ -85,24 +83,18 @@ class PeaksViewerPresenter(object):
           - Draw overlays.
         """
         self._clear_peaks()
-        peak_representations = self.model.compute_peak_representations(self._view.sliceinfo)
-        self._view.draw_peaks(peak_representations)
+        self.model.draw_peaks(self._view.sliceinfo, self._view.painter)
 
     def _peak_selection_changed(self):
         """
         Respond to the selection change of a peak in the list
         """
         selected_index = self._view.selected_index
-        if selected_index is not None:
-            peak = self.model.peak_representation_at(self._view.selected_index)
-            self._view.snap_to(peak)
+        if selected_index is None:
+            return
 
-    def _update_peaks(self):
-        """
-        Respond to a change that only requires updating PeakRepresentation properties such
-        as transparency
-        """
-        self._view.update_peaks(self.model.update_peak_representations(self._view.sliceinfo))
+        self._view.set_slicepoint(self.model.slice_center(selected_index, self._view.sliceinfo))
+        self.model.zoom_to(selected_index)
 
     # private api
     @staticmethod

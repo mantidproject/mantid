@@ -14,7 +14,7 @@ from mantid.kernel import logger
 # local imports
 from mantidqt.widgets.workspacedisplay.table.model \
     import TableWorkspaceDisplayModel
-from .representation import create_peakrepresentation
+from .representation import draw_peak_representation
 
 # constants
 # cycle colors for each peaks workspace - it is unlikely there will be more than 3
@@ -52,6 +52,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         self._fg_color = fg_color
         self._bg_color = bg_color
         self._visible_peaks = []
+        self._representations = []
 
     @property
     def bg_color(self):
@@ -69,59 +70,63 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     def visible_peaks(self):
         return self._visible_peaks
 
-    def compute_peak_representations(self, sliceinfo):
+    def clear_peak_representations(self):
         """
-        Create a list of PeakRepresentation object describing each Peak.
-        :param sliceinfo: Object describing current slicing information
+        Remove drawn peaks from the view
         """
-        diminfo = sliceinfo.indices
-        slicepoint = sliceinfo.point[diminfo[2]]
-        dimrange = sliceinfo.range
-        slicedim_width = dimrange[1] - dimrange[0]
-        try:
-            peak_center_getter = FRAME_TO_PEAK_CENTER_ATTR[sliceinfo.frame]
-        except KeyError:
-            logger.warning("Unknown frame {}. Assuming QLab.".format(sliceinfo.frame))
-            peak_center_getter = FRAME_TO_PEAK_CENTER_ATTR[SpecialCoordinateSystem.QLab]
+        for peak in self._representations:
+            if peak:
+                peak.remove()
+        self._representations.clear()
 
-        info = []
+    def draw_peaks(self, slice_info, painter):
+        """
+        Draw a list of Peaks on the display
+        :param slice_info: Object describing current slicing information
+        :param painter: A reference to the object that will draw to the screen
+        """
+        frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
+
+        representations = []
         for peak in self.ws:
-            qframe = getattr(peak, peak_center_getter)()
-            x, y, z = qframe[diminfo[0]], qframe[diminfo[1]], qframe[diminfo[2]]
-            info.append(
-                create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak.getPeakShape(),
-                                          self.fg_color, self.bg_color))
-        self._visible_peaks = info
-        return info
+            peak_origin = getattr(peak, frame_to_slice_fn)()
+            peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info,
+                                                 painter, self.fg_color, self.bg_color)
+            representations.append(peak_repr)
 
-    def peak_representation_at(self, index):
-        """Return a reference to the peak at the given index
-        :return: A single Peak from the table at the index
-        :raises: IndexError if the index is out of range
-        """
-        return self._visible_peaks[index]
+        self._representations = representations
 
-    def take_peak_representations(self):
-        """Return the current set of peaks and remove them from the model
-        :return: A list of the current peaks
+    def slice_center(self, selected_index, slice_info):
         """
-        peaks = self._visible_peaks
-        self._visible_peaks = []
-        return peaks
+        Return the value of the center in the slice dimension for the peak at the given index
+        :param selected_index: Index of a peak in the table
+        :param slice_info: Information on the current slice
+        """
+        frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
+        peak = self.ws.getPeak(selected_index)
+        center = slice_info.transform(getattr(peak, frame_to_slice_fn)())
+        print(f"Center of peak at index={selected_index}: {center}")
+        return center[2]
 
-    def update_peak_representations(self, sliceinfo):
+    def zoom_to(self, index):
         """
-        Update the internal list of PeakRepresentation objects describing each Peak.
-        :param sliceinfo: Object describing current slicing information
+        Set the view to display the peak center at the given index. It is assumed
+        that slice point has been updated so it contains this peak
+        :param index: Index of peak in list
         """
-        diminfo = sliceinfo.indices
-        slicepoint = sliceinfo.point[diminfo[2]]
-        dimrange = sliceinfo.range
-        slicedim_width = dimrange[1] - dimrange[0]
-        for peak in self.visible_peaks:
-            peak.update_alpha(slicepoint, slicedim_width)
+        self._representations[index].zoom_to()
 
-        return self.visible_peaks
+    def _frame_to_slice_fn(self, frame):
+        """
+        Return the appropriate function to retrieve the peak coordinates in the given frame
+        :param frame: The frame of the data workspace
+        """
+        try:
+            peak_center_getter = FRAME_TO_PEAK_CENTER_ATTR[frame]
+        except KeyError:
+            logger.warning("Unknown frame {}. Assuming QLab.".format(frame))
+            peak_center_getter = FRAME_TO_PEAK_CENTER_ATTR[SpecialCoordinateSystem.QLab]
+        return peak_center_getter
 
 
 def create_peaksviewermodel(peaks_ws_name):

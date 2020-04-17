@@ -13,7 +13,7 @@ import unittest
 from unittest.mock import MagicMock, create_autospec, patch
 
 # thirdparty imports
-from mantid.api import MatrixWorkspace
+from mantid.api import MatrixWorkspace, SpecialCoordinateSystem
 from mantid.dataobjects import PeaksWorkspace
 
 # local imports
@@ -45,6 +45,25 @@ class PeaksViewerModelTest(unittest.TestCase):
         second_model = create_peaksviewermodel('test')
 
         self.assertNotEqual(first_model.fg_color, second_model.fg_color)
+
+    def test_compute_peak_representations(self):
+        model = PeaksViewerModel(create_autospec(PeaksWorkspace), 'r', 'g')
+        peak = MagicMock()
+        peak.getQLabFrame.return_value = (0.5, 0.2, 0.25)
+        shape = MagicMock()
+        shape.shapeName.return_value = 'none'
+        peak.getPeakShape.return_value = shape
+        model.ws.__iter__.return_value = [peak]
+
+        sliceinfo = MagicMock()
+        sliceinfo.frame = SpecialCoordinateSystem.QLab
+        sliceinfo.transform.return_value = peak.getQLabFrame()
+        sliceinfo.value = 0.5
+        sliceinfo.width = 30.
+
+        peaks = model.compute_peak_representations(sliceinfo)
+
+        self.assertEqual(1, len(peaks))
 
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):

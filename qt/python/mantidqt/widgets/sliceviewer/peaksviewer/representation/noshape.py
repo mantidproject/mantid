@@ -6,57 +6,34 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# std imports
-
-# 3rdparty imports
-
 # local imports
-from .base import PeakDrawable, PeakRepresentation
+from .alpha import compute_alpha
+from .painter import Painted
 
 
-class PeakDrawableNoShape(PeakDrawable):
-    """Describes representation of Peak with no shape for display"""
-    SNAP_WIDTH = 0.5
-
-    def __init__(self, half_width):
-        """
-        :param half_width: Width from center to the edge of cross
-        """
-        super().__init__()
-        self._half_width = half_width
-
-    @property
-    def snap_width(self):
-        """Return the width of the view when a peak is zoomed to"""
-        return self.SNAP_WIDTH
-
-    def draw_impl(self, painter, peak):
-        """
-        Override base method and draws a single peak center marker
-        :param painter: A Painter object to accept the draw command
-        :param peak: A reference to the PeakRepresentation object
-        :return: The object added
-        """
-        return painter.cross(
-            peak.x, peak.y, self._half_width, alpha=peak.alpha, color=peak.fg_color)
-
-
-class NonIntegratedPeakRepresentation(PeakRepresentation):
+class NonIntegratedPeakRepresentation(object):
     """Create a collection of PeakDrawable objects for a non-integrated Peak"""
-    CROSS_HALF_WIDTH = 0.1
+    VIEW_FRACTION = 0.015
 
     @classmethod
-    def create(cls, x, y, z, alpha, peak_shape, fg_color, bg_color):
+    def draw(cls, peak_origin, peak_shape, slice_info, painter, fg_color, _):
         """
-        Create an instance of NonIntegratedPeakRepresentation from the given set of attributes
-        :param x: Position of peak in X dimension
-        :param y: Position of peak in Y dimension
-        :param z: Position of peak in Z dimension
-        :param alpha: Initial alpha value
-        :param shape: A PeakShape object describing the shape properties (unused)
-        :param fg_color: A string indicating the color of the marker
-        :param bg_color: A string indicating the color of optional background region (unused)
+        Draw the representation of a slice through a peak with no shape
+        :param peak_origin: Peak origin in original workspace frame
+        :param peak_shape: A reference to the object describing the PeakShape
+        :param slice_info: A SliceInfo object detailing the current slice
+        :param painter: A reference to a object capable of drawing shapes
+        :param fg_color: A str representing the color of the peak shape marker
+        :param _: A str representing the color of the background region. Unused
         :return: A new instance of this class
         """
-        return cls(
-            x, y, z, alpha, fg_color, drawables=(PeakDrawableNoShape(cls.CROSS_HALF_WIDTH), ))
+        peak_origin = slice_info.transform(peak_origin)
+        x, y, z = peak_origin
+        alpha = compute_alpha(z, slice_info.value, slice_info.width)
+        painted = None
+        if alpha > 0.0:
+            effective_radius = slice_info.width * cls.VIEW_FRACTION
+            painted = Painted(
+                painter, (painter.cross(x, y, effective_radius, alpha=alpha, color=fg_color), ))
+
+        return painted

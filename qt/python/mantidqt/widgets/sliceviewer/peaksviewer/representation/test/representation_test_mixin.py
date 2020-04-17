@@ -56,5 +56,5 @@ class PeakRepresentationMixin(object):
         self.assertEqual(self.x, representation.x)
         self.assertEqual(self.y, representation.y)
         self.assertEqual(self.z, representation.z)
-        self.assertEqual(self.alpha, representation.alpha)
+        self.assertAlmostEqual(self.alpha, representation.alpha, places=5)
         self.assertEqual(self.fg_color, representation.fg_color)

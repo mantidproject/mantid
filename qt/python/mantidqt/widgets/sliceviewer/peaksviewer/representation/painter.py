@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# std imports
-
 # 3rdparty imports
 from matplotlib.path import Path
 from matplotlib.patches import Circle, Ellipse, Patch, PathPatch, Wedge
@@ -79,6 +77,7 @@ class MplPainter(object):
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
+    ZOOM_PAD_FRAC = 0.2
 
     def __init__(self, axes):
         """
@@ -155,24 +154,38 @@ class MplPainter(object):
         return self._axes.add_patch(
             Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
 
-    def snap_to(self, x, y, width):
+    def zoom_to(self, artist):
+        """Set the view such that the given artist is in the center
         """
-        Set the display such the point (x, y) is at the center with width
-        :param x: X location of scatter point
-        :param y: Y location of scatter point
-        :param width: The width/height of the view
-        """
+        # Use the bounding box of the artist with small amount of padding
+        # to set the axis limits
+        to_data_coords = self._axes.transData.inverted()
+        artist_bbox = artist.get_extents()
+        ll, ur = to_data_coords.transform(artist_bbox.min), \
+            to_data_coords.transform(artist_bbox.max)
+        # pad by fraction of maximum width so the artist is still in the center
+        xl, xr = ll[0], ur[0]
+        yb, yt = ll[1], ur[1]
+        padding = max(xr - xl, yt - yb) * self.ZOOM_PAD_FRAC
+        self._axes.set_xlim(xl - padding, xr + padding)
+        self._axes.set_ylim(yb - padding, yt + padding)
 
-        def snap_limits(center):
-            return (center - width, center + width)
 
-        self._axes.set_xlim(*snap_limits(x))
-        self._axes.set_ylim(*snap_limits(y))
+class Painted(object):
+    """Combine a collection of artists with the painter that created them"""
 
-    def update_properties(self, artist, **kwargs):
+    def __init__(self, painter, artists):
+        self._painter = painter
+        self._artists = artists
+
+    def remove(self):
+        for artist in self._artists:
+            self._painter.remove(artist)
+
+    def zoom_to(self):
         """
-        Update artist properties
-        :param artist: Reference to a list of the Artist
-        :param kwargs: Keywords giving Artist properties to change
+        Place the painted objects at the center of the view.
+        There is an assumption that the final artist represents the "largest"
+        object painted on the screen
         """
-        artist.set(**kwargs)
+        self._painter.zoom_to(self._artists[-1])

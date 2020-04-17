@@ -121,9 +121,6 @@ class DimensionWidget(QWidget):
 
         return [xdim, ydim, zdim]
 
-    def get_frame(self):
-        """:return: A frame """
-
     def get_slicepoint(self):
         """:return: a list of 3 elements where None indicates a non-slice dimension and a
           float indicates the current slice point in that dimension.
@@ -201,7 +198,6 @@ class Dimension(QWidget):
         self.spinbox.setRange(self.get_bin_center(0), self.get_bin_center(self.nbins - 1))
         self.spinbox.setSingleStep(self.width)
         self.spinbox.editingFinished.connect(self.spinbox_changed)
-        # self.spinbox.valueChanged.connect(self.spinbox_changed)
 
         self.layout.addWidget(self.name)
         self.layout.addWidget(self.x)
@@ -263,7 +259,7 @@ class Dimension(QWidget):
         if self.state != old_state:
             self.stateChanged.emit(self.number)
 
-    def spinbox_changed(self, _):
+    def spinbox_changed(self):
         self.value = self.spinbox.value()
         self.update_slider()
 

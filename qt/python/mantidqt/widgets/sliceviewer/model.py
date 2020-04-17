@@ -6,11 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#
+from collections import namedtuple
+from enum import Enum
+
 from mantid.plots.datafunctions import get_indices
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.simpleapi import BinMD
-from enum import Enum
 import numpy as np
 
 
@@ -59,17 +60,18 @@ class SliceViewerModel(object):
         params = {}
         for n in range(self._get_ws().getNumDims()):
             if slicepoint[n] is None:
-                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(self._get_ws().getDimension(n).name,
-                                                                        self._get_ws().getDimension(n).getMinimum(),
-                                                                        self._get_ws().getDimension(n).getMaximum(),
-                                                                        bin_params[n])
+                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(
+                    self._get_ws().getDimension(n).name,
+                    self._get_ws().getDimension(n).getMinimum(),
+                    self._get_ws().getDimension(n).getMaximum(), bin_params[n])
             else:
-                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(self._get_ws().getDimension(n).name,
-                                                                        slicepoint[n] - bin_params[n] / 2,
-                                                                        slicepoint[n] + bin_params[n] / 2,
-                                                                        1)
-        return BinMD(InputWorkspace=self._get_ws(),
-                     OutputWorkspace=self._get_ws().name() + '_rebinned', **params)
+                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(
+                    self._get_ws().getDimension(n).name, slicepoint[n] - bin_params[n] / 2,
+                    slicepoint[n] + bin_params[n] / 2, 1)
+        return BinMD(
+            InputWorkspace=self._get_ws(),
+            OutputWorkspace=self._get_ws().name() + '_rebinned',
+            **params)
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
@@ -80,22 +82,26 @@ class SliceViewerModel(object):
 
     def get_data_MDE(self, slicepoint, bin_params, transpose=False):
         if transpose:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze()).T
+            return np.ma.masked_invalid(
+                self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze()).T
         else:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze())
+            return np.ma.masked_invalid(
+                self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze())
 
     def get_dim_info(self, n):
         """
         returns dict of (minimum, maximun, number_of_bins, width, name, units) for dimension n
         """
         dim = self._get_ws().getDimension(n)
-        return {'minimum': dim.getMinimum(),
-                'maximum': dim.getMaximum(),
-                'number_of_bins': dim.getNBins(),
-                'width': dim.getBinWidth(),
-                'name': dim.name,
-                'units': dim.getUnits(),
-                'type': self.get_ws_type().name}
+        return {
+            'minimum': dim.getMinimum(),
+            'maximum': dim.getMaximum(),
+            'number_of_bins': dim.getNBins(),
+            'width': dim.getBinWidth(),
+            'name': dim.name,
+            'units': dim.getUnits(),
+            'type': self.get_ws_type().name
+        }
 
     def get_dimensions_info(self):
         """
@@ -118,3 +124,39 @@ class SliceViewerModel(object):
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
             return True
         return False
+
+
+# Encapsulate information current slice paramters
+_SliceInfoBase = namedtuple("SliceInfo", ("indices", "frame", "point", "range"))
+
+
+class SliceInfo(_SliceInfoBase):
+    """
+    Keep information regarding the current slice of data. Allows transforming a point
+    to the slice coordinate system.
+
+    Fields:
+        indices: A list of 3 indices, (a,b,c),
+                 where a=index of displayed X dimension,
+                 b=index of displayed Y dimension and c=index of out of plane slicing dimension
+        frame: A str indicating the frame of the slice
+        point: A float storing the current slice point
+        range: A 2-tuple giving the range of the slice in the slicing dimension
+    """
+
+    @property
+    def value(self):
+        return self.point[self.indices[2]]
+
+    @property
+    def width(self):
+        return self.range[1] - self.range[0]
+
+    def transform(self, point):
+        """Transform a point to the slice frame.
+        It returns a ndarray(X,Y,Z) where X,Y are coordinates of X,Y of the display
+        and Z is the out of place coordinate
+        :param point: A 3D point in the slice frame
+        """
+        dimindices = self.indices
+        return np.array((point[dimindices[0]], point[dimindices[1]], point[dimindices[2]]))

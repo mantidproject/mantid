@@ -40,9 +40,13 @@ class CreatePeakRepresentationTest(unittest.TestCase):
         mock_shape.shapeName.return_value = peak_shape
         mock_shape.toJSON.return_value = json.dumps(shape_json)
         marker_color = 'w'
-        slicepoint, dimwidth = 3.2, 30
-        representation = create_peakrepresentation(x, y, z, slicepoint, dimwidth, mock_shape,
-                                                   marker_color, None)
+        mock_sliceinfo = MagicMock()
+        mock_sliceinfo.transform.return_value = center
+        mock_sliceinfo.value = 3.2
+        mock_sliceinfo.width = 30
+
+        representation = create_peakrepresentation(center, mock_shape, mock_sliceinfo, marker_color,
+                                                   None)
         self.assertTrue(isinstance(representation, expected_cls))
         self._verify_expected_attributes(representation, center, 0.4444, marker_color)
         return representation

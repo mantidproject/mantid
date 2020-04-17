@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 
 # local imports
-from .base import compute_alpha
 from .noshape import NonIntegratedPeakRepresentation
 from .spherical import SphericallyIntergratedPeakRepresentation
 from .ellipsoid import EllipsoidalIntergratedPeakRepresentation
@@ -37,21 +36,17 @@ def _get_factory(peak_shape):
         return NonIntegratedPeakRepresentation
 
 
-def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, marker_color,
-                              bg_color):
+def draw_peak_representation(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):
     """
     A factory function to create an appropriate PeakRepresentation
-    object for a peak.
-    :param x: X position of peak in slice plane
-    :param x: Y position of peak in slice plane
-    :param z: Z position of peak out of slice plane
-    :param slicepoint: float giving current slice point
-    :param slicedim_width: Total width of the slicing dimension
+    object for a peak and draw it.
+    :param peak_origin: Peak origin in original workspace frame
     :param peak_shape: A reference to the object describing the PeakShape
-    :param marker_color: A str representing the color of the peak shape marker
+    :param slice_info: A SliceInfo object detailing the current slice
+    :param painter: A reference to a object capable of drawing shapes
+    :param fg_color: A str representing the color of the peak shape marker
     :param bg_color: A str representing the color of the background region if applicable
-    :returns: A PeakRepresentation object describing the Peak aspects
-              important for display
+    :returns: A collection of drawn objects or None if nothing is visible
     """
-    return _get_factory(peak_shape).create(x, y, z, compute_alpha(z, slicepoint, slicedim_width),
-                                           peak_shape, marker_color, bg_color)
+    return _get_factory(peak_shape).draw(peak_origin, peak_shape, slice_info, painter, fg_color,
+                                         bg_color)

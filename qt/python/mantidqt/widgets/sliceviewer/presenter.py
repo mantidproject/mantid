@@ -7,19 +7,14 @@
 #  This file is part of the mantid workbench.
 #
 #
-# std imports
-from collections import namedtuple
 
 # 3rdparty imports
 import mantid.api
 
 # local imports
-from .model import SliceViewerModel, WS_TYPE
+from .model import SliceViewerModel, WS_TYPE, SliceInfo
 from .view import SliceViewerView
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
-
-# Encapsulate information about the current slice paramters
-SliceInfo = namedtuple("SliceInfo", ("indices", "frame", "point", "range"))
 
 
 class SliceViewer(object):

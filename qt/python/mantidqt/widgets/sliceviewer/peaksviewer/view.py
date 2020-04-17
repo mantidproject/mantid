@@ -34,6 +34,11 @@ class PeaksViewerView(QWidget):
         self._setup_ui()
 
     @property
+    def painter(self):
+        """Return a reference to the painter used in this view"""
+        return self._painter
+
+    @property
     def sliceinfo(self):
         """Return information regarding the current slice"""
         return self._sliceinfo_provider.get_sliceinfo()
@@ -54,7 +59,7 @@ class PeaksViewerView(QWidget):
     def clear_peaks(self, peaks):
         """Clear all peaks from display"""
         for peak in peaks:
-            peak.remove(self._painter)
+            peak.remove()
 
     def draw_peaks(self, peaks):
         """
@@ -62,15 +67,14 @@ class PeaksViewerView(QWidget):
         :param peaks: An iterable of PeakRepresentations to display
         """
         for peak in peaks:
-            peak.draw(self._painter)
+            peak.draw()
 
-    def snap_to(self, peak):
+    def set_slicepoint(self, value):
         """
-        Set the peak center as the center of the display
-        :param peak: A list
+        Set the slice point to the given value
+        :param value: Float giving the current slice value
         """
-        peak.snap_to(self._painter)
-        self._sliceinfo_provider.set_slicevalue(peak.z)
+        self._sliceinfo_provider.set_slicevalue(value)
 
     def update_peaks(self, peaks):
         """
@@ -78,7 +82,7 @@ class PeaksViewerView(QWidget):
         :param peaks: An iterable of PeakRepresentations to display
         """
         for peak in peaks:
-            peak.repaint(self._painter)
+            peak.repaint()
 
     def set_title(self, name):
         """

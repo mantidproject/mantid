@@ -9,113 +9,131 @@
 from json import loads as json_loads
 
 # 3rdparty imports
+import numpy as np
 
 # local imports
-from .base import PeakDrawable, IntegratedPeakRepresentation
-from .noshape import PeakDrawableNoShape
+from .alpha import compute_alpha
+from .ellipsoid import slice_ellipsoid_matrix
+from .painter import Painted
 
 
-class PeakDrawableCircle(PeakDrawable):
-    """Draws a circle"""
-
-    def __init__(self, radius):
-        """
-        :param radius: The radius of the circle
-        """
-        self._radius = radius
-
-    def draw_impl(self, painter, peak):
-        """
-        Draw this peak with the given Painter
-        :param painter: A painter that understands how to draw
-        :param peak: A reference to a Peak representation
-        :return: The new Artist added
-        """
-        return painter.circle(
-            peak.x,
-            peak.y,
-            self._radius,
-            alpha=peak.alpha,
-            linestyle="--",
-            facecolor='none',
-            edgecolor=peak.fg_color)
-
-
-class PeakDrawableShell(PeakDrawable):
-    """Draws a shell of a given width and outer radius"""
-
-    def __init__(self, outer_radius, thick):
-        """
-        :param outer_radius: The radius of the outer radius of the shell
-        :param thick: The thickness of the shell
-        """
-        self._outer_radius = outer_radius
-        self._thick = thick
-
-    def draw_impl(self, painter, peak):
-        """
-        Draw this peak with the given Painter
-        :param painter: A painter that understands how to draw
-        :param peak: A reference to a Peak representation
-        :return: The new Artist added
-        """
-        return painter.shell(
-            peak.x,
-            peak.y,
-            self._outer_radius,
-            self._thick,
-            alpha=peak.alpha,
-            linestyle="--",
-            facecolor=peak.bg_color,
-            edgecolor=peak.fg_color)
-
-
-class SphericallyIntergratedPeakRepresentation(IntegratedPeakRepresentation):
-    """"Extends the default PeakRepresentation adding radius properties
-    describing a Spherical integration"""
-    # Additional "distance" to add to snap view on top of peak radius
-    SNAP_VIEW_PAD = 0.25
+class SphericallyIntergratedPeakRepresentation(object):
+    """Provide methods to display a representation of a slice through an
+    Spherically intgerated region around a Peak"""
 
     @classmethod
-    def create(cls, x, y, z, alpha, peak_shape, fg_color, bg_color):
+    def draw(cls, peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):
         """
-        Create an instance of NonIntegratedPeakRepresentation from the given set of attributes
-        :param x: Position of peak in X dimension
-        :param y: Position of peak in Y dimension
-        :param z: Position of peak in Z dimension
-        :param alpha: Initial alpha value
-        :param shape: A PeakShape object describing the shape properties (unused)
-        :param fg_color: A string indicating the color of the marker
-        :param: bg_color: A string indicating the color of the optionl background region
+        Draw the representation of a slice through an sphere
+        :param peak_origin: Peak origin in original workspace frame
+        :param peak_shape: A reference to the object describing the PeakShape
+        :param slice_info: A SliceInfo object detailing the current slice
+        :param painter: A reference to a object capable of drawing shapes
+        :param fg_color: A str representing the color of the peak shape marker
+        :param bg_color: A str representing the color of the background region.
         :return: A new instance of this class
         """
-        radius, bg_radii = _radius_info(peak_shape)
-        drawables = [PeakDrawableNoShape(radius * 0.1), PeakDrawableCircle(radius)]
-        snap_width = cls.SNAP_VIEW_PAD
-        if bg_radii is not None:
-            outer_radius = bg_radii[1]
-            drawables.append(PeakDrawableShell(outer_radius, outer_radius - bg_radii[0]))
-            snap_width += outer_radius
-        else:
-            snap_width += radius
+        shape_info = json_loads(peak_shape.toJSON())
+        signal_radius = _signal_radius_info(shape_info)
+        peak_origin = slice_info.transform(peak_origin)
 
-        return cls(x, y, z, alpha, fg_color, bg_color, drawables, snap_width)
+        slice_origin, signal_radius = slice_sphere(peak_origin, signal_radius, slice_info.value)
+        if not np.any(np.isfinite((signal_radius, ))):
+            # slice not possible
+            return None
+        alpha = compute_alpha(slice_origin[2], slice_info.value, slice_info.width)
+        if alpha < 0.0:
+            return None
+
+        center_x, center_y = slice_origin[:2]
+        # yapf: disable
+        artists = [
+            painter.cross(
+                center_x,
+                center_y,
+                0.1 * signal_radius,
+                alpha=alpha,
+                color=fg_color
+            ),
+            painter.circle(
+                center_x,
+                center_y,
+                signal_radius,
+                alpha=alpha,
+                linestyle="--",
+                facecolor="none",
+                edgecolor=fg_color
+            ),
+        ]
+        # yapf: enable
+
+        # add background if we have one
+        bkgd_radius_thick = _bkgd_radius_info(shape_info)
+        if bkgd_radius_thick is not None:
+            bkgd_outer_radius, thickness = bkgd_radius_thick
+            _, bkgd_circle_radius = slice_sphere(peak_origin, bkgd_outer_radius, slice_info.value)
+            # yapf: disable
+            artists.append(
+                painter.shell(
+                    center_x,
+                    center_y,
+                    bkgd_circle_radius,
+                    thickness,
+                    alpha=alpha,
+                    linestyle="--",
+                    facecolor=bg_color,
+                    edgecolor="none"
+                )
+            )
+            # yapf: enable
+
+        return Painted(painter, artists)
 
 
-def _radius_info(peak_shape):
+def _signal_radius_info(shape_info):
     """
-    Parse shape information and return information on the radii
-    :param peak_shape: A reference to a PeakShape object
-    :returns: 2-tuple (radius, bg_radii) where radius is the signal
-              integation region and bg_radii is the optional background
-              integration region
+    Parse shape information and return information on the radius of the signal region of the Sphere
+    :param shape_info: A reference to a a dictionary of parameters from a PeakShape object
+    :return: The radius of the Sphere
     """
-    shape_info = json_loads(peak_shape.toJSON())
-    radius = float(shape_info["radius"])
+    return float(shape_info["radius"])
+
+
+def _bkgd_radius_info(shape_info):
+    """
+    Parse shape information and return information on the background radii of the Sphere
+    :param shape_info: A reference to a a dictionary of parameters from a PeakShape object
+    :return: 2-tuple of (outer_radius, thickness) or None if no background region is defined
+    """
     bg_inner_radius = shape_info.get("background_inner_radius", None)
     bg_outer_radius = shape_info.get("background_outer_radius", None)
-    bg_radii = None
+    radius_thickness = None
     if bg_inner_radius and bg_outer_radius:
-        bg_radii = (float(bg_inner_radius), float(bg_outer_radius))
+        radius_thickness = (bg_outer_radius, bg_outer_radius - bg_inner_radius)
 
-    return radius, bg_radii
+    return radius_thickness
+
+
+def slice_sphere(peak_origin, radius, zp):
+    """Slice a Sphere at a point z=zp and return the radius of the resulting circle
+    :param peak_origin: Origin of Sphere
+    :param radius: Radius of the Sphere
+    :param zp: Slice point in slice dimension
+    """
+    # Sphere is just a special case of an ellipse
+    slice_origin, circle_radius, _, __ = slice_ellipsoid_matrix(peak_origin, zp,
+                                                                calculate_spherical_matrix(radius))
+    return slice_origin, circle_radius
+
+
+def calculate_spherical_matrix(radius):
+    """
+    Compute matrix defining Sphere:
+    https://en.wikipedia.org/wiki/Ellipsoid#As_quadric
+    :param radius: Radius of Sphere
+    """
+    # Create matrix whose eigenvalues are squares of semi-axes lengths
+    # and eigen vectors define principle axis vectors
+    inv_rad_sq = 1 / radius**2
+    axes_lengths = np.diag((inv_rad_sq, ) * 3)
+    return axes_lengths
