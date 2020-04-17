@@ -209,6 +209,7 @@ def get_fit_function_name_from_workspace(workspace_name):
     except ValueError:
         return None
 
+
 def create_multi_domain_fitted_workspace_name(input_workspace, function_name):
     directory = input_workspace + '; Fitted;' + function_name + '/'
     name = input_workspace + '+ ...; Fitted;' + function_name

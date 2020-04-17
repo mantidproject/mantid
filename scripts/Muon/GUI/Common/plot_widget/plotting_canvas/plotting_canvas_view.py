@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -12,7 +12,7 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantid import AnalysisDataService
-from mantid.plots import legend_set_draggable, MantidAxes
+from mantid.plots import legend_set_draggable
 from mantid.plots.plotfunctions import get_plot_fig
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt

@@ -9,7 +9,6 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWith
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 
-from collections import defaultdict
 import functools
 
 

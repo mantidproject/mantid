@@ -4,9 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, List, DefaultDict
-
-from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from typing import Dict, List
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
