@@ -293,7 +293,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 self._ui.wksp_indices_label.setText("Workspace Indices")
                 self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, WORKSPACE_NAME)
                 self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
-
                 self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(new_text != "Tiled")
 
                 if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_REFERENCE_NUMBER:
