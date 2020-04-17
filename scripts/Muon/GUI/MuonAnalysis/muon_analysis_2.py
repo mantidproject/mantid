@@ -323,5 +323,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.dockable_plot_widget.presenter.plot_guess_observer)
 
     def closeEvent(self, event):
+        self.removeDockWidget(self.dockable_plot_widget_window)
+        self.tabs.closeEvent(event)
         self.context.ads_observer = None
         super(MuonAnalysisGui, self).closeEvent(event)
