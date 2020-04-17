@@ -81,7 +81,7 @@ void LoadILLTOF2::init() {
 void LoadILLTOF2::exec() {
   // Retrieve filename
   const std::string filenameData = getPropertyValue("Filename");
-  m_convertToTOF = getProperty("convertToTOF");
+  bool convertToTOF = getProperty("convertToTOF");
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -99,7 +99,7 @@ void LoadILLTOF2::exec() {
 
   runLoadInstrument(); // just to get IDF contents
 
-  loadDataIntoTheWorkSpace(dataFirstEntry, monitors);
+  loadDataIntoTheWorkSpace(dataFirstEntry, monitors, convertToTOF);
 
   addEnergyToRun();
   addPulseInterval();
@@ -355,9 +355,12 @@ void LoadILLTOF2::addPulseInterval() {
  *
  * @param entry The Nexus entry
  * @param monitors List of monitor data
+ * @param convertToTOF Should the bin edges be converted to time of flight or
+ * keep the channel indexes
  */
 void LoadILLTOF2::loadDataIntoTheWorkSpace(
-    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors) {
+    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors,
+    bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
   // read in the data
@@ -371,7 +374,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
   if (monitor.containsDataSet("time_of_flight")) {
-    if (m_convertToTOF) {
+    if (convertToTOF) {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
         X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
                 m_channelWidth / 2; // to make sure the bin centre is correct
