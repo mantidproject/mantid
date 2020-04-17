@@ -72,7 +72,8 @@ void LoadILLTOF2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
-  declareProperty("ConvertToTOF", false, Direction::Input);
+  declareProperty("ConvertToTOF", false,
+                  "Convert the bin edges to time-of-flight", Direction::Input);
 }
 
 /**

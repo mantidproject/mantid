@@ -125,9 +125,10 @@ public:
     const size_t channelCount = 512;
     const size_t histogramCount = 397;
     const size_t monitorCount = 1;
+    const bool convertToTOF = true;
     MatrixWorkspace_sptr ws =
         loadDataFile("ILL/IN4/084446.nxs", histogramCount, monitorCount,
-                     channelCount, tofDelay, tofChannelWidth, true);
+                     channelCount, tofDelay, tofChannelWidth, convertToTOF);
 
     const double pulseInterval =
         ws->run().getLogAsSingleValue("pulse_interval");
@@ -141,8 +142,9 @@ public:
     const size_t channelCount = 512;
     const size_t histogramCount = 98305;
     const size_t monitorCount = 1;
+    const bool convertToTOF = true;
     loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount,
-                 channelCount, tofDelay, tofChannelWidth, true);
+                 channelCount, tofDelay, tofChannelWidth, convertToTOF);
   }
 
   void test_IN6_load() {
@@ -152,9 +154,10 @@ public:
     const size_t channelCount = 1024;
     const size_t histogramCount = 340;
     const size_t monitorCount = 3;
+    const bool convertToTOF = true;
     MatrixWorkspace_sptr ws =
         loadDataFile("ILL/IN6/164192.nxs", histogramCount, monitorCount,
-                     channelCount, tofDelay, tofChannelWidth, true);
+                     channelCount, tofDelay, tofChannelWidth, convertToTOF);
 
     const double pulseInterval =
         ws->run().getLogAsSingleValue("pulse_interval");
@@ -227,8 +230,9 @@ public:
     const size_t channelCount = 512;
     const size_t histogramCount = 73729;
     const size_t monitorCount = 1;
+    const bool convertToTOF = false;
     loadDataFile("ILL/PANTHER/001723.nxs", histogramCount, monitorCount,
-                 channelCount, tofDelay, tofChannelWidth, false);
+                 channelCount, tofDelay, tofChannelWidth, convertToTOF);
   }
 
   void test_convertToTOF() {
@@ -238,8 +242,9 @@ public:
     const size_t channelCount = 512;
     const size_t histogramCount = 98305;
     const size_t monitorCount = 1;
+    const bool convertToTOF = false;
     loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount,
-                 channelCount, tofDelay, tofChannelWidth, false);
+                 channelCount, tofDelay, tofChannelWidth, convertToTOF);
   }
 };
 
