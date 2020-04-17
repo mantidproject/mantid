@@ -203,7 +203,7 @@ def zoom(ax, x, y, factor):
 
 def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None, log_name=None):
     if log_values is None:
-        if log_name == "Workspace index" or log_name == "":
+        if log_name in ["Workspace index", "Workspace", ""]:
             return ws_index
 
         return matrix_ws.run().getPropertyAsSingleValueWithTimeAveragedMean(log_name)

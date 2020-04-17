@@ -25,7 +25,8 @@ PLACEHOLDER_FORMAT_SINGLE_INPUT = 'valid range: {}'
 RED_ASTERISK = None
 
 WORKSPACE_NAME = "Workspace name"
-WORKSPACE_INDEX = "Workspace index"
+# A title to refer to the workspace, but as a number for use on an axis label
+WORKSPACE_REFERENCE_NUMBER = "Workspace"
 CUSTOM = "Custom"
 CONTOUR = "Contour"
 SURFACE = "Surface"
@@ -277,10 +278,10 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(True)
                 self._ui.spec_num_label.setText("Spectrum Number")
                 self._ui.wksp_indices_label.setText("Workspace Index")
-                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, WORKSPACE_INDEX)
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, WORKSPACE_REFERENCE_NUMBER)
 
                 if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_NAME:
-                    self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_INDEX)
+                    self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_REFERENCE_NUMBER)
 
                 self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(False)
             else:
@@ -292,6 +293,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
 
                 self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(new_text != "Tiled")
+                
+                if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_REFERENCE_NUMBER:
+                    self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_NAME)
 
                 if new_text == "Tiled":
                     self._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(0)
