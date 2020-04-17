@@ -110,3 +110,11 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         Sets the raw checkbox state, which can be controlled externally through the home tab.
         """
         self.plot_raw_checkbox.setChecked(state)
+
+    def set_plot_type(self, plot_type: str):
+        """
+        Sets the plot type to the input str
+        """
+        self.plot_type_combo.blockSignals(True)
+        self.plot_type_combo.setCurrentText(plot_type)
+        self.plot_type_combo.blockSignals(False)

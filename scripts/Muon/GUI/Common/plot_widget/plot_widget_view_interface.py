@@ -112,3 +112,17 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         :param slot: call back function for the signal
         """
         pass
+
+    @abstractmethod
+    def set_raw_checkbox_state(self, state):
+        """
+        Sets the raw checkbox state, which can be controlled externally through the home tab.
+        """
+        pass
+
+    @abstractmethod
+    def set_plot_type(self, plot_type: str):
+        """
+        Sets the plot type to the input string
+        """
+        pass

@@ -23,6 +23,12 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         """
         pass
 
+    @abc.abstractmethod
+    def remove_workspace_names_from_plot(self, workspace_names: List[str]):
+        """Removes the input workspace names from the plot
+        :param workspace_names: List of workspace names
+        """
+        pass
 
     @abc.abstractmethod
     def remove_workspace_from_plot(self, workspace: Workspace2D):
@@ -70,6 +76,12 @@ class PlottingCanvasPresenterInterface(abc.ABC):
     def get_plotted_workspaces_and_indices(self):
         """Returns the workspace names and indices which are plotted in the figure
         :return: A tuple of workspace_names and workspace indices"""
+        pass
+
+    @abc.abstractmethod
+    def get_plot_axes(self):
+        """Returns the matplotlib axes - needed for the external plot button
+        :return: matplotlib axes instance"""
         pass
 
     @abc.abstractmethod

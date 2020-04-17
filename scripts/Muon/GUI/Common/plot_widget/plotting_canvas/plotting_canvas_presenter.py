@@ -107,6 +107,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.add_workspaces_to_plot([fit_plot_information])
         self._view.redraw_figure()
 
+    def get_plot_axes(self):
+        """Returns the matplotlib axes - needed for the external plot button"""
+        return self._view.fig.axes
+
     def autoscale_y_axes(self):
         """Autoscales all y-axes in the figure using the existing x axis"""
         self._view.autoscale_y_axes()
@@ -125,10 +129,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def set_axis_title(self, ax_num, title):
         """Sets the title for a specified axis in the figure"""
         self._view.set_title(ax_num, title)
-
-    def get_fig_axes(self):
-        """Returns the matplotlib axes - needed for the external plot button"""
-        return self._view.fig.axes
 
     # Implementation of QuickEdit widget
     def _update_quickedit_widget(self):

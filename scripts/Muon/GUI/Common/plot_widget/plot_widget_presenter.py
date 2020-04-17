@@ -22,12 +22,15 @@ from mantid.dataobjects import Workspace2D
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
     def __init__(self, view: PlotWidgetViewInterface, model: PlotWidgetModel, context,
-                 figure_presenter: PlottingCanvasPresenterInterface):
+                 figure_presenter: PlottingCanvasPresenterInterface,
+                 external_plotting_view=None, external_plotting_model=None):
         """
         :param view: A reference to the QWidget object for plotting
         :param model: A reference to a model which contains the plotting logic
         :param context: A reference to the Muon context object
         :param figure_presenter: A reference to a figure presenter, which is used as an interface to plotting
+        :param external_plotting_view: A reference to an external plotting_view - used for mocking
+        :param external_plotting_model: A reference to an external plotting model - used for mocking
         """
         if not isinstance(figure_presenter, PlottingCanvasPresenterInterface):
             raise TypeError("Parameter figure_presenter must be of type PlottingCanvasPresenterInterface")
@@ -37,8 +40,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self.context = context
         # figure presenter - the common presenter talks to this through an interface
         self._figure_presenter = figure_presenter
-        self._plotting_view = ExternalPlottingView()
-        self._plotting_model = ExternalPlottingModel()
+        self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
+        self._external_plotting_model = external_plotting_model if external_plotting_model else ExternalPlottingModel()
 
         # gui observers
         self._setup_gui_observers()
@@ -81,10 +84,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
 
-        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                     self._view.get_plot_type())
-
-        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+        self.plot_all_selected_data(autoscale=False, hold_on=False)
 
     def handle_workspace_deleted_from_ads(self, workspace: Workspace2D):
         """
@@ -110,11 +110,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         Handles the plot type being changed in the view by plotting the workspaces corresponding to the new plot type
         """
-        self._check_if_counts_and_groups_selected()
+        if self._check_if_counts_and_groups_selected():
+            return
 
-        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                     self._view.get_plot_type())
-        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=True)
+        self.plot_all_selected_data(autoscale=True, hold_on=False)
         self.plot_type_changed_notifier.notify_subscribers(self._view.get_plot_type())
 
     def handle_plot_tiled_state_changed(self):
@@ -186,13 +185,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             tiled_by = self._view.tiled_by()
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
-            workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                         self._view.get_plot_type())
-            self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+            self.plot_all_selected_data(autoscale=False, hold_on=False)
             return
 
         workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair(
-            group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
+            group_or_pair_name, is_raw=self._view.is_raw_plot(), plot_type=self._view.get_plot_type())
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=True, autoscale=False)
 
     def handle_removed_group_or_pair_to_plot(self, group_or_pair_name: str):
@@ -205,9 +202,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             tiled_by = self._view.tiled_by()
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
-            workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                         self._view.get_plot_type())
-            self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+            self.plot_all_selected_data(hold_on=False, autoscale=False)
             return
 
         workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair(
@@ -218,12 +213,12 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         Handles an external plot request
         """
-        axes = self._figure_presenter.get_fig_axes()
-        external_fig = self._plotting_view.create_external_plot_window(axes)
-        data = self._plotting_model.get_plotted_workspaces_and_indices_from_axes(axes)
-        self._plotting_view.plot_data(external_fig, data)
-        self._plotting_view.copy_axes_setup(external_fig, axes)
-        self._plotting_view.show(external_fig)
+        axes = self._figure_presenter.get_plot_axes()
+        external_fig = self._external_plotting_view.create_external_plot_window(axes)
+        data = self._external_plotting_model.get_plotted_workspaces_and_indices_from_axes(axes)
+        self._external_plotting_view.plot_data(external_fig, data)
+        self._external_plotting_view.copy_axes_setup(external_fig, axes)
+        self._external_plotting_view.show(external_fig)
 
     def handle_instrument_changed(self):
         """
@@ -255,12 +250,19 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         else:
             self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_ws])
 
+    def plot_all_selected_data(self, autoscale, hold_on):
+        """Plots all selected run data e.g runs and groups
+        :param autoscale: Whether to autoscale the graph
+        :param hold_on: Whether to keep previous plots"""
+        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
+                                                                                     self._view.get_plot_type())
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):
         if len(self.context.group_pair_context.selected_pairs) != 0 and \
-                self._view.get_selected() == self._model.counts_plot:
-            self._view.plot_selector.blockSignals(True)
-            self._view.plot_selector.setCurrentText(self._model.asymmetry_plot)
-            self._view.plot_selector.blockSignals(False)
+                self._view.get_plot_type() == self._model.counts_plot:
+            self._view.set_plot_type(self._model.asymmetry_plot)
             self._view.warning_popup(
                 'Pair workspaces have no counts workspace, plotting Asymmetry')
+            return True
+        return False

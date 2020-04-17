@@ -359,11 +359,11 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
 
     def test_handle_external_plot_pressed(self):
         expected_axes = mock.NonCallableMock()
-        self.view.get_axes.return_value = expected_axes
+        self.figure_presenter.get_fig_axes.return_value = expected_axes
 
         self.presenter.handle_external_plot_requested()
 
-        self.view.get_axes.assert_called_once()
+        self.figure_presenter.get_fig_axes.assert_called_once()
         self.plotting_view.create_external_plot_window.assert_called_once_with(expected_axes)
         self.plotting_model.get_plotted_workspaces_and_indices_from_axes.assert_called_once_with(expected_axes)
         self.plotting_view.plot_data.assert_called_once()

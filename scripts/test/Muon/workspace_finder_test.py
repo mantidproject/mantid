@@ -25,6 +25,7 @@ class WorkspaceFinderTest(unittest.TestCase):
         self.context.group_pair_context._selected_groups = ["fwd"]
         self.context.group_pair_context._selected_pairs = []
 
+
     def test_get_workspace_to_plot_calls_correctly_if_frequency_domain(self):
         self.workspace_finder.get_freq_workspaces_to_plot = mock.Mock(return_value=["62260;fwd"])
         self.workspace_finder.get_time_workspaces_to_plot = mock.Mock(return_value=["62260;fwd"])
