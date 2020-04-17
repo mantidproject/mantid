@@ -149,11 +149,13 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         if self._advanced:
             ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
+            self.setMinimumSize(300,351)
             ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
             if len(self._workspaces) > 2:
                 ui.plotType.addItem(SURFACE)
                 ui.plotType.addItem(CONTOUR)
             self.setWindowTitle("Plot Advanced")
+
 
         self._ui = ui
         ui.colorfillButton.setVisible(self._show_colorfill_button)
@@ -293,7 +295,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
 
                 self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(new_text != "Tiled")
-                
+
                 if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_REFERENCE_NUMBER:
                     self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_NAME)
 
