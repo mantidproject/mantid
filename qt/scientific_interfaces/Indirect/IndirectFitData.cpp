@@ -212,6 +212,7 @@ Spectra::Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   }
   m_vec.resize(maximum.value - minimum.value + 1);
   std::iota(m_vec.begin(), m_vec.end(), minimum);
+  m_isContinuous = true;
 }
 
 Spectra::Spectra(const Spectra &vec)

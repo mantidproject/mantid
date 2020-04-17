@@ -805,7 +805,8 @@ WorkspaceGroup_sptr IndirectFittingModel::getResultGroup() const {
 
 bool IndirectFittingModel::isPreviousModelSelected() const {
   return m_fitFunction &&
-         equivalentFunctions(getFittingFunction(), m_fitFunction);
+         equivalentFunctions(extractFirstInnerFunction(getFittingFunction()),
+                             m_fitFunction);
 }
 
 MultiDomainFunction_sptr IndirectFittingModel::getMultiDomainFunction() const {
