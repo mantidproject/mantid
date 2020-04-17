@@ -221,13 +221,13 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.plotType.setCurrentIndex(3)
-        self.assertNotEqual(ssd._ui.advanced_options_widget.ui.log_value_combo_box.findText("Workspace index"), -1)
+        self.assertNotEqual(ssd._ui.advanced_options_widget.ui.log_value_combo_box.findText("Workspace"), -1)
 
     def test_log_value_combo_box_contains_workspace_index_option_for_contour_plots(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.plotType.setCurrentIndex(4)
-        self.assertNotEqual(ssd._ui.advanced_options_widget.ui.log_value_combo_box.findText("Workspace index"), -1)
+        self.assertNotEqual(ssd._ui.advanced_options_widget.ui.log_value_combo_box.findText("Workspace"), -1)
 
     def test_log_value_combo_box_contains_sample_logs(self):
         ws1 = CreateSampleWorkspace()
