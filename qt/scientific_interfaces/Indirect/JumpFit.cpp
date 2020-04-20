@@ -69,6 +69,12 @@ void JumpFit::updateModelFitTypeString() {
 }
 
 std::string JumpFit::fitTypeString() const {
+  if (!m_jumpFittingModel->getFittingFunction()
+            || m_jumpFittingModel->getFittingFunction()
+               ->nFunctions() == 0) {
+    return "NoCurrentFunction";
+  }
+
   auto fun = m_jumpFittingModel->getFittingFunction()->getFunction(0);
   if (fun->nFunctions() == 0) {
     return fun->name();
