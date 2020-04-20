@@ -200,9 +200,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1");
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
 
-    Kernel::Timer timer;
-    while (alg1->isRunning() && timer.elapsed_no_reset() < 0.5) {
-    }
+    Poco::Thread::sleep(500);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -241,8 +239,6 @@ public:
     TS_ASSERT(ws2->monitorWorkspace());
     TS_ASSERT_EQUALS(ws2->monitorWorkspace()->readY(0)[0], 1);
 
-    Kernel::Timer timer;
-    while (alg1->isRunning() && timer.elapsed_no_reset() < 0.5) {
-    }
+    Poco::Thread::sleep(500);
   }
 };
