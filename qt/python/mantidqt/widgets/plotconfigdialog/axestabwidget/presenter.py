@@ -128,11 +128,6 @@ class AxesTabWidgetPresenter:
 
         self.current_view_props.update(self.view.get_properties())
 
-        # Currently changing the axis scale doesn't work correctly for 3D plots so those options are disabled.
-        enable_scale = not isinstance(self.get_selected_ax(), MantidAxes3D)
-        self.view.yscale_combo_box.setEnabled(enable_scale)
-        self.view.xscale_combo_box.setEnabled(enable_scale)
-
     def axis_changed(self):
         ax = self.current_axis
 
