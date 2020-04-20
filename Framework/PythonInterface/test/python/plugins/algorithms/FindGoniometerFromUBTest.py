@@ -8,6 +8,7 @@
 # System test that loads short SXD numors and runs LinkedUBs.
 from __future__ import (absolute_import, division, print_function)
 import unittest
+from testhelpers import create_algorithm
 from mantid.simpleapi import *
 import numpy as np
 
@@ -64,9 +65,13 @@ class FindGoniometerFromUB_Test(unittest.TestCase):
                     self.assertAlmostEqual(aUB[ii, jj], correctUB[irun - 1][ii, jj], delta=1e-5,
                                            msg="Discrepancy in UB file {}".format(ubList[irun]))
 
-    def doValidation(self):
-        # If we reach here, no validation failed
-        return True
+    def test_InputValidation(self):
+        alg = create_algorithm('FindGoniometerFromUB',
+                               UBfiles='WISH00043350',
+                               chi=45, chiTol=5, phiTol=10,
+                               phiHand=-1, dOmega=0, omegaHand=1)
+        with self.assertRaises(RuntimeError):
+            alg.execute()
 
 
 if __name__ == '__main__':

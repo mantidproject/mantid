@@ -9,8 +9,7 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress,
                         FileFinder, MultipleFileProperty, ITableWorkspaceProperty)
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, LoadLog, LoadNexusLogs, LoadIsawUB,
                               SetUB, SaveIsawUB, DeleteWorkspace)
-from mantid.kernel import (Direction, FloatBoundedValidator, StringMandatoryValidator, IntListValidator,
-                           StringMandatoryValidator, V3D)
+from mantid.kernel import (Direction, FloatBoundedValidator, IntListValidator, StringMandatoryValidator, V3D)
 import numpy as np
 from os import path
 import warnings
