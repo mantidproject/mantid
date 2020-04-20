@@ -42,7 +42,7 @@ class DrillView(QMainWindow):
         self.setup_header()
         self.setup_table()
 
-        self.buffer = list()  # for copy-paste actions
+        self.buffer = list()  # for row cut-copy-paste
 
     def setup_header(self):
         """
@@ -115,7 +115,6 @@ class DrillView(QMainWindow):
         table_header.setSectionResizeMode(QHeaderView.Interactive)
         delegate = DrillItemDelegate(self.table)
         self.table.setItemDelegate(delegate)
-        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.cellChanged.connect(
                 lambda row, column : self.data_changed.emit(row, column)
                 )
@@ -165,6 +164,17 @@ class DrillView(QMainWindow):
         selected_rows = self.table.selectionModel().selectedRows()
         rows = [row.row() for row in selected_rows]
         return rows
+
+    def get_selected_cells(self):
+        """
+        Get the coordinates of the selected cells.
+
+        Returns:
+            list(tuple(int, int)): the coordinates (row, column) of the
+                selected cells
+        """
+        selected_indexes = self.table.selectionModel().selectedIndexes()
+        return [(i.row(), i.column()) for i in selected_indexes]
 
     def get_last_selected_row(self):
         """
