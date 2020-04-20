@@ -136,6 +136,9 @@ class DrillModel(QObject):
         elif (self.columns[column] == self.columns[-1]):
             options = dict()
             for option in contents.split(","):
+                # ignore bad formatted options
+                if ('=' not in option):
+                    continue
                 options[option.split("=")[0]] = option.split("=")[1]
             self.samples[row][self.columns[column]] = options
         else:
