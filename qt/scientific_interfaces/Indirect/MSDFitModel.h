@@ -19,7 +19,6 @@ public:
   std::string singleFitOutputName(TableDatasetIndex index,
                                   WorkspaceIndex spectrum) const override;
 
-  std::vector<std::string> getSpectrumDependentAttributes() const override;
   void setFitTypeString(const std::string &fitType);
 
 private:

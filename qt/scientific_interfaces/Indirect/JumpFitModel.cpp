@@ -327,10 +327,6 @@ bool JumpFitModel::isMultiFit() const {
   return !allWorkspacesEqual(getWorkspace(TableDatasetIndex{0}));
 }
 
-std::vector<std::string> JumpFitModel::getSpectrumDependentAttributes() const {
-  return {};
-}
-
 std::vector<std::string>
 JumpFitModel::getWidths(TableDatasetIndex dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);

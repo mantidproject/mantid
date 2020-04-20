@@ -32,8 +32,6 @@ public:
   Mantid::API::MatrixWorkspace_sptr
   getResolution(TableDatasetIndex index) const;
 
-  std::vector<std::string> getSpectrumDependentAttributes() const override;
-
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
 

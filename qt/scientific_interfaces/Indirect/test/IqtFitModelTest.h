@@ -53,10 +53,6 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
-  void test_that_getSpectrumDependentAttributes_will_return_an_empty_vector() {
-    TS_ASSERT(m_model->getSpectrumDependentAttributes().empty());
-  }
-
 private:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

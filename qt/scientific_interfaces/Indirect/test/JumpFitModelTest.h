@@ -159,10 +159,6 @@ public:
     TS_ASSERT(!m_model->isMultiFit());
   }
 
-  void test_that_getSpectrumDependentAttributes_returns_an_empty_vector() {
-    TS_ASSERT(m_model->getSpectrumDependentAttributes().empty());
-  }
-
   void
   test_that_getFitParameterName_will_return_the_name_of_the_expected_parameter() {
     Spectra const spectra = Spectra("0-1");

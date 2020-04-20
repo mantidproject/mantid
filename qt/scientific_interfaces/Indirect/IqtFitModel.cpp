@@ -166,10 +166,6 @@ IAlgorithm_sptr IqtFitModel::getFittingAlgorithm() const {
   return IndirectFittingModel::getFittingAlgorithm();
 }
 
-std::vector<std::string> IqtFitModel::getSpectrumDependentAttributes() const {
-  return {};
-}
-
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
   algorithm->setProperty("IgnoreInvalidData", true);

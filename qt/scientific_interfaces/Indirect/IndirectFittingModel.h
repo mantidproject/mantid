@@ -8,6 +8,7 @@
 
 #include "IIndirectFitData.h"
 #include "IIndirectFitRegion.h"
+#include "IIndirectFitResult.h"
 #include "IndexTypes.h"
 #include "IndirectFitData.h"
 #include "IndirectFitOutput.h"
@@ -53,7 +54,8 @@ private:
     performing a QENS fit, as well as accessing the results of the fit.
 */
 class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitData,
-                                                   IIndirectFitRegion {
+                                                   IIndirectFitRegion,
+                                                   IIndirectFitResult {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
@@ -87,12 +89,11 @@ public:
 
   // IIndirectFitResult
   bool isPreviouslyFit(TableDatasetIndex dataIndex,
-                       WorkspaceIndex spectrum) const;
-  virtual boost::optional<std::string> isInvalidFunction() const;
-  std::vector<std::string> getFitParameterNames() const;
-  virtual Mantid::API::MultiDomainFunction_sptr getFittingFunction() const;
-
-  virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
+                       WorkspaceIndex spectrum) const override;
+  virtual boost::optional<std::string> isInvalidFunction() const override;
+  std::vector<std::string> getFitParameterNames() const override;
+  virtual Mantid::API::MultiDomainFunction_sptr
+  getFittingFunction() const override;
 
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(const std::string &spectra, TableDatasetIndex dataIndex);

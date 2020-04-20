@@ -166,15 +166,6 @@ public:
     TS_ASSERT(!m_model->getResolution(TableDatasetIndex{2}));
   }
 
-  void test_that_getSpectrumDependentAttributes_returns_workspace_index() {
-    std::vector<std::string> attributes{"WorkspaceIndex"};
-
-    auto const spectrumDependentAttributes =
-        m_model->getSpectrumDependentAttributes();
-    for (auto i = 0u; i < spectrumDependentAttributes.size(); ++i)
-      TS_ASSERT_EQUALS(attributes[i], spectrumDependentAttributes[i]);
-  }
-
   void
   test_that_removeWorkspace_will_remove_the_workspace_specified_from_the_model() {
     Spectra const spectra = Spectra("0-1");

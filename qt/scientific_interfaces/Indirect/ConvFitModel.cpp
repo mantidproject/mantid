@@ -388,12 +388,6 @@ MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
-std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
-  /// Q value also depends on spectrum but is automatically updated when
-  /// the WorkspaceIndex is changed
-  return {"WorkspaceIndex"};
-}
-
 void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) {
   IndirectFittingModel::setFitFunction(function);
 }

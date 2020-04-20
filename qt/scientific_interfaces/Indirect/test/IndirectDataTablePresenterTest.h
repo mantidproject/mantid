@@ -87,10 +87,6 @@ private:
     UNUSED_ARG(spectrum);
     return "";
   };
-
-  std::vector<std::string> getSpectrumDependentAttributes() const override {
-    return {};
-  };
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

@@ -33,8 +33,6 @@ public:
 
   bool isMultiFit() const override;
 
-  std::vector<std::string> getSpectrumDependentAttributes() const override;
-
   std::string getFitParameterName(TableDatasetIndex dataIndex,
                                   WorkspaceIndex spectrum) const;
   std::vector<std::string> getWidths(TableDatasetIndex dataIndex) const;
