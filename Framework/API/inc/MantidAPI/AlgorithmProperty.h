@@ -10,6 +10,8 @@
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
+#include <memory>
+
 namespace Mantid {
 namespace API {
 //-------------------------------------------------------------------------

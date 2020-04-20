@@ -13,6 +13,7 @@
 
 #include <json/value.h>
 
+#include <memory>
 #include <utility>
 
 namespace Mantid {
@@ -37,7 +38,7 @@ AlgorithmProperty::AlgorithmProperty(const std::string &propName,
       m_algmStr() {}
 
 AlgorithmProperty::AlgorithmProperty(const AlgorithmProperty &other)
-    : Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm>>(other),
+    : Kernel::PropertyWithValue<std::shared_ptr<IAlgorithm>>(other),
       m_algmStr(other.m_algmStr) {}
 
 /**
