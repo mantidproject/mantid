@@ -378,6 +378,72 @@ class DrillTest(unittest.TestCase):
         for r in range(n_rows):
             self.assertEqual(self.view.table.item(r, column).text(), test_str)
 
+    def test_increment_fill(self):
+        self.view.add_row(0)
+        self.view.add_row(0)
+        n_rows = self.view.table.rowCount()
+        self.assertEqual(n_rows, 3)
+        # one cell filling
+        row = 0
+        column = 0
+        test_str = "10,20,30"
+        cell = QTableWidgetItem(test_str)
+        self.view.table.setItem(row, column, cell)
+        self.assertEqual(self.view.table.item(row, column).text(), test_str)
+        for r in range(1, n_rows):
+            self.assertIsNone(self.view.table.item(r, column))
+        # 0 increment fill
+        self.select_column(column, Qt.NoModifier)
+        self.view.increment.setValue(0)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        for r in range(n_rows):
+            self.assertEqual(self.view.table.item(r, column).text(), test_str)
+        # increment
+        increment_value = 99
+        column = 1
+        cell = QTableWidgetItem(test_str)
+        self.view.table.setItem(row, column, cell)
+        self.assertEqual(self.view.table.item(row, column).text(), test_str)
+        for r in range(1, n_rows):
+            self.assertIsNone(self.view.table.item(r, column))
+        self.select_column(column, Qt.NoModifier)
+        self.view.increment.setValue(increment_value)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        i = 0
+        for r in range(n_rows):
+            test_str_increment = ','.join([str(int(n) + i * increment_value)
+                                           for n in test_str.split(',')])
+            self.assertEqual(self.view.table.item(r, column).text(),
+                             test_str_increment)
+            i += 1
+        # increment a text
+        column = 2
+        test_str = "a=b,test,54"
+        cell = QTableWidgetItem(test_str)
+        self.view.table.setItem(row, column, cell)
+        self.assertEqual(self.view.table.item(row, column).text(), test_str)
+        for r in range(1, n_rows):
+            self.assertIsNone(self.view.table.item(r, column))
+        self.select_column(column, Qt.NoModifier)
+        self.view.increment.setValue(increment_value)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        for r in range(n_rows):
+            self.assertEqual(self.view.table.item(r, column).text(), test_str)
+        # increment a valid numor string
+        increment_value = 1
+        column = 3
+        test_str = "1000,2000+3000,5000:8000,15000-16000"
+        cell = QTableWidgetItem(test_str)
+        self.view.table.setItem(row, column, cell)
+        self.assertEqual(self.view.table.item(row, column).text(), test_str)
+        self.select_column(column, Qt.NoModifier)
+        self.view.increment.setValue(increment_value)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        self.assertEqual(self.view.table.item(1, column).text(),
+                         "1001,2001+3001,8001:11001,16001-17001")
+        self.assertEqual(self.view.table.item(2, column).text(),
+                         "1002,2002+3002,11002:14002,17002-18002")
+
     ###########################################################################
     # test model specific functions                                           #
     ###########################################################################

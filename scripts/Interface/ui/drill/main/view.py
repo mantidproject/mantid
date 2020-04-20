@@ -394,14 +394,60 @@ class DrillView(QMainWindow):
 
     def automatic_filling(self):
         """
-        Copy the contents of the first selected cell in the other ones.
+        Copy (and increment) the contents of the first selected cell in the
+        other ones. If a numors string is detected in the first cell, the
+        numors values are incremented by the number found in the ui spinbox
+        associated with this action.
         """
+        def inc(numors, i):
+            """
+            Increment a numors string by i.
+            For example, for increment by 1:
+            "1000,2000,3000"  ->  "1001,2001,3001"
+            "1000+2000,3000"  ->  "1001+2001,3001"
+            "1000:2000,3000"  ->  "2001-3001,3001"
+            "1000-2000,3000"  ->  "2001-3001,3001"
+
+            Args:
+                numors (str): a numors string
+                i (int): increment value
+
+            Returns:
+                str: A string that represents the incremented numors
+            """
+            try:
+                return str(int(numors) + i)
+            except:
+                if ((',' in numors) or ('+' in numors)):
+                    c = ',' if ',' in numors else '+'
+                    splitted = numors.split(c)
+                    out = list()
+                    for e in splitted:
+                        out.append(inc(e, i))
+                        if out[-1] == e:
+                            return numors
+                    return c.join(out)
+                elif ((':' in numors) or ('-' in numors)):
+                    c = ':' if ':' in numors else '-'
+                    splitted = numors.split(c)
+                    try:
+                        r0 = str(int(splitted[1]) + i)
+                        r1 = str(2 * int(splitted[1]) - int(splitted[0]) + i)
+                        return r0 + c + r1
+                    except:
+                        return numors
+                else:
+                    return numors
+
+        increment = self.increment.value()
         cells = self.get_selected_cells()
         if not cells:
             return
-        contents = self.get_cell_contents(cells[0][0], cells[0][1])
-        for cell in cells[1:]:
-            self.set_cell_contents(cell[0], cell[1], contents)
+        # increment or copy the content of the previous cell
+        for i in range(1, len(cells)):
+            contents = self.get_cell_contents(cells[i-1][0], cells[i-1][1])
+            self.set_cell_contents(cells[i][0], cells[i][1],
+                                   inc(contents, increment))
 
     def keyPressEvent(self, event):
         """
