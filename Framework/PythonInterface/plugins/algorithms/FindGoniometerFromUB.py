@@ -7,8 +7,9 @@
 from mantid import config
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress,
                         FileFinder, MultipleFileProperty, ITableWorkspaceProperty)
-from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, LoadLog, LoadNexusLogs)
-from mantid.kernel import (Direction, FloatBoundedValidator, IntListValidator,
+from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, LoadLog, LoadNexusLogs, LoadIsawUB,
+                              SetUB, SaveIsawUB, DeleteWorkspace)
+from mantid.kernel import (Direction, FloatBoundedValidator, StringMandatoryValidator, IntListValidator,
                            StringMandatoryValidator, V3D)
 import numpy as np
 from os import path
@@ -70,6 +71,12 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             doc="Handedness for the phi angles (rotation around goniometer axis) in the"
                 " log file (1 for ccw/RH, -1 for cw/LH)")
         self.declareProperty(
+            name="PhiLogName",
+            defaultValue='ewald_pos',
+            direction=Direction.Input,
+            validator=StringMandatoryValidator(),
+            doc="Name of log entry that records angle of rotation about goniometer axis")
+        self.declareProperty(
             name="DOmega",
             defaultValue=0.0,
             direction=Direction.Input,
@@ -83,6 +90,12 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             validator=IntListValidator([-1, 1]),
             direction=Direction.Input,
             doc="Handedness for the omega angles (rotation around +ve Z) in the log file (1 for ccw/RH, -1 for cw/LH)")
+        self.declareProperty(
+            name="OmegaLogName",
+            defaultValue='ccr_pos',
+            direction=Direction.Input,
+            validator=StringMandatoryValidator(),
+            doc="Name of log entry that records angle of rotation about vertical axis")
         # output
         self.declareProperty(
             ITableWorkspaceProperty(
@@ -110,50 +123,21 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         chiTol = self.getProperty('ChiTol').value
         phiTol = self.getProperty('PhiTol').value
         phiHand = self.getProperty('PhiHand').value
+        phiLogName = self.getProperty('PhiLogName').value
         dOmega = self.getProperty('DOmega').value
         omegaHand = self.getProperty('OmegaHand').value
-        # rotation matrices work in right-handed coordinate system so the handedness
-
-        # self.log().information(msg)
-        # MultipleFileProperty -> UB matrix (first one for reference)
+        omegaLogName = self.getProperty('OmegaLogName').value
 
         # update progress
         prog_reporter.report(1, "Load Logs and UBs")
 
-        matUB = []  # container to hold UB matrix arrays
-        omega = np.zeros(len(ubFiles))  # rot around vertical axis (assumed to be correct)
-        phiRef = np.zeros(len(ubFiles))  # rot around gonio axis (needs to be refined)
-        for irun in range(0, len(ubFiles)):
-            # get rotation angles from logs (handedness given in input)
-            # these rotation matrices are defined in right-handed coordinate system (i.e. omegaHand = 1 etc.)
-            tmpWS = CreateSampleWorkspace(StoreInADS=False)
-            _, fname = path.split(ubFiles[irun])
-            dataPath = FileFinder.findRuns(fname.split('.mat')[0])[0]
-            if dataPath[-4:] == ".raw":
-                # assume log is kept separately in a .log file with same path
-                LoadLog(Workspace=tmpWS, Filename="".join(dataPath[:-4] + '.log'))
-            elif dataPath[-4:] == '.nxs':
-                # logs are kept with data in nexus file
-                LoadNexusLogs(Workspace=tmpWS, Filename=dataPath)
-            # read omega and phi (in RH coords)
-            omega[irun] = omegaHand * tmpWS.getRun().getLogData('ccr_pos').value[0]
-            phiRef[irun] = phiHand * tmpWS.getRun().getLogData('ewald_pos').value[0]
-            # load UB
-            matUB += [self.readUB(ubFiles[irun])]
+        matUB, omega, phiRef = self.loadUBFiles(ubFiles, omegaHand, phiHand, omegaLogName, phiLogName)
 
         # update progress
         prog_reporter.report(2, "Calculate Rotations")
 
         # create table to store the found goniometer axes and angles
-        gonioTable = CreateEmptyTableWorkspace(StoreInADS=False)
-        # Add some columns, Recognized types are: int,float,double,bool,str,V3D,long64
-        gonioTable.addColumn(type="str", name="Run")
-        gonioTable.addColumn(type="float", name="Chi")
-        gonioTable.addColumn(type="float", name="Phi")
-        gonioTable.addColumn(type="V3D", name="GonioAxis")
-
-        # get save directory
-        saveDir = config['defaultsave.directory']
+        gonioTable = self.createGoniometerTable()
 
         # make the UB for omega = 0 from reference
         zeroUB = self.getR(omega[0], [0, 0, 1]).T @ matUB[0]
@@ -161,8 +145,59 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         dPhiRef = phiRef - phiRef[0]
         dPhiRef = dPhiRef + np.ceil(-dPhiRef / 360) * 360
 
+        self.findConsistentUB(ubFiles, zeroUB, matUB, omega, dOmega, omegaHand, phiRef, dPhiRef, phiTol, phiHand,
+                              chiRef, chiTol, gonioTable)
+
+        # assign output
+        self.setProperty("OutputTable", gonioTable)
+        # complete progress
+        prog_reporter.report(3, "Done")
+
+    def loadUBFiles(self, ubFiles, omegaHand, phiHand, omegaLogName, phiLogName):
+        """
+        load the ub files and update the
+        :param ubFiles: list of paths to saved UB files
+        :param omegaHand: handedness of omega rotation (ccw/cw)
+        :param phiHand: handedness of phi rotation (ccw/cw)
+        :param omegaLogName: name of log entry for omega angle
+        :param phiLogName: name of log entry for phi angle
+        :return: matUB: list containing the UB for each run
+        :return: omega: array of omega values from log of each run
+        :return: phiRef: array of nominal phi values from log of each run
+        """
+        matUB = []  # container to hold UB matrix arrays
+        omega = np.zeros(len(ubFiles))  # rot around vertical axis (assumed to be correct)
+        phiRef = np.zeros(len(ubFiles))  # rot around gonio axis (needs to be refined)
+        for irun in range(0, len(ubFiles)):
+            # get rotation angles from logs (handedness given in input)
+            # these rotation matrices are defined in right-handed coordinate system (i.e. omegaHand = 1 etc.)
+            _, fname = path.split(ubFiles[irun])
+            dataPath = FileFinder.findRuns(fname.split('.mat')[0])[0]
+            tmpWS = CreateSampleWorkspace(StoreInADS=False)
+            if dataPath[-4:] == ".raw":
+                # assume log is kept separately in a .log file with same path
+                LoadLog(Workspace=tmpWS, Filename="".join(dataPath[:-4] + '.log'))
+            elif dataPath[-4:] == '.nxs':
+                # logs are kept with data in nexus file
+                LoadNexusLogs(Workspace=tmpWS, Filename=dataPath)
+            # read omega and phi (in RH coords)
+            omega[irun] = omegaHand * tmpWS.getRun().getLogData(omegaLogName).value[0]
+            phiRef[irun] = phiHand * tmpWS.getRun().getLogData(phiLogName).value[0]
+            # load UB
+            LoadIsawUB(InputWorkspace=tmpWS, Filename=ubFiles[irun], CheckUMatrix=True)
+            tmpUB = tmpWS.sample().getOrientedLattice().getUB()
+            # permute axes to use IPNS convention (as in saved .mat file)
+            matUB += [tmpUB[[2, 0, 1], :]]
+        DeleteWorkspace(tmpWS)
+        return matUB, omega, phiRef
+
+    def findConsistentUB(self, ubFiles, zeroUB, matUB, omega, dOmega, omegaHand, phiRef, dPhiRef, phiTol, phiHand,
+                         chiRef, chiTol, gonioTable):
         # calculate the rotation matrix that maps the UB of the first run onto subsequent UBs
-        for irun in range(1, len(ubFiles)):
+        # get save directory
+        saveDir = config['defaultsave.directory']
+        tmpWS = CreateSampleWorkspace()
+        for irun in range(1, len(omega)):
             chi, phi, u = self.getGonioAngles(matUB[irun], zeroUB, omega[irun])
             # phi relative to first run in RH/LH convention of user
             # check if phi and chi are not within tolerance of expected
@@ -183,10 +218,12 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
                 chi, phi, u = self.getGonioAngles(matUB[irun], zeroUB, omega[irun])
 
             if abs(chi - chiRef) <= chiTol and abs(phi - dPhiRef[irun]) <= phiTol:
-                # save the consistent UB to the ubPath
+                # save the consistent UB to the default save directory
                 _, nameUB = path.split(ubFiles[irun])
                 newUBPath = path.join(saveDir, nameUB[:-4] + '_consistent' + nameUB[-4:])
-                self.writeConsistentUB(ubFiles[irun], newUBPath, matUB[irun])
+                # set as UB (converting back to non-IPNS convention)
+                SetUB(tmpWS, UB=matUB[irun][[1, 2, 0], :])
+                SaveIsawUB(tmpWS, newUBPath)
                 # populate row of table
                 phi2print = phiHand * (phi + phiRef[0])
                 phi2print = phi2print + np.ceil(-phi2print / 360) * 360
@@ -199,19 +236,19 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
                 warnings.warn("WARNING: The UB {0} cannot be made consistent with the reference UB. "
                               "Check the goniometer angles and handedness supplied "
                               "and the accuracy of reference UB.".format(ubFiles[irun]))
+        DeleteWorkspace(tmpWS)
 
-        # assign output
-        self.setProperty("OutputTable", gonioTable)
-        # complete progress
-        prog_reporter.report(3, "Done")
-
-    def readUB(self, fpath):
+    def createGoniometerTable(self):
         """
-        :param fpath: path to UB files exported with SaveIsawUB
-        :return: 3x3 UB matrix
+        :return: Empty table workspace with columns Run, Chi, Phi and GonioAxis (unit vector)
         """
-        ub = np.loadtxt(fpath, skiprows=0, max_rows=3).T
-        return ub
+        gonioTable = CreateEmptyTableWorkspace(StoreInADS=False)
+        # Add some columns, Recognized types are: int,float,double,bool,str,V3D,long64
+        gonioTable.addColumn(type="str", name="Run")
+        gonioTable.addColumn(type="float", name="Chi")
+        gonioTable.addColumn(type="float", name="Phi")
+        gonioTable.addColumn(type="V3D", name="GonioAxis")
+        return gonioTable
 
     def getSignMaxAbsValInCol(self, mat):
         """
@@ -224,6 +261,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
     def getSingleAxis(self, r):
         """
         Single-axis rotation for a given rotation matrix using the Rodrigues formula
+        (see https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula)
         :param r: Rotation matrix from which to find the single-axis rotation
         :return: theta: rotation (ccw) around goniometer axis
         :return: u: goniometer axis unit vector
@@ -270,23 +308,6 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         # force phi to be in range [0,360)
         phi = phi + np.ceil(-phi / 360) * 360
         return chi, phi, u
-
-    def writeConsistentUB(self, oldUBPath, newUBPath, newUB):
-        """
-        :param oldUBPath: path of old UB that was loaded (incl. filename)
-        :param newUBPath: path to write the consistent UB (incl. filename)
-        :param newUB: the new consistent UB to write
-        """
-        # read the content of the old UB (very small file)
-        with open(oldUBPath, 'r') as fid:
-            lines = fid.read().splitlines()
-        # replace the first three lines with the three cols of UB matrix
-        # (.mat file contains the transpose of the UB matrix)
-        for irow in range(0, newUB.shape[1]):
-            lines[irow] = " ".join(["{0:>11.8f}".format(uu) for uu in newUB[:, irow]]) + " "
-        # write lines to new file (with a newline at end)
-        with open(newUBPath, 'w+') as fid:
-            fid.writelines('\n'.join(lines + ['']))
 
 
 # register algorithm with mantid
