@@ -91,6 +91,9 @@ class DrillView(QMainWindow):
         self.help.setIcon(icons.get_icon("mdi.help"))
         self.help.clicked.connect(self.display_help)
 
+        self.fill.setIcon(icons.get_icon("mdi.arrow-expand-down"))
+        self.fill.clicked.connect(self.automatic_filling)
+
         self.processRows.setIcon(icons.get_icon("mdi.play"))
         self.processRows.clicked.connect(self.process_selected_rows)
 
@@ -388,6 +391,17 @@ class DrillView(QMainWindow):
 
     def display_help(self):
         pass
+
+    def automatic_filling(self):
+        """
+        Copy the contents of the first selected cell in the other ones.
+        """
+        cells = self.get_selected_cells()
+        if not cells:
+            return
+        contents = self.get_cell_contents(cells[0][0], cells[0][1])
+        for cell in cells[1:]:
+            self.set_cell_contents(cell[0], cell[1], contents)
 
     def keyPressEvent(self, event):
         """

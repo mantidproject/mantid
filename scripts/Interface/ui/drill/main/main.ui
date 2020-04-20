@@ -148,6 +148,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QSpinBox" name="increment"/>
+      </item>
+      <item>
+       <widget class="QToolButton" name="fill">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="help">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

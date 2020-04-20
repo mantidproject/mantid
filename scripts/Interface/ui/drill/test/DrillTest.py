@@ -46,6 +46,16 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(vertical_header.viewport(),
                          Qt.LeftButton, modifier, QPoint(x, y))
 
+    def select_column(self, column, modifier):
+        # find the middle of the column header
+        horizontal_header = self.view.table.horizontalHeader()
+        x = horizontal_header.sectionPosition(column) \
+            + horizontal_header.sectionSize(column) / 2
+        y = 0 + horizontal_header.length() / 2
+
+        QTest.mouseClick(horizontal_header.viewport(),
+                         Qt.LeftButton, modifier, QPoint(x, y))
+
     def edit_cell(self, row, column):
         y = self.view.table.rowViewportPosition(row) + 1
         x = self.view.table.columnViewportPosition(column) + 1
@@ -334,6 +344,39 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(len(self.model.samples), 2)
         self.assertEqual(self.model.samples[0], self.model.samples[1])
         self.assertEqual(self.model.samples[1], reference)
+
+    def test_copy_fill(self):
+        self.view.add_row(0)
+        self.view.add_row(0)
+        n_rows = self.view.table.rowCount()
+        self.assertEqual(n_rows, 3)
+        # one cell filling
+        row = 0
+        column = 0
+        test_str = "test"
+        cell = QTableWidgetItem(test_str)
+        self.view.table.setItem(row, column, cell)
+        self.assertEqual(self.view.table.item(row, column).text(), test_str)
+        for r in range(1, n_rows):
+            self.assertIsNone(self.view.table.item(r, column))
+        # no selection
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        self.assertEqual(self.view.table.item(row, column).text(), test_str)
+        for r in range(1, n_rows):
+            self.assertIsNone(self.view.table.item(r, column))
+        # individual selections
+        self.select_cell(row, column, Qt.NoModifier)
+        self.select_cell(row + 1, column, Qt.ControlModifier)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        self.assertEqual(self.view.table.item(row, column).text(), test_str)
+        self.assertEqual(self.view.table.item(row + 1, column).text(), test_str)
+        for r in range(2, n_rows):
+            self.assertIsNone(self.view.table.item(r, column))
+        # whole column selection
+        self.select_column(column, Qt.NoModifier)
+        QTest.mouseClick(self.view.fill, Qt.LeftButton)
+        for r in range(n_rows):
+            self.assertEqual(self.view.table.item(r, column).text(), test_str)
 
     ###########################################################################
     # test model specific functions                                           #
