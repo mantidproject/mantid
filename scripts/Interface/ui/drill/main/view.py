@@ -125,31 +125,40 @@ class DrillView(QMainWindow):
 
     def add_row(self, position):
         """
-        Add a row in the table at a given postion.
+        Add a row in the table at a given valid postion.
 
         Args:
             position (int): row index
         """
+        n_rows = self.table.rowCount()
+        if ((position < 0) or (position > n_rows)):
+            return
         self.table.insertRow(position)
         self.row_added.emit(position)
 
     def del_row(self, position):
         """
-        Delete a row at a given position.
+        Delete a row at a given position (if this row exists).
 
         Args:
             position(int): row index
         """
+        n_rows = self.table.rowCount()
+        if ((position < 0) or (position >= n_rows)):
+            return
         self.table.removeRow(position)
         self.row_deleted.emit(position)
 
     def erase_row(self, position):
         """
-        Erase the contents of a whole row.
+        Erase the contents of a whole row (if it exists).
 
         Args:
             position (int): row index
         """
+        n_rows = self.table.rowCount()
+        if ((position < 0) or (position >= n_rows)):
+            return
         for column in range(self.table.columnCount()):
             self.table.takeItem(position, column)
             self.data_changed.emit(position, column)
@@ -181,7 +190,7 @@ class DrillView(QMainWindow):
         Get the further down selected row.
 
         Returns:
-            int: the row index
+            int: the row index, -1 if no row selected.
         """
         rows = self.get_selected_rows()
         if rows:
@@ -217,13 +226,18 @@ class DrillView(QMainWindow):
 
     def set_cell_contents(self, row, column, contents):
         """
-        Set the content of a cell.
+        Set the content of an existing cell.
 
         Args:
             row (int): row index
             column (int): column index
             contents (str): cell contents
         """
+        n_rows = self.table.rowCount()
+        n_columns = self.table.columnCount()
+        if ((row < 0) or (row >= n_rows) \
+            or (column < 0) or (column >= n_columns)):
+            return
         cell = QTableWidgetItem(contents)
         self.table.setItem(row, column, cell)
 
@@ -244,12 +258,15 @@ class DrillView(QMainWindow):
 
     def set_row_contents(self, row, contents):
         """
-        Set the content of a row.
+        Set the content of an existing row.
 
         Args:
             row (int): row index
             contents (list(str)): contents
         """
+        n_rows = self.table.rowCount()
+        if ((row < 0) or (row >= n_rows)):
+            return
         column = 0
         for txt in contents:
             self.set_cell_contents(row, column, txt)
