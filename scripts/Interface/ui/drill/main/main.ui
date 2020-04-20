@@ -280,13 +280,113 @@
      <string>File</string>
     </property>
     <addaction name="actionLoadRundex"/>
+    <addaction name="actionSaveRundex"/>
+    <addaction name="actionManageDirectories"/>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuProcess">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionAddRow"/>
+    <addaction name="actionDelRow"/>
+    <addaction name="actionCopyRow"/>
+    <addaction name="actionCutRow"/>
+    <addaction name="actionPasteRow"/>
+    <addaction name="actionErase"/>
+   </widget>
+   <widget class="QMenu" name="menuProcess_2">
+    <property name="title">
+     <string>Process</string>
+    </property>
+    <addaction name="actionProcessRow"/>
+    <addaction name="actionProcessAll_2"/>
+    <addaction name="actionStopProcessing"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuProcess"/>
+   <addaction name="menuProcess_2"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionLoadRundex">
    <property name="text">
-    <string>LoadRundex</string>
+    <string>Load rundex</string>
+   </property>
+  </action>
+  <action name="actionProcessSelected">
+   <property name="text">
+    <string>Process selected row(s)</string>
+   </property>
+  </action>
+  <action name="actionProcessAll">
+   <property name="text">
+    <string>Process selected rows</string>
+   </property>
+  </action>
+  <action name="actionSaveRundex">
+   <property name="text">
+    <string>Save rundex</string>
+   </property>
+  </action>
+  <action name="actionManageDirectories">
+   <property name="text">
+    <string>Manage data directories</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionProcessRow">
+   <property name="text">
+    <string>Process select row(s)</string>
+   </property>
+  </action>
+  <action name="actionProcessAll_2">
+   <property name="text">
+    <string>Process all rows</string>
+   </property>
+  </action>
+  <action name="actionStopProcessing">
+   <property name="text">
+    <string>Stop processing</string>
+   </property>
+  </action>
+  <action name="actionCopyRow">
+   <property name="text">
+    <string>Copy selected row(s)</string>
+   </property>
+  </action>
+  <action name="actionCutRow">
+   <property name="text">
+    <string>Cut selected row(s)</string>
+   </property>
+  </action>
+  <action name="actionPasteRow">
+   <property name="text">
+    <string>Paste row(s)</string>
+   </property>
+  </action>
+  <action name="actionErase">
+   <property name="text">
+    <string>Erase seleced cell(s)</string>
+   </property>
+  </action>
+  <action name="actionAddRow">
+   <property name="text">
+    <string>Add a row</string>
+   </property>
+  </action>
+  <action name="actionDelRow">
+   <property name="text">
+    <string>Remove selected row(s)</string>
    </property>
   </action>
  </widget>

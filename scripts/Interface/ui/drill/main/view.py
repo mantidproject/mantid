@@ -48,6 +48,22 @@ class DrillView(QMainWindow):
         """
         Setup the window header. Set the buttons icons and connect the signals.
         """
+        self.actionLoadRundex.triggered.connect(self.load_rundex)
+        self.actionSaveRundex.triggered.connect(self.save_rundex)
+        self.actionManageDirectories.triggered.connect(self.show_directory_manager)
+        self.actionSettings.triggered.connect(self.show_settings)
+        self.actionAddRow.triggered.connect(self.add_row_after)
+        self.actionDelRow.triggered.connect(self.del_selected_rows)
+        self.actionCopyRow.triggered.connect(self.copy_selected_rows)
+        self.actionCutRow.triggered.connect(self.cut_selected_rows)
+        self.actionPasteRow.triggered.connect(self.paste_rows)
+        self.actionErase.triggered.connect(self.erase_selected_rows)
+        self.actionProcessRow.triggered.connect(self.process_selected_rows)
+        self.actionProcessAll.triggered.connect(self.process_all_rows)
+        self.actionStopProcessing.triggered.connect(
+                lambda : self.process_stopped.emit()
+                )
+
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
         self.headerLeft.addWidget(self.instrumentselector, 0, Qt.AlignLeft)
         self.instrumentselector.instrumentSelectionChanged.connect(

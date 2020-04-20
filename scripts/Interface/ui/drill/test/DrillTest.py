@@ -244,8 +244,10 @@ class DrillTest(unittest.TestCase):
         self.presenter.on_instrument_changed("D22")
         self.assertEqual(self.view.table.rowCount(), 1)
         self.assertEqual(len(self.model.samples), 1)
+        # add through the icon
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
+        # add through the menu
+        self.view.actionAddRow.trigger()
         self.assertEqual(self.view.table.rowCount(), 3)
         self.assertEqual(len(self.model.samples), 3)
 
@@ -275,8 +277,8 @@ class DrillTest(unittest.TestCase):
         # shift-click on the third row
         self.select_row(2, Qt.ShiftModifier)
 
-        # delete the first three rows
-        QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
+        # delete the first three rows with the menu
+        self.view.actionDelRow.trigger()
         self.assertEqual(self.view.table.rowCount(), 0)
         self.assertEqual(len(self.model.samples), 0)
 
@@ -304,19 +306,31 @@ class DrillTest(unittest.TestCase):
     def test_erase_row(self):
         self.presenter.on_instrument_changed("D22")
 
+        self.view.add_row(0)
         # add contents (last column has a special treatment !)
         for i in range(self.view.table.columnCount() - 1):
             item = QTableWidgetItem("test")
             self.view.table.setItem(0, i, item)
+            item = QTableWidgetItem("test")
+            self.view.table.setItem(1, i, item)
         item = QTableWidgetItem("test=test")
         self.view.table.setItem(0, self.view.table.columnCount() - 1, item)
+        item = QTableWidgetItem("test=test")
+        self.view.table.setItem(1, self.view.table.columnCount() - 1, item)
         self.assertEqual(len(self.model.samples[0]),
                          self.view.table.columnCount())
+        self.assertEqual(len(self.model.samples[1]),
+                        self.view.table.columnCount())
 
-        # erase row
+        # erase row with icon
         self.select_row(0, Qt.NoModifier)
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
         self.assertEqual(len(self.model.samples[0]), 0)
+
+        #erase row with menu
+        self.select_row(1, Qt.NoModifier)
+        self.view.actionErase.trigger()
+        self.assertEqual(len(self.model.samples[1]), 0)
 
     def test_cut_copy_paste(self):
         self.presenter.on_instrument_changed("D22")
@@ -329,7 +343,7 @@ class DrillTest(unittest.TestCase):
         self.view.table.setItem(0, self.view.table.columnCount() - 1, item)
         reference = self.model.samples[0]
 
-        # cut - paste
+        # cut - paste with icon
         self.select_row(0, Qt.NoModifier)
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         self.assertEqual(len(self.model.samples), 0)
@@ -337,10 +351,27 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(len(self.model.samples), 1)
         self.assertEqual(self.model.samples[0], reference)
 
-        # copy - paste
+        # cut - paste with menu
+        self.select_row(0, Qt.NoModifier)
+        self.view.actionCutRow.trigger()
+        self.assertEqual(len(self.model.samples), 0)
+        self.view.actionPasteRow.trigger()
+        self.assertEqual(len(self.model.samples), 1)
+        self.assertEqual(self.model.samples[0], reference)
+
+        # copy - paste with icon
         self.select_row(0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
+        self.assertEqual(len(self.model.samples), 2)
+        self.assertEqual(self.model.samples[0], self.model.samples[1])
+        self.assertEqual(self.model.samples[1], reference)
+
+        # copy - paste with menu
+        self.view.del_row(1)
+        self.select_row(0, Qt.NoModifier)
+        self.view.actionCopyRow.trigger()
+        self.view.actionPasteRow.trigger()
         self.assertEqual(len(self.model.samples), 2)
         self.assertEqual(self.model.samples[0], self.model.samples[1])
         self.assertEqual(self.model.samples[1], reference)
