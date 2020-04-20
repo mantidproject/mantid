@@ -63,7 +63,7 @@ public:
   void setCurrentDataset(TableRowIndex i);
   TableRowIndex currentDataset() const;
   void updateFunctionBrowserData(
-      TableRowIndex nData, const QStringList &datasetNames,
+      int nData, const QStringList &datasetNames,
       const std::vector<double> &qValues,
       const std::vector<std::pair<std::string, int>> &fitResolutions);
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);

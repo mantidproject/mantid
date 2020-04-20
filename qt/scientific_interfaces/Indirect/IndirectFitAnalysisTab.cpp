@@ -445,7 +445,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 paramWsName);
         auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
+        if (rowCount == m_fittingModel->getNumberOfDomains())
           m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
       } else {
         IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");

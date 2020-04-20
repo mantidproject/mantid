@@ -325,8 +325,8 @@ PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)
 PrivateFittingData::PrivateFittingData(IndirectFitDataCollectionType &&data)
     : m_data(std::move(data)) {}
 
-PrivateFittingData &PrivateFittingData::
-operator=(PrivateFittingData &&fittingData) {
+PrivateFittingData &
+PrivateFittingData::operator=(PrivateFittingData &&fittingData) {
   m_data = std::move(fittingData.m_data);
   return *this;
 }
@@ -430,21 +430,20 @@ TableDatasetIndex IndirectFittingModel::numberOfWorkspaces() const {
   return TableDatasetIndex{m_fittingData.size()};
 }
 
-TableRowIndex
-IndirectFittingModel::getNumberOfSpectra(TableDatasetIndex index) const {
+int IndirectFittingModel::getNumberOfSpectra(TableDatasetIndex index) const {
   if (index < m_fittingData.size())
-    return m_fittingData[index]->numberOfSpectra();
+    return m_fittingData[index]->numberOfSpectra().value;
   else
     throw std::runtime_error(
         "Cannot find the number of spectra for a workspace: the workspace "
         "index provided is too large.");
 }
 
-TableRowIndex IndirectFittingModel::getNumberOfDomains() const {
-  TableRowIndex sum{0};
+int IndirectFittingModel::getNumberOfDomains() const {
+  int sum{0};
   for (TableDatasetIndex i = m_fittingData.zero(); i < m_fittingData.size();
        ++i) {
-    sum += m_fittingData[i]->numberOfSpectra();
+    sum += m_fittingData[i]->numberOfSpectra().value;
   }
   return sum;
 }
@@ -848,7 +847,7 @@ IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
                                         WorkspaceIndex spectrum) const {
   auto function = getFittingFunction();
   assert(function->getNumberDomains() ==
-         static_cast<size_t>(getNumberOfDomains().value));
+         static_cast<size_t>(getNumberOfDomains()));
   if (function->getNumberDomains() == 0) {
     throw std::runtime_error("Cannot set up a fit: is the function defined?");
   }
@@ -859,7 +858,7 @@ Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::sequentialFitAlgorithm() const {
   auto function = getFittingFunction();
   assert(function->getNumberDomains() ==
-         static_cast<size_t>(getNumberOfDomains().value));
+         static_cast<size_t>(getNumberOfDomains()));
   return AlgorithmManager::Instance().create("QENSFitSequential");
 }
 
@@ -867,7 +866,7 @@ Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::simultaneousFitAlgorithm() const {
   auto function = getFittingFunction();
   assert(function->getNumberDomains() ==
-         static_cast<size_t>(getNumberOfDomains().value));
+         static_cast<size_t>(getNumberOfDomains()));
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }
 

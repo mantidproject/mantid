@@ -56,13 +56,13 @@ template <int Class> struct IndexType {
   }
 }; // namespace IDA
 
-// Used to index table rows in the GUI
+// The index of the fitting Domain, i.e. ignores workspaces and spectra
 using TableRowIndex = IndexType<0>;
 // Used to index spectra in workspaces
 using WorkspaceIndex = IndexType<1>;
 // Used to index worspaces in workspace groups
 using WorkspaceGroupIndex = IndexType<2>;
-// Used to index
+// Used to index data by workspace
 using TableDatasetIndex = IndexType<3>;
 
 /** A class which wraps a vector so that you supply not only the value

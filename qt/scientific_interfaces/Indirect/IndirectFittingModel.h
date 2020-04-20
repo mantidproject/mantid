@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IIndirectFitData.h"
+#include "IIndirectFitRegion.h"
 #include "IndexTypes.h"
 #include "IndirectFitData.h"
 #include "IndirectFitOutput.h"
@@ -50,34 +52,43 @@ private:
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class MANTIDQT_INDIRECT_DLL IndirectFittingModel {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitData,
+                                                   IIndirectFitRegion {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
-  virtual bool hasWorkspace(std::string const &workspaceName) const;
-  virtual Mantid::API::MatrixWorkspace_sptr
-  getWorkspace(TableDatasetIndex index) const;
-  Spectra getSpectra(TableDatasetIndex index) const;
+  // IIndirectFitData
+  bool hasWorkspace(std::string const &workspaceName) const override;
+  Mantid::API::MatrixWorkspace_sptr
+  getWorkspace(TableDatasetIndex index) const override;
+  Spectra getSpectra(TableDatasetIndex index) const override;
+  bool isMultiFit() const override;
+  TableDatasetIndex numberOfWorkspaces() const override;
+  int getNumberOfSpectra(TableDatasetIndex index) const override;
+  int getNumberOfDomains() const override;
+  TableRowIndex getDomainIndex(TableDatasetIndex dataIndex,
+                               WorkspaceIndex spectrum) const override;
+
+  // IIndirectFitRegion
   virtual std::pair<double, double>
-  getFittingRange(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  getFittingRange(TableDatasetIndex dataIndex,
+                  WorkspaceIndex spectrum) const override;
   virtual std::string getExcludeRegion(TableDatasetIndex dataIndex,
-                                       WorkspaceIndex index) const;
+                                       WorkspaceIndex index) const override;
+
+  // Functions concerned with naming
   virtual std::string createDisplayName(const std::string &formatString,
                                         const std::string &rangeDelimiter,
                                         TableDatasetIndex dataIndex) const;
   std::string createOutputName(const std::string &formatString,
                                const std::string &rangeDelimiter,
                                TableDatasetIndex dataIndex) const;
-  virtual bool isMultiFit() const;
+
+  // IIndirectFitResult
   bool isPreviouslyFit(TableDatasetIndex dataIndex,
                        WorkspaceIndex spectrum) const;
   virtual boost::optional<std::string> isInvalidFunction() const;
-  virtual TableDatasetIndex numberOfWorkspaces() const;
-  TableRowIndex getNumberOfSpectra(TableDatasetIndex index) const;
-  TableRowIndex getNumberOfDomains() const;
-  virtual TableRowIndex getDomainIndex(TableDatasetIndex dataIndex,
-                                       WorkspaceIndex spectrum) const;
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::MultiDomainFunction_sptr getFittingFunction() const;
 
