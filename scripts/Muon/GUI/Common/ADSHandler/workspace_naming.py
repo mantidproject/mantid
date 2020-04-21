@@ -36,7 +36,7 @@ def get_group_data_workspace_name(context, group_name, run, rebin):
         name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
 
     if rebin:
-        name += "".join([REBIN_STR, ';'])
+        name += "".join([' ', REBIN_STR, ';'])
 
     name += context.workspace_suffix
 

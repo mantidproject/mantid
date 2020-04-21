@@ -430,10 +430,11 @@ class FittingContext(object):
         self.remove_fits_from_stored_fit_list(fits_to_remove)
 
     def remove_latest_fit(self):
-        removed_fit = self.fit_list[-1]
-        self.fit_list = self.fit_list[:-1]
-        self._number_of_fits += -1
-        self.fit_removed_notifier.notify_subscribers([removed_fit])
+        if self.fit_list:
+            removed_fit = self.fit_list[-1]
+            self.fit_list = self.fit_list[:-1]
+            self._number_of_fits += -1
+            self.fit_removed_notifier.notify_subscribers([removed_fit])
 
     @property
     def number_of_fits(self):

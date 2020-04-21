@@ -110,6 +110,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Plots the guess workspace """
         fit_plot_information = self._model.create_plot_information_for_guess_ws(guess_ws_name)
         self._view.add_workspaces_to_plot([fit_plot_information])
+        self._view.redraw_figure()
 
     def get_plot_axes(self):
         """Returns the matplotlib axes - needed for the external plot button"""

@@ -331,6 +331,7 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(False)
         self.context.fitting_context.remove_latest_fit()
         self._number_of_fits_cached = 0
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_by_changed(self):
         self.manual_selection_made = False  # reset manual selection flag

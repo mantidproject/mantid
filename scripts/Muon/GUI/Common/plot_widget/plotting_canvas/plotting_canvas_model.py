@@ -126,7 +126,7 @@ class PlottingCanvasModel(object):
     def _get_workspace_plot_axis(self, workspace_name: str):
         if not self._is_tiled:
             return 0
-        for axis, key in enumerate(self._axes_workspace_map):
+        for key, axis in self._axes_workspace_map.items():
             if key in workspace_name:
                 return axis
         else:

@@ -225,8 +225,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._figure_presenter.create_single_plot()
 
     def handle_plot_selected_fits(self, fit_information_list: List[FitPlotInformation]):
-        """Plots a list of selected fit workspaces (attained from fit and seq fit tabs.
-        :param fit_information_list: List of named tuples each entry of the form (fit, input_workspaces)"""
+        """Plots a list of selected fit workspaces (obtained from fit and seq fit tabs).
+        :param fit_information_list: List of named tuples each entry of the form (fit, input_workspaces)
+        """
         if not fit_information_list:
             return
         workspace_list = []
