@@ -45,9 +45,6 @@
        <number>2</number>
       </property>
       <item>
-       <layout class="QVBoxLayout" name="headerLeft"/>
-      </item>
-      <item>
        <widget class="QComboBox" name="techniqueSelector"/>
       </item>
       <item>

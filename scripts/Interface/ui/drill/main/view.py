@@ -65,7 +65,7 @@ class DrillView(QMainWindow):
                 )
 
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
-        self.headerLeft.addWidget(self.instrumentselector, 0, Qt.AlignLeft)
+        self.toolbar.insertWidget(0, self.instrumentselector, 0, Qt.AlignLeft)
         self.instrumentselector.instrumentSelectionChanged.connect(
                 lambda i : self.instrument_changed.emit(i)
                 )
