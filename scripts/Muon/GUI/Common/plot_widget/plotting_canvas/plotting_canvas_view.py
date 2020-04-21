@@ -108,24 +108,39 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 workspace = AnalysisDataService.Instance().retrieve(workspace_name)
             except RuntimeError:
                 continue
+            self._plot_information_list.append(workspace_plot_info)
             errors = workspace_plot_info.errors
             ws_index = workspace_plot_info.index
             axis_number = workspace_plot_info.axis
             ax = self.fig.axes[axis_number]
             _do_single_plot(ax, workspace, ws_index, errors=errors,
                             plot_kwargs=self._get_plot_kwargs(workspace_plot_info))
-            self._plot_information_list.append(workspace_plot_info)
+
+    def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+        for workspace_plot_info in workspace_plot_info_list:
+            workspace_name = workspace_plot_info.workspace_name
+            try:
+                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+            except RuntimeError:
+                continue
+            for plotted_information in self._plot_information_list.copy():
+                if workspace_plot_info == plotted_information:
+                    axis = self.fig.axes[workspace_plot_info.axis]
+                    axis.remove_workspace_artists(workspace)
+                    self._plot_information_list.remove(plotted_information)
+
+        # If we have no plotted lines, reset the color cycle
+        if self.num_plotted_workspaces == 0:
+            self._reset_color_cycle()
 
     def remove_workspace_from_plot(self, workspace):
-        """Remove a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
-           The PlotInformation contains the workspace name, workspace index and target axis."""
-        for workspace_plot_info in reversed(self._plot_information_list):
+        """Remove all references to a workspaces from the plot """
+        for workspace_plot_info in self._plot_information_list.copy():
             workspace_name = workspace_plot_info.workspace_name
             if workspace_name == workspace.name():
                 axis = self.fig.axes[workspace_plot_info.axis]
                 axis.remove_workspace_artists(workspace)
                 self._plot_information_list.remove(workspace_plot_info)
-        self.redraw_figure()
 
     # Ads observer functions
     def replace_specified_workspace_in_plot(self, workspace):
@@ -155,18 +170,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                         axis.replot_artist(artist, with_errors, **plot_kwargs)
         self.redraw_figure()
 
-    def redraw_figure(self):
-        self.fig.canvas.toolbar.update()
-        self.redraw_legend()
-        self.fig.tight_layout()
-        self.fig.canvas.draw()
-
-    def redraw_legend(self):
-        for ax in self.fig.axes:
-            if ax.get_legend_handles_labels()[0]:
-                legend = ax.legend(prop=dict(size=5))
-                legend_set_draggable(legend, True)
-
     def set_axis_xlimits(self, axis_number, xlims):
         ax = self.fig.axes[axis_number]
         ax.set_xlim(xlims[0], xlims[1])
@@ -177,6 +180,25 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def set_axes_limits(self, xlim, ylim):
         plt.setp(self.fig.axes, xlim=xlim, ylim=ylim)
+
+    def autoscale_y_axes(self):
+        ymin = 1e9
+        ymax = -1e9
+        for axis in self.fig.axes:
+            ymin_i, ymax_i = self._get_y_axis_autoscale_limts(axis)
+            if ymin_i < ymin:
+                ymin = ymin_i
+            if ymax_i > ymax:
+                ymax = ymax_i
+
+        plt.setp(self.fig.axes, ylim=[ymin, ymax])
+
+    def autoscale_selected_y_axis(self, axis_number):
+        if axis_number >= len(self.fig.axes):
+            return
+        axis = self.fig.axes[axis_number]
+        bottom, top, = self._get_y_axis_autoscale_limts(axis)
+        axis.set_ylim(bottom, top)
 
     def set_title(self, axis_number, title):
         if axis_number >= self.number_of_axes:
@@ -190,33 +212,22 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
         return xmin, xmax, ymin, ymax
 
+    def redraw_figure(self):
+        self.fig.canvas.toolbar.update()
+        self._redraw_legend()
+        self.fig.tight_layout()
+        self.fig.canvas.draw()
+
+    def _redraw_legend(self):
+        for ax in self.fig.axes:
+            if ax.get_legend_handles_labels()[0]:
+                legend = ax.legend(prop=dict(size=5))
+                legend_set_draggable(legend, True)
+
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
         return plot_kwargs
-
-    def autoscale_selected_y_axis(self, axis_number):
-        if axis_number >= len(self.fig.axes):
-            return
-        axis = self.fig.axes[axis_number]
-        bottom, top, = self._get_y_axis_autoscale_limts(axis)
-        axis.set_ylim(bottom, top)
-
-    def set_default_axes_limits(self):
-        plt.setp(self.fig.axes, xlim=DEFAULT_X_LIMITS)
-        self.autoscale_y_axes()
-
-    def autoscale_y_axes(self):
-        ymin = 1e9
-        ymax = -1e9
-        for axis in self.fig.axes:
-            ymin_i, ymax_i = self._get_y_axis_autoscale_limts(axis)
-            if ymin_i < ymin:
-                ymin = ymin_i
-            if ymax_i > ymax:
-                ymax = ymax_i
-
-        plt.setp(self.fig.axes, ylim=[ymin, ymax])
 
     @staticmethod
     def _get_y_axis_autoscale_limts(axis):
@@ -236,6 +247,12 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             if top_i > top:
                 top = top_i
         return bottom, top
+
+    def _reset_color_cycle(self):
+        for ax in self.fig.axes:
+            ax.cla()
+            ax.tracked_workspaces.clear()
+            ax.set_prop_cycle(None)
 
     def resizeEvent(self, event):
         self.fig.tight_layout()

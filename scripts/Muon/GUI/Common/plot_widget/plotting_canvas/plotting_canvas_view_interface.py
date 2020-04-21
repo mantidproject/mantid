@@ -31,6 +31,12 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
 
     @property
     @abc.abstractmethod
+    def plotted_workspace_information(self):
+        """Returns a list of named tuples containing the plot information, e.g axis workspace index"""
+        pass
+
+    @property
+    @abc.abstractmethod
     def plotted_workspaces_and_indices(self):
         """Returns plotted workspaces and indices"""
         pass
@@ -50,6 +56,11 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
         """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
         pass
+
+    @abc.abstractmethod
+    def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+        """Remove a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
+        The PlotInformation contains the workspace name, workspace index and target axis."""
 
     @abc.abstractmethod
     def remove_workspace_from_plot(self, workspace):
@@ -78,9 +89,27 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
         pass
 
     @abc.abstractmethod
+    def set_axes_limits(self, xlim, ylim):
+        """Sets the limits of all axes to the input xlims and ylims"""
+
+    @abc.abstractmethod
+    def autoscale_y_axes(self):
+        """Autoscales the y axes such that all the y-data in the current xrange is shown"""
+        pass
+
+    @abc.abstractmethod
+    def autoscale_selected_y_axis(self, axis_number):
+        """Autoscales the selected y axis such that all the y-data in the current xrange is shown"""
+        pass
+
+    @abc.abstractmethod
     def set_title(self, axis_number, title):
         """Set the title of the specified axis"""
         pass
+
+    @abc.abstractmethod
+    def redraw_figure(self):
+        """Redraws the figure including the axes legend and title. Used after making a change to the figure"""
 
     @abc.abstractmethod
     def get_axis_limits(self, axis_number):

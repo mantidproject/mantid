@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.Common.plotting_widget.external_plotting_model import ExternalPlottingModel, PlotInformation
+from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel, PlotInformation
 from mantid.plots import MantidAxes
 
 NUM_AXES = 2

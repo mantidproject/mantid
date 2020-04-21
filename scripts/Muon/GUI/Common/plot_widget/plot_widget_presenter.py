@@ -163,7 +163,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         Handles a group or pair being added or removed from
         the grouping widget analysis table
-        :param group_pair_info: A dictionary continue information on the removed group/pair
+        :param group_pair_info: A dictionary containing information on the removed group/pair
         """
         is_added = group_pair_info["is_added"]
         name = group_pair_info["name"]
@@ -251,9 +251,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
     def plot_all_selected_data(self, autoscale, hold_on):
         """Plots all selected run data e.g runs and groups
         :param autoscale: Whether to autoscale the graph
-        :param hold_on: Whether to keep previous plots"""
+        :param hold_on: Whether to keep previous plots
+        """
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
+
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):

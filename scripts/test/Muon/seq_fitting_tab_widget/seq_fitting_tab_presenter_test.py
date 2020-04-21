@@ -91,8 +91,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
         self.presenter.handle_fit_selected_pressed()
 
-        mock_function_tools.partial.assert_called_once_with(self.model.evaluate_sequential_fit, [workspace], False,
-                                                            False)
+        mock_function_tools.partial.assert_called_once_with(self.model.evaluate_sequential_fit, [workspace], False)
 
     @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_fit_selected_does_nothing_if_fit_function_is_none(self, mock_function_tools):
@@ -137,8 +136,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.get_workspaces_for_row_in_fit_table.call_count, number_of_entries)
         mock_function_tools.partial.assert_called_once_with(self.model.evaluate_sequential_fit,
-                                                            [workspaces] * number_of_entries,
-                                                            False, False)
+                                                            [workspaces] * number_of_entries, False)
 
     @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_sequential_fit_does_nothing_if_fit_function_is_none(self, mock_function_tools):

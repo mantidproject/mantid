@@ -62,6 +62,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         super(MuonAnalysisGui, self).__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("MuonAnalysis2")
+        self.current_tab = ''
 
         try:
             check_facility()
@@ -206,6 +207,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
+
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 

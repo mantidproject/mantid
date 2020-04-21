@@ -8,8 +8,6 @@ from typing import NamedTuple, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 
-DEFAULT_X_LIMITS = [0, 15]
-
 
 class WorkspacePlotInformation(NamedTuple):
     workspace_name: str
@@ -49,28 +47,30 @@ class PlottingCanvasModel(object):
     def is_tiled(self, state: bool):
         self._is_tiled = state
 
-    def create_workspace_plot_information(self, input_workspace_names, input_indices, errors,
-                                          existing_plot_information):
+    def create_workspace_plot_information(self, input_workspace_names: List[str], input_indices: List[int],
+                                          errors: bool) -> List[WorkspacePlotInformation]:
+        """
+        Creates a list of workspace plot information (workspace name, index, axis..) from a input list
+        of indices and workspace names
+        :param input_workspace_names: List of workspace names
+        :param input_indices: List of workspace indices
+        :param errors: Boolean stating whether errors are to be plotted
+        :return: A list of WorkspacePlotInformation
+        """
         workspace_plot_information = []
         for workspace_name, index in zip(input_workspace_names, input_indices):
             axis = self._get_workspace_plot_axis(workspace_name)
-
             workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors)]
-        workspaces_plot_information_to_add = [plot_info for plot_info in workspace_plot_information if plot_info not in
-                                              existing_plot_information]
 
-        return workspaces_plot_information_to_add
-
-    def _get_workspace_plot_axis(self, workspace_name: str):
-        if not self._is_tiled:
-            return 0
-        for axis, key in enumerate(self._axes_workspace_map):
-            if key in workspace_name:
-                return axis
-        else:
-            return 0
+        return workspace_plot_information
 
     def update_tiled_axis_map(self, tiled_keys: List[str], tiled_by_type: str):
+        """
+        Updates the map containing the {tiled_key: axis}. This map is used to assign
+        each WorkspacePlotInformation to the correct tiled.
+        :param tiled_keys: A list of strings which are used as the keys for the tiles.
+        :param tiled_by_type: A string describing the tiling mechanism.
+        """
         self._is_tiled = True
         self._axes_workspace_map = {}
         self._tiled_by = tiled_by_type
@@ -79,15 +79,36 @@ class PlottingCanvasModel(object):
 
     def create_plot_information(self, workspace_name: str, index: int, axis: int,
                                 errors: bool) -> WorkspacePlotInformation:
+        """
+        Creates a workspace plot information instance (workspace name, index, axis..) from an input
+        workspace name, index, axis and errors flag.
+        :param workspace_name: List of workspace names
+        :param index: List of workspace indices
+        :param axis: An integer describing the axis which the workspace and index will be plotted on.
+        :param errors: Boolean stating whether errors are to be plotted
+        :return: A WorkspacePlotInformation instance desciribng the data to be plotted
+        """
         label = self._create_workspace_label(workspace_name, index)
         return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
                                         normalised=self._normalised,
                                         errors=errors, label=label)
 
     def create_plot_information_for_guess_ws(self, guess_ws_name: str) -> WorkspacePlotInformation:
+        """
+        Creates a workspacePlotInformation instance for the fit_guess
+        By default this is plotted on the zero'th axis.
+        :param guess_ws_name: The workspace name for the fit function guess
+        :return: A WorkspacePlotInformation instance describing the data to be plotted
+        """
         return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=0,
                                         normalised=self._normalised,
                                         errors=False, label="Fit function guess")
+
+    def create_axes_titles(self):
+        if not self._is_tiled:
+            return ''
+        else:
+            return list(self._axes_workspace_map.keys())
 
     def _create_workspace_label(self, workspace_name, index):
         group = str(get_group_or_pair_from_name(workspace_name))
@@ -101,6 +122,15 @@ class PlottingCanvasModel(object):
             return "".join([run, fit_label, rebin_label])
         else:
             return "".join([group, fit_label, rebin_label])
+
+    def _get_workspace_plot_axis(self, workspace_name: str):
+        if not self._is_tiled:
+            return 0
+        for axis, key in enumerate(self._axes_workspace_map):
+            if key in workspace_name:
+                return axis
+        else:
+            return 0
 
     def _get_rebin_label(self, workspace_name):
         if REBIN_STR in workspace_name:
@@ -118,9 +148,3 @@ class PlottingCanvasModel(object):
                 workspace_type = 'Diff'
             label = ''.join([';', fit_function_name, ';', workspace_type])
         return label
-
-    def create_axes_titles(self):
-        if not self._is_tiled:
-            return ''
-        else:
-            return list(self._axes_workspace_map.keys())
