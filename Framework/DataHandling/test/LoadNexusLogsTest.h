@@ -292,6 +292,17 @@ public:
     TS_ASSERT_EQUALS(endTime.totalNanoseconds(), lastTime.totalNanoseconds());
   }
 
+  void test_load_file_with_invalid_log_entries() {
+    LoadNexusLogs ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "ENGINX00228061_log_alarm_data.nxs");
+    MatrixWorkspace_sptr ws = createTestWorkspace();
+    // Put it in the object.
+    ld.setProperty("Workspace", ws);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+  }
+
 private:
   API::MatrixWorkspace_sptr createTestWorkspace() {
     return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);

@@ -195,6 +195,47 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
     std::transform(time_double.begin(), time_double.end(), time_double.begin(),
                    std::bind(std::multiplies<double>(), _1, 60.0));
   }
+
+  // Now the the validity of the values
+  // this should be a match int array to the data values (or times)
+  // If not present assume all data is valid
+  try {
+    file.openData("value_valid");
+
+    // Now the validity data
+    ::NeXus::Info info = file.getInfo();
+    // Check the size
+    if (size_t(info.dims[0]) != time_double.size()) {
+      throw ::NeXus::Exception("Invalid value entry for validity data");
+    }
+    if (file.isDataInt()) // Int type
+    {
+      std::vector<int> values;
+      try {
+        file.getDataCoerce(values);
+
+        for (auto validity : values) {
+          if (validity != 0) {
+            log.warning() << "Some \"" << propName
+                          << "\" log data is invalid!\n";
+            break;
+          }
+        }
+      } catch (::NeXus::Exception &) {
+        throw;
+      }
+    } else {
+      throw ::NeXus::Exception(
+          "Invalid value type for validity data. Only int is supported");
+    }
+  } catch (::NeXus::Exception &ex) {
+    std::string error_msg = ex.what();
+    if (error_msg != "NXopendata(value_valid) failed") {
+      log.warning() << error_msg << "\n";
+      file.closeData();
+    }
+  }
+
   // Now the values: Could be a string, int or double
   file.openData("value");
   // Get the units of the property
