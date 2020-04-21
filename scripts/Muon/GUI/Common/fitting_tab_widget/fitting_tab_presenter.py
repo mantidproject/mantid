@@ -82,6 +82,8 @@ class FittingTabPresenter(object):
     def end_x(self):
         return self._end_x
 
+    # TODO: DELETE THIS COMMENT -- START OF HANDLE SIGNALS
+
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
             self.context.data_context.current_runs,
@@ -154,25 +156,11 @@ class FittingTabPresenter(object):
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_plot_guess_changed(self):
-        if self.view.is_simul_fit():
-            parameters = self.get_multi_domain_fit_parameters()
-            current_idx = self.view.get_index_for_start_end_times()
-            if len(parameters['InputWorkspace']) > current_idx:
-                parameters['InputWorkspace'] = parameters['InputWorkspace'][current_idx]
-            if len(parameters['StartX']) > current_idx:
-                parameters['StartX'] = parameters['StartX'][current_idx]
-            if len(parameters['EndX']) > current_idx:
-                parameters['EndX'] = parameters['EndX'][current_idx]
-        else:
-            parameters = self.get_parameters_for_single_fit()
-
-        self.model.change_plot_guess(self.view.plot_guess, parameters)
+        workspaces = self.get_fit_input_workspaces()
+        self.model.change_plot_guess(self.view.plot_guess, workspaces)
 
     def handle_fit_clicked(self):
-        if self._tf_asymmetry_mode:
-            self.perform_tf_asymmetry_fit()
-        else:
-            self.perform_standard_fit()
+        self.perform_fit()
 
     def handle_started(self):
         self.view.setEnabled(False)
@@ -350,31 +338,20 @@ class FittingTabPresenter(object):
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
-    def perform_standard_fit(self):
+    # TODO: DELETE THIS COMMENT -- END OF HANDLE SIGNALS
+
+    def perform_fit(self):
         if not self.view.fit_object:
             return
 
         self._fit_function_cache = [func.clone() for func in self._fit_function]
-
         try:
-            if self.view.is_simul_fit():
-                self._number_of_fits_cached += 1
-                simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
-                global_parameters = self.view.get_global_parameters()
-                calculation_function = functools.partial(
-                    self.model.do_simultaneous_fit,
-                    simultaneous_fit_parameters, global_parameters)
-
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
-            else:
-                self._number_of_fits_cached += 1
-                single_fit_parameters = self.get_parameters_for_single_fit()
-                calculation_function = functools.partial(
-                    self.model.do_single_fit, single_fit_parameters)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
-
+            workspaces = self.get_fit_input_workspaces()
+            self._number_of_fits_cached += 1
+            calculation_function = functools.partial(
+                self.model.evaluate_single_fit, workspaces)
+            self.calculation_thread = self.create_thread(
+                calculation_function)
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
                                                        self.handle_error)
@@ -383,57 +360,8 @@ class FittingTabPresenter(object):
         except ValueError as error:
             self.view.warning_popup(error)
 
-    def perform_tf_asymmetry_fit(self):
-        self._fit_function_cache = [item.clone() for item in self._fit_function if item]
 
-        try:
-            if self.view.is_simul_fit():
-                simultaneous_fit_parameters = self.get_multi_domain_tf_fit_parameters()
-                global_parameters = self.view.get_global_parameters()
-                calculation_function = functools.partial(
-                    self.model.do_simultaneous_tf_fit,
-                    simultaneous_fit_parameters, global_parameters)
-                self.calculation_thread = self.create_thread(calculation_function)
-            else:
-                single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
-                calculation_function = functools.partial(
-                    self.model.do_single_tf_fit, single_fit_parameters)
-                self.calculation_thread = self.create_thread(calculation_function)
-
-            self.calculation_thread.threadWrapperSetUp(self.handle_started,
-                                                       self.handle_finished,
-                                                       self.handle_error)
-            self.calculation_thread.start()
-        except ValueError as error:
-            self.view.warning_popup(error)
-
-    def get_parameters_for_tf_single_fit_calculation(self):
-        workspace, _ = create_fitted_workspace_name(self.view.display_workspace, self.model.function_name)
-
-        return {
-            'InputFunction': self._current_fit_function(),
-            'ReNormalizedWorkspaceList': self.view.display_workspace,
-            'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
-                [self.view.display_workspace])[0],
-            'OutputFitWorkspace': workspace,
-            'StartX': self.start_x[0],
-            'EndX': self.end_x[0],
-            'Minimizer': self.view.minimizer
-        }
-
-    def get_multi_domain_tf_fit_parameters(self):
-        workspace, _ = create_multi_domain_fitted_workspace_name(
-            self.view.display_workspace, self.model.function_name)
-        return {
-            'InputFunction': self.view.fit_object,
-            'ReNormalizedWorkspaceList': self.selected_data,
-            'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
-                self.selected_data),
-            'OutputFitWorkspace': workspace,
-            'StartX': self.start_x[self.view.get_index_for_start_end_times()],
-            'EndX': self.end_x[self.view.get_index_for_start_end_times()],
-            'Minimizer': self.view.minimizer
-        }
+    # TODO: DELETE THIS COMMENT -- END OF ACTUAL FITTING CODE
 
     def clear_and_reset_gui_state(self):
         self.view.set_datasets_in_function_browser(self.selected_data)
@@ -505,22 +433,6 @@ class FittingTabPresenter(object):
 
         self.view.setup_fit_by_specifier(simul_choices)
 
-    def get_parameters_for_single_fit(self):
-        params = self._get_shared_parameters()
-        params['InputWorkspace'] = self.view.display_workspace
-        params['StartX'] = self.start_x[self._fit_function_index()]
-        params['EndX'] = self.end_x[self._fit_function_index()]
-
-        return params
-
-    def get_multi_domain_fit_parameters(self):
-        params = self._get_shared_parameters()
-        params['InputWorkspace'] = self.selected_data
-        params['StartX'] = self.start_x
-        params['EndX'] = self.end_x
-
-        return params
-
     def get_simul_fit_workspaces(self):
         selected_data = self.selected_data
         fit_workspaces = []
@@ -532,16 +444,6 @@ class FittingTabPresenter(object):
         else:
             pass
         return fit_workspaces
-
-    def _get_shared_parameters(self):
-        """
-        :return: The set of attributes common to all fit types
-        """
-        return {
-            'Function': self._current_fit_function(),
-            'Minimizer': self.view.minimizer,
-            'EvaluationType': self.view.evaluation_type
-        }
 
     def _update_stored_fit_functions(self):
         if self.view.is_simul_fit():
@@ -636,20 +538,18 @@ class FittingTabPresenter(object):
                                             self.view.get_global_parameters(),
                                             self.view.tf_asymmetry_mode)
 
-    def get_parameters_for_tf_function_calculation(self, fit_function):
-        mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
-        workspace_list = self.selected_data if self.view.is_simul_fit() else [
-            self.view.display_workspace]
-        return {'InputFunction': fit_function,
-                'WorkspaceList': workspace_list,
-                'Mode': mode}
-
     def _get_fit_type(self):
         if self.view.is_simul_fit():
             fit_type = "Simul"
         else:
             fit_type = "Single"
         return fit_type
+
+    def get_fit_input_workspaces(self):
+        if self.view.is_simul_fit():
+            return self.selected_data
+        else:
+            return [self.view.display_workspace]
 
     def get_selected_fit_workspaces(self):
         if self.selected_data:

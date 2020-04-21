@@ -353,12 +353,15 @@ class FittingTabModel(object):
             parameter_workspace, self.function_name,
             input_workspace, output_workspace_name, global_parameters)
 
-    def change_plot_guess(self, plot_guess, parameter_dict):
-        try:
-            fit_function = parameter_dict['Function']
+    def change_plot_guess(self, plot_guess, workspaces):
+        parameter_dict = self._get_fit_parameters(workspaces)
+        fit_function = parameter_dict['Function']
+        if self.fit_type == "Single":
             data_ws_name = parameter_dict['InputWorkspace']
-        except KeyError:
-            return
+        else:
+            # If on simultaneous fit, use zeroth workspace as the data workspace for evaluating guess
+            data_ws_name = parameter_dict['InputWorkspace'][0]
+
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
             guess_ws_name = MUON_ANALYSIS_GUESS_WS
         elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
@@ -440,16 +443,16 @@ class FittingTabModel(object):
             return
 
         self.ws_fit_function_map.clear()
-        equiv_workspace_names = self.create_hashable_fit_workspace_names()
-        for workspace in equiv_workspace_names:
-            self.ws_fit_function_map[workspace] = self.fit_function.clone()
+        workspace_keys = self.create_hashable_keys_for_workspace_names()
+        for workspace_key in workspace_keys:
+            self.ws_fit_function_map[workspace_key] = self.fit_function.clone()
 
         if self.tf_asymmetry_mode:
             self.update_fit_function_map_with_tf_asym_data()
 
     # This function creates a workspace string from a workspace_list taken from the fit input workspaces.
     # This string is then used as a key in the ws_fit_function_map.
-    def create_hashable_fit_workspace_names(self):
+    def create_hashable_keys_for_workspace_names(self):
         runs, group_and_pairs = self.get_runs_groups_and_pairs_for_fits()
         list_of_workspace_lists = []
         for run, group_and_pair in zip(runs, group_and_pairs):
@@ -457,23 +460,23 @@ class FittingTabModel(object):
                 self.get_separated_runs_and_group_and_pairs(run, group_and_pair)
             list_of_workspace_lists += [self.get_fit_workspace_names_from_groups_and_runs(separated_runs,
                                                                                           separated_groups_and_pairs)]
-        equiv_workspace_list = []
+        workspace_key_list = []
         for workspace_list in list_of_workspace_lists:
-            equiv_workspace_list += [self.create_equivalent_workspace_name(workspace_list)]
+            workspace_key_list += [self.create_workspace_key(workspace_list)]
 
-        return equiv_workspace_list
+        return workspace_key_list
 
     def update_ws_fit_function_parameters(self, workspace, params):
-        equiv_workspace_name = self.create_equivalent_workspace_name(workspace)
+        workspace_key = self.create_workspace_key(workspace)
         try:
-            fit_function = self.ws_fit_function_map[equiv_workspace_name]
+            fit_function = self.ws_fit_function_map[workspace_key]
         except KeyError:
             return
         self.set_fit_function_parameter_values(fit_function, params)
 
     def update_fit_function_map_with_tf_asym_data(self):
-        for workspaces, fit_function in self.ws_fit_function_map.items():
-            workspace_list = self.get_separated_workspaces(workspaces)
+        for workspace_key, fit_function in self.ws_fit_function_map.items():
+            workspace_list = list(workspace_key)
             self.update_tf_fit_function(workspace_list, fit_function)
 
     def update_tf_fit_function(self, workspaces, fit_function):
@@ -520,11 +523,24 @@ class FittingTabModel(object):
         return freq
 
     def get_ws_fit_function(self, workspaces):
-        equiv_workspace_name = self.create_equivalent_workspace_name(workspaces)
+        workspace_key = self.create_workspace_key(workspaces)
         try:
-            return self.ws_fit_function_map[equiv_workspace_name]
+            return self.ws_fit_function_map[workspace_key]
         except KeyError:
             pass
+
+    def _get_fit_parameters(self, workspaces):
+        if self.fit_type == "Single":
+            if self.tf_asymmetry_mode:
+                params = self.get_parameters_for_single_tf_fit(workspaces[0])
+            else:
+                params = self.get_parameters_for_single_fit(workspaces[0])
+        else:  # single simultaneous fit
+            if self.tf_asymmetry_mode:
+                params = self.get_parameters_for_simultaneous_tf_fit(workspaces)
+            else:
+                params = self.get_parameters_for_simultaneous_fit(workspaces)
+        return params
 
     def get_parameters_for_single_fit(self, workspace):
         params = self._get_shared_parameters()
@@ -694,12 +710,10 @@ class FittingTabModel(object):
             fit_function.setParameter(parameters[i], vals[i])
 
     @staticmethod
-    def create_equivalent_workspace_name(workspace_list):
-        eq_name = workspace_list[0]
-        for i in range(1, len(workspace_list)):
-            eq_name += '-' + workspace_list[i]
-
-        return eq_name
+    def create_workspace_key(workspace_list):
+        # Using a frozenset means the hash of the key is invariant to the order of the input workspace_list
+        # which is a desired outcome
+        return frozenset(workspace_list)
 
     @staticmethod
     def convert_to_tf_function(algorithm_parameters):
