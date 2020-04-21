@@ -153,11 +153,11 @@ WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
   return WorkspaceIndex{0};
 }
 
-TableRowIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
+FitDomainIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return TableRowIndex{m_plotForm->spPlotSpectrum->value() -
-                         m_plotForm->spPlotSpectrum->minimum()};
-  return TableRowIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
+    return FitDomainIndex{m_plotForm->spPlotSpectrum->value() -
+                          m_plotForm->spPlotSpectrum->minimum()};
+  return FitDomainIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
 }
 
 TableDatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {

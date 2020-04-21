@@ -30,8 +30,8 @@ public:
   virtual TableDatasetIndex numberOfWorkspaces() const = 0;
   virtual int getNumberOfSpectra(TableDatasetIndex index) const = 0;
   virtual int getNumberOfDomains() const = 0;
-  virtual TableRowIndex getDomainIndex(TableDatasetIndex dataIndex,
-                                       WorkspaceIndex spectrum) const = 0;
+  virtual FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
+                                        WorkspaceIndex spectrum) const = 0;
 };
 
 } // namespace IDA

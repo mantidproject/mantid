@@ -236,8 +236,8 @@ Spectra &Spectra::operator=(Spectra &&vec) {
 
 bool Spectra::empty() const { return m_vec.empty(); }
 
-TableRowIndex Spectra::size() const {
-  return TableRowIndex{static_cast<int>(m_vec.size())};
+FitDomainIndex Spectra::size() const {
+  return FitDomainIndex{static_cast<int>(m_vec.size())};
 }
 
 std::string Spectra::getString() const {
@@ -265,13 +265,13 @@ bool Spectra::operator==(Spectra const &spec) const {
 
 bool Spectra::isContinuous() const { return m_isContinuous; }
 
-TableRowIndex Spectra::indexOf(WorkspaceIndex i) const {
+FitDomainIndex Spectra::indexOf(WorkspaceIndex i) const {
   auto const it = std::find(begin(), end(), i);
   if (it == end()) {
     throw std::runtime_error("Spectrum index " + std::to_string(i.value) +
                              " not found.");
   }
-  return TableRowIndex{static_cast<int>(std::distance(begin(), it))};
+  return FitDomainIndex{static_cast<int>(std::distance(begin(), it))};
 }
 
 Spectra Spectra::combine(const Spectra &other) const {
@@ -342,11 +342,11 @@ Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {
 
 const Spectra &IndirectFitData::spectra() const { return m_spectra; }
 
-WorkspaceIndex IndirectFitData::getSpectrum(TableRowIndex index) const {
+WorkspaceIndex IndirectFitData::getSpectrum(FitDomainIndex index) const {
   return m_spectra[index];
 }
 
-TableRowIndex IndirectFitData::numberOfSpectra() const {
+FitDomainIndex IndirectFitData::numberOfSpectra() const {
   return m_spectra.size();
 }
 
@@ -362,7 +362,7 @@ IndirectFitData::getRange(WorkspaceIndex spectrum) const {
   if (range != m_ranges.end()) {
     return range->second;
   }
-  range = m_ranges.find(getSpectrum(TableRowIndex{0}));
+  range = m_ranges.find(getSpectrum(FitDomainIndex{0}));
   if (range != m_ranges.end()) {
     return range->second;
   }

@@ -69,8 +69,8 @@ public:
   TableDatasetIndex numberOfWorkspaces() const override;
   int getNumberOfSpectra(TableDatasetIndex index) const override;
   int getNumberOfDomains() const override;
-  TableRowIndex getDomainIndex(TableDatasetIndex dataIndex,
-                               WorkspaceIndex spectrum) const override;
+  FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
+                                WorkspaceIndex spectrum) const override;
 
   // IIndirectFitRegion
   virtual std::pair<double, double>

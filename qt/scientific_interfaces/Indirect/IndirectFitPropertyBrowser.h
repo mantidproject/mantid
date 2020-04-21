@@ -60,8 +60,8 @@ public:
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveMembers);
   void setFitEnabled(bool enable);
-  void setCurrentDataset(TableRowIndex i);
-  TableRowIndex currentDataset() const;
+  void setCurrentDataset(FitDomainIndex i);
+  FitDomainIndex currentDataset() const;
   void updateFunctionBrowserData(
       int nData, const QStringList &datasetNames,
       const std::vector<double> &qValues,

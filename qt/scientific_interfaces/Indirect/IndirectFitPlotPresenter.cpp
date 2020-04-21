@@ -91,11 +91,11 @@ WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const {
   return m_model->getActiveSpectrum();
 }
 
-TableRowIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
+FitDomainIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
   return m_view->getSelectedSpectrumIndex();
 }
 
-TableRowIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
+FitDomainIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
   return m_model->getActiveDomainIndex();
 }
 

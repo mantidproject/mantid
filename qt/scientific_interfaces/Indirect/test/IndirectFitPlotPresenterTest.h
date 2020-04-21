@@ -86,7 +86,7 @@ public:
   MOCK_METHOD0(disableSpectrumPlotSelection, void());
 
   MOCK_CONST_METHOD0(getSelectedSpectrum, IDA::WorkspaceIndex());
-  MOCK_CONST_METHOD0(getSelectedSpectrumIndex, TableRowIndex());
+  MOCK_CONST_METHOD0(getSelectedSpectrumIndex, FitDomainIndex());
   MOCK_CONST_METHOD0(getSelectedDataIndex, TableDatasetIndex());
   MOCK_CONST_METHOD0(dataSelectionSize, TableDatasetIndex());
   MOCK_CONST_METHOD0(isPlotGuessChecked, bool());
@@ -495,7 +495,7 @@ public:
   test_that_getSelectedSpectrumIndex_will_get_the_selected_spectrum_from_the_view() {
     EXPECT_CALL(*m_view, getSelectedSpectrumIndex())
         .Times(1)
-        .WillOnce(Return(TableRowIndex(0)));
+        .WillOnce(Return(FitDomainIndex(0)));
     m_presenter->getSelectedSpectrumIndex();
   }
 

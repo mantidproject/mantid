@@ -284,7 +284,7 @@ public:
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     TableItem const excludeRegion("2-3");
 
-    m_presenter->setExcludeRegion(excludeRegion.asString(), TableRowIndex(0));
+    m_presenter->setExcludeRegion(excludeRegion.asString(), FitDomainIndex(0));
 
     assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }

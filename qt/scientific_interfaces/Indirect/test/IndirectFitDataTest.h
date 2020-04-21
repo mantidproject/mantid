@@ -147,13 +147,13 @@ public:
   void
   test_that_the_number_of_spectra_returned_matches_the_instantiated_value() {
     auto const data = getIndirectFitData(10);
-    TS_ASSERT_EQUALS(data->numberOfSpectra(), TableRowIndex{10});
+    TS_ASSERT_EQUALS(data->numberOfSpectra(), FitDomainIndex{10});
   }
 
   void test_that_getSpectrum_returns_the_expected_spectrum_numbers() {
     auto const data = getIndirectFitData(4);
 
-    for (auto i = TableRowIndex{0}; i < data->numberOfSpectra(); ++i) {
+    for (auto i = FitDomainIndex{0}; i < data->numberOfSpectra(); ++i) {
       MantidQt::CustomInterfaces::IDA::WorkspaceIndex const spectrumNum =
           data->getSpectrum(i);
       TS_ASSERT_EQUALS(spectrumNum.value, i.value);

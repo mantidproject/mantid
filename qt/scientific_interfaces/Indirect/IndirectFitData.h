@@ -38,7 +38,7 @@ public:
   Spectra &operator=(const Spectra &vec);
   Spectra &operator=(Spectra &&vec);
   bool empty() const;
-  TableRowIndex size() const;
+  FitDomainIndex size() const;
   std::string getString() const;
   std::pair<WorkspaceIndex, WorkspaceIndex> getMinMax() const;
   WorkspaceIndex front() const { return m_vec.front(); }
@@ -49,12 +49,12 @@ public:
   std::vector<WorkspaceIndex>::const_iterator end() const {
     return m_vec.cend();
   }
-  const WorkspaceIndex &operator[](TableRowIndex index) const {
+  const WorkspaceIndex &operator[](FitDomainIndex index) const {
     return m_vec[index.value];
   }
   bool operator==(Spectra const &spec) const;
   bool isContinuous() const;
-  TableRowIndex indexOf(WorkspaceIndex i) const;
+  FitDomainIndex indexOf(WorkspaceIndex i) const;
   Spectra combine(const Spectra &other) const;
 
 private:
@@ -119,8 +119,8 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
   const Spectra &spectra() const;
-  WorkspaceIndex getSpectrum(TableRowIndex index) const;
-  TableRowIndex numberOfSpectra() const;
+  WorkspaceIndex getSpectrum(FitDomainIndex index) const;
+  FitDomainIndex numberOfSpectra() const;
   bool zeroSpectra() const;
   std::pair<double, double> getRange(WorkspaceIndex spectrum) const;
   std::string getExcludeRegion(WorkspaceIndex spectrum) const;

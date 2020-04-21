@@ -339,7 +339,7 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
   }
 }
 
-void IndirectFitPropertyBrowser::setCurrentDataset(TableRowIndex i) {
+void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
   if (isFullFunctionBrowserActive()) {
@@ -349,8 +349,8 @@ void IndirectFitPropertyBrowser::setCurrentDataset(TableRowIndex i) {
   }
 }
 
-TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return TableRowIndex{m_functionBrowser->getCurrentDataset()};
+FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
+  return FitDomainIndex{m_functionBrowser->getCurrentDataset()};
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(

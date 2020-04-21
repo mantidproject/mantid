@@ -57,7 +57,7 @@ template <int Class> struct IndexType {
 }; // namespace IDA
 
 // The index of the fitting Domain, i.e. ignores workspaces and spectra
-using TableRowIndex = IndexType<0>;
+using FitDomainIndex = IndexType<0>;
 // Used to index spectra in workspaces
 using WorkspaceIndex = IndexType<1>;
 // Used to index worspaces in workspace groups
@@ -131,6 +131,6 @@ operator<<(std::ostream &out,
   return out;
 }
 
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::TableRowIndex)
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::FitDomainIndex)
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceIndex)
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceGroupIndex)

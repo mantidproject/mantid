@@ -227,9 +227,9 @@ typename Map::mapped_type &findOrCreateDefaultInMap(Map &map, const Key &key) {
   return map[key] = typename Map::mapped_type();
 }
 
-TableRowIndex numberOfSpectraIn(const FitDataIterator &fitDataBegin,
-                                const FitDataIterator &fitDataEnd) {
-  TableRowIndex spectra{0};
+FitDomainIndex numberOfSpectraIn(const FitDataIterator &fitDataBegin,
+                                 const FitDataIterator &fitDataEnd) {
+  FitDomainIndex spectra{0};
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     spectra += (*it)->numberOfSpectra();
   return spectra;

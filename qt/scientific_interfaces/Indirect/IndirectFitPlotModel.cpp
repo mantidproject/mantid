@@ -201,11 +201,11 @@ TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
   return m_fittingModel->numberOfWorkspaces();
 }
 
-TableRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
-  TableRowIndex index{0};
+FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
+  FitDomainIndex index{0};
   for (TableDatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
     if (iws < m_activeIndex) {
-      index += TableRowIndex{m_fittingModel->getNumberOfSpectra(iws)};
+      index += FitDomainIndex{m_fittingModel->getNumberOfSpectra(iws)};
     } else {
       auto const spectra = m_fittingModel->getSpectra(iws);
       try {

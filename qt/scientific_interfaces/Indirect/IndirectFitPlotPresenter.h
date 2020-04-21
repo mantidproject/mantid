@@ -31,8 +31,8 @@ public:
 
   TableDatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  TableRowIndex getSelectedSpectrumIndex() const;
-  TableRowIndex getSelectedDomainIndex() const;
+  FitDomainIndex getSelectedSpectrumIndex() const;
+  FitDomainIndex getSelectedDomainIndex() const;
   bool isCurrentlySelected(TableDatasetIndex dataIndex,
                            WorkspaceIndex spectrum) const;
 

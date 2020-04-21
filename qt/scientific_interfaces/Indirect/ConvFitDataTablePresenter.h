@@ -28,16 +28,16 @@ public:
 
 protected:
   void addTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                     TableRowIndex row) override;
+                     FitDomainIndex row) override;
   void updateTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                        TableRowIndex row) override;
+                        FitDomainIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-  std::string getResolutionName(TableRowIndex row) const;
+  std::string getResolutionName(FitDomainIndex row) const;
 
   ConvFitModel *m_convFitModel;
 };

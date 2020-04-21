@@ -448,10 +448,10 @@ int IndirectFittingModel::getNumberOfDomains() const {
   return sum;
 }
 
-TableRowIndex
+FitDomainIndex
 IndirectFittingModel::getDomainIndex(TableDatasetIndex dataIndex,
                                      WorkspaceIndex spectrum) const {
-  TableRowIndex index{0};
+  FitDomainIndex index{0};
   for (auto iws = m_fittingData.zero(); iws < m_fittingData.size(); ++iws) {
     if (iws < dataIndex) {
       index += getNumberOfSpectra(iws);
@@ -886,7 +886,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("LogName", getResultLogName());
 
-  auto const firstWsIndex = initialFitData->getSpectrum(TableRowIndex{0});
+  auto const firstWsIndex = initialFitData->getSpectrum(FitDomainIndex{0});
   const auto range = initialFitData->getRange(firstWsIndex);
   fitAlgorithm->setProperty("StartX", range.first);
   fitAlgorithm->setProperty("EndX", range.second);
