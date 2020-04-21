@@ -264,7 +264,7 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
 size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
     const std::string &functionName) const {
   auto fittingFunction = m_fittingModel->getFittingFunction();
-  if (fittingFunction->nFunctions() > 0)
+  if (fittingFunction && fittingFunction->nFunctions() > 0)
     return getNumberOfSpecificFunctionContained(
         functionName, fittingFunction->getFunction(0).get());
   else
