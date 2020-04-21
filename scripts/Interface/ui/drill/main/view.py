@@ -226,6 +226,19 @@ class DrillView(QMainWindow):
         """
         return list(range(self.table.rowCount()))
 
+    def get_last_row(self):
+        """
+        Get the further down row of the whole table.
+
+        Returns:
+            int: the row index, -1 if the table is empty
+        """
+        rows = self.get_all_rows()
+        if rows:
+            return rows[-1]
+        else:
+            return -1
+
     def get_cell_contents(self, row, column):
         """
         Get the contents of a given cell as a string.
@@ -345,10 +358,13 @@ class DrillView(QMainWindow):
 
     def add_row_after(self):
         """
-        Add a row after the selected ones.
+        Add a row after the selected ones. If no row selected, the row is added
+        at the end of the table.
         """
-        position = self.get_last_selected_row() + 1
-        self.add_row(position)
+        position = self.get_last_selected_row()
+        if position == -1:
+            position = self.get_last_row()
+        self.add_row(position + 1)
 
     def del_selected_rows(self):
         """
