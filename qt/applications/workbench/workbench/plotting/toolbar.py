@@ -145,14 +145,16 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             toolbar_action.setEnabled(on)
             toolbar_action.setVisible(on)
 
+        # show/hide separator
+        fit_action = self._actions['toggle_fit']
+        self.toggle_separator_visibility(fit_action, on)
+
     def set_generate_plot_script_enabled(self, enabled):
         action = self._actions['generate_plot_script']
         action.setEnabled(enabled)
         action.setVisible(enabled)
         # Show/hide the separator between this button and the "Fit" button
-        for i, toolbar_action in enumerate(self.actions()):
-            if toolbar_action == action:
-                self.actions()[i+1].setVisible(enabled)
+        self.toggle_separator_visibility(action, enabled)
 
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
@@ -162,6 +164,24 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     def waterfall_fill_area(self):
         self.sig_waterfall_fill_area_triggered.emit()
+
+    def adjust_for_3d_plots(self):
+        self._actions['toggle_grid'].setChecked(True)
+
+        for action in ['back', 'forward', 'pan', 'zoom']:
+            toolbar_action = self._actions[action]
+            toolbar_action.setEnabled(False)
+            toolbar_action.setVisible(False)
+
+        action = self._actions['forward']
+        self.toggle_separator_visibility(action, False)
+
+    def toggle_separator_visibility(self, action, enabled):
+        # shows/hides the separator positioned immediately after the action
+        for i, toolbar_action in enumerate(self.actions()):
+            if toolbar_action == action:
+                self.actions()[i+1].setVisible(enabled)
+                break
 
 
 class ToolbarStateManager(object):
