@@ -1,0 +1,65 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+#include <string>
+
+#include "DllConfig.h"
+#include "IIndirectFitData.h"
+#include "IndexTypes.h"
+#include "IndirectFitdata.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
+/*
+    IIndirectFitData - Specifies an interface for updating, querying and
+   accessing the raw data in IndirectFitAnalysisTabs
+*/
+class MANTIDQT_INDIRECT_DLL IndirectFitDataModel : public IIndirectFitData {
+public:
+  bool hasWorkspace(std::string const &workspaceName) const override;
+  Mantid::API::MatrixWorkspace_sptr
+  getWorkspace(TableDatasetIndex index) const override;
+  Spectra getSpectra(TableDatasetIndex index) const override;
+  bool isMultiFit() const override;
+  TableDatasetIndex numberOfWorkspaces() const override;
+  int getNumberOfSpectra(TableDatasetIndex index) const override;
+  int getNumberOfDomains() const override;
+  FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
+                                WorkspaceIndex spectrum) const override;
+  std::vector<double> getQValuesForData() const;
+  std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
+
+  void setSpectra(const std::string &spectra,
+                  TableDatasetIndex dataIndex) override;
+  void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex) override;
+  void setSpectra(const Spectra &spectra, TableDatasetIndex dataIndex) override;
+  void addWorkspace(const std::string &workspaceName) override;
+  void addWorkspace(const std::string &workspaceName,
+                    const std::string &spectra) override;
+  void addWorkspace(const std::string &workspaceName,
+                    const Spectra &spectra) override;
+  void removeWorkspace(TableDatasetIndex index) override;
+
+protected:
+  virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+                            const Spectra &spectra);
+
+private:
+  std::vector<std::string> getWorkspaceNames() const;
+  void IndirectFitDataModel::addNewWorkspace(
+      const Mantid::API::MatrixWorkspace_sptr &workspace,
+      const Spectra &spectra);
+
+  IndirectFitDataCollectionType m_fittingData;
+};
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt

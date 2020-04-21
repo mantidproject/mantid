@@ -24,6 +24,14 @@ public:
   virtual boost::optional<std::string> isInvalidFunction() const = 0;
   virtual std::vector<std::string> getFitParameterNames() const = 0;
   virtual Mantid::API::MultiDomainFunction_sptr getFittingFunction() const = 0;
+  virtual std::unordered_map<std::string, ParameterValue>
+  getParameterValues(TableDatasetIndex dataIndex,
+                     WorkspaceIndex spectrum) const = 0;
+
+  virtual void
+  setFitFunction(Mantid::API::MultiDomainFunction_sptr function) = 0;
+  virtual void setDefaultParameterValue(const std::string &name, double value,
+                                        TableDatasetIndex dataIndex) = 0;
 };
 
 } // namespace IDA
