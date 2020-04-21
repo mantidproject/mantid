@@ -73,5 +73,5 @@ Useful Links
 
 How to use a script to:
 
-* :ref:`Control Workspaces <scripting_plots>`
-* :ref:`Customise Plots <scripting_workspaces>`
+* :ref:`Control Workspaces <scripting_workspaces>`
+* :ref:`Customise Plots <scripting_plots>`

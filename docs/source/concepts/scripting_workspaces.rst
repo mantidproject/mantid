@@ -45,26 +45,46 @@ Required import:
 
 .. code-block:: python
 
-    wsGroup = GroupWorkspaces("ws1,ws2,ws3")
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+    ws3 = CreateSampleWorkspace()
+    wsGroup = GroupWorkspaces([ws1,ws2,ws3])
+    
+    # or if you only have the names of the workspaces 
+    wsGroup = GroupWorkspaces(['ws1','ws2','ws3'])
 
 :ref:`Save a Workspace in a supported ASCII format <algm-SaveAscii>`:
 
 .. code-block:: python
 
-    SaveAscii(InputWorkspace=ws1,Filename=savefile,Separator="CSV")
+    SaveAscii(InputWorkspace=ws,Filename=savefile,Separator="CSV")
 
 :ref:`Save a Workspace in Nexus format <algm-SaveNexus>`:
 
 .. code-block:: python
 
-    SaveNexus(InputWorkspace=ws1,Filename=savefile.nxs)
+    SaveNexus(InputWorkspace=ws,Filename=savefile.nxs)
 
 :ref:`Plot Spectra from a Workspace <mantidplot.plotSpectrum>`:
 
 .. code-block:: python
 
+    #simple plot of 1 spectrum
+    plotSpectrum(ws, 0)
+    
+    #Plot of 3 spectra, and error bars
+    plotSpectrum(ws, [0,1,2], error_bars=True)
+    
+    # Waterfall plot from two workspaces, with two spectras from each
+    plotSpectrum([ws1, ws2], [0,1], waterfall=True)
+
+Above the selected spectra are called by their Workspace Index. Within Workbench, you may wish to call them by their Spectrum Number:
+
+.. code-block:: python
+
     plotSpectrum(ws,spectrum_nums=[1,2,3],error_bars=True, waterfall=False)
 
+`Explanation of the difference between Workspace Index and Spectrum Number <02_the_matrix_workspace>`
 
 
 Workspace Management
@@ -87,6 +107,7 @@ Access ALL workspaces,loaded in the Workspaces Toolbox, inside a script:
 
 .. code-block:: python
 
+    # This will create a python variable matching the workspace name for each loaded workspace
     ADS.importAll()
 
 Get a list of currently loaded workspaces:
@@ -99,7 +120,7 @@ Delete all Workspaces:
 
 .. code-block:: python
 
-    ADS.clear('ws')
+    ADS.clear()
 
 
 Top Tip
