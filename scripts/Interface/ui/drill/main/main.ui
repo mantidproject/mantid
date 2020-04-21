@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
-    <height>960</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -26,23 +26,38 @@
    <property name="styleSheet">
     <string notr="true"/>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+    <property name="spacing">
+     <number>5</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="toolbar">
       <property name="spacing">
        <number>6</number>
       </property>
       <property name="leftMargin">
-       <number>2</number>
+       <number>5</number>
       </property>
       <property name="topMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>2</number>
+       <number>5</number>
       </property>
       <property name="bottomMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <item>
        <widget class="QComboBox" name="techniqueSelector"/>
@@ -222,6 +237,12 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="footer">
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
       <item>
        <widget class="QProgressBar" name="progressBar">
         <property name="value">
@@ -268,7 +289,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1200</width>
+     <width>1024</width>
      <height>24</height>
     </rect>
    </property>
@@ -310,7 +331,6 @@
    <addaction name="menuProcess_2"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionLoadRundex">
    <property name="text">
     <string>Load rundex</string>
