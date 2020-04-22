@@ -251,26 +251,26 @@ def _validate_pcolormesh_inputs(workspaces):
 
 @manage_workspace_names
 def plot_surface(workspaces):
-    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
-    ws = workspaces[0]
-    surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
-    ax.set_title(ws.name())
-    fig.colorbar(surface)
-    fig.show()
+    for ws in workspaces:
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
+        ax.set_title(ws.name())
+        fig.colorbar(surface)
+        fig.show()
 
 
 @manage_workspace_names
 def plot_wireframe(workspaces):
-    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
-    ws = workspaces[0]
-    ax.plot_wireframe(ws)
-    ax.set_title(ws.name())
-    fig.show()
+    for ws in workspaces:
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        ax.plot_wireframe(ws)
+        ax.set_title(ws.name())
+        fig.show()
 
 
 @manage_workspace_names
 def plot_contour(workspaces):
-    ws = workspaces[0]
-    fig = pcolormesh([ws])
-    ax = fig.get_axes()[0]
-    ax.contour(ws, levels=2, colors='k', linewidths=0.5)
+    for ws in workspaces:
+        fig = pcolormesh([ws])
+        ax = fig.get_axes()[0]
+        ax.contour(ws, levels=2, colors='k', linewidths=0.5)
