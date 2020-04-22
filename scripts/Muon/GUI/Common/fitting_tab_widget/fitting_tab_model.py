@@ -80,6 +80,69 @@ class FittingTabModel(object):
         except AttributeError:
             return function_temp.name()
 
+    # plot guess
+    def change_plot_guess(self, plot_guess, workspace_names, index):
+        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
+        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
+            guess_ws_name = MUON_ANALYSIS_GUESS_WS
+        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
+            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
+        else:
+            guess_ws_name = '__unknown_interface_fitting_guess'
+        # Handle case of function removed
+        if fit_function is None and plot_guess:
+            self.context.fitting_context.notify_plot_guess_changed(plot_guess, None)
+        elif fit_function is None or not workspace_names:
+            return
+        else:
+            # evaluate the current function on the workspace
+            if plot_guess:
+                try:
+                    EvaluateFunction(InputWorkspace=data_ws_name,
+                                     Function=fit_function,
+                                     StartX=self.startX,
+                                     EndX=self.endX,
+                                     OutputWorkspace=guess_ws_name)
+                except RuntimeError:
+                    mantid.logger.error('Could not evaluate the function.')
+                    return
+
+            if AnalysisDataService.doesExist(guess_ws_name):
+                self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
+
+    def _get_guess_parameters(self, workspace_names, index):
+        if self.tf_asymmetry_mode:  # Currently not supporting plot guess and tf asymmetry mode
+            return None, None
+        params = self._get_fit_parameters(workspace_names)
+        data_ws_name = params['InputWorkspace']
+        fit_function = params['Function']
+        if self.fit_type != "Single" and fit_function is not None:
+            equiv_functions = fit_function.createEquivalentFunctions()
+            fit_function = equiv_functions[index]
+            data_ws_name = workspace_names[index]
+        return fit_function, data_ws_name
+
+    def update_plot_guess(self, workspace_names, index):
+        if not self.context.fitting_context.plot_guess:
+            return
+
+        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
+        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
+            guess_ws_name = MUON_ANALYSIS_GUESS_WS
+        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
+            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
+        else:
+            guess_ws_name = '__unknown_interface_fitting_guess'
+        try:
+            EvaluateFunction(InputWorkspace=data_ws_name,
+                             Function=fit_function,
+                             StartX=self.startX,
+                             EndX=self.endX,
+                             OutputWorkspace=guess_ws_name)
+        except RuntimeError:
+            mantid.logger.error('Could not evaluate the function.')
+            return
+
     # single fitting
     def evaluate_single_fit(self, workspace):
         if self.fit_type == "Single":
@@ -182,6 +245,36 @@ class FittingTabModel(object):
                                               covariance_matrix)
 
         return function_object, output_status, output_chi_squared
+
+    def _handle_simultaneous_fit_results(self, input_workspace_list, fit_function, fitting_parameters_table,
+                                         output_workspace, global_parameters, covariance_matrix):
+        if len(input_workspace_list) > 1:
+            table_name, table_directory = create_parameter_table_name(input_workspace_list[0] + '+ ...',
+                                                                      self.function_name)
+            workspace_name, workspace_directory = create_multi_domain_fitted_workspace_name(
+                input_workspace_list[0], self.function_name)
+            self.add_workspace_to_ADS(output_workspace, workspace_name, '')
+
+            workspace_name = self.rename_members_of_fitted_workspace_group(workspace_name,
+                                                                           input_workspace_list,
+                                                                           fit_function)
+            self.add_workspace_to_ADS(covariance_matrix, workspace_name[0] + '_CovarianceMatrix', table_directory)
+        else:
+            table_name, table_directory = create_parameter_table_name(input_workspace_list[0], self.function_name)
+            workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace_list[0],
+                                                                               self.function_name)
+            self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
+            self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+            workspace_name = [workspace_name]
+
+        wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
+                                                                table_directory)
+
+        self.add_fit_to_context(wrapped_parameter_workspace,
+                                fit_function,
+                                input_workspace_list,
+                                workspace_name,
+                                global_parameters)
 
     # sequential fitting
     def evaluate_sequential_fit(self, workspaces, use_initial_values):
@@ -292,36 +385,6 @@ class FittingTabModel(object):
 
         return function_object_list, output_status_list, output_chi_squared_list
 
-    def _handle_simultaneous_fit_results(self, input_workspace_list, fit_function, fitting_parameters_table,
-                                         output_workspace, global_parameters, covariance_matrix):
-        if len(input_workspace_list) > 1:
-            table_name, table_directory = create_parameter_table_name(input_workspace_list[0] + '+ ...',
-                                                                      self.function_name)
-            workspace_name, workspace_directory = create_multi_domain_fitted_workspace_name(
-                input_workspace_list[0], self.function_name)
-            self.add_workspace_to_ADS(output_workspace, workspace_name, '')
-
-            workspace_name = self.rename_members_of_fitted_workspace_group(workspace_name,
-                                                                           input_workspace_list,
-                                                                           fit_function)
-            self.add_workspace_to_ADS(covariance_matrix, workspace_name[0] + '_CovarianceMatrix', table_directory)
-        else:
-            table_name, table_directory = create_parameter_table_name(input_workspace_list[0], self.function_name)
-            workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace_list[0],
-                                                                               self.function_name)
-            self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-            self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
-            workspace_name = [workspace_name]
-
-        wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
-                                                                table_directory)
-
-        self.add_fit_to_context(wrapped_parameter_workspace,
-                                fit_function,
-                                input_workspace_list,
-                                workspace_name,
-                                global_parameters)
-
     # workspace operations
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function):
         self.context.ads_observer.observeRename(False)
@@ -350,56 +413,6 @@ class FittingTabModel(object):
         self.context.fitting_context.add_fit_from_values(
             parameter_workspace, self.function_name,
             input_workspace, output_workspace_name, global_parameters)
-
-    def change_plot_guess(self, plot_guess, workspace_names, index):
-        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
-        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
-            guess_ws_name = MUON_ANALYSIS_GUESS_WS
-        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
-            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
-        else:
-            guess_ws_name = '__unknown_interface_fitting_guess'
-        # Handle case of function removed
-        if fit_function is None and plot_guess:
-            self.context.fitting_context.notify_plot_guess_changed(plot_guess, None)
-        elif fit_function is None or not workspace_names:
-            return
-        else:
-            # evaluate the current function on the workspace
-            if plot_guess:
-                try:
-                    EvaluateFunction(InputWorkspace=data_ws_name,
-                                     Function=fit_function,
-                                     StartX=self.startX,
-                                     EndX=self.endX,
-                                     OutputWorkspace=guess_ws_name)
-                except RuntimeError:
-                    mantid.logger.error('Could not evaluate the function.')
-                    return
-
-            if AnalysisDataService.doesExist(guess_ws_name):
-                self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
-
-    def update_plot_guess(self, workspace_names, index):
-        if not self.context.fitting_context.plot_guess:
-            return
-
-        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
-        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
-            guess_ws_name = MUON_ANALYSIS_GUESS_WS
-        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
-            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
-        else:
-            guess_ws_name = '__unknown_interface_fitting_guess'
-        try:
-            EvaluateFunction(InputWorkspace=data_ws_name,
-                             Function=fit_function,
-                             StartX=self.startX,
-                             EndX=self.endX,
-                             OutputWorkspace=guess_ws_name)
-        except RuntimeError:
-            mantid.logger.error('Could not evaluate the function.')
-            return
 
     # update model information
     def update_stored_fit_function(self, fit_function):
@@ -673,17 +686,6 @@ class FittingTabModel(object):
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
 
-    def _get_guess_parameters(self, workspace_names, index):
-        if self.tf_asymmetry_mode:  # Currently not supporting plot guess and tf asymmetry mode
-            return None, None
-        params = self._get_fit_parameters(workspace_names)
-        data_ws_name = params['InputWorkspace']
-        fit_function = params['Function']
-        if self.fit_type != "Single" and fit_function is not None:
-            equiv_functions = fit_function.createEquivalentFunctions()
-            fit_function = equiv_functions[index]
-            data_ws_name = workspace_names[index]
-        return fit_function, data_ws_name
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function):
