@@ -17,9 +17,7 @@ class DrillHeaderView(QHeaderView):
     """
     BUTTON_TEXT_FOLDED = "+"    # push button text when the section is folded
     BUTTON_TEXT_UNFOLDED = "-"  # push button text when the section is unfolded
-    BUTTON_X_SIZE = 12          # push button horizontal size
-    BUTTON_Y_SIZE = 12          # push button vertical size
-    BUTTON_MARGIN = 5           # margin around the push button
+    BUTTON_MARGIN = 2           # margin around the push button
 
     def __init__(self):
         super(DrillHeaderView, self).__init__(Qt.Horizontal)
@@ -78,7 +76,9 @@ class DrillHeaderView(QHeaderView):
             (QSize): section size
         """
         size = super(DrillHeaderView, self).sectionSizeFromContents(li)
-        return size + QSize(self.BUTTON_X_SIZE + 2 * self.BUTTON_MARGIN, 0)
+        buttonSize = size.height() - 2 * self.BUTTON_MARGIN
+        size.setWidth(size.width() + buttonSize + 2 * self.BUTTON_MARGIN)
+        return size
 
     def paintSection(self, painter, rect, logicalIndex):
         """
@@ -90,13 +90,15 @@ class DrillHeaderView(QHeaderView):
             rect (QRect): section rectangle
             logicalIndex (int): section logical index
         """
-        # button shape
+        # button shape, get the size from the header height
+        buttonSize = rect.height() - 2 * self.BUTTON_MARGIN
         self.buttonsRectangles[logicalIndex] = QRect(0, 0,
-                                                    self.BUTTON_X_SIZE,
-                                                    self.BUTTON_Y_SIZE)
+                                                    buttonSize, buttonSize)
         self.buttonsRectangles[logicalIndex].moveCenter(rect.center())
-        self.buttonsRectangles[logicalIndex].moveRight(
-                rect.right() - self.BUTTON_MARGIN)
+        # if the section is not folded, the button is right aligned
+        if not self.isSectionFolded(logicalIndex):
+            self.buttonsRectangles[logicalIndex].moveRight(
+                    rect.right() - self.BUTTON_MARGIN)
         buttonOption = QStyleOptionButton()
         buttonOption.rect = self.buttonsRectangles[logicalIndex]
         buttonOption.features = QStyleOptionButton.AutoDefaultButton
@@ -113,23 +115,26 @@ class DrillHeaderView(QHeaderView):
         else:
             buttonOption.text = self.BUTTON_TEXT_FOLDED
 
-        # button background
-        buttonBackOption = QStyleOptionHeader()
-        self.initStyleOption(buttonBackOption)
-        buttonBackOption.rect = rect
-        buttonBackOption.rect.setWidth(
-                self.BUTTON_X_SIZE + 2 * self.BUTTON_MARGIN)
-        buttonBackOption.rect.moveCenter(buttonOption.rect.center())
+        # button background, only if the section is unfolded
+        if not self.isSectionFolded(logicalIndex):
+            buttonBackOption = QStyleOptionHeader()
+            self.initStyleOption(buttonBackOption)
+            buttonBackOption.rect = rect
+            buttonBackOption.rect.setWidth(
+                   buttonSize + 2 * self.BUTTON_MARGIN)
+            buttonBackOption.rect.moveCenter(buttonOption.rect.center())
 
         # call QTableView function
         painter.save()
         super(DrillHeaderView, self).paintSection(painter, rect, logicalIndex)
         painter.restore()
 
-        # paint the push button background
-        painter.save()
-        self.style().drawControl(QStyle.CE_Header, buttonBackOption, painter)
-        painter.restore()
+        # paint the push button background, only if the section is unfoled
+        if not self.isSectionFolded(logicalIndex):
+            painter.save()
+            self.style().drawControl(QStyle.CE_Header,
+                                     buttonBackOption, painter)
+            painter.restore()
 
         # paint the push button
         self.style().drawControl(QStyle.CE_PushButton, buttonOption, painter)
@@ -177,18 +182,20 @@ class DrillHeaderView(QHeaderView):
             li (int): section logical index
         """
         if self.isSectionFolded(li):
-            # set the size back
+            # set size and resize mode back
             size = self.sectionsSizes[li]
             self.resizeSection(li, size)
+            self.setSectionResizeMode(li, QHeaderView.Interactive)
             # and the text
             text = self.sectionsTexts[li]
             self.model().setHeaderData(li, self.orientation(), text)
 
             self.sectionsFolded[li] = False
         else:
-            # save the size
+            # save the size, resize the minimum
             self.sectionsSizes[li] = self.sectionSize(li)
-            self.resizeSection(li, self.BUTTON_X_SIZE + 2 * self.BUTTON_MARGIN)
+            self.resizeSection(li, self.minimumSectionSize())
+            self.setSectionResizeMode(li, QHeaderView.Fixed)
             # save and hide the text
             text = self.model().headerData(li, self.orientation())
             self.sectionsTexts[li] = text
