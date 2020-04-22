@@ -148,6 +148,9 @@ class SliceViewer(object):
         """
         names_overlayed = self._overlayed_peaks_workspaces()
         names_to_overlay = self.view.query_peaks_to_overlay(names_overlayed)
+        if names_to_overlay is None:
+            # cancelled
+            return
         if names_to_overlay or names_overlayed:
             self._peaks_view_presenter.overlay_peaksworkspaces(names_to_overlay)
         else:

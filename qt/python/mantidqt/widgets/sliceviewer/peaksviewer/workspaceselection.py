@@ -65,14 +65,15 @@ class PeaksWorkspaceSelectorPresenter(object):
 
     def select_peaks_workspaces(self):
         """
-        :returns: A list of the selected workspaces. Can be empty to indicate no selection
+        :returns: A list of the selected workspaces. Can be empty
+                  to indicate no selection or None to indicate cancellation.
         """
         view = self._view
         result = view.exec_()
         if result == view.Accepted:
             return view.selected_peaks_workspaces()
         else:
-            return []
+            return None
 
 
 class PeaksWorkspaceSelectorView(QDialog):
