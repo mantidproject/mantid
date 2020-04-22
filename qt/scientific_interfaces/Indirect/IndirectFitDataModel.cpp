@@ -185,6 +185,61 @@ IndirectFitDataModel::getDomainIndex(TableDatasetIndex dataIndex,
 
 void IndirectFitDataModel::clear() { m_fittingData.clear(); }
 
+std::pair<double, double>
+IndirectFitDataModel::getFittingRange(TableDatasetIndex dataIndex,
+                                      WorkspaceIndex spectrum) const {
+  if (dataIndex.value < m_fittingData.size() &&
+      !m_fittingData[dataIndex.value].zeroSpectra()) {
+    return m_fittingData[dataIndex.value].getRange(spectrum);
+  }
+  return std::make_pair(0., 0.);
+}
+
+std::string
+IndirectFitDataModel::getExcludeRegion(TableDatasetIndex dataIndex,
+                                       WorkspaceIndex spectrum) const {
+  if (dataIndex.value < m_fittingData.size() &&
+      !m_fittingData[dataIndex.value].zeroSpectra()) {
+    return m_fittingData[dataIndex.value].getExcludeRegion(spectrum);
+  }
+  return "";
+}
+
+void IndirectFitDataModel::setStartX(double startX, TableDatasetIndex dataIndex,
+                                     WorkspaceIndex spectrum) {
+  if (m_fittingData.empty())
+    return;
+  m_fittingData[dataIndex.value].setStartX(startX, spectrum);
+}
+
+void IndirectFitDataModel::setStartX(double startX,
+                                     TableDatasetIndex dataIndex) {
+  if (m_fittingData.empty())
+    return;
+  m_fittingData[dataIndex.value].setStartX(startX);
+}
+
+void IndirectFitDataModel::setEndX(double endX, TableDatasetIndex dataIndex,
+                                   WorkspaceIndex spectrum) {
+  if (m_fittingData.empty())
+    return;
+  m_fittingData[dataIndex.value].setEndX(endX, spectrum);
+}
+
+void IndirectFitDataModel::setEndX(double endX, TableDatasetIndex dataIndex) {
+  if (m_fittingData.empty())
+    return;
+  m_fittingData[dataIndex.value].setEndX(endX);
+}
+
+void IndirectFitDataModel::setExcludeRegion(const std::string &exclude,
+                                            TableDatasetIndex dataIndex,
+                                            WorkspaceIndex spectrum) {
+  if (m_fittingData.empty())
+    return;
+  m_fittingData[dataIndex.value].setExcludeRegionString(exclude, spectrum);
+}
+
 void IndirectFitDataModel::addNewWorkspace(
     const Mantid::API::MatrixWorkspace_sptr &workspace,
     const Spectra &spectra) {

@@ -8,7 +8,6 @@
 
 #include "IIndirectFitData.h"
 #include "IIndirectFitOutput.h"
-#include "IIndirectFitRegion.h"
 #include "IIndirectFitResult.h"
 #include "IndexTypes.h"
 #include "IndirectFitData.h"
@@ -40,7 +39,6 @@ using DefaultParametersType =
     performing a QENS fit, as well as accessing the results of the fit.
 */
 class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitData,
-                                                   IIndirectFitRegion,
                                                    IIndirectFitResult,
                                                    IIndirectFitOutput {
 public:

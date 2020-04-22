@@ -51,6 +51,21 @@ public:
 
   void clear() override;
 
+  std::pair<double, double>
+  getFittingRange(TableDatasetIndex dataIndex,
+                  WorkspaceIndex spectrum) const override;
+  std::string getExcludeRegion(TableDatasetIndex dataIndex,
+                               WorkspaceIndex index) const override;
+
+  void setStartX(double startX, TableDatasetIndex dataIndex,
+                 WorkspaceIndex spectrum) override;
+  void setStartX(double startX, TableDatasetIndex dataIndex) override;
+  void setEndX(double endX, TableDatasetIndex dataIndex,
+               WorkspaceIndex spectrum) override;
+  void setEndX(double endX, TableDatasetIndex dataIndex) override;
+  void setExcludeRegion(const std::string &exclude, TableDatasetIndex dataIndex,
+                        WorkspaceIndex spectrum) override;
+
 protected:
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
