@@ -13,8 +13,8 @@ recommended that they could be changed by editing the AbinsParameters.py file.
 This is still possible, but in general it is recommended to edit the
 value dictionaries through the Python API if possible. e.g.::
 
-    from AbinsModules import AbinsParameters
-    AbinsParameters.instruments['TOSCA']['final_neutron_energy'] = 24.0
+    import abins
+    abins.parameters.instruments['TOSCA']['final_neutron_energy'] = 24.0
 """
 
 # Instruments constants  #############################

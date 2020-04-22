@@ -4,13 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
 import io
 import numpy as np
+
+import abins
+from abins.constants import COMPLEX_TYPE, FLOAT_TYPE, ROTATIONS_AND_TRANSLATIONS
 from mantid.kernel import Atom
 
 
-class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
+class LoadGAUSSIAN(abins.GeneralAbInitioProgram):
     """
     Class for loading GAUSSIAN ab initio vibrational data.
     """
@@ -20,7 +22,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
         """
         super(LoadGAUSSIAN, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "GAUSSIAN"
-        self._parser = AbinsModules.GeneralAbInitioParser()
+        self._parser = abins.GeneralAbInitioParser()
         self._num_atoms = None
         self._num_read_freq = 0
 
@@ -97,7 +99,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        data["unit_cell"] = np.zeros(shape=(3, 3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
 
     def _read_modes(self, file_obj=None, data=None):
         """
@@ -107,9 +109,9 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
         """
         freq = []
         # it is a molecule so we subtract 3 translations and 3 rotations
-        num_freq = 3 * self._num_atoms - AbinsModules.AbinsConstants.ROTATIONS_AND_TRANSLATIONS
+        num_freq = 3 * self._num_atoms - ROTATIONS_AND_TRANSLATIONS
         dim = 3
-        atomic_disp = np.zeros(shape=(num_freq, self._num_atoms, dim), dtype=AbinsModules.AbinsConstants.COMPLEX_TYPE)
+        atomic_disp = np.zeros(shape=(num_freq, self._num_atoms, dim), dtype=COMPLEX_TYPE)
         end_msg = ["-------------------"]
         # Next block is:
         # -------------------
@@ -122,11 +124,10 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_atomic_disp_block(file_obj=file_obj, disp=atomic_disp)
 
-        data["frequencies"] = np.asarray([freq]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+        data["frequencies"] = np.asarray([freq]).astype(dtype=FLOAT_TYPE, casting="safe")
 
         # we mimic that we have one Gamma k-point
-        data["k_vectors"] = np.asarray([[0.0, 0.0, 0.0]]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE,
-                                                                 casting="safe")
+        data["k_vectors"] = np.asarray([[0.0, 0.0, 0.0]]).astype(dtype=FLOAT_TYPE, casting="safe")
         data["weights"] = np.asarray([1.0])
 
         # Normalize displacements so that Abins can use it to create its internal data objects

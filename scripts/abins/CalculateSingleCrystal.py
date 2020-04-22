@@ -4,17 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
+import abins
 
 
-class CalculateSingleCrystal(AbinsModules.IOmodule):
+class CalculateSingleCrystal(abins.IO):
     def __init__(self, filename=None, abins_data=None, temperature=None):
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from phonon DFT file
         :param temperature:  temperature in K
         """
-        if not isinstance(abins_data, AbinsModules.AbinsData):
+        if not isinstance(abins_data, abins.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
         self._abins_data = abins_data
 
@@ -27,14 +27,14 @@ class CalculateSingleCrystal(AbinsModules.IOmodule):
         super(CalculateSingleCrystal, self).__init__(
             input_filename=filename,
             group_name="{group}/{t}K".format(
-                group=AbinsModules.AbinsParameters.hdf_groups['crystal_data'],
+                group=abins.parameters.hdf_groups['crystal_data'],
                 t=self._temperature))
 
     def _calculate_crystal(self):
 
-        _dw_crystal = AbinsModules.CalculateDWSingleCrystal(temperature=self._temperature, abins_data=self._abins_data)
+        _dw_crystal = abins.CalculateDWSingleCrystal(temperature=self._temperature, abins_data=self._abins_data)
         _dw_crystal_data = _dw_crystal.calculate_data()
-        _crystal_data = AbinsModules.SingleCrystalData()
+        _crystal_data = abins.SingleCrystalData()
         _crystal_data.set(abins_data=self._abins_data, dw_crystal_data=_dw_crystal_data)
 
         return _crystal_data
@@ -62,10 +62,10 @@ class CalculateSingleCrystal(AbinsModules.IOmodule):
         _data = self.load(list_of_datasets=["dw"])
         _num_atoms = _data["datasets"]["dw"].shape[0]
 
-        _dw_crystal_data = AbinsModules.DWSingleCrystalData(temperature=self._temperature, num_atoms=_num_atoms)
+        _dw_crystal_data = abins.DWSingleCrystalData(temperature=self._temperature, num_atoms=_num_atoms)
         _dw_crystal_data.set(items=_data["datasets"]["dw"])
 
-        _crystal_data = AbinsModules.SingleCrystalData()
+        _crystal_data = abins.SingleCrystalData()
         _crystal_data.set(abins_data=self._abins_data, dw_crystal_data=_dw_crystal_data)
 
         return _crystal_data

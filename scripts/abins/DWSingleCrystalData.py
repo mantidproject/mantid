@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-# Abins modules
-import AbinsModules
 
+from abins import GeneralData
+from abins.constants import FLOAT_ID, FLOAT_TYPE
 
-class DWSingleCrystalData(AbinsModules.GeneralData):
+class DWSingleCrystalData(GeneralData):
     """
     Data structure for Debye-Waller coefficients for single crystals (sample form is a SingleCrystal).
     """
@@ -30,7 +30,7 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
         else:
             raise ValueError("Improper number of atoms.")
 
-        self._data = np.zeros((self._num_atoms, 3, 3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        self._data = np.zeros((self._num_atoms, 3, 3), dtype=FLOAT_TYPE)
 
     def _append(self, item=None, num_atom=None):
         """
@@ -78,7 +78,7 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
         if data.shape != (3, 3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if data.dtype.num != AbinsModules.AbinsConstants.FLOAT_ID:
+        if data.dtype.num != FLOAT_ID:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")
 
     def _check_items(self, items=None):
@@ -92,5 +92,5 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
         if items.shape != (self._num_atoms, 3, 3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if items.dtype.num != AbinsModules.AbinsConstants.FLOAT_ID:
+        if items.dtype.num != FLOAT_ID:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")

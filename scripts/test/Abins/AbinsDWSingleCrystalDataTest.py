@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import logger
 import numpy as np
-from AbinsModules import DWSingleCrystalData, AbinsTestHelpers
+
+from abins import DWSingleCrystalData
 
 
-class AbinsDWSingleCrystalTest(unittest.TestCase):
+class DWSingleCrystalTest(unittest.TestCase):
     # fake DW tensors for two atoms
     _good_data = np.asarray([[[1.0, 1.0, 1.0],
                               [1.0, 1.0, 1.0],
@@ -26,13 +26,11 @@ class AbinsDWSingleCrystalTest(unittest.TestCase):
 
         # invalid temperature
         with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            poor_tester = DWSingleCrystalData(temperature=-1, num_atoms=2)
+            _ = DWSingleCrystalData(temperature=-1, num_atoms=2)
 
         # invalid number of atoms
         with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            poor_tester = DWSingleCrystalData(temperature=10, num_atoms=-2)
+            _ = DWSingleCrystalData(temperature=10, num_atoms=-2)
 
     def test_wrong_append(self):
         # list instead of numpy array

@@ -9,11 +9,10 @@ from mantid.simpleapi import *
 import numpy as np
 import json
 
-from AbinsModules import CalculateDWSingleCrystal, LoadCASTEP, AbinsTestHelpers
+from abins import CalculateDWSingleCrystal, LoadCASTEP, test_helpers
 
 
-class AbinsCalculateDWSingleCrystalTest(unittest.TestCase):
-
+class CalculateDWSingleCrystalTest(unittest.TestCase):
     temperature = 10  # 10 K
 
     # data
@@ -24,13 +23,13 @@ class AbinsCalculateDWSingleCrystalTest(unittest.TestCase):
     _si2 = "Si2-sc_CalculateDWSingleCrystal"
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["CalculateDWSingleCrystal"])
+        test_helpers.remove_output_files(list_of_names=["CalculateDWSingleCrystal"])
 
     # simple tests
     def test_wrong_input(self):
         filename = self._si2 + ".phonon"
 
-        castep_reader = LoadCASTEP(input_ab_initio_filename=AbinsTestHelpers.find_file(filename=filename))
+        castep_reader = LoadCASTEP(input_ab_initio_filename=test_helpers.find_file(filename=filename))
         good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong temperature
@@ -59,8 +58,8 @@ class AbinsCalculateDWSingleCrystalTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = LoadCASTEP(input_ab_initio_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
-        dw = self._prepare_data(filename=AbinsTestHelpers.find_file(filename=filename + "_crystal_DW.txt"))
+        castep_reader = LoadCASTEP(input_ab_initio_filename=test_helpers.find_file(filename=filename + ".phonon"))
+        dw = self._prepare_data(filename=test_helpers.find_file(filename=filename + "_crystal_DW.txt"))
 
         return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "DW": dw}
 

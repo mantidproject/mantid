@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-import AbinsModules
-from AbinsModules import AbinsParameters
+
+import abins
+from abins.constants import CONSTANT, GAMMA_POINT, NUM_ZERO
 
 try:
     # noinspection PyUnresolvedReferences
@@ -26,32 +27,31 @@ class CalculatePowder(object):
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
         """
-        if not isinstance(abins_data, AbinsModules.AbinsData):
+        if not isinstance(abins_data, abins.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
 
         k_data = abins_data.get_kpoints_data().extract()
-        gamma_pkt = AbinsModules.AbinsConstants.GAMMA_POINT
         self._frequencies = k_data["frequencies"]
         self._displacements = k_data["atomic_displacements"]
-        self._num_atoms = self._displacements[gamma_pkt].shape[0]
+        self._num_atoms = self._displacements[GAMMA_POINT].shape[0]
         self._atoms_data = abins_data.get_atoms_data().extract()
 
-        self._clerk = AbinsModules.IOmodule(input_filename=filename,
-                                            group_name=AbinsParameters.hdf_groups['powder_data'])
+        self._clerk = abins.IO(input_filename=filename,
+                               group_name=abins.parameters.hdf_groups['powder_data'])
 
     def _calculate_powder(self):
         """
         Calculates powder data (a_tensors, b_tensors according to aCLIMAX manual).
         """
         # define container for powder data
-        powder = AbinsModules.PowderData(num_atoms=self._num_atoms)
+        powder = abins.PowderData(num_atoms=self._num_atoms)
 
         k_indices = sorted(self._frequencies.keys())  # make sure dictionary keys are in the same order on each machine
         b_tensors = {}
         a_tensors = {}
 
         if PATHOS_FOUND:
-            threads = AbinsParameters.performance['threads']
+            threads = abins.parameters.performance['threads']
             p_local = ProcessPool(nodes=threads)
             tensors = p_local.map(self._calculate_powder_k, k_indices)
         else:
@@ -85,15 +85,15 @@ class CalculatePowder(object):
         disp = self._displacements[k]
 
         # factor[num_atoms, num_freq]
-        factor = np.einsum('ij,j->ij', 1.0 / masses, AbinsModules.AbinsConstants.CONSTANT / self._frequencies[k])
+        factor = np.einsum('ij,j->ij', 1.0 / masses, CONSTANT / self._frequencies[k])
 
         # b_tensors[num_atoms, num_freq, dim, dim]
         b_tensors = np.einsum('ijkl,ij->ijkl',
                               np.einsum('lki, lkj->lkij', disp, disp.conjugate()).real, factor)
 
         temp = np.fabs(b_tensors)
-        indices = temp < AbinsModules.AbinsConstants.NUM_ZERO
-        b_tensors[indices] = AbinsModules.AbinsConstants.NUM_ZERO
+        indices = temp < NUM_ZERO
+        b_tensors[indices] = NUM_ZERO
 
         # a_tensors[num_atoms, dim, dim]
         a_tensors = np.sum(a=b_tensors, axis=1)
@@ -138,8 +138,7 @@ class CalculatePowder(object):
         :returns: object of type PowderData with mean square displacements.
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
-        k_pkt = AbinsModules.AbinsConstants.GAMMA_POINT
-        powder_data = AbinsModules.PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"][k_pkt].shape[0])
+        powder_data = abins.PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"][GAMMA_POINT].shape[0])
         powder_data.set(data["datasets"]["powder_data"])
 
         return powder_data

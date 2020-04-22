@@ -4,10 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
+import abins
+from abins.constants import GAMMA_POINT
 
 
-class SingleCrystalData(AbinsModules.GeneralData):
+class SingleCrystalData(abins.GeneralData):
     """
     Class for storing the data in case sample has a form of single crystal.
     """
@@ -25,12 +26,12 @@ class SingleCrystalData(AbinsModules.GeneralData):
         :param dw_crystal_data: object of type DwCrystalData with DW for the case of crystal.
         """
 
-        if isinstance(abins_data, AbinsModules.AbinsData):
+        if isinstance(abins_data, abins.AbinsData):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
-        if isinstance(dw_crystal_data, AbinsModules.DWSingleCrystalData):
+        if isinstance(dw_crystal_data, abins.DWSingleCrystalData):
             self._dw_crystal_data = dw_crystal_data
         else:
             raise ValueError("Object of type DWCrystalData was expected.")
@@ -38,8 +39,7 @@ class SingleCrystalData(AbinsModules.GeneralData):
         self._data = {"abins_data": self._abins_data.extract(), "dw_crystal_data": self._dw_crystal_data.extract()}
 
     def extract(self):
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-        if (self._data["abins_data"]["k_points_data"]["atomic_displacements"][gamma].shape[0]
+        if (self._data["abins_data"]["k_points_data"]["atomic_displacements"][GAMMA_POINT].shape[0]
                 == self._data["dw_crystal_data"].shape[0]):
 
             return self._data

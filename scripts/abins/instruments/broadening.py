@@ -145,7 +145,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme='gaussian_truncated
 
     else:
         raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
-                         'AbinsParameters.sampling["broadening_scheme"]'.format(scheme))
+                         'abins.parameters.sampling["broadening_scheme"]'.format(scheme))
 
 
 def mesh_gaussian(sigma=None, points=None, center=0):
@@ -348,7 +348,7 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
     # Select method for summation
     # Histogram seems to be faster below 1500 points; tested on a macbook pro and a Xeon workstation.
     # This threshold may change depending on updates to hardware, Python and Numpy...
-    # For now we hard-code the number. It would ideally live in AbinsParameters but is very specific to this function.
+    # For now we hard-code the number. It would ideally live in abins.parameters but is very specific to this function.
     if method == 'auto' and points.size < 1500:
         sum_method = 'histogram'
     elif method == 'auto':

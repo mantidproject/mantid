@@ -5,5 +5,5 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # flake8: noqa
-from .ToscaInstrument import ToscaInstrument
-from .Instrument import Instrument
+from .toscainstrument import ToscaInstrument
+from .instrument import Instrument

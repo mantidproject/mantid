@@ -12,12 +12,13 @@ import subprocess
 import shutil
 import h5py
 import numpy as np
-import AbinsModules
 
+import abins
+from abins.constants import BUF
 from mantid.kernel import logger, ConfigService
 
 
-class IOmodule(object):
+class IO(object):
     """
     Class for Abins I/O HDF file operations.
     """
@@ -77,7 +78,7 @@ class IOmodule(object):
 
         """
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
-        return (AbinsModules.AbinsParameters.non_performance_parameters
+        return (abins.parameters.non_performance_parameters
                 == json.loads(previous_advanced_parameters["attributes"]["advanced_parameters"]))
 
     def get_previous_ab_initio_program(self):
@@ -121,7 +122,7 @@ class IOmodule(object):
         self.add_attribute("hash", self._hash_input_filename)
         self.add_attribute("filename", self._input_filename)
         self.add_attribute("advanced_parameters",
-                           json.dumps(AbinsModules.AbinsParameters.non_performance_parameters))
+                           json.dumps(abins.parameters.non_performance_parameters))
 
     def add_data(self, name=None, value=None):
         """
@@ -407,10 +408,9 @@ class IOmodule(object):
         hash_calculator = hashlib.sha512()
 
         # chop content of a file into chunks to minimize memory consumption for hash creation
-        buf = AbinsModules.AbinsConstants.BUF
-        with io.open(file=filename, mode="rt", encoding=coding, buffering=buf, newline=None) as f:
+        with io.open(file=filename, mode="rt", encoding=coding, buffering=BUF, newline=None) as f:
             while True:
-                data = f.read(buf)
+                data = f.read(BUF)
                 if not data:
                     break
                 hash_calculator.update(data.encode(coding))

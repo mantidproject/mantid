@@ -4,8 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
-from AbinsModules import AbinsParameters, AbinsConstants
+import abins
+from abins.constants import FUNDAMENTALS, HIGHER_ORDER_QUANTUM_EVENTS
+
+
 import gc
 try:
     # noinspection PyUnresolvedReferences
@@ -74,10 +76,10 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             raise ValueError("Invalid name of input file. String was expected!")
 
-        self._clerk = AbinsModules.IOmodule(
+        self._clerk = AbinsModules.IO(
             input_filename=filename,
             group_name=("{s_data_group}/{instrument}/{sample_form}/{temperature}K").format(
-                s_data_group=AbinsParameters.hdf_groups['s_data'],
+                s_data_group=abins.parameters.hdf_groups['s_data'],
                 instrument=self._instrument,
                 sample_form=self._sample_form,
                 temperature=self._temperature))
@@ -89,8 +91,8 @@ class SPowderSemiEmpiricalCalculator(object):
                                  AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
         self._bin_width = bin_width  # This is only here to store in s_data. Is that necessary/useful?
-        self._bins = np.arange(start=AbinsParameters.sampling['min_wavenumber'],
-                               stop=AbinsParameters.sampling['max_wavenumber'] + bin_width,
+        self._bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
+                               stop=abins.parameters.sampling['max_wavenumber'] + bin_width,
                                step=bin_width,
                                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
         self._frequencies = self._bins[:-1] + (bin_width / 2)
@@ -130,10 +132,10 @@ class SPowderSemiEmpiricalCalculator(object):
         :param freq: frequencies which correspond to s
         :param coeff: coefficients which correspond to  freq
 
-        :returns: freq, coeff corresponding to S greater than AbinsParameters.sampling['s_absolute_threshold']
+        :returns: freq, coeff corresponding to S greater than abins.parameters.sampling['s_absolute_threshold']
         """
 
-        indices = s > AbinsParameters.sampling['s_absolute_threshold']
+        indices = s > abins.parameters.sampling['s_absolute_threshold']
 
         # Mask out small values, but avoid returning an array smaller than MIN_SIZE
         if np.count_nonzero(indices) >= AbinsConstants.MIN_SIZE:
@@ -207,7 +209,7 @@ class SPowderSemiEmpiricalCalculator(object):
         self._prepare_data(k_point=q_indx)
 
         if PATHOS_FOUND:
-            p_local = ProcessingPool(nodes=AbinsParameters.performance['threads'])
+            p_local = ProcessingPool(nodes=abins.parameters.performance['threads'])
             result = p_local.map(self._calculate_s_powder_one_atom, atoms)
         else:
             result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
@@ -223,8 +225,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: number of atoms, sorted atom indices
         """
         # load powder data for one k
-        clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
-                                      group_name=AbinsParameters.hdf_groups['powder_data'])
+        clerk = AbinsModules.IO(input_filename=self._input_filename,
+                                group_name=abins.parameters.hdf_groups['powder_data'])
         powder_data = clerk.load(list_of_datasets=["powder_data"])
         self._a_tensors = powder_data["datasets"]["powder_data"]["a_tensors"][k_point]
         self._b_tensors = powder_data["datasets"]["powder_data"]["b_tensors"][k_point]
@@ -232,8 +234,8 @@ class SPowderSemiEmpiricalCalculator(object):
         self._b_traces = np.trace(a=self._b_tensors, axis1=2, axis2=3)
 
         # load dft data for one k point
-        clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
-                                      group_name=AbinsParameters.hdf_groups['ab_initio_data'])
+        clerk = AbinsModules.IO(input_filename=self._input_filename,
+                                group_name=abins.parameters.hdf_groups['ab_initio_data'])
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
 
         frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
@@ -281,7 +283,7 @@ class SPowderSemiEmpiricalCalculator(object):
                            self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
             # in case there is large number of transitions chop it into chunks and process chunk by chunk
-            if local_freq.size * self._fundamentals_freq.size > AbinsParameters.performance['optimal_size']:
+            if local_freq.size * self._fundamentals_freq.size > abins.parameters.performance['optimal_size']:
 
                 chunked_fundamentals, chunked_fundamentals_coeff = self._prepare_chunks(local_freq=local_freq,
                                                                                         order=order, s=s)
@@ -322,7 +324,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         fund_size = self._fundamentals_freq.size
         l_size = local_freq.size
-        opt_size = float(AbinsParameters.performance['optimal_size'])
+        opt_size = float(abins.parameters.performance['optimal_size'])
 
         chunk_size = max(1.0, np.floor(opt_size / (l_size * 2**(AbinsConstants.MAX_ORDER - order))))
         chunk_num = int(np.ceil(float(fund_size) / chunk_size))
@@ -374,7 +376,7 @@ class SPowderSemiEmpiricalCalculator(object):
                                                      b_tensor=self._b_tensors[atom],
                                                      b_trace=self._b_traces[atom])
 
-            broadening_scheme = AbinsParameters.sampling['broadening_scheme']
+            broadening_scheme = abins.parameters.sampling['broadening_scheme']
             _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq,
                                                                                             bins=self._bins,
                                                                                             s_dft=value_dft,

@@ -5,15 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import logger
 import numpy as np
-import AbinsModules
 import json
+
+import abins
+from mantid.simpleapi import logger
 
 
 class AbinsCalculatePowderTest(unittest.TestCase):
-
-    # data
     # Use case: one k-point
     _c6h6 = "benzene_CalculatePowder"
 
@@ -22,22 +21,22 @@ class AbinsCalculatePowderTest(unittest.TestCase):
 
     #     test input
     def tearDown(self):
-        AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["CalculatePowder"])
+        abins.test_helpers.remove_output_files(list_of_names=["CalculatePowder"])
 
     def test_wrong_input(self):
 
-        full_path_filename = AbinsModules.AbinsTestHelpers.find_file(filename=self._si2 + ".phonon")
+        full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".phonon")
 
-        castep_reader = AbinsModules.LoadCASTEP(input_ab_initio_filename=full_path_filename)
+        castep_reader = abins.LoadCASTEP(input_ab_initio_filename=full_path_filename)
         good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong filename
-        self.assertRaises(ValueError, AbinsModules.CalculatePowder,
+        self.assertRaises(ValueError, abins.CalculatePowder,
                           filename=1, abins_data=good_data)
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = good_data.extract()["atoms_data"]
-        self.assertRaises(ValueError, AbinsModules.CalculatePowder,
+        self.assertRaises(ValueError, abins.CalculatePowder,
                           filename=full_path_filename, abins_data=bad_data)
 
     #       main test
@@ -51,8 +50,8 @@ class AbinsCalculatePowderTest(unittest.TestCase):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
 
-        good_tester = AbinsModules.CalculatePowder(
-            filename=AbinsModules.AbinsTestHelpers.find_file(filename=name + ".phonon"),
+        good_tester = abins.CalculatePowder(
+            filename=abins.test_helpers.find_file(filename=name + ".phonon"),
             abins_data=good_data["DFT"])
         calculated_data = good_tester.calculate_data().extract()
 
@@ -62,8 +61,8 @@ class AbinsCalculatePowderTest(unittest.TestCase):
                 self.assertEqual(True, np.allclose(good_data["powder"][key][i], calculated_data[key][i]))
 
         # check if loading powder data is correct
-        new_tester = AbinsModules.CalculatePowder(
-            filename=AbinsModules.AbinsTestHelpers.find_file(name + ".phonon"),
+        new_tester = abins.CalculatePowder(
+            filename=abins.test_helpers.find_file(name + ".phonon"),
             abins_data=good_data["DFT"])
         loaded_data = new_tester.load_formatted_data().extract()
         for key in good_data["powder"]:
@@ -72,9 +71,9 @@ class AbinsCalculatePowderTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = AbinsModules.LoadCASTEP(
-            input_ab_initio_filename=AbinsModules.AbinsTestHelpers.find_file(filename + ".phonon"))
-        powder = self._prepare_data(filename=AbinsModules.AbinsTestHelpers.find_file(filename + "_powder.txt"))
+        castep_reader = abins.LoadCASTEP(
+            input_ab_initio_filename=abins.test_helpers.find_file(filename + ".phonon"))
+        powder = self._prepare_data(filename=abins.test_helpers.find_file(filename + "_powder.txt"))
 
         return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "powder": powder}
 

@@ -5,13 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import AbinsModules
+from abins import GeneralLoadAbInitioTester, LoadCRYSTAL, test_helpers
 
 
-class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
+class AbinsLoadCRYSTALTest(unittest.TestCase, abins.GeneralLoadAbInitioTester):
 
     def tearDown(self):
-        AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadCRYSTAL"])
+        test_helpers.remove_output_files(list_of_names=["LoadCRYSTAL"])
 
     # *************************** USE CASES *********************************************
     # ===================================================================================
@@ -37,18 +37,18 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTe
     _phonon_dispersion_v2 = "MgO-222-DISP_LoadCRYSTAL"
 
     def test_gamma_crystal(self):
-        self.check(name=self._gamma_crystal, loader=AbinsModules.LoadCRYSTAL)
-        self.check(name=self._set_crystal, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._gamma_crystal, loader=LoadCRYSTAL)
+        self.check(name=self._set_crystal, loader=LoadCRYSTAL)
 
     def test_molecule(self):
-        self.check(name=self._molecule, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._molecule, loader=LoadCRYSTAL)
 
     def test_molecule17(self):
-        self.check(name=self._molecule17, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._molecule17, loader=LoadCRYSTAL)
 
     def test_phonon_dispersion_crystal(self):
-        self.check(name=self._phonon_dispersion_v1, loader=AbinsModules.LoadCRYSTAL)
-        self.check(name=self._phonon_dispersion_v2, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._phonon_dispersion_v1, loader=LoadCRYSTAL)
+        self.check(name=self._phonon_dispersion_v2, loader=LoadCRYSTAL)
 
 
 if __name__ == '__main__':

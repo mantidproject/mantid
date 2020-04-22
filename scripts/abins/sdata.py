@@ -5,12 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
+
 from mantid.kernel import logger as mantid_logger
-import AbinsModules
-from AbinsModules import AbinsConstants, AbinsParameters
+import abins
+from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
 
 
-class SData(AbinsModules.GeneralData):
+class SData(abins.GeneralData):
     """
     Class for storing S(Q, omega)
     """
@@ -22,7 +23,7 @@ class SData(AbinsModules.GeneralData):
             raise ValueError("Invalid value of temperature.")
         self._temperature = float(temperature)
 
-        if sample_form in AbinsConstants.ALL_SAMPLE_FORMS:
+        if sample_form in ALL_SAMPLE_FORMS:
             self._sample_form = sample_form
         else:
             raise ValueError("Invalid sample form %s" % sample_form)
@@ -41,24 +42,24 @@ class SData(AbinsModules.GeneralData):
             raise ValueError("New value of S  should have a form of a dict.")
 
         for item in items:
-            if AbinsConstants.ATOM_LABEL in item:
+            if ATOM_LABEL in item:
 
                 if not isinstance(items[item], dict):
                     raise ValueError("New value of item from S data should have a form of dictionary.")
 
-                if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
+                if sorted(items[item].keys()) != sorted(ALL_KEYWORDS_ATOMS_S_DATA):
                     raise ValueError("Invalid structure of the dictionary.")
 
-                for order in items[item][AbinsConstants.S_LABEL]:
-                    if not isinstance(items[item][AbinsConstants.S_LABEL][order], np.ndarray):
+                for order in items[item][S_LABEL]:
+                    if not isinstance(items[item][S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
 
             elif "frequencies" == item:
                 step = self._bin_width
-                bins = np.arange(start=AbinsParameters.sampling['min_wavenumber'],
-                                 stop=AbinsParameters.sampling['max_wavenumber'] + step,
+                bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
+                                 stop=abins.parameters.sampling['max_wavenumber'] + step,
                                  step=step,
-                                 dtype=AbinsConstants.FLOAT_TYPE)
+                                 dtype=FLOAT_TYPE)
 
                 freq_points = bins[:-1] + (step / 2)
                 if not np.array_equal(items[item], freq_points):
@@ -81,7 +82,7 @@ class SData(AbinsModules.GeneralData):
         Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
 
         Warnings will be raised if [max(S) * s_relative_threshold] is less than s_absolute_threshold. These
-        thresholds are defined in the AbinsParameters.sampling dictionary.
+        thresholds are defined in the abins.parameters.sampling dictionary.
 
         :param return_cases: If True, return a list of cases where S was small compared to threshold.
         :type return_cases: bool
@@ -95,10 +96,10 @@ class SData(AbinsModules.GeneralData):
             logger = mantid_logger
 
         warning_cases = []
-        absolute_threshold = AbinsParameters.sampling['s_absolute_threshold']
-        relative_threshold = AbinsParameters.sampling['s_relative_threshold']
+        absolute_threshold = abins.parameters.sampling['s_absolute_threshold']
+        relative_threshold = abins.parameters.sampling['s_relative_threshold']
         for key, entry in self._data.items():
-            if AbinsConstants.ATOM_LABEL in key:
+            if ATOM_LABEL in key:
                 for order, s in entry['s'].items():
                     if max(s.flatten()) * relative_threshold < absolute_threshold:
                         warning_cases.append((key, order, max(s.flatten())))

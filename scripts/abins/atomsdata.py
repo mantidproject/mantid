@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-import AbinsModules
+import abins
 
 
-class AtomsData(AbinsModules.GeneralData):
+class AtomsData(abins.GeneralData):
 
     def __init__(self, num_atoms=None):
         super(AtomsData, self).__init__()
@@ -30,11 +30,11 @@ class AtomsData(AbinsModules.GeneralData):
         if not isinstance(item, dict):
             raise ValueError("Every element of AtomsData has  a form of the dictionary.")
 
-        if not sorted(item.keys()) == sorted(AbinsModules.AbinsConstants.ALL_KEYWORDS_ATOMS_DATA):
+        if not sorted(item.keys()) == sorted(abins.constants.ALL_KEYWORDS_ATOMS_DATA):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if not item["symbol"] in AbinsModules.AbinsConstants.ALL_SYMBOLS:
+        if not item["symbol"] in abins.constants.ALL_SYMBOLS:
             raise ValueError("Invalid value of symbol.")
 
         # "coord"
@@ -45,7 +45,7 @@ class AtomsData(AbinsModules.GeneralData):
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if coord.dtype.num != AbinsModules.AbinsConstants.FLOAT_ID:
+        if coord.dtype.num != abins.constants.FLOAT_ID:
             raise ValueError("All coordinates should be real numbers.")
 
         # "sort"

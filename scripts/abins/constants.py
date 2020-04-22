@@ -8,13 +8,13 @@ import math
 import numpy as np
 from scipy import constants
 
-# Parameters in this bloc shouldn't be changed by a user. They should be treated as constants.
-# Changing these parameters may lead to non-functional Abins.
+# Constant values are set here and should be imported into other Abins modules before use.
+# The ALLCAPS notation imitates C-preprocessing conventions and should only be used in Abins
+# to indicate values imported from this module.
 
 # power expansion in terms of FUNDAMENTALS and overtones
 # S(Q, n * omega) \simeq (Q^2 * U^2)^n / n! exp(-Q^2 * U^2)
 # n = 1, 2, 3.....
-
 
 FUNDAMENTALS = 1  # value of fundamental parameter  (n = 1)
 FIRST_OVERTONE = 1 + FUNDAMENTALS  # value of first overtone (n = 2)

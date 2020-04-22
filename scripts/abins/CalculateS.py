@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-import AbinsModules
+import abins
+from abins.constants import ALL_SAMPLE_FORMS
 
 
 class CalculateS(object):
@@ -15,7 +16,6 @@ class CalculateS(object):
 
          * SPowderSemiEmpiricalCalculator
     """
-
     @staticmethod
     def init(filename=None, temperature=None, sample_form=None, abins_data=None, instrument=None,
              quantum_order_num=None, bin_width=1.0):
@@ -28,13 +28,13 @@ class CalculateS(object):
         :param quantum_order_num: number of quantum order events taken into account during the simulation
         :param bin_width: width of bins in wavenumber
         """
-        if sample_form in AbinsModules.AbinsConstants.ALL_SAMPLE_FORMS:
+        if sample_form in ALL_SAMPLE_FORMS:
             if sample_form == "Powder":
 
-                return AbinsModules.SPowderSemiEmpiricalCalculator(filename=filename, temperature=temperature,
-                                                                   abins_data=abins_data, instrument=instrument,
-                                                                   quantum_order_num=quantum_order_num,
-                                                                   bin_width=bin_width)
+                return abins.SPowderSemiEmpiricalCalculator(filename=filename, temperature=temperature,
+                                                            abins_data=abins_data, instrument=instrument,
+                                                            quantum_order_num=quantum_order_num,
+                                                            bin_width=bin_width)
                 # TODO: implement numerical powder averaging
 
             # elif sample == "SingleCrystal":  #TODO implement single crystal scenario

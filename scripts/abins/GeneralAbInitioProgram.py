@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import logger
-import AbinsModules
 from mantid.kernel import Atom
-
+import abins
+from abins.constants import MASS_EPS
 
 class GeneralAbInitioProgramName(type):
     def __str__(self):
@@ -26,8 +26,8 @@ class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
         self._num_atoms = None
         self._sample_form = None
         self._ab_initio_program = None
-        self._clerk = AbinsModules.IOmodule(input_filename=input_ab_initio_filename,
-                                            group_name=AbinsModules.AbinsParameters.hdf_groups['ab_initio_data'])
+        self._clerk = abins.IO(input_filename=input_ab_initio_filename,
+                               group_name=abins.parameters.hdf_groups['ab_initio_data'])
 
     def read_vibrational_or_phonon_data(self):
         """
@@ -109,7 +109,7 @@ class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
 
                         "filename" - name of input ab initio file
 
-          For more details about these fields please look at the documentation of IOmodule class.
+          For more details about these fields please look at the documentation of abins.IO class.
 
         :returns: Method should return an object of type AbinsData.
 
@@ -153,7 +153,7 @@ class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
         :returns: Returns an object of type AbinsData
         """
 
-        k_points = AbinsModules.KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
+        k_points = abins.KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
 
         # 1D [k] (one entry corresponds to weight of one k-point)
         k_points.set({"weights": data["weights"],
@@ -167,10 +167,10 @@ class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
                       "unit_cell": data["unit_cell"]
                       })
 
-        atoms = AbinsModules.AtomsData(num_atoms=self._num_atoms)
+        atoms = abins.AtomsData(num_atoms=self._num_atoms)
         atoms.set(data["atoms"])
 
-        result_data = AbinsModules.AbinsData()
+        result_data = abins.AbinsData()
         result_data.set(k_points_data=k_points, atoms_data=atoms)
         return result_data
 
@@ -212,7 +212,7 @@ class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
         :param approximate: whether or not look for isotopes in the approximated way
         """
         num_atoms = len(atoms)
-        eps = AbinsModules.AbinsConstants.MASS_EPS
+        eps = MASS_EPS
         if approximate:
             isotopes_found = [abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps
                               for i in range(num_atoms)]

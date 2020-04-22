@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-from .Instrument import Instrument
-from .Broadening import broaden_spectrum, prebin_required_schemes
-from AbinsModules import AbinsParameters
-from AbinsModules import AbinsConstants
+
+import abins
+from .instrument import Instrument
+from .broadening import broaden_spectrum, prebin_required_schemes
+abins.constants import WAVENUMBER_TO_INVERSE_A
 from AbinsModules.FrequencyPowderGenerator import FrequencyPowderGenerator
 
 
@@ -16,7 +17,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
     """
     Class for TOSCA and TOSCA-like instruments.
     """
-    parameters = AbinsParameters.instruments['TOSCA']
+    parameters = abins.parameters.instruments['TOSCA']
 
     def __init__(self, name):
         self._name = name
@@ -29,9 +30,9 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
 
         where k are determined from
-        AbinsParameters.instruments['TOSCA']['final_neutron_energy']
+        abins.parameters.instruments['TOSCA']['final_neutron_energy']
         and the input series of vibrational frequencies and cos(theta) is
-        precomputed as AbinsParameters.instruments['TOSCA']['cos_scattering_angle']
+        precomputed as abins.parameters.instruments['TOSCA']['cos_scattering_angle']
 
         :param input_data:
             frequencies (in cm-1) which should be used to construct Q2
@@ -41,8 +42,8 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
             constrained by conservation of mass/momentum and TOSCA geometry
         """
 
-        k2_i = (input_data + cls.parameters['final_neutron_energy']) * AbinsConstants.WAVENUMBER_TO_INVERSE_A
-        k2_f = cls.parameters['final_neutron_energy'] * AbinsConstants.WAVENUMBER_TO_INVERSE_A
+        k2_i = (input_data + cls.parameters['final_neutron_energy']) * WAVENUMBER_TO_INVERSE_A
+        k2_f = cls.parameters['final_neutron_energy'] * WAVENUMBER_TO_INVERSE_A
         result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * cls.parameters['cos_scattering_angle']
         return result
 

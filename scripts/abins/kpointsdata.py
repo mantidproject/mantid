@@ -5,10 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-import AbinsModules
+
+from abins import GeneralData
+from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, ALL_KEYWORDS_K_DATA,
+                             COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
 
 
-class KpointsData(AbinsModules.GeneralData):
+class KpointsData(GeneralData):
     """
     Class for storing k-points data. The data is arranged as a dictionary.
     The dictionary has the following form:
@@ -58,7 +61,7 @@ class KpointsData(AbinsModules.GeneralData):
         if not isinstance(items, dict):
             raise ValueError("New value of KpointsData should be a dictionary.")
 
-        if not sorted(items.keys()) == sorted(AbinsModules.AbinsConstants.ALL_KEYWORDS_K_DATA):
+        if not sorted(items.keys()) == sorted(ALL_KEYWORDS_K_DATA):
             raise ValueError("Invalid structure of the dictionary.")
 
         dim = 3
@@ -67,7 +70,7 @@ class KpointsData(AbinsModules.GeneralData):
         unit_cell = items["unit_cell"]
         if not (isinstance(unit_cell, np.ndarray)
                 and unit_cell.shape == (dim, dim)
-                and unit_cell.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+                and unit_cell.dtype.num == FLOAT_ID):
 
             raise ValueError("Invalid values of unit cell vectors.")
 
@@ -76,7 +79,7 @@ class KpointsData(AbinsModules.GeneralData):
 
         if not (isinstance(weights, np.ndarray)
                 and weights.shape == (self._num_k,)
-                and weights.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID
+                and weights.dtype.num == FLOAT_ID
                 and np.allclose(weights, weights[weights >= 0])):
 
             raise ValueError("Invalid value of weights.")
@@ -86,7 +89,7 @@ class KpointsData(AbinsModules.GeneralData):
 
         if not (isinstance(k_vectors, np.ndarray)
                 and k_vectors.shape == (self._num_k, dim)
-                and k_vectors.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+                and k_vectors.dtype.num == FLOAT_ID):
 
             raise ValueError("Invalid value of k_vectors.")
 
@@ -95,7 +98,7 @@ class KpointsData(AbinsModules.GeneralData):
         num_freq = frequencies.shape[1]
         if not (isinstance(frequencies, np.ndarray)
                 and frequencies.shape == (self._num_k, num_freq)
-                and frequencies.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+                and frequencies.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
 
         # "atomic_displacements"
@@ -103,7 +106,7 @@ class KpointsData(AbinsModules.GeneralData):
         if not (isinstance(
                 atomic_displacements, np.ndarray)
                 and atomic_displacements.shape == (self._num_k, self._num_atoms, num_freq, dim)
-                and atomic_displacements.dtype.num == AbinsModules.AbinsConstants.COMPLEX_ID):
+                and atomic_displacements.dtype.num == COMPLEX_ID):
 
             raise ValueError("Invalid value of atomic_displacements.")
 
@@ -113,7 +116,7 @@ class KpointsData(AbinsModules.GeneralData):
         weights_dic = {}
         k_vectors_dic = {}
 
-        indx = frequencies > AbinsModules.AbinsConstants.ACOUSTIC_PHONON_THRESHOLD
+        indx = frequencies > ACOUSTIC_PHONON_THRESHOLD
         for k in range(frequencies.shape[0]):
             freq_dic[str(k)] = frequencies[k, indx[k]]
             for atom in range(self._num_atoms):
@@ -138,18 +141,16 @@ class KpointsData(AbinsModules.GeneralData):
 
         # look for index of Gamma point
         for k in self._data["k_vectors"]:
-            if np.linalg.norm(self._data["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
+            if np.linalg.norm(self._data["k_vectors"][k]) < SMALL_K:
                 gamma_pkt_index = k
                 break
         if gamma_pkt_index == -1:
             raise ValueError("Gamma point not found.")
 
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-
-        k_points = {"weights": {gamma: self._data["weights"][gamma_pkt_index]},
-                    "k_vectors": {gamma: self._data["k_vectors"][gamma_pkt_index]},
-                    "frequencies": {gamma: self._data["frequencies"][gamma_pkt_index]},
-                    "atomic_displacements": {gamma: self._data["atomic_displacements"][gamma_pkt_index]}
+        k_points = {"weights": {GAMMA_POINT: self._data["weights"][gamma_pkt_index]},
+                    "k_vectors": {GAMMA_POINT: self._data["k_vectors"][gamma_pkt_index]},
+                    "frequencies": {GAMMA_POINT: self._data["frequencies"][gamma_pkt_index]},
+                    "atomic_displacements": {GAMMA_POINT: self._data["atomic_displacements"][gamma_pkt_index]}
                     }
 
         return k_points

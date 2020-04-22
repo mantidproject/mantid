@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-import AbinsModules
+
+from abins.constants import EOF, ONE_CHARACTER
 
 
 class GeneralAbInitioParser(object):
@@ -78,10 +79,9 @@ class GeneralAbInitioParser(object):
         :param file_obj: file object which was open in "r" mode
         :returns: True if end of file, otherwise False
         """
-        n = AbinsModules.AbinsConstants.ONE_CHARACTER
         pos = file_obj.tell()
-        potential_end = file_obj.read(n)
-        if potential_end == AbinsModules.AbinsConstants.EOF:
+        potential_end = file_obj.read(ONE_CHARACTER)
+        if potential_end == EOF:
             return True
         else:
             file_obj.seek(pos)

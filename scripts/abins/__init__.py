@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # flake8: noqa
-from .IOmodule import IOmodule
+from .io import IO
 
 # Frequency generator
-from .FrequencyPowderGenerator import FrequencyPowderGenerator
+from .frequencypowdergenerator import FrequencyPowderGenerator
 
 # Loading modules
 from .GeneralAbInitioProgram import GeneralAbInitioProgram
@@ -27,10 +27,10 @@ from .CalculateS import CalculateS
 from .SPowderSemiEmpiricalCalculator import SPowderSemiEmpiricalCalculator
 
 # Data
-from .GeneralData import GeneralData
-from .KpointsData import KpointsData
-from .AtomsData import AtomsData
-from .AbinsData import AbinsData
+from .generaldata import GeneralData
+from .kpointsdata import KpointsData
+from .atomsdata import AtomsData
+from .abinsdata import AbinsData
 from .DWSingleCrystalData import DWSingleCrystalData
 from .SingleCrystalData import SingleCrystalData
 from .PowderData import PowderData
@@ -39,8 +39,8 @@ from .SData import SData
 # Instruments
 from .InstrumentProducer import InstrumentProducer
 
-from . import AbinsParameters
-from . import AbinsConstants
-from . import AbinsTestHelpers
+from . import parameters
+from . import constants
+from . import test_helpers
 
 from .GeneralLoadAbInitioTester import GeneralLoadAbInitioTester
