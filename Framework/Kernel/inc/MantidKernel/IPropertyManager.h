@@ -349,6 +349,7 @@ public:
   virtual void
   splitByTime(std::vector<SplittingInterval> & /*splitter*/,
               std::vector<PropertyManager *> /* outputs*/) const = 0;
+
   virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/,
                                 const std::vector<std::string> &
                                 /* excludedFromFiltering */) = 0;

@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/LogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <locale>
@@ -196,46 +197,6 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
                    std::bind(std::multiplies<double>(), _1, 60.0));
   }
 
-  // Now the the validity of the values
-  // this should be a match int array to the data values (or times)
-  // If not present assume all data is valid
-  try {
-    file.openData("value_valid");
-
-    // Now the validity data
-    ::NeXus::Info info = file.getInfo();
-    // Check the size
-    if (size_t(info.dims[0]) != time_double.size()) {
-      throw ::NeXus::Exception("Invalid value entry for validity data");
-    }
-    if (file.isDataInt()) // Int type
-    {
-      std::vector<int> values;
-      try {
-        file.getDataCoerce(values);
-
-        for (auto validity : values) {
-          if (validity != 0) {
-            log.warning() << "Some \"" << propName
-                          << "\" log data is invalid!\n";
-            break;
-          }
-        }
-      } catch (::NeXus::Exception &) {
-        throw;
-      }
-    } else {
-      throw ::NeXus::Exception(
-          "Invalid value type for validity data. Only int is supported");
-    }
-  } catch (::NeXus::Exception &ex) {
-    std::string error_msg = ex.what();
-    if (error_msg != "NXopendata(value_valid) failed") {
-      log.warning() << error_msg << "\n";
-      file.closeData();
-    }
-  }
-
   // Now the values: Could be a string, int or double
   file.openData("value");
   // Get the units of the property
@@ -319,6 +280,84 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
     throw ::NeXus::Exception(
         "Invalid value type for time series. Only int, double or strings are "
         "supported");
+  }
+}
+
+/**
+ * Creates a time series validity filter property from the currently opened log entry. It is
+ * assumed to
+ * have been checked to have a time field and the value entry's name is given
+ * as an argument
+ * @param file :: A reference to the file handle
+ * @param prop :: The property to check for a validity array
+ * @param log :: Reference to logger to print out to
+ * @returns A pointer to a new property containing the time series filter or null
+ */
+std::unique_ptr<Kernel::Property>
+createTimeSeriesValidityFilter(::NeXus::File &file, 
+    const std::unique_ptr<Kernel::Property> &prop,
+                                                   Kernel::Logger &log) {
+;
+  auto tsProp = dynamic_cast<Kernel::ITimeSeriesProperty *>(prop.get());
+  auto times = tsProp->timesAsVector();
+  std::vector<int> values;
+  std::vector<bool> boolValues;
+  // Now the the validity of the values
+  // this should be a match int array to the data values (or times)
+  // If not present assume all data is valid
+  try {
+    file.openData("value_valid");
+
+    // Now the validity data
+    ::NeXus::Info info = file.getInfo();
+    // Check the size
+    if (size_t(info.dims[0]) != times.size()) {
+      throw ::NeXus::Exception("Invalid value entry for validity data");
+    }
+    if (file.isDataInt()) // Int type
+    {
+      try {
+        file.getDataCoerce(values);
+        file.closeData();
+      } catch (::NeXus::Exception &) {
+        throw;
+      }
+    } else {
+      throw ::NeXus::Exception(
+          "Invalid value type for validity data. Only int is supported");
+    }
+  } catch (::NeXus::Exception &ex) {
+    std::string error_msg = ex.what();
+    if (error_msg != "NXopendata(value_valid) failed") {
+      log.warning() << error_msg << "\n";
+      file.closeData();
+      // no data found
+      return std::unique_ptr<Kernel::Property>(nullptr);
+    }
+  }
+
+  bool invalidDataFound = false;
+  boolValues.reserve(values.size());
+  //convert the integer values to boolean with 0=valid data
+  for (size_t i = 0; i < values.size(); i++) {
+    bool boolValue = (values[i] != 0);
+    boolValues.emplace_back(boolValue);
+    if ((boolValue) && (!invalidDataFound)) {
+      invalidDataFound = true;
+    }
+  }
+  if (invalidDataFound) {
+    log.warning() << "Some \"" << prop->name() << "\" log data is invalid!\n";
+    auto tspName =
+        API::LogManager::getInvalidValuesFilterLogName(prop->name());
+    auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
+    tsp->create(times, boolValues);
+    log.debug() << "   done reading \"value_valid\" array\n";
+
+    return tsp;
+  } else {
+    // no data found
+    return std::unique_ptr<Kernel::Property>(nullptr);
   }
 }
 
@@ -811,6 +850,13 @@ void LoadNexusLogs::loadNXLog(
   try {
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
       auto logValue = createTimeSeries(file, entry_name, freqStart, g_log);
+      auto validityLogValue =
+          createTimeSeriesValidityFilter(file, logValue, g_log);
+      if (validityLogValue) {
+        appendEndTimeLog(validityLogValue.get(), workspace->run());
+        workspace->mutableRun().addProperty(std::move(validityLogValue),
+                                            overwritelogs);
+      }
       appendEndTimeLog(logValue.get(), workspace->run());
       workspace->mutableRun().addProperty(std::move(logValue), overwritelogs);
     }
@@ -869,6 +915,12 @@ void LoadNexusLogs::loadSELog(
       }
 
       logValue = createTimeSeries(file, propName, freqStart, g_log);
+      auto validityLogValue =
+          createTimeSeriesValidityFilter(file, logValue, g_log);
+      if (validityLogValue) {
+        appendEndTimeLog(validityLogValue.get(), workspace->run());
+        workspace->mutableRun().addProperty(std::move(validityLogValue));
+      }
       appendEndTimeLog(logValue.get(), workspace->run());
 
       file.closeGroup();
