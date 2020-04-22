@@ -51,8 +51,6 @@ public:
   virtual std::vector<double> getQValuesForData() const = 0;
   virtual std::vector<std::pair<std::string, int>>
   getResolutionsForFit() const = 0;
-  virtual void setFittingData(PrivateFittingData &&fittingData) = 0;
-  virtual PrivateFittingData clearWorkspaces() = 0;
 
   virtual void setSpectra(const std::string &spectra,
                           TableDatasetIndex dataIndex) = 0;
@@ -65,6 +63,7 @@ public:
   virtual void addWorkspace(const std::string &workspaceName,
                             const Spectra &spectra) = 0;
   virtual void removeWorkspace(TableDatasetIndex index) = 0;
+  virtual void clear() = 0;
 };
 
 } // namespace IDA

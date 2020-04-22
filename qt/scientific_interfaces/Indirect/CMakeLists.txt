@@ -43,6 +43,7 @@ set(
         IndirectFitPlotPresenter.cpp
         IndirectFitPlotView.cpp
         IndirectFittingModel.cpp
+        IndirectFitDataModel.cpp
         IndirectInstrumentConfig.cpp
         IndirectInterface.cpp
         IndirectLoadILL.cpp
@@ -110,6 +111,7 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
+        IndirectFitDataModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h
         IndirectToolsTab.h
@@ -339,6 +341,7 @@ set(
         IndirectFitPlotPresenter.cpp
         IndirectFitPlotView.cpp
         IndirectFittingModel.cpp
+        IndirectFitDataModel.cpp
         IndirectInstrumentConfig.cpp
         IndirectInterface.cpp
         IndirectLoadILL.cpp
@@ -484,6 +487,7 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
+        IndirectFitDataModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h
         IPythonRunner.h

@@ -29,28 +29,32 @@ bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+IndirectFitDataModel::IndirectFitDataModel() : m_fittingData() {}
+
 bool IndirectFitDataModel::hasWorkspace(
     std::string const &workspaceName) const {
   auto const names = getWorkspaceNames();
   auto const iter = std::find(names.begin(), names.end(), workspaceName);
   return iter != names.end();
+  return true;
 }
 
 Mantid::API::MatrixWorkspace_sptr
 IndirectFitDataModel::getWorkspace(TableDatasetIndex index) const {
   if (index < m_fittingData.size())
-    return m_fittingData[index]->workspace();
+    return m_fittingData[index.value].workspace();
   return nullptr;
 }
 
 Spectra IndirectFitDataModel::getSpectra(TableDatasetIndex index) const {
   if (index < m_fittingData.size())
-    return m_fittingData[index]->spectra();
+    return m_fittingData[index.value].spectra();
   return Spectra("");
 }
 
 TableDatasetIndex IndirectFitDataModel::numberOfWorkspaces() const {
-  return TableDatasetIndex{m_fittingData.size()};
+  return TableDatasetIndex{static_cast<int>(m_fittingData.size())};
 }
 
 bool IndirectFitDataModel::isMultiFit() const {
@@ -59,26 +63,26 @@ bool IndirectFitDataModel::isMultiFit() const {
 
 int IndirectFitDataModel::getNumberOfSpectra(TableDatasetIndex index) const {
   if (index < m_fittingData.size())
-    return m_fittingData[index]->numberOfSpectra().value;
+    return m_fittingData[index.value].numberOfSpectra().value;
   else
     throw std::runtime_error(
         "Cannot find the number of spectra for a workspace: the workspace "
         "index provided is too large.");
+  return 1;
 }
 
 int IndirectFitDataModel::getNumberOfDomains() const {
   int sum{0};
-  for (TableDatasetIndex i = m_fittingData.zero(); i < m_fittingData.size();
-       ++i) {
-    sum += m_fittingData[i]->numberOfSpectra().value;
+  for (auto fittingData : m_fittingData) {
+    sum += fittingData.numberOfSpectra().value;
   }
   return sum;
 }
 
 std::vector<double> IndirectFitDataModel::getQValuesForData() const {
-  std::vector<double> qValues;
+  std::vector<double> qValues{1};
   for (auto &fitData : m_fittingData) {
-    auto indexQValues = fitData->getQValues();
+    auto indexQValues = fitData.getQValues();
     qValues.insert(std::end(qValues), std::begin(indexQValues),
                    std::end(indexQValues));
   }
@@ -99,22 +103,21 @@ void IndirectFitDataModel::setSpectra(Spectra &&spectra,
                                       TableDatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
-  m_fittingData[dataIndex]->setSpectra(std::forward<Spectra>(spectra));
+  m_fittingData[dataIndex.value].setSpectra(std::forward<Spectra>(spectra));
 }
 
 void IndirectFitDataModel::setSpectra(const Spectra &spectra,
                                       TableDatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
-  m_fittingData[dataIndex]->setSpectra(spectra);
+  m_fittingData[dataIndex.value].setSpectra(spectra);
 }
 
 std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
   std::vector<std::string> names;
-  names.reserve(m_fittingData.size().value);
-  for (TableDatasetIndex i = m_fittingData.zero(); i < m_fittingData.size();
-       ++i)
-    names.emplace_back(m_fittingData[i]->workspace()->getName());
+  names.reserve(m_fittingData.size());
+  for (auto fittingData : m_fittingData)
+    names.emplace_back(fittingData.workspace()->getName());
   return names;
 }
 
@@ -153,34 +156,42 @@ void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
 void IndirectFitDataModel::addWorkspace(
     Mantid::API ::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
   if (!m_fittingData.empty() &&
-      equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
-    m_fittingData.back()->combine(IndirectFitData(workspace, spectra));
+      equivalentWorkspaces(workspace, m_fittingData.back().workspace()))
+    m_fittingData.back().combine(IndirectFitData(workspace, spectra));
   else
     addNewWorkspace(workspace, spectra);
 }
 
+FitDomainIndex
+IndirectFitDataModel::getDomainIndex(TableDatasetIndex dataIndex,
+                                     WorkspaceIndex spectrum) const {
+  FitDomainIndex index{0};
+  for (int iws = 0; iws < m_fittingData.size(); ++iws) {
+    if (iws < dataIndex.value) {
+      index += getNumberOfSpectra(iws);
+    } else {
+      auto const spectra = getSpectra(iws);
+      try {
+        index += spectra.indexOf(spectrum);
+      } catch (const std::runtime_error &) {
+        if (spectrum.value != 0)
+          throw;
+      }
+      break;
+    }
+  }
+  return index;
+}
+
+void IndirectFitDataModel::clear() { m_fittingData.clear(); }
+
 void IndirectFitDataModel::addNewWorkspace(
     const Mantid::API::MatrixWorkspace_sptr &workspace,
     const Spectra &spectra) {
-  m_fittingData.emplace_back(
-      new IndirectFitData(std::move(workspace), spectra));
+  m_fittingData.emplace_back(IndirectFitData(std::move(workspace), spectra));
 }
 
 void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {}
-
-PrivateFittingData::PrivateFittingData() : m_data() {}
-
-PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)
-    : m_data(std::move(privateData.m_data)) {}
-
-PrivateFittingData::PrivateFittingData(IndirectFitDataCollectionType &&data)
-    : m_data(std::move(data)) {}
-
-PrivateFittingData &
-PrivateFittingData::operator=(PrivateFittingData &&fittingData) {
-  m_data = std::move(fittingData.m_data);
-  return *this;
-}
 
 } // namespace IDA
 } // namespace CustomInterfaces

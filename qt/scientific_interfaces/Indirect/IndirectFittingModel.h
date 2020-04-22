@@ -61,8 +61,9 @@ public:
   std::vector<double> getQValuesForData() const override;
   std::vector<std::pair<std::string, int>>
   getResolutionsForFit() const override;
-  void setFittingData(PrivateFittingData &&fittingData) override;
-  PrivateFittingData clearWorkspaces() override;
+  void setFittingData(PrivateFittingData &&fittingData);
+  PrivateFittingData clearWorkspaces();
+  void clear() override;
 
   void setSpectra(const std::string &spectra,
                   TableDatasetIndex dataIndex) override;

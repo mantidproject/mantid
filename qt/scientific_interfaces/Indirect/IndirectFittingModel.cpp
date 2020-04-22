@@ -624,6 +624,8 @@ PrivateFittingData IndirectFittingModel::clearWorkspaces() {
   return std::move(m_fittingData);
 }
 
+void IndirectFittingModel::clear() {};
+
 void IndirectFittingModel::setFittingMode(FittingMode mode) {
   m_fittingMode = mode;
 }

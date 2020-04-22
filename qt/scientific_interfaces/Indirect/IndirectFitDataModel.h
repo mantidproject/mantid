@@ -23,6 +23,8 @@ namespace IDA {
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitDataModel : public IIndirectFitData {
 public:
+  IndirectFitDataModel();
+  virtual ~IndirectFitDataModel() = default;
   bool hasWorkspace(std::string const &workspaceName) const override;
   Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const override;
@@ -47,6 +49,8 @@ public:
                     const Spectra &spectra) override;
   void removeWorkspace(TableDatasetIndex index) override;
 
+  void clear() override;
+
 protected:
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
@@ -57,7 +61,7 @@ private:
       const Mantid::API::MatrixWorkspace_sptr &workspace,
       const Spectra &spectra);
 
-  IndirectFitDataCollectionType m_fittingData;
+  std::vector<IndirectFitData> m_fittingData;
 };
 
 } // namespace IDA
