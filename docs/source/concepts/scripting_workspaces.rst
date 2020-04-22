@@ -139,3 +139,54 @@ Useful links
 * :ref:`WorkingWithWorkspaces`
 * :ref:`More ADS options <mantid.api.AnalysisDataServiceImpl>`
 * :ref:`Analysis Data Service Explained <Analysis Data Service>` 
+
+
+Overall Example
+===============
+
+.. testcode:: mask_detectors
+
+    from mantid.simpleapi import *
+    from mantid.api import AnalysisDataService as ADS
+
+    ws = CreateSampleWorkspace(); print('Create Workspace')
+    print('Workspace list:',ADS.getObjectNames())
+    DeleteWorkspace(ws); print('Delete Workspace')
+    print('Workspace list:',ADS.getObjectNames())
+
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+    ws3 = CreateSampleWorkspace()
+    wsGroup = GroupWorkspaces([ws1,ws2,ws3]); print('Create + GroupWorkspaces')
+    print('Workspace list:',ADS.getObjectNames())
+
+    import os
+    filePath = os.path.expanduser('~/SavedNexusFile.nxs')
+    SaveNexus(wsGroup,filePath); print('Save Workspaces')
+
+    ADS.clear(); print('Clear All Workspaces')
+    print('Workspace list:',ADS.getObjectNames())
+
+    Load(filePath,OutputWorkspace='DATA555'); print('Load Data')
+    data = ADS.retrieve('DATA555')
+    plotSpectrum(data,[1,2,3],error_bars=True, waterfall=False); print('Plot Data')
+    print('Workspace list:',ADS.getObjectNames())
+
+Output:
+
+.. testoutput:: mask_detectors
+
+    Create Workspace
+    Workspace list: ['DATA555', 'ws', 'ws1', 'ws2', 'ws3']
+    Delete Workspace
+    Workspace list: ['DATA555', 'ws1', 'ws2', 'ws3']
+    Create + GroupWorkspaces
+    Workspace list: ['DATA555', 'ws1', 'ws2', 'ws3', 'wsGroup']
+    Save Workspaces
+    Clear All Workspaces
+    Workspace list: []
+    Load Data
+    Plot Data
+    Workspace list: ['DATA555', 'ws1', 'ws2', 'ws3']
+
+.. categories:: Concepts
