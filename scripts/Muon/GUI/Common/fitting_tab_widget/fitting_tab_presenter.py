@@ -9,8 +9,6 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name, \
-    create_fitted_workspace_name, create_multi_domain_fitted_workspace_name
 from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
 import re
@@ -82,7 +80,7 @@ class FittingTabPresenter(object):
     def end_x(self):
         return self._end_x
 
-    # TODO: DELETE THIS COMMENT -- START OF HANDLE SIGNALS
+    # Respond to changes on view
 
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
@@ -320,13 +318,10 @@ class FittingTabPresenter(object):
             fit_function = self._get_fit_function()[index]
             self._fit_function[index] = self._get_fit_function()[index]
         else:
-            print(self._get_fit_function())
             fit_function = self._get_fit_function()[0]
             self._fit_function = self._get_fit_function()
 
-        print("index is now", self.view.get_index_for_start_end_times())
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
-        print(parameter_values)
         self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
         self.model.update_plot_guess(self.get_fit_input_workspaces(), self.view.get_index_for_start_end_times())
@@ -357,8 +352,7 @@ class FittingTabPresenter(object):
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
-    # TODO: DELETE THIS COMMENT -- END OF HANDLE SIGNALS
-
+    # Perform fit
     def perform_fit(self):
         if not self.view.fit_object:
             return
@@ -379,8 +373,7 @@ class FittingTabPresenter(object):
         except ValueError as error:
             self.view.warning_popup(error)
 
-    # TODO: DELETE THIS COMMENT -- END OF ACTUAL FITTING CODE
-
+    # Query view and update model.
     def clear_and_reset_gui_state(self):
         self.view.set_datasets_in_function_browser(self.selected_data)
 
@@ -450,18 +443,6 @@ class FittingTabPresenter(object):
             simul_choices = self.selected_data
 
         self.view.setup_fit_by_specifier(simul_choices)
-
-    def get_simul_fit_workspaces(self):
-        selected_data = self.selected_data
-        fit_workspaces = []
-        if self.view.simultaneous_fit_by == "Run":
-            selected_run = self.view.simultaneous_fit_by_specifier
-            for workspace in selected_data:
-                if selected_run == get_run_number_from_workspace_name(workspace, self.context.data_context.instrument):
-                    fit_workspaces.append(workspace)
-        else:
-            pass
-        return fit_workspaces
 
     def _update_stored_fit_functions(self):
         if self.view.is_simul_fit():

@@ -31,7 +31,6 @@ class FittingTabModel(object):
         self.context = context
         self.function_name = ''
         self._grppair_index = {}
-
         # fitting options from view
         self.fit_function = None
         self.startX = 0
@@ -83,7 +82,6 @@ class FittingTabModel(object):
 
     # single fitting
     def evaluate_single_fit(self, workspace):
-
         if self.fit_type == "Single":
             if self.tf_asymmetry_mode:
                 params = self.get_parameters_for_single_tf_fit(workspace[0])
@@ -383,6 +381,9 @@ class FittingTabModel(object):
                 self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
 
     def update_plot_guess(self, workspace_names, index):
+        if not self.context.fitting_context.plot_guess:
+            return
+
         fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
             guess_ws_name = MUON_ANALYSIS_GUESS_WS
