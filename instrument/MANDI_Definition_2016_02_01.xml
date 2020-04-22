@@ -5,8 +5,8 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="MANDI" valid-from   ="2016-02-01 00:00:00"
-              valid-to     ="2100-12-31 23:59:59"
-                      last-modified="2016-02-29 14:03:45.139095">
+              valid-to     ="2020-03-31 23:59:59"
+                      last-modified="2020-04-06 16:30">
   <!--DEFAULTS-->
   <defaults>
     <length unit="metre"/>
