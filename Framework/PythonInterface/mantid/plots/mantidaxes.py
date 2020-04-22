@@ -1179,6 +1179,12 @@ class MantidAxes3D(Axes3D):
         # it interfering with double-clicking on the axes.
         self.figure.canvas.mpl_disconnect(self._cids[1])
 
+    def set_title(self, *args, **kwargs):
+        # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called
+        # instead.
+        title = super(Axes3D, self).set_title(*args, **kwargs)
+        return title
+
     def set_xlim3d(self, *args):
         min, max = super().set_xlim3d(*args)
 

@@ -11,6 +11,7 @@ from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
+from mantidqt.plotting import functions
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
@@ -59,6 +60,9 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.showDetectorsClicked.connect(self._do_show_detectors)
         self.workspacewidget.plotAdvancedClicked.connect(partial(self._do_plot_spectrum,
                                                                  errors=False, overplot=False, advanced=True))
+        self.workspacewidget.plotSurfaceClicked.connect(partial(self._do_plot_3D, plot_type='surface'))
+        self.workspacewidget.plotWireframeClicked.connect(partial(self._do_plot_3D, plot_type='wireframe'))
+        self.workspacewidget.plotContourClicked.connect(partial(self._do_plot_3D, plot_type='contour'))
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -128,6 +132,23 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _do_plot_3D(self, workspaces, plot_type):
+        """
+        Make a 3D plot from the selected workspace.
+
+        :param workspaces: A list of workspace names.
+        :param plot_type: The type of 3D plot, either 'surface', 'wireframe', or 'contour'.
+        """
+        plot_function = getattr(functions, f'plot_{plot_type}', None)
+
+        if plot_function is None:
+            return
+
+        try:
+            plot_function(workspaces)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_sample_logs(self, names):
         """
