@@ -349,7 +349,7 @@ public:
   virtual void
   splitByTime(std::vector<SplittingInterval> & /*splitter*/,
               std::vector<PropertyManager *> /* outputs*/) const = 0;
-  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) = 0;
+  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/) = 0;
 
 protected:
   /// Get a property by an index
