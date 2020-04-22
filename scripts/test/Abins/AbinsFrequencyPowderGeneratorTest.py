@@ -154,7 +154,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         # At order one this should just be a pass-through
         # (it also reindexes the coefficients but we might not keep that)
         fundamentals, fund_coeffs = (
-            FrequencyPowderGenerator.construct_freq_combinations(
+            abins.FrequencyPowderGenerator.construct_freq_combinations(
                 previous_array=None, previous_coefficients=None,
                 fundamentals_array=rand_fundamentals,
                 fundamentals_coefficients=np.arange(len(rand_fundamentals),
@@ -167,7 +167,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
 
         # Calcualate some doubles
         doubles, double_coeffs = (
-            FrequencyPowderGenerator.construct_freq_combinations(
+            abins.FrequencyPowderGenerator.construct_freq_combinations(
                 previous_array=fundamentals,
                 previous_coefficients=fund_coeffs,
                 fundamentals_array=rand_fundamentals,

@@ -8,7 +8,7 @@ import unittest
 from abins import GeneralLoadAbInitioTester, LoadCRYSTAL, test_helpers
 
 
-class AbinsLoadCRYSTALTest(unittest.TestCase, abins.GeneralLoadAbInitioTester):
+class AbinsLoadCRYSTALTest(unittest.TestCase, GeneralLoadAbInitioTester):
 
     def tearDown(self):
         test_helpers.remove_output_files(list_of_names=["LoadCRYSTAL"])

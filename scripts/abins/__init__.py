@@ -34,10 +34,10 @@ from .abinsdata import AbinsData
 from .DWSingleCrystalData import DWSingleCrystalData
 from .SingleCrystalData import SingleCrystalData
 from .PowderData import PowderData
-from .SData import SData
+from .sdata import SData
 
 # Instruments
-from .InstrumentProducer import InstrumentProducer
+from .instrumentproducer import InstrumentProducer
 
 from . import parameters
 from . import constants

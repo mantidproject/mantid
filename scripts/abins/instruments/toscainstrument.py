@@ -7,13 +7,13 @@
 import numpy as np
 
 import abins
+import abins.parameters
+from abins.constants import WAVENUMBER_TO_INVERSE_A
 from .instrument import Instrument
 from .broadening import broaden_spectrum, prebin_required_schemes
-abins.constants import WAVENUMBER_TO_INVERSE_A
-from AbinsModules.FrequencyPowderGenerator import FrequencyPowderGenerator
 
 
-class ToscaInstrument(Instrument, FrequencyPowderGenerator):
+class ToscaInstrument(Instrument, abins.FrequencyPowderGenerator):
     """
     Class for TOSCA and TOSCA-like instruments.
     """

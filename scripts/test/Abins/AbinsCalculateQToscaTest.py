@@ -10,7 +10,7 @@ import numpy as np
 # from mantid.simpleapi import *
 import abins
 from abins.constants import CM1_2_HARTREE, FIRST_OPTICAL_PHONON, WAVENUMBER_TO_INVERSE_A
-from abins.instrumentproducer import InstrumentProducer, KpointsData
+from abins import InstrumentProducer, KpointsData
 
 
 class CalculateQToscaTest(unittest.TestCase):
