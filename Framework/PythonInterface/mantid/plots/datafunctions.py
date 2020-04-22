@@ -491,7 +491,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     try:
         specInfo = workspace.spectrumInfo()
         for index in range(workspace.getNumberHistograms()):
-            if specInfo.isMasked(index):
+            if specInfo.isMasked(index) or specInfo.isMonitor(index):
                 z[index,:] = np.nan
     except:
         pass
@@ -559,7 +559,7 @@ def get_uneven_data(workspace, distribution):
                 zvals = zvals/(xvals[1:] - xvals[0:-1])
         else:
             xvals = boundaries_from_points(xvals)
-        if specInfo and specInfo.hasDetectors(index) and specInfo.isMasked(index):
+        if specInfo and specInfo.hasDetectors(index) and (specInfo.isMasked(index) or specInfo.isMonitor(index)):
             zvals[:] = np.nan
         zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
