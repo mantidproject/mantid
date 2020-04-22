@@ -341,6 +341,19 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
     return x, y, dy, dx
 
 
+def get_detectors_indices(workspace):
+    """
+    Find the detectors' spectrum indices
+    (ie every detector which is not a monitor)
+
+    :param workspace: a Workspace2D or an EventWorkspace
+    """
+    total_range = workspace.getNumberHistograms()
+    spectrum_info = workspace.spectrumInfo()
+    indices = [i for i in range(total_range) if not spectrum_info.isMonitor(i)]
+    return indices
+
+
 def get_bins(workspace, wkspIndex, withDy=False):
     """
     Extract all the bins for a spectrum
@@ -350,8 +363,7 @@ def get_bins(workspace, wkspIndex, withDy=False):
     :param withDy: if True, it will return the error in the "counts", otherwise None
 
     """
-    num_hist = workspace.getNumberHistograms()
-    x = range(0, num_hist)
+    x = get_detectors_indices(workspace)
     y = []
     dy = [] if withDy else None
     for i in x:
