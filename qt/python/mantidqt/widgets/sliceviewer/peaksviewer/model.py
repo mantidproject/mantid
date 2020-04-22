@@ -104,9 +104,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         """
         frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
         peak = self.ws.getPeak(selected_index)
-        center = slice_info.transform(getattr(peak, frame_to_slice_fn)())
-        print(f"Center of peak at index={selected_index}: {center}")
-        return center[2]
+        return slice_info.transform(getattr(peak, frame_to_slice_fn)())[2]
 
     def zoom_to(self, index):
         """

@@ -107,7 +107,7 @@ class PeaksViewerView(QWidget):
         self._table_view = TableWorkspaceDisplayView(parent=self)
         self._table_view.setSelectionBehavior(TableWorkspaceDisplayView.SelectRows)
         self._table_view.setSelectionMode(TableWorkspaceDisplayView.SingleSelection)
-        self._table_view.itemSelectionChanged.connect(self._on_row_selection_changed)
+        self._table_view.itemClicked.connect(self._on_row_clicked)
 
         group_box_layout = QVBoxLayout()
         group_box_layout.addWidget(self._table_view)
@@ -116,12 +116,12 @@ class PeaksViewerView(QWidget):
         widget_layout.addWidget(self._group_box)
         self.setLayout(widget_layout)
 
-    def _on_row_selection_changed(self):
+    def _on_row_clicked(self, _):
         """
-        Slot to handle row selection changes. It is assumed only single row
+        Slot to handle row clicks. It is assumed only single row
         selection is allowed
         """
-        self._presenter.notify(self._presenter.Event.PeakSelectionChanged)
+        self._presenter.notify(self._presenter.Event.PeakSelected)
 
 
 class PeaksViewerCollectionView(QWidget):
