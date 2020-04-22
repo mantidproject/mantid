@@ -30,6 +30,9 @@ Improvements
 
 Single Crystal Diffraction
 --------------------------
+Improvements
+^^^^^^^^^^^^
+- :ref:`CombinePeaksWorkspaces <algm-CombinePeaksWorkspaces>` now combines the modulation vectors present in the two workspaces, provided the total number of vectors is less than 3.
 - New instrument geometry for MaNDi instrument at SNS
 
 Imaging
