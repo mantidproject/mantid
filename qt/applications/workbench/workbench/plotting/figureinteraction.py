@@ -17,6 +17,7 @@ from functools import partial
 
 # third party imports
 from matplotlib.container import ErrorbarContainer
+from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
@@ -688,6 +689,9 @@ class FigureInteraction(object):
 
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
+            if arg_set['function'] == 'contour':
+                continue
+
             if arg_set['workspaces'] in ax.tracked_workspaces:
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
@@ -710,7 +714,13 @@ class FigureInteraction(object):
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
                     if ws_artist.spec_num == arg_set.get('specNum'):
                         ws_artist.is_normalized = not is_normalized
-                        ws_artist.replace_data(workspace, arg_set_copy)
+
+                        # This check is to prevent the contour lines being re-plotted using the colorfill plot args.
+                        if isinstance(ws_artist._artists[0], QuadContourSet):
+                            ws_artist.replace_data(workspace, None)
+                        else:
+                            ws_artist.replace_data(workspace, arg_set_copy)
+
         if ax.lines:  # Relim causes issues with colour plots, which have no lines.
             ax.relim()
 
