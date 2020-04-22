@@ -54,7 +54,6 @@ private:
   std::string m_value = "Nothing";
 };
 
-
 void addTestTimeSeriesFilter(LogManager &run, const std::string &name) {
   auto timeSeries = new TimeSeriesProperty<bool>(name);
   timeSeries->addValue("2012-07-19T16:17:00", true);
@@ -600,7 +599,8 @@ public:
     LogManager runInfo;
     const std::string name = "test_has_invalid_values_filter";
     const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
-    TSM_ASSERT("The filter name should start with the log name",filterName.rfind(name, 0) == 0);
+    TSM_ASSERT("The filter name should start with the log name",
+               filterName.rfind(name, 0) == 0);
     addTestTimeSeries<double>(runInfo, name);
 
     TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), false);
@@ -619,18 +619,17 @@ public:
                filterfail == nullptr);
     addTestTimeSeriesFilter(runInfo, filterName);
 
-    auto * filter = runInfo.getInvalidValuesFilter(name);
+    auto *filter = runInfo.getInvalidValuesFilter(name);
     TSM_ASSERT("The filter was returned incorrectly as NULL", filter);
     TS_ASSERT_THROWS_NOTHING(filter->firstTime());
 
-    //check it can be used to filter the log
+    // check it can be used to filter the log
     auto *log = runInfo.getProperty(name);
-    auto *tsLog = dynamic_cast<TimeSeriesProperty<double>*>(log);
+    auto *tsLog = dynamic_cast<TimeSeriesProperty<double> *>(log);
     TS_ASSERT(tsLog);
     if (tsLog) {
       auto filtered =
-              std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog,
-                                                                   *filter);
+          std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog, *filter);
       TS_ASSERT_DELTA(filtered->nthValue(0), 2, 1e-5);
       TS_ASSERT_DELTA(filtered->nthValue(1), 3, 1e-5);
       TS_ASSERT_DELTA(filtered->nthValue(2), 4, 1e-5);

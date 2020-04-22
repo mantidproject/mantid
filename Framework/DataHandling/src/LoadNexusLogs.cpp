@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <locale>
@@ -284,20 +284,20 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
 }
 
 /**
- * Creates a time series validity filter property from the currently opened log entry. It is
- * assumed to
- * have been checked to have a time field and the value entry's name is given
- * as an argument
+ * Creates a time series validity filter property from the currently opened log
+ * entry. It is assumed to have been checked to have a time field and the value
+ * entry's name is given as an argument
  * @param file :: A reference to the file handle
  * @param prop :: The property to check for a validity array
  * @param log :: Reference to logger to print out to
- * @returns A pointer to a new property containing the time series filter or null
+ * @returns A pointer to a new property containing the time series filter or
+ * null
  */
 std::unique_ptr<Kernel::Property>
-createTimeSeriesValidityFilter(::NeXus::File &file, 
-    const std::unique_ptr<Kernel::Property> &prop,
-                                                   Kernel::Logger &log) {
-;
+createTimeSeriesValidityFilter(::NeXus::File &file,
+                               const std::unique_ptr<Kernel::Property> &prop,
+                               Kernel::Logger &log) {
+  ;
   auto tsProp = dynamic_cast<Kernel::ITimeSeriesProperty *>(prop.get());
   auto times = tsProp->timesAsVector();
   std::vector<int> values;
@@ -338,7 +338,7 @@ createTimeSeriesValidityFilter(::NeXus::File &file,
 
   bool invalidDataFound = false;
   boolValues.reserve(values.size());
-  //convert the integer values to boolean with 0=valid data
+  // convert the integer values to boolean with 0=valid data
   for (size_t i = 0; i < values.size(); i++) {
     bool boolValue = (values[i] != 0);
     boolValues.emplace_back(boolValue);
@@ -348,8 +348,7 @@ createTimeSeriesValidityFilter(::NeXus::File &file,
   }
   if (invalidDataFound) {
     log.warning() << "Some \"" << prop->name() << "\" log data is invalid!\n";
-    auto tspName =
-        API::LogManager::getInvalidValuesFilterLogName(prop->name());
+    auto tspName = API::LogManager::getInvalidValuesFilterLogName(prop->name());
     auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
     tsp->create(times, boolValues);
     log.debug() << "   done reading \"value_valid\" array\n";
