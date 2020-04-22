@@ -353,26 +353,18 @@ class FittingTabModel(object):
             parameter_workspace, self.function_name,
             input_workspace, output_workspace_name, global_parameters)
 
-    def change_plot_guess(self, plot_guess, workspaces):
-        parameter_dict = self._get_fit_parameters(workspaces)
-        fit_function = parameter_dict['Function']
-        if self.fit_type == "Single":
-            data_ws_name = parameter_dict['InputWorkspace']
-        else:
-            # If on simultaneous fit, use zeroth workspace as the data workspace for evaluating guess
-            data_ws_name = parameter_dict['InputWorkspace'][0]
-
+    def change_plot_guess(self, plot_guess, workspace_names, index):
+        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
             guess_ws_name = MUON_ANALYSIS_GUESS_WS
         elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
             guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
         else:
             guess_ws_name = '__unknown_interface_fitting_guess'
-
         # Handle case of function removed
         if fit_function is None and plot_guess:
             self.context.fitting_context.notify_plot_guess_changed(plot_guess, None)
-        elif fit_function is None or data_ws_name == '':
+        elif fit_function is None or not workspace_names:
             return
         else:
             # evaluate the current function on the workspace
@@ -380,8 +372,8 @@ class FittingTabModel(object):
                 try:
                     EvaluateFunction(InputWorkspace=data_ws_name,
                                      Function=fit_function,
-                                     StartX=parameter_dict['StartX'],
-                                     EndX=parameter_dict['EndX'],
+                                     StartX=self.startX,
+                                     EndX=self.endX,
                                      OutputWorkspace=guess_ws_name)
                 except RuntimeError:
                     mantid.logger.error('Could not evaluate the function.')
@@ -390,8 +382,8 @@ class FittingTabModel(object):
             if AnalysisDataService.doesExist(guess_ws_name):
                 self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
 
-    def update_plot_guess(self, fit_function, workspace_name):
-
+    def update_plot_guess(self, workspace_names, index):
+        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
             guess_ws_name = MUON_ANALYSIS_GUESS_WS
         elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
@@ -399,7 +391,7 @@ class FittingTabModel(object):
         else:
             guess_ws_name = '__unknown_interface_fitting_guess'
         try:
-            EvaluateFunction(InputWorkspace=workspace_name,
+            EvaluateFunction(InputWorkspace=data_ws_name,
                              Function=fit_function,
                              StartX=self.startX,
                              EndX=self.endX,
@@ -407,8 +399,6 @@ class FittingTabModel(object):
         except RuntimeError:
             mantid.logger.error('Could not evaluate the function.')
             return
-        if AnalysisDataService.doesExist(guess_ws_name):
-            self.context.fitting_context.notify_plot_guess_changed(True, guess_ws_name)
 
     # update model information
     def update_stored_fit_function(self, fit_function):
@@ -514,6 +504,7 @@ class FittingTabModel(object):
     def clear_fit_information(self):
         self.fit_function = None
         self.function_name = ''
+        self.ws_fit_function_map = {}
 
     def freq_type(self):
         if self.context._frequency_context is not None:
@@ -693,6 +684,19 @@ class FittingTabModel(object):
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
+
+    def _get_guess_parameters(self, workspace_names, index):
+        if self.tf_asymmetry_mode:  # Currently not supporting plot guess and tf asymmetry mode
+            return None, None
+        params = self._get_fit_parameters(workspace_names)
+        data_ws_name = params['InputWorkspace']
+        fit_function = params['Function']
+
+        if self.fit_type != "Single" and fit_function is not None:
+            equiv_functions = fit_function.createEquivalentFunctions()
+            fit_function = equiv_functions[index]
+            data_ws_name = workspace_names[index]
+        return fit_function, data_ws_name
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function):

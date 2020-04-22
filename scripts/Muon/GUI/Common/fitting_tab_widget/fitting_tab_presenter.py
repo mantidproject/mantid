@@ -118,7 +118,7 @@ class FittingTabPresenter(object):
         self.view.function_browser.setCurrentDataset(current_index)
         self._update_stored_fit_functions()
         self.update_fit_status_information_in_view()
-        # Send the workpsaces to be plotted
+        self.handle_plot_guess_changed()  # update the guess (use the selected workspace as data for the guess)
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_use_rebin_changed(self):
@@ -154,10 +154,12 @@ class FittingTabPresenter(object):
         self.fit_function_changed_notifier.notify_subscribers()
         # Send the workpsaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        self.handle_plot_guess_changed()
 
     def handle_plot_guess_changed(self):
+        index = self.view.get_index_for_start_end_times()
         workspaces = self.get_fit_input_workspaces()
-        self.model.change_plot_guess(self.view.plot_guess, workspaces)
+        self.model.change_plot_guess(self.view.plot_guess, workspaces, index)
 
     def handle_fit_clicked(self):
         self.perform_fit()
@@ -212,6 +214,7 @@ class FittingTabPresenter(object):
         self.model.function_name = self.view.function_name
 
     def handle_function_structure_changed(self):
+        self.view.plot_guess_checkbox.setChecked(False)
         if self._tf_asymmetry_mode:
             self.view.warning_popup('Cannot change function structure during tf asymmetry mode')
             self.view.function_browser.blockSignals(True)
@@ -251,6 +254,7 @@ class FittingTabPresenter(object):
             return tf_function
 
         self.view.undo_fit_button.setEnabled(False)
+        self.view.plot_guess_checkbox.setChecked(False)
 
         groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
         if (
@@ -302,15 +306,30 @@ class FittingTabPresenter(object):
         self.update_model_from_view()
         self.fit_function_changed_notifier.notify_subscribers()
 
+    def get_parameters_for_tf_function_calculation(self, fit_function):
+        mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
+        workspace_list = self.selected_data if self.view.is_simul_fit() else [
+            self.view.display_workspace]
+        return {'InputFunction': fit_function,
+                'WorkspaceList': workspace_list,
+                'Mode': mode}
+
     def handle_function_parameter_changed(self):
         if not self.view.is_simul_fit():
             index = self.view.get_index_for_start_end_times()
+            fit_function = self._get_fit_function()[index]
             self._fit_function[index] = self._get_fit_function()[index]
         else:
+            print(self._get_fit_function())
+            fit_function = self._get_fit_function()[0]
             self._fit_function = self._get_fit_function()
 
-        self.update_model_from_view()
+        print("index is now", self.view.get_index_for_start_end_times())
+        parameter_values = self.model.get_fit_function_parameter_values(fit_function)
+        print(parameter_values)
+        self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
+        self.model.update_plot_guess(self.get_fit_input_workspaces(), self.view.get_index_for_start_end_times())
 
     def handle_undo_fit_clicked(self):
         self._fit_function = self._fit_function_cache
@@ -359,7 +378,6 @@ class FittingTabPresenter(object):
 
         except ValueError as error:
             self.view.warning_popup(error)
-
 
     # TODO: DELETE THIS COMMENT -- END OF ACTUAL FITTING CODE
 
