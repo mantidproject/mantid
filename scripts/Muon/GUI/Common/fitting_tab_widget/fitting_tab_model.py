@@ -589,19 +589,6 @@ class FittingTabModel(object):
             'Minimizer': self.minimiser
         }
 
-    def get_parameters_for_tf_single_fit_calculation(self, workspace):
-        fit_workspace, _ = create_fitted_workspace_name(workspace, self.function_name)
-        return {
-            'InputFunction': self.fit_function,
-            'ReNormalizedWorkspaceList': workspace,
-            'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
-                [workspace])[0],
-            'OutputFitWorkspace': fit_workspace,
-            'StartX': self.startX,
-            'EndX': self.endX,
-            'Minimizer': self.minimiser
-        }
-
     # get workspace information
     def get_selected_workspace_list(self):
         selected_workspaces = []
@@ -692,7 +679,6 @@ class FittingTabModel(object):
         params = self._get_fit_parameters(workspace_names)
         data_ws_name = params['InputWorkspace']
         fit_function = params['Function']
-
         if self.fit_type != "Single" and fit_function is not None:
             equiv_functions = fit_function.createEquivalentFunctions()
             fit_function = equiv_functions[index]
