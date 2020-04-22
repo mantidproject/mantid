@@ -222,6 +222,7 @@ class SANSILLIntegration(PythonAlgorithm):
                         if mtd[self._input_ws].getInstrument().getName() == "D16":
                             pixel_nb = 320
                         else:
+                            pixel_nb = 320
                             self.log().warning("Width of the instrument not found. Assuming 320 pixels.")
                         q_binning = self._pixel_q_binning_non_aligned(q_min, q_max, pixel_nb, binning_factor)
                     else:
