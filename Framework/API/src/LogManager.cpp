@@ -548,8 +548,8 @@ void LogManager::loadNexus(::NeXus::File *file,
  */
 void LogManager::clearLogs() { m_manager->clear(); }
 
-/// Gets the correct log name for the matching invalid values log for a given log
-/// name
+/// Gets the correct log name for the matching invalid values log for a given
+/// log name
 std::string
 LogManager::getInvalidValuesFilterLogName(const std::string logName) {
   return PropertyManager::getInvalidValuesFilterLogName(logName);
@@ -569,9 +569,8 @@ LogManager::getInvalidValuesFilter(const std::string logName) const {
     if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
       return tsp;
     }
-  }
-  catch(Exception::NotFoundError &) {
-     //do nothing, just drop through tto the return line below
+  } catch (Exception::NotFoundError &) {
+    // do nothing, just drop through tto the return line below
   }
   return nullptr;
 }

@@ -188,7 +188,7 @@ void PropertyManager::splitByTime(
  * all time
  * series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each property on
- * @param applyInvalidDataFilters :: Wether to also apply any matching invalid 
+ * @param applyInvalidDataFilters :: Wether to also apply any matching invalid
  * data filter logs (default:true)
  */
 void PropertyManager::filterByProperty(
@@ -197,8 +197,8 @@ void PropertyManager::filterByProperty(
     Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
-        // don't filter the invalid values filters
-      if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name())) 
+      // don't filter the invalid values filters
+      if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
         break;
       std::unique_ptr<Property> filtered(nullptr);
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(

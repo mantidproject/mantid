@@ -306,22 +306,20 @@ public:
     auto run = ws->run();
 
     // This one should not be present as there is no invalid data
-    TS_ASSERT_THROWS_ANYTHING(run.getLogData(
-            LogManager::getInvalidValuesFilterLogName("slitpos")));
+    TS_ASSERT_THROWS_ANYTHING(
+        run.getLogData(LogManager::getInvalidValuesFilterLogName("slitpos")));
 
-    //This one should not be present as there is no invalid data
+    // This one should not be present as there is no invalid data
     TS_ASSERT_THROWS_ANYTHING(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_Sample")));
 
-    //these two both contain invalid data
-    auto pclog1 =
-        dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
-            LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
+    // these two both contain invalid data
+    auto pclog1 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
+        LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
     std::vector<bool> correct{true, false, true};
     TS_ASSERT_EQUALS(pclog1->valuesAsVector(), correct);
 
-    auto pclog2 =
-        dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
+    auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
     std::vector<bool> correct2{true, true, true};
     TS_ASSERT_EQUALS(pclog2->valuesAsVector(), correct2);
@@ -330,11 +328,11 @@ public:
     auto emptyProperty = new TimeSeriesProperty<bool>("empty");
     run.filterByLog(*emptyProperty);
 
-    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("cryo_temp1"));
+    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("cryo_temp1"));
     std::vector<double> correctFiltered1{0., 0., 0.};
     TS_ASSERT_EQUALS(pclogFiltered1->valuesAsVector(), correctFiltered1);
 
-    
     auto pclogFiltered2 = dynamic_cast<TimeSeriesProperty<double> *>(
         run.getLogData("cryo_temp2"));
     std::vector<double> correctFiltered2{0., 0., 0.};
