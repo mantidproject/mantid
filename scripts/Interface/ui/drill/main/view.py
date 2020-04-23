@@ -580,3 +580,30 @@ class DrillView(QMainWindow):
         self.processAll.setDisabled(state)
         self.table.setDisabled(state)
 
+    def set_row_processing(self, row):
+        """
+        Set a row as currently processing.
+
+        Args:
+            row (int): the row index
+        """
+        self.table.setRowProcessingColor(row)
+
+    def set_row_done(self, row):
+        """
+        Set a row as done with success.
+
+        Args:
+            row (int): the row index
+        """
+        self.table.setRowOkColor(row)
+
+    def set_row_error(self, row):
+        """
+        Set a row as done with error.
+
+        Args:
+            row (int): the row index
+        """
+        self.table.setRowErrorColor(row)
+

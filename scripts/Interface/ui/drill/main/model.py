@@ -13,33 +13,41 @@ from mantid.kernel import config, logger
 
 class DrillWorker(QThread):
 
-    process_done = Signal()
+    process_done = Signal(int)
+    process_error = Signal(int)
+    process_running = Signal(int)
 
     def __init__(self):
         super(DrillWorker, self).__init__()
-        self.processes = list()
+        self.processes = dict()
         self.stopped = False
+        self.current = None
 
-    def add_process(self, algo, **kwargs):
-        self.processes.append((algo, kwargs))
+    def add_process(self, ref, algo, **kwargs):
+        self.processes[ref] = (algo, kwargs)
 
     def stop(self):
         self.stopped = True
-        for process in self.processes:
-            p = sapi.AlgorithmManager.newestInstanceOf(process[0])
-            if p:
-                p.cancel()
+        process = self.processes[self.current]
+        p = sapi.AlgorithmManager.runningInstancesOf(process[0])
+        if p and len(p) == 1:
+            p[0].cancel()
+            self.process_error.emit(self.current)
+            self.current = None
 
     def run(self):
-        for process in self.processes:
+        for (ref, process) in self.processes.items():
             if self.stopped:
                 return
             try:
+                self.process_running.emit(ref)
+                self.current = ref
                 fn = getattr(sapi, process[0])
                 fn(**process[1])
-                self.process_done.emit()
+                self.process_done.emit(ref)
             except Exception as e:
                 print(e)
+                self.process_error.emit(ref)
             except:
                 pass
 
@@ -48,7 +56,9 @@ class DrillModel(QObject):
 
     settings = dict()
     algorithm = None
-    process_done = Signal()
+    process_done = Signal(int)
+    process_error = Signal(int)
+    process_running = Signal(int)
     processing_done = Signal()
 
     def __init__(self):
@@ -77,9 +87,11 @@ class DrillModel(QObject):
                 kwargs = self.convolute(self.samples[e])
                 kwargs.update(self.settings)
                 kwargs['OutputWorkspace'] = "sample_" + str(e)
-                self.thread.add_process(self.algorithm, **kwargs)
+                self.thread.add_process(e, self.algorithm, **kwargs)
                 self.processes_running += 1
         self.thread.process_done.connect(self.on_process_done)
+        self.thread.process_error.connect(self.on_process_error)
+        self.thread.process_running.connect(self.on_process_running)
         self.thread.finished.connect(self.on_processing_done)
         self.thread.start()
 
@@ -87,9 +99,15 @@ class DrillModel(QObject):
         self.thread.stop()
         self.processing_done.emit()
 
-    def on_process_done(self):
+    def on_process_done(self, ref):
         self.processes_done += 1
-        self.process_done.emit()
+        self.process_done.emit(ref)
+
+    def on_process_error(self, ref):
+        self.process_error.emit(ref)
+
+    def on_process_running(self, ref):
+        self.process_running.emit(ref)
 
     def on_processing_done(self):
         self.processing_done.emit()
