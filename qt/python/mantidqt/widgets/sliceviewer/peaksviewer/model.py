@@ -20,9 +20,9 @@ from .representation import draw_peak_representation
 # cycle colors for each peaks workspace - it is unlikely there will be more than 3
 FG_COLORS = cycler(fg_color=[
     '#d62728',  # ~red,
-    '#e9f02e',  # ~yellow
-    '#17becf',  # ~cyan
     '#03ad06',  # ~green
+    '#17becf',  # ~cyan
+    '#e9f02e',  # ~yellow
     '#e377c2'  # ~pink
 ])()
 DEFAULT_BG_COLOR = '0.75'

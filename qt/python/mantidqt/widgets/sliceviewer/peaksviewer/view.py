@@ -17,7 +17,6 @@ class PeaksWorkspaceTableView(TableWorkspaceDisplayView):
     """Specialization of a table view to display peaks"""
 
     def keyPressEvent(self, event):
-        """Ignore all keypress events"""
         QTableWidget.keyPressEvent(self, event)
 
 
@@ -62,18 +61,12 @@ class PeaksViewerView(QWidget):
         self._current_selection = self._selected_index()
         return self._current_selection
 
-    def clear_peaks(self, peaks):
-        """Clear all peaks from display"""
-        for peak in peaks:
-            peak.remove()
-
-    def draw_peaks(self, peaks):
+    def set_peak_color(self, peak_color):
         """
-        Draw a single peak using the supplied painter
-        :param peaks: An iterable of PeakRepresentations to display
+        Set the color of the peak represented in this view
+        :param peak_color: A str describing the color of the displayed peak
         """
-        for peak in peaks:
-            peak.draw()
+        self._group_box.setStyleSheet(f"QGroupBox  {{color: {peak_color}}};")
 
     def set_slicepoint(self, value):
         """
@@ -81,14 +74,6 @@ class PeaksViewerView(QWidget):
         :param value: Float giving the current slice value
         """
         self._sliceinfo_provider.set_slicevalue(value)
-
-    def update_peaks(self, peaks):
-        """
-        Update existing peak represetations
-        :param peaks: An iterable of PeakRepresentations to display
-        """
-        for peak in peaks:
-            peak.repaint()
 
     def set_title(self, name):
         """

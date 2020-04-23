@@ -43,6 +43,7 @@ class PeaksViewerPresenter(object):
         self._view = view
         view.subscribe(self)
         view.set_title(model.peaks_workspace.name())
+        view.set_peak_color(model.fg_color)
         self.notify(PeaksViewerPresenter.Event.PeaksListChanged)
 
     @property
