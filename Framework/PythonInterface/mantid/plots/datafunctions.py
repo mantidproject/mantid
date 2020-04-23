@@ -10,10 +10,11 @@
 import datetime
 
 import numpy as np
-from matplotlib.collections import PolyCollection
+from matplotlib.collections import PolyCollection, QuadMesh
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -1039,3 +1040,28 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                                              "as the range between min value and max value is too large")
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
         figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+
+def get_images_from_figure(figure):
+    """Return a list of images in the given figure excluding any colorbar images"""
+    axes = figure.get_axes()
+
+    images = []
+    for ax in axes:
+        images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
+                               or isinstance(col, Poly3DCollection)]
+
+    # remove any colorbar images
+    for img in images:
+        if img.colorbar:
+            images.remove(img.colorbar.solids)
+
+    return images
+
+def get_axes_from_figure(figure):
+    """Return a list of axes in the given figure excluding any colorbar axes"""
+    images = get_images_from_figure(figure)
+    axes = []
+    for im in images:
+        axes.append(im.axes)
+
+    return axes
