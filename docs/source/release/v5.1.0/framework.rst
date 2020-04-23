@@ -18,7 +18,8 @@ Algorithms
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
    cost of cloning the inputWorkspace.
-- Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace. 
+- Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
 
 Data Handling
 -------------
