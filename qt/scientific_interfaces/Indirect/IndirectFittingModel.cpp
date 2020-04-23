@@ -143,58 +143,31 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
     fitAlgorithm->setProperty("Exclude" + suffix, excludeRegions);
 }
 
-void addInputDataToSimultaneousFit(
-    IAlgorithm_sptr fitAlgorithm,
-    const std::unique_ptr<IndirectFitData> &fitData, std::size_t &counter) {
-  const auto workspace = fitData->workspace();
-  const auto addData = [&](IDAWorkspaceIndex spectrum) {
-    const auto suffix = counter == 0 ? "" : "_" + std::to_string(counter);
+void addInputDataToSimultaneousFitWithEqualRange(
+    const IAlgorithm_sptr &fitAlgorithm, const IIndirectFitData *fittingData) {
+  auto fittingRange = fittingData->getFittingRange(FitDomainIndex{0});
+  for (auto index = FitDomainIndex{0};
+       index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
+    std::string suffix =
+        index == FitDomainIndex{0} ? "" : std::to_string(index.value);
     addInputDataToSimultaneousFit(
-        fitAlgorithm, workspace, spectrum, fitData->getRange(spectrum),
-        fitData->excludeRegionsVector(spectrum), suffix);
-    counter += 1;
-  };
-  fitData->applySpectra(addData);
-}
-
-void addInputDataToSimultaneousFit(
-    IAlgorithm_sptr fitAlgorithm,
-    const std::unique_ptr<IndirectFitData> &fitData,
-    const std::pair<double, double> &range, const std::vector<double> &exclude,
-    std::size_t &counter) {
-  const auto workspace = fitData->workspace();
-  const auto addData = [&](IDAWorkspaceIndex spectrum) {
-    const auto suffix = counter == 0 ? "" : "_" + std::to_string(counter);
-    addInputDataToSimultaneousFit(fitAlgorithm, workspace, spectrum, range,
-                                  exclude, suffix);
-    counter += 1;
-  };
-  fitData->applySpectra(addData);
+        fitAlgorithm, fittingData->getWorkspace(index),
+        fittingData->getSpectrum(index), fittingRange,
+        fittingData->getExcludeRegionVector(index), suffix);
+  }
 }
 
 void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
                                    const IIndirectFitData *fittingData) {
-  // for (auto index = TableDatasetIndex{0}; i <
-  // fittingData->numberOfWorkspaces();
-  //      i++) {
-  //   addInputDataToSimultaneousFit(
-  //       fitAlgorithm, fittingData->getWorkspace(index),
-  //       fittingData->getSpectra(index), fittingData->getFittingRange(),
-  //       fittingData->getExcludeRegionVector());
-  // }
-  // std::size_t counter = 0;
-  // for (const auto &data : fittingData)
-  //   addInputDataToSimultaneousFit(fitAlgorithm, data, counter);
-}
-
-void addInputDataToSimultaneousFit(
-    const IAlgorithm_sptr &fitAlgorithm,
-    const IndirectFitDataCollectionType &fittingData,
-    const std::pair<double, double> &range,
-    const std::vector<double> &exclude) {
-  std::size_t counter = 0;
-  for (const auto &data : fittingData)
-    addInputDataToSimultaneousFit(fitAlgorithm, data, range, exclude, counter);
+  for (auto index = FitDomainIndex{0};
+       index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
+    std::string suffix =
+        index == FitDomainIndex{0} ? "" : std::to_string(index.value);
+    addInputDataToSimultaneousFit(
+        fitAlgorithm, fittingData->getWorkspace(index),
+        fittingData->getSpectrum(index), fittingData->getFittingRange(index),
+        fittingData->getExcludeRegionVector(index), suffix);
+  }
 }
 
 template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
@@ -355,7 +328,7 @@ std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
 
 std::vector<double>
 IndirectFittingModel::getExcludeRegionVector(TableDatasetIndex dataIndex,
-                                           WorkspaceIndex index) const {
+                                             WorkspaceIndex index) const {
   return m_fitDataModel->getExcludeRegionVector(dataIndex, index);
 }
 
@@ -732,11 +705,13 @@ IndirectFittingModel::getSingleFit(TableDatasetIndex dataIndex,
                                    WorkspaceIndex spectrum) const {
   const auto ws = m_fitDataModel->getWorkspace(dataIndex);
   const auto range = m_fitDataModel->getFittingRange(dataIndex, spectrum);
-  const auto exclude = m_fitDataModel->getExcludeRegion(dataIndex, spectrum);
+  const auto exclude =
+      m_fitDataModel->getExcludeRegionVector(dataIndex, spectrum);
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, getSingleFunction(dataIndex, spectrum),
                    getResultXAxisUnit());
-  //addInputDataToSimultaneousFit(fitAlgorithm, ws, spectrum, range, exclude, "");
+  addInputDataToSimultaneousFit(fitAlgorithm, ws, spectrum, range, exclude,
+                                std::string(""));
   fitAlgorithm->setProperty("OutputWorkspace",
                             singleFitOutputName(dataIndex, spectrum));
   return fitAlgorithm;
@@ -792,11 +767,11 @@ IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
   fitAlgorithm->setProperty("StartX", range.first);
   fitAlgorithm->setProperty("EndX", range.second);
 
-  auto excludeRegion = Mantid::Kernel::ArrayProperty<double>(
-      "vector",
-      m_fitDataModel->getExcludeRegion(TableDatasetIndex{0}, firstWsIndex));
-  // if (!excludeRegion.empty())
-  fitAlgorithm->setProperty("Exclude", excludeRegion);
+  auto excludeRegion = m_fitDataModel->getExcludeRegionVector(
+      TableDatasetIndex{0}, firstWsIndex);
+  if (!excludeRegion.empty()) {
+    fitAlgorithm->setProperty("Exclude", excludeRegion);
+  }
 
   return fitAlgorithm;
 }
@@ -805,7 +780,7 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFit(
     const MultiDomainFunction_sptr &function) const {
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
-  //addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData);
+  addInputDataToSimultaneousFit(fitAlgorithm, m_fitDataModel.get());
   return fitAlgorithm;
 }
 
@@ -814,13 +789,8 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFitWithEqualRange(
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, std::move(function), getResultXAxisUnit());
 
-  auto const dataIndex = TableDatasetIndex{0};
-  auto const workspaceIndex = getSpectra(dataIndex).front();
-  auto exclude =
-      vectorFromString<double>(getExcludeRegion(dataIndex, workspaceIndex));
-  // addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData,
-  //                               getFittingRange(dataIndex, workspaceIndex),
-  //                               exclude);
+  addInputDataToSimultaneousFitWithEqualRange(fitAlgorithm,
+                                              m_fitDataModel.get());
   fitAlgorithm->setProperty("OutputWorkspace", simultaneousFitOutputName());
   return fitAlgorithm;
 }
