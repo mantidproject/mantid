@@ -9,6 +9,7 @@ from mantid.kernel import Atom
 import abins
 from abins.constants import MASS_EPS
 
+
 class GeneralAbInitioProgramName(type):
     def __str__(self):
         return self.__name__
@@ -21,7 +22,6 @@ class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
     in INS analysis.
     """
     def __init__(self, input_ab_initio_filename=None):
-
         self._num_k = None
         self._num_atoms = None
         self._sample_form = None

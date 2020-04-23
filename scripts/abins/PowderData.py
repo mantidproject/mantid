@@ -7,6 +7,7 @@
 from abins import GeneralData
 from abins.constants import ALL_KEYWORDS_POWDER_DATA, GAMMA_POINT
 
+
 class PowderData(GeneralData):
     """
     Class for storing powder data.

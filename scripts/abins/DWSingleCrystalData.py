@@ -9,6 +9,7 @@ import numpy as np
 from abins import GeneralData
 from abins.constants import FLOAT_ID, FLOAT_TYPE
 
+
 class DWSingleCrystalData(GeneralData):
     """
     Data structure for Debye-Waller coefficients for single crystals (sample form is a SingleCrystal).
