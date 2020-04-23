@@ -10,7 +10,15 @@
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 
 # local imports
-from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
+from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView, QTableWidget
+
+
+class PeaksWorkspaceTableView(TableWorkspaceDisplayView):
+    """Specialization of a table view to display peaks"""
+
+    def keyPressEvent(self, event):
+        """Ignore all keypress events"""
+        QTableWidget.keyPressEvent(self, event)
 
 
 class PeaksViewerView(QWidget):
@@ -104,9 +112,9 @@ class PeaksViewerView(QWidget):
         """
         self._group_box = QGroupBox(self)
         self._group_box.setContentsMargins(0, 0, 0, 0)
-        self._table_view = TableWorkspaceDisplayView(parent=self)
-        self._table_view.setSelectionBehavior(TableWorkspaceDisplayView.SelectRows)
-        self._table_view.setSelectionMode(TableWorkspaceDisplayView.SingleSelection)
+        self._table_view = PeaksWorkspaceTableView(parent=self)
+        self._table_view.setSelectionBehavior(PeaksWorkspaceTableView.SelectRows)
+        self._table_view.setSelectionMode(PeaksWorkspaceTableView.SingleSelection)
         self._table_view.itemClicked.connect(self._on_row_clicked)
 
         group_box_layout = QVBoxLayout()
