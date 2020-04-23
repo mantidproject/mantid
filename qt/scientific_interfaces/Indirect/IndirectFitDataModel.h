@@ -71,6 +71,14 @@ public:
   void setExcludeRegion(const std::string &exclude, TableDatasetIndex dataIndex,
                         WorkspaceIndex spectrum) override;
 
+  Mantid::API::MatrixWorkspace_sptr
+  getWorkspace(FitDomainIndex index) const override;
+  std::pair<double, double>
+  getFittingRange(FitDomainIndex index) const override;
+  int getSpectrum(FitDomainIndex index) const override;
+  std::vector<double>
+  getExcludeRegionVector(FitDomainIndex index) const override;
+
 protected:
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
@@ -79,6 +87,9 @@ private:
   void IndirectFitDataModel::addNewWorkspace(
       const Mantid::API::MatrixWorkspace_sptr &workspace,
       const Spectra &spectra);
+
+  std::pair<TableDatasetIndex, WorkspaceIndex>
+      getSubIndices(FitDomainIndex) const;
 
   std::vector<IndirectFitData> m_fittingData;
 };

@@ -277,6 +277,48 @@ IndirectFitDataModel::getExcludeRegionVector(TableDatasetIndex dataIndex,
   return fitData.excludeRegionsVector(index);
 }
 
+Mantid::API::MatrixWorkspace_sptr
+IndirectFitDataModel::getWorkspace(FitDomainIndex index) const {
+  auto subIndices = getSubIndices(index);
+  return getWorkspace(subIndices.first);
+};
+
+std::pair<double, double>
+IndirectFitDataModel::getFittingRange(FitDomainIndex index) const {
+  auto subIndices = getSubIndices(index);
+  return getFittingRange(subIndices.first, subIndices.second);
+};
+
+int IndirectFitDataModel::getSpectrum(FitDomainIndex index) const {
+  auto subIndices = getSubIndices(index);
+  return subIndices.second.value;
+};
+
+std::vector<double>
+IndirectFitDataModel::getExcludeRegionVector(FitDomainIndex index) const {
+  auto subIndices = getSubIndices(index);
+  return getExcludeRegionVector(subIndices.first, subIndices.second);
+};
+
+std::pair<TableDatasetIndex, WorkspaceIndex>
+IndirectFitDataModel::getSubIndices(FitDomainIndex index) const {
+  int sum{0};
+  for (int datasetIndex = 0; datasetIndex < m_fittingData.size();
+       datasetIndex++) {
+    for (int workspaceIndex = 0;
+         workspaceIndex < m_fittingData[datasetIndex].spectra().size().value;
+         workspaceIndex++) {
+      if (sum == index.value) {
+        WorkspaceIndex spectraIndex =
+            m_fittingData[datasetIndex]
+                .spectra()[FitDomainIndex{workspaceIndex}];
+        return std::make_pair(TableDatasetIndex{datasetIndex}, spectraIndex);
+      }
+      sum++;
+    }
+  }
+};
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

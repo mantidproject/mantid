@@ -84,6 +84,14 @@ public:
   virtual void setExcludeRegion(const std::string &exclude,
                                 TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) = 0;
+
+  virtual Mantid::API::MatrixWorkspace_sptr
+  getWorkspace(FitDomainIndex index) const = 0;
+  virtual std::pair<double, double>
+  getFittingRange(FitDomainIndex index) const = 0;
+  virtual int getSpectrum(FitDomainIndex index) const = 0;
+  virtual std::vector<double>
+  getExcludeRegionVector(FitDomainIndex index) const = 0;
 };
 
 } // namespace IDA
