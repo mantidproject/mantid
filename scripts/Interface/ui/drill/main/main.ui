@@ -60,7 +60,11 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QComboBox" name="techniqueSelector"/>
+       <widget class="QComboBox" name="techniqueSelector">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QToolButton" name="datadirs">
