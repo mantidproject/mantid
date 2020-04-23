@@ -59,8 +59,8 @@ public:
   std::vector<double> getQValuesForData() const override;
   std::vector<std::pair<std::string, int>>
   getResolutionsForFit() const override;
-  void setFittingData(PrivateFittingData &&fittingData);
-  PrivateFittingData clearWorkspaces();
+  // void setFittingData(PrivateFittingData &&fittingData);
+  void clearWorkspaces();
   void clear() override;
 
   void setSpectra(const std::string &spectra,
@@ -148,8 +148,8 @@ public:
   getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 protected:
-  virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const Spectra &spectra);
+  // virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+  //                           const Spectra &spectra);
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
@@ -168,14 +168,13 @@ protected:
   void removeFittingData(TableDatasetIndex index);
 
 private:
-  std::vector<std::string> getWorkspaceNames() const;
+  // std::vector<std::string> getWorkspaceNames() const;
 
   void removeWorkspaceFromFittingData(TableDatasetIndex const &index);
 
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(const Mantid::API::IFunction_sptr &function,
-                      const std::string &input,
-                      IndirectFitData *initialFitData) const;
+                      const std::string &input) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
   virtual std::string sequentialFitOutputName() const = 0;
@@ -229,7 +228,8 @@ private:
                          WorkspaceIndex spectrum) const;
 
   std::unique_ptr<IndirectFitOutput> m_fitOutput;
-  IndirectFitDataCollectionType m_fittingData;
+  // IndirectFitDataCollectionType m_fittingData;
+  std::unique_ptr<IIndirectFitData> m_fitDataModel;
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;
   Mantid::API::IFunction_sptr m_fitFunction;
   DefaultParametersType m_defaultParameters;
@@ -240,8 +240,8 @@ private:
 template <typename F>
 void IndirectFittingModel::applySpectra(TableDatasetIndex index,
                                         const F &functor) const {
-  if (m_fittingData.size() > m_fittingData.zero())
-    m_fittingData[index]->applySpectra(functor);
+  // if (m_fittingData.size() > m_fittingData.zero())
+  //   m_fittingData[index]->applySpectra(functor);
 }
 
 } // namespace IDA

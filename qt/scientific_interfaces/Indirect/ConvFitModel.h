@@ -35,8 +35,8 @@ public:
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
 
-  void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra) override;
+  // void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+  //                   const Spectra &spectra);
   void removeWorkspace(TableDatasetIndex index) override;
   void setResolution(const std::string &name, TableDatasetIndex index);
   void setResolution(const Mantid::API::MatrixWorkspace_sptr &resolution,

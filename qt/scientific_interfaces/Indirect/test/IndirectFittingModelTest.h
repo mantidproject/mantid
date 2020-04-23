@@ -541,12 +541,6 @@ public:
   }
 
   void
-  test_that_setFittingData_will_set_the_fittingData_to_the_data_provided() {
-    auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
-    TS_ASSERT_THROWS_NOTHING(model->setFittingData(model->clearWorkspaces()));
-  }
-
-  void
   test_that_setSpectra_will_set_the_spectra_to_the_provided_inputSpectra() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 

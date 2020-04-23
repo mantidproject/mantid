@@ -24,6 +24,28 @@ bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
     return lhs == rhs;
   return lhs->getName() == rhs->getName();
 }
+
+// std::ostringstream &addInputString(const IndirectFitData &fitData,
+//                                    std::ostringstream &stream) {
+//   const auto &name = fitData.workspace()->getName();
+//   if (!name.empty()) {
+//     auto addToStream = [&](IDA::WorkspaceIndex spectrum) {
+//       stream << name << ",i" << spectrum.value << ";";
+//     };
+//     fitData.applySpectra(addToStream);
+//     return stream;
+//   } else
+//     throw std::runtime_error(
+//         "Workspace name is empty. The sample workspace may not be loaded.");
+// }
+
+// std::string
+// constructInputString(const std::vector<IndirectFitData> &fittingData) {
+//   std::ostringstream input;
+//   for (const auto &fitData : fittingData)
+//     addInputString(fitData, input);
+//   return input.str();
+// }
 } // namespace
 
 namespace MantidQt {

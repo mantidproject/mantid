@@ -66,14 +66,6 @@ public:
     m_model.reset();
   }
 
-  void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = Spectra("0-1");
-
-    m_model->addWorkspace(m_workspace, spectra);
-
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
-  }
-
   void test_that_addWorkspace_will_add_multiple_workspaces() {
     Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspace(3, 3);
@@ -238,13 +230,13 @@ private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,
                             Workspaces const &... workspaces) {
-    m_model->addWorkspace(workspace, spectra);
-    addWorkspacesToModel(spectra, workspaces...);
+    // m_model->addWorkspace(workspace, spectra);
+    // addWorkspacesToModel(spectra, workspaces...);
   }
 
   void addWorkspacesToModel(Spectra const &spectra,
                             MatrixWorkspace_sptr const &workspace) {
-    m_model->addWorkspace(workspace, spectra);
+    // m_model->addWorkspace(workspace, spectra);
   }
 
   MatrixWorkspace_sptr m_workspace;

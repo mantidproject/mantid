@@ -227,20 +227,21 @@ namespace IDA {
 
 void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                                 const Spectra & /*spectra*/) {
-  const auto name = getHWHMName(workspace->getName());
-  const auto parameters = addJumpFitParameters(workspace.get(), name);
+  // const auto name = getHWHMName(workspace->getName());
+  // const auto parameters = addJumpFitParameters(workspace.get(), name);
 
-  const auto spectrum = getSpectrum(parameters);
-  if (!spectrum)
-    throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
+  // const auto spectrum = getSpectrum(parameters);
+  // if (!spectrum)
+  //   throw std::invalid_argument("Workspace contains no Width or EISF
+  //   spectra.");
 
-  if (workspace->y(0).size() == 1)
-    throw std::invalid_argument("Workspace contains only one data point.");
+  // if (workspace->y(0).size() == 1)
+  //   throw std::invalid_argument("Workspace contains only one data point.");
 
-  const auto hwhmWorkspace =
-      createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  IndirectFittingModel::addNewWorkspace(hwhmWorkspace,
-                                        Spectra(createSpectra(spectrum.get())));
+  // const auto hwhmWorkspace =
+  //     createHWHMWorkspace(workspace, name, parameters.widthSpectra);
+  // IndirectFittingModel::addNewWorkspace(hwhmWorkspace,
+  //                                       Spectra(createSpectra(spectrum.get())));
 }
 
 void JumpFitModel::removeWorkspace(TableDatasetIndex index) {

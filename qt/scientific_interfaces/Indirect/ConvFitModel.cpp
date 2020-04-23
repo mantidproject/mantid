@@ -396,10 +396,10 @@ void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
   m_temperature = temperature;
 }
 
-void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
-                                const Spectra &spectra) {
-  IndirectFittingModel::addWorkspace(workspace, spectra);
-}
+// void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
+//                                 const Spectra &spectra) {
+//   IndirectFittingModel::addWorkspace(workspace, spectra);
+// }
 
 void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
   IndirectFittingModel::removeWorkspace(index);
