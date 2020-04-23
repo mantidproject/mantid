@@ -1028,6 +1028,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
         mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
     image.set_norm(scale(vmin=vmin, vmax=vmax))
+
     if image.colorbar:
         image.colorbar.remove()
         locator = None

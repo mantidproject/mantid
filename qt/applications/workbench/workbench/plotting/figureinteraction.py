@@ -23,11 +23,12 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes
+from mantid.plots import datafunctions, MantidAxes, MantidAxes3D
 from mantid.plots.utility import zoom, MantidAxType
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -300,6 +301,9 @@ class FigureInteraction(object):
             if isinstance(event.inaxes, MantidAxes):
                 self._add_axes_scale_menu(menu, event.inaxes)
                 self._add_normalization_option_menu(menu, event.inaxes)
+                self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+            elif isinstance(event.inaxes, MantidAxes3D) and isinstance(event.inaxes.collections[0], Poly3DCollection):
+                # Surface plots
                 self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         else:
             if self.fit_browser.tool is not None:
