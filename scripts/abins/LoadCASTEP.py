@@ -12,7 +12,7 @@ from abins.constants import COMPLEX_TYPE
 from  mantid.kernel import Atom
 
 
-class LoadCASTEP(abins.GeneralAbInitioProgram):
+class LoadCASTEP(abins.AbInitioProgram):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).

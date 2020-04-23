@@ -12,7 +12,7 @@ from abins.constants import COMPLEX_TYPE, FLOAT_TYPE, ROTATIONS_AND_TRANSLATIONS
 from mantid.kernel import Atom
 
 
-class LoadGAUSSIAN(abins.GeneralAbInitioProgram):
+class LoadGAUSSIAN(abins.AbInitioProgram):
     """
     Class for loading GAUSSIAN ab initio vibrational data.
     """
@@ -22,7 +22,7 @@ class LoadGAUSSIAN(abins.GeneralAbInitioProgram):
         """
         super(LoadGAUSSIAN, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "GAUSSIAN"
-        self._parser = abins.GeneralAbInitioParser()
+        self._parser = abins.AbInitioParser()
         self._num_atoms = None
         self._num_read_freq = 0
 

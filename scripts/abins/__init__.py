@@ -12,12 +12,12 @@ from .io import IO
 from .frequencypowdergenerator import FrequencyPowderGenerator
 
 # Loading modules
-from .GeneralAbInitioProgram import GeneralAbInitioProgram
+from .abinitioprogram import AbInitioProgram
 from .LoadCASTEP import LoadCASTEP
 from .LoadCRYSTAL import LoadCRYSTAL
 from .LoadDMOL3 import LoadDMOL3
 from .LoadGAUSSIAN import LoadGAUSSIAN
-from .GeneralAbInitioParser import GeneralAbInitioParser
+from .abinitioparser import AbInitioParser
 
 # Calculating modules
 from .powdercalculator import PowderCalculator

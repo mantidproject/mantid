@@ -13,7 +13,7 @@ from abins.constants import ATOMIC_LENGTH_2_ANGSTROM, FLOAT_TYPE
 from mantid.kernel import Atom
 
 
-class LoadDMOL3(abins.GeneralAbInitioProgram):
+class LoadDMOL3(abins.AbInitioProgram):
     """
     Class for loading DMOL3 ab initio vibrational data.
     """
@@ -24,7 +24,7 @@ class LoadDMOL3(abins.GeneralAbInitioProgram):
         super(LoadDMOL3, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "DMOL3"
         self._norm = 0
-        self._parser = abins.GeneralAbInitioParser()
+        self._parser = abins.AbInitioParser()
 
     def read_vibrational_or_phonon_data(self):
         """

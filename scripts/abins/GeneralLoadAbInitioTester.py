@@ -164,7 +164,7 @@ class GeneralLoadAbInitioTester(object):
     @staticmethod
     def _get_reader_data(ab_initio_reader):
         """
-        :param ab_initio_reader: object of type  GeneralAbInitioProgram
+        :param ab_initio_reader: object of type  AbInitioProgram
         :returns: read data
         """
         abins_type_data = ab_initio_reader.read_vibrational_or_phonon_data()
@@ -180,7 +180,7 @@ class GeneralLoadAbInitioTester(object):
         Write ab initio calculation data to JSON file for use in test cases
 
         :param ab_initio_reader: Reader after import of external calculation
-        :type ab_initio_reader: abins.GeneralAbInitioProgram
+        :type ab_initio_reader: abins.AbInitioProgram
         :param filename: Seed for text files for JSON output. Data will be written to the file {seedname}_data.txt,
             except for the atomic displacements which are written to files {seedname}_atomic_displacements_data_{I}.txt,
             where {I} are k-point indices.

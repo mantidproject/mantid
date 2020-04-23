@@ -16,7 +16,7 @@ class GeneralAbInitioProgramName(type):
 
 
 # noinspection PyMethodMayBeStatic
-class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
+class AbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
     """
     A general class which groups all methods which should be inherited or implemented by an ab initio program used
     in INS analysis.
