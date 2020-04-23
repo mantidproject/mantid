@@ -186,12 +186,12 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("Vibrational/phonon data has been read.")
 
         # 3) calculate S
-        s_calculator = abins.CalculateS.init(filename=self._vibrational_or_phonon_data_file,
-                                             temperature=self._temperature,
-                                             sample_form=self._sample_form, abins_data=ab_initio_data,
-                                             instrument=self._instrument,
-                                             quantum_order_num=self._num_quantum_order_events,
-                                             bin_width=self._bin_width)
+        s_calculator = abins.SCalculatorFactory.init(filename=self._vibrational_or_phonon_data_file,
+                                                     temperature=self._temperature,
+                                                     sample_form=self._sample_form, abins_data=ab_initio_data,
+                                                     instrument=self._instrument,
+                                                     quantum_order_num=self._num_quantum_order_events,
+                                                     bin_width=self._bin_width)
         s_data = s_calculator.get_formatted_data()
         prog_reporter.report("Dynamical structure factors have been determined.")
 

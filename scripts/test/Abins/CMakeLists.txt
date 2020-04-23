@@ -2,7 +2,7 @@
 set ( TEST_PY_FILES
    AbinsAtomsDataTest.py
    AbinsBroadeningTest.py
-   AbinsCalculatePowderTest.py
+   AbinsPowderCalculatorTest.py
    AbinsCalculateQToscaTest.py
    AbinsCalculateSPowderTest.py
    AbinsFrequencyPowderGeneratorTest.py

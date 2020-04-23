@@ -12,7 +12,7 @@ import abins
 from mantid.simpleapi import logger
 
 
-class AbinsCalculatePowderTest(unittest.TestCase):
+class PowderCalculatorTest(unittest.TestCase):
     # Use case: one k-point
     _c6h6 = "benzene_CalculatePowder"
 
@@ -31,12 +31,12 @@ class AbinsCalculatePowderTest(unittest.TestCase):
         good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong filename
-        self.assertRaises(ValueError, abins.CalculatePowder,
+        self.assertRaises(ValueError, abins.PowderCalculator,
                           filename=1, abins_data=good_data)
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = good_data.extract()["atoms_data"]
-        self.assertRaises(ValueError, abins.CalculatePowder,
+        self.assertRaises(ValueError, abins.PowderCalculator,
                           filename=full_path_filename, abins_data=bad_data)
 
     #       main test
@@ -50,7 +50,7 @@ class AbinsCalculatePowderTest(unittest.TestCase):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
 
-        good_tester = abins.CalculatePowder(
+        good_tester = abins.PowderCalculator(
             filename=abins.test_helpers.find_file(filename=name + ".phonon"),
             abins_data=good_data["DFT"])
         calculated_data = good_tester.calculate_data().extract()
@@ -61,7 +61,7 @@ class AbinsCalculatePowderTest(unittest.TestCase):
                 self.assertEqual(True, np.allclose(good_data["powder"][key][i], calculated_data[key][i]))
 
         # check if loading powder data is correct
-        new_tester = abins.CalculatePowder(
+        new_tester = abins.PowderCalculator(
             filename=abins.test_helpers.find_file(name + ".phonon"),
             abins_data=good_data["DFT"])
         loaded_data = new_tester.load_formatted_data().extract()

@@ -237,7 +237,7 @@ class LoadDMOL3(abins.GeneralAbInitioProgram):
                      created
         :param mass: mass of atom
         """
-        # We multiply by square root of atomic mass so that no modifications are needed in CalculatePowder module
+        # We multiply by square root of atomic mass so that no modifications are needed in PowderCalculator
         floated_item = float(item)
         self._norm += floated_item * floated_item
         if part == "real":

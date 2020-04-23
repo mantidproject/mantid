@@ -9,10 +9,9 @@ import abins
 from abins.constants import ALL_SAMPLE_FORMS
 
 
-class CalculateS(object):
+class SCalculatorFactory(object):
     """
-    Class producer for generating required S calculator
-    Currently available S calculators:
+    Get an instantiated S calculator. Currently available S calculators:
 
          * SPowderSemiEmpiricalCalculator
     """

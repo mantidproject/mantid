@@ -112,7 +112,7 @@ class SPowderSemiEmpiricalCalculator(object):
     def _calculate_s(self):
 
         # calculate powder data
-        powder_calculator = abins.CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
+        powder_calculator = abins.PowderCalculator(filename=self._input_filename, abins_data=self._abins_data)
         powder_calculator.get_formatted_data()
 
         # free memory

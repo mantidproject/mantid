@@ -12,9 +12,9 @@ import abins
 from abins.constants import FUNDAMENTALS
 
 
-class CalculateSPowderTest(unittest.TestCase):
+class SCalculatorFactoryPowderTest(unittest.TestCase):
     """
-    Test of  CalculateS for the Powder scenario.
+    Test of SCalculatorFactory for the Powder scenario.
     """
 
     _temperature = 10  # 10 K,  temperature for the benchmark
@@ -40,34 +40,34 @@ class CalculateSPowderTest(unittest.TestCase):
 
         # wrong filename
         with self.assertRaises(ValueError):
-            abins.CalculateS.init(filename=1, temperature=self._temperature, sample_form=self._sample_form,
-                                  abins_data=good_data, instrument=self._instrument,
-                                  quantum_order_num=self._order_event)
+            abins.SCalculatorFactory.init(filename=1, temperature=self._temperature, sample_form=self._sample_form,
+                                          abins_data=good_data, instrument=self._instrument,
+                                          quantum_order_num=self._order_event)
 
         # wrong temperature
         with self.assertRaises(ValueError):
-            abins.CalculateS.init(filename=full_path_filename, temperature=-1, sample_form=self._sample_form,
-                                  abins_data=good_data, instrument=self._instrument,
-                                  quantum_order_num=self._order_event)
+            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=-1, sample_form=self._sample_form,
+                                          abins_data=good_data, instrument=self._instrument,
+                                          quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
-            abins.CalculateS.init(filename=full_path_filename, temperature=self._temperature,
-                                  sample_form="SOLID", abins_data=good_data, instrument=self._instrument,
-                                  quantum_order_num=self._order_event)
+            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=self._temperature,
+                                          sample_form="SOLID", abins_data=good_data, instrument=self._instrument,
+                                          quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
-            abins.CalculateS.init(filename=full_path_filename, temperature=self._temperature,
-                                  sample_form=self._sample_form, abins_data=good_data.extract(),
-                                  instrument=self._instrument, quantum_order_num=self._order_event)
+            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=self._temperature,
+                                          sample_form=self._sample_form, abins_data=good_data.extract(),
+                                          instrument=self._instrument, quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            abins.CalculateS.init(filename=full_path_filename, temperature=self._temperature,
-                                  sample_form=self._sample_form, abins_data=good_data.extract(),
-                                  instrument=self._instrument, quantum_order_num=self._order_event)
+            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=self._temperature,
+                                          sample_form=self._sample_form, abins_data=good_data.extract(),
+                                          instrument=self._instrument, quantum_order_num=self._order_event)
 
     #  main test
     def test_good_case(self):
@@ -77,7 +77,7 @@ class CalculateSPowderTest(unittest.TestCase):
     def _good_case(self, name=None):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
-        good_tester = abins.CalculateS.init(
+        good_tester = abins.SCalculatorFactory.init(
             filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
             sample_form=self._sample_form, abins_data=good_data["DFT"], instrument=self._instrument,
             quantum_order_num=self._order_event)
@@ -86,7 +86,7 @@ class CalculateSPowderTest(unittest.TestCase):
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
         # check if loading powder data is correct
-        new_tester = abins.CalculateS.init(
+        new_tester = abins.SCalculatorFactory.init(
             filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
             sample_form=self._sample_form, abins_data=good_data["DFT"], instrument=self._instrument,
             quantum_order_num=self._order_event)

@@ -20,8 +20,8 @@ from .LoadGAUSSIAN import LoadGAUSSIAN
 from .GeneralAbInitioParser import GeneralAbInitioParser
 
 # Calculating modules
-from .CalculatePowder import CalculatePowder
-from .CalculateS import CalculateS
+from .powdercalculator import PowderCalculator
+from .scalculatorfactory import SCalculatorFactory
 from .SPowderSemiEmpiricalCalculator import SPowderSemiEmpiricalCalculator
 
 # Data

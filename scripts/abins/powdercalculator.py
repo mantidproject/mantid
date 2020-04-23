@@ -18,7 +18,7 @@ except ImportError:
 
 
 # noinspection PyMethodMayBeStatic
-class CalculatePowder(object):
+class PowderCalculator(object):
     """
     Class for calculating powder data.
     """
