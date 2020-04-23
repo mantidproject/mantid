@@ -52,6 +52,7 @@ public:
   virtual std::vector<double> getQValuesForData() const = 0;
   virtual std::vector<std::pair<std::string, int>>
   getResolutionsForFit() const = 0;
+  virtual std::vector<std::string> getWorkspaceNames() const = 0;
 
   virtual void setSpectra(const std::string &spectra,
                           TableDatasetIndex dataIndex) = 0;
@@ -71,7 +72,9 @@ public:
                   WorkspaceIndex spectrum) const = 0;
   virtual std::string getExcludeRegion(TableDatasetIndex dataIndex,
                                        WorkspaceIndex index) const = 0;
-
+  virtual std::vector<double>
+  getExcludeRegionVector(TableDatasetIndex dataIndex,
+                         WorkspaceIndex index) const = 0;
   virtual void setStartX(double startX, TableDatasetIndex dataIndex,
                          WorkspaceIndex spectrum) = 0;
   virtual void setStartX(double startX, TableDatasetIndex dataIndex) = 0;

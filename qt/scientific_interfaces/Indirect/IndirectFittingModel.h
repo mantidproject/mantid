@@ -38,57 +38,51 @@ using DefaultParametersType =
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitData,
-                                                   IIndirectFitResult,
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitResult,
                                                    IIndirectFitOutput {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
   // IIndirectFitData
-  bool hasWorkspace(std::string const &workspaceName) const override;
-  Mantid::API::MatrixWorkspace_sptr
-  getWorkspace(TableDatasetIndex index) const override;
-  Spectra getSpectra(TableDatasetIndex index) const override;
-  bool isMultiFit() const override;
-  TableDatasetIndex numberOfWorkspaces() const override;
-  int getNumberOfSpectra(TableDatasetIndex index) const override;
-  int getNumberOfDomains() const override;
+  bool hasWorkspace(std::string const &workspaceName) const;
+  Mantid::API::MatrixWorkspace_sptr getWorkspace(TableDatasetIndex index) const;
+  Spectra getSpectra(TableDatasetIndex index) const;
+  virtual bool isMultiFit() const;
+  TableDatasetIndex numberOfWorkspaces() const;
+  int getNumberOfSpectra(TableDatasetIndex index) const;
+  int getNumberOfDomains() const;
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
-                                WorkspaceIndex spectrum) const override;
-  std::vector<double> getQValuesForData() const override;
-  std::vector<std::pair<std::string, int>>
-  getResolutionsForFit() const override;
+                                WorkspaceIndex spectrum) const;
+  std::vector<double> getQValuesForData() const;
+  virtual std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
   // void setFittingData(PrivateFittingData &&fittingData);
   void clearWorkspaces();
-  void clear() override;
+  void clear();
 
-  void setSpectra(const std::string &spectra,
-                  TableDatasetIndex dataIndex) override;
-  void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex) override;
-  void setSpectra(const Spectra &spectra, TableDatasetIndex dataIndex) override;
-  void addWorkspace(const std::string &workspaceName) override;
+  void setSpectra(const std::string &spectra, TableDatasetIndex dataIndex);
+  void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex);
+  void setSpectra(const Spectra &spectra, TableDatasetIndex dataIndex);
+  void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
-                    const std::string &spectra) override;
-  void addWorkspace(const std::string &workspaceName,
-                    const Spectra &spectra) override;
-  void removeWorkspace(TableDatasetIndex index) override;
+                    const std::string &spectra);
+  void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
+  virtual void removeWorkspace(TableDatasetIndex index);
 
   // IIndirectFitRegion
   virtual std::pair<double, double>
-  getFittingRange(TableDatasetIndex dataIndex,
-                  WorkspaceIndex spectrum) const override;
+  getFittingRange(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
   virtual std::string getExcludeRegion(TableDatasetIndex dataIndex,
-                                       WorkspaceIndex index) const override;
+                                       WorkspaceIndex index) const;
 
   void setStartX(double startX, TableDatasetIndex dataIndex,
-                 WorkspaceIndex spectrum) override;
-  void setStartX(double startX, TableDatasetIndex dataIndex) override;
+                 WorkspaceIndex spectrum);
+  void setStartX(double startX, TableDatasetIndex dataIndex);
   void setEndX(double endX, TableDatasetIndex dataIndex,
-               WorkspaceIndex spectrum) override;
-  void setEndX(double endX, TableDatasetIndex dataIndex) override;
+               WorkspaceIndex spectrum);
+  void setEndX(double endX, TableDatasetIndex dataIndex);
   void setExcludeRegion(const std::string &exclude, TableDatasetIndex dataIndex,
-                        WorkspaceIndex spectrum) override;
+                        WorkspaceIndex spectrum);
 
   // Functions concerned with naming
   virtual std::string createDisplayName(const std::string &formatString,
@@ -168,7 +162,9 @@ protected:
   void removeFittingData(TableDatasetIndex index);
 
 private:
-  // std::vector<std::string> getWorkspaceNames() const;
+  std::vector<std::string> getWorkspaceNames() const;
+  std::vector<double> getExcludeRegionVector(TableDatasetIndex dataIndex,
+                                             WorkspaceIndex index) const;
 
   void removeWorkspaceFromFittingData(TableDatasetIndex const &index);
 

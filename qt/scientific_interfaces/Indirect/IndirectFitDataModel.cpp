@@ -270,6 +270,13 @@ void IndirectFitDataModel::addNewWorkspace(
 
 void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {}
 
+std::vector<double>
+IndirectFitDataModel::getExcludeRegionVector(TableDatasetIndex dataIndex,
+                                             WorkspaceIndex index) const {
+  auto fitData = m_fittingData[dataIndex.value];
+  return fitData.excludeRegionsVector(index);
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

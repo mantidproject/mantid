@@ -36,7 +36,9 @@ public:
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) const override;
   std::vector<double> getQValuesForData() const;
-  std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
+  std::vector<std::pair<std::string, int>>
+  getResolutionsForFit() const override;
+  std::vector<std::string> getWorkspaceNames() const override;
 
   void setSpectra(const std::string &spectra,
                   TableDatasetIndex dataIndex) override;
@@ -56,6 +58,9 @@ public:
                   WorkspaceIndex spectrum) const override;
   std::string getExcludeRegion(TableDatasetIndex dataIndex,
                                WorkspaceIndex index) const override;
+  std::vector<double>
+  getExcludeRegionVector(TableDatasetIndex dataIndex,
+                         WorkspaceIndex index) const override;
 
   void setStartX(double startX, TableDatasetIndex dataIndex,
                  WorkspaceIndex spectrum) override;
@@ -71,7 +76,6 @@ protected:
                             const Spectra &spectra);
 
 private:
-  std::vector<std::string> getWorkspaceNames() const;
   void IndirectFitDataModel::addNewWorkspace(
       const Mantid::API::MatrixWorkspace_sptr &workspace,
       const Spectra &spectra);
