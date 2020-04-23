@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,8 +12,8 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
+#include <memory>
 
 using namespace MantidQt::MantidWidgets;
 
@@ -24,8 +24,8 @@ class MockMantidDisplayBase;
 class MockWorkspaceDockView : public IWorkspaceDockView {
 public:
   MockWorkspaceDockView() {
-    auto presenter = boost::make_shared<WorkspacePresenter>(this);
-    m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+    auto presenter = std::make_shared<WorkspacePresenter>(this);
+    m_presenter = std::dynamic_pointer_cast<ViewNotifiable>(presenter);
     presenter->init();
   }
   ~MockWorkspaceDockView() override {}
@@ -92,7 +92,7 @@ public:
   // Methods which are not to be mocked
   void enableDeletePrompt(bool) override {}
   WorkspacePresenterWN_wptr getPresenterWeakPtr() override {
-    return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
+    return std::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
   }
 
   void refreshWorkspaces() override {}

@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   include_directories(../../CurveFitting/inc
                       ../../MDAlgorithms/inc
@@ -26,8 +25,8 @@ if(CXXTEST_FOUND)
                         SINQ
                         CurveFitting
                         ${MANTIDLIBS}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
 
   # Test data
   add_dependencies(PSISINQTest StandardTestData)

@@ -230,8 +230,7 @@ endif()
 # Create test file projects
 include_directories(SYSTEM
                     ${CXXTEST_INCLUDE_DIR}
-                    ${GMOCK_INCLUDE_DIR}
-                    ${GTEST_INCLUDE_DIR})
+)
 
 include_directories(inc
                     ../../../Framework/TestHelpers/inc
@@ -263,8 +262,8 @@ target_link_libraries(VatesAPITest
                       ${vtkjsoncpp_LIBRARIES}
                       ${POCO_LIBRARIES}
                       ${Boost_LIBRARIES}
-                      ${GMOCK_LIBRARIES}
-                      ${GTEST_LIBRARIES})
+                      gmock
+)
 add_dependencies(AllTests VatesAPITest)
 # Add to the 'UnitTests' group in VS
 set_property(TARGET VatesAPITest PROPERTY FOLDER "UnitTests")

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/SINQTranspose3D.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -24,10 +24,9 @@ void SINQTranspose3D::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "InputWorkspace", "", Direction::Input));
   std::vector<std::string> transposeOptions{"Y,X,Z", "X,Z,Y", "TRICS", "AMOR"};
-  this->declareProperty(
-      "TransposeOption", "Y,X,Z",
-      boost::make_shared<StringListValidator>(transposeOptions),
-      "The transpose option");
+  this->declareProperty("TransposeOption", "Y,X,Z",
+                        std::make_shared<StringListValidator>(transposeOptions),
+                        "The transpose option");
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "OutputWorkspace", "", Direction::Output));
@@ -57,20 +56,20 @@ void SINQTranspose3D::exec() {
   }
 }
 
-void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doYXZ(const IMDHistoWorkspace_sptr &inWS) {
   size_t idxIn, idxOut;
 
-  boost::shared_ptr<const IMDDimension> x, y, z;
+  std::shared_ptr<const IMDDimension> x, y, z;
   x = inWS->getXDimension();
   y = inWS->getYDimension();
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(z));
 
-  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto outWS = std::make_shared<MDHistoWorkspace>(dimensions);
 
   const auto inVal = inWS->getSignalArray();
   const auto inErr = inWS->getErrorSquaredArray();
@@ -92,21 +91,21 @@ void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
   setProperty("OutputWorkspace", outWS);
 }
 
-void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doXZY(const IMDHistoWorkspace_sptr &inWS) {
   size_t idxIn, idxOut;
   unsigned int xdim, ydim, zdim;
 
-  boost::shared_ptr<const IMDDimension> x, y, z;
+  std::shared_ptr<const IMDDimension> x, y, z;
   x = inWS->getXDimension();
   y = inWS->getYDimension();
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(y));
 
-  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto outWS = std::make_shared<MDHistoWorkspace>(dimensions);
 
   const auto inVal = inWS->getSignalArray();
   const auto inErr = inWS->getErrorSquaredArray();
@@ -130,21 +129,21 @@ void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
   // assign the workspace
   setProperty("OutputWorkspace", outWS);
 }
-void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doTRICS(const IMDHistoWorkspace_sptr &inWS) {
   size_t idxIn, idxOut;
   unsigned int xdim, ydim, zdim;
 
-  boost::shared_ptr<const IMDDimension> x, y, z;
+  std::shared_ptr<const IMDDimension> x, y, z;
   x = inWS->getXDimension();
   y = inWS->getYDimension();
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(y));
 
-  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto outWS = std::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   const auto inVal = inWS->getSignalArray();
@@ -169,21 +168,21 @@ void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
   // assign the workspace
   setProperty("OutputWorkspace", outWS);
 }
-void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doAMOR(const IMDHistoWorkspace_sptr &inWS) {
   double val;
   unsigned int xdim, ydim, zdim, idx;
 
-  boost::shared_ptr<const IMDDimension> x, y, z;
+  std::shared_ptr<const IMDDimension> x, y, z;
   x = inWS->getXDimension();
   y = inWS->getYDimension();
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(z));
 
-  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto outWS = std::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   xdim = static_cast<unsigned int>(x->getNBins());
@@ -208,8 +207,9 @@ void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
   setProperty("OutputWorkspace", outWS);
 }
 
-void SINQTranspose3D::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                                   Mantid::API::IMDHistoWorkspace_sptr outws) {
+void SINQTranspose3D::copyMetaData(
+    const Mantid::API::IMDHistoWorkspace_sptr &inws,
+    const Mantid::API::IMDHistoWorkspace_sptr &outws) {
   outws->setTitle(inws->getTitle());
   ExperimentInfo_sptr info;
 

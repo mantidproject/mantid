@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 #include "IndirectDataValidationHelper.h"
@@ -115,7 +115,7 @@ void deleteWorkspace(std::string const &name) {
   deleter->execute();
 }
 
-double getSampleLog(MatrixWorkspace_const_sptr workspace,
+double getSampleLog(const MatrixWorkspace_const_sptr &workspace,
                     std::string const &logName, double const &defaultValue) {
   try {
     return workspace->getLogAsSingleValue(logName);
@@ -124,7 +124,7 @@ double getSampleLog(MatrixWorkspace_const_sptr workspace,
   }
 }
 
-double getSampleLog(MatrixWorkspace_const_sptr workspace,
+double getSampleLog(const MatrixWorkspace_const_sptr &workspace,
                     std::vector<std::string> const &logNames,
                     double const &defaultValue) {
   double value(defaultValue);
@@ -1014,8 +1014,8 @@ void ISISEnergyTransfer::setSaveEnabled(bool enable) {
 
 void ISISEnergyTransfer::updateRunButton(bool enabled,
                                          std::string const &enableOutputButtons,
-                                         QString const message,
-                                         QString const tooltip) {
+                                         QString const &message,
+                                         QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

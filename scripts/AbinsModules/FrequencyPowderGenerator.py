@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 import AbinsModules
 
@@ -32,24 +30,24 @@ class FrequencyPowderGenerator(object):
         :returns: array with frequencies for the required quantum number event, array which stores coefficients for all
                  frequencies
         """
-        if not (isinstance(fundamentals_array, np.ndarray) and
-                len(fundamentals_array.shape) == 1 and
-                fundamentals_array.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+        if not (isinstance(fundamentals_array, np.ndarray)
+                and len(fundamentals_array.shape) == 1
+                and fundamentals_array.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
 
             raise ValueError("Fundamentals in the form of one dimensional array are expected.")
 
-        if not (isinstance(fundamentals_coefficients, np.ndarray) and
-                len(fundamentals_coefficients.shape) == 1 and
-                fundamentals_coefficients.dtype.num == AbinsModules.AbinsConstants.INT_ID):
+        if not (isinstance(fundamentals_coefficients, np.ndarray)
+                and len(fundamentals_coefficients.shape) == 1
+                and fundamentals_coefficients.dtype.num == AbinsModules.AbinsConstants.INT_ID):
             raise ValueError("Coefficients of fundamentals in the form of one dimensional array are expected.")
 
         if fundamentals_coefficients.size != fundamentals_array.size:
             raise ValueError("Inconsistent size of fundamentals and corresponding coefficients. "
                              "(%s != %s)" % (fundamentals_coefficients.size, fundamentals_array.size))
 
-        if not (isinstance(quantum_order, int) and
-                AbinsModules.AbinsConstants.FUNDAMENTALS <= quantum_order <=
-                AbinsModules.AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS + AbinsModules.AbinsConstants.FUNDAMENTALS):
+        if not (isinstance(quantum_order, int)
+                and AbinsModules.AbinsConstants.FUNDAMENTALS <= quantum_order
+                <= AbinsModules.AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS + AbinsModules.AbinsConstants.FUNDAMENTALS):
             raise ValueError("Improper value of quantum order event (quantum_order = %s)" % quantum_order)
 
         # frequencies for fundamentals
@@ -62,14 +60,14 @@ class FrequencyPowderGenerator(object):
         # higher order quantum events.
         else:
 
-            if not (isinstance(previous_array, np.ndarray) and
-                    len(previous_array.shape) == 1 and
-                    previous_array.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+            if not (isinstance(previous_array, np.ndarray)
+                    and len(previous_array.shape) == 1
+                    and previous_array.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
                 raise ValueError("One dimensional previous_array is expected.")
 
-            if not (isinstance(previous_coefficients, np.ndarray) and
-                    len(previous_coefficients.shape) == min(2, quantum_order - 1) and
-                    previous_coefficients.dtype.num == AbinsModules.AbinsConstants.INT_ID):
+            if not (isinstance(previous_coefficients, np.ndarray)
+                    and len(previous_coefficients.shape) == min(2, quantum_order - 1)
+                    and previous_coefficients.dtype.num == AbinsModules.AbinsConstants.INT_ID):
                 raise ValueError("Numpy array of previous_coefficients is expected. (%s)" % previous_coefficients,
                                  type(previous_coefficients), previous_coefficients.dtype)
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -103,8 +103,7 @@ public:
   }
 
   void test_evaluate() {
-    auto fun =
-        boost::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
+    auto fun = std::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
     fun->setParameter("B20", 0.37737);
     fun->setParameter("B22", 3.9770);
     fun->setParameter("B40", -0.031787);
@@ -135,8 +134,7 @@ public:
   }
 
   void test_evaluate_gaussian() {
-    auto fun =
-        boost::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
+    auto fun = std::shared_ptr<CrystalFieldSpectrum>(new CrystalFieldSpectrum);
     fun->setParameter("B20", 0.37737);
     fun->setParameter("B22", 3.9770);
     fun->setParameter("B40", -0.031787);

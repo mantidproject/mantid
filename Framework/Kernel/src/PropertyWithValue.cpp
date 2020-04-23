@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Matrix.h"
@@ -57,7 +57,7 @@ template class MANTID_KERNEL_DLL
 template class MANTID_KERNEL_DLL
     PropertyWithValue<std::vector<std::vector<std::string>>>;
 template class MANTID_KERNEL_DLL
-    PropertyWithValue<boost::shared_ptr<PropertyManager>>;
+    PropertyWithValue<std::shared_ptr<PropertyManager>>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class MANTID_KERNEL_DLL PropertyWithValue<long>;
 template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long>;

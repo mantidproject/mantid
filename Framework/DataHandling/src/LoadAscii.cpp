@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidAPI/Axis.h"
@@ -234,7 +234,7 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   }
 
   MatrixWorkspace_sptr localWorkspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(
+      std::dynamic_pointer_cast<MatrixWorkspace>(
           WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
                                               numBins, numBins));
   try {
@@ -337,7 +337,7 @@ void LoadAscii::init() {
 
   declareProperty(
       "Separator", "Automatic",
-      boost::make_shared<StringListValidator>(sepOptions),
+      std::make_shared<StringListValidator>(sepOptions),
       "The separator between data columns in the data file. The possible "
       "values are \"CSV\", \"Tab\", "
       "\"Space\", \"SemiColon\", or \"Colon\" (default: Automatic selection).");
@@ -345,11 +345,11 @@ void LoadAscii::init() {
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(), "Dimensionless");
   declareProperty("Unit", "Energy",
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\")");
 
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "SkipNumLines", EMPTY_INT(), mustBePosInt,
@@ -373,7 +373,7 @@ void LoadAscii::exec() {
   processHeader(file);
   // Read the data
   MatrixWorkspace_sptr outputWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(readData(file));
+      std::dynamic_pointer_cast<MatrixWorkspace>(readData(file));
   outputWS->mutableRun().addProperty("Filename", filename);
   setProperty("OutputWorkspace", outputWS);
 }

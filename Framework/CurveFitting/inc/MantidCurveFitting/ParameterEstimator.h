@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 #include <vector>
 
@@ -23,9 +23,9 @@ namespace ParameterEstimator {
 
 /// ParameterEstimator estimates parameter values of some fitting functions
 ///  from fitting data.
-void DLLExport estimate(API::IFunction &function,
-                        const API::FunctionDomain1D &domain,
-                        const API::FunctionValues &values);
+void MANTID_CURVEFITTING_DLL estimate(API::IFunction &function,
+                                      const API::FunctionDomain1D &domain,
+                                      const API::FunctionValues &values);
 
 } // namespace ParameterEstimator
 } // namespace CurveFitting

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/SubmitRemoteJob.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -15,8 +15,7 @@
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidKernel/SimpleJSON.h"
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -33,17 +32,17 @@ using namespace Mantid::Kernel;
 void SubmitRemoteJob::init() {
   // Unlike most algorithms, this wone doesn't deal with workspaces....
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty(
-      "ComputeResource", "", boost::make_shared<StringListValidator>(computes),
+      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
       "The name of the remote computer to submit the job to", Direction::Input);
 
   // Note: these 2 properties are 'implementation specific'.  We know that Fermi
@@ -91,11 +90,11 @@ void SubmitRemoteJob::exec() {
   // Here's the line for that - just uncomment it:
   //   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  boost::shared_ptr<RemoteJobManager> jobManager =
+  std::shared_ptr<RemoteJobManager> jobManager =
       ConfigService::Instance().getFacility().getRemoteJobManager(
           getPropertyValue("ComputeResource"));
 
-  // jobManager is a boost::shared_ptr...
+  // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -477,5 +475,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                            WedgeOffset=self.getProperty('WedgeOffset').value,
                            AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                            PanelOutputWorkspaces=panel_ws_group)
+
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

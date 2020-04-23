@@ -1,15 +1,13 @@
-# encoding: utf-8
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# encoding: utf-8
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 import sys
 import traceback
@@ -19,8 +17,8 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantid.py3compat import StringIO
-from mantid.py3compat.mock import patch, Mock
+from io import StringIO
+from unittest.mock import patch, Mock
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution, _get_imported_from_future

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -92,7 +92,7 @@ private:
   int height() const;
   int width() const;
 
-  QRect drawHandle(QPainter &painter, QPointF coords, QColor brush);
+  QRect drawHandle(QPainter &painter, QPointF coords, const QColor &brush);
   void paintEvent(QPaintEvent *event) override;
 
   eHandleID mouseOverHandle(QPoint pos);

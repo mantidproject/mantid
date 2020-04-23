@@ -1,20 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab which visualizes the SANS state object. """
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta
-from six import with_metaclass
-
 from sans.common.enums import SANSInstrument
 from sans.user_file.settings_tags import MonId, monitor_spectrum, DetectorId
 
 
-class ModelCommon(with_metaclass(ABCMeta)):
+class ModelCommon(metaclass=ABCMeta):
     def __init__(self, user_file_items):
         # Workaround to avoid refactoring becoming impossibly large
         # TODO this should be encapsulated in sub-models

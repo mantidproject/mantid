@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidKernel/System.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <set>
 
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
@@ -125,7 +125,7 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
 
   for (const auto &operation : m_allOperations) {
     SymmetryElementWithAxis_sptr element =
-        boost::dynamic_pointer_cast<SymmetryElementWithAxis>(
+        std::dynamic_pointer_cast<SymmetryElementWithAxis>(
             SymmetryElementFactory::Instance().createSymElement(operation));
 
     if (element) {

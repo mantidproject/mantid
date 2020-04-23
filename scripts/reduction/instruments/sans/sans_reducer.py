@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     SANS-specific implementation of the Reducer. The SANSReducer class implements
     a predefined set of reduction steps to be followed. The actual ReductionStep objects
     executed for each of those steps can be modified.
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction import Reducer
 from reduction import ReductionStep
 from reduction import validate_step

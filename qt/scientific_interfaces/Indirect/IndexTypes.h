@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //
 // This file contains the implimentation of type safe indices for use
@@ -25,6 +25,8 @@ namespace IDA {
 template <int Class> struct IndexType {
   using IntImplementationType = int;
   IntImplementationType value = 0;
+  IndexType() noexcept : value(0) {}
+  IndexType(IntImplementationType data) noexcept : value(data) {}
   IndexType operator+(IndexType index) const {
     return IndexType{value + index.value};
   }

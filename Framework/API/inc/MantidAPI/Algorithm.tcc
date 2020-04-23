@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,16 +11,19 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 
+#include <memory>
+#include <type_traits>
+
 namespace {
 template <typename T1, typename T2>
 void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp,
-                          const T2 &wksp, const boost::true_type &) {
+                          const T2 &wksp, const std::true_type &) {
   *wsProp = wksp;
 }
 
 template <typename T1, typename T2>
 void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp,
-                          const T2 &wksp, const boost::false_type &) {
+                          const T2 &wksp, const std::false_type &) {
   wsProp->setValue(wksp);
 }
 } // namespace
@@ -90,7 +93,7 @@ void Algorithm::doSetInputProperties(const std::string &name, const T1 &wksp,
       getPointerToProperty(IndexProperty::generatePropertyName(name)));
 
   setWorkspaceProperty<WsType, T1>(
-      wsProp, wksp, boost::is_convertible<T1, boost::shared_ptr<WsType>>());
+      wsProp, wksp, std::is_convertible<T1, std::shared_ptr<WsType>>());
 
   *indexTypeProp = type;
 
@@ -108,9 +111,9 @@ void Algorithm::doSetInputProperties(const std::string &name, const T1 &wksp,
 */
 template <typename T1, typename T2, typename, typename>
 void Algorithm::setWorkspaceInputProperties(const std::string &name,
-                                            const boost::shared_ptr<T1> &wksp,
+                                            const std::shared_ptr<T1> &wksp,
                                             IndexType type, const T2 &list) {
-  doSetInputProperties<boost::shared_ptr<T1>, T2, T1>(name, wksp, type, list);
+  doSetInputProperties<std::shared_ptr<T1>, T2, T1>(name, wksp, type, list);
 }
 
 /** Mechanism for setting the index property with a workspace shared pointer.
@@ -136,7 +139,7 @@ if T is convertible to a MatrixWorkspace.
 @returns Tuple containing Workspace shared pointer and SpectrumIndexSet
 */
 template <typename T, typename>
-std::tuple<boost::shared_ptr<T>, Indexing::SpectrumIndexSet>
+std::tuple<std::shared_ptr<T>, Indexing::SpectrumIndexSet>
 Algorithm::getWorkspaceAndIndices(const std::string &name) const {
   if (!isCompoundProperty(name))
     throw std::runtime_error(
@@ -144,7 +147,7 @@ Algorithm::getWorkspaceAndIndices(const std::string &name) const {
         "with properties declared using "
         "declareWorkspaceInputProperties.");
 
-  boost::shared_ptr<T> ws = getProperty(name);
+  std::shared_ptr<T> ws = getProperty(name);
 
   // Not able to use the regular getProperty mechanism because types, in this
   // case SpectrumIndexSet, need to be known upfront. Since SpectrumIndexSet is

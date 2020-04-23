@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-from six import PY2, iterkeys
 import collections
 import warnings
 
@@ -146,7 +144,7 @@ def dictionary_key_helper(dictionary, key, throws=True, case_insensitive=False, 
     if case_insensitive:
         # Convert key to str
         lower_key = str(key).lower()
-        for dict_key in iterkeys(dictionary):
+        for dict_key in dictionary.keys():
             if str(dict_key).lower() == lower_key:
                 # Found it
                 return dictionary[dict_key]
@@ -522,14 +520,7 @@ def read_masking_file(masking_file_path):
     all_banks_masking_list = []
     bank_masking_list = []
 
-    # Python > 3 requires the encoding to be included so an Angstrom
-    # symbol can be read, I'm assuming all file read here are
-    # `latin-1` which may not be true in the future. Python 2 `open`
-    # doesn't have an encoding option
-    if PY2:
-        encoding = {}
-    else:
-        encoding = {"encoding": "latin-1"}
+    encoding = {"encoding": "latin-1"}
     with open(masking_file_path, **encoding) as mask_file:
         for line in mask_file:
             if 'bank' in line:

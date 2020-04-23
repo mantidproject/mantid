@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-from __future__ import (absolute_import, unicode_literals)
-
 import sys
 from functools import wraps
 
@@ -24,7 +22,6 @@ from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
 from mantid.plots import datafunctions, MantidAxes
-from mantid.py3compat import text_type
 from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -92,9 +89,12 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         # managed via a workspace.
         # See https://github.com/mantidproject/mantid/issues/25135.
         empty_axes = []
+        redraw = False
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                ax.remove_workspace_artists(workspace)
+                to_redraw = ax.remove_workspace_artists(workspace)
+            else:
+                to_redraw = False
             # We check for axes type below as a pseudo check for an axes being
             # a colorbar. Creating a colorfill plot creates 2 axes: one linked
             # to a workspace, the other a colorbar. Deleting the workspace
@@ -104,10 +104,11 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             # Axes object being closed.
             if type(ax) is not Axes:
                 empty_axes.append(MantidAxes.is_empty(ax))
+            redraw = redraw | to_redraw
 
         if all(empty_axes):
             self.window.emit_close()
-        else:
+        elif redraw:
             self.canvas.draw()
 
     @_catch_exceptions
@@ -340,12 +341,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
-    def grid_toggle(self):
+    def grid_toggle(self, on):
         """Toggle grid lines on/off"""
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            ax.grid()
+            ax.grid(on)
         canvas.draw_idle()
 
     def fit_toggle(self):
@@ -367,7 +368,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.hold()
 
     def get_window_title(self):
-        return text_type(self.window.windowTitle())
+        return self.window.windowTitle()
 
     def set_window_title(self, title):
         self.window.setWindowTitle(title)

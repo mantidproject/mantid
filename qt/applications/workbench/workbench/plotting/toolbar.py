@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
 #
-
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
@@ -19,7 +17,7 @@ from mantidqt.icons import get_icon
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     sig_home_clicked = QtCore.Signal()
-    sig_grid_toggle_triggered = QtCore.Signal()
+    sig_grid_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
@@ -104,7 +102,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.sig_plot_options_triggered.emit()
 
     def toggle_grid(self):
-        self.sig_grid_toggle_triggered.emit()
+        enable = self._actions['toggle_grid'].isChecked()
+        self.sig_grid_toggle_triggered.emit(enable)
 
     def toggle_fit(self):
         fit_action = self._actions['toggle_fit']

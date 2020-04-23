@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.plotting_widget.dockable_plot_toolbar import DockablePlotToolbar
@@ -32,6 +30,7 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.plot_selector = None
         self.tile_type_selector = None
         self.tiled_type_label = None
+        self.external_plot_button = None
         self.plot_type_selector = None
         self.group_selector = None
         self.horizontal_layout = None
@@ -41,6 +40,7 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.toolBar = None
         self.group = None
         self.widget_layout = None
+        self._number_of_axes = 0
 
         self.setup_interface()
 
@@ -75,6 +75,9 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.tile_type_selector.setObjectName("tileTypeSelector")
         self.tile_type_selector.addItems(["Group/Pair", "Run"])
 
+        self.external_plot_button = QtWidgets.QPushButton(self)
+        self.external_plot_button.setText("External plot")
+
         self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.plot_label)
@@ -88,6 +91,7 @@ class PlotWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.raw)
         self.horizontal_layout.addStretch(0)
+        self.horizontal_layout.addWidget(self.external_plot_button)
         self.horizontal_layout.addSpacing(50)
 
         # plotting options
@@ -122,6 +126,7 @@ class PlotWidgetView(QtWidgets.QWidget):
         # Create a set of Mantid axis for the figure
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1,
                                       fig=self.fig)
+        self._number_of_axes = 1
 
         self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
@@ -174,12 +179,16 @@ class PlotWidgetView(QtWidgets.QWidget):
     def on_plot_tiled_changed(self, slot):
         self.plot_type_selector.stateChanged.connect(slot)
 
+    def on_external_plot_pressed(self, slot):
+        self.external_plot_button.clicked.connect(slot)
+
     def new_plot_figure(self, num_axes):
         self.fig.clf()
         if num_axes < 1:
             num_axes = 1
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
                                       fig=self.fig)
+        self._number_of_axes = num_axes
         self.fig.tight_layout()
         self.fig.canvas.draw()
 
@@ -190,7 +199,10 @@ class PlotWidgetView(QtWidgets.QWidget):
         return self.fig
 
     def get_axes(self):
-        return self.fig.axes
+        return self.fig.axes[0:self.num_axes()]
+
+    def num_axes(self):
+        return self._number_of_axes
 
     def set_fig_titles(self, titles):
         for i, title in enumerate(titles):

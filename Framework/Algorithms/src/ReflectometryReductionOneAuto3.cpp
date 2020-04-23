@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryReductionOneAuto3.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
@@ -163,7 +163,7 @@ ReflectometryReductionOneAuto3::validateInputs() {
 }
 
 std::string ReflectometryReductionOneAuto3::getRunNumberForWorkspaceGroup(
-    WorkspaceGroup_const_sptr group) {
+    const WorkspaceGroup_const_sptr &group) {
   // Return the run number for the first child workspace
   if (!group)
     throw std::runtime_error("Invalid workspace group type");
@@ -172,7 +172,7 @@ std::string ReflectometryReductionOneAuto3::getRunNumberForWorkspaceGroup(
     throw std::runtime_error("Cannot run algorithm on empty group");
 
   auto childWs = group->getItem(0);
-  auto childMatrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(childWs);
+  auto childMatrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(childWs);
 
   if (!childMatrixWs)
     throw std::runtime_error("Child workspace is not a MatrixWorkspace");
@@ -248,7 +248,7 @@ void ReflectometryReductionOneAuto3::init() {
   const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
                                               "MultiDetectorAnalysis"};
   auto analysisModeValidator =
-      boost::make_shared<StringListValidator>(analysisMode);
+      std::make_shared<StringListValidator>(analysisMode);
   declareProperty("AnalysisMode", analysisMode[0], analysisModeValidator,
                   "Analysis mode. This property is only used when "
                   "ProcessingInstructions is not set.",
@@ -277,11 +277,11 @@ void ReflectometryReductionOneAuto3::init() {
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
-  auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
+  auto correctionTypeValidator = std::make_shared<CompositeValidator>();
   correctionTypeValidator->add(
-      boost::make_shared<MandatoryValidator<std::string>>());
+      std::make_shared<MandatoryValidator<std::string>>());
   correctionTypeValidator->add(
-      boost::make_shared<StringListValidator>(correctionType));
+      std::make_shared<StringListValidator>(correctionType));
   declareProperty(
       "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
       "When correcting detector positions, this determines whether detectors"
@@ -311,7 +311,7 @@ void ReflectometryReductionOneAuto3::init() {
   // Flood correction
   std::vector<std::string> propOptions = {"Workspace", "ParameterFile"};
   declareProperty("FloodCorrection", "Workspace",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The way to apply flood correction: "
                   "Workspace - use FloodWorkspace property to get the flood "
                   "workspace, ParameterFile - use parameters in the parameter "
@@ -471,8 +471,8 @@ void ReflectometryReductionOneAuto3::exec() {
  * @param inputWS :: the input workspace
  * @return :: the names of the detectors of interest
  */
-std::vector<std::string>
-ReflectometryReductionOneAuto3::getDetectorNames(MatrixWorkspace_sptr inputWS) {
+std::vector<std::string> ReflectometryReductionOneAuto3::getDetectorNames(
+    const MatrixWorkspace_sptr &inputWS) {
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, m_processingInstructionsWorkspaceIndex,
                boost::is_any_of(":,-+"));
@@ -546,8 +546,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::correctDetectorPositions(
  * @param inputWS :: the input workspace
  * @return :: the angle of the detector (only the first detector is considered)
  */
-double
-ReflectometryReductionOneAuto3::calculateTheta(MatrixWorkspace_sptr inputWS) {
+double ReflectometryReductionOneAuto3::calculateTheta(
+    const MatrixWorkspace_sptr &inputWS) {
   const auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
@@ -573,7 +573,7 @@ ReflectometryReductionOneAuto3::calculateTheta(MatrixWorkspace_sptr inputWS) {
  * @param instrument :: The instrument attached to the workspace
  */
 void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
-    IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
+    const IAlgorithm_sptr &alg, const Instrument_const_sptr &instrument) {
 
   // With algorithmic corrections, monitors should not be integrated, see below
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
@@ -635,7 +635,7 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
 }
 
 auto ReflectometryReductionOneAuto3::getRebinParams(
-    MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
+    const MatrixWorkspace_sptr &inputWS, const double theta) -> RebinParams {
   bool qMinIsDefault = true, qMaxIsDefault = true;
   auto const qMin = getPropertyOrDefault("MomentumTransferMin",
                                          inputWS->x(0).front(), qMinIsDefault);
@@ -652,7 +652,7 @@ auto ReflectometryReductionOneAuto3::getRebinParams(
  * @return :: the rebin step in Q, or none if it could not be found
  */
 boost::optional<double>
-ReflectometryReductionOneAuto3::getQStep(MatrixWorkspace_sptr inputWS,
+ReflectometryReductionOneAuto3::getQStep(const MatrixWorkspace_sptr &inputWS,
                                          const double theta) {
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
@@ -690,7 +690,7 @@ ReflectometryReductionOneAuto3::getQStep(MatrixWorkspace_sptr inputWS,
  * @return :: the output workspace
  */
 MatrixWorkspace_sptr
-ReflectometryReductionOneAuto3::rebin(MatrixWorkspace_sptr inputWS,
+ReflectometryReductionOneAuto3::rebin(const MatrixWorkspace_sptr &inputWS,
                                       const RebinParams &params) {
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
@@ -851,7 +851,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   if (!firstTrans.empty()) {
     auto firstTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
-    firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
+    firstTransG = std::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
     } else {
@@ -866,7 +866,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   if (!secondTrans.empty()) {
     auto secondTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
-    secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
+    secondTransG = std::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
     } else {
@@ -963,7 +963,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
     const std::string IvsLamName = outputIvsLamNames[i];
 
     // Find the spectrum processing instructions for ws index 0
-    auto currentWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto currentWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(outputIvsLamNames[i]));
     auto newProcInst = convertToSpectrumNumber("0", currentWorkspace);
     alg->setProperty("ProcessingInstructions", newProcInst);

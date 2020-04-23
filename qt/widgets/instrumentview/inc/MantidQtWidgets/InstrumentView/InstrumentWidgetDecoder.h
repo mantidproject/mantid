@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -60,7 +60,7 @@ private:
                    std::unique_ptr<InstrumentActor> &obj);
   void decodeBinMasks(const QList<QVariant> &list, MaskBinsData &obj);
   void decodeSurface(const QMap<QString, QVariant> &map,
-                     boost::shared_ptr<ProjectionSurface> obj);
+                     std::shared_ptr<ProjectionSurface> obj);
   void decodeProjection3D(const QMap<QString, QVariant> &map,
                           Projection3D &obj);
   void decodeViewPort(const QMap<QString, QVariant> &map, Viewport &obj);
@@ -73,7 +73,7 @@ private:
   Shape2D *decodeFree(const QMap<QString, QVariant> &map);
 
   void decodeAlignmentInfo(const QList<QVariant> &list,
-                           boost::shared_ptr<ProjectionSurface> &obj);
+                           std::shared_ptr<ProjectionSurface> &obj);
 
   QString m_projectPath;
   QString m_workspaceName;

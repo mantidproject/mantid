@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,7 @@ public:
   bool checkForRecovery() const noexcept;
 
   /// Clears all checkpoints in the existing folder at the given path
-  bool clearAllCheckpoints(Poco::Path path) const noexcept;
+  bool clearAllCheckpoints(const Poco::Path &path) const noexcept;
 
   /// Clears all checkpoints in the existing folder at the given path
   bool clearAllUnusedCheckpoints() const noexcept;

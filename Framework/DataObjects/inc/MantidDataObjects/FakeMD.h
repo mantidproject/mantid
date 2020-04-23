@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -25,7 +25,7 @@ public:
          const std::vector<double> &peakParams, const int randomSeed,
          const bool randomizeSignal);
 
-  void fill(API::IMDEventWorkspace_sptr workspace);
+  void fill(const API::IMDEventWorkspace_sptr &workspace);
 
 private:
   void setupDetectorCache(const API::IMDEventWorkspace &workspace);

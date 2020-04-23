@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,7 +20,7 @@ namespace Kernel {
 /// forward declaration
 class PropertyMantager;
 /// Typedef for a shared pointer to a PropertyManager
-using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+using PropertyManager_sptr = std::shared_ptr<PropertyManager>;
 } // namespace Kernel
 
 namespace Algorithms {

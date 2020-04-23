@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -53,7 +53,7 @@ public:
     wsName = "LoadIDFFromNexusTest";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // Put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
@@ -87,14 +87,14 @@ public:
             wsName));
 
     // Test instrument name, source and sample
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(i->getName(), "LOQ");
 
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "source");
     TS_ASSERT_DELTA(source->getPos().Z(), 0.0, 0.01);
 
-    boost::shared_ptr<const IComponent> samplepos = i->getSample();
+    std::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS(samplepos->getName(), "some-sample-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 11.0, 0.01);
 
@@ -142,7 +142,7 @@ public:
     wsName = "LoadIDFFromNexusTest2";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // Put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
@@ -165,7 +165,7 @@ public:
 
     // We now check the parameter that is different in the embedded parameters
     const auto &paramMap = output->constInstrumentParameters();
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "LAB");
     // If this gives "main-detector-bank" instead of "LAB",
@@ -185,7 +185,7 @@ public:
     wsName = "LoadIDFFromNexusTest3";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // Put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
@@ -208,7 +208,7 @@ public:
 
     // We now check a parameter
     const auto &paramMap = output->constInstrumentParameters();
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "main-detector-bank");
   }
@@ -227,7 +227,7 @@ public:
     wsName = "LoadIDFFromNexusTestParameterCorrectionFileAppend";
     Workspace_sptr wsd =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr wsd2D = boost::dynamic_pointer_cast<Workspace2D>(wsd);
+    Workspace2D_sptr wsd2D = std::dynamic_pointer_cast<Workspace2D>(wsd);
     Run &runDetails = wsd2D->mutableRun();
     runDetails.addProperty("run_start", std::string("2015-08-01 12:00:00"));
 
@@ -290,7 +290,7 @@ public:
 
     // We now check a parameter that has been changed by this
     const auto &paramMap = output->constInstrumentParameters();
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB App");
     // If this gives "main-detector-bank" instead of "HAB",
@@ -317,7 +317,7 @@ public:
     wsName = "LoadIDFFromNexusTestParameterCorrectionFileReplace";
     Workspace_sptr wsd =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr wsd2D = boost::dynamic_pointer_cast<Workspace2D>(wsd);
+    Workspace2D_sptr wsd2D = std::dynamic_pointer_cast<Workspace2D>(wsd);
     Run &runDetails = wsd2D->mutableRun();
     runDetails.addProperty("run_start", std::string("2015-08-01 12:00:00"));
 
@@ -380,7 +380,7 @@ public:
 
     // We now check a parameter that has been changed by this
     const auto &paramMap = output->constInstrumentParameters();
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB Rep");
     // If this gives "main-detector-bank" instead of "HAB",

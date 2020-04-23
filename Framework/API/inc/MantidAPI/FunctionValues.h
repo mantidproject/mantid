@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -105,7 +105,7 @@ protected:
 };
 
 /// typedef for a shared pointer
-using FunctionValues_sptr = boost::shared_ptr<FunctionValues>;
+using FunctionValues_sptr = std::shared_ptr<FunctionValues>;
 
 } // namespace API
 } // namespace Mantid

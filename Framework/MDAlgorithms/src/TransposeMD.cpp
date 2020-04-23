@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/TransposeMD.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -18,8 +18,6 @@
 #include "MantidKernel/MultiThreaded.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <memory>
 #include <numeric>
 #include <vector>
@@ -61,7 +59,7 @@ void TransposeMD::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  auto axisValidator = boost::make_shared<ArrayBoundedValidator<int>>();
+  auto axisValidator = std::make_shared<ArrayBoundedValidator<int>>();
   axisValidator->setLower(0);
 
   declareProperty(
@@ -80,7 +78,7 @@ void TransposeMD::init() {
  */
 void TransposeMD::exec() {
   IMDHistoWorkspace_sptr inWSProp = getProperty("InputWorkspace");
-  auto inWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(inWSProp);
+  auto inWS = std::dynamic_pointer_cast<MDHistoWorkspace>(inWSProp);
   if (!inWS) {
     throw std::invalid_argument(
         "Expect the InputWorkspace to be a MDHistoWorkspace");

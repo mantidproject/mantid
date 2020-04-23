@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "FQFitConstants.h"
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
-#include "IndirectFunctionBrowser/FQTemplateBrowser.h"
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "JumpFitAddWorkspaceDialog.h"
 #include "JumpFitModel.h"
 #include "Notifier.h"
@@ -27,7 +28,7 @@ public:
   JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter,
-                       IFQFitObserver *fQTemplateBrowser);
+                       IFQFitObserver *SingleFunctionTemplateBrowser);
 
 private slots:
   void hideParameterComboBoxes();

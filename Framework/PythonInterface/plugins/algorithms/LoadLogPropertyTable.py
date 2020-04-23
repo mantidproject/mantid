@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-from __future__ import (absolute_import, division, print_function)
 import time
 import datetime
 import numbers
@@ -39,8 +38,8 @@ class LoadLogPropertyTable(PythonAlgorithm):
         self.declareProperty(FileProperty(name="LastFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),
                              "The Last file to load from, must be in the same directory, all files in between will also be used")
         self.declareProperty(StringArrayProperty("LogNames",direction=Direction.Input),
-                             "The comma seperated list of properties to include. \n"+
-                             "The full list will be printed if an invalid value is used.")
+                             "The comma seperated list of properties to include. \n"
+                             + "The full list will be printed if an invalid value is used.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace","",Direction.Output),"Table of results")
 
     def category(self):

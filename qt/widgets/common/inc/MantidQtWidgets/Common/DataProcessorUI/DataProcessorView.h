@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidKernel/System.h"
 
-#include <boost/shared_ptr.hpp>
 #include <map>
 #include <memory>
 #include <set>
@@ -39,7 +38,7 @@ public:
   virtual void addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
+  virtual void showTable(std::shared_ptr<AbstractTreeModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;

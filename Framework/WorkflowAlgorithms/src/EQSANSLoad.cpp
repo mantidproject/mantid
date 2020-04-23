@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -43,7 +43,7 @@ void EQSANSLoad::init() {
           "Filename", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load");
 
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       PropertyMode::Optional, wsValidator),
@@ -120,7 +120,7 @@ void EQSANSLoad::init() {
 /// Returns the value of a run property from a given workspace
 /// @param inputWS :: input workspace
 /// @param pname :: name of the property to retrieve
-double getRunPropertyDbl(MatrixWorkspace_sptr inputWS,
+double getRunPropertyDbl(const MatrixWorkspace_sptr &inputWS,
                          const std::string &pname) {
   Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
   auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
@@ -495,12 +495,12 @@ void EQSANSLoad::exec() {
 
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    reductionManager = boost::make_shared<PropertyManager>();
+    reductionManager = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         reductionManager);
   }
@@ -537,14 +537,14 @@ void EQSANSLoad::exec() {
     }
     loadAlg->execute();
     Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
-    dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
+    dataWS = std::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
 
     // Get monitor workspace as necessary
     std::string mon_wsname = getPropertyValue("OutputWorkspace") + "_monitors";
     if (loadMonitors && loadAlg->existsProperty("MonitorWorkspace")) {
       Workspace_sptr monWSOutput = loadAlg->getProperty("MonitorWorkspace");
       MatrixWorkspace_sptr monWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
+          std::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
       if ((monWSOutput) && (!monWS))
         // this was a group workspace - EQSansLoad does not support multi period
         // data yet
@@ -559,15 +559,15 @@ void EQSANSLoad::exec() {
   } else {
     MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
     EventWorkspace_sptr outputEventWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+        std::dynamic_pointer_cast<EventWorkspace>(outputWS);
     if (inputEventWS != outputEventWS) {
       IAlgorithm_sptr copyAlg = createChildAlgorithm("CloneWorkspace", 0, 0.2);
       copyAlg->setProperty("InputWorkspace", inputEventWS);
       copyAlg->executeAsChildAlg();
       Workspace_sptr dataWS_asWks = copyAlg->getProperty("OutputWorkspace");
-      dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
+      dataWS = std::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
     } else {
-      dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputEventWS);
+      dataWS = std::dynamic_pointer_cast<MatrixWorkspace>(inputEventWS);
     }
   }
 
@@ -752,7 +752,7 @@ void EQSANSLoad::exec() {
       m_output_message += "NOT ";
     m_output_message += "applied\n";
     DataObjects::EventWorkspace_sptr dataWS_evt =
-        boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
+        std::dynamic_pointer_cast<EventWorkspace>(dataWS);
     IAlgorithm_sptr tofAlg =
         createChildAlgorithm("EQSANSTofStructure", 0.5, 0.7);
     tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
@@ -804,7 +804,7 @@ void EQSANSLoad::exec() {
 
   if (skipTOFCorrection) {
     DataObjects::EventWorkspace_sptr dataWS_evt =
-        boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
+        std::dynamic_pointer_cast<EventWorkspace>(dataWS);
     if (dataWS_evt->getNumberEvents() == 0)
       throw std::invalid_argument("No event to process: check your TOF cuts");
     wl_min = dataWS_evt->getTofMin() * conversion_factor;
@@ -849,7 +849,7 @@ void EQSANSLoad::exec() {
   dataWS->mutableRun().addProperty("event_ws",
                                    getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>(
-      "OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
+      "OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
   setPropertyValue("OutputMessage", m_output_message);
 }
 

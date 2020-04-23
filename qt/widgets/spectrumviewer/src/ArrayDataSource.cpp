@@ -1,11 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include <cmath>
+#include <utility>
 
 #include "MantidQtWidgets/SpectrumViewer/ArrayDataSource.h"
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
@@ -39,13 +39,13 @@ ArrayDataSource::ArrayDataSource(double m_totalXMin, double m_totalXMax,
                                  std::vector<float> data)
     : SpectrumDataSource(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
                          m_totalRows, m_totalCols),
-      m_data(data) {}
+      m_data(std::move(data)) {}
 
 ArrayDataSource::~ArrayDataSource() {}
 
 bool ArrayDataSource::hasData(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(wsName);
   UNUSED_ARG(ws);
   return false;

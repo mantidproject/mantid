@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -78,13 +78,13 @@ void EstimateResolutionDiffraction::init() {
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum");
 
-  auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDeltaTOF = std::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
   positiveDeltaTOF->setLowerExclusive(true);
   declareProperty("DeltaTOF", 0., positiveDeltaTOF,
                   "DeltaT as the resolution of TOF with unit microsecond");
 
-  auto positiveWavelength = boost::make_shared<BoundedValidator<double>>();
+  auto positiveWavelength = std::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);
   positiveWavelength->setLowerExclusive(true);
   declareProperty("Wavelength", EMPTY_DBL(), positiveWavelength,
@@ -96,8 +96,6 @@ void EstimateResolutionDiffraction::init() {
                   "Workspaces created showing the various resolution terms");
 }
 
-/**
- */
 void EstimateResolutionDiffraction::exec() {
   processAlgProperties();
 
@@ -119,7 +117,7 @@ void EstimateResolutionDiffraction::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 
   // put together the output group
-  auto partialsGroup = boost::make_shared<WorkspaceGroup>();
+  auto partialsGroup = std::make_shared<WorkspaceGroup>();
   API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_tof",
                                                     m_resTof);
   API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_length",
@@ -132,8 +130,6 @@ void EstimateResolutionDiffraction::exec() {
   setProperty("PartialResolutionWorkspaces", partialsGroup);
 }
 
-/**
- */
 void EstimateResolutionDiffraction::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
   m_divergenceWS = getProperty("DivergenceWorkspace");
@@ -167,8 +163,6 @@ double EstimateResolutionDiffraction::getWavelength() {
   return cwltimeseries->timeAverageValue();
 }
 
-/**
- */
 void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   double centrewavelength = getWavelength();
   g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
@@ -181,8 +175,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   g_log.notice() << "Centre neutron velocity = " << m_centreVelocity << "\n";
 }
 
-/**
- */
 void EstimateResolutionDiffraction::estimateDetectorResolution() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto l1 = spectrumInfo.l1();

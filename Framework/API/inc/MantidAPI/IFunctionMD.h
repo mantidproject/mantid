@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -17,10 +17,9 @@
 #include "MantidKernel/Unit.h"
 #ifndef Q_MOC_RUN
 #include <boost/scoped_array.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #endif
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -53,10 +52,10 @@ public:
   /* Overidden methods */
 
   /// Virtual copy constructor
-  boost::shared_ptr<IFunction> clone() const override;
+  std::shared_ptr<IFunction> clone() const override;
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const Workspace> ws) override;
 
   void function(const FunctionDomain &domain,
                 FunctionValues &values) const override;
@@ -79,13 +78,12 @@ protected:
   /// maps dimension id to its index in m_dimensions
   std::map<std::string, size_t> m_dimensionIndexMap;
   /// dimensions used in this function in the expected order
-  std::vector<boost::shared_ptr<const Mantid::Geometry::IMDDimension>>
+  std::vector<std::shared_ptr<const Mantid::Geometry::IMDDimension>>
       m_dimensions;
 
 private:
   /// Use all the dimensions in the workspace
-  virtual void
-  useAllDimensions(boost::shared_ptr<const IMDWorkspace> workspace);
+  virtual void useAllDimensions(std::shared_ptr<const IMDWorkspace> workspace);
 };
 
 } // namespace API

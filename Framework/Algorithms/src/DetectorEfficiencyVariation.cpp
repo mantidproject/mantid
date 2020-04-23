@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -26,7 +26,7 @@ using Geometry::IDetector_const_sptr;
 
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
-  auto val = boost::make_shared<HistogramValidator>();
+  auto val = std::make_shared<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "WhiteBeamBase", "", Direction::Input, val),
                   "Name of a white beam vanadium workspace");
@@ -43,13 +43,13 @@ void DetectorEfficiencyVariation::init() {
                   "masked. Each histogram from the input workspace maps to a "
                   "histogram in this workspace with one value that indicates "
                   "if there was a dead detector.");
-  auto moreThanZero = boost::make_shared<BoundedValidator<double>>();
+  auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.0);
   declareProperty("Variation", 1.1, moreThanZero,
                   "Identify histograms whose total number of counts has "
                   "changed by more than this factor of the median change "
                   "between the two input workspaces.");
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
                   "The index number of the first spectrum to include in the "
@@ -187,8 +187,8 @@ void DetectorEfficiencyVariation::retrieveProperties(
  * @return number of detectors for which tests failed
  */
 int DetectorEfficiencyVariation::doDetectorTests(
-    API::MatrixWorkspace_const_sptr counts1,
-    API::MatrixWorkspace_const_sptr counts2, const double average,
+    const API::MatrixWorkspace_const_sptr &counts1,
+    const API::MatrixWorkspace_const_sptr &counts2, const double average,
     double variation) {
   // DIAG in libISIS did this.  A variation of less than 1 doesn't make sense in
   // this algorithm

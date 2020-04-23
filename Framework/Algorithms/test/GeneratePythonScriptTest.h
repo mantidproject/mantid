@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -168,8 +168,8 @@ public:
     API::WorkspaceHistory &history = ws->history();
     auto pAlg = std::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
-    history.addHistory(boost::make_shared<AlgorithmHistory>(
-        API::AlgorithmHistory(pAlg.get())));
+    history.addHistory(
+        std::make_shared<AlgorithmHistory>(API::AlgorithmHistory(pAlg.get())));
 
     pAlg.reset(nullptr);
   }

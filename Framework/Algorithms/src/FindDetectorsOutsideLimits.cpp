@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidAPI/FileProperty.h"
@@ -46,7 +46,7 @@ void FindDetectorsOutsideLimits::init() {
       "LowThreshold", 0.0,
       "Spectra whose total number of counts are equal to or below this value\n"
       "will be marked bad (default 0)");
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "StartWorkspaceIndex", 0, mustBePosInt,
@@ -108,7 +108,7 @@ void FindDetectorsOutsideLimits::exec() {
   // Get the integrated input workspace; converting to a Workspace2D
   MatrixWorkspace_sptr countsWS = integrateSpectra(
       inputWS, minIndex, maxIndex, rangeLower, rangeUpper, true);
-  if (boost::dynamic_pointer_cast<EventWorkspace>(countsWS))
+  if (std::dynamic_pointer_cast<EventWorkspace>(countsWS))
     throw std::runtime_error("Error! Integration output is not a Workspace2D.");
 
   // Create a new workspace for the results, copy from the input to ensure that

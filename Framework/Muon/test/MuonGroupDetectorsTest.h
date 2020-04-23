@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -99,7 +99,7 @@ public:
 
 private:
   TableWorkspace_sptr createDetectorGroupingTable() {
-    auto t = boost::make_shared<TableWorkspace>();
+    auto t = std::make_shared<TableWorkspace>();
 
     t->addColumn("vector_int", "Detectors");
 

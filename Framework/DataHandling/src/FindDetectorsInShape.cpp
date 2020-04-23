@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/FindDetectorsInShape.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -30,7 +30,7 @@ void FindDetectorsInShape::init() {
                       "Workspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty("ShapeXML", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the shape");
   declareProperty(
       "IncludeMonitors", false,

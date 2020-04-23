@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
@@ -30,12 +30,12 @@ void MaskDetectorsIf::init() {
                   "A 1D Workspace that contains values to select against");
   const std::vector<std::string> select_mode{"SelectIf", "DeselectIf"};
   declareProperty(
-      "Mode", "SelectIf", boost::make_shared<StringListValidator>(select_mode),
+      "Mode", "SelectIf", std::make_shared<StringListValidator>(select_mode),
       "Mode to select or deselect detectors based on comparison with values.");
   const std::vector<std::string> select_operator{
       "Equal", "NotEqual", "Greater", "GreaterEqual", "Less", "LessEqual"};
   declareProperty("Operator", "Equal",
-                  boost::make_shared<StringListValidator>(select_operator),
+                  std::make_shared<StringListValidator>(select_operator),
                   "Unary operator to compare to given values.");
   declareProperty("Value", 0.0);
   declareProperty(

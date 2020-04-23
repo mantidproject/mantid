@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidAPI/Axis.h"
@@ -14,9 +14,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
@@ -71,14 +70,14 @@ void LorentzCorrection::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::INPUT_WKSP, "", Direction::Input,
                       PropertyMode::Mandatory),
-                  // boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                  // std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Input workspace to correct in Wavelength.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::OUTPUT_WKSP, "", Direction::Output),
                   "An output workspace.");
   const std::vector<std::string> correction_types{TOF_SCD, TOF_PD};
   declareProperty(PropertyNames::TYPE, correction_types[0],
-                  boost::make_shared<StringListValidator>(correction_types),
+                  std::make_shared<StringListValidator>(correction_types),
                   "Type of Lorentz correction to do");
 }
 
@@ -114,8 +113,7 @@ void LorentzCorrection::exec() {
       "OutputWorkspace", this->getPropertyValue(PropertyNames::OUTPUT_WKSP));
   cloneAlg->execute();
   Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr outWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+  MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
   Progress prog(this, 0.1, 1.0, inWS->getNumberHistograms());
 
@@ -180,7 +178,7 @@ void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp,
   const auto &spectrumInfo = wksp->spectrumInfo();
 
   EventWorkspace_sptr wkspEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(wksp);
+      std::dynamic_pointer_cast<EventWorkspace>(wksp);
   bool isEvent = bool(wkspEvent);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))

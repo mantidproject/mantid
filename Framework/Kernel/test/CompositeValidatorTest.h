@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -21,8 +21,8 @@ class CompositeValidatorTest : public CxxTest::TestSuite {
 public:
   /** Is valid does an AND of the components */
   void test_isValid() {
-    auto val1 = boost::make_shared<BoundedValidator<int>>(100, 1000);
-    auto val2 = boost::make_shared<BoundedValidator<int>>(900, 2000);
+    auto val1 = std::make_shared<BoundedValidator<int>>(100, 1000);
+    auto val2 = std::make_shared<BoundedValidator<int>>(900, 2000);
 
     CompositeValidator comp;
     comp.add(val1);
@@ -53,7 +53,7 @@ public:
     allowed_val1[1] = "b2";
     allowed_val1[2] = "c";
 
-    auto val1 = boost::make_shared<StringListValidator>(allowed_val1);
+    auto val1 = std::make_shared<StringListValidator>(allowed_val1);
     CompositeValidator comp;
     comp.add(val1);
 
@@ -65,7 +65,7 @@ public:
     allowed_val2[1] = "b2";
     allowed_val2[2] = "c2";
 
-    auto val2 = boost::make_shared<StringListValidator>(allowed_val2);
+    auto val2 = std::make_shared<StringListValidator>(allowed_val2);
     comp.add(val2);
 
     std::vector<std::string> allowed2 = comp.allowedValues();
@@ -76,8 +76,8 @@ public:
   void
   test_Given_TwoValidators_When_CheckIsValid_That_ValidValuesReturnValid() {
     // Arrange
-    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
-    auto val2 = boost::make_shared<BoundedValidator<int>>(60, 100);
+    auto val1 = std::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = std::make_shared<BoundedValidator<int>>(60, 100);
 
     CompositeValidator comp(CompositeRelation::OR);
     comp.add(val1);
@@ -91,8 +91,8 @@ public:
 
   void test_ContainsReturnsTrueIfListContainsType() {
     CompositeValidator comp;
-    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
-    auto val2 = boost::make_shared<BoundedValidator<double>>(60, 100);
+    auto val1 = std::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = std::make_shared<BoundedValidator<double>>(60, 100);
     comp.add(val1);
     comp.add(val2);
 
@@ -102,8 +102,8 @@ public:
 
   void test_ContainsReturnsFalseIfListDoesNotContainType() {
     CompositeValidator comp;
-    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
-    auto val2 = boost::make_shared<BoundedValidator<double>>(60, 100);
+    auto val1 = std::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = std::make_shared<BoundedValidator<double>>(60, 100);
     comp.add(val1);
     comp.add(val2);
 

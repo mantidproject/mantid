@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -33,7 +33,7 @@ const FunctionDomain &JointDomain::getDomain(size_t i) const {
  * Add a new domain.
  * @param domain :: A shared pointer to a domain.
  */
-void JointDomain::addDomain(FunctionDomain_sptr domain) {
+void JointDomain::addDomain(const FunctionDomain_sptr &domain) {
   m_domains.emplace_back(domain);
 }
 

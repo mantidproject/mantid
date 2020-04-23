@@ -1,15 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import warnings
-
-from six import assertRaisesRegex, assertRegex
 
 from isis_powder.routines import instrument_settings, param_map_entry
 
@@ -20,7 +16,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
-        with assertRaisesRegex(self, AttributeError, "is required but was not set or passed"):
+        with self.assertRaisesRegex(AttributeError, "is required but was not set or passed"):
             foo = inst_settings_obj.script_facing_name
             del foo
 
@@ -30,7 +26,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
         # Check it still prints the acceptable values when it fails
-        with assertRaisesRegex(self, AttributeError, "A BAR"):
+        with self.assertRaisesRegex(AttributeError, "A BAR"):
             foo = inst_settings_obj.script_facing_name
             del foo
 
@@ -39,7 +35,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
-        with assertRaisesRegex(self, AttributeError, "Please contact the development team"):
+        with self.assertRaisesRegex(AttributeError, "Please contact the development team"):
             foo = inst_settings_obj.not_known
             del foo
 
@@ -65,9 +61,9 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry], kwargs=keyword_args,
                                                                        adv_conf_dict=adv_config)
 
-            assertRegex(self, str(warning_capture[-1].message), "which was previously set to")
-            assertRegex(self, str(warning_capture[-1].message), str(original_value))
-            assertRegex(self, str(warning_capture[-1].message), str(new_value))
+            self.assertRegex(str(warning_capture[-1].message), "which was previously set to")
+            self.assertRegex(str(warning_capture[-1].message), str(original_value))
+            self.assertRegex(str(warning_capture[-1].message), str(new_value))
 
         self.assertEqual(inst_settings_obj.script_facing_name, new_value)
 
@@ -92,9 +88,9 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             warnings.simplefilter("always")
 
             inst_settings_obj.update_attributes(basic_config=config_dict)
-            assertRegex(self, str(warning_capture[-1].message), "which was previously set to")
-            assertRegex(self, str(warning_capture[-1].message), str(original_value))
-            assertRegex(self, str(warning_capture[-1].message), str(new_value))
+            self.assertRegex(str(warning_capture[-1].message), "which was previously set to")
+            self.assertRegex(str(warning_capture[-1].message), str(original_value))
+            self.assertRegex(str(warning_capture[-1].message), str(new_value))
             warnings_current_length = len(warning_capture)
 
             # Then check that we only get one additional warning when replacing values again not two
@@ -143,7 +139,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         # First test we cannot set it to a different value
         incorrect_value_dict = {"user_facing_name": "wrong"}
-        with assertRaisesRegex(self, ValueError, "The user specified value: 'wrong' is unknown"):
+        with self.assertRaisesRegex(ValueError, "The user specified value: 'wrong' is unknown"):
             instrument_settings.InstrumentSettings(param_map=[param_entry],
                                                    adv_conf_dict=incorrect_value_dict)
 
@@ -159,8 +155,8 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
     def test_param_map_rejects_enum_missing_friendly_name(self):
         # Check that is the friendly name is not set it is correctly detected
-        with assertRaisesRegex(self, RuntimeError,
-                               "'enum_friendly_name' was not set. Please contact development team."):
+        with self.assertRaisesRegex(RuntimeError,
+                                    "'enum_friendly_name' was not set. Please contact development team."):
             param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
                                           enum_class=BadSampleEnum)
 

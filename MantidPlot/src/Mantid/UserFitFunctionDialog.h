@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,7 +11,7 @@
 //----------------------------
 
 #include "ui_UserFitFunctionDialog.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qcheckbox.h>
 #include <qdialog.h>
 #include <qlineedit.h>

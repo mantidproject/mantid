@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/HyspecScharpfCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -51,7 +51,7 @@ const std::string HyspecScharpfCorrection::summary() const {
 /** Initialize the algorithm's properties.
  */
 void HyspecScharpfCorrection::init() {
-  auto wsValidator = boost::make_shared<Mantid::Kernel::CompositeValidator>();
+  auto wsValidator = std::make_shared<Mantid::Kernel::CompositeValidator>();
   wsValidator->add<Mantid::API::WorkspaceUnitValidator>("DeltaE");
   wsValidator->add<Mantid::API::InstrumentValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
@@ -59,14 +59,14 @@ void HyspecScharpfCorrection::init() {
                   "An input workspace in units of energy transfer.");
 
   auto angleValidator =
-      boost::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+      std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   angleValidator->setLower(-180.0);
   angleValidator->setUpper(180.0);
   declareProperty("PolarizationAngle", EMPTY_DBL(), angleValidator,
                   "In plane angle between polatrization and incident beam"
                   "Must be between -180 and +180 degrees");
   auto precisionValidator =
-      boost::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+      std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   precisionValidator->setLower(0.0);
   precisionValidator->setUpper(1.0);
   declareProperty(
@@ -169,7 +169,7 @@ void HyspecScharpfCorrection::execEvent() {
   }
 
   Mantid::DataObjects::EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           m_outputWS);
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();

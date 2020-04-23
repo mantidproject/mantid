@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrixCurve.h"
 
@@ -142,8 +142,7 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
   // Perhaps, with new CreateCurveName(this->title(), Workspace)
 
   Mantid::API::MatrixWorkspace_const_sptr matrixWS =
-      boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-          workspace);
+      std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(workspace);
   // we need to censor the data if there is a log scale because it can't deal
   // with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
@@ -289,7 +288,7 @@ void MantidMatrixCurve::itemChanged() {
  */
 QString MantidMatrixCurve::createCurveName(
     const QString &prefix,
-    const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws) {
+    const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws) {
   QString name = "";
 
   if (prefix.isEmpty())
@@ -317,7 +316,7 @@ void MantidMatrixCurve::dataReset(const QString &wsName) {
   try {
     Mantid::API::Workspace_sptr base =
         Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
-    mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
+    mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
   } catch (std::runtime_error &) {
     g_log.information() << "Workspace " << wsNameStd
                         << " could not be found - plotted curve(s) deleted\n";
@@ -348,7 +347,7 @@ void MantidMatrixCurve::dataReset(const QString &wsName) {
 
 void MantidMatrixCurve::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   (void)ws;
 
   invalidateBoundingRect();

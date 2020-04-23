@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -49,8 +49,8 @@ private:
   void exec() override; ///< Executes the algorithm.
 
   void getStdDev(API::Progress &progress,
-                 Mantid::API::MatrixWorkspace_sptr valid,
-                 Mantid::API::MatrixWorkspace_sptr values);
+                 const Mantid::API::MatrixWorkspace_sptr &valid,
+                 const Mantid::API::MatrixWorkspace_sptr &values);
 };
 } // namespace Algorithms
 } // namespace Mantid

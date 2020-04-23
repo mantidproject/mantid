@@ -254,6 +254,10 @@ target_link_libraries(Crystal
 # Add the unit tests directory
 add_subdirectory(test)
 
+# Auto-generate exports header
+target_include_directories(Crystal PUBLIC ${CMAKE_BINARY_DIR}/Framework/Crystal)
+generate_mantid_export_header(Crystal FALSE)
+
 # Installation settings
 
 mtd_install_targets(TARGETS

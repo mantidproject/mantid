@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The table  model contains all the reduction information which is provided via the data table
 
 The main information in the table model are the run numbers and the selected periods. However it also contains
 information regarding the custom output name and the information in the options tab.
 """
-
-from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import Logger
 from sans.common.enums import RowState

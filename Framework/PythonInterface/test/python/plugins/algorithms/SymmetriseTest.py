@@ -1,16 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=redefined-builtin
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 import unittest
-
-from six.moves import range
 
 from mantid.api import *
 from mantid.simpleapi import CreateWorkspace, ScaleX, Symmetrise

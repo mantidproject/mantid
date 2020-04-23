@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -43,7 +43,7 @@ void run_parallel(const Parallel::Communicator &comm) {
   }
 }
 
-boost::shared_ptr<Workspace2D> createWorkspace() {
+std::shared_ptr<Workspace2D> createWorkspace() {
   auto ws = create<Workspace2D>(5, Points(1));
   ws->setHistogram(0, Points{0.0}, Counts{1.0});
   ws->setHistogram(1, Points{1.0}, Counts{1.0});

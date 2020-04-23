@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import abc
 import collections
@@ -138,8 +138,8 @@ class ParsedDictConverter(IStateParser):
                 state_builder.set_can_fit_type(clear_settings.fit_type)
 
             # 2. General settings
-            general_settings = [item for item in fit_general if item.data_type is None and
-                                item.fit_type is not FitType.NO_FIT]
+            general_settings = [item for item in fit_general if item.data_type is None
+                                and item.fit_type is not FitType.NO_FIT]
             if general_settings:
                 general_settings = general_settings[-1]
                 state_builder.set_sample_fit_type(general_settings.fit_type)

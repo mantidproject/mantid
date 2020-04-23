@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 
@@ -52,17 +52,17 @@ LatticeDomainCreator::LatticeDomainCreator(
  * @param i0 :: Size offset for values object if it already contains data.
  */
 void LatticeDomainCreator::createDomain(
-    boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> &values, size_t i0) {
+    std::shared_ptr<API::FunctionDomain> &domain,
+    std::shared_ptr<API::FunctionValues> &values, size_t i0) {
   setWorkspaceFromPropertyManager();
 
   API::IPeaksWorkspace_sptr peaksWorkspace =
-      boost::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
   if (peaksWorkspace) {
     createDomainFromPeaksWorkspace(peaksWorkspace, domain, values, i0);
   } else {
     API::ITableWorkspace_sptr tableWorkspace =
-        boost::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
+        std::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
     if (tableWorkspace) {
       createDomainFromPeakTable(tableWorkspace, domain, values, i0);
     }
@@ -85,18 +85,18 @@ void LatticeDomainCreator::createDomain(
  */
 Workspace_sptr LatticeDomainCreator::createOutputWorkspace(
     const std::string &baseName, IFunction_sptr function,
-    boost::shared_ptr<FunctionDomain> domain,
-    boost::shared_ptr<FunctionValues> values,
+    std::shared_ptr<FunctionDomain> domain,
+    std::shared_ptr<FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
 
-  boost::shared_ptr<LatticeDomain> latticeDomain =
-      boost::dynamic_pointer_cast<LatticeDomain>(domain);
+  std::shared_ptr<LatticeDomain> latticeDomain =
+      std::dynamic_pointer_cast<LatticeDomain>(domain);
   if (!latticeDomain) {
     throw std::invalid_argument("LatticeDomain is required.");
   }
 
   ILatticeFunction_sptr latticeFunction =
-      boost::dynamic_pointer_cast<ILatticeFunction>(function);
+      std::dynamic_pointer_cast<ILatticeFunction>(function);
   if (!latticeFunction) {
     throw std::invalid_argument(
         "LatticeDomainCreator can only process ILatticeFunction.");
@@ -139,13 +139,13 @@ Workspace_sptr LatticeDomainCreator::createOutputWorkspace(
 
 size_t LatticeDomainCreator::getDomainSize() const {
   API::IPeaksWorkspace_sptr peaksWorkspace =
-      boost::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
   if (peaksWorkspace) {
     return peaksWorkspace->getNumberPeaks();
   }
 
   API::ITableWorkspace_sptr tableWorkspace =
-      boost::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
   if (tableWorkspace) {
     return tableWorkspace->rowCount();
   }
@@ -171,8 +171,8 @@ void LatticeDomainCreator::setWorkspaceFromPropertyManager() {
 /// Creates a LatticeDomain from an IPeaksWorkspace, using HKL and d-values.
 void LatticeDomainCreator::createDomainFromPeaksWorkspace(
     const API::IPeaksWorkspace_sptr &workspace,
-    boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> &values, size_t i0) {
+    std::shared_ptr<API::FunctionDomain> &domain,
+    std::shared_ptr<API::FunctionValues> &values, size_t i0) {
   if (!workspace) {
     throw std::invalid_argument(
         "This function only works on an IPeaksWorkspace-object.");
@@ -232,8 +232,8 @@ void LatticeDomainCreator::createDomainFromPeaksWorkspace(
  */
 void LatticeDomainCreator::createDomainFromPeakTable(
     const ITableWorkspace_sptr &workspace,
-    boost::shared_ptr<FunctionDomain> &domain,
-    boost::shared_ptr<FunctionValues> &values, size_t i0) {
+    std::shared_ptr<FunctionDomain> &domain,
+    std::shared_ptr<FunctionValues> &values, size_t i0) {
 
   size_t peakCount = workspace->rowCount();
 
@@ -268,9 +268,9 @@ void LatticeDomainCreator::createDomainFromPeakTable(
       }
     }
 
-    domain = boost::make_shared<LatticeDomain>(hkls);
+    domain = std::make_shared<LatticeDomain>(hkls);
     if (!values) {
-      values = boost::make_shared<FunctionValues>(*domain);
+      values = std::make_shared<FunctionValues>(*domain);
     } else {
       values->expand(i0 + domain->size());
     }

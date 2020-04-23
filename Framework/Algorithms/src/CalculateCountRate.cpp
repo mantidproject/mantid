@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateCountRate.h"
 
@@ -73,7 +73,7 @@ void CalculateCountRate::init() {
   declareProperty(
       std::make_unique<Kernel::PropertyWithValue<std::string>>(
           "RangeUnits", "Energy",
-          boost::make_shared<Kernel::StringListValidator>(
+          std::make_shared<Kernel::StringListValidator>(
               Kernel::UnitFactory::Instance().getKeys()),
           Kernel::Direction::Input),
       "The units from Mantid Unit factory for calculating the "
@@ -87,7 +87,7 @@ void CalculateCountRate::init() {
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty(
       "EMode", "Elastic",
-      boost::make_shared<Kernel::StringListValidator>(propOptions),
+      std::make_shared<Kernel::StringListValidator>(propOptions),
       "The energy mode for 'RangeUnits' conversion mode (default: elastic)");
 
   // Used logs group
@@ -112,7 +112,7 @@ void CalculateCountRate::init() {
 
   // Results
   declareProperty("CountRateLogName", "block_count_rate",
-                  boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
+                  std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "The name of the processed time series log with instrument "
                   "count rate to be added"
                   " to the source workspace");
@@ -133,7 +133,7 @@ void CalculateCountRate::init() {
       "containing data to visualize counting rate as function of time in the "
       "ranges XMin-XMax");
 
-  auto mustBeReasonable = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBeReasonable = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBeReasonable->setLower(3);
   declareProperty(
       std::make_unique<Kernel::PropertyWithValue<int>>(
@@ -524,7 +524,7 @@ void CalculateCountRate::setSourceWSandXRanges(
   } else {
     wst = InputWorkspace;
   }
-  m_workingWS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
+  m_workingWS = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
   if (!m_workingWS) {
     throw std::runtime_error("SetWSDataRanges:Can not retrieve EventWorkspace "
                              "after converting units");
@@ -652,7 +652,7 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
     xx[i] = (0.5 + static_cast<double>(i)) * dt;
   }
   auto ax1 = std::make_unique<API::NumericAxis>(xx);
-  auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  auto labelY = std::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel("sec");
   ax1->unit() = labelY;

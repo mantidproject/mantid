@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -52,7 +52,7 @@ public:
 protected:
   void preDeleteHandle(
       const std::string &workspaceName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 signals:
   void signalWorkspaceUpdated();
@@ -65,7 +65,7 @@ public slots:
 private:
   void updateDomain();
   /// workspace selected for fitting
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;
   /// current sliced to be displayed and/or fitted
   size_t m_selectedWorkspaceIndex;
   /// energy range for each slice with non-zero signal. We use the

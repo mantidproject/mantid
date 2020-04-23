@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFDataController.h"
 #include "MDFAddWorkspaceDialog.h"
@@ -63,7 +63,7 @@ void DataController::addWorkspace() {
         if (grp) {
           for (size_t i = 0; i < static_cast<size_t>(grp->getNumberOfEntries());
                ++i) {
-            mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                 grp->getItem(i));
             if (mws) {
               matrixWorkspaces.emplace_back(mws);

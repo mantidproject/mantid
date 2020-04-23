@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -96,7 +96,7 @@ public:
 
       Mantid::API::MatrixWorkspace_const_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+          ws = std::dynamic_pointer_cast<const MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(
                   "ReadGroupsFromFileTest_Workspace")););
       TS_ASSERT(ws);

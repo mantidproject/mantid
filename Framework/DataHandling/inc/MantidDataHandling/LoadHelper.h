@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -35,18 +35,19 @@ public:
   static double calculateStandardError(double in) { return sqrt(in); }
   double calculateEnergy(double);
   double calculateTOF(double, double);
-  double getInstrumentProperty(const API::MatrixWorkspace_sptr &, std::string);
+  double getInstrumentProperty(const API::MatrixWorkspace_sptr &,
+                               const std::string &);
   void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails);
   void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
-  std::string dateTimeInIsoFormat(std::string);
+  std::string dateTimeInIsoFormat(const std::string &);
 
-  void moveComponent(API::MatrixWorkspace_sptr ws,
+  void moveComponent(const API::MatrixWorkspace_sptr &ws,
                      const std::string &componentName,
                      const Kernel::V3D &newPos);
-  void rotateComponent(API::MatrixWorkspace_sptr ws,
+  void rotateComponent(const API::MatrixWorkspace_sptr &ws,
                        const std::string &componentName,
                        const Kernel::Quat &rot);
-  Kernel::V3D getComponentPosition(API::MatrixWorkspace_sptr ws,
+  Kernel::V3D getComponentPosition(const API::MatrixWorkspace_sptr &ws,
                                    const std::string &componentName);
 
 private:

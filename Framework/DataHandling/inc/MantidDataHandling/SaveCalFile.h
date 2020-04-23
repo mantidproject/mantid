@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -46,9 +46,9 @@ public:
   }
 
   void saveCalFile(const std::string &calFileName,
-                   Mantid::DataObjects::GroupingWorkspace_sptr groupWS,
-                   Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
-                   Mantid::DataObjects::MaskWorkspace_sptr maskWS);
+                   const Mantid::DataObjects::GroupingWorkspace_sptr &groupWS,
+                   const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
+                   const Mantid::DataObjects::MaskWorkspace_sptr &maskWS);
 
 private:
   /// Initialise the properties

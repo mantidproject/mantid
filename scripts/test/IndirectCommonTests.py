@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Test suite for the utility functions in the IndirectCommon script file
 
@@ -15,6 +15,7 @@ import numpy as np
 
 from mantid.simpleapi import *
 import IndirectCommon as indirect_common
+
 
 class IndirectCommonTests(unittest.TestCase):
 
@@ -322,7 +323,7 @@ class IndirectCommonTests(unittest.TestCase):
 
     def assert_logs_match_expected(self, workspace, expected_logs):
         run = mtd[workspace].getRun()
-        for log_name, log_value in expected_logs.iteritems():
+        for log_name, log_value in expected_logs.items():
             self.assertTrue(run.hasProperty(log_name),
                             "The log %s is missing from the workspace" % log_name)
             self.assertEqual(str(run.getProperty(log_name).value), str(log_value),

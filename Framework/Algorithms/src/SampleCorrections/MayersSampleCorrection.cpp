@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -88,8 +88,6 @@ void MayersSampleCorrection::init() {
                   "An output workspace.");
 }
 
-/**
- */
 void MayersSampleCorrection::exec() {
   using API::Progress;
   using API::WorkspaceFactory;
@@ -173,7 +171,7 @@ Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
   using API::InstrumentValidator;
   using API::SampleValidator;
   using Kernel::CompositeValidator;
-  auto validator = boost::make_shared<CompositeValidator>();
+  auto validator = std::make_shared<CompositeValidator>();
 
   unsigned int requires = (InstrumentValidator::SamplePosition |
                            InstrumentValidator::SourcePosition);

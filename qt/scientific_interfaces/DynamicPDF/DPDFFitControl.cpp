@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -23,6 +23,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalMapper>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -312,7 +313,7 @@ void FitControl::fitIndividual(const bool &isEvaluation) {
  * @param fun A function from which to retrieve the parameters
  */
 void FitControl::updateFunctionBrowser(Mantid::API::IFunction_sptr fun) {
-  m_functionBrowser->setFunction(fun);
+  m_functionBrowser->setFunction(std::move(fun));
 }
 
 /*

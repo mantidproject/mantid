@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,20 +26,21 @@ namespace API {
 
 class MANTID_API_DLL NotebookBuilder {
 public:
-  NotebookBuilder(boost::shared_ptr<HistoryView> view,
+  NotebookBuilder(const std::shared_ptr<HistoryView> &view,
                   std::string versionSpecificity = "old");
   virtual ~NotebookBuilder() = default;
   /// build an ipython notebook from the history view
-  const std::string build(std::string ws_name, std::string ws_title,
-                          std::string ws_comment);
+  const std::string build(const std::string &ws_name,
+                          const std::string &ws_title,
+                          const std::string &ws_comment);
 
 private:
   void writeHistoryToStream(std::vector<HistoryItem>::const_iterator &iter);
   void buildChildren(std::vector<HistoryItem>::const_iterator &iter);
   const std::string
-  buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
-  const std::string
-  buildPropertyString(Mantid::Kernel::PropertyHistory_const_sptr propHistory);
+  buildAlgorithmString(const AlgorithmHistory_const_sptr &algHistory);
+  const std::string buildPropertyString(
+      const Mantid::Kernel::PropertyHistory_const_sptr &propHistory);
 
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;

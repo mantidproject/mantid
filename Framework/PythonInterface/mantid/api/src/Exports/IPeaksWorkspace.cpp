@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -16,6 +16,7 @@
 #include <boost/python/iterator.hpp>
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <utility>
 
 using namespace boost::python;
 using namespace Mantid::Geometry;
@@ -102,7 +103,7 @@ public:
       throw std::runtime_error(columnName +
                                " is a read only column of a peaks workspace");
     }
-    m_setterMap[columnName](peak, value);
+    m_setterMap[columnName](peak, std::move(value));
   }
 
 private:
@@ -122,7 +123,7 @@ private:
    * setter's value type
    */
   template <typename T> SetterType setterFunction(MemberFunc<T> func) {
-    return [func](IPeak &peak, const object value) {
+    return [func](IPeak &peak, const object &value) {
       extract<T> extractor{value};
       if (!extractor.check()) {
         throw std::runtime_error(
@@ -143,7 +144,7 @@ private:
    * setter's value type
    */
   SetterType setterFunction(MemberFuncV3D func) {
-    return [func](IPeak &peak, const object value) {
+    return [func](IPeak &peak, const object &value) {
       extract<const V3D &> extractor{value};
       if (!extractor.check()) {
         throw std::runtime_error(

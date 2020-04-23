@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -58,7 +58,7 @@ public:
   void replaceHandle(const std::string &workspaceName,
                      const Workspace_sptr &workspace) override;
   DataForParameterEstimationCollection
-  getDataForParameterEstimation(EstimationDataSelector selector) const;
+  getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 public slots:
   void updateSpectraInTable(TableDatasetIndex dataIndex);

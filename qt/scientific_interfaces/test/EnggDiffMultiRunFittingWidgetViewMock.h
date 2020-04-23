@@ -26,10 +26,10 @@ public:
   MOCK_CONST_METHOD0(getSelectedRunLabel, boost::optional<RunLabel>());
 
   MOCK_METHOD1(plotFittedPeaks,
-               void(const std::vector<boost::shared_ptr<QwtData>> &curve));
+               void(const std::vector<std::shared_ptr<QwtData>> &curve));
 
   MOCK_METHOD1(plotFocusedRun,
-               void(const std::vector<boost::shared_ptr<QwtData>> &curve));
+               void(const std::vector<std::shared_ptr<QwtData>> &curve));
 
   MOCK_METHOD2(plotToSeparateWindow,
                void(const std::string &focusedRunName,
@@ -45,13 +45,12 @@ public:
 
   MOCK_METHOD1(setEnabled, void(const bool));
 
-  MOCK_METHOD1(
-      setMessageProvider,
-      void(boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider));
+  MOCK_METHOD1(setMessageProvider,
+               void(std::shared_ptr<IEnggDiffractionUserMsg> messageProvider));
 
-  MOCK_METHOD1(setPresenter,
-               void(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
-                        presenter));
+  MOCK_METHOD1(
+      setPresenter,
+      void(std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter));
 
   MOCK_CONST_METHOD0(showFitResultsSelected, bool());
 

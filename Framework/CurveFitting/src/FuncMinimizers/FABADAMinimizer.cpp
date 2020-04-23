@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -153,8 +153,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
                                  size_t maxIterations) {
 
   m_leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-          function);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
   if (!m_leastSquares) {
     throw std::invalid_argument("FABADA works only with least squares."
                                 " Different function was given.");
@@ -348,12 +347,12 @@ void FABADAMinimizer::finalize() {
     m_fitFunction->setParameter(j, bestParameters[j]);
   }
   // Convert type to setDirty the cost function
-  boost::shared_ptr<MaleableCostFunction> leastSquaresMaleable =
-      boost::static_pointer_cast<MaleableCostFunction>(m_leastSquares);
+  std::shared_ptr<MaleableCostFunction> leastSquaresMaleable =
+      std::static_pointer_cast<MaleableCostFunction>(m_leastSquares);
   leastSquaresMaleable->setDirtyInherited();
   // Convert back to base class
   m_leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           leastSquaresMaleable);
 
   // If required, output the complete chain
@@ -469,14 +468,14 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
 
   // Convert type to setDirty the cost function
   //(to notify the CostFunction we have modified the IFunction)
-  boost::shared_ptr<MaleableCostFunction> leastSquaresMaleable =
-      boost::static_pointer_cast<MaleableCostFunction>(m_leastSquares);
+  std::shared_ptr<MaleableCostFunction> leastSquaresMaleable =
+      std::static_pointer_cast<MaleableCostFunction>(m_leastSquares);
 
   leastSquaresMaleable->setDirtyInherited();
 
   // Convert back to base class
   m_leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           leastSquaresMaleable);
 }
 
@@ -527,14 +526,14 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
       }
       // Convert type to setDirty the cost function
       //(to notify the CostFunction we have modified the FittingFunction)
-      boost::shared_ptr<MaleableCostFunction> leastSquaresMaleable =
-          boost::static_pointer_cast<MaleableCostFunction>(m_leastSquares);
+      std::shared_ptr<MaleableCostFunction> leastSquaresMaleable =
+          std::static_pointer_cast<MaleableCostFunction>(m_leastSquares);
 
       leastSquaresMaleable->setDirtyInherited();
 
       // Convert back to base class
       m_leastSquares =
-          boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+          std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
               leastSquaresMaleable);
     }
   }
@@ -875,7 +874,7 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues,
     groupPDF->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
   } else {
-    auto groupPDF = boost::make_shared<WorkspaceGroup>();
+    auto groupPDF = std::make_shared<WorkspaceGroup>();
     groupPDF->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
   }

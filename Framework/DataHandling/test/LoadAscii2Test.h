@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -388,7 +388,7 @@ public:
       Workspace_sptr output;
       TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
       TableWorkspace_sptr outputWS =
-          boost::dynamic_pointer_cast<TableWorkspace>(output);
+          std::dynamic_pointer_cast<TableWorkspace>(output);
       if (outputWS) {
         checkTableData(outputWS);
       } else {
@@ -434,7 +434,7 @@ private:
     return save.getPropertyValue("Filename");
   }
 
-  void checkTableData(const Mantid::API::ITableWorkspace_sptr outputWS) {
+  void checkTableData(const Mantid::API::ITableWorkspace_sptr &outputWS) {
 
     const std::string name = "Compare_SaveAsciiWS";
     auto wsToCompare = SaveAscii2Test::writeTableWS(name);
@@ -490,7 +490,7 @@ private:
       file.close();
     } else {
       Mantid::DataObjects::Workspace2D_sptr wsToSave =
-          boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+          std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
       for (int i = 0; i < 5; i++) {
         auto &X = wsToSave->mutableX(i);
@@ -566,7 +566,7 @@ private:
         Workspace_sptr output;
         TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
         MatrixWorkspace_sptr outputWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+            std::dynamic_pointer_cast<MatrixWorkspace>(output);
         if (outputWS) {
           if (dataCheck) {
             checkData(outputWS, cols);
@@ -590,7 +590,7 @@ private:
     return outputWS;
   }
 
-  void checkData(const Mantid::API::MatrixWorkspace_sptr outputWS,
+  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                  const int cols) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
@@ -679,7 +679,7 @@ private:
     constexpr int xyLen = 100;
 
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen,
                                                 xyLen));
 

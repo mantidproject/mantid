@@ -8,7 +8,7 @@
 
 #include "IEnggDiffMultiRunFittingWidgetAdder.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {

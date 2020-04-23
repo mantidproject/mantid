@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -57,13 +57,12 @@ public:
   }
 
   /** Calculate min-max value defaults*/
-  Mantid::API::IAlgorithm *
+  Mantid::API::IAlgorithm_sptr
   calcMinMaxValDefaults(const std::string &QMode, const std::string &QFrame,
-                        std::string OtherProperties = std::string("")) {
+                        const std::string &OtherProperties = std::string("")) {
 
-    Mantid::API::IAlgorithm *childAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "ConvertToMDMinMaxLocal");
+    auto childAlg =
+        AlgorithmManager::Instance().create("ConvertToMDMinMaxLocal");
     if (!childAlg) {
       TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values",
                  false);
@@ -365,9 +364,7 @@ public:
     pAlg->initialize();
     // initialize (load)Matid algorithm framework -- needed to run this test
     // separately
-    Mantid::API::IAlgorithm *childAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "ConvertUnits");
+    auto childAlg = AlgorithmManager::Instance().create("ConvertUnits");
     TSM_ASSERT("Can not initialize Mantid algorithm framework", childAlg);
     if (!childAlg) {
       throw(std::runtime_error("Can not initalize/Load MantidAlgorithm dll"));

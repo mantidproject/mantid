@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -37,7 +37,7 @@ public:
   ColumnFactoryImpl(const ColumnFactoryImpl &) = delete;
   ColumnFactoryImpl &operator=(const ColumnFactoryImpl &) = delete;
   /// Creates an instance of a column
-  boost::shared_ptr<Column> create(const std::string &type) const override;
+  std::shared_ptr<Column> create(const std::string &type) const override;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;

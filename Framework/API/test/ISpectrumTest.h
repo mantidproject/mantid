@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -100,7 +100,7 @@ public:
     // setDX vesion 2
     SpectrumTester s4(Histogram::XMode::Points, Histogram::YMode::Counts);
     auto Dx_vec_ptr_type =
-        boost::make_shared<Mantid::HistogramData::HistogramDx>(0);
+        std::make_shared<Mantid::HistogramData::HistogramDx>(0);
     s4.setSharedDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 

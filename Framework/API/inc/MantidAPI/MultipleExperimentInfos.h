@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -17,7 +17,7 @@ namespace API {
 
   @date 2011-11-28
 */
-class DLLExport MultipleExperimentInfos {
+class MANTID_API_DLL MultipleExperimentInfos {
 public:
   MultipleExperimentInfos() = default;
   MultipleExperimentInfos(const MultipleExperimentInfos &other);
@@ -27,7 +27,7 @@ public:
 
   ExperimentInfo_const_sptr getExperimentInfo(const uint16_t runIndex) const;
 
-  uint16_t addExperimentInfo(ExperimentInfo_sptr ei);
+  uint16_t addExperimentInfo(const ExperimentInfo_sptr &ei);
 
   void setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei);
 
@@ -47,9 +47,9 @@ private:
   std::vector<ExperimentInfo_sptr> m_expInfos;
 };
 
-using MultipleExperimentInfos_sptr = boost::shared_ptr<MultipleExperimentInfos>;
+using MultipleExperimentInfos_sptr = std::shared_ptr<MultipleExperimentInfos>;
 using MultipleExperimentInfos_const_sptr =
-    boost::shared_ptr<const MultipleExperimentInfos>;
+    std::shared_ptr<const MultipleExperimentInfos>;
 
 } // namespace API
 } // namespace Mantid

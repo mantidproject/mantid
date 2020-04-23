@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -37,7 +37,7 @@ public:
   void setHidden(bool isHidden);
   void setSelectedPeak(int index);
   std::string getWSName() const;
-  void workspaceUpdate(Mantid::API::IPeaksWorkspace_const_sptr ws =
+  void workspaceUpdate(const Mantid::API::IPeaksWorkspace_const_sptr &ws =
                            Mantid::API::IPeaksWorkspace_const_sptr());
   void exitClearPeaksMode();
   void exitAddPeaksMode();
@@ -95,7 +95,7 @@ private slots:
   void onShowBackgroundChanged(bool /*show*/);
   void onRemoveWorkspaceClicked();
   void onToggleHideInPlot();
-  void onCurrentChanged(QModelIndex /*index*/, QModelIndex /*unused*/);
+  void onCurrentChanged(QModelIndex /*index*/, const QModelIndex & /*unused*/);
   void onClearPeaksToggled(bool /*on*/);
   void onAddPeaksToggled(bool /*on*/);
 };

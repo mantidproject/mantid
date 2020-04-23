@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 
@@ -35,9 +35,9 @@ PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction()
  * @param ws :: Workspace with valid POLDI instrument and run information
  */
 void PoldiSpectrumDomainFunction::setWorkspace(
-    boost::shared_ptr<const Workspace> ws) {
+    std::shared_ptr<const Workspace> ws) {
   Workspace2D_const_sptr workspace2D =
-      boost::dynamic_pointer_cast<const Workspace2D>(ws);
+      std::dynamic_pointer_cast<const Workspace2D>(ws);
 
   if (!workspace2D) {
     throw std::invalid_argument(
@@ -201,8 +201,8 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
   m_deltaT = xVals[1] - xVals[0];
 
   PoldiInstrumentAdapter_sptr adapter =
-      boost::make_shared<PoldiInstrumentAdapter>(workspace2D->getInstrument(),
-                                                 workspace2D->run());
+      std::make_shared<PoldiInstrumentAdapter>(workspace2D->getInstrument(),
+                                               workspace2D->run());
   initializeInstrumentParameters(adapter);
 }
 
@@ -217,7 +217,7 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
  */
 void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
     const PoldiInstrumentAdapter_sptr &poldiInstrument) {
-  m_timeTransformer = boost::make_shared<PoldiTimeTransformer>(poldiInstrument);
+  m_timeTransformer = std::make_shared<PoldiTimeTransformer>(poldiInstrument);
   m_chopperSlitOffsets = getChopperSlitOffsets(poldiInstrument->chopper());
 
   if (!poldiInstrument) {
@@ -240,7 +240,7 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
         detector->distanceFromSample(i) + chopper->distanceFromSample();
     double deltaD = Conversions::TOFtoD(m_deltaT, distance, sinTheta);
 
-    Poldi2DHelper_sptr curr = boost::make_shared<Poldi2DHelper>();
+    Poldi2DHelper_sptr curr = std::make_shared<Poldi2DHelper>();
     curr->setChopperSlitOffsets(distance, sinTheta, deltaD,
                                 m_chopperSlitOffsets);
     curr->setDomain(dMin, dMax, deltaD);
@@ -256,7 +256,7 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
 void PoldiSpectrumDomainFunction::beforeDecoratedFunctionSet(
     const IFunction_sptr &fn) {
   IPeakFunction_sptr peakFunction =
-      boost::dynamic_pointer_cast<IPeakFunction>(fn);
+      std::dynamic_pointer_cast<IPeakFunction>(fn);
 
   if (!peakFunction) {
     throw std::invalid_argument("Function is not a peak function.");

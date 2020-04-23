@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -580,7 +580,7 @@ private:
     }
   }
 
-  MatrixWorkspace_sptr runWienerSmooth(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr runWienerSmooth(const MatrixWorkspace_sptr &inputWS,
                                        const std::vector<int> &wsIndexList) {
     // Name of the output workspace.
     std::string outWSName("WienerSmoothTest_OutputWS");

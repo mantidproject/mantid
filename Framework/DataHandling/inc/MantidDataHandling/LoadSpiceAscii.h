@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -63,13 +63,13 @@ private:
                                 const std::string &timeformat);
 
   /// Set up run start time
-  void setupRunStartTime(API::MatrixWorkspace_sptr runinfows,
+  void setupRunStartTime(const API::MatrixWorkspace_sptr &runinfows,
                          const std::vector<std::string> &datetimeprop);
 
   /// Add property to workspace
   template <typename T>
-  void addProperty(API::MatrixWorkspace_sptr ws, const std::string &pname,
-                   T pvalue);
+  void addProperty(const API::MatrixWorkspace_sptr &ws,
+                   const std::string &pname, T pvalue);
 };
 
 } // namespace DataHandling

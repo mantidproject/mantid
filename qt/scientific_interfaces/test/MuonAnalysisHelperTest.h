@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -160,7 +160,7 @@ public:
     std::vector<Workspace_sptr> wsList{ws1, ws2, ws3};
 
     auto result =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(sumWorkspaces(wsList));
+        std::dynamic_pointer_cast<MatrixWorkspace>(sumWorkspaces(wsList));
 
     TS_ASSERT(result);
     if (!result)
@@ -324,7 +324,7 @@ public:
     addTimeSeriesLog(ws2, logName, {time4, time5, time6},
                      {value4, value5, value6});
     appendTimeSeriesLogs(ws2, ws1, logName);
-    auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws1);
+    auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws1);
     TS_ASSERT(matrixWS);
     auto prop = matrixWS->run().getTimeSeriesProperty<double>(logName);
     TS_ASSERT_EQUALS(time1, prop->firstTime());
@@ -609,7 +609,7 @@ public:
     ads.add("MuonSimulFit_Label_MUSR15189_Workspace", wsOne);
     const auto &wsTwo = createWs("MUSR", 15190);
     ads.add("MuonSimulFit_Label_MUSR15190_Workspace", wsTwo);
-    const auto &groupOne = boost::make_shared<WorkspaceGroup>();
+    const auto &groupOne = std::make_shared<WorkspaceGroup>();
     ads.add("GroupOne", groupOne);
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_Parameters");
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15189_Workspace");
@@ -621,7 +621,7 @@ public:
     ads.add("MuonSimulFit_Label#2_MUSR15191_Workspace", wsThree);
     const auto &wsFour = createWs("MUSR", 15192);
     ads.add("MuonSimulFit_Label#2_MUSR15192_Workspace", wsFour);
-    const auto &groupTwo = boost::make_shared<WorkspaceGroup>();
+    const auto &groupTwo = std::make_shared<WorkspaceGroup>();
     ads.add("GroupTwo", groupTwo);
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_Parameters");
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15191_Workspace");
@@ -646,7 +646,7 @@ public:
     ads.add("MuonSimulFit_Label_MUSR15190_Workspace", wsTwo);
     const auto &wsThree = createWs("MUSR", 15191);
     ads.add("MuonSimulFit_Label_MUSR15191_Workspace", wsThree);
-    const auto &groupOne = boost::make_shared<WorkspaceGroup>();
+    const auto &groupOne = std::make_shared<WorkspaceGroup>();
     ads.add("GroupOne", groupOne);
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_Parameters");
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15189_Workspace");
@@ -659,7 +659,7 @@ public:
     ads.add("MuonSimulFit_Label#2_MUSR15192_Workspace", wsFour);
     const auto &wsFive = createWs("MUSR", 15193);
     ads.add("MuonSimulFit_Label#2_MUSR15193_Workspace", wsFive);
-    const auto &groupTwo = boost::make_shared<WorkspaceGroup>();
+    const auto &groupTwo = std::make_shared<WorkspaceGroup>();
     ads.add("GroupTwo", groupTwo);
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_Parameters");
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15192_Workspace");
@@ -682,7 +682,7 @@ public:
     ads.add("MuonSimulFit_Label_MUSR15189_Workspace", wsOne);
     const auto &wsTwo = createWs("MUSR", 15190);
     ads.add("MuonSimulFit_Label_MUSR15190_Workspace", wsTwo);
-    const auto &groupOne = boost::make_shared<WorkspaceGroup>();
+    const auto &groupOne = std::make_shared<WorkspaceGroup>();
     ads.add("GroupOne", groupOne);
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_Parameters");
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15189_Workspace");
@@ -694,7 +694,7 @@ public:
     ads.add("MuonSimulFit_Label#2_MUSR15191_Workspace", wsThree);
     const auto &wsFour = createWs("MUSR", 15192);
     ads.add("MuonSimulFit_Label#2_MUSR15192_Workspace", wsFour);
-    const auto &groupTwo = boost::make_shared<WorkspaceGroup>();
+    const auto &groupTwo = std::make_shared<WorkspaceGroup>();
     ads.add("GroupTwo", groupTwo);
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_Parameters");
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15191_Workspace");
@@ -713,7 +713,7 @@ private:
   Workspace_sptr createWs(const std::string &instrName, int runNumber,
                           size_t nSpectra = 1) {
     Geometry::Instrument_const_sptr instr =
-        boost::make_shared<Geometry::Instrument>(instrName);
+        std::make_shared<Geometry::Instrument>(instrName);
 
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
@@ -739,7 +739,7 @@ private:
   // Groups the supplied workspaces
   WorkspaceGroup_sptr
   groupWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     for (auto ws : workspaces) {
       group->addWorkspace(ws);
     }
@@ -752,7 +752,7 @@ private:
                    const std::vector<Mantid::Types::Core::DateAndTime> &times,
                    const std::vector<double> &values) {
     TS_ASSERT_EQUALS(times.size(), values.size());
-    auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     TS_ASSERT(matrixWS);
     auto prop = std::make_unique<TimeSeriesProperty<double>>(logName);
     prop->addValues(times, values);

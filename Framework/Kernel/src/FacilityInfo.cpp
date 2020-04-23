@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -16,7 +16,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/Element.h>
@@ -201,7 +201,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       // RemoteJobManager goes away from here (then this would be
       // removed), see header for details.
       m_computeResources.emplace(name,
-                                 boost::make_shared<RemoteJobManager>(elem));
+                                 std::make_shared<RemoteJobManager>(elem));
     }
   }
 }
@@ -327,12 +327,12 @@ FacilityInfo::computeResource(const std::string &name) const {
  * @return a shared pointer to the RemoteJobManager instance (or
  * Null if the name wasn't recognized)
  */
-boost::shared_ptr<RemoteJobManager>
+std::shared_ptr<RemoteJobManager>
 FacilityInfo::getRemoteJobManager(const std::string &name) const {
   auto it = m_computeResources.find(name);
   if (it == m_computeResources.end()) {
-    return boost::shared_ptr<RemoteJobManager>(); // TODO: should we throw an
-                                                  // exception instead??
+    return std::shared_ptr<RemoteJobManager>(); // TODO: should we throw an
+                                                // exception instead??
   }
   return (*it).second;
 }

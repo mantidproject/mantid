@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/NRCalculateSlitResolution.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
@@ -50,7 +50,7 @@ const std::string NRCalculateSlitResolution::summary() const {
 void NRCalculateSlitResolution::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "Workspace to calculate the instrument resolution of.");
 
   declareProperty("TwoTheta", Mantid::EMPTY_DBL(),

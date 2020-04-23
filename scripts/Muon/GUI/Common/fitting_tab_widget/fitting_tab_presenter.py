@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
@@ -43,6 +41,8 @@ class FittingTabPresenter(object):
         self.fit_function_changed_notifier = GenericObservable()
         self.fit_parameter_changed_notifier = GenericObservable()
         self.fit_type_changed_notifier = GenericObservable()
+        self.selected_single_fit_notifier = GenericObservable()
+
         self.gui_context_observer = GenericObserverWithArgPassing(
             self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(
@@ -115,6 +115,8 @@ class FittingTabPresenter(object):
         self.view.function_browser.setCurrentDataset(current_index)
         self._update_stored_fit_functions()
         self.update_fit_status_information_in_view()
+        # Send the workpsaces to be plotted
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_use_rebin_changed(self):
         if not self.view.fit_to_raw and not self.context._do_rebin():
@@ -147,6 +149,8 @@ class FittingTabPresenter(object):
         self.update_model_from_view()
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
+        # Send the workpsaces to be plotted
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_plot_guess_changed(self):
         if self.view.is_simul_fit():
@@ -332,9 +336,13 @@ class FittingTabPresenter(object):
         self.update_model_from_view()
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
+        # Send the workpsaces to be plotted
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_specifier_changed(self):
         self.selected_data = self.get_workspace_selected_list()
+        # Send the workpsaces to be plotted
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def perform_standard_fit(self):
         if not self.view.fit_object:
@@ -636,6 +644,16 @@ class FittingTabPresenter(object):
         else:
             fit_type = "Single"
         return fit_type
+
+    def get_selected_fit_workspaces(self):
+        # only ever going to return one fit
+        if self.selected_data:
+            if self._get_fit_type() == "Single":
+                return {0: [self.view.display_workspace]}
+            else:
+                return {0: self.selected_data}
+        else:
+            return {}
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs

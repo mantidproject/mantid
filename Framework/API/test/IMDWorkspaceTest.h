@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -52,7 +52,7 @@ public:
   void testGetXDimension() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
+    std::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
         matrixWS.getXDimension();
     std::string id = dimension->getDimensionId();
     TSM_ASSERT_EQUALS("Dimension-X does not have the expected dimension id.",
@@ -62,7 +62,7 @@ public:
   void testGetYDimension() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
+    std::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
         matrixWS.getYDimension();
     std::string id = dimension->getDimensionId();
     TSM_ASSERT_EQUALS("Dimension-Y does not have the expected dimension id.",
@@ -94,7 +94,7 @@ public:
   void testGetDimension() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim =
+    std::shared_ptr<const Mantid::Geometry::IMDDimension> dim =
         matrixWS.getDimensionWithId("yDimension");
     TSM_ASSERT_EQUALS(
         "The dimension id found is not the same as that searched for.",

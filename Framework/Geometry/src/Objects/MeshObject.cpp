@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
@@ -14,14 +14,14 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
 
 MeshObject::MeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Kernel::V3D> &vertices,
-                       const Kernel::Material material)
+                       const Kernel::Material &material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(faces),
       m_vertices(vertices), m_material(material) {
 
@@ -41,7 +41,7 @@ MeshObject::MeshObject(std::vector<uint32_t> &&faces,
 void MeshObject::initialize() {
 
   MeshObjectCommon::checkVertexLimit(m_vertices.size());
-  m_handler = boost::make_shared<GeometryHandler>(*this);
+  m_handler = std::make_shared<GeometryHandler>(*this);
 }
 
 /**
@@ -453,7 +453,7 @@ bool MeshObject::searchForObject(Kernel::V3D &point) const {
  * @param[in] h is pointer to the geometry handler. don't delete this pointer in
  * the calling function.
  */
-void MeshObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
+void MeshObject::setGeometryHandler(const std::shared_ptr<GeometryHandler> &h) {
   if (h == nullptr)
     return;
   m_handler = h;
@@ -485,7 +485,7 @@ void MeshObject::initDraw() const {
 /**
  * Returns the geometry handler
  */
-boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
+std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;

@@ -33,8 +33,8 @@ Using the Generated Class
 --------------------------
 
 When following the MVP design pattern as described at
-:ref:`GuiDesignGuidelinesMVPIntro`, the generated class alone is not
-sufficient as a :ref:`GuiDesignGuidelinesMVPView`. The generated class
+:ref:`MVPDesignIntro`, the generated class alone is not
+sufficient as a :ref:`MVPDesignView`. The generated class
 lacks any method for sending signals or changing data in its own widgets.
 Directly accessing the widgets and the signals defined on the view from
 the presenter moves the view implementation details into the presenter,

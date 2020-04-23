@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SortPeaksWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -44,7 +44,7 @@ void SortPeaksWorkspace::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  auto mustHave = boost::make_shared<MandatoryValidator<std::string>>();
+  auto mustHave = std::make_shared<MandatoryValidator<std::string>>();
   declareProperty("ColumnNameToSortBy", "", mustHave, "Column to sort by");
 
   declareProperty(

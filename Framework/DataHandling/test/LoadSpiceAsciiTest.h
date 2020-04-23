@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -59,7 +59,7 @@ public:
     TS_ASSERT(testalg.isExecuted());
 
     Mantid::API::ITableWorkspace_sptr datatbws =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("HB2A_0231_0001_Data"));
     TS_ASSERT(datatbws);
 
@@ -73,7 +73,7 @@ public:
     TS_ASSERT_EQUALS(numrows, 61);
 
     Mantid::API::MatrixWorkspace_sptr infows =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("HB2A_0231_Info"));
     TS_ASSERT(infows);
 
@@ -121,7 +121,7 @@ public:
     TS_ASSERT(testalg.isExecuted());
 
     Mantid::API::ITableWorkspace_sptr datatbws =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("HB2A_0231_0001_Data"));
     TS_ASSERT(datatbws);
 
@@ -135,7 +135,7 @@ public:
     TS_ASSERT_EQUALS(colnames[0], "Pt.");
 
     Mantid::API::MatrixWorkspace_sptr runinfows =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("HB2A_0231_Info2"));
     TS_ASSERT(runinfows);
 

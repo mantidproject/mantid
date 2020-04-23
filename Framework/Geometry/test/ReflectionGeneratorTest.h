@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -86,7 +86,7 @@ public:
                                   ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hklsCentering = generator.getUniqueHKLs(
-        0.6, 10.0, boost::make_shared<HKLFilterCentering>(si.centering()));
+        0.6, 10.0, std::make_shared<HKLFilterCentering>(si.centering()));
 
     std::vector<V3D> hklsStructureFactors = generator.getUniqueHKLs(0.6, 10.0);
 

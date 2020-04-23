@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
@@ -34,7 +34,7 @@ namespace DataObjects {
  * @param isPointData If true will use points for the x-axis instead of bins
  */
 ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
-    const boost::shared_ptr<const Geometry::Instrument> &instrument,
+    const std::shared_ptr<const Geometry::Instrument> &instrument,
     const size_t nTimeIndexes, const size_t nBins, const bool isPointData)
     : m_nDetectors(instrument->getNumberDetectors()),
       m_nTimeIndexes(nTimeIndexes), m_nBins(nBins), m_instrument(instrument),
@@ -229,7 +229,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
     break;
   }
 
-  return boost::shared_ptr<MatrixWorkspace>(std::move(outputWorkspace));
+  return std::shared_ptr<MatrixWorkspace>(std::move(outputWorkspace));
 }
 
 void ScanningWorkspaceBuilder::buildOutputComponentInfo(

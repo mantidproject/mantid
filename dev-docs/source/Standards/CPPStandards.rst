@@ -18,7 +18,7 @@ Overview
 ^^^^^^^^
 
 Mantid follow the LLVM C++ coding standards and standards on this
-page.  Where these standards overlap the standards on this page take
+page. Where these standards overlap the standards on this page take
 precedence.
 
 `This page

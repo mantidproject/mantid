@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -28,7 +29,7 @@ Lorentzian parameters:
 <LI> FWHM - Full-width half-maximum (default 0.0)</LI>
 </UL>
 */
-class DLLExport Lorentzian : public API::IPeakFunction {
+class MANTID_CURVEFITTING_DLL Lorentzian : public API::IPeakFunction {
 public:
   Lorentzian();
   /// overwrite IPeakFunction base class methods

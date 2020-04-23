@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeaksOnSurface.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -40,7 +40,7 @@ const std::string PeaksOnSurface::category() const { return "Crystal\\Peaks"; }
 void PeaksOnSurface::init() {
   this->initBaseProperties();
 
-  auto manditoryExtents = boost::make_shared<
+  auto manditoryExtents = std::make_shared<
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   declareProperty(

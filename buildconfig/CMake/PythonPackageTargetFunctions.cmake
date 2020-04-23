@@ -33,7 +33,6 @@ function(
         user_options = setuptools_command_cls.user_options[:]
         boolean_options = setuptools_command_cls.boolean_options[:]
         def finalize_options(self):
-            build_cmd = self.get_finalized_command('build')
             self.build_lib = '${_setup_py_build_root}/build'
             setuptools_command_cls.finalize_options(self)
 

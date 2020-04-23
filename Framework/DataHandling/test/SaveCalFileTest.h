@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,16 +51,13 @@ public:
     maskWS->getSpectrum(0).clearData();
     maskWS->mutableSpectrumInfo().setMasked(0, true);
 
-    // Name of the output workspace.
-    std::string outWSName("SaveCalFileTest_OutputWS");
-
     SaveCalFile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsetsWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "MaskWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(maskWS)));
+        "MaskWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(maskWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("Filename", "SaveCalFileTest.cal"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););

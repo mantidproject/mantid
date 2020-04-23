@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -88,7 +88,8 @@ private:
   API::Workspace_sptr loadFileToWs(const std::string &fileName,
                                    const std::string &wsName);
   /// Plus two workspaces together, "in place".
-  API::Workspace_sptr plusWs(API::Workspace_sptr ws1, API::Workspace_sptr ws2);
+  API::Workspace_sptr plusWs(API::Workspace_sptr ws1,
+                             const API::Workspace_sptr &ws2);
   /// Manually group workspaces.
   API::WorkspaceGroup_sptr
   groupWsList(const std::vector<API::Workspace_sptr> &wsList);

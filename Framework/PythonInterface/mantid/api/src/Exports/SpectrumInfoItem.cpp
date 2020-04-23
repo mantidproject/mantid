@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfoItem.h"
 #include "MantidKernel/V3D.h"
@@ -27,6 +27,8 @@ void export_SpectrumInfoItem() {
       .add_property("signedTwoTheta",
                     &SpectrumInfoItem<SpectrumInfo>::signedTwoTheta)
       .add_property("l2", &SpectrumInfoItem<SpectrumInfo>::l2)
+      .add_property("hasDetectors",
+                    &SpectrumInfoItem<SpectrumInfo>::hasDetectors)
       .add_property("hasUniqueDetector",
                     &SpectrumInfoItem<SpectrumInfo>::hasUniqueDetector)
       .add_property(

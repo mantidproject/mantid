@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -249,7 +249,7 @@ public:
   /// Set a property from a string
   std::string setValueFromJson(const Json::Value &) override;
   /// Set a property from a DataItem
-  std::string setDataItem(const boost::shared_ptr<DataItem>) override;
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override;
 
   /// Deletes the series of values in the property
   void clear() override;

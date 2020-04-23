@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/LatticeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -69,7 +69,7 @@ void LatticeFunction::init() {
 /// Checks that the decorated function is a PawleyParameterFunction.
 void LatticeFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
   Functions::PawleyParameterFunction_sptr paramFn =
-      boost::dynamic_pointer_cast<Functions::PawleyParameterFunction>(fn);
+      std::dynamic_pointer_cast<Functions::PawleyParameterFunction>(fn);
 
   if (!paramFn) {
     throw std::invalid_argument(

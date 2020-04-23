@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
@@ -29,6 +29,7 @@
 #include <fstream>
 #include <numeric>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,7 +47,7 @@ using namespace DataObjects;
 void LoadIsawDetCal::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   const auto exts =
@@ -74,15 +75,15 @@ std::string getBankName(const std::string &bankPart, const int idnum) {
   }
 }
 
-std::string getInstName(API::Workspace_const_sptr wksp) {
+std::string getInstName(const API::Workspace_const_sptr &wksp) {
   MatrixWorkspace_const_sptr matrixWksp =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
   if (matrixWksp) {
     return matrixWksp->getInstrument()->getName();
   }
 
   PeaksWorkspace_const_sptr peaksWksp =
-      boost::dynamic_pointer_cast<const PeaksWorkspace>(wksp);
+      std::dynamic_pointer_cast<const PeaksWorkspace>(wksp);
   if (peaksWksp) {
     return peaksWksp->getInstrument()->getName();
   }
@@ -119,9 +120,8 @@ std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
 void LoadIsawDetCal::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
+  MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<PeaksWorkspace>(ws);
 
   Instrument_sptr inst = getCheckInst(ws);
 
@@ -137,23 +137,23 @@ void LoadIsawDetCal::exec() {
   std::string line;
   std::string detname;
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector>> detList;
+  std::vector<std::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
+    std::shared_ptr<RectangularDetector> det;
+    std::shared_ptr<ICompAssembly> assem;
+    std::shared_ptr<ICompAssembly> assem2;
 
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
       detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
       // for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
+      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
-          det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
+          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             detList.emplace_back(det);
 
@@ -162,10 +162,10 @@ void LoadIsawDetCal::exec() {
             // PG3).
             // We are not doing a full recursive search since that will be very
             // long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
+            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = boost::dynamic_pointer_cast<RectangularDetector>(
+                det = std::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
@@ -199,7 +199,7 @@ void LoadIsawDetCal::exec() {
     }
   }
 
-  auto expInfoWS = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  auto expInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(ws);
   auto &componentInfo = expInfoWS->mutableComponentInfo();
   std::vector<ComponentScaling> rectangularDetectorScalings;
 
@@ -259,11 +259,11 @@ void LoadIsawDetCal::exec() {
           break;
       }
     }
-    boost::shared_ptr<RectangularDetector> det;
+    std::shared_ptr<RectangularDetector> det;
     std::string bankName = getBankName(bankPart, id);
     auto matchingDetector = std::find_if(
         detList.begin(), detList.end(),
-        [&bankName](const boost::shared_ptr<RectangularDetector> &detector) {
+        [&bankName](const std::shared_ptr<RectangularDetector> &detector) {
           return detector->getName() == bankName;
         });
     if (matchingDetector != detList.end()) {
@@ -318,8 +318,8 @@ void LoadIsawDetCal::exec() {
     // for Corelli with sixteenpack under bank
     if (instname == "CORELLI") {
       std::vector<Geometry::IComponent_const_sptr> children;
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
               inst->getComponentByName(bankName));
       asmb->getChildren(children, false);
       comp = children[0];
@@ -352,10 +352,11 @@ void LoadIsawDetCal::exec() {
  * @param componentInfo :: The component info object for the workspace
  */
 void LoadIsawDetCal::center(const double x, const double y, const double z,
-                            const std::string &detname, API::Workspace_sptr ws,
+                            const std::string &detname,
+                            const API::Workspace_sptr &ws,
                             Geometry::ComponentInfo &componentInfo) {
 
-  Instrument_sptr inst = getCheckInst(ws);
+  Instrument_sptr inst = getCheckInst(std::move(ws));
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
   if (comp == nullptr) {
@@ -378,20 +379,19 @@ void LoadIsawDetCal::center(const double x, const double y, const double z,
  * @throw std::runtime_error if there's any problem with the workspace or it is
  * not possible to get an instrument object from it
  */
-Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
+Instrument_sptr LoadIsawDetCal::getCheckInst(const API::Workspace_sptr &ws) {
+  MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputW->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "MatrixWorkspace provided as input");
   } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputP->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
@@ -432,7 +432,7 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
  * @param doWishCorrection if true apply a special correction for WISH
  */
 void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
-                                boost::shared_ptr<const IComponent> comp,
+                                const std::shared_ptr<const IComponent> &comp,
                                 bool doWishCorrection) {
   // These are the ISAW axes
   rX.normalize();

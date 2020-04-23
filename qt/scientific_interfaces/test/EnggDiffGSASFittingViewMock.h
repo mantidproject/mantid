@@ -58,7 +58,7 @@ public:
   MOCK_CONST_METHOD0(getXMin, boost::optional<double>());
 
   MOCK_METHOD1(plotCurve,
-               void(const std::vector<boost::shared_ptr<QwtData>> &curve));
+               void(const std::vector<std::shared_ptr<QwtData>> &curve));
 
   MOCK_METHOD0(resetCanvas, void());
 

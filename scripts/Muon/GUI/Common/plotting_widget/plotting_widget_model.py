@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from mantid.api import AnalysisDataService
@@ -21,20 +20,10 @@ class PlotWidgetModel(object):
         self._plotted_workspaces_inverse_binning = {}
         self._plotted_fit_workspaces = []
         self.tiled_plot_positions = {}
-        self._number_of_axes = 1
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------------------------------------------------------
-
-    @property
-    def number_of_axes(self):
-        """
-        This property is needed as the view will generate an even number of axes, which can exceed the number of axes
-        required by the model
-        """
-        return self._number_of_axes
-
     @property
     def plotted_workspaces(self):
         """
@@ -56,13 +45,6 @@ class PlotWidgetModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Setters
     # ------------------------------------------------------------------------------------------------------------------
-
-    @number_of_axes.setter
-    def number_of_axes(self, number_of_axes):
-        if number_of_axes > 1:
-            self._number_of_axes = number_of_axes
-        else:
-            self._number_of_axes = 1
 
     @plotted_workspaces.setter
     def plotted_workspaces(self, workspaces):
@@ -136,7 +118,7 @@ class PlotWidgetModel(object):
         except RuntimeError:
             return
 
-        for i in range(self.number_of_axes):
+        for i in range(len(axes)):
             ax = axes[i]
             ax.remove_workspace_artists(workspace)
             self._update_legend(ax)
@@ -158,7 +140,7 @@ class PlotWidgetModel(object):
         if workspace_name not in self.plotted_workspaces + self.plotted_fit_workspaces:
             return
 
-        for i in range(self.number_of_axes):
+        for i in range(len(axes)):
             ax = axes[i]
             ax.remove_workspace_artists(workspace)
             self._update_legend(ax)
@@ -273,7 +255,7 @@ class PlotWidgetModel(object):
             ax.legend("")
 
     def get_axes_titles(self, axes):
-        titles = [None] * self.number_of_axes
-        for i in range(self.number_of_axes):
+        titles = [None] * len(axes)
+        for i in range(len(axes)):
             titles[i] = axes[i].get_title()
         return titles

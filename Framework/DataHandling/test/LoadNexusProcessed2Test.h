@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -39,7 +39,7 @@ Mantid::API::MatrixWorkspace_sptr do_load(const std::string &filename) {
   loader.execute();
   Workspace_sptr out = loader.getProperty("OutputWorkspace");
   auto matrixWSOut =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
   return matrixWSOut;
 }
 
@@ -52,7 +52,7 @@ Mantid::API::MatrixWorkspace_sptr do_load_v1(const std::string &filename) {
 }
 
 namespace test_utility {
-template <typename T> void save(const std::string filename, T &ws) {
+template <typename T> void save(const std::string &filename, T &ws) {
   SaveNexusESS alg;
   alg.setChild(true);
   alg.setRethrows(true);
@@ -257,7 +257,7 @@ public:
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
     // Create a workspace, data is not important
-    auto wsIn = boost::make_shared<Workspace2D>();
+    auto wsIn = std::make_shared<Workspace2D>();
     Histogram histogram(BinEdges{1.0, 2.0}, Counts(), CountVariances());
     wsIn->setInstrument(instrument);
     wsIn->initialize(info, histogram);

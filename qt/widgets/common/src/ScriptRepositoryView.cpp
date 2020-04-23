@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ScriptRepositoryView.h"
 #include "MantidAPI/ScriptRepository.h"
@@ -360,7 +360,7 @@ void ScriptRepositoryView::RepoDelegate::paint(
   QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
 }
 
-QIcon ScriptRepositoryView::RepoDelegate::getIcon(QString state) const {
+QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
   QIcon icon;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   if (state == RepoModel::remoteOnlySt())
@@ -646,7 +646,7 @@ bool ScriptRepositoryView::RemoveEntryDelegate::editorEvent(
  *
  * @param link :: the folder link to open.
  */
-void ScriptRepositoryView::openFolderLink(QString link) {
+void ScriptRepositoryView::openFolderLink(const QString &link) {
   const std::string error_msg =
       "Unable to open \"" + link.toStdString() + "\".  Reason: ";
 

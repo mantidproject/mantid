@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,7 +20,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <set>
 
 using namespace Mantid::Geometry;
@@ -30,10 +30,10 @@ using Mantid::detid_t;
 
 namespace {
 
-boost::shared_ptr<const Instrument>
-makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
-  return boost::make_shared<const Instrument>(
-      baseInstrument, boost::make_shared<ParameterMap>());
+std::shared_ptr<const Instrument>
+makeParameterized(std::shared_ptr<const Instrument> baseInstrument) {
+  return std::make_shared<const Instrument>(baseInstrument,
+                                            std::make_shared<ParameterMap>());
 }
 } // namespace
 
@@ -74,7 +74,7 @@ public:
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
                                            V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
-    auto pmap = boost::make_shared<ParameterMap>();
+    auto pmap = std::make_shared<ParameterMap>();
     auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
     pmap->addV3D(detector->getComponentID(), "pos",
                  Mantid::Kernel::V3D{12, 0, 0});
@@ -85,7 +85,7 @@ public:
 
     // Create the visitor.
     InstrumentVisitor visitor(
-        boost::make_shared<const Instrument>(visitee, pmap));
+        std::make_shared<const Instrument>(visitee, pmap));
 
     // Visit everything. Purging should happen.
     visitor.walkInstrument();
@@ -109,7 +109,7 @@ public:
     // Create a very basic instrument to visit
     auto baseInstrument = ComponentCreationHelper::createMinimalInstrument(
         sourcePos, samplePos, detectorPos);
-    auto paramMap = boost::make_shared<Mantid::Geometry::ParameterMap>();
+    auto paramMap = std::make_shared<Mantid::Geometry::ParameterMap>();
 
     TSM_ASSERT_EQUALS("Expect 0 items in the parameter map to start with",
                       paramMap->size(), 0);
@@ -129,7 +129,7 @@ public:
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
                       paramMap->size(), 0);
 
-    auto parInstrument = boost::make_shared<Mantid::Geometry::Instrument>(
+    auto parInstrument = std::make_shared<Mantid::Geometry::Instrument>(
         baseInstrument, paramMap);
     TS_ASSERT_EQUALS(newSourcePos,
                      parInstrument->getComponentByName("source")->getPos());
@@ -424,7 +424,7 @@ public:
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
                                            V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
-    auto pmap = boost::make_shared<ParameterMap>();
+    auto pmap = std::make_shared<ParameterMap>();
     auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
     // Add a scale factor for the detector
 
@@ -502,7 +502,7 @@ public:
 class InstrumentVisitorTestPerformance : public CxxTest::TestSuite {
 private:
   const int m_nPixels = 1000;
-  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
+  std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -28,8 +28,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QwtPlotPicker,
 
 public:
   /// Constructor
-  PeakPicker(QwtPlot *plot, QColor color);
-  PeakPicker(PreviewPlot *plot, QColor color);
+  PeakPicker(QwtPlot *plot, const QColor &color);
+  PeakPicker(PreviewPlot *plot, const QColor &color);
 
   /// Correct QwtPlotItem type info
   int rtti() const override { return QwtPlotItem::Rtti_PlotMarker; }

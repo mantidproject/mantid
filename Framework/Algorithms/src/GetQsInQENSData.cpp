@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetQsInQENSData.h"
 
@@ -88,7 +88,7 @@ void GetQsInQENSData::exec() {
  * @return          The extracted Q-values as a vector.
  */
 MantidVec GetQsInQENSData::extractQValues(
-    const Mantid::API::MatrixWorkspace_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
   size_t numSpectra = workspace->getNumberHistograms();
   Axis *qAxis;
 

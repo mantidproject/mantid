@@ -26,7 +26,7 @@ API::MatrixWorkspace_sptr createSampleWorkspace() {
   return API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 }
 
-void addBankID(API::MatrixWorkspace_sptr ws, const size_t bankID) {
+void addBankID(const API::MatrixWorkspace_sptr &ws, const size_t bankID) {
   auto addLogAlg =
       API::FrameworkManager::Instance().createAlgorithm("AddSampleLog");
   addLogAlg->initialize();

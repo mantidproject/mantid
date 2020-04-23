@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/System.h"
@@ -35,7 +36,7 @@ class MatrixWorkspace;
   @author Janik Zikovsky
   @date 2011-07-01
 */
-class DLLExport ISpectrum {
+class MANTID_API_DLL ISpectrum {
 public:
   ISpectrum() = default;
   ISpectrum(const specnum_t specNo);

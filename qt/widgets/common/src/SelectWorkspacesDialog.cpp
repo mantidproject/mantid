@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------
 // Includes
@@ -32,7 +32,7 @@ private:
 public:
   explicit WorkspaceIsNotOfType(const std::string &type)
       : m_type(type), m_isMatrixWorkspace(type == "MatrixWorkspace") {}
-  bool operator()(Mantid::API::Workspace_sptr ws) const {
+  bool operator()(const Mantid::API::Workspace_sptr &ws) const {
     if (m_type.empty())
       return false;
     if (m_isMatrixWorkspace) {

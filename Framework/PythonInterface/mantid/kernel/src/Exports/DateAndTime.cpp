@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DateAndTime.h"
 #include "MantidPythonInterface/core/Converters/DateAndTime.h"
-#include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/operators.hpp> // Also provides self
+#include <memory>
 #include <numpy/arrayobject.h>
 #include <numpy/arrayscalars.h>
 

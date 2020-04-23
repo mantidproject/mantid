@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,10 +41,10 @@ private:
 
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace>) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &) override;
   void clearADSHandle() override;
 
   MantidMatrixFunction *m_function;

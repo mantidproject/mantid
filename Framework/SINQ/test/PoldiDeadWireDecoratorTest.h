@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -18,7 +18,7 @@ using ::testing::Return;
 
 class PoldiDeadWireDecoratorTest : public CxxTest::TestSuite {
 private:
-  boost::shared_ptr<MockDetector> m_detector;
+  std::shared_ptr<MockDetector> m_detector;
   std::set<int> m_validDeadWires;
   std::set<int> m_invalidDeadWires;
 
@@ -31,7 +31,7 @@ public:
   static void destroySuite(PoldiDeadWireDecoratorTest *suite) { delete suite; }
 
   PoldiDeadWireDecoratorTest() {
-    m_detector = boost::make_shared<MockDetector>();
+    m_detector = std::make_shared<MockDetector>();
 
     int valid[] = {0, 1, 2, 5, 99, 299, 399};
     int invalid[] = {0, 1, 400};

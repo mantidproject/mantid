@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -98,8 +98,8 @@ public:
                                 WorkspaceIndex spectrum);
 
   virtual void addWorkspace(const std::string &workspaceName);
-  void addWorkspace(const std::string &workspaceName,
-                    const std::string &spectra);
+  virtual void addWorkspace(const std::string &workspaceName,
+                            const std::string &spectra);
   void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
@@ -109,7 +109,7 @@ public:
   virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
   virtual void setDefaultParameterValue(const std::string &name, double value,
                                         TableDatasetIndex dataIndex);
-  void addSingleFitOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
+  void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm,
                           TableDatasetIndex index);
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
@@ -135,11 +135,12 @@ public:
                                                 WorkspaceIndex spectrum) const;
   std::string getOutputBasename() const;
 
-  void cleanFailedRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm);
-  void cleanFailedSingleRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm,
-                            TableDatasetIndex index);
+  void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
+  void
+  cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm,
+                       TableDatasetIndex index);
   DataForParameterEstimationCollection
-  getDataForParameterEstimation(EstimationDataSelector selector) const;
+  getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
   std::vector<double> getQValuesForData() const;
   virtual std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
@@ -148,17 +149,17 @@ protected:
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
-  Mantid::API::IAlgorithm_sptr
-  createSimultaneousFit(Mantid::API::MultiDomainFunction_sptr function) const;
+  Mantid::API::IAlgorithm_sptr createSimultaneousFit(
+      const Mantid::API::MultiDomainFunction_sptr &function) const;
   Mantid::API::IAlgorithm_sptr createSimultaneousFitWithEqualRange(
-      Mantid::API::IFunction_sptr function) const;
+      const Mantid::API::IFunction_sptr &function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const;
   std::string createSingleFitOutputName(const std::string &formatString,
                                         TableDatasetIndex index,
                                         WorkspaceIndex spectrum) const;
-  void addNewWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+  void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
                        const Spectra &spectra);
   void removeFittingData(TableDatasetIndex index);
 
@@ -168,7 +169,7 @@ private:
   void removeWorkspaceFromFittingData(TableDatasetIndex const &index);
 
   Mantid::API::IAlgorithm_sptr
-  createSequentialFit(Mantid::API::IFunction_sptr function,
+  createSequentialFit(const Mantid::API::IFunction_sptr &function,
                       const std::string &input,
                       IndirectFitData *initialFitData) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
@@ -197,17 +198,17 @@ private:
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                   IndirectFitData *fitData, WorkspaceIndex spectrum) const;
 
-  void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
+  void addOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm,
                  const FitDataIterator &fitDataBegin,
                  const FitDataIterator &fitDataEnd);
-  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                 Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                 const Mantid::API::ITableWorkspace_sptr &parameterTable,
+                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                  const FitDataIterator &fitDataBegin,
                  const FitDataIterator &fitDataEnd);
-  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                 Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                 const Mantid::API::ITableWorkspace_sptr &parameterTable,
+                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                  IndirectFitData *fitData, WorkspaceIndex spectrum);
 
   virtual void addOutput(IndirectFitOutput *fitOutput,

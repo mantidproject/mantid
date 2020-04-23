@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -50,15 +50,15 @@ private:
                              Poco::XML::Element *element) const;
   Geometry::Container_const_sptr
   parseContainer(Poco::XML::Element *element) const;
-  boost::shared_ptr<Geometry::IObject>
+  std::shared_ptr<Geometry::IObject>
   parseComponent(Poco::XML::Element *element) const;
-  boost::shared_ptr<Geometry::MeshObject>
+  std::shared_ptr<Geometry::MeshObject>
   loadMeshFromSTL(Poco::XML::Element *stlfile) const;
   void LoadOptionalDoubleFromXML(Poco::XML::Element *componentElement,
-                                 std::string elementName,
+                                 const std::string &elementName,
                                  double &targetVariable) const;
   std::vector<double>
-  parseTranslationVector(std::string translationVectorStr) const;
+  parseTranslationVector(const std::string &translationVectorStr) const;
   // Members
   MaterialsIndex m_materials;
   std::string m_filepath;

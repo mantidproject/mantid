@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -217,7 +217,7 @@ private:
 
   const MeshObject *loadMeshObject(LoadSampleShape &alg,
                                    bool outputWsSameAsInputWs,
-                                   const std::string filename) {
+                                   const std::string &filename) {
     alg.initialize();
     alg.setPropertyValue("Filename", filename);
     prepareWorkspaces(alg, outputWsSameAsInputWs);
@@ -226,7 +226,7 @@ private:
     return getMeshObject(alg);
   }
 
-  void loadFailureTest(LoadSampleShape &alg, const std::string filename) {
+  void loadFailureTest(LoadSampleShape &alg, const std::string &filename) {
     alg.initialize();
     alg.setPropertyValue("Filename", filename);
     prepareWorkspaces(alg, true);
@@ -276,7 +276,7 @@ private:
   std::unique_ptr<LoadSampleShape> alg;
   const int numberOfIterations = 5;
 
-  std::unique_ptr<LoadSampleShape> setupAlg(Workspace2D_sptr inputWS) {
+  std::unique_ptr<LoadSampleShape> setupAlg(const Workspace2D_sptr &inputWS) {
     auto loadAlg = std::make_unique<LoadSampleShape>();
     loadAlg->initialize();
     loadAlg->setChild(true);

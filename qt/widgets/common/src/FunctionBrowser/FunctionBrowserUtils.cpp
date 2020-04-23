@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -31,7 +31,7 @@ IFunction_sptr getFunctionWithPrefix(const QString &prefix,
   if (prefix.isEmpty() || !fun) {
     return fun;
   }
-  auto compFun = boost::dynamic_pointer_cast<CompositeFunction>(fun);
+  auto compFun = std::dynamic_pointer_cast<CompositeFunction>(fun);
   if (!compFun) {
     throw std::runtime_error("Function " + fun->name() + " is not composite");
   }

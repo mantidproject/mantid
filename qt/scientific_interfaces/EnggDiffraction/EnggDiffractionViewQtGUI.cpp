@@ -75,7 +75,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // presenter that knows how to handle a IEnggDiffractionView should
   // take care of all the logic. Note that the view needs to know the
   // concrete presenter
-  auto fullPres = boost::make_shared<EnggDiffractionPresenter>(this);
+  auto fullPres = std::make_shared<EnggDiffractionPresenter>(this);
   m_presenter = fullPres;
 
   // add tab contents and set up their ui's
@@ -93,7 +93,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
 
   // This is created from a QWidget* -> use null-deleter to prevent double-free
   // with Qt
-  boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
+  std::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
       this, [](EnggDiffractionViewQtGUI * /*unused*/) {});
   m_fittingWidget =
       new EnggDiffFittingViewQtWidget(m_ui.tabMain, sharedView, sharedView,
@@ -931,7 +931,7 @@ EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
 }
 
 std::vector<std::string>
-EnggDiffractionViewQtGUI::qListToVector(QStringList list,
+EnggDiffractionViewQtGUI::qListToVector(const QStringList &list,
                                         bool validator) const {
   std::vector<std::string> vec;
   if (validator) {
@@ -1038,7 +1038,7 @@ void EnggDiffractionViewQtGUI::userSelectInstrument(const QString &prefix) {
   setPrefix(prefix.toStdString());
 }
 
-void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
+void EnggDiffractionViewQtGUI::setPrefix(const std::string &prefix) {
   QString prefixInput = QString::fromStdString(prefix);
   // focus tab
   m_uiTabFocus.MWRunFiles_run_num->setInstrumentOverride(prefixInput);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -48,7 +48,7 @@ private:
   /// file to base all NXlog times on
   std::time_t startTime_time_t; ///< startTime in time_t format
   std::time_t
-  to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
+  to_time_t(const boost::posix_time::ptime &t) ///< convert posix time to time_t
   {
     /**
     Take the input Posix time, subtract the unix epoch, and return the seconds

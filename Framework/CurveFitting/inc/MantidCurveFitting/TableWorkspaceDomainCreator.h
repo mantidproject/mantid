@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,11 +10,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <boost/weak_ptr.hpp>
 #include <list>
+#include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -26,7 +28,8 @@ class TableWorkspace;
 
 namespace CurveFitting {
 
-class DLLExport TableWorkspaceDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL TableWorkspaceDomainCreator
+    : public API::IDomainCreator {
 public:
   // Constructor
   TableWorkspaceDomainCreator(Kernel::IPropertyManager *fit,
@@ -40,20 +43,22 @@ public:
                                 bool addProp = true) override;
 
   // Create a domain from the input workspace
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
 
   // Create an output workspace.
-  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+  std::shared_ptr<API::Workspace> createOutputWorkspace(
       const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
+      std::shared_ptr<API::FunctionDomain> domain,
+      std::shared_ptr<API::FunctionValues> values,
       const std::string &outputWorkspacePropertyName) override;
 
   /// Set the workspace
   /// @param ws :: workspace to set.
-  void setWorkspace(API::ITableWorkspace_sptr ws) { m_tableWorkspace = ws; }
+  void setWorkspace(API::ITableWorkspace_sptr ws) {
+    m_tableWorkspace = std::move(ws);
+  }
   /// Set the startX and endX
   /// @param startX :: Start of the domain
   /// @param endX :: End of the domain
@@ -86,9 +91,9 @@ private:
   /// Set all parameters
   void setParameters() const;
   /// Set the names of the X, Y and Error columns
-  void setXYEColumnNames(API::ITableWorkspace_sptr ws) const;
+  void setXYEColumnNames(const API::ITableWorkspace_sptr &ws) const;
   /// Creates the blank output workspace of the correct size
-  boost::shared_ptr<API::MatrixWorkspace>
+  std::shared_ptr<API::MatrixWorkspace>
   createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
   /// Set initial values for parameters with default values.
   void setInitialValues(API::IFunction &function);
@@ -105,11 +110,11 @@ private:
   /// Add the calculated function values to the workspace
   void addFunctionValuesToWS(
       const API::IFunction_sptr &function,
-      boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-      const boost::shared_ptr<API::FunctionDomain> &domain,
-      boost::shared_ptr<API::FunctionValues> resultValues) const;
+      std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+      const std::shared_ptr<API::FunctionDomain> &domain,
+      const std::shared_ptr<API::FunctionValues> &resultValues) const;
   /// Check workspace is in the correct form
-  void setAndValidateWorkspace(API::Workspace_sptr ws) const;
+  void setAndValidateWorkspace(const API::Workspace_sptr &ws) const;
 
   /// Store workspace property name
   std::string m_workspacePropertyName;
@@ -135,8 +140,8 @@ private:
   /// Ranges that must be excluded from fit
   mutable std::vector<double> m_exclude;
   /// Store the created domain and values
-  boost::weak_ptr<API::FunctionDomain1D> m_domain;
-  boost::weak_ptr<API::FunctionValues> m_values;
+  std::weak_ptr<API::FunctionDomain1D> m_domain;
+  std::weak_ptr<API::FunctionValues> m_values;
   /// Store maxSize property name
   std::string m_maxSizePropertyName;
   /// Store the Exclude property name

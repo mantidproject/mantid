@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
@@ -87,6 +86,14 @@ private:
                      map[QString("transStitchParamsEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.transScaleRHSCheckBox->isChecked(),
                      map[QString("transScaleRHSCheckBox")].toBool())
+    TS_ASSERT_EQUALS(gui->m_ui.subtractBackgroundCheckBox->isChecked(),
+                     map[QString("subtractBackgroundCheckBox")].toBool())
+    TS_ASSERT_EQUALS(gui->m_ui.backgroundMethodComboBox->currentIndex(),
+                     map[QString("backgroundMethodComboBox")].toInt())
+    TS_ASSERT_EQUALS(gui->m_ui.polynomialDegreeSpinBox->value(),
+                     map[QString("polynomialDegreeSpinBox")].toInt())
+    TS_ASSERT_EQUALS(gui->m_ui.costFunctionComboBox->currentIndex(),
+                     map[QString("costFunctionComboBox")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.polCorrCheckBox->isChecked(),
                      map[QString("polCorrCheckBox")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.floodCorComboBox->currentIndex(),

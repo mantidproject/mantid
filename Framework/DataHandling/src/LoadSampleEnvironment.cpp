@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleEnvironment.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
@@ -42,7 +42,7 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleEnvironment::init() {
-  auto wsValidator = boost::make_shared<InstrumentValidator>();
+  auto wsValidator = std::make_shared<InstrumentValidator>();
   // input workspace
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -90,7 +90,7 @@ void LoadSampleEnvironment::init() {
   declareProperty("AtomicNumber", 0, "The atomic number");
   declareProperty("MassNumber", 0,
                   "Mass number if ion (use 0 for default mass sensity)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
                   "This number density of the sample in number of "
@@ -114,12 +114,17 @@ void LoadSampleEnvironment::init() {
                   "Optional:  This total scattering cross-section (coherent + "
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
+  const std::vector<std::string> attExtensions{".DAT"};
+  declareProperty(
+      std::make_unique<FileProperty>("AttenuationProfile", "",
+                                     FileProperty::OptionalLoad, attExtensions),
+      "The path name of the file containing the attenuation profile");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
   declareProperty("NumberDensityUnit", units.front(),
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
@@ -159,6 +164,7 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
+  setPropertyGroup("AttenuationProfile", specificValuesGrp);
   setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>(
                                               "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
@@ -169,6 +175,9 @@ void LoadSampleEnvironment::init() {
       std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
       "ScatteringXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "AttenuationProfile",
       std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 }
 
@@ -204,7 +213,7 @@ void LoadSampleEnvironment::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+  std::shared_ptr<MeshObject> environmentMesh = nullptr;
 
   std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
@@ -235,6 +244,7 @@ void LoadSampleEnvironment::exec() {
     params.incoherentXSection = getProperty("IncoherentXSection");
     params.attenuationXSection = getProperty("AttenuationXSection");
     params.scatteringXSection = getProperty("ScatteringXSection");
+    params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
     const std::string numberDensityUnit = getProperty("NumberDensityUnit");
     if (numberDensityUnit == "Atoms") {
       params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
@@ -274,7 +284,7 @@ void LoadSampleEnvironment::exec() {
     environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
-    auto can = boost::make_shared<Container>(environmentMesh);
+    auto can = std::make_shared<Container>(environmentMesh);
     environment = std::make_unique<SampleEnvironment>(name, can);
   }
   // Put Environment into sample.

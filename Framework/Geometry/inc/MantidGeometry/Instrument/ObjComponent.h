@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,7 +42,7 @@ public:
   // probably add others)
   explicit ObjComponent(const std::string &name, IComponent *parent = nullptr);
   explicit ObjComponent(const std::string &name,
-                        boost::shared_ptr<const IObject> shape,
+                        std::shared_ptr<const IObject> shape,
                         IComponent *parent = nullptr);
 
   /** Virtual Copy Constructor
@@ -73,10 +73,10 @@ public:
   void initDraw() const override;
 
   /// Return the shape of the component
-  const boost::shared_ptr<const IObject> shape() const override;
+  const std::shared_ptr<const IObject> shape() const override;
   /// Set a new shape on the component
-  /// void setShape(boost::shared_ptr<const IObject> newShape);
-  void setShape(boost::shared_ptr<const IObject> newShape);
+  /// void setShape(std::shared_ptr<const IObject> newShape);
+  void setShape(std::shared_ptr<const IObject> newShape);
   /// Return the material this component is made from
   const Kernel::Material material() const override;
 
@@ -88,7 +88,7 @@ protected:
   // Made a pointer to a const object. Since this is a shared object we
   // shouldn't be
   // exposing non-const methods of Object through this class.
-  boost::shared_ptr<const IObject> m_shape;
+  std::shared_ptr<const IObject> m_shape;
 
   const Kernel::V3D factorOutComponentPosition(const Kernel::V3D &point) const;
   const Kernel::V3D takeOutRotation(Kernel::V3D point) const;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SaveZODS.h"
 #include "MantidAPI/FileProperty.h"
@@ -52,8 +52,7 @@ void SaveZODS::init() {
 void SaveZODS::exec() {
   IMDHistoWorkspace_sptr inWS = getProperty("InputWorkspace");
   std::string Filename = getPropertyValue("Filename");
-  MDHistoWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
+  MDHistoWorkspace_sptr ws = std::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
   if (!ws)
     throw std::runtime_error("InputWorkspace is not a MDHistoWorkspace");
   if (ws->getNumDims() != 3)

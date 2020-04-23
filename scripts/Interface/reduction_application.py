@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
     Main window for reduction UIs
 """
-from __future__ import (absolute_import, division, print_function)
-import six
 import sys
 import os
 import traceback
@@ -31,8 +29,7 @@ except ImportError:
     Logger("ReductionGUI").information('Using legacy ui importer')
     from mantidplot import load_ui  # noqa
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 STARTUP_WARNING = ""
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -71,7 +71,8 @@ protected:
   void setSampleSuffixes(std::string const &tab, bool filter);
   void setResolutionSuffixes(std::string const &tab, bool filter);
 
-  void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
+  void setAlgorithmProperties(
+      const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -117,6 +118,7 @@ protected slots:
   void updateFitBrowserParameterValuesFromAlg();
   void updateDataReferences();
   void updateResultOptions();
+  void respondToFunctionChanged();
 
 private slots:
   void plotSelectedSpectra();
@@ -132,7 +134,6 @@ private slots:
   void respondToPlotSpectrumChanged(WorkspaceIndex);
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double);
-  void respondToFunctionChanged();
 
 private:
   void setup() override;

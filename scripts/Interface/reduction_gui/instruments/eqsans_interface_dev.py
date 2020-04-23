@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     This module defines the interface control for EQSANS.
@@ -10,7 +10,6 @@
     The actual view/layout is define in .ui files. The state of the reduction
     process is kept elsewhere (SNSReduction object)
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget
 from reduction_gui.widgets.sans.eqsans_instrument import SANSInstrumentWidget

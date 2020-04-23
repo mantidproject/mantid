@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -66,7 +66,7 @@ private:
   properties can be overriden in indivdual tests.
   Helps make tests easy to read.
   */
-  boost::shared_ptr<IAlgorithm>
+  std::shared_ptr<IAlgorithm>
   make_standard_algorithm(const MDFileObject &fileObject) {
     IAlgorithm_sptr alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
     alg->initialize();
@@ -229,9 +229,8 @@ public:
     TS_ASSERT(ADS.doesExist("test_workspace"));
 
     // Check the workspace
-    IMDHistoWorkspace_sptr outWs =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
-            ADS.retrieve("test_workspace"));
+    IMDHistoWorkspace_sptr outWs = std::dynamic_pointer_cast<IMDHistoWorkspace>(
+        ADS.retrieve("test_workspace"));
     TS_ASSERT(outWs != nullptr);
 
     // Check the dimensionality
@@ -291,9 +290,8 @@ public:
     TS_ASSERT(ADS.doesExist("test_workspace"));
 
     // Check the workspace
-    IMDHistoWorkspace_sptr outWs =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
-            ADS.retrieve("test_workspace"));
+    IMDHistoWorkspace_sptr outWs = std::dynamic_pointer_cast<IMDHistoWorkspace>(
+        ADS.retrieve("test_workspace"));
     TS_ASSERT(outWs != nullptr);
 
     // Check the dimensionality

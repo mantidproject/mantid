@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -113,35 +113,37 @@ private:
   void exec() override;
 
   /// Main algorithm to reduce powder diffraction data
-  API::MatrixWorkspace_sptr reducePowderData(
-      API::IMDEventWorkspace_const_sptr dataws,
-      API::IMDEventWorkspace_const_sptr monitorws, const std::string targetunit,
-      const std::map<int, double> &map_runwavelength, const double xmin,
-      const double xmax, const double binsize, bool dolinearinterpolation,
-      const std::vector<detid_t> &vec_excludeddets);
+  API::MatrixWorkspace_sptr
+  reducePowderData(const API::IMDEventWorkspace_const_sptr &dataws,
+                   const API::IMDEventWorkspace_const_sptr &monitorws,
+                   const std::string &targetunit,
+                   const std::map<int, double> &map_runwavelength,
+                   const double xmin, const double xmax, const double binsize,
+                   bool dolinearinterpolation,
+                   const std::vector<detid_t> &vec_excludeddets);
 
   /// Find the binning boundary according to detectors' positions
-  void findXBoundary(API::IMDEventWorkspace_const_sptr dataws,
+  void findXBoundary(const API::IMDEventWorkspace_const_sptr &dataws,
                      const std::string &targetunit,
                      const std::map<int, double> &map_runwavelength,
                      double &xmin, double &xmax);
 
   /// Bin signals to its 2theta position
-  void binMD(API::IMDEventWorkspace_const_sptr mdws, const char &unitbit,
+  void binMD(const API::IMDEventWorkspace_const_sptr &mdws, const char &unitbit,
              const std::map<int, double> &map_runlambda,
              const std::vector<double> &vecx, std::vector<double> &vecy,
              const std::vector<detid_t> &vec_excludedet);
 
   /// Do linear interpolation to zero counts if bin is too small
-  void linearInterpolation(API::MatrixWorkspace_sptr matrixws,
+  void linearInterpolation(const API::MatrixWorkspace_sptr &matrixws,
                            const double &infinitesimal);
 
   /// Set up sample logs
-  void setupSampleLogs(API::MatrixWorkspace_sptr matrixws,
-                       API::IMDEventWorkspace_const_sptr inputmdws);
+  void setupSampleLogs(const API::MatrixWorkspace_sptr &matrixws,
+                       const API::IMDEventWorkspace_const_sptr &inputmdws);
 
   /// Scale reduced data
-  void scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
+  void scaleMatrixWorkspace(const API::MatrixWorkspace_sptr &matrixws,
                             const double &scalefactor,
                             const double &infinitesimal);
 

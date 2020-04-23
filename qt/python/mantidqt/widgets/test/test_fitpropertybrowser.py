@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -13,7 +13,7 @@ matplotlib.use('AGG')  # noqa
 from numpy import zeros
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.py3compat.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication

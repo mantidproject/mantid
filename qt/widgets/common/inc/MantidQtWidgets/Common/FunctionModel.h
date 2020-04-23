@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -33,7 +33,7 @@ public:
   bool isParameterFixed(const QString &parName) const;
   QString getParameterTie(const QString &parName) const;
   void setParameterFixed(const QString &parName, bool fixed);
-  void setParameterTie(const QString &parName, QString tie);
+  void setParameterTie(const QString &parName, const QString &tie);
   QStringList getParameterNames() const override;
   IFunction_sptr getSingleFunction(int index) const override;
   IFunction_sptr getCurrentFunction() const override;

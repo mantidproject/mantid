@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidAPI/Axis.h"
@@ -30,6 +30,8 @@ GNU_DIAG_ON("conversion")
 #include <chrono>
 #include <json/json.h>
 #include <numeric>
+#include <utility>
+
 #include <tbb/parallel_sort.h>
 
 using namespace Mantid::Types;
@@ -120,8 +122,9 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic,
     const std::string &monitorTopic, const std::size_t bufferThreshold)
-    : IKafkaStreamDecoder(broker, eventTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic, monitorTopic),
+    : IKafkaStreamDecoder(std::move(broker), eventTopic, runInfoTopic,
+                          spDetTopic, sampleEnvTopic, chopperTopic,
+                          monitorTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "
@@ -152,6 +155,17 @@ KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {
    * capture has fully completed before local state is deleted.
    */
   stopCapture();
+}
+
+KafkaEventStreamDecoder::KafkaEventStreamDecoder(
+    KafkaEventStreamDecoder &&o) noexcept
+    : IKafkaStreamDecoder(std::move(o)),
+      m_intermediateBufferFlushThreshold(o.m_intermediateBufferFlushThreshold) {
+
+  std::scoped_lock lck(m_intermediateBufferMutex, m_mutex);
+  m_localEvents = std::move(o.m_localEvents);
+  m_receivedEventBuffer = std::move(o.m_receivedEventBuffer);
+  m_receivedPulseBuffer = std::move(o.m_receivedPulseBuffer);
 }
 
 /**
@@ -200,7 +214,7 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
     std::swap(m_localEvents.front(), temp);
     return temp;
   } else if (m_localEvents.size() > 1) {
-    auto group = boost::make_shared<API::WorkspaceGroup>();
+    auto group = std::make_shared<API::WorkspaceGroup>();
     size_t index(0);
     for (auto &filledBuffer : m_localEvents) {
       auto temp = createBufferWorkspace<DataObjects::EventWorkspace>(
@@ -575,7 +589,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
     const auto nspec = ws->getInstrument()->getNumberDetectors();
 
     // Create buffer
-    eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+    eventBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
                                                  1));
     eventBuffer->setInstrument(ws->getInstrument());

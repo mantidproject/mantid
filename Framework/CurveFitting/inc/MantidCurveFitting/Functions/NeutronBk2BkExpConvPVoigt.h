@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -20,7 +21,7 @@ namespace Functions {
   It is the number 3 neutron TOF function of GSAS and number 9 peak profile of
   FullProf.
 */
-class DLLExport NeutronBk2BkExpConvPVoigt
+class MANTID_CURVEFITTING_DLL NeutronBk2BkExpConvPVoigt
     : public API::IPowderDiffPeakFunction {
 
 public:

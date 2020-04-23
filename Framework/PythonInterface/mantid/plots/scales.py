@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 """
 Defines a set of custom axis scales
 """
-from __future__ import (absolute_import, division, unicode_literals)
-
 from mantid.plots.utility import mpl_version_info
 from matplotlib.scale import ScaleBase
 from matplotlib.ticker import (AutoLocator, NullFormatter,

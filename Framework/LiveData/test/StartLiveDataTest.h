@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,12 +51,12 @@ public:
    * @param AccumulationMethod :: parameter string
    * @return the created processed WS
    */
-  EventWorkspace_sptr doExecEvent(std::string AccumulationMethod,
-                                  double UpdateEvery,
-                                  std::string ProcessingAlgorithm = "",
-                                  std::string ProcessingProperties = "",
-                                  std::string PostProcessingAlgorithm = "",
-                                  std::string PostProcessingProperties = "") {
+  EventWorkspace_sptr
+  doExecEvent(const std::string &AccumulationMethod, double UpdateEvery,
+              const std::string &ProcessingAlgorithm = "",
+              const std::string &ProcessingProperties = "",
+              const std::string &PostProcessingAlgorithm = "",
+              const std::string &PostProcessingProperties = "") {
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FromNow", "1"));

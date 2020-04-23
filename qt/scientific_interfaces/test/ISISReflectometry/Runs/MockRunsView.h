@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "GUI/Runs/IRunsView.h"
@@ -52,9 +52,9 @@ public:
   MOCK_CONST_METHOD0(getLiveDataUpdateInterval, int());
 
   MOCK_CONST_METHOD0(getAlgorithmRunner,
-                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
+                     std::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
-                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
+                     std::shared_ptr<MantidQt::API::AlgorithmRunner>());
 
   MOCK_METHOD0(startMonitor, void());
   MOCK_METHOD0(stopMonitor, void());

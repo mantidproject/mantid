@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
@@ -69,20 +69,20 @@ public:
   /** Get the mutex object for this Task
    * @return Mutex pointer, or NULL
    */
-  boost::shared_ptr<std::mutex> getMutex() { return m_mutex; }
+  std::shared_ptr<std::mutex> getMutex() { return m_mutex; }
 
   //---------------------------------------------------------------------------------------------
   /** Set the mutex object for this Task
    * @param mutex :: Mutex pointer, or NULL
    */
-  void setMutex(boost::shared_ptr<std::mutex> &mutex) { m_mutex = mutex; }
+  void setMutex(std::shared_ptr<std::mutex> &mutex) { m_mutex = mutex; }
 
 protected:
   /// Cached computational cost for the thread.
   double m_cost;
 
   /// Mutex associated with this task (can be NULL)
-  boost::shared_ptr<std::mutex> m_mutex;
+  std::shared_ptr<std::mutex> m_mutex;
 };
 
 } // namespace Kernel

@@ -1,16 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division)
-
 from collections import OrderedDict
 import re
 
 from mantid.api import AnalysisDataService
-from mantid.py3compat import iteritems, iterkeys, string_types
 import numpy as np
 
 from mantidqt.utils.observer_pattern import Observable
@@ -60,7 +57,7 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
             return False, False
 
         # Do we have this parameter already?
-        for unique_name in iterkeys(unique_params):
+        for unique_name in unique_params.keys():
             if is_same_parameter(unique_name, global_name):
                 return True, True
 
@@ -86,7 +83,7 @@ def _move_globals_to_front(unique_params):
     :return: The updated parameters list reordered
     """
     return OrderedDict(
-        sorted(iteritems(unique_params), key=lambda x: not x[1].is_global))
+        sorted(unique_params.items(), key=lambda x: not x[1].is_global))
 
 
 class Parameter(object):
@@ -200,9 +197,9 @@ class FitInformation(object):
                                              global_parameters)
         self.fit_function_name = fit_function_name
         self.input_workspaces = [input_workspace] if isinstance(
-            input_workspace, string_types) else input_workspace
+            input_workspace, str) else input_workspace
         self.output_workspace_names = [output_workspace_names] if isinstance(
-            output_workspace_names, string_types) else output_workspace_names
+            output_workspace_names, str) else output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
@@ -384,6 +381,17 @@ class FittingContext(object):
                     workspace_list.append(fit.output_workspace_names[index])
 
         return workspace_list
+
+    def find_fit_for_input_workspace_list(
+            self, input_workspace_list):
+        """
+        Find the fit in the list whose input workspace matches the input workspace list
+        :param  input_workspace_list: A list of input workspaces
+        :return: A matching fit
+        """
+        for fit in self.fit_list:
+            if fit.input_workspaces == input_workspace_list:
+                return fit
 
     def remove_workspace_by_name(self, workspace_name):
         list_of_fits_to_remove = []

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -57,7 +57,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::string setTopEntryName(std::string filename);
+  std::string setTopEntryName(const std::string &filename);
   FileType getFileType(const std::string &filename);
 };
 

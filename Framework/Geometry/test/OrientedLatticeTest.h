@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -299,5 +299,30 @@ public:
     TSM_ASSERT_EQUALS("U*v should be along the x direction", V3D(1, 0, 0), ex);
     TSM_ASSERT_EQUALS(" should be along the y direction", V3D(0, 1, 0), ey);
     TSM_ASSERT_EQUALS("y direction is", V3D(0, -1, 0), eyPrime);
+  }
+  void test_equals_when_orientedlattice_identical() {
+    OrientedLattice a(1.0, 2.0, 3.0, 90.0, 90.0,
+                      90.0); // create via lattice parameters
+    OrientedLattice b{a};
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equals_when_orientedlattice_different_b() {
+    OrientedLattice a(1.0, 2.0, 3.0, 90.0, 90.0,
+                      90.0); // create via lattice parameters
+    OrientedLattice b{a};
+    b.seta(10); // Results in B change
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equals_when_orientedlattice_different_u() {
+    OrientedLattice a(1.0, 2.0, 3.0, 90.0, 90.0,
+                      90.0); // create via lattice parameters
+    OrientedLattice b{a};
+    b.setUFromVectors(V3D(0, 1, 0), V3D(1, 0, 0)); // Different U
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
   }
 };

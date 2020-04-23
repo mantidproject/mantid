@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -136,13 +136,13 @@ public:
   size_t rowCount() const override { return getNumberPeaks(); }
 
   /// Gets the shared pointer to a column by name.
-  boost::shared_ptr<Mantid::API::Column>
+  std::shared_ptr<Mantid::API::Column>
   getColumn(const std::string &name) override {
     return getColumn(getColumnIndex(name));
   }
 
   /// Gets the shared pointer to a column by name.
-  boost::shared_ptr<const Mantid::API::Column>
+  std::shared_ptr<const Mantid::API::Column>
   getColumn(const std::string &name) const override {
     return getColumn(getColumnIndex(name));
   }
@@ -151,7 +151,7 @@ public:
   virtual size_t getColumnIndex(const std::string &name) const;
 
   /// Gets the shared pointer to a column by index.
-  boost::shared_ptr<Mantid::API::Column> getColumn(size_t index) override;
+  std::shared_ptr<Mantid::API::Column> getColumn(size_t index) override;
 
   /// Gets the shared pointer to a column by index - return none-modifyable
   /// column.
@@ -272,7 +272,7 @@ private:
   std::vector<Peak> peaks;
 
   /** Column shared pointers. */
-  std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
+  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
 
   /** Column names */
   std::vector<std::string> columnNames;
@@ -282,9 +282,9 @@ private:
 };
 
 /// Typedef for a shared pointer to a peaks workspace.
-using PeaksWorkspace_sptr = boost::shared_ptr<PeaksWorkspace>;
+using PeaksWorkspace_sptr = std::shared_ptr<PeaksWorkspace>;
 
 /// Typedef for a shared pointer to a const peaks workspace.
-using PeaksWorkspace_const_sptr = boost::shared_ptr<const PeaksWorkspace>;
+using PeaksWorkspace_const_sptr = std::shared_ptr<const PeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid

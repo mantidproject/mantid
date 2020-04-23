@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -183,7 +183,7 @@ public:
     TS_ASSERT_EQUALS(fit->getPropertyValue("OutputStatus"), "success");
 
     // ITableWorkspace_sptr covar =
-    // boost::dynamic_pointer_cast<ITableWorkspace>(
+    // std::dynamic_pointer_cast<ITableWorkspace>(
     //  API::AnalysisDataService::Instance().retrieve("Output_NormalisedCovarianceMatrix"));
 
     // TS_ASSERT(covar);
@@ -206,7 +206,7 @@ public:
     TS_ASSERT_DIFFERS(fun->getError(0), 0.0);
     TS_ASSERT_DIFFERS(fun->getError(1), 0.0);
 
-    ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(
+    ITableWorkspace_sptr params = std::dynamic_pointer_cast<ITableWorkspace>(
         API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     TS_ASSERT(params);

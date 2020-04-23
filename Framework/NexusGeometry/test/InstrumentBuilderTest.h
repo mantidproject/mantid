@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -83,6 +83,6 @@ private:
   Eigen::Vector3d testPos1 = Eigen::Vector3d(1.0, -0.5, 2.9);
   Eigen::Vector3d testPos2 = Eigen::Vector3d(-1.2, 0.5, 1.9);
   // Placeholder empty shape
-  boost::shared_ptr<const Geometry::IObject> shape =
-      boost::make_shared<const Geometry::CSGObject>();
+  std::shared_ptr<const Geometry::IObject> shape =
+      std::make_shared<const Geometry::CSGObject>();
 };

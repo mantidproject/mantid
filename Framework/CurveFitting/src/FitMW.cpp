@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 //----------------------------------------------------------------------
@@ -177,7 +177,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
   if (addProp) {
     if (m_domainType != Simple &&
         !m_manager->existsProperty(m_maxSizePropertyName)) {
-      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+      auto mustBePositive = std::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(0);
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
@@ -191,7 +191,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
     }
     if (!m_manager->existsProperty(m_excludePropertyName)) {
       auto mustBeOrderedPairs =
-          boost::make_shared<ArrayOrderedPairsValidator<double>>();
+          std::make_shared<ArrayOrderedPairsValidator<double>>();
       declareProperty(
           new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
           "A list of pairs of doubles that specify ranges that "
@@ -201,8 +201,8 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
 }
 
 /// Create a domain from the input workspace
-void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                         boost::shared_ptr<API::FunctionValues> &values,
+void FitMW::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                         std::shared_ptr<API::FunctionValues> &values,
                          size_t i0) {
   setParameters();
 
@@ -312,7 +312,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     values->setFitData(j, y);
     values->setFitWeight(j, weight);
   }
-  m_domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
+  m_domain = std::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
   m_values = values;
 }
 
@@ -324,11 +324,11 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-boost::shared_ptr<API::Workspace>
+std::shared_ptr<API::Workspace>
 FitMW::createOutputWorkspace(const std::string &baseName,
                              API::IFunction_sptr function,
-                             boost::shared_ptr<API::FunctionDomain> domain,
-                             boost::shared_ptr<API::FunctionValues> values,
+                             std::shared_ptr<API::FunctionDomain> domain,
+                             std::shared_ptr<API::FunctionValues> values,
                              const std::string &outputWorkspacePropertyName) {
   auto ws = IMWDomainCreator::createOutputWorkspace(
       baseName, function, domain, values, outputWorkspacePropertyName);

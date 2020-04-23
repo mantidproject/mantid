@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 This file is concerned with calibrating a specified set of tubes
@@ -15,8 +15,6 @@ Users should not need to directly call any other function other than :func:`getC
 
 """
 ## Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
-
-from __future__ import absolute_import, division, print_function
 
 import numpy
 from mantid.simpleapi import *
@@ -445,7 +443,7 @@ def read_peak_file(file_name):
     # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
     # Will be splited as:
     # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
-    pattern = re.compile('[\[\],\s\r]')
+    pattern = re.compile(r'[\[\],\s\r]')
     save_directory = config['defaultsave.directory']
     pfile = os.path.join(save_directory, file_name)
     for line in open(pfile, 'r'):

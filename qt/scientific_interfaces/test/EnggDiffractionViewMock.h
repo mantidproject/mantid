@@ -179,9 +179,8 @@ public:
                     const std::string &type));
 
   // virtual void setDataVector
-  MOCK_METHOD3(setDataVector,
-               void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
-                    bool plotSinglePeaks));
+  MOCK_METHOD3(setDataVector, void(std::vector<std::shared_ptr<QwtData>> &data,
+                                   bool focused, bool plotSinglePeaks));
 
   // virtual void plotCalibOutput();
   MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));

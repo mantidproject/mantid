@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,14 +13,14 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/XML/XMLException.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
 class ComputeResourceInfoTest : public CxxTest::TestSuite {
 public:
   void test_allMissing() {
-    boost::shared_ptr<FacilityInfo> fac;
+    std::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac =
                                  createCRInfoInMinimalFacility(simpleInstStr));
     TS_ASSERT(fac);
@@ -28,7 +28,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(cri = fac->computeResInfos());
     TS_ASSERT_EQUALS(cri.size(), 0);
 
-    boost::shared_ptr<FacilityInfo> another;
+    std::shared_ptr<FacilityInfo> another;
     TS_ASSERT_THROWS(another = createCRInfoInMinimalFacility(
                          "<computeResource fooAtt=\"barVal\"/>"),
                      const std::runtime_error &);
@@ -41,7 +41,7 @@ public:
                               fermiURL +
                               "</u>"
                               "</computeResource>";
-    boost::shared_ptr<FacilityInfo> fac;
+    std::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
                      const std::runtime_error &);
     TS_ASSERT(!fac);
@@ -53,7 +53,7 @@ public:
                               fermiURL +
                               "</u_bar>"
                               "</compResource>";
-    boost::shared_ptr<FacilityInfo> fac;
+    std::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
                      const Poco::XML::XMLException &);
     TS_ASSERT(!fac);
@@ -67,7 +67,7 @@ public:
                               "</baseURL>"
                               "</computeResource>";
 
-    boost::shared_ptr<FacilityInfo> fac;
+    std::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(fermi));
     TS_ASSERT(fac);
     TS_ASSERT_EQUALS(fac->name(), this->testFacilityName);
@@ -100,7 +100,7 @@ public:
                               "</URL>"
                               "</computeResource>";
 
-    boost::shared_ptr<FacilityInfo> fac;
+    std::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(fermi),
                      const std::runtime_error &);
 
@@ -142,7 +142,7 @@ public:
                             "</baseURL>"
                             "</computeResource>";
 
-    boost::shared_ptr<FacilityInfo> fac;
+    std::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(rep));
     TS_ASSERT(fac);
     TS_ASSERT_EQUALS(fac->computeResources().size(), 3);
@@ -174,7 +174,7 @@ public:
 private:
   /// make a minimal facilities file/xml string includin the compute resource
   /// passed
-  boost::shared_ptr<FacilityInfo>
+  std::shared_ptr<FacilityInfo>
   createCRInfoInMinimalFacility(const std::string &crStr) {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                "<facilities>"
@@ -188,13 +188,13 @@ private:
     return createFacility(xmlStr);
   }
 
-  boost::shared_ptr<FacilityInfo> createFacility(const std::string &xml) {
+  std::shared_ptr<FacilityInfo> createFacility(const std::string &xml) {
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(xml);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     Poco::XML::Element *elem = pRootElem->getChildElement("facility");
 
-    return boost::make_shared<FacilityInfo>(elem);
+    return std::make_shared<FacilityInfo>(elem);
   }
 
 private:

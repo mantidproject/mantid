@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/SmoothNeighboursDialog.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -102,8 +102,7 @@ void SmoothNeighboursDialog::inputWorkspaceChanged(const QString &pName) {
       // If is a group workspace, use the first workspace to determine the
       // instrument type,
       // as most of the times it will be the same for all the workspaces
-      inWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(inGroupWs->getItem(0));
+      inWs = std::dynamic_pointer_cast<MatrixWorkspace>(inGroupWs->getItem(0));
     else
       // If is not a GroupWorkspace as well, do nothing
       return;

@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 import io
-import six
 import numpy as np
 from mantid.kernel import Atom
 
@@ -197,9 +195,8 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
 
         end_msg = "Molecular mass:"
         key = "Atom"
-        if not six.PY2:
-            end_msg = bytes(end_msg, "utf8")
-            key = bytes(key, "utf8")
+        end_msg = bytes(end_msg, "utf8")
+        key = bytes(key, "utf8")
 
         while not self._parser.file_end(file_obj=file_obj):
 

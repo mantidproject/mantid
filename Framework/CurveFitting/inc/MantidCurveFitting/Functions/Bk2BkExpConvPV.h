@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <complex>
 
@@ -21,8 +22,9 @@ namespace Functions {
 
   @date 2012-06-06
 */
-class DLLExport Bk2BkExpConvPV : virtual public API::IPeakFunction,
-                                 virtual public API::IFunctionMW {
+class MANTID_CURVEFITTING_DLL Bk2BkExpConvPV
+    : virtual public API::IPeakFunction,
+      virtual public API::IFunctionMW {
 public:
   Bk2BkExpConvPV();
 
@@ -72,9 +74,9 @@ private:
   mutable double mUpperTOF;
 };
 
-// typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
+// typedef std::shared_ptr<TableWorkspace> TableWorkspace_sptr;
 
-using Bk2BkExpConvPV_sptr = boost::shared_ptr<Bk2BkExpConvPV>;
+using Bk2BkExpConvPV_sptr = std::shared_ptr<Bk2BkExpConvPV>;
 
 } // namespace Functions
 } // namespace CurveFitting

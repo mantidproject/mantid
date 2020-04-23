@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -932,16 +932,26 @@ void EventList::clearData() { this->clear(false); }
  */
 void EventList::setMRU(EventWorkspaceMRU *newMRU) { mru = newMRU; }
 
-/** Reserve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT
- *call
- * on weighted events!
+/** Reserve a certain number of entries in event list of the specified eventType
  *
  * Calls std::vector<>::reserve() in order to pre-allocate the length of the
  *event list vector.
  *
  * @param num :: number of events that will be in this EventList
  */
-void EventList::reserve(size_t num) { this->events.reserve(num); }
+void EventList::reserve(size_t num) {
+  switch (this->eventType) {
+  case TOF:
+    this->events.reserve(num);
+    break;
+  case WEIGHTED:
+    this->weightedEvents.reserve(num);
+    break;
+  case WEIGHTED_NOTIME:
+    this->weightedEventsNoTime.reserve(num);
+    break;
+  }
+}
 
 // ==============================================================================================
 // --- Sorting functions -----------------------------------------------------
@@ -2545,7 +2555,7 @@ void EventList::convertTof(std::function<double(double)> func,
  */
 template <class T>
 void EventList::convertTofHelper(std::vector<T> &events,
-                                 std::function<double(double)> func) {
+                                 const std::function<double(double)> &func) {
   // iterate through all events
   for (auto &ev : events)
     ev.m_tof = func(ev.m_tof);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidAPI/Axis.h"
@@ -200,7 +200,7 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
           // we seem to have a table workspace
           // if we have no already created a workspace
           if (!ws) {
-            ws = boost::make_shared<DataObjects::TableWorkspace>();
+            ws = std::make_shared<DataObjects::TableWorkspace>();
             // create the columns
             auto itName = names.begin();
             auto itTypes = types.begin();
@@ -797,7 +797,7 @@ void LoadAscii2::init() {
   }
 
   declareProperty("Separator", "Automatic",
-                  boost::make_shared<StringListValidator>(sepOptions),
+                  std::make_shared<StringListValidator>(sepOptions),
                   "The separator between data columns in the data file. The "
                   "possible values are \"CSV\", \"Tab\", "
                   "\"Space\", \"SemiColon\", \"Colon\" or a user defined "
@@ -821,11 +821,11 @@ void LoadAscii2::init() {
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(), "Dimensionless");
   declareProperty("Unit", "Energy",
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\")");
 
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "SkipNumLines", EMPTY_INT(), mustBePosInt,
@@ -900,7 +900,7 @@ void LoadAscii2::exec() {
                              "cannot continue.");
   }
   MatrixWorkspace_sptr outputWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(rd);
+      std::dynamic_pointer_cast<MatrixWorkspace>(rd);
   if (outputWS) {
     outputWS->mutableRun().addProperty("Filename", filename);
   }

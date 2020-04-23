@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -28,13 +28,13 @@ public:
   /// Set the successor factory. create will be called on that if this instance
   /// is not suitable.
   virtual void
-  setSuccessor(boost::shared_ptr<const PeakShapeFactory> successorFactory) = 0;
+  setSuccessor(std::shared_ptr<const PeakShapeFactory> successorFactory) = 0;
 };
 
 /// Helper typedef
-using PeakShapeFactory_sptr = boost::shared_ptr<PeakShapeFactory>;
+using PeakShapeFactory_sptr = std::shared_ptr<PeakShapeFactory>;
 /// Helper typedef
-using PeakShapeFactory_const_sptr = boost::shared_ptr<const PeakShapeFactory>;
+using PeakShapeFactory_const_sptr = std::shared_ptr<const PeakShapeFactory>;
 
 } // namespace DataObjects
 } // namespace Mantid

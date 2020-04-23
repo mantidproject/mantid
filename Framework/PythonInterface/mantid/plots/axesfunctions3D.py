@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import numpy
 
 from mantid.plots.datafunctions import (get_axes_labels, get_normalization, get_distribution,
@@ -21,7 +19,7 @@ def _set_labels_3d(axes, workspace, indices=None):
     """
     Helper function to automatically set axis labels for 3D plots
     """
-    labels = get_axes_labels(workspace, indices)
+    labels = get_axes_labels(workspace, indices, normalize_by_bin_width=False)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
     axes.set_zlabel(labels[0])

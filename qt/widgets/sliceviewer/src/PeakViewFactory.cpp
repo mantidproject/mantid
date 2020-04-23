@@ -1,10 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/SliceViewer/PeakViewFactory.h"
+#include <utility>
+
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -17,6 +18,7 @@
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
 #include "MantidQtWidgets/SliceViewer/PeakView.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewFactory.h"
 
 namespace {
 struct ZMinAndMax {
@@ -24,8 +26,9 @@ struct ZMinAndMax {
   double zMin;
 };
 
-ZMinAndMax getZMinAndMax(Mantid::API::IMDWorkspace_sptr workspace,
-                         Mantid::Geometry::PeakTransform_const_sptr transform) {
+ZMinAndMax
+getZMinAndMax(const Mantid::API::IMDWorkspace_sptr &workspace,
+              const Mantid::Geometry::PeakTransform_const_sptr &transform) {
   double zMax = 0.0;
   double zMin = 0.0;
   const auto numberOfDimensions = workspace->getNumDims();
@@ -79,7 +82,7 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
                                  const size_t colorNumber)
     : PeakOverlayViewFactoryBase(plot, parent, plotXIndex, plotYIndex,
                                  colorNumber),
-      m_mdWS(mdWS), m_peaksWS(peaksWS),
+      m_mdWS(std::move(mdWS)), m_peaksWS(std::move(peaksWS)),
       m_calculator(std::make_shared<
                    Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>()) {
   setForegroundAndBackgroundColors(colorNumber);
@@ -87,7 +90,7 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
 
 PeakViewFactory::~PeakViewFactory() {}
 
-boost::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
+std::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
     PeaksPresenter *const presenter,
     Mantid::Geometry::PeakTransform_const_sptr transform) const {
   double largestEffectiveRadius = 0.0;
@@ -106,10 +109,10 @@ boost::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
     ++index;
   }
 
-  return boost::make_shared<PeakView>(
-      presenter, m_plot, m_parent, peakRepresentations, m_plotXIndex,
-      m_plotYIndex, m_foregroundColor, m_backgroundColor,
-      largestEffectiveRadius);
+  return std::make_shared<PeakView>(presenter, m_plot, m_parent,
+                                    peakRepresentations, m_plotXIndex,
+                                    m_plotYIndex, m_foregroundColor,
+                                    m_backgroundColor, largestEffectiveRadius);
 }
 
 PeakRepresentation_sptr PeakViewFactory::createSinglePeakRepresentation(
@@ -127,15 +130,16 @@ PeakRepresentation_sptr PeakViewFactory::createSinglePeakRepresentation(
              Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName()) {
     peakRepresentation = createPeakRepresentationEllipsoid(position, peak);
   } else {
-    peakRepresentation = createPeakRepresentationCross(position, transform);
+    peakRepresentation =
+        createPeakRepresentationCross(position, std::move(transform));
   }
   return peakRepresentation;
 }
 
 PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationCross(
     Mantid::Kernel::V3D position,
-    Mantid::Geometry::PeakTransform_const_sptr transform) const {
-  const auto zMinAndMax = getZMinAndMax(m_mdWS, transform);
+    const Mantid::Geometry::PeakTransform_const_sptr &transform) const {
+  const auto zMinAndMax = getZMinAndMax(m_mdWS, std::move(transform));
   return std::make_shared<PeakRepresentationCross>(position, zMinAndMax.zMax,
                                                    zMinAndMax.zMin);
 }

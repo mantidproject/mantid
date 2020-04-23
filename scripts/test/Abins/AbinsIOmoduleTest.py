@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-import six
 import unittest
 import numpy as np
 from mantid.simpleapi import logger
@@ -102,31 +99,6 @@ class AbinsIOmoduleTest(unittest.TestCase):
 
         self.assertRaises(ValueError, self.loader.load, list_of_datasets=1)
 
-    def _py2_unicode_laundering(self):
-        if six.PY2:
-            unit_data_list = [u'1 Å', u'2 Å', u'3 Å']
-            cleaned_data_list = IOmodule._convert_unicode_to_str(unit_data_list)
-            self.assertNotIn(u'2 Å', cleaned_data_list)
-            self.assertIn('2 \xc3\x85', cleaned_data_list)
-
-            unit_data_nested = [[u'1 Å', u'2 Å'], [u'3 Å', u'4 Å']]
-            cleaned_data_nested = IOmodule._convert_unicode_to_str(unit_data_nested)
-            self.assertNotIn(u'3 Å', cleaned_data_nested[1])
-            self.assertIn('3 \xc3\x85', cleaned_data_nested[1])
-
-            unit_data_dict = {u'1 Å': 1, u'2 Å': 2,
-                              'tens': {u'10 Å': 10, u'20 Å': 20}}
-            cleaned_data_dict = IOmodule._convert_unicode_to_str(unit_data_dict)
-            self.assertNotIn(u'2 Å', cleaned_data_dict)
-            self.assertNotIn(u'10 Å', cleaned_data_dict['tens'])
-            self.assertIn('10 \xc3\x85', cleaned_data_dict['tens'])
-
-            for item in ('x', 1, 2.34, (1, 2)):
-                self.assertEqual(IOmodule._convert_unicode_to_str(item), item)
-
-            self.assertIsInstance(IOmodule._convert_unicode_to_str(np.ones(5)),
-                                  np.ndarray)
-
     def runTest(self):
 
         self._save_stuff()
@@ -144,7 +116,6 @@ class AbinsIOmoduleTest(unittest.TestCase):
         self._loading_datasets()
         self._loading_structured_datasets()
 
-        self._py2_unicode_laundering()
 
 if __name__ == '__main__':
     unittest.main()

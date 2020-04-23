@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #pragma once
 #include "Common/DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
@@ -48,13 +47,13 @@ public:
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
   bool
-  validItemAtPath(const MantidWidgets::Batch::RowLocation rowLocation) const;
+  validItemAtPath(const MantidWidgets::Batch::RowLocation &rowLocation) const;
   Group const &
-  getGroupFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  getGroupFromPath(const MantidWidgets::Batch::RowLocation &path) const;
   boost::optional<Row> const &
-  getRowFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  getRowFromPath(const MantidWidgets::Batch::RowLocation &path) const;
   Item const &
-  getItemFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  getItemFromPath(const MantidWidgets::Batch::RowLocation &path) const;
 
 private:
   std::vector<Group> m_groups;

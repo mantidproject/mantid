@@ -14,7 +14,7 @@
 #include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 
@@ -30,9 +30,9 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
 
 public:
   EnggDiffGSASFittingViewQtWidget(
-      boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
-      boost::shared_ptr<IEnggDiffractionParam> mainSettings);
+      std::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+      const std::shared_ptr<IEnggDiffractionPythonRunner> &pythonRunner,
+      std::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
 
@@ -101,13 +101,13 @@ private:
   static const char GSAS_HOME_SETTING_NAME[];
   static const char SETTINGS_NAME[];
 
-  boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
+  std::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 
-  boost::shared_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
+  std::shared_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
-  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
+  std::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 
   void setFocusedRunFileNames(const QStringList &filenames);
 

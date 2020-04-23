@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #pragma once
 
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
@@ -20,7 +19,7 @@ namespace ISISReflectometry {
 
 class RegexFilter : public MantidQt::MantidWidgets::Batch::RowPredicate {
 public:
-  RegexFilter(boost::regex regex,
+  RegexFilter(const boost::regex &regex,
               MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
               ReductionJobs const &jobs);
   bool rowMeetsCriteria(

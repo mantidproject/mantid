@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/LoadSQW.h"
 #include "MantidAPI/FileProperty.h"
@@ -163,7 +163,7 @@ void LoadSQW::exec() {
     m_prog->resetNumSteps(100, 0.05, 0.75);
 
     // set file backed boxes
-    auto Saver = boost::shared_ptr<API::IBoxControllerIO>(
+    auto Saver = std::shared_ptr<API::IBoxControllerIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     bc->setFileBacked(Saver, m_outputFile);
     pWs->getBox()->setFileBacked();

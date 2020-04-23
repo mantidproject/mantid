@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -101,7 +101,7 @@ public:
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    auto ws = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
     // Need the raw pointer to test assertions here. Object is not yet deleted
@@ -124,7 +124,7 @@ public:
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    auto ws = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdater));
 
@@ -137,7 +137,7 @@ public:
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     // factory.SetSuccessor(mockSuccessor); No Successor set.
 
-    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    auto ws = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), const std::runtime_error &);
   }
 

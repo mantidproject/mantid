@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -84,13 +84,13 @@ void subscribeTestFunction(const std::string &clsName, std::string functionImpl,
 }
 
 template <typename FunctionType>
-boost::shared_ptr<FunctionType> createTestFunction(std::string clsName,
-                                                   std::string functionImpl,
-                                                   std::string derivImpl = "") {
+std::shared_ptr<FunctionType> createTestFunction(std::string clsName,
+                                                 std::string functionImpl,
+                                                 std::string derivImpl = "") {
   using Mantid::API::FunctionFactory;
   subscribeTestFunction<FunctionType>(clsName, std::move(functionImpl),
                                       std::move(derivImpl));
-  return boost::dynamic_pointer_cast<FunctionType>(
+  return std::dynamic_pointer_cast<FunctionType>(
       FunctionFactory::Instance().createFunction(clsName));
 }
 

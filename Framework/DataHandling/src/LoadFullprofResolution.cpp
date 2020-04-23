@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
@@ -214,7 +214,7 @@ void LoadFullprofResolution::exec() {
         int bankId = vec_bankids[i];
         size_t wsId = workspaceOfBank[bankId];
         Workspace_sptr wsi = wsg->getItem(wsId - 1);
-        auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+        auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
         // Get column from table workspace
         API::Column_const_sptr OutTabColumn = outTabWs->getColumn(i + 1);
         std::string parameterXMLString;
@@ -240,7 +240,8 @@ void LoadFullprofResolution::exec() {
  * @param filename :: string for name of the .irf file
  * @param lines :: vector of strings for each non-empty line in .irf file
  */
-void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
+void LoadFullprofResolution::loadFile(const string &filename,
+                                      vector<string> &lines) {
   string line;
 
   // the variable of type ifstream:
@@ -686,7 +687,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
                 << "\n";
 
   // Create TableWorkspace
-  auto tablews = boost::make_shared<TableWorkspace>();
+  auto tablews = std::make_shared<TableWorkspace>();
 
   // set columns :
   // Any 2 columns cannot have the same name.
@@ -773,8 +774,8 @@ void LoadFullprofResolution::createBankToWorkspaceMap(
  * stored
  */
 void LoadFullprofResolution::putParametersIntoWorkspace(
-    API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf,
-    std::string &parameterXMLString) {
+    const API::Column_const_sptr &column, const API::MatrixWorkspace_sptr &ws,
+    int nProf, std::string &parameterXMLString) {
 
   // Get instrument name from matrix workspace
   std::string instrumentName = ws->getInstrument()->getName();
@@ -833,7 +834,7 @@ void LoadFullprofResolution::putParametersIntoWorkspace(
  *  paramName is the name of the parameter as it appears in the table workspace
  */
 void LoadFullprofResolution::addALFBEParameter(
-    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
     Element *parent, const std::string &paramName) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", getXMLParameterName(paramName));
@@ -856,7 +857,7 @@ void LoadFullprofResolution::addALFBEParameter(
  * for the bank at the given column of the table workspace
  */
 void LoadFullprofResolution::addSigmaParameters(
-    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
@@ -878,7 +879,7 @@ void LoadFullprofResolution::addSigmaParameters(
  * for the bank at the given column of the table workspace
  */
 void LoadFullprofResolution::addGammaParameters(
-    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
@@ -899,7 +900,7 @@ void LoadFullprofResolution::addGammaParameters(
  * for the bank at the given column of the table workspace
  */
 void LoadFullprofResolution::addBBX_S_Parameters(
-    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:S");
@@ -923,7 +924,7 @@ void LoadFullprofResolution::addBBX_S_Parameters(
  * for the bank at the given column of the table workspace
  */
 void LoadFullprofResolution::addBBX_A_Parameters(
-    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:A");
@@ -948,7 +949,7 @@ void LoadFullprofResolution::addBBX_A_Parameters(
  * for the bank at the given column of the table workspace
  */
 void LoadFullprofResolution::addBBX_B_Parameters(
-    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:B");
@@ -992,7 +993,7 @@ LoadFullprofResolution::getXMLParameterName(const std::string &name) {
  * given the name of the parameter in the table workspace.
  */
 std::string
-LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr column,
+LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr &column,
                                       const std::string &name) {
   size_t paramNumber = LoadFullprofResolution::m_rowNumbers[name];
   // API::Column_const_sptr column = tablews->getColumn( columnIndex );
@@ -1006,7 +1007,7 @@ LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr column,
  * given the name of the parameter in the table workspace.
  */
 std::string LoadFullprofResolution::getXMLSquaredEqValue(
-    const API::Column_const_sptr column, const std::string &name) {
+    const API::Column_const_sptr &column, const std::string &name) {
   size_t paramNumber = LoadFullprofResolution::m_rowNumbers[name];
   // API::Column_const_sptr column = tablews->getColumn( columnIndex );
   double eqValue = column->cell<double>(paramNumber);

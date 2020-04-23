@@ -1,39 +1,40 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 """
 Defines interaction behaviour for plotting.
 """
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
+import numpy as np
 from collections import OrderedDict
 from copy import copy
 from functools import partial
+
+# third party imports
 from matplotlib.container import ErrorbarContainer
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-# third party imports
+# mantid imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, MantidAxes
 from mantid.plots.utility import zoom, MantidAxType
-from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
-                                                 ColorbarAxisEditor)
+                                                 ColorbarAxisEditor, ZAxisEditor)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -101,7 +102,7 @@ class FigureInteraction(object):
     def on_scroll(self, event):
         """Respond to scroll events: zoom in/out"""
         self.canvas.toolbar.push_current()
-        if not getattr(event, 'inaxes', None):
+        if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D):
             return
         zoom_factor = 1.05 + abs(event.step)/6
         if event.button == 'up':  # zoom in
@@ -154,6 +155,8 @@ class FigureInteraction(object):
                         self.canvas.toolbar.press_pan(event)
                     finally:
                         event.button = 3
+        elif isinstance(event.inaxes, Axes3D):
+            event.inaxes._button_press(event)
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
@@ -229,6 +232,12 @@ class FigureInteraction(object):
                     move_and_show(YAxisEditor(canvas, ax))
                 else:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
+            if hasattr(ax, 'zaxis'):
+                if ax.zaxis.label.contains(event)[0]:
+                    move_and_show(LabelEditor(canvas, ax.zaxis.label))
+                elif (ax.zaxis.contains(event)[0]
+                      or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
+                    move_and_show(ZAxisEditor(canvas, ax))
 
     def _show_markers_menu(self, markers, event):
         """
@@ -308,7 +317,7 @@ class FigureInteraction(object):
         axes_menu = QMenu("Axes", menu)
         axes_actions = QActionGroup(axes_menu)
         current_scale_types = (ax.get_xscale(), ax.get_yscale())
-        for label, scale_types in iteritems(AXES_SCALE_MENU_OPTS):
+        for label, scale_types in AXES_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types, ax))
             if current_scale_types == scale_types:
                 action.setCheckable(True)
@@ -346,7 +355,7 @@ class FigureInteraction(object):
         axes_menu = QMenu("Color bar", menu)
         axes_actions = QActionGroup(axes_menu)
         images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
-        for label, scale_type in iteritems(COLORBAR_SCALE_MENU_OPTS):
+        for label, scale_type in COLORBAR_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
             if type(images[0].norm) == scale_type:
                 action.setCheckable(True)
@@ -704,6 +713,12 @@ class FigureInteraction(object):
         if ax.lines:  # Relim causes issues with colour plots, which have no lines.
             ax.relim()
 
+        if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
+            colorbar_min = np.nanmin(ax.images[-1].get_array())
+            colorbar_max = np.nanmax(ax.images[-1].get_array())
+            for image in ax.images:
+                image.set_clim(colorbar_min, colorbar_max)
+
         ax.autoscale()
 
         datafunctions.set_initial_dimensions(ax)
@@ -761,5 +776,8 @@ class FigureInteraction(object):
         for ax in self.canvas.figure.get_axes():
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
-                datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
+                if image.norm.vmin is not None and image.norm.vmax is not None:
+                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin,
+                                                        image.norm.vmax)
+
         self.canvas.draw_idle()

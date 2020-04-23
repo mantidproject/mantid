@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <ctime>
 #include <exception>
@@ -313,7 +313,7 @@ void SNSLiveEventDataListener::run() {
 
     m_isConnected = false;
 
-    m_backgroundException = boost::make_shared<ADARA::invalid_packet>(e);
+    m_backgroundException = std::make_shared<ADARA::invalid_packet>(e);
   } catch (std::runtime_error &e) { // exception handler for generic runtime
                                     // exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
@@ -321,7 +321,7 @@ void SNSLiveEventDataListener::run() {
                   << "Thread will exit.\n";
     m_isConnected = false;
 
-    m_backgroundException = boost::make_shared<std::runtime_error>(e);
+    m_backgroundException = std::make_shared<std::runtime_error>(e);
   } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some
                                        // other things) can throw these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
@@ -333,14 +333,14 @@ void SNSLiveEventDataListener::run() {
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
+    m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
   } catch (...) { // Default exception handler
     g_log.fatal(
         "Uncaught exception in SNSLiveEventDataListener network read thread."
         " Thread is exiting.");
     m_isConnected = false;
 
-    m_backgroundException = boost::make_shared<std::runtime_error>(
+    m_backgroundException = std::make_shared<std::runtime_error>(
         "Unknown error in backgound thread");
   }
 }
@@ -473,7 +473,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   // m_eventBuffer->m_monitorWorkspace), so lock the mutex
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
-  auto monitorBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+  auto monitorBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(
       m_eventBuffer->monitorWorkspace());
   const auto pktTime = timeFromPacket(pkt);
 
@@ -724,8 +724,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
         // as a member, and thus have to actually allocate our deferred packet
         // with new.  Fortunately, this doesn't happen to often, so performance
         // isn't an issue.
-        m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(
-            new ADARA::RunStatusPkt(pkt));
+        m_deferredRunDetailsPkt =
+            std::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
       }
     }
 
@@ -837,7 +837,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
     m_variableMap.emplace(std::make_pair(devId, pvId),
-                          boost::make_shared<ADARA::VariableU32Pkt>(pkt));
+                          std::make_shared<ADARA::VariableU32Pkt>(pkt));
   } else {
     // Look up the name of this variable
     NameMapType::const_iterator it =
@@ -887,7 +887,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
     m_variableMap.emplace(std::make_pair(devId, pvId),
-                          boost::make_shared<ADARA::VariableDoublePkt>(pkt));
+                          std::make_shared<ADARA::VariableDoublePkt>(pkt));
   } else {
     // Look up the name of this variable
     NameMapType::const_iterator it =
@@ -940,7 +940,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
     m_variableMap.emplace(std::make_pair(devId, pvId),
-                          boost::make_shared<ADARA::VariableStringPkt>(pkt));
+                          std::make_shared<ADARA::VariableStringPkt>(pkt));
   } else {
     // Look up the name of this variable
     NameMapType::const_iterator it =
@@ -1284,7 +1284,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunInfoPkt &pkt) {
 /// Performs various initialization steps that can (and, in some
 /// cases, must) be done prior to receiving any packets from the SMS daemon.
 void SNSLiveEventDataListener::initWorkspacePart1() {
-  m_eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+  m_eventBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
   // The numbers in the create() function don't matter - they'll get overwritten
   // down in initWorkspacePart2() when we load the instrument definition.
@@ -1314,7 +1314,7 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
 void SNSLiveEventDataListener::initWorkspacePart2() {
   // Use the LoadEmptyInstrument algorithm to create a proper workspace
   // for whatever beamline we're on
-  boost::shared_ptr<Algorithm> loadInst =
+  std::shared_ptr<Algorithm> loadInst =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged(
           "LoadInstrument");
   loadInst->initialize();
@@ -1430,7 +1430,7 @@ void SNSLiveEventDataListener::appendEvent(
 /// the temporary workspace.  The temporary workspace is left empty and
 /// ready to receive more data.
 /// @return shared pointer to a workspace containing the accumulated data
-boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
+std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   // Check to see if the background thread has thrown an exception.  If so,
   // re-throw it here.
   if (m_backgroundException) {
@@ -1462,7 +1462,7 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   using namespace DataObjects;
 
   // Make a brand new EventWorkspace
-  EventWorkspace_sptr temp = boost::dynamic_pointer_cast<EventWorkspace>(
+  EventWorkspace_sptr temp = std::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 

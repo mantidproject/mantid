@@ -1,9 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
+#include <utility>
+
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
@@ -22,17 +26,17 @@ public:
   Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation,
                                         double zRotation);
 
-  boost::shared_ptr<Geometry::MeshObject>
-  rotate(boost::shared_ptr<Geometry::MeshObject> environmentMesh,
+  std::shared_ptr<Geometry::MeshObject>
+  rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
          double xRotation, double yRotation, double zRotation);
 
   Kernel::Matrix<double> generateXRotation(double xRotation);
   Kernel::Matrix<double> generateYRotation(double yRotation);
   Kernel::Matrix<double> generateZRotation(double zRotation);
 
-  boost::shared_ptr<Geometry::MeshObject>
-  translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh,
-            const std::vector<double> translationVector);
+  std::shared_ptr<Geometry::MeshObject>
+  translate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
+            const std::vector<double> &translationVector);
 
   Kernel::V3D createScaledV3D(double xVal, double yVal, double zVal);
 
@@ -40,7 +44,8 @@ protected:
   MeshFileIO(ScaleUnits scaleType) : m_scaleType(scaleType) {}
   MeshFileIO(ScaleUnits scaleType, std::vector<uint32_t> triangles,
              std::vector<Kernel::V3D> vertices)
-      : m_scaleType(scaleType), m_triangle(triangles), m_vertices(vertices) {}
+      : m_scaleType(scaleType), m_triangle(std::move(std::move(triangles))),
+        m_vertices(std::move(std::move(vertices))) {}
   double scaleValue(double val) {
     switch (m_scaleType) {
     case ScaleUnits::centimetres:

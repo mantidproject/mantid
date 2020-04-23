@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -151,9 +151,8 @@ public:
     TS_ASSERT_EQUALS(numsplittedws, 4);
 
     // Check Workspace group 0
-    EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
+    EventWorkspace_sptr filteredws0 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
@@ -174,9 +173,8 @@ public:
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Check Workspace group 1
-    EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
+    EventWorkspace_sptr filteredws1 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
     TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 3);
@@ -199,9 +197,8 @@ public:
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Check Workspace group 2
-    EventWorkspace_sptr filteredws2 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
+    EventWorkspace_sptr filteredws2 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
     TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
@@ -334,24 +331,21 @@ public:
     TS_ASSERT_EQUALS(numsplittedws, 3);
 
     // 4.1 Workspace group 0
-    EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
+    EventWorkspace_sptr filteredws0 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
 
     // 4.2 Workspace group 1
-    EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
+    EventWorkspace_sptr filteredws1 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     // 4.3 Workspace group 2
-    EventWorkspace_sptr filteredws2 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS01_3"));
+    EventWorkspace_sptr filteredws2 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS01_3"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
 
@@ -424,9 +418,8 @@ public:
 
     // 4. Get output
     // 4.1 Workspace group 0
-    EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("SplittedDataX_0"));
+    EventWorkspace_sptr filteredws0 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("SplittedDataX_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 15);
@@ -434,9 +427,8 @@ public:
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
 
     // 4.2 Workspace group 1
-    EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("SplittedDataX_1"));
+    EventWorkspace_sptr filteredws1 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("SplittedDataX_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 10);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
@@ -493,14 +485,14 @@ public:
         filter.getProperty("OutputWorkspaceNames");
     TS_ASSERT_EQUALS(vecwsname.size(), 9);
 
-    EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ws5 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataElastic_5"));
     TS_ASSERT(ws5);
     if (ws5) {
       TS_ASSERT_EQUALS(ws5->getNumberEvents(), 0);
     }
 
-    EventWorkspace_sptr ws7 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ws7 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataElastic_7"));
     TS_ASSERT(ws7);
     if (ws7) {
@@ -546,14 +538,14 @@ public:
     TS_ASSERT(filter.isExecuted());
 
     // Check
-    EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ws5 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataDG_5"));
     TS_ASSERT(ws5);
     if (ws5) {
       TS_ASSERT_EQUALS(ws5->getNumberEvents(), 0);
     }
 
-    EventWorkspace_sptr ws7 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ws7 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataDG_7"));
     TS_ASSERT(ws7);
     if (ws7) {
@@ -599,9 +591,8 @@ public:
     TS_ASSERT(filter.isExecuted());
 
     // Check
-    MatrixWorkspace_sptr outcorrws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("MockIndGeoCorrWS"));
+    MatrixWorkspace_sptr outcorrws = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("MockIndGeoCorrWS"));
     TS_ASSERT(outcorrws);
     if (outcorrws) {
       TS_ASSERT_EQUALS(outcorrws->getNumberHistograms(),
@@ -701,9 +692,8 @@ public:
                 << "\n";
 
     // Workspace 0
-    EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_0"));
+    EventWorkspace_sptr filteredws0 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS10_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
@@ -725,9 +715,8 @@ public:
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Workspace 1
-    EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
+    EventWorkspace_sptr filteredws1 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
@@ -755,9 +744,8 @@ public:
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Workspace 2
-    EventWorkspace_sptr filteredws2 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
+    EventWorkspace_sptr filteredws2 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
@@ -806,7 +794,7 @@ public:
         filter.getProperty("OutputWorkspaceNames");
     for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr filtered_ws =
-          boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+          std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
               AnalysisDataService::Instance().retrieve(outputwsname));
 
       TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
@@ -895,9 +883,8 @@ public:
                 << "\n";
 
     // Workspace 0
-    EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_A"));
+    EventWorkspace_sptr filteredws0 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_A"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
@@ -920,9 +907,8 @@ public:
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Workspace 1
-    EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_B"));
+    EventWorkspace_sptr filteredws1 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_B"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
@@ -950,9 +936,8 @@ public:
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Workspace 2
-    EventWorkspace_sptr filteredws2 =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_C"));
+    EventWorkspace_sptr filteredws2 = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_C"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
@@ -1056,7 +1041,7 @@ public:
         filter.getProperty("OutputWorkspaceNames");
     for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr childworkspace =
-          boost::dynamic_pointer_cast<EventWorkspace>(
+          std::dynamic_pointer_cast<EventWorkspace>(
               AnalysisDataService::Instance().retrieve(outputwsname));
       TS_ASSERT(childworkspace);
       // there is 1 sample logs that is excluded from propagating to the child
@@ -1174,7 +1159,7 @@ public:
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("InputWS", inpWS);
 
-    SplittersWorkspace_sptr splws = boost::make_shared<SplittersWorkspace>();
+    SplittersWorkspace_sptr splws = std::make_shared<SplittersWorkspace>();
     for (int i = 0; i < 5; i++) {
       auto t0 = runstart_i64 + i * pulsedt;
       auto t1 = runstart_i64 + (i + 1) * pulsedt;
@@ -1518,8 +1503,7 @@ public:
   SplittersWorkspace_sptr createSplittersWorkspace(int64_t runstart_i64,
                                                    int64_t pulsedt,
                                                    int64_t tofdt) {
-    SplittersWorkspace_sptr splitterws =
-        boost::make_shared<SplittersWorkspace>();
+    SplittersWorkspace_sptr splitterws = std::make_shared<SplittersWorkspace>();
 
     // 1. Splitter 0: 0 ~ 3+ (first pulse)
     int64_t t0 = runstart_i64;
@@ -1590,7 +1574,7 @@ public:
     TS_ASSERT(size_x - size_y == 1);
 
     MatrixWorkspace_sptr splitterws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             WorkspaceFactory::Instance().create("Workspace2D", 1, size_x,
                                                 size_y));
 
@@ -1628,7 +1612,7 @@ public:
   createTableSplitters(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt) {
     // create table workspace
     DataObjects::TableWorkspace_sptr tablesplitter =
-        boost::make_shared<DataObjects::TableWorkspace>();
+        std::make_shared<DataObjects::TableWorkspace>();
     tablesplitter->addColumn("double", "start");
     tablesplitter->addColumn("double", "stop");
     tablesplitter->addColumn("str", "target");
@@ -1681,7 +1665,7 @@ public:
   createInformationWorkspace(int noOfRows, bool splitByTime) {
     // create table workspace
     DataObjects::TableWorkspace_sptr infoWorkspace =
-        boost::make_shared<DataObjects::TableWorkspace>();
+        std::make_shared<DataObjects::TableWorkspace>();
     infoWorkspace->addColumn("int", "workspacegroup");
     infoWorkspace->addColumn("str", "title");
 
@@ -1726,8 +1710,7 @@ public:
     UNUSED_ARG(tofdt);
 
     // 1. Create an empty splitter workspace
-    SplittersWorkspace_sptr splitterws =
-        boost::make_shared<SplittersWorkspace>();
+    SplittersWorkspace_sptr splitterws = std::make_shared<SplittersWorkspace>();
 
     // 2. Create splitters
     for (size_t i = 0; i < numpulses; ++i) {
@@ -1753,9 +1736,10 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create the time correction table
    */
-  TableWorkspace_sptr createTimeCorrectionTable(MatrixWorkspace_sptr inpws) {
+  TableWorkspace_sptr
+  createTimeCorrectionTable(const MatrixWorkspace_sptr &inpws) {
     // 1. Generate an empty table
-    auto corrtable = boost::make_shared<TableWorkspace>();
+    auto corrtable = std::make_shared<TableWorkspace>();
     corrtable->addColumn("int", "DetectorID");
     corrtable->addColumn("double", "Correction");
 
@@ -1800,7 +1784,7 @@ public:
    * @return
    */
   API::MatrixWorkspace_sptr createMatrixSplittersElastic() {
-    MatrixWorkspace_sptr spws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr spws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
 
     auto &vec_splitTimes = spws->mutableX(0);
@@ -1838,7 +1822,7 @@ public:
   }
 
   API::MatrixWorkspace_sptr createMatrixSplittersDG() {
-    MatrixWorkspace_sptr spws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr spws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
 
     auto &vec_splitTimes = spws->mutableX(0);

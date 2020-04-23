@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -37,8 +37,7 @@ class MANTID_API_DLL FuncMinimizerFactoryImpl
     : public Kernel::DynamicFactory<IFuncMinimizer> {
 public:
   /// Creates an instance of a minimizer
-  boost::shared_ptr<IFuncMinimizer>
-  createMinimizer(const std::string &str) const;
+  std::shared_ptr<IFuncMinimizer> createMinimizer(const std::string &str) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FuncMinimizerFactoryImpl>;

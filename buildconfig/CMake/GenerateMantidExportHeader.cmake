@@ -1,5 +1,5 @@
 include (GenerateExportHeader)
-function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY )
+function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
     string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
     set (CUSTOM "\n")
     
@@ -31,7 +31,19 @@ function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY )
 #ifndef ${TARGET_NAME}_DEPRECATED\n\
     #define ${TARGET_NAME}_DEPRECATED(func) MANTID_${TARGET_NAME}_DEPRECATED func\n\
 #endif\n\n\
+")
+
+    if(GENERATE_EXTERN)
+        set(CUSTOM "${CUSTOM}\
+// Use extern keyword in client code to suppress class template instantiation\n\
+#include \"MantidKernel/System.h\"\n\n\
+#ifdef ${TARGET_NAME}_EXPORTS\n\
+#define EXTERN_MANTID_${TARGET_NAME}\n\
+#else\n\
+#define EXTERN_MANTID_${TARGET_NAME} EXTERN_IMPORT\n\
+#endif /* ${TARGET_NAME}_EXPORTS*/\n\
  ")
+    endif(GENERATE_EXTERN)
     
     generate_export_header("${TARGET_LIBRARY}" 
        BASE_NAME "MANTID_${TARGET_NAME}" 

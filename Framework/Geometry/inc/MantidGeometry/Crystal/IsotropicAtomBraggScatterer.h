@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,7 +16,7 @@ namespace Geometry {
 class IsotropicAtomBraggScatterer;
 
 using IsotropicAtomBraggScatterer_sptr =
-    boost::shared_ptr<IsotropicAtomBraggScatterer>;
+    std::shared_ptr<IsotropicAtomBraggScatterer>;
 
 /** @class IsotropicAtomBraggScatterer
 
@@ -107,7 +107,7 @@ protected:
 };
 
 using IsotropicAtomBraggScatterer_sptr =
-    boost::shared_ptr<IsotropicAtomBraggScatterer>;
+    std::shared_ptr<IsotropicAtomBraggScatterer>;
 
 class MANTID_GEOMETRY_DLL IsotropicAtomBraggScattererParser {
 public:

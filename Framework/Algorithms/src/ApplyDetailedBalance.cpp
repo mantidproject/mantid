@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
 #include "MantidAPI/Run.h"
@@ -31,7 +31,7 @@ DECLARE_ALGORITHM(ApplyDetailedBalance)
 /** Initialize the algorithm's properties.
  */
 void ApplyDetailedBalance::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("DeltaE");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -46,7 +46,7 @@ void ApplyDetailedBalance::init() {
   std::vector<std::string> unitOptions{"Energy", "Frequency"};
   declareProperty(
       "OutputUnits", "Energy",
-      boost::make_shared<StringListValidator>(unitOptions),
+      std::make_shared<StringListValidator>(unitOptions),
       "Susceptibility as a function of energy (meV) or frequency (GHz)");
 }
 

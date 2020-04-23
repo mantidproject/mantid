@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,7 +15,7 @@ using namespace Mantid::Kernel;
 
 template <typename Callback> class MockObserver : ConfigPropertyObserver {
 public:
-  MockObserver(std::string propertyName, Callback callback)
+  MockObserver(const std::string &propertyName, Callback callback)
       : ConfigPropertyObserver(std::move(propertyName)), m_callback(callback) {}
 
 protected:
@@ -41,8 +41,6 @@ public:
         ConfigService::Instance().getString("datasearch.directories");
     m_defaultSaveDirectory =
         ConfigService::Instance().getString("defaultsave.directory");
-    m_retainedAlgorithms =
-        ConfigService::Instance().getString("algorithms.retained");
   }
 
   void tearDown() override {
@@ -50,8 +48,6 @@ public:
                                         m_searchDirectories);
     ConfigService::Instance().setString("defaultsave.directory",
                                         m_defaultSaveDirectory);
-    ConfigService::Instance().setString("algorithms.retained",
-                                        m_retainedAlgorithms);
   }
 
   void testRecievesCallbackForSearchDirectoryChange() {
@@ -96,7 +92,7 @@ public:
                          });
     auto callCountB = 0;
     auto observerB =
-        makeMockObserver("algorithms.retained",
+        makeMockObserver("projectRecovery.secondsBetween",
                          [&callCountB](const std::string &newValue,
                                        const std::string &prevValue) -> void {
                            UNUSED_ARG(newValue);
@@ -105,7 +101,8 @@ public:
                          });
 
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
-    ConfigService::Instance().setString("algorithms.retained", "40");
+    ConfigService::Instance().setString("projectRecovery.secondsBetween",
+                                        "600");
 
     TS_ASSERT_EQUALS(1, callCountA);
     TS_ASSERT_EQUALS(1, callCountB);

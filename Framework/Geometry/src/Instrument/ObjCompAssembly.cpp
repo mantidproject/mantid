@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("ObjCompAssembly");
@@ -200,7 +201,7 @@ int ObjCompAssembly::nelements() const {
  *
  *  Throws if i is not in range
  */
-boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
+std::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
   if (i < 0 || i > nelements() - 1) {
     throw std::runtime_error("ObjCompAssembly::operator[] range not valid");
   }
@@ -214,7 +215,7 @@ boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
     return ParComponentFactory::create(child_base->operator[](i), m_map);
   } else {
     // Unparamterized - return the normal one
-    return boost::shared_ptr<IComponent>(group[i], NoDeleting());
+    return std::shared_ptr<IComponent>(group[i], NoDeleting());
   }
 }
 
@@ -228,13 +229,13 @@ boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
 void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
                                   bool recursive) const {
   for (int i = 0; i < this->nelements(); i++) {
-    boost::shared_ptr<IComponent> comp = this->getChild(i);
+    std::shared_ptr<IComponent> comp = this->getChild(i);
     if (comp) {
       outVector.emplace_back(comp);
       // Look deeper, on option.
       if (recursive) {
-        boost::shared_ptr<ICompAssembly> assemb =
-            boost::dynamic_pointer_cast<ICompAssembly>(comp);
+        std::shared_ptr<ICompAssembly> assemb =
+            std::dynamic_pointer_cast<ICompAssembly>(comp);
         if (assemb)
           assemb->getChildren(outVector, recursive);
       }
@@ -249,18 +250,18 @@ void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
  * @param nlevels :: Optional argument to limit number of levels searched.
  * @returns A shared pointer to the component
  */
-boost::shared_ptr<const IComponent>
+std::shared_ptr<const IComponent>
 ObjCompAssembly::getComponentByName(const std::string &cname,
                                     int nlevels) const {
   int nchildren = this->nelements();
   if (nlevels > 1)
     g_log.debug() << "only implemented for children\n";
   for (int i = 0; i < nchildren; ++i) {
-    boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
+    std::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
     if (comp->getName() == cname)
       return comp;
   }
-  return boost::shared_ptr<const IComponent>();
+  return std::shared_ptr<const IComponent>();
 }
 
 /** Print information about elements in the assembly to a stream
@@ -288,8 +289,8 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
   // std::vector<IComponent*>::const_iterator it;
   int i = 0;
   for (i = 0; i < this->nelements(); i++) {
-    boost::shared_ptr<const ObjCompAssembly> test =
-        boost::dynamic_pointer_cast<const ObjCompAssembly>(this->operator[](i));
+    std::shared_ptr<const ObjCompAssembly> test =
+        std::dynamic_pointer_cast<const ObjCompAssembly>(this->operator[](i));
     os << "Element " << i << " in the assembly : ";
     if (test) {
       os << test->getName() << '\n';
@@ -346,9 +347,9 @@ void ObjCompAssembly::testIntersectionWithChildren(
     Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const {
   int nchildren = this->nelements();
   for (int i = 0; i < nchildren; ++i) {
-    boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
+    std::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
     if (ICompAssembly_sptr childAssembly =
-            boost::dynamic_pointer_cast<ICompAssembly>(comp)) {
+            std::dynamic_pointer_cast<ICompAssembly>(comp)) {
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection
@@ -372,7 +373,7 @@ size_t ObjCompAssembly::registerContents(
  *  The shape can be either a box or a cylinder.
  *  @return The shape of the outline: "cylinder", "box", ...
  */
-boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
+std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   if (group.empty()) {
     throw Kernel::Exception::InstrumentDefinitionError("Empty ObjCompAssembly");
   }
@@ -387,7 +388,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height, innerRadius;
-  boost::shared_ptr<const IObject> obj = group.front()->shape();
+  std::shared_ptr<const IObject> obj = group.front()->shape();
   if (!obj) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Found ObjComponent without shape");
@@ -408,12 +409,12 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // find the 'moments of inertia' of the assembly
   double Ixx = 0, Iyy = 0, Izz = 0, Ixy = 0, Ixz = 0, Iyz = 0;
   V3D Cmass; // 'center of mass' of the assembly
-  for (const_comp_it it = group.begin(); it != group.end(); it++) {
+  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
     V3D p = (**it).getRelativePos();
     Cmass += p;
   }
   Cmass /= nelements();
-  for (const_comp_it it = group.begin(); it != group.end(); it++) {
+  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
     V3D p = (**it).getRelativePos();
     double x = p.X() - Cmass.X(), x2 = x * x;
     double y = p.Y() - Cmass.Y(), y2 = y * y;
@@ -475,7 +476,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // positive displacements are positive numbers and negative ones are negative
   double hxn = 0, hyn = 0, hzn = 0;
   double hxp = 0, hyp = 0, hzp = 0;
-  for (const_comp_it it = group.begin(); it != group.end(); it++) {
+  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
     // displacement vector of a detector
     V3D p = (**it).getRelativePos() - Cmass;
     // its projection on the vx axis
@@ -597,19 +598,19 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   }
 
   if (!obj_str.str().empty()) {
-    boost::shared_ptr<IObject> s = ShapeFactory().createShape(obj_str.str());
+    std::shared_ptr<IObject> s = ShapeFactory().createShape(obj_str.str());
     setOutline(s);
     return s;
   }
-  return boost::shared_ptr<IObject>();
+  return std::shared_ptr<IObject>();
 }
 
 /**
  * Sets the outline shape for this assembly
  * @param obj :: The outline shape created previously fith createOutline()
  */
-void ObjCompAssembly::setOutline(boost::shared_ptr<const IObject> obj) {
-  m_shape = obj;
+void ObjCompAssembly::setOutline(std::shared_ptr<const IObject> obj) {
+  m_shape = std::move(obj);
 }
 
 /** Print information about elements in the assembly to a stream

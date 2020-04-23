@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -14,7 +14,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MuonAnalysisHelper.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //-----------------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ void MuonAnalysisFitDataTab::muonAnalysisHelpDataAnalysisClicked() {
  */
 void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string &wsName) {
   Mantid::API::Workspace_sptr inputWs =
-      boost::dynamic_pointer_cast<Mantid::API::Workspace>(
+      std::dynamic_pointer_cast<Mantid::API::Workspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   Mantid::API::IAlgorithm_sptr duplicate =
       Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");

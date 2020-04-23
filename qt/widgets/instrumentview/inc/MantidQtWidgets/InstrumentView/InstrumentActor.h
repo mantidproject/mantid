@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -18,7 +18,7 @@
 
 #include <QObject>
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <vector>
 
 //------------------------------------------------------------------
@@ -76,22 +76,20 @@ public:
   bool hasChildVisible() const;
   /// Get the underlying instrument
   std::vector<size_t> getMonitors() const;
-  boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
+  std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
-  boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
+  std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
   const Mantid::Geometry::ComponentInfo &componentInfo() const;
   const Mantid::Geometry::DetectorInfo &detectorInfo() const;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
-  getMaskMatrixWorkspace() const;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const;
   /// set the mask workspace
   void setMaskMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr wsMask) const;
   /// inverts the internal mask workspace
   void invertMaskWorkspace() const;
   /// Get the mask displayed but not yet applied as a IMaskWorkspace
-  boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
-  boost::shared_ptr<Mantid::API::IMaskWorkspace>
-  getMaskWorkspaceIfExists() const;
+  std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
+  std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const;
   /// Apply the mask in the attached mask workspace to the data.
   void applyMaskWorkspace();
   /// Add a range of bins for masking
@@ -216,9 +214,9 @@ signals:
   void colorMapChanged() const;
 
 private:
-  void setUpWorkspace(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
-      double scaleMin, double scaleMax);
+  void setUpWorkspace(const std::shared_ptr<const Mantid::API::MatrixWorkspace>
+                          &sharedWorkspace,
+                      double scaleMin, double scaleMax);
   void setupPhysicalInstrumentIfExists();
   void resetColors();
   void loadSettings();
@@ -238,10 +236,10 @@ private:
                           size_t size) const;
 
   /// The workspace whose data are shown
-  const boost::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
+  const std::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   /// The helper masking workspace keeping the mask build in the mask tab but
   /// not applied to the data workspace.
-  mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
+  mutable std::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// A helper object that keeps bin masking data.
   mutable MaskBinsData m_maskBinsData;
   QString m_currentCMap;

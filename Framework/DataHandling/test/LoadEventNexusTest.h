@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -90,7 +90,7 @@ void run_multiprocess_load(const std::string &file, bool precount) {
 }
 
 namespace {
-boost::shared_ptr<const EventWorkspace>
+std::shared_ptr<const EventWorkspace>
 load_reference_workspace(const std::string &filename) {
   // Construct default communicator *without* threading backend. In non-MPI run
   // (such as when running unit tests) this will thus just be a communicator
@@ -103,13 +103,13 @@ load_reference_workspace(const std::string &filename) {
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<const EventWorkspace>(out);
+  return std::dynamic_pointer_cast<const EventWorkspace>(out);
 }
 void run_MPI_load(const Parallel::Communicator &comm,
-                  boost::shared_ptr<std::mutex> mutex,
+                  const std::shared_ptr<std::mutex> &mutex,
                   const std::string &filename) {
-  boost::shared_ptr<const EventWorkspace> reference;
-  boost::shared_ptr<const EventWorkspace> eventWS;
+  std::shared_ptr<const EventWorkspace> reference;
+  std::shared_ptr<const EventWorkspace> eventWS;
   {
     std::lock_guard<std::mutex> lock(*mutex);
     reference = load_reference_workspace(filename);
@@ -122,7 +122,7 @@ void run_MPI_load(const Parallel::Communicator &comm,
     if (comm.size() != 1) {
       TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
     }
-    eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(out);
+    eventWS = std::dynamic_pointer_cast<const EventWorkspace>(out);
   }
   const size_t localSize = eventWS->getNumberHistograms();
   auto localEventCount = eventWS->getNumberEvents();
@@ -210,7 +210,7 @@ public:
     alg.setProperty("OutputWorkspace", "dummy_for_child");
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
 
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
@@ -230,7 +230,7 @@ public:
       alg.setProperty("OutputWorkspace", "dummy_for_child");
       alg.execute();
       Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-      auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+      auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
       TS_ASSERT(eventWS);
 
       TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
@@ -253,7 +253,7 @@ public:
     alg.setProperty("NumberOfBins", nBins);
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
 
     TS_ASSERT_EQUALS(eventWS->blocksize(), nBins);
@@ -270,7 +270,7 @@ public:
     alg.setProperty("NumberOfBins", 1);
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
 
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 14258850);
@@ -320,7 +320,7 @@ public:
     alg.setProperty("OutputWorkspace", "dummy_for_child");
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
     const double duration =
         eventWS->mutableRun().getPropertyValueAsType<double>("duration");
@@ -736,7 +736,7 @@ public:
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,
-                        std::string BankName = "bank36",
+                        const std::string &BankName = "bank36",
                         bool willFail = false) {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
@@ -953,11 +953,11 @@ public:
     loader.execute();
     Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
     WorkspaceGroup_sptr outGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     TSM_ASSERT("Invalid Output Workspace Type", outGroup);
 
     IEventWorkspace_sptr firstWS =
-        boost::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
+        std::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
     auto run = firstWS->run();
     const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
     TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
@@ -966,7 +966,7 @@ public:
 
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       TS_ASSERT(ws);
       TSM_ASSERT("Non-zero events in each period", ws->getNumberEvents() > 0);
 
@@ -989,7 +989,7 @@ public:
 
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       if (isFirstChildWorkspace) {
         specids.reserve(ws->getNumberHistograms());
       }
@@ -1019,7 +1019,7 @@ public:
     ParallelTestHelpers::ParallelRunner runner(threads);
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
-    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    auto hdf5Mutex = std::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
   }
 
@@ -1028,7 +1028,7 @@ public:
     ParallelTestHelpers::ParallelRunner runner(threads);
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
-    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    auto hdf5Mutex = std::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 

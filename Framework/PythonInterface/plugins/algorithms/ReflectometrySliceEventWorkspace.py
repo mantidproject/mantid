@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -299,5 +298,6 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         if len(value_as_list) < 1:
             raise RuntimeError("Interval was not specified")
         return float(value_as_list[0])
+
 
 AlgorithmFactory.subscribe(ReflectometrySliceEventWorkspace())

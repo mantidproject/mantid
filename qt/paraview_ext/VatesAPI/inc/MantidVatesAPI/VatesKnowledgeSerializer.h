@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace Mantid {
@@ -41,7 +41,7 @@ enum LocationPolicy { LocationMandatory, LocationNotRequired };
 class DLLExport VatesKnowledgeSerializer {
 
 private:
-  boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> m_spFunction;
+  std::shared_ptr<const Mantid::Geometry::MDImplicitFunction> m_spFunction;
   std::string m_wsLocationXML;
   std::string m_wsNameXML;
   std::string m_wsName;
@@ -52,7 +52,7 @@ public:
 
   /// Set the implicit function to use called.
   void setImplicitFunction(
-      boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
+      std::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
 
   /// Set the workspace name to apply.
   void setWorkspace(const Mantid::API::IMDWorkspace &workspace);

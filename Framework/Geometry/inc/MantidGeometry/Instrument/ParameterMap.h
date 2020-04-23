@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -40,21 +40,22 @@ class Instrument;
 /// Parameter map iterator typedef
 using component_map_it =
     tbb::concurrent_unordered_multimap<ComponentID,
-                                       boost::shared_ptr<Parameter>>::iterator;
+                                       std::shared_ptr<Parameter>>::iterator;
 using component_map_cit = tbb::concurrent_unordered_multimap<
-    ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
+    ComponentID, std::shared_ptr<Parameter>>::const_iterator;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
   using pmap = tbb::concurrent_unordered_multimap<ComponentID,
-                                                  boost::shared_ptr<Parameter>>;
+                                                  std::shared_ptr<Parameter>>;
   /// Parameter map iterator typedef
-  using pmap_it = tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::iterator;
+  using pmap_it =
+      tbb::concurrent_unordered_multimap<ComponentID,
+                                         std::shared_ptr<Parameter>>::iterator;
   /// Parameter map iterator typedef
   using pmap_cit = tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
+      ComponentID, std::shared_ptr<Parameter>>::const_iterator;
   /// Default constructor
   ParameterMap();
   /// Const constructor
@@ -129,7 +130,7 @@ public:
            const std::string &name, const T &value,
            const std::string *const pDescription = nullptr) {
     auto param = create(type, name);
-    auto typedParam = boost::dynamic_pointer_cast<ParameterType<T>>(param);
+    auto typedParam = std::dynamic_pointer_cast<ParameterType<T>>(param);
     assert(typedParam); // If not true the factory has created the wrong type
     typedParam->setValue(value);
 
@@ -137,7 +138,7 @@ public:
   }
   /// Method for adding a parameter providing shared pointer to it. The class
   /// stores share pointer and increment ref count to it
-  void add(const IComponent *comp, const boost::shared_ptr<Parameter> &par,
+  void add(const IComponent *comp, const std::shared_ptr<Parameter> &par,
            const std::string *const pDescription = nullptr);
 
   /** @name Helper methods for adding and updating parameter types  */
@@ -199,29 +200,29 @@ public:
   /// Does the given parameter & component combination exist
   bool contains(const IComponent *comp, const Parameter &parameter) const;
   /// Get a parameter with a given name and type (std::string version)
-  boost::shared_ptr<Parameter> get(const IComponent *comp,
-                                   const std::string &name,
-                                   const std::string &type = "") const;
+  std::shared_ptr<Parameter> get(const IComponent *comp,
+                                 const std::string &name,
+                                 const std::string &type = "") const;
   /// Get a parameter with a given name and type (c-string version)
-  boost::shared_ptr<Parameter> get(const IComponent *comp, const char *name,
-                                   const char *type = "") const;
+  std::shared_ptr<Parameter> get(const IComponent *comp, const char *name,
+                                 const char *type = "") const;
   /// Finds the parameter in the map via the parameter type.
-  boost::shared_ptr<Parameter> getByType(const IComponent *comp,
-                                         const std::string &type) const;
+  std::shared_ptr<Parameter> getByType(const IComponent *comp,
+                                       const std::string &type) const;
   /// Use get() recursively to see if can find param in all parents of comp and
   /// given type (std::string version)
-  boost::shared_ptr<Parameter> getRecursive(const IComponent *comp,
-                                            const std::string &name,
-                                            const std::string &type = "") const;
+  std::shared_ptr<Parameter> getRecursive(const IComponent *comp,
+                                          const std::string &name,
+                                          const std::string &type = "") const;
   /// Use get() recursively to see if can find param in all parents of comp and
   /// given type (const char type)
-  boost::shared_ptr<Parameter> getRecursive(const IComponent *comp,
-                                            const char *name,
-                                            const char *type = "") const;
+  std::shared_ptr<Parameter> getRecursive(const IComponent *comp,
+                                          const char *name,
+                                          const char *type = "") const;
   /// Looks recursively upwards in the component tree for the first instance of
   /// a parameter with a specified type.
-  boost::shared_ptr<Parameter>
-  getRecursiveByType(const IComponent *comp, const std::string &type) const;
+  std::shared_ptr<Parameter> getRecursiveByType(const IComponent *comp,
+                                                const std::string &type) const;
 
   /** Get the values of a given parameter of all the components that have the
    * name: compName
@@ -238,7 +239,7 @@ public:
     pmap_cit it;
     for (it = m_map.begin(); it != m_map.end(); ++it) {
       if (compName == it->first->getName()) {
-        boost::shared_ptr<Parameter> param = get(it->first, name);
+        std::shared_ptr<Parameter> param = get(it->first, name);
         if (param)
           retval.emplace_back(param->value<T>());
       }
@@ -333,8 +334,8 @@ public:
   void setInstrument(const Instrument *instrument);
 
 private:
-  boost::shared_ptr<Parameter> create(const std::string &className,
-                                      const std::string &name) const;
+  std::shared_ptr<Parameter> create(const std::string &className,
+                                    const std::string &name) const;
 
   /// Assignment operator
   ParameterMap &operator=(ParameterMap *rhs);
@@ -372,9 +373,9 @@ private:
 };
 
 /// ParameterMap shared pointer typedef
-using ParameterMap_sptr = boost::shared_ptr<ParameterMap>;
+using ParameterMap_sptr = std::shared_ptr<ParameterMap>;
 /// ParameterMap constant shared pointer typedef
-using ParameterMap_const_sptr = boost::shared_ptr<const ParameterMap>;
+using ParameterMap_const_sptr = std::shared_ptr<const ParameterMap>;
 
 } // Namespace Geometry
 

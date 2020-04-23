@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -29,7 +29,7 @@ public:
   bool isValid() const override;
   std::string toXMLString() const override;
   AffineMatrixParameter *clone() const override;
-  void setMatrix(const AffineMatrixType newMatrix);
+  void setMatrix(const AffineMatrixType &newMatrix);
   AffineMatrixParameter(size_t outD, size_t inD);
   AffineMatrixParameter(const AffineMatrixParameter &);
   AffineMatrixParameter &operator=(const AffineMatrixParameter &other);

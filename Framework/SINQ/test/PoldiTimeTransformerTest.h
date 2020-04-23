@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,9 +27,9 @@ public:
   static void destroySuite(PoldiTimeTransformerTest *suite) { delete suite; }
 
   PoldiTimeTransformerTest() {
-    m_detector = boost::shared_ptr<ConfiguredHeliumDetector>(
-        new ConfiguredHeliumDetector);
-    m_chopper = boost::make_shared<MockChopper>();
+    m_detector =
+        std::shared_ptr<ConfiguredHeliumDetector>(new ConfiguredHeliumDetector);
+    m_chopper = std::make_shared<MockChopper>();
 
     m_spectrum = PoldiSourceSpectrum_sptr(new ConfiguredSpectrum);
 
@@ -126,8 +126,8 @@ private:
     TestablePoldiTimeTransformer() : PoldiTimeTransformer() {}
   };
 
-  boost::shared_ptr<ConfiguredHeliumDetector> m_detector;
-  boost::shared_ptr<MockChopper> m_chopper;
+  std::shared_ptr<ConfiguredHeliumDetector> m_detector;
+  std::shared_ptr<MockChopper> m_chopper;
   PoldiSourceSpectrum_sptr m_spectrum;
 
   PoldiInstrumentAdapter_sptr m_instrument;

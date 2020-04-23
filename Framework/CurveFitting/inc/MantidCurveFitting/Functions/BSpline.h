@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,10 +11,10 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 
-#include <boost/shared_ptr.hpp>
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_version.h>
+#include <memory>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -25,7 +25,7 @@ A wrapper around GSL functions implementing a B-spline.
 This function can also calculate derivatives up to order 2 as a by product of
 the spline.
 */
-class DLLExport BSpline : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL BSpline : public BackgroundFunction {
 
 public:
   /// Constructor
@@ -54,10 +54,9 @@ private:
   void getGSLBreakPoints(std::vector<double> &bp) const;
 
   /// structure used by GSL internally
-  boost::shared_ptr<gsl_bspline_workspace> m_bsplineWorkspace;
+  std::shared_ptr<gsl_bspline_workspace> m_bsplineWorkspace;
 #if GSL_MAJOR_VERSION < 2
-  mutable boost::shared_ptr<gsl_bspline_deriv_workspace>
-      m_bsplineDerivWorkspace;
+  mutable std::shared_ptr<gsl_bspline_deriv_workspace> m_bsplineDerivWorkspace;
 #endif
 };
 

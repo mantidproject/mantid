@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -61,9 +61,9 @@ public:
   std::map<std::string, std::string> availableActions() const;
 
 private:
-  bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,
+  bool validateSpectra(const Mantid::API::MatrixWorkspace_sptr &workspace,
                        std::string const &spectra) const;
-  bool validateBins(Mantid::API::MatrixWorkspace_sptr workspace,
+  bool validateBins(const Mantid::API::MatrixWorkspace_sptr &workspace,
                     std::string const &bins) const;
 
   boost::optional<std::string>

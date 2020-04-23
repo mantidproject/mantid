@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,7 +41,7 @@ public:
   enum class IndexingType { Default, TimeOriented, DetectorOriented };
 
   ScanningWorkspaceBuilder(
-      const boost::shared_ptr<const Geometry::Instrument> &instrument,
+      const std::shared_ptr<const Geometry::Instrument> &instrument,
       const size_t nTimeIndexes, const size_t nBins,
       const bool isPointData = false);
 
@@ -67,7 +67,7 @@ private:
   size_t m_nTimeIndexes;
   size_t m_nBins;
 
-  boost::shared_ptr<const Geometry::Instrument> m_instrument;
+  std::shared_ptr<const Geometry::Instrument> m_instrument;
 
   HistogramData::Histogram m_histogram;
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -81,7 +81,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->isDistribution(), true)
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "MomentumTransfer")
@@ -127,19 +127,19 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     Mantid::API::MatrixWorkspace_sptr sumOfCounts;
     TS_ASSERT_THROWS_NOTHING(
-        sumOfCounts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_sumOfCounts")))
 
     Mantid::API::MatrixWorkspace_sptr sumOfNormFactors;
     TS_ASSERT_THROWS_NOTHING(
         sumOfNormFactors =
-            boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                 Mantid::API::AnalysisDataService::Instance().retrieve(
                     outputWS + "_sumOfNormFactors")))
 
@@ -185,7 +185,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav)))
     TS_ASSERT(result)
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
@@ -261,10 +261,10 @@ public:
     TS_ASSERT(Q1D.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr gravity,
-        refNoGrav = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        refNoGrav = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
     TS_ASSERT_THROWS_NOTHING(
-        gravity = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        gravity = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT(refNoGrav)
@@ -306,7 +306,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT(result)
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
@@ -348,10 +348,10 @@ public:
     TS_ASSERT(Q1D.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr nocuts,
-        noGrav = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        noGrav = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
     TS_ASSERT_THROWS_NOTHING(
-        nocuts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        nocuts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT(nocuts)
@@ -423,12 +423,12 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     Mantid::API::MatrixWorkspace_sptr sumOfCounts;
     TS_ASSERT_THROWS_NOTHING(
-        sumOfCounts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_sumOfCounts")))
 
@@ -487,7 +487,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     // Make sure that the Q resolution is not calculated
@@ -591,9 +591,9 @@ void createInputWorkspaces(int start, int end,
   crop.setPropertyValue("EndWorkspaceIndex", "0");
   crop.execute();
 
-  input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  input = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
-  wave = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  wave = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wavNorm));
   pixels = WorkspaceCreationHelper::create2DWorkspaceBinned(29, 1);
   for (int i = 0; i < 29; ++i) {

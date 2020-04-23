@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h"
 
 #include "MantidQtWidgets/InstrumentView/ColorBar.h"
@@ -195,9 +194,9 @@ void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list,
 
 void InstrumentWidgetDecoder::decodeSurface(
     const QMap<QString, QVariant> &map,
-    boost::shared_ptr<ProjectionSurface> obj) {
+    std::shared_ptr<ProjectionSurface> obj) {
 
-  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  auto projection3D = std::dynamic_pointer_cast<Projection3D>(obj);
   // Decide Projection3D stuff
   if (map[QString("projection3DSuccess")].toBool() && projection3D) {
     this->decodeProjection3D(map[QString("projection3D")].toMap(),
@@ -338,7 +337,7 @@ InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
 }
 
 void InstrumentWidgetDecoder::decodeAlignmentInfo(
-    const QList<QVariant> &list, boost::shared_ptr<ProjectionSurface> &obj) {
+    const QList<QVariant> &list, std::shared_ptr<ProjectionSurface> &obj) {
 
   std::vector<std::pair<Mantid::Kernel::V3D, QPointF>> alignmentPlane;
   for (const auto &item : list) {

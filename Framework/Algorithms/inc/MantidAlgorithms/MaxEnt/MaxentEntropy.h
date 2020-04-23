@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -33,7 +33,7 @@ public:
                                             double newValue) = 0;
 };
 
-using MaxentEntropy_sptr = boost::shared_ptr<MaxentEntropy>;
+using MaxentEntropy_sptr = std::shared_ptr<MaxentEntropy>;
 
 } // namespace Algorithms
 } // namespace Mantid

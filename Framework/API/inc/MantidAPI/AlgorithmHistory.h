@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -25,8 +25,8 @@ class Algorithm;
 class AlgorithmHistory;
 
 // typedefs for algorithm history pointers
-using AlgorithmHistory_sptr = boost::shared_ptr<AlgorithmHistory>;
-using AlgorithmHistory_const_sptr = boost::shared_ptr<const AlgorithmHistory>;
+using AlgorithmHistory_sptr = std::shared_ptr<AlgorithmHistory>;
+using AlgorithmHistory_const_sptr = std::shared_ptr<const AlgorithmHistory>;
 using AlgorithmHistories = std::vector<AlgorithmHistory_sptr>;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
@@ -63,7 +63,7 @@ public:
                    bool isdefault, const unsigned int &direction = 99);
 
   /// add a child algorithm history record to this history object
-  void addChildHistory(AlgorithmHistory_sptr childHist);
+  void addChildHistory(const AlgorithmHistory_sptr &childHist);
   // get functions
   /// get name of algorithm in history const
   const std::string &name() const { return m_name; }
@@ -107,9 +107,9 @@ public:
     return (execCount() == other.execCount() && name() == other.name());
   }
   /// Create a concrete algorithm based on a history record
-  boost::shared_ptr<IAlgorithm> createAlgorithm() const;
+  std::shared_ptr<IAlgorithm> createAlgorithm() const;
   /// Create an child algorithm from a history record at a given index
-  boost::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
+  std::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
   /// Write this history object to a nexus file
   void saveNexus(::NeXus::File *file, int &algCount) const;
   // Set the execution count

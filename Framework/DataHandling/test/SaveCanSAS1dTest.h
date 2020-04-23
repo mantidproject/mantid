@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include <cxxtest/TestSuite.h>
@@ -61,7 +61,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Change the unit to Q
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(m_workspace1));
     ws->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
@@ -81,7 +81,7 @@ public:
     TS_ASSERT(load.isExecuted());
 
     // Change the unit to Q
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(m_workspace2));
     ws->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
@@ -206,7 +206,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(lAlg.execute());
     TS_ASSERT(lAlg.isExecuted());
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve("newgroup");
-    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
     // we have the data now the tests begin
     TS_ASSERT(group);
@@ -223,7 +223,7 @@ public:
     // check the second workspace in more detail
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
     Mantid::DataObjects::Workspace2D_sptr ws2d =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     TS_ASSERT(ws2d);
 
     Run run = ws2d->run();

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -58,7 +58,8 @@ private:
   bool areEqual(double, double, double);
   int roundUp(double);
   std::vector<double> makeTofAxis(int, double, size_t, double);
-  void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);
+  void setTofInWS(const std::vector<double> &,
+                  const API::MatrixWorkspace_sptr &);
 
   DataObjects::Workspace2D_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outputWS;

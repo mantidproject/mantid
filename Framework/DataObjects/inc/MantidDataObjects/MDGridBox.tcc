@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEvent.h"
@@ -56,7 +56,7 @@ TMDE(MDGridBox)::MDGridBox(
  * @param extentsVector :: size of the box
  */
 TMDE(MDGridBox)::MDGridBox(
-    boost::shared_ptr<API::BoxController> &bc, const uint32_t depth,
+    std::shared_ptr<API::BoxController> &bc, const uint32_t depth,
     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
         &extentsVector)
     : MDBoxBase<MDE, nd>(bc.get(), depth, UNDEF_SIZET, extentsVector),

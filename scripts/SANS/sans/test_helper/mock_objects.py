@@ -1,16 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import)
-
 from functools import (partial)
 
-from six import with_metaclass
-
-from mantid.py3compat import mock
+from unittest import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
 from sans.state.JsonSerializable import JsonSerializable
@@ -240,7 +236,7 @@ def create_mock_view2(user_file_path, batch_file_path=None):
     return view
 
 
-class FakeState(with_metaclass(JsonSerializable)):
+class FakeState(metaclass=JsonSerializable):
     def __init__(self):
         super(FakeState, self).__init__()
         self.dummy_state = "dummy_state"

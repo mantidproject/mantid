@@ -46,7 +46,7 @@ public:
            const std::string &filename));
 
   MOCK_METHOD1(setObserver,
-               void(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer));
+               void(std::shared_ptr<IEnggDiffGSASFittingObserver> observer));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

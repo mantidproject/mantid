@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,15 +36,15 @@ private:
 
   /// Normalize by monitors
   API::MatrixWorkspace_sptr
-  normalizeDetectorsByMonitors(API::MatrixWorkspace_sptr IvsTOF);
+  normalizeDetectorsByMonitors(const API::MatrixWorkspace_sptr &IvsTOF);
   /// Get the run numbers of the input workspaces
   void getRunNumbers();
   /// Get the run number of a given workspace
   std::string getRunNumber(std::string const &propertyName);
   /// Store a transition run in ADS
-  void setOutputTransmissionRun(int which, API::MatrixWorkspace_sptr ws);
+  void setOutputTransmissionRun(int which, const API::MatrixWorkspace_sptr &ws);
   /// Store the stitched transition workspace run in ADS
-  void setOutputWorkspace(API::MatrixWorkspace_sptr ws);
+  void setOutputWorkspace(const API::MatrixWorkspace_sptr &ws);
 
   /// Run numbers for the first/second transmission run
   std::string m_firstTransmissionRunNumber;

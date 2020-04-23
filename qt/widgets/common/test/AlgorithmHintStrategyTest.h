@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,7 +41,7 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
       declareProperty("BoolValue", false);
       declareProperty("StringValue", "Empty");
       auto mustBePositive =
-          boost::make_shared<Mantid::Kernel::BoundedValidator<int>>();
+          std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
       mustBePositive->setLower(0);
       declareProperty("PositiveIntValue", 0, mustBePositive);
       declareProperty("PositiveIntValue1", 0, mustBePositive);

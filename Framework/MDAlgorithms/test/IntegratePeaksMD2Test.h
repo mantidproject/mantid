@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,11 +51,11 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
-  static void doRun(double PeakRadius, double BackgroundRadius,
-                    std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
-                    double BackgroundStartRadius = 0.0, bool edge = true,
-                    bool cyl = false, std::string fnct = "NoFit",
-                    double adaptive = 0.0) {
+  static void
+  doRun(double PeakRadius, double BackgroundRadius,
+        const std::string &OutputWorkspace = "IntegratePeaksMD2Test_peaks",
+        double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false,
+        const std::string &fnct = "NoFit", double adaptive = 0.0) {
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -316,7 +316,7 @@ public:
     // Old workspace is unchanged
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
 
-    PeaksWorkspace_sptr newPW = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "IntegratePeaksMD2Test_peaks_out"));
     TS_ASSERT(newPW);

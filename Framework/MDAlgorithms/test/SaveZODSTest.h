@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,8 +27,8 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  std::string do_test(std::string InputWorkspace, std::string Filename,
-                      bool expectSuccess = true) {
+  std::string do_test(const std::string &InputWorkspace,
+                      const std::string &Filename, bool expectSuccess = true) {
     SaveZODS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

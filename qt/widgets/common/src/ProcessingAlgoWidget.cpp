@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ProcessingAlgoWidget.h"
 #include "MantidAPI/Algorithm.h"
@@ -164,7 +164,7 @@ void ProcessingAlgoWidget::setSelectedAlgorithm(QString algo) {
 /// @return the text in the script editor
 QString ProcessingAlgoWidget::getScriptText() { return ui.editor->text(); }
 /// Set the script editor text
-void ProcessingAlgoWidget::setScriptText(QString text) {
+void ProcessingAlgoWidget::setScriptText(const QString &text) {
   ui.editor->setText(text);
 }
 

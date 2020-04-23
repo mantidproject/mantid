@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/CSGObject.h"
 
@@ -32,12 +32,13 @@
 #include <boost/accumulators/statistics/error_of_mean.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <array>
 #include <deque>
 #include <random>
 #include <stack>
+#include <utility>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -402,11 +403,11 @@ CSGObject::CSGObject(const std::string &shapeXML)
     : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
       m_handler(), bGeometryCaching(false),
-      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
+      vtkCacheReader(std::shared_ptr<vtkGeometryCacheReader>()),
+      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  m_handler = boost::make_shared<GeometryHandler>(this);
+  m_handler = std::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -613,7 +614,7 @@ int CSGObject::hasComplement() const {
  * @retval 1000+ keyNumber :: Error with keyNumber
  * @retval 0 :: successfully populated all the whole Object.
  */
-int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
+int CSGObject::populate(const std::map<int, std::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
   Rst.emplace_back(TopRule.get());
   while (!Rst.empty()) {
@@ -909,7 +910,7 @@ int CSGObject::removeSurface(const int SurfN) {
  * @return number of surfaces substituted
  */
 int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
-                              const boost::shared_ptr<Surface> &SPtr) {
+                              const std::shared_ptr<Surface> &SPtr) {
   if (!TopRule)
     return 0;
   const int out = TopRule->substituteSurf(SurfN, NsurfN, SPtr);
@@ -1593,6 +1594,7 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
     const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
     const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
     size_t blocksize = shotSize / threadCount;
+    // cppcheck-suppress knownConditionTrueFalse
     if (currentThreadNum == threadCount - 1) {
       // Last thread may have to do threadCount extra iterations in
       // the worst case.
@@ -2113,7 +2115,7 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
  * Set the geometry handler for Object
  * @param[in] h is pointer to the geometry handler.
  */
-void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
+void CSGObject::setGeometryHandler(const std::shared_ptr<GeometryHandler> &h) {
   if (h)
     m_handler = h;
 }
@@ -2144,8 +2146,8 @@ void CSGObject::initDraw() const {
  * set vtkGeometryCache writer
  */
 void CSGObject::setVtkGeometryCacheWriter(
-    boost::shared_ptr<vtkGeometryCacheWriter> writer) {
-  vtkCacheWriter = writer;
+    std::shared_ptr<vtkGeometryCacheWriter> writer) {
+  vtkCacheWriter = std::move(writer);
   updateGeometryHandler();
 }
 
@@ -2153,15 +2155,15 @@ void CSGObject::setVtkGeometryCacheWriter(
  * set vtkGeometryCache reader
  */
 void CSGObject::setVtkGeometryCacheReader(
-    boost::shared_ptr<vtkGeometryCacheReader> reader) {
-  vtkCacheReader = reader;
+    std::shared_ptr<vtkGeometryCacheReader> reader) {
+  vtkCacheReader = std::move(reader);
   updateGeometryHandler();
 }
 
 /**
  * Returns the geometry handler
  */
-boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
+std::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;

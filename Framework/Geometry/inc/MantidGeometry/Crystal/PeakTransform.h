@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,7 +10,7 @@
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 #include <boost/regex.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -36,7 +36,7 @@ public:
   /// Get a regex to find the axis of the free peak.
   boost::regex getFreePeakAxisRegex() const;
   /// Virtual constructor.
-  virtual boost::shared_ptr<PeakTransform> clone() const = 0;
+  virtual std::shared_ptr<PeakTransform> clone() const = 0;
   /// Getter for a friendly name to describe the transform type.
   virtual std::string getFriendlyName() const = 0;
   /// Getter for the special coordinate representation of this transform type.
@@ -61,8 +61,8 @@ protected:
 };
 
 /// Typedef for a PeakTransform wrapped in a shared_pointer.
-using PeakTransform_sptr = boost::shared_ptr<PeakTransform>;
-using PeakTransform_const_sptr = boost::shared_ptr<const PeakTransform>;
+using PeakTransform_sptr = std::shared_ptr<PeakTransform>;
+using PeakTransform_const_sptr = std::shared_ptr<const PeakTransform>;
 
 /**
 @class PeakTransformException

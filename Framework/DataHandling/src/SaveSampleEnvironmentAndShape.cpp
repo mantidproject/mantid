@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveSampleEnvironmentAndShape.h"
 #include "MantidAPI/FileProperty.h"
@@ -25,7 +25,7 @@ using namespace API;
 using namespace Geometry;
 
 void SaveSampleEnvironmentAndShape::init() {
-  auto wsValidator = boost::make_shared<InstrumentValidator>();
+  auto wsValidator = std::make_shared<InstrumentValidator>();
 
   // input workspace
   declareProperty(

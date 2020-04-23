@@ -68,11 +68,11 @@ private:
 
   void saveCorrectionsToCache(
       const std::string &runNumber,
-      const Mantid::API::MatrixWorkspace_sptr curvesWorkspace,
-      const Mantid::API::ITableWorkspace_sptr integratedWorkspace) const;
+      const Mantid::API::MatrixWorkspace_sptr &curvesWorkspace,
+      const Mantid::API::ITableWorkspace_sptr &integratedWorkspace) const;
 
   void saveNexus(const std::string &filename,
-                 const Mantid::API::Workspace_sptr workspace) const;
+                 const Mantid::API::Workspace_sptr &workspace) const;
 
   EnggDiffCalibSettings m_calibSettings;
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisResultTableTab.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -23,7 +23,7 @@
 #include "MuonSequentialFitDialog.h"
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QFileInfo>
 #include <QHash>
@@ -474,7 +474,7 @@ void MuonAnalysisResultTableTab::populateTables() {
       auto wsFromName = [](const QString &qs) {
         const auto &wsGroup = retrieveWSChecked<WorkspaceGroup>(
             MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + qs.toStdString());
-        return boost::dynamic_pointer_cast<Workspace>(wsGroup);
+        return std::dynamic_pointer_cast<Workspace>(wsGroup);
       };
       populateFittings(getFitLabels().second, wsFromName);
     } else {
@@ -482,7 +482,7 @@ void MuonAnalysisResultTableTab::populateTables() {
       auto wsFromName = [](const QString &qs) {
         const auto &tab = retrieveWSChecked<ITableWorkspace>(qs.toStdString() +
                                                              PARAMS_POSTFIX);
-        return boost::dynamic_pointer_cast<Workspace>(tab);
+        return std::dynamic_pointer_cast<Workspace>(tab);
       };
       populateFittings(fittedWsList, wsFromName);
     }
@@ -676,7 +676,7 @@ bool MuonAnalysisResultTableTab::logNameLessThan(const QString &logName1,
  */
 void MuonAnalysisResultTableTab::populateFittings(
     const QStringList &names,
-    std::function<Workspace_sptr(const QString &)> wsFromName) {
+    const std::function<Workspace_sptr(const QString &)> &wsFromName) {
   // Add number of rows for the amount of fittings.
   m_uiForm.fittingResultsTable->setRowCount(names.size());
 

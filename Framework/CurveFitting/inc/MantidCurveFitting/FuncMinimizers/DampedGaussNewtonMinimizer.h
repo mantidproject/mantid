@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,7 +26,8 @@ namespace FuncMinimisers {
 
     @author Roman Tolchenov, Tessella plc
 */
-class DLLExport DampedGaussNewtonMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL DampedGaussNewtonMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// Constructor
   DampedGaussNewtonMinimizer(double relTol = 0.0001);
@@ -43,7 +44,7 @@ public:
 
 private:
   /// Pointer to the cost function. Must be the least squares.
-  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
+  std::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// Relative tolerance.
   double m_relTol;
   /// The damping mu parameter in the Levenberg-Marquardt method.

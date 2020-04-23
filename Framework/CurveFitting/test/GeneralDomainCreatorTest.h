@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -304,7 +304,7 @@ public:
   }
 
   void test_create_output() {
-    auto fun = boost::shared_ptr<TestFunction1>(new TestFunction1);
+    auto fun = std::shared_ptr<TestFunction1>(new TestFunction1);
     PropertyManager manager;
     GeneralDomainCreator creator(*fun, manager, "InputWorkspace");
     creator.declareDatasetProperties();
@@ -331,7 +331,7 @@ public:
     fun->setParameter(0, 5.0);
     fun->function(*domain, *values);
 
-    auto result = boost::static_pointer_cast<ITableWorkspace>(
+    auto result = std::static_pointer_cast<ITableWorkspace>(
         creator.createOutputWorkspace("out", fun, domain, values));
 
     TS_ASSERT_EQUALS(result->columnCount(), 8);
@@ -371,7 +371,7 @@ public:
   }
 
   void test_create_output_2() {
-    auto fun = boost::shared_ptr<TestFunction2>(new TestFunction2);
+    auto fun = std::shared_ptr<TestFunction2>(new TestFunction2);
     PropertyManager manager;
     GeneralDomainCreator creator(*fun, manager, "InputWorkspace");
     creator.declareDatasetProperties();
@@ -393,7 +393,7 @@ public:
     fun->setParameter(0, 2.0);
     fun->function(*domain, *values);
 
-    auto result = boost::static_pointer_cast<ITableWorkspace>(
+    auto result = std::static_pointer_cast<ITableWorkspace>(
         creator.createOutputWorkspace("out", fun, domain, values));
 
     TS_ASSERT_EQUALS(result->columnCount(), 4);

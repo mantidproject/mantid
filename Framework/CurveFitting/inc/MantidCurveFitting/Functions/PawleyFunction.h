@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
@@ -30,8 +31,9 @@ namespace Functions {
   Additionally it stores the crystal system and the name of the profile function
   that is used to model the Bragg peaks as attributes.
 */
-class DLLExport PawleyParameterFunction : virtual public API::IFunction,
-                                          virtual public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL PawleyParameterFunction
+    : virtual public API::IFunction,
+      virtual public API::ParamFunction {
 public:
   PawleyParameterFunction();
 
@@ -79,7 +81,7 @@ protected:
   std::string m_profileFunctionCenterParameterName;
 };
 
-using PawleyParameterFunction_sptr = boost::shared_ptr<PawleyParameterFunction>;
+using PawleyParameterFunction_sptr = std::shared_ptr<PawleyParameterFunction>;
 
 /** @class PawleyFunction
 
@@ -96,16 +98,15 @@ using PawleyParameterFunction_sptr = boost::shared_ptr<PawleyParameterFunction>;
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 11/03/2015
 */
-class DLLExport PawleyFunction : public API::IPawleyFunction {
+class MANTID_CURVEFITTING_DLL PawleyFunction : public API::IPawleyFunction {
 public:
   PawleyFunction();
 
   /// Returns the name of the function.
   std::string name() const override { return "PawleyFunction"; }
 
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
 
   void setLatticeSystem(const std::string &latticeSystem) override;
   void setProfileFunction(const std::string &profileFunction) override;
@@ -132,7 +133,7 @@ public:
   PawleyParameterFunction_sptr getPawleyParameterFunction() const;
 
 protected:
-  void setPeakPositions(std::string centreName, double zeroShift,
+  void setPeakPositions(const std::string &centreName, double zeroShift,
                         const Geometry::UnitCell &cell) const;
 
   size_t calculateFunctionValues(const API::IPeakFunction_sptr &peak,
@@ -156,7 +157,7 @@ protected:
   int m_peakRadius;
 };
 
-using PawleyFunction_sptr = boost::shared_ptr<PawleyFunction>;
+using PawleyFunction_sptr = std::shared_ptr<PawleyFunction>;
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,7 +14,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -30,8 +30,8 @@ public:
   Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
   Spectra getSpectra() const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  appendGuessToInput(Mantid::API::MatrixWorkspace_sptr guessWorkspace) const;
+  Mantid::API::MatrixWorkspace_sptr appendGuessToInput(
+      const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
 
   TableDatasetIndex getActiveDataIndex() const;
   WorkspaceIndex getActiveSpectrum() const;
@@ -62,18 +62,19 @@ public:
 private:
   std::pair<double, double> getGuessRange() const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  createInputAndGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
-                               Mantid::API::MatrixWorkspace_sptr guessWorkspace,
-                               int spectrum, double startX, double endX) const;
+  Mantid::API::MatrixWorkspace_sptr createInputAndGuessWorkspace(
+      const Mantid::API::MatrixWorkspace_sptr &inputWS,
+      const Mantid::API::MatrixWorkspace_sptr &guessWorkspace, int spectrum,
+      double startX, double endX) const;
 
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-                       Mantid::API::IFunction_const_sptr func, double startX,
-                       double endX) const;
+  createGuessWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,
+                       const Mantid::API::IFunction_const_sptr &func,
+                       double startX, double endX) const;
 
-  std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
-                                    const std::vector<double> &dataX) const;
+  std::vector<double>
+  computeOutput(const Mantid::API::IFunction_const_sptr &func,
+                const std::vector<double> &dataX) const;
 
   Mantid::API::IAlgorithm_sptr
   createWorkspaceAlgorithm(std::size_t numberOfSpectra,
@@ -81,15 +82,16 @@ private:
                            const std::vector<double> &dataY) const;
 
   Mantid::API::MatrixWorkspace_sptr
-  extractSpectra(Mantid::API::MatrixWorkspace_sptr inputWS, int startIndex,
-                 int endIndex, double startX, double endX) const;
+  extractSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                 int startIndex, int endIndex, double startX,
+                 double endX) const;
 
   Mantid::API::MatrixWorkspace_sptr
-  appendSpectra(Mantid::API::MatrixWorkspace_sptr inputWS,
-                Mantid::API::MatrixWorkspace_sptr spectraWS) const;
+  appendSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                const Mantid::API::MatrixWorkspace_sptr &spectraWS) const;
 
   Mantid::API::MatrixWorkspace_sptr
-  cropWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS, double startX,
+  cropWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWS, double startX,
                 double endX, int startIndex, int endIndex) const;
 
   void deleteWorkspace(const std::string &name) const;

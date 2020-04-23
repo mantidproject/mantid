@@ -1,18 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """State describing the creation of pixel and wavelength adjustment workspaces for SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
@@ -20,7 +17,7 @@ from sans.state.state_functions import (is_not_none_and_first_larger_than_second
 from sans.common.enums import (RangeStepType, DetectorType, SANSFacility)
 
 
-class StateAdjustmentFiles(with_metaclass(JsonSerializable)):
+class StateAdjustmentFiles(metaclass=JsonSerializable):
     def __init__(self):
         super(StateAdjustmentFiles, self).__init__()
         self.pixel_adjustment_file = None  # : Str()
@@ -36,7 +33,7 @@ class StateAdjustmentFiles(with_metaclass(JsonSerializable)):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-class StateWavelengthAndPixelAdjustment(with_metaclass(JsonSerializable)):
+class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
         self.wavelength_low = None  # : List[Float] (Positive)

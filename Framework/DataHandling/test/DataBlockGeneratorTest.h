@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -96,8 +96,9 @@ public:
   }
 
 private:
-  void do_test_interval(std::vector<std::pair<int64_t, int64_t>> interval,
-                        std::vector<int64_t> expectedOutput) {
+  void
+  do_test_interval(const std::vector<std::pair<int64_t, int64_t>> &interval,
+                   std::vector<int64_t> expectedOutput) {
     Mantid::DataHandling::DataBlockGenerator generator(interval);
 
     TSM_ASSERT("Should be done", !generator.isDone());

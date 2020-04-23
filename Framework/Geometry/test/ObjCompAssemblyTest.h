@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -72,7 +72,7 @@ public:
     bank.add(det2);
     bank.add(det3);
     TS_ASSERT_EQUALS(bank.nelements(), 3);
-    boost::shared_ptr<IComponent> det1copy;
+    std::shared_ptr<IComponent> det1copy;
     TS_ASSERT_THROWS_NOTHING(det1copy = bank[0]);
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
     // show that they are the same object
@@ -91,7 +91,7 @@ public:
     bank.addCopy(&det2);
     bank.addCopy(&det3, "ChangedDet3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 3);
-    boost::shared_ptr<IComponent> detcopy;
+    std::shared_ptr<IComponent> detcopy;
     TS_ASSERT_THROWS_NOTHING(detcopy = bank[0]);
     TS_ASSERT_EQUALS(det1.getName(), detcopy->getName());
     // show that they are NOT the same object
@@ -362,7 +362,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    boost::shared_ptr<IObject> shape = bank.createOutline();
+    std::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
     detail::ShapeInfo::GeometryShape otype;
@@ -395,7 +395,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    TS_ASSERT_THROWS(boost::shared_ptr<IObject> shape = bank.createOutline(),
+    TS_ASSERT_THROWS(std::shared_ptr<IObject> shape = bank.createOutline(),
                      const std::runtime_error &);
   }
 };

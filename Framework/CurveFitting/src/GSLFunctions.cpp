@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -40,7 +40,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   }
   p->function->applyTies();
 
-  auto values = boost::dynamic_pointer_cast<API::FunctionValues>(
+  auto values = std::dynamic_pointer_cast<API::FunctionValues>(
       p->costFunction->getValues());
   if (!values) {
     throw std::invalid_argument("FunctionValues expected");
@@ -132,7 +132,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   // functionDeriv() return derivatives of calculated data values. Need to
   // convert this values into
   // derivatives of calculated-observed divided by error values used by GSL
-  auto values = boost::dynamic_pointer_cast<API::FunctionValues>(
+  auto values = std::dynamic_pointer_cast<API::FunctionValues>(
       p->costFunction->getValues());
   if (!values) {
     throw std::invalid_argument("FunctionValues expected");
@@ -163,7 +163,7 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
  * @param cf :: ICostFunction
  */
 GSL_FitData::GSL_FitData(
-    boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf)
+    const std::shared_ptr<CostFunctions::CostFuncLeastSquares> &cf)
     : function(cf->getFittingFunction()), costFunction(cf) {
   gsl_set_error_handler_off();
   // number of active parameters

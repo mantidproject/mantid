@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -49,7 +49,7 @@ void OptimizeLatticeForCellType::init() {
   cellTypes.emplace_back(ReducedCell::MONOCLINIC());
   cellTypes.emplace_back(ReducedCell::TRICLINIC());
   declareProperty("CellType", cellTypes[0],
-                  boost::make_shared<StringListValidator>(cellTypes),
+                  std::make_shared<StringListValidator>(cellTypes),
                   "Select the cell type.");
   declareProperty("Apply", false, "Re-index the peaks");
   declareProperty("PerRun", false, "Make per run orientation matrices");
@@ -108,7 +108,7 @@ void OptimizeLatticeForCellType::exec() {
     for (const auto &peak : peaks_all) {
       if (peak.getRunNumber() != run) {
         count++; // first entry in runWS is input workspace
-        auto cloneWS = boost::make_shared<PeaksWorkspace>();
+        auto cloneWS = std::make_shared<PeaksWorkspace>();
         cloneWS->setInstrument(inst);
         cloneWS->copyExperimentInfoFrom(ws.get());
         runWS.emplace_back(cloneWS);
@@ -145,8 +145,8 @@ void OptimizeLatticeForCellType::exec() {
       throw;
     }
 
-    fit_alg->setProperty(
-        "Function", boost::static_pointer_cast<IFunction>(latticeFunction));
+    fit_alg->setProperty("Function",
+                         std::static_pointer_cast<IFunction>(latticeFunction));
     fit_alg->setProperty("Ties", "ZeroShift=0.0");
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
@@ -245,7 +245,7 @@ OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
   API::IFunction_sptr rawFunction =
       API::FunctionFactory::Instance().createInitialized(fun_str.str());
   API::ILatticeFunction_sptr latticeFunction =
-      boost::dynamic_pointer_cast<API::ILatticeFunction>(rawFunction);
+      std::dynamic_pointer_cast<API::ILatticeFunction>(rawFunction);
   if (latticeFunction) {
     latticeFunction->setUnitCell(cell);
   }

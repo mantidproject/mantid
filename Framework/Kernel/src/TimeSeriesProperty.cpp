@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/EmptyValues.h"
@@ -1388,7 +1388,7 @@ TimeSeriesProperty<TYPE>::setValueFromJson(const Json::Value & /*unused*/) {
  */
 template <typename TYPE>
 std::string TimeSeriesProperty<TYPE>::setDataItem(
-    const boost::shared_ptr<DataItem> /*unused*/) {
+    const std::shared_ptr<DataItem> & /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from "
                                        "DataItem");

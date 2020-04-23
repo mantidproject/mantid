@@ -14,7 +14,9 @@ the given name.
 
 To date this algorithm only supports: IN4, IN5, IN6 and PANTHER.
 
-This algorithm also supports diffraction mode. In this case, the unit of the output workspace will be wavelength instead of time-of-flight.
+By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the ConvertToTOF option.
+
+This algorithm also supports diffraction mode. In this case, the unit of the output workspace will be wavelength instead of time-of-flight or channel.
 
 .. note::
     The initial time-of-flight axis is set up using the 'time_of_flight' field in the NeXus file. Therefore the conversion from 'TOF' to 'DeltaE' may not give the correct zero-energy transfer.

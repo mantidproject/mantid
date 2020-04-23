@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -56,7 +56,7 @@ public slots:
   void setMaximum(double /*val*/); ///< outside setting of value
   void reapply();                  ///< re-apply the range selector lines
   void detach(); ///< Detach range selector lines from the plot
-  void setColour(QColor colour);
+  void setColour(const QColor &colour);
   void setInfoOnly(bool state);
   void setVisible(bool state);
 

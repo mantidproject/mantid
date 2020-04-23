@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -117,8 +117,8 @@ public:
   void testSelectedSpectrum() {
     MatrixWorkspace_sptr inputWs = loadDataFromFile();
 
-    boost::shared_ptr<ITableWorkspace> deadTimes =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    std::shared_ptr<ITableWorkspace> deadTimes =
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     deadTimes->addColumn("int", "Spectrum Number");
     deadTimes->addColumn("double", "DeadTime Value");
 
@@ -225,9 +225,9 @@ private:
    * @param numSpectra :: [input] Number of rows in the table
    * @returns :: Dead time table
    */
-  boost::shared_ptr<ITableWorkspace> makeDeadTimeTable(size_t numSpectra) {
-    boost::shared_ptr<ITableWorkspace> deadTimes =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+  std::shared_ptr<ITableWorkspace> makeDeadTimeTable(size_t numSpectra) {
+    std::shared_ptr<ITableWorkspace> deadTimes =
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     deadTimes->addColumn("int", "Spectrum Number");
     deadTimes->addColumn("double", "DeadTime Value");
     for (size_t i = 0; i < numSpectra; i++) {
@@ -250,7 +250,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
     Workspace_sptr data = loader.getProperty("OutputWorkspace");
-    auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(data);
+    auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(data);
     TS_ASSERT(data);
     return matrixWS;
   }

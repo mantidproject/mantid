@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SpecularReflectionAlgorithmTest.h
@@ -68,7 +68,8 @@ protected:
   }
 
   VerticalHorizontalOffsetType determine_vertical_and_horizontal_offsets(
-      MatrixWorkspace_sptr ws, std::string detectorName = "point-detector") {
+      const MatrixWorkspace_sptr &ws,
+      const std::string &detectorName = "point-detector") {
     auto instrument = ws->getInstrument();
     const V3D pointDetector =
         instrument->getComponentByName(detectorName)->getPos();

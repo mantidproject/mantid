@@ -1,14 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidKernel/V2D.h"
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
+
 /**
  *
  * The functions in this file intend to calculate the paramters of an ellipse
@@ -94,8 +96,8 @@ namespace {
  * @param zVal: the z value (in the ellipse frame)
  * @return the origin of the ellipse
  */
-Mantid::Kernel::V3D getOrigin(Mantid::Kernel::DblMatrix AInverse,
-                              Mantid::Kernel::DblMatrix B,
+Mantid::Kernel::V3D getOrigin(const Mantid::Kernel::DblMatrix &AInverse,
+                              const Mantid::Kernel::DblMatrix &B,
                               Mantid::Kernel::V3D originEllipsoid,
                               double zVal) {
   const auto multiplied = AInverse * B;
@@ -167,16 +169,17 @@ getEigenVectorsForEllipse(const Mantid::Kernel::DblMatrix &MM,
  * @return radii and directions
  */
 EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A,
-                                      Mantid::Kernel::DblMatrix AInverse,
-                                      Mantid::Kernel::DblMatrix B,
-                                      Mantid::Kernel::DblMatrix BT, double c) {
+                                      const Mantid::Kernel::DblMatrix &AInverse,
+                                      const Mantid::Kernel::DblMatrix &B,
+                                      const Mantid::Kernel::DblMatrix &BT,
+                                      double c) {
   // Calculate the denominator: (Transpose[B]*A^(-1)*B/4 - (c-1))
   const auto temp1 = AInverse * B;
   const auto temp2 = BT * temp1;
   const auto denominator = 0.25 * temp2[0][0] - c + 1;
 
   // Calculate the MM matrix: A/(Transpose[B]*A^(-1)*B/4 - (c-1))
-  auto MM = A;
+  auto MM = std::move(A);
   MM /= denominator;
 
   // Calculate the Eigenvalues: since we are dealing with EVs of a
@@ -234,7 +237,8 @@ SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
     std::vector<Mantid::Kernel::V3D> directions, std::vector<double> radii,
     Mantid::Kernel::V3D originEllipsoid, double zPlane) const {
   // Setup the Ellipsoid Matrix
-  auto m = createEllipsoidMatrixInXYZFrame(directions, radii);
+  auto m =
+      createEllipsoidMatrixInXYZFrame(std::move(directions), std::move(radii));
 
   auto isEllipsoid = checkIfIsEllipse(m);
 

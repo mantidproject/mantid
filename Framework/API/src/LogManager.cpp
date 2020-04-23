@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/Cache.h"
@@ -548,6 +548,14 @@ void LogManager::loadNexus(::NeXus::File *file,
  * Clear the logs.
  */
 void LogManager::clearLogs() { m_manager->clear(); }
+
+bool LogManager::operator==(const LogManager &other) const {
+  return *m_manager == *(other.m_manager);
+}
+
+bool LogManager::operator!=(const LogManager &other) const {
+  return *m_manager != *(other.m_manager);
+}
 
 //-----------------------------------------------------------------------------------------------------------------------
 // Private methods
