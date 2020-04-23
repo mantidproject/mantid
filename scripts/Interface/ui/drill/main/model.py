@@ -180,10 +180,10 @@ class DrillModel(QObject):
                 else:
                     row.append("")
             if self.columns[-1] in sample:
-                options = str()
+                options = list()
                 for (k, v) in sample[self.columns[-1]].items():
-                    options += str(k) + "=" + str(v)
-                row.append(options)
+                    options.append(str(k) + "=" + str(v))
+                row.append(','.join(options))
             rows.append(row)
         return rows
 
