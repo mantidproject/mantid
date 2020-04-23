@@ -39,7 +39,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.parameter_display_combo.blockSignals(True)
         name = self.parameter_display_combo.currentText()
         self.parameter_display_combo.clear()
-
         self.parameter_display_combo.addItems(data_list)
 
         index = self.parameter_display_combo.findText(name)

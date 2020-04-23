@@ -189,6 +189,10 @@ class FittingTabPresenter(object):
         self.view.plot_guess_checkbox.setChecked(False)
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        # Update parameter values in sequential tab.
+        parameter_values = self.model.get_fit_function_parameter_values(fit_function)
+        self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
+        self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_error(self, error):
         self.thread_success = False

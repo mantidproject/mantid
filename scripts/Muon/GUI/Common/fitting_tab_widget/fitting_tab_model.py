@@ -612,6 +612,9 @@ class FittingTabModel(object):
                 group_and_pair=grp_and_pair,
                 phasequad=False,
                 rebin=not self.fit_to_raw, freq=self.freq_type())
+
+        selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))
+        selected_workspaces.sort(key=self.workspace_list_sorter)
         return selected_workspaces
 
     def get_runs_groups_and_pairs_for_fits(self):
@@ -623,7 +626,7 @@ class FittingTabModel(object):
             for workspace in selected_workspaces:
                 runs += [get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)]
                 groups_and_pairs += [get_group_or_pair_from_name(workspace)]
-            run_groups_and_pairs = sorted(zip(runs, groups_and_pairs))
+            run_groups_and_pairs = list(zip(runs, groups_and_pairs))
             groups_and_pairs = [grp_pair for _, grp_pair in run_groups_and_pairs]
             runs = [run for run, _ in run_groups_and_pairs]
         else:
@@ -726,3 +729,7 @@ class FittingTabModel(object):
     def get_separated_workspaces(workspace_names):
         separated_workspaces = workspace_names.split('-')
         return separated_workspaces
+
+    @staticmethod
+    def _check_data_exists(guess_selection):
+        return [item for item in guess_selection if AnalysisDataService.doesExist(item)]
