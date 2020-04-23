@@ -149,7 +149,7 @@ void addInputDataToSimultaneousFitWithEqualRange(
   for (auto index = FitDomainIndex{0};
        index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
     std::string suffix =
-        index == FitDomainIndex{0} ? "" : std::to_string(index.value);
+        index == FitDomainIndex{0} ? "" : "_" + std::to_string(index.value);
     addInputDataToSimultaneousFit(
         fitAlgorithm, fittingData->getWorkspace(index),
         fittingData->getSpectrum(index), fittingRange,
@@ -162,7 +162,7 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
   for (auto index = FitDomainIndex{0};
        index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
     std::string suffix =
-        index == FitDomainIndex{0} ? "" : std::to_string(index.value);
+        index == FitDomainIndex{0} ? "" : "_" + std::to_string(index.value);
     addInputDataToSimultaneousFit(
         fitAlgorithm, fittingData->getWorkspace(index),
         fittingData->getSpectrum(index), fittingData->getFittingRange(index),
@@ -204,6 +204,27 @@ void cleanTemporaries(const std::string &base) {
   removeFromADSIfExists(base + "_Parameters");
   removeFromADSIfExists(base + "_Workspace");
   removeFromADSIfExists(base + "_NormalisedCovarianceMatrix");
+}
+
+std::ostringstream &addInputString(const std::string &workspaceName,
+                                   int workspaceIndex,
+                                   std::ostringstream &stream) {
+  if (!workspaceName.empty()) {
+    stream << workspaceName << ",i" << workspaceIndex << ";";
+    return stream;
+  } else
+    throw std::runtime_error(
+        "Workspace name is empty. The sample workspace may not be loaded.");
+}
+
+std::string constructInputString(const IIndirectFitData *fittingData) {
+  std::ostringstream input;
+  for (auto index = FitDomainIndex{0};
+       index < fittingData->getNumberOfDomains(); index++) {
+    addInputString(fittingData->getWorkspace(index)->getName(),
+                   fittingData->getSpectrum(index), input);
+  }
+  return input.str();
 }
 
 void cleanTemporaries(const std::string &base,
@@ -747,7 +768,7 @@ IndirectFittingModel::simultaneousFitAlgorithm() const {
 
 IAlgorithm_sptr
 IndirectFittingModel::createSequentialFit(IFunction_sptr function) const {
-  const auto input = std::string(); // constructInputString(m_fittingData);
+  const auto input = constructInputString(m_fitDataModel.get());
   return createSequentialFit(std::move(function), input);
 }
 
@@ -781,6 +802,7 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFit(
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, m_fitDataModel.get());
+  fitAlgorithm->setProperty("OutputWorkspace", simultaneousFitOutputName());
   return fitAlgorithm;
 }
 
