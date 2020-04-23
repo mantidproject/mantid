@@ -165,30 +165,22 @@ Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
       std::move(m_triangle), std::move(m_vertices), material);
   mesh->setID(meshObject->GetName());
 
-  // 3MF stores transformation matrix as row major so transpose
-  // to store in Mantid Matrix class
-
-  // scale the translation entries on 3rd row into metres
+  // 3MF stores transformation as a 4 x 3 matrix using row major convention
+  // The 4th column is implicit (0,0,0,1)
   Kernel::Matrix<double> transformMatrix(4, 4);
-  transformMatrix[0][0] = buildTransform.m_Fields[0][0];
-  transformMatrix[0][1] = buildTransform.m_Fields[1][0];
-  transformMatrix[0][2] = buildTransform.m_Fields[2][0];
-  transformMatrix[0][3] = scaleValue(buildTransform.m_Fields[3][0]);
 
-  transformMatrix[1][0] = buildTransform.m_Fields[0][1];
-  transformMatrix[1][1] = buildTransform.m_Fields[1][1];
-  transformMatrix[1][2] = buildTransform.m_Fields[2][1];
-  transformMatrix[1][3] = scaleValue(buildTransform.m_Fields[3][1]);
-
-  transformMatrix[2][0] = buildTransform.m_Fields[0][2];
-  transformMatrix[2][1] = buildTransform.m_Fields[1][2];
-  transformMatrix[2][2] = buildTransform.m_Fields[2][2];
-  transformMatrix[2][3] = scaleValue(buildTransform.m_Fields[3][2]);
-
-  transformMatrix[3][0] = 0;
-  transformMatrix[3][1] = 0;
-  transformMatrix[3][2] = 0;
-  transformMatrix[3][3] = 1;
+  // copy data into Mantid matrix and transpose
+  for (size_t i = 0; i < 4; i++) {
+    for (size_t j = 0; j < 3; j++) {
+      transformMatrix[j][i] = buildTransform.m_Fields[i][j];
+    }
+  }
+  // fill in the implicit row and make explicit
+  transformMatrix.setRow(3, {0, 0, 0, 1});
+  // scale the translations into metres
+  for (size_t i = 0; i < 3; i++) {
+    transformMatrix[i][3] = scaleValue(transformMatrix[i][3]);
+  }
 
   mesh->multiply(transformMatrix);
 
