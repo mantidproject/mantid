@@ -330,13 +330,20 @@ public:
 
     auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
         run.getLogData("cryo_temp1"));
-    std::vector<double> correctFiltered1{0., 0., 0.};
-    TS_ASSERT_EQUALS(pclogFiltered1->valuesAsVector(), correctFiltered1);
+    //middle value is invalid and is filtered out
+    TS_ASSERT_DELTA(pclogFiltered1->nthValue(0), 3, 1e-5);
+    TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
 
     auto pclogFiltered2 = dynamic_cast<TimeSeriesProperty<double> *>(
         run.getLogData("cryo_temp2"));
-    std::vector<double> correctFiltered2{0., 0., 0.};
-    TS_ASSERT_EQUALS(pclogFiltered2->valuesAsVector(), correctFiltered2);
+    std::vector<double> correctFiltered2{3., 5., 7.};
+    // Here the entire log is filtered out
+    // Our filtering in this case does not filter anything.
+    // This seems stringe, but actually may be what people want,
+    // It also resolves the question of what we should do with an entirely invalid log.
+    TS_ASSERT_DELTA(pclogFiltered2->nthValue(0), 3, 1e-5);
+    TS_ASSERT_DELTA(pclogFiltered2->nthValue(1), 5, 1e-5);
+    TS_ASSERT_DELTA(pclogFiltered2->nthValue(2), 7, 1e-5);
   }
 
 private:
