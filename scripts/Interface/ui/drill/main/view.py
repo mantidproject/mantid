@@ -419,7 +419,7 @@ class DrillView(QMainWindow):
                 )
         if not filename[0]:
             return
-        self.rundex_saved_emit(filename[0])
+        self.rundex_saved.emit(filename[0])
 
     def display_help(self):
         pass
