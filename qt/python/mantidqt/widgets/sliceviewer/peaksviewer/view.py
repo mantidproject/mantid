@@ -36,6 +36,7 @@ class PeaksViewerView(QWidget):
         super().__init__(parent)
         self._painter = painter
         self._sliceinfo_provider = sliceinfo_provider
+        self._current_selection = None
         self._group_box = None
         self._presenter = None
         self._table_view = None
@@ -57,12 +58,9 @@ class PeaksViewerView(QWidget):
 
     @property
     def selected_index(self):
-        # construction ensures we can only have 0 or 1 items selected
-        selected = self.table_view.selectedItems()
-        if not selected:
-            return None
-
-        return self.table_view.row(selected[0])
+        # cache current selection for checking in mouse click handler
+        self._current_selection = self._selected_index()
+        return self._current_selection
 
     def clear_peaks(self, peaks):
         """Clear all peaks from display"""
@@ -115,6 +113,10 @@ class PeaksViewerView(QWidget):
         self._table_view = PeaksWorkspaceTableView(parent=self)
         self._table_view.setSelectionBehavior(PeaksWorkspaceTableView.SelectRows)
         self._table_view.setSelectionMode(PeaksWorkspaceTableView.SingleSelection)
+        # itemSelectionChanges handles selection changes from either keyboard/mouse
+        self._table_view.itemSelectionChanged.connect(self._on_row_selection_changed)
+        # the selection might not change when an item is clicked but we want to notify
+        # the outside world
         self._table_view.itemClicked.connect(self._on_row_clicked)
 
         group_box_layout = QVBoxLayout()
@@ -124,12 +126,30 @@ class PeaksViewerView(QWidget):
         widget_layout.addWidget(self._group_box)
         self.setLayout(widget_layout)
 
-    def _on_row_clicked(self, _):
+    def _on_row_selection_changed(self):
         """
-        Slot to handle row clicks. It is assumed only single row
-        selection is allowed
+        Notify that a different peak has been selected. It is assumed only single row selection is allowed
         """
         self._presenter.notify(self._presenter.Event.PeakSelected)
+
+    def _on_row_clicked(self, _):
+        """
+        When a peak is clicked check if it is already selected and notify that this
+        peak has been selected again. Handles the case when selecting the same
+        peak needs to reset another view. Care is taken to avoid emitting the peak
+        selection notification when peak selection changes as _on_row_selection_changed
+        handles this.
+        """
+        if self._current_selection == self._selected_index():
+            self._presenter.notify(self._presenter.Event.PeakSelected)
+
+    def _selected_index(self):
+        # construction ensures we can only have 0 or 1 items selected
+        selected = self.table_view.selectedItems()
+        if not selected:
+            return None
+
+        return self.table_view.row(selected[0])
 
 
 class PeaksViewerCollectionView(QWidget):
