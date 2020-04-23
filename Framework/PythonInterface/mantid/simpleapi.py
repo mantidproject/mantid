@@ -101,64 +101,23 @@ def _create_generic_signature(algm_object):
     #       taking care of giving no default values to mandatory parameters
     #   2 - All output properties will be removed from the function
     #       argument list
-    if hasattr(inspect, 'Signature'):
-        from inspect import Parameter, Signature
-        pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
-        parameters = []
-        for name in algm_object.mandatoryProperties():
-            prop = algm_object.getProperty(name)
-            # Mandatory parameters are those for which the default value is not valid
-            if isinstance(prop.isValid, str):
-                valid_str = prop.isValid
-            else:
-                valid_str = prop.isValid()
-            if len(valid_str) > 0:
-                parameters.append(Parameter(name, pos_or_keyword))
-            else:
-                # None is not quite accurate here, but we are reproducing the
-                # behavior found in the C++ code for SimpleAPI.
-                parameters.append(Parameter(name, pos_or_keyword, default=None))
-        return Signature(parameters)
-    else:
-        return _create_generic_signature_legacy(algm_object)
-
-
-# Drop this when dropping Python 2
-def _create_generic_signature_legacy(algm_object):
-    """
-    Create a function signature appropriate for the given algorithm.
-    :param algm_object: An algorithm instance
-    :return: A 2-tuple suitable to replace func_code.co_varnames
-    """
-    # Dark magic to get the correct function signature
-    # Calling help(...) on the wrapper function will produce a function
-    # signature along the lines of AlgorithmName(*args, **kwargs).
-    # We will replace the name "args" by the list of properties, and
-    # the name "kwargs" by "Version=X".
-    #   1 - Get the algorithm properties and build a string to list them,
-    #       taking care of giving no default values to mandatory parameters
-    #   2 - All output properties will be removed from the function
-    #       argument list
-    arg_list = []
-    for p in algm_object.mandatoryProperties():
-        prop = algm_object.getProperty(p)
+    from inspect import Parameter, Signature
+    pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
+    parameters = []
+    for name in algm_object.mandatoryProperties():
+        prop = algm_object.getProperty(name)
         # Mandatory parameters are those for which the default value is not valid
         if isinstance(prop.isValid, str):
             valid_str = prop.isValid
         else:
             valid_str = prop.isValid()
         if len(valid_str) > 0:
-            arg_list.append(p)
+            parameters.append(Parameter(name, pos_or_keyword))
         else:
             # None is not quite accurate here, but we are reproducing the
             # behavior found in the C++ code for SimpleAPI.
-            arg_list.append("%s=None" % p)
-
-    # Build the function argument string from the tokens we found
-    arg_str = ','.join(arg_list)
-    # Calling help(...) will put a * in front of the first parameter name,
-    # so we use \b to delete it
-    return "\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version()
+            parameters.append(Parameter(name, pos_or_keyword, default=None))
+    return Signature(parameters)
 
 
 def _show_dialog_fn_deprecation_warning(name):
