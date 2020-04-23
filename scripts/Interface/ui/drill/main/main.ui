@@ -233,7 +233,7 @@
      </layout>
     </item>
     <item>
-     <widget class="QTableWidget" name="table">
+     <widget class="DrillTableWidget" name="table">
       <attribute name="horizontalHeaderStretchLastSection">
        <bool>true</bool>
       </attribute>
@@ -294,7 +294,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -411,6 +411,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DrillTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>Interface.ui.drill.main.DrillTableWidget</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

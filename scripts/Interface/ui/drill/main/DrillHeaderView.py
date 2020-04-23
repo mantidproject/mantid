@@ -19,8 +19,9 @@ class DrillHeaderView(QHeaderView):
     BUTTON_TEXT_UNFOLDED = "-"  # push button text when the section is unfolded
     BUTTON_MARGIN = 2           # margin around the push button
 
-    def __init__(self):
-        super(DrillHeaderView, self).__init__(Qt.Horizontal)
+    def __init__(self, parent=None):
+        super(DrillHeaderView, self).__init__(Qt.Horizontal, parent)
+        self.setDefaultAlignment(Qt.AlignLeft)
         self.buttonsRectangles = dict()
         self.sectionsFolded = dict()  # folded columns indexes
         self.sectionsTexts = dict()   # folded columns text

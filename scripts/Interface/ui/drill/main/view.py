@@ -17,9 +17,6 @@ from mantidqt.widgets import manageuserdirectories, instrumentselector
 from mantid.kernel import UsageService, FeatureType, config, logger
 from mantidqt import icons
 
-from .DrillHeaderView import DrillHeaderView
-from .DrillItemDelegate import DrillItemDelegate
-
 class DrillView(QMainWindow):
 
     # Signals that the view can send and data that they include
@@ -38,7 +35,8 @@ class DrillView(QMainWindow):
         self.here = os.path.dirname(os.path.realpath(__file__))
 
         # setup ui
-        uic.loadUi(os.path.join(self.here, 'main.ui'), self)
+        uic.loadUi(os.path.join(self.here, 'main.ui'), self,
+                'Interface.ui.drill.main.DrillTableWidget')
         self.setup_header()
         self.setup_table()
 
@@ -125,15 +123,6 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        header = DrillHeaderView()
-        header.setSectionsClickable(True)
-        header.setHighlightSections(True)
-        self.table.setHorizontalHeader(header)
-        table_header = self.table.horizontalHeader()
-        table_header.setDefaultAlignment(Qt.AlignLeft)
-        table_header.setSectionResizeMode(QHeaderView.Interactive)
-        delegate = DrillItemDelegate(self.table)
-        self.table.setItemDelegate(delegate)
         self.table.cellChanged.connect(
                 lambda row, column : self.data_changed.emit(row, column)
                 )
