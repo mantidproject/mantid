@@ -8,7 +8,6 @@
 #  This file is part of the mantidqt package.
 from mantid.api import IPeaksWorkspace, ITableWorkspace
 from mantid.kernel import V3D
-from mantid.simpleapi import DeleteTableRows, SortPeaksWorkspace, SortTableWorkspace, StatisticsOfTableWorkspace
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.marked_columns import MarkedColumns
 
@@ -123,13 +122,16 @@ class TableWorkspaceDisplayModel:
         return self.ws.name() == workspace_name
 
     def delete_rows(self, selected_rows):
+        from mantid.simpleapi import DeleteTableRows
         DeleteTableRows(self.ws, selected_rows)
 
     def get_statistics(self, selected_columns):
+        from mantid.simpleapi import StatisticsOfTableWorkspace
         stats = StatisticsOfTableWorkspace(self.ws, selected_columns)
         return stats
 
     def sort(self, column_index, sort_ascending):
+        from mantid.simpleapi import SortPeaksWorkspace, SortTableWorkspace
         column_name = self.ws.getColumnNames()[column_index]
         if self.is_peaks_workspace():
             SortPeaksWorkspace(

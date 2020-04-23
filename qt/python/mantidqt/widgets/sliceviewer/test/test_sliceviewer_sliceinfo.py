@@ -9,7 +9,7 @@
 import unittest
 
 # local imports
-from mantidqt.widgets.sliceviewer.model import SliceInfo
+from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
 
 
 class SliceInfoTest(unittest.TestCase):

@@ -136,13 +136,15 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
-      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewercollection_presenter.py
-      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksworkspaceselectormodel.py
-      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksworkspaceselectorpresenter.py
-      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_createpeaksrepresentation.py
-      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_painter.py
-      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_representation_nonintegrated.py
-      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_representation_spherical.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_alpha.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_draw.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_painter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_nonintegrated.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_spherical.py
       mantidqt/widgets/test/test_jupyterconsole.py
       mantidqt/widgets/workspacedisplay/test/test_data_copier.py
       mantidqt/widgets/workspacedisplay/test/test_user_notifier.py

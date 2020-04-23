@@ -12,7 +12,8 @@
 import mantid.api
 
 # local imports
-from .model import SliceViewerModel, WS_TYPE, SliceInfo
+from .model import SliceViewerModel, WS_TYPE
+from .sliceinfo import SliceInfo
 from .view import SliceViewerView
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 

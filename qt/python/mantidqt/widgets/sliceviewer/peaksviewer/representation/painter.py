@@ -87,6 +87,10 @@ class MplPainter(object):
             raise ValueError("Expected matplotlib.axes.Axes instance. Found {}.".format(type(axes)))
         self._axes = axes
 
+    @property
+    def axes(self):
+        return self._axes
+
     def remove(self, artist):
         """
         Remove the painted artifact from the drawn destination
@@ -177,6 +181,14 @@ class Painted(object):
     def __init__(self, painter, artists):
         self._painter = painter
         self._artists = artists
+
+    @property
+    def artists(self):
+        return self._artists
+
+    @property
+    def painter(self):
+        return self._painter
 
     def remove(self):
         for artist in self._artists:

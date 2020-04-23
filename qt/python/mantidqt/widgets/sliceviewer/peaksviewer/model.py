@@ -14,7 +14,7 @@ from mantid.kernel import logger
 # local imports
 from mantidqt.widgets.workspacedisplay.table.model \
     import TableWorkspaceDisplayModel
-from .representation import draw_peak_representation
+from .representation.draw import draw_peak_representation
 
 # constants
 # cycle colors for each peaks workspace - it is unlikely there will be more than 3
@@ -51,7 +51,6 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         super().__init__(peaks_ws)
         self._fg_color = fg_color
         self._bg_color = bg_color
-        self._visible_peaks = []
         self._representations = []
 
     @property
@@ -65,10 +64,6 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     @property
     def peaks_workspace(self):
         return self.ws
-
-    @property
-    def visible_peaks(self):
-        return self._visible_peaks
 
     def clear_peak_representations(self):
         """
