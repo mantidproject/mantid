@@ -20,15 +20,15 @@ from mantidqt import icons
 class DrillView(QMainWindow):
 
     # Signals that the view can send and data that they include
-    instrument_changed = Signal(str)  # the instrument
-    technique_changed = Signal(int)   # the technique index
-    row_added = Signal(int)           # the row index
-    row_deleted = Signal(int)         # the row index
-    data_changed = Signal(int, int)   # the row and column indexes
-    process = Signal(list)            # the list of row indexes
+    instrument_changed = Signal(str)       # the instrument
+    technique_changed = Signal(int)        # the technique index
+    row_added = Signal(int)                # the row index
+    row_deleted = Signal(int)              # the row index
+    data_changed = Signal(int, int, str)   # the row and column indexes and the contents
+    process = Signal(list)                 # the list of row indexes
     process_stopped = Signal()
-    rundex_loaded = Signal(str)       # the path and filename
-    rundex_saved = Signal(str)        # the path and filename
+    rundex_loaded = Signal(str)            # the path and filename
+    rundex_saved = Signal(str)             # the path and filename
 
     def __init__(self):
         super(DrillView, self).__init__()
@@ -123,175 +123,17 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        self.table.cellChanged.connect(
-                lambda row, column : self.data_changed.emit(row, column)
+        self.table.rowAdded.connect(
+                lambda position : self.row_added.emit(position)
                 )
-
-    ###########################################################################
-    # table interactions                                                      #
-    ###########################################################################
-
-    def add_row(self, position):
-        """
-        Add a row in the table at a given valid postion.
-
-        Args:
-            position (int): row index
-        """
-        n_rows = self.table.rowCount()
-        if ((position < 0) or (position > n_rows)):
-            return
-        self.table.insertRow(position)
-        self.row_added.emit(position)
-
-    def del_row(self, position):
-        """
-        Delete a row at a given position (if this row exists).
-
-        Args:
-            position(int): row index
-        """
-        n_rows = self.table.rowCount()
-        if ((position < 0) or (position >= n_rows)):
-            return
-        self.table.removeRow(position)
-        self.row_deleted.emit(position)
-
-    def erase_row(self, position):
-        """
-        Erase the contents of a whole row (if it exists).
-
-        Args:
-            position (int): row index
-        """
-        n_rows = self.table.rowCount()
-        if ((position < 0) or (position >= n_rows)):
-            return
-        for column in range(self.table.columnCount()):
-            self.table.takeItem(position, column)
-            self.data_changed.emit(position, column)
-
-    def get_selected_rows(self):
-        """
-        Get the list of currently selected rows.
-
-        Returns:
-            list(int): list of selected rows indexes
-        """
-        selected_rows = self.table.selectionModel().selectedRows()
-        rows = [row.row() for row in selected_rows]
-        return rows
-
-    def get_selected_cells(self):
-        """
-        Get the coordinates of the selected cells.
-
-        Returns:
-            list(tuple(int, int)): the coordinates (row, column) of the
-                selected cells
-        """
-        selected_indexes = self.table.selectionModel().selectedIndexes()
-        return [(i.row(), i.column()) for i in selected_indexes]
-
-    def get_last_selected_row(self):
-        """
-        Get the further down selected row.
-
-        Returns:
-            int: the row index, -1 if no row selected.
-        """
-        rows = self.get_selected_rows()
-        if rows:
-            return rows[-1]
-        else:
-            return -1
-
-    def get_all_rows(self):
-        """
-        Get the list of all rows indexes.
-
-        Returns:
-            list(int): list of rows indexes
-        """
-        return list(range(self.table.rowCount()))
-
-    def get_last_row(self):
-        """
-        Get the further down row of the whole table.
-
-        Returns:
-            int: the row index, -1 if the table is empty
-        """
-        rows = self.get_all_rows()
-        if rows:
-            return rows[-1]
-        else:
-            return -1
-
-    def get_cell_contents(self, row, column):
-        """
-        Get the contents of a given cell as a string.
-
-        Args:
-            row (int): row index
-            column (int): column index
-
-        Returns:
-            str: cell contents
-        """
-        cell = self.table.item(row, column)
-        if cell:
-            return cell.text()
-        else:
-            return ""
-
-    def set_cell_contents(self, row, column, contents):
-        """
-        Set the content of an existing cell.
-
-        Args:
-            row (int): row index
-            column (int): column index
-            contents (str): cell contents
-        """
-        n_rows = self.table.rowCount()
-        n_columns = self.table.columnCount()
-        if ((row < 0) or (row >= n_rows) \
-            or (column < 0) or (column >= n_columns)):
-            return
-        cell = QTableWidgetItem(contents)
-        self.table.setItem(row, column, cell)
-
-    def get_row_contents(self, row):
-        """
-        Get the contents of a whole row.
-
-        Args:
-            row (int): row index
-
-        Returns:
-            list(str): the row contents
-        """
-        contents = list()
-        for column in range(self.table.columnCount()):
-            contents.append(self.get_cell_contents(row, column))
-        return contents
-
-    def set_row_contents(self, row, contents):
-        """
-        Set the content of an existing row.
-
-        Args:
-            row (int): row index
-            contents (list(str)): contents
-        """
-        n_rows = self.table.rowCount()
-        if ((row < 0) or (row >= n_rows)):
-            return
-        column = 0
-        for txt in contents:
-            self.set_cell_contents(row, column, txt)
-            column += 1
+        self.table.rowDeleted.connect(
+                lambda position : self.row_deleted.emit(position)
+                )
+        self.table.cellChanged.connect(
+                lambda row, column :
+                self.data_changed.emit(row, column,
+                                       self.table.getCellContents(row, column))
+                )
 
     ###########################################################################
     # actions                                                                 #
@@ -312,12 +154,12 @@ class DrillView(QMainWindow):
         """
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Copy rows button"], False)
-        rows = self.get_selected_rows()
+        rows = self.table.getSelectedRows()
         if not rows:
             return
         self.buffer = list()
         for row in rows:
-            self.buffer.append(self.get_row_contents(row))
+            self.buffer.append(self.table.getRowContents(row))
 
     def cut_selected_rows(self):
         """
@@ -325,12 +167,12 @@ class DrillView(QMainWindow):
         """
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Cut rows button"], False)
-        rows = self.get_selected_rows()
+        rows = self.table.getSelectedRows()
         if not rows:
             return
         self.buffer = list()
         for row in rows:
-            self.buffer.append(self.get_row_contents(row))
+            self.buffer.append(self.table.getRowContents(row))
         self.del_selected_rows()
 
     def paste_rows(self):
@@ -339,10 +181,10 @@ class DrillView(QMainWindow):
         """
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Paste rows button"], False)
-        position = self.get_last_selected_row() + 1
+        position = self.table.getLastSelectedRow() + 1
         for row_contents in self.buffer:
-            self.add_row(position)
-            self.set_row_contents(position, row_contents)
+            self.table.addRow(position)
+            self.table.setRowContents(position, row_contents)
             position += 1
 
     def add_row_after(self):
@@ -350,33 +192,33 @@ class DrillView(QMainWindow):
         Add a row after the selected ones. If no row selected, the row is added
         at the end of the table.
         """
-        position = self.get_last_selected_row()
+        position = self.table.getLastSelectedRow()
         if position == -1:
-            position = self.get_last_row()
-        self.add_row(position + 1)
+            position = self.table.getLastRow()
+        self.table.addRow(position + 1)
 
     def del_selected_rows(self):
         """
         Delete the selected rows.
         """
-        rows = self.get_selected_rows()
+        rows = self.table.getSelectedRows()
         rows = sorted(rows, reverse=True)
         for row in rows:
-            self.del_row(row)
+            self.table.deleteRow(row)
 
     def erase_selected_rows(self):
         """
         Erase the contents of the selected rows.
         """
-        rows = self.get_selected_rows()
+        rows = self.table.getSelectedRows()
         for row in rows:
-            self.erase_row(row)
+            self.table.eraseRow(row)
 
     def process_selected_rows(self):
         """
         Ask for the processing of the selected rows.
         """
-        rows = self.get_selected_rows()
+        rows = self.table.getSelectedRows()
         if rows:
             self.process.emit(rows)
 
@@ -384,7 +226,7 @@ class DrillView(QMainWindow):
         """
         Ask for the processing of all the rows.
         """
-        rows = self.get_all_rows()
+        rows = self.table.getAllRows()
         if rows:
             self.process.emit(rows)
 
@@ -461,14 +303,14 @@ class DrillView(QMainWindow):
                     return numors
 
         increment = self.increment.value()
-        cells = self.get_selected_cells()
+        cells = self.table.getSelectedCells()
         if not cells:
             return
         # increment or copy the content of the previous cell
         for i in range(1, len(cells)):
-            contents = self.get_cell_contents(cells[i-1][0], cells[i-1][1])
-            self.set_cell_contents(cells[i][0], cells[i][1],
-                                   inc(contents, increment))
+            contents = self.table.getCellContents(cells[i-1][0], cells[i-1][1])
+            self.table.setCellContents(cells[i][0], cells[i][1],
+                                       inc(contents, increment))
 
     def keyPressEvent(self, event):
         """
@@ -542,9 +384,14 @@ class DrillView(QMainWindow):
         Args:
             rows_contents (list(list(str))): list of rows contents
         """
-        self.table.setRowCount(len(rows_contents))
-        for row in range(len(rows_contents)):
-            self.set_row_contents(row, rows_contents[row])
+        if rows_contents:
+            self.blockSignals(True)
+            self.table.setRowCount(len(rows_contents))
+            for row in range(len(rows_contents)):
+                self.table.setRowContents(row, rows_contents[row])
+            self.blockSignals(False)
+        else:
+            self.table.addRow(0)
 
     def set_progress(self, n, nmax):
         """

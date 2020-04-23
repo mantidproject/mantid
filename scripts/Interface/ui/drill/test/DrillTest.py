@@ -65,172 +65,6 @@ class DrillTest(unittest.TestCase):
                           Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
 
     ###########################################################################
-    # test view functions                                                     #
-    ###########################################################################
-
-    def test_view_init(self):
-        self.assertEqual(self.view.table.rowCount(), 1)
-
-    def test_view_add_row(self):
-        n_row = self.view.table.rowCount()
-        # add in position 0
-        self.view.add_row(0)
-        self.assertEqual(self.view.table.rowCount(), n_row + 1)
-        # add after the end
-        self.view.add_row(n_row + 10)
-        self.assertEqual(self.view.table.rowCount(), n_row + 1)
-        # add before the first
-        self.view.add_row(-1)
-        self.assertEqual(self.view.table.rowCount(), n_row + 1)
-
-    def test_view_del_row(self):
-        n_row = self.view.table.rowCount()
-        self.view.add_row(0)
-        # delete an existing row
-        row = 0
-        self.view.del_row(row)
-        self.assertEqual(self.view.table.rowCount(), n_row)
-        # delete a non existing row
-        row = 20
-        self.view.del_row(row)
-        self.assertEqual(self.view.table.rowCount(), n_row)
-        row = -1
-        self.view.del_row(row)
-        self.assertEqual(self.view.table.rowCount(), n_row)
-
-    def test_view_erase_row(self):
-        self.view.add_row(0)
-        n_columns = self.view.table.columnCount()
-        # set row contents
-        row = 0
-        test_str = "test"
-        for c in range(n_columns):
-            cell = QTableWidgetItem(test_str)
-            self.view.table.setItem(row, c, cell)
-            self.assertEqual(self.view.table.item(row, c).text(), test_str)
-        # erase an existing row
-        row = 0
-        self.view.erase_row(row)
-        for c in range(n_columns):
-            self.assertIsNone(self.view.table.item(row, c))
-        # erase a non existing row
-        row = 20
-        self.view.erase_row(row)
-        for c in range(n_columns):
-            self.assertIsNone(self.view.table.item(row, c))
-
-    def test_view_get_selected_rows(self):
-        # no selection
-        self.assertEqual(self.view.get_selected_rows(), [])
-        # select two rows
-        self.view.add_row(0)
-        self.view.add_row(0)
-        self.select_row(0, Qt.NoModifier)
-        self.select_row(1, Qt.ControlModifier)
-        self.assertEqual(self.view.get_selected_rows(), [0, 1])
-
-    def test_view_get_selected_cells(self):
-        # no selection
-        self.assertEqual(self.view.get_selected_cells(), [])
-        # select two cells
-        self.view.add_row(0)
-        self.select_cell(0, 0, Qt.NoModifier)
-        self.select_cell(0, 1, Qt.ControlModifier)
-        self.assertEqual(self.view.get_selected_cells(), [(0, 0), (0, 1)])
-
-    def test_view_get_last_selected_row(self):
-        # no selection
-        self.assertEqual(self.view.get_last_selected_row(), -1)
-        # select the first two rows
-        self.view.add_row(0)
-        self.view.add_row(0)
-        self.select_row(0, Qt.NoModifier)
-        self.select_row(1, Qt.ControlModifier)
-        self.assertEqual(self.view.get_last_selected_row(), 1)
-
-    def test_view_get_all_rows(self):
-        # empty table
-        self.view.del_row(0)
-        self.assertEqual(self.view.get_all_rows(), [])
-        # add a row
-        self.view.add_row(0)
-        self.assertEqual(self.view.get_all_rows(), [0])
-        # a second
-        self.view.add_row(0)
-        self.assertEqual(self.view.get_all_rows(), [0, 1])
-
-    def test_view_get_cell_contents(self):
-        test_str = "test"
-        cell = QTableWidgetItem(test_str)
-        self.view.add_row(0)
-        self.view.table.setItem(0, 0, cell)
-        self.assertEqual(self.view.get_cell_contents(0, 0), test_str)
-        # empty cell
-        self.assertEqual(self.view.get_cell_contents(0, 1), "")
-        # non existing cell
-        self.assertEqual(self.view.get_cell_contents(20, 20), "")
-        self.assertEqual(self.view.get_cell_contents(-1, -1), "")
-
-    def test_view_set_cell_contents(self):
-        test_str = "test"
-        self.view.add_row(0)
-        # existing cell
-        row = 0
-        column = 0
-        self.view.set_cell_contents(row, column, test_str)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        # non existing cell
-        row = 20
-        column = 20
-        self.view.set_cell_contents(row, column, test_str)
-        self.assertIsNone(self.view.table.item(row, column))
-        row = -1
-        column = -1
-        self.view.set_cell_contents(row, column, test_str)
-        self.assertIsNone(self.view.table.item(row, column))
-
-    def test_view_get_row_contents(self):
-        self.view.add_row(0)
-        n_columns = self.view.table.columnCount()
-        test_row_contents = list()
-        for c in range(n_columns):
-            test_str = "test_" + str(c)
-            test_row_contents.append(test_str)
-            cell = QTableWidgetItem(test_str)
-            self.view.table.setItem(0, c, cell)
-        #existing row
-        row = 0
-        self.assertEqual(self.view.get_row_contents(row), test_row_contents)
-        # non existing row
-        row = 20
-        self.assertEqual(self.view.get_row_contents(row), [""] * n_columns)
-        row = -1
-        self.assertEqual(self.view.get_row_contents(row), [""] * n_columns)
-
-    def test_view_set_row_contents(self):
-        n_columns = self.view.table.columnCount()
-        test_row_contents = list()
-        for c in range(n_columns):
-            test_str = "test_" + str(c)
-            test_row_contents.append(test_str)
-        self.view.add_row(0)
-        # existing row
-        row = 0
-        self.view.set_row_contents(row, test_row_contents)
-        for c in range(n_columns):
-            self.assertEqual(self.view.table.item(row, c).text(),
-                             test_row_contents[c])
-        # non existing row
-        row = 20
-        self.view.set_row_contents(row, test_row_contents)
-        for c in range(n_columns):
-            self.assertIsNone(self.view.table.item(row, c))
-        row = -1
-        self.view.set_row_contents(row, test_row_contents)
-        for c in range(n_columns):
-            self.assertIsNone(self.view.table.item(row, c))
-
-    ###########################################################################
     # test view interface and model connections                               #
     ###########################################################################
 
@@ -306,7 +140,7 @@ class DrillTest(unittest.TestCase):
     def test_erase_row(self):
         self.presenter.on_instrument_changed("D22")
 
-        self.view.add_row(0)
+        self.view.table.addRow(0)
         # add contents (last column has a special treatment !)
         for i in range(self.view.table.columnCount() - 1):
             item = QTableWidgetItem("test")
@@ -368,7 +202,7 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.model.samples[1], reference)
 
         # copy - paste with menu
-        self.view.del_row(1)
+        self.view.table.deleteRow(1)
         self.select_row(0, Qt.NoModifier)
         self.view.actionCopyRow.trigger()
         self.view.actionPasteRow.trigger()
@@ -377,8 +211,8 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.model.samples[1], reference)
 
     def test_copy_fill(self):
-        self.view.add_row(0)
-        self.view.add_row(0)
+        self.view.table.addRow(0)
+        self.view.table.addRow(0)
         n_rows = self.view.table.rowCount()
         self.assertEqual(n_rows, 3)
         # one cell filling
@@ -410,8 +244,8 @@ class DrillTest(unittest.TestCase):
             self.assertEqual(self.view.table.item(r, column).text(), test_str)
 
     def test_increment_fill(self):
-        self.view.add_row(0)
-        self.view.add_row(0)
+        self.view.table.addRow(0)
+        self.view.table.addRow(0)
         n_rows = self.view.table.rowCount()
         self.assertEqual(n_rows, 3)
         # one cell filling

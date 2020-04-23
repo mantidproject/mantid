@@ -51,8 +51,7 @@ class DrillPresenter:
     def on_del_row(self, position):
         self.model.del_row(position)
 
-    def on_data_changed(self, row, column):
-        contents = self.view.get_cell_contents(row, column)
+    def on_data_changed(self, row, column, contents):
         self.model.change_data(row, column, contents)
 
     def on_process(self, rows):
@@ -98,17 +97,10 @@ class DrillPresenter:
         self.view.set_available_techniques(
                 self.model.get_available_techniques())
         self.view.set_technique(self.model.get_technique())
-        # set table header
+        # set table
         self.view.set_table(self.model.get_columns())
-
-        # fill the table if needed. Disconnect the view to avoid recursion
         rows_contents = self.model.get_rows_contents()
-        if rows_contents:
-            self.disconnect_view_signals()
-            self.view.fill_table(self.model.get_rows_contents())
-            self.connect_view_signals()
-        else:
-            self.view.add_row(0)
+        self.view.fill_table(self.model.get_rows_contents())
 
         self.view.set_technique(self.model.get_technique())
 
