@@ -106,7 +106,7 @@ def _plot_impl(axes, workspace, args, kwargs):
             axes.xaxis_date()
             axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
             axes.set_xlabel('Time')
-        kwargs['linestyle'] = 'steps-post'
+        kwargs['drawstyle'] = 'steps-post'
     else:
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
             workspace, axes, **kwargs)
