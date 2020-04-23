@@ -20,9 +20,11 @@ public:
                                   WorkspaceIndex spectrum) const override;
 
   std::vector<std::string> getSpectrumDependentAttributes() const override;
+  void setFitTypeString(const std::string &fitType);
 
 private:
   std::string getResultXAxisUnit() const override;
+  std::string m_fitType;
 };
 
 } // namespace IDA

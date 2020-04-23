@@ -44,6 +44,19 @@ double getPropertyAsSingleValueWithDefaultStatistic(Run &self,
 }
 
 /**
+ * Wrapper around getPropertyAsSingleValue to use TimeAveragedMean as the
+ * StatisticType.
+ * @param self A reference to the Run object
+ * @param name A name of a log
+ * @return A double value
+ */
+double getPropertyAsSingleValueWithTimeAveragedMean(Run &self,
+                                                    const std::string &name) {
+  return self.getPropertyAsSingleValue(name,
+                                       Mantid::Kernel::Math::TimeAveragedMean);
+}
+
+/**
  * Add a property with the given name and value
  * @param self A reference to the run object that we have been called on
  * @param name The name of the new property
@@ -178,6 +191,12 @@ void export_Run() {
            (arg("self"), arg("name")),
            "Return a log as a single float value. Time series values are "
            "averaged.")
+
+      .def("getPropertyAsSingleValueWithTimeAveragedMean",
+           getPropertyAsSingleValueWithTimeAveragedMean,
+           (arg("self"), arg("name")),
+           "Returns a log as a single float value. Calculated using "
+           "time-averaged mean.")
 
       .def("getTimeAveragedStd", &Run::getTimeAveragedStd,
            (arg("self"), arg("name")),

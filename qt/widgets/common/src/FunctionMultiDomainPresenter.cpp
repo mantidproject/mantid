@@ -107,13 +107,8 @@ FunctionMultiDomainPresenter::getParameterTie(const QString &parName) const {
 }
 
 void FunctionMultiDomainPresenter::updateParameters(const IFunction &fun) {
-  const auto paramNames = fun.getParameterNames();
-  for (const auto &parameter : paramNames) {
-    const QString qName = QString::fromStdString(parameter);
-    setParameter(qName, fun.getParameter(parameter));
-    const size_t index = fun.parameterIndex(parameter);
-    setParameterError(qName, fun.getError(index));
-  }
+  m_model->updateParameters(fun);
+  updateViewFromModel();
 }
 
 void FunctionMultiDomainPresenter::updateMultiDatasetParameters(

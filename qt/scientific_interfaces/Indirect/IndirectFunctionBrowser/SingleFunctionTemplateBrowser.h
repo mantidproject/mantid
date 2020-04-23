@@ -7,8 +7,10 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "FQFitConstants.h"
 #include "FunctionTemplateBrowser.h"
-#include "MSDTemplatePresenter.h"
+#include "IFQFitObserver.h"
+#include "SingleFunctionTemplatePresenter.h"
 
 #include <QMap>
 #include <QWidget>
@@ -24,28 +26,17 @@ namespace IDA {
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL MSDTemplateBrowser
-    : public FunctionTemplateBrowser {
+class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateBrowser
+    : public FunctionTemplateBrowser,
+      public IFQFitObserver {
   Q_OBJECT
 public:
-  explicit MSDTemplateBrowser(QWidget *parent = nullptr);
-  virtual ~MSDTemplateBrowser() = default;
-  void addGaussian();
-  void removeGaussian();
-  void addPeters();
-  void removePeters();
-  void addYi();
-  void removeYi();
-
-  void setGaussianHeight(double, double);
-  void setGaussianMsd(double, double);
-  void setPetersHeight(double, double);
-  void setPetersMsd(double, double);
-  void setPetersBeta(double, double);
-  void setYiHeight(double, double);
-  void setYiMsd(double, double);
-  void setYiSigma(double, double);
-
+  explicit SingleFunctionTemplateBrowser(
+      const std::map<std::string, std::string> &functionInitialisationStrings,
+      QWidget *parent = nullptr);
+  virtual ~SingleFunctionTemplateBrowser() = default;
+  void updateAvailableFunctions(const std::map<std::string, std::string>
+                                    &functionInitialisationStrings) override;
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
@@ -71,6 +62,15 @@ public:
   void setResolution(const std::vector<std::pair<std::string, int>> &) override;
   void setQValues(const std::vector<double> &) override;
   int getCurrentDataset() override;
+  void addParameter(const QString &parameterName,
+                    const QString &parameterDescription);
+  void setParameterValue(const QString &parameterName, double parameterValue,
+                         double parameterError);
+  void setDataType(const QStringList &allowedFunctionsList);
+  void setEnumValue(int enumIndex);
+
+signals:
+  void dataTypeChanged(DataType dataType);
 
 protected slots:
   void enumChanged(QtProperty *) override;
@@ -85,24 +85,15 @@ private:
   void setGlobalParametersQuiet(const QStringList &globals);
 
   QtProperty *m_fitType;
-  QtProperty *m_gaussianHeight = nullptr;
-  QtProperty *m_gaussianMsd = nullptr;
-  QtProperty *m_petersHeight = nullptr;
-  QtProperty *m_petersMsd = nullptr;
-  QtProperty *m_petersBeta = nullptr;
-  QtProperty *m_yiHeight = nullptr;
-  QtProperty *m_yiMsd = nullptr;
-  QtProperty *m_yiSigma = nullptr;
-  QMap<QtProperty *, int> m_parameterMap;
-  QMap<QtProperty *, QString> m_actualParameterNames;
-  QMap<QtProperty *, std::string> m_parameterDescriptions;
+  QMap<QString, QtProperty *> m_parameterMap;
+  QMap<QtProperty *, QString> m_parameterNames;
 
 private:
-  MSDTemplatePresenter m_presenter;
+  SingleFunctionTemplatePresenter m_presenter;
   bool m_emitParameterValueChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
-  friend class MSDTemplatePresenter;
+  friend class SingleFunctionTemplatePresenter;
 };
 
 } // namespace IDA

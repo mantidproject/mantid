@@ -61,6 +61,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(MuonAnalysisGui, self).__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setObjectName("MuonAnalysis2")
 
         try:
             check_facility()
@@ -84,7 +85,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
                                    workspace_suffix=' MA')
 
         # create the dockable widget
-        self.dockable_plot_widget = PlottingWidget(self.context)
+        self.dockable_plot_widget = PlottingWidget(self.context, parent=self)
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
                                                               plotting_widget=self.dockable_plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
@@ -322,8 +323,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.dockable_plot_widget.presenter.plot_guess_observer)
 
     def closeEvent(self, event):
-        self.tabs.closeEvent(event)
-        self.dockable_plot_widget_window.widget().close()
         self.removeDockWidget(self.dockable_plot_widget_window)
-        super(MuonAnalysisGui, self).closeEvent(event)
+        self.tabs.closeEvent(event)
         self.context.ads_observer = None
+        super(MuonAnalysisGui, self).closeEvent(event)

@@ -341,12 +341,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
-    def grid_toggle(self):
+    def grid_toggle(self, on):
         """Toggle grid lines on/off"""
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            ax.grid()
+            ax.grid(on)
         canvas.draw_idle()
 
     def fit_toggle(self):

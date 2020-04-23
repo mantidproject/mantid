@@ -30,6 +30,7 @@ Improvements
 
 Single Crystal Diffraction
 --------------------------
+- New instrument geometry for MaNDi instrument at SNS
 
 Imaging
 -------
