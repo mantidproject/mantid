@@ -21,8 +21,6 @@ from .GeneralAbInitioParser import GeneralAbInitioParser
 
 # Calculating modules
 from .CalculatePowder import CalculatePowder
-from .CalculateSingleCrystal import CalculateSingleCrystal
-from .CalculateDWSingleCrystal import CalculateDWSingleCrystal
 from .CalculateS import CalculateS
 from .SPowderSemiEmpiricalCalculator import SPowderSemiEmpiricalCalculator
 
@@ -31,8 +29,6 @@ from .generaldata import GeneralData
 from .kpointsdata import KpointsData
 from .atomsdata import AtomsData
 from .abinsdata import AbinsData
-from .DWSingleCrystalData import DWSingleCrystalData
-from .SingleCrystalData import SingleCrystalData
 from .PowderData import PowderData
 from .sdata import SData
 
