@@ -10,9 +10,8 @@ from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion, Pr
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage, signal as ssignal
 import importlib
-
 
 class DeltaPDF3D(PythonAlgorithm):
 
@@ -136,7 +135,8 @@ class DeltaPDF3D(PythonAlgorithm):
             issues["SphereMax"] = 'Must provide 1 or 3 diameters'
 
         if self.getProperty("WindowFunction").value == 'Tukey':
-            if importlib.util.find_spec("scipy.signal.tukey") is None:
+            import scipy.signal
+            if not hasattr(scipy.signal, 'tukey'):
                 issues["WindowFunction"] = 'Tukey window requires scipy >= 0.16.0'
 
         return issues
