@@ -27,6 +27,11 @@ class DrillHeaderView(QHeaderView):
         self.sectionsSizes = dict()   # folded columns original size
         self.buttonPressed = None     # currently pressed button, used for release
 
+        # set the minimum section size
+        margin = self.style().pixelMetric(QStyle.PM_FocusFrameHMargin, None, self)
+        minSize = self.fontMetrics().width("....") + 2 * margin
+        self.setMinimumSectionSize(minSize)
+
     def isButtonPressed(self, li):
         """
         Tells if a push button is pressed by providing the logical index of the
