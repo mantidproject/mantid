@@ -10,12 +10,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "ALFMock.h"
 #include "ALFCustomInstrumentModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/NumericAxis.h"
 
@@ -36,38 +36,12 @@ public:
     partALFModelTest():m_loadCount(0),m_transformCount(0){};
     virtual ~partALFModelTest(){};
     void loadAlg(const std::string &name) override final {(void) name;m_loadCount+=1;};
-    MOCK_METHOD0(transformData, void());
-    //void transformData() override final {m_transformCount+=1;};
+    void transformData() override final {m_transformCount+=1;};
     int getLoadCount(){return m_loadCount;};
     int getTransformCount(){return m_transformCount;};
 private:
     int m_loadCount;
     int m_transformCount;
-};
-
-class mockData{
-public:
-   mockData(const std::string &name, const std::string &instName, const int &run, const bool TOF):m_name(name){
-     std::set<long int> masks;
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, 0.2, 0.01,0.3,masks);
-    //set instrument
-    boost::shared_ptr<Instrument> inst = boost::make_shared<Instrument>();
-    inst->setName(instName);
-    //set run
-    ws->mutableRun().addProperty("run_number", run,true);
-    // set units   
-    ws->setInstrument(inst);
-    auto axis = ws->getAxis(0);
-    if(TOF){axis->setUnit("TOF");}else{
-     axis->setUnit("dSpacing");}
-   AnalysisDataService::Instance().addOrReplace(m_name, ws);
- 
-}
-  ~mockData(){ 
-    AnalysisDataService::Instance().remove(m_name);
-}
-private:
-   std::string m_name;
 };
 
 class ALFCustomInstrumentModelTest : public CxxTest::TestSuite {

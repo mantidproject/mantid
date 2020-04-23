@@ -35,7 +35,6 @@ public:
 
   void addInstrument() override;
 
-protected:
   void loadSideEffects() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
