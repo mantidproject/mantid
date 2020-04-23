@@ -188,8 +188,6 @@ void PropertyManager::splitByTime(
  * all time
  * series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each property on
- * @param applyInvalidDataFilters :: Wether to also apply any matching invalid
- * data filter logs (default:true)
  */
 void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter) {
