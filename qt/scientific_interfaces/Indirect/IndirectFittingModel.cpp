@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFittingModel.h"
 #include "IndirectFitDataModel.h"
+#include "IndirectFitOutputModel.h"
 #include "IndirectWorkspaceNames.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -315,6 +316,7 @@ PrivateFittingData::operator=(PrivateFittingData &&fittingData) {
 IndirectFittingModel::IndirectFittingModel()
     : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {
   m_fitDataModel = std::make_unique<IndirectFitDataModel>();
+  m_fitOutput = std::make_unique<IndirectFitOutputModel>();
 }
 
 bool IndirectFittingModel::hasWorkspace(
@@ -511,7 +513,7 @@ void IndirectFittingModel::removeFittingData(TableDatasetIndex index) {
 }
 
 void IndirectFittingModel::clearWorkspaces() {
-  m_fitOutput.reset();
+  m_fitOutput->clear();
   m_fitDataModel->clear();
   // return std::move(m_fittingData);
 }
@@ -566,14 +568,15 @@ void IndirectFittingModel::addOutput(const WorkspaceGroup_sptr &resultGroup,
                                      const WorkspaceGroup_sptr &resultWorkspace,
                                      const FitDataIterator &fitDataBegin,
                                      const FitDataIterator &fitDataEnd) {
-  if (m_previousModelSelected && m_fitOutput)
-    addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
-              fitDataBegin, fitDataEnd);
-  else
-    m_fitOutput = std::make_unique<IndirectFitOutput>(
-        createFitOutput(resultGroup, parameterTable, resultWorkspace,
-                        fitDataBegin, fitDataEnd));
-  m_previousModelSelected = isPreviousModelSelected();
+  // if (m_previousModelSelected && m_fitOutput)
+  //   addOutput(m_fitOutput.get(), resultGroup, parameterTable,
+  //   resultWorkspace,
+  //             fitDataBegin, fitDataEnd);
+  // else
+  //   m_fitOutput = std::make_unique<IndirectFitOutput>(
+  //       createFitOutput(resultGroup, parameterTable, resultWorkspace,
+  //                       fitDataBegin, fitDataEnd));
+  // m_previousModelSelected = isPreviousModelSelected();
 }
 
 void IndirectFittingModel::addOutput(const WorkspaceGroup_sptr &resultGroup,
@@ -581,13 +584,14 @@ void IndirectFittingModel::addOutput(const WorkspaceGroup_sptr &resultGroup,
                                      const WorkspaceGroup_sptr &resultWorkspace,
                                      IndirectFitData *fitData,
                                      WorkspaceIndex spectrum) {
-  if (m_previousModelSelected && m_fitOutput)
-    addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
-              fitData, spectrum);
-  else
-    m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
-        resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
-  m_previousModelSelected = isPreviousModelSelected();
+  // if (m_previousModelSelected && m_fitOutput)
+  //   addOutput(m_fitOutput.get(), resultGroup, parameterTable,
+  //   resultWorkspace,
+  //             fitData, spectrum);
+  // else
+  //   m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
+  //       resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
+  // m_previousModelSelected = isPreviousModelSelected();
 }
 
 IndirectFitOutput IndirectFittingModel::createFitOutput(
@@ -648,8 +652,9 @@ IndirectFittingModel::getParameterValues(TableDatasetIndex index,
 std::unordered_map<std::string, ParameterValue>
 IndirectFittingModel::getFitParameters(TableDatasetIndex index,
                                        WorkspaceIndex spectrum) const {
-  // if (m_fitOutput)
-  //   return m_fitOutput->getParameters(m_fittingData[index].get(), spectrum);
+  auto fitDomainIndex = m_fitDataModel->getDomainIndex(index, spectrum);
+  if (m_fitOutput)
+    return m_fitOutput->getParameters(fitDomainIndex);
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -682,9 +687,9 @@ std::string IndirectFittingModel::getResultLogName() const { return "axis-1"; }
 boost::optional<ResultLocationNew>
 IndirectFittingModel::getResultLocation(TableDatasetIndex index,
                                         WorkspaceIndex spectrum) const {
-  // if (m_fitOutput && m_fittingData.size() > index)
-  //   return m_fitOutput->getResultLocation(m_fittingData[index].get(),
-  //   spectrum);
+  auto fitDomainIndex = m_fitDataModel->getDomainIndex(index, spectrum);
+  if (m_fitOutput && m_fitDataModel->numberOfWorkspaces() > index)
+    return m_fitOutput->getResultLocation(fitDomainIndex);
   return boost::none;
 }
 

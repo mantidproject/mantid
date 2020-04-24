@@ -10,13 +10,13 @@
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
-#include "IndirectFitOutput.h"
 #include "IndirectFitdata.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
 using IndirectFitDataCollectionType =
     IndexCollectionType<TableDatasetIndex, std::unique_ptr<IndirectFitData>>;
 

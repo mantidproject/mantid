@@ -222,7 +222,7 @@ private:
                          IndirectFitData *fitData,
                          WorkspaceIndex spectrum) const;
 
-  std::unique_ptr<IndirectFitOutput> m_fitOutput;
+  std::unique_ptr<IIndirectFitOutput> m_fitOutput;
   // IndirectFitDataCollectionType m_fittingData;
   std::unique_ptr<IIndirectFitData> m_fitDataModel;
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;
