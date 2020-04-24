@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView
+from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
 
@@ -35,6 +35,12 @@ class DrillTableWidget(QTableWidget):
 
         delegate = DrillItemDelegate(self)
         self.setItemDelegate(delegate)
+
+        # set the default row height to fit a text
+        margin = self.style().pixelMetric(QStyle.PM_FocusFrameVMargin,
+                                          None, self)
+        minSize = self.fontMetrics().height() + 2 * margin
+        self.verticalHeader().setDefaultSectionSize(minSize)
 
     def addRow(self, position):
         """
