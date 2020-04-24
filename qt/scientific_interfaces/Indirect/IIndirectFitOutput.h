@@ -19,10 +19,6 @@ namespace IDA {
 */
 class MANTIDQT_INDIRECT_DLL IIndirectFitOutput {
 public:
-  virtual void
-  addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm,
-                     TableDatasetIndex index) = 0;
-  virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) = 0;
 };
 
 } // namespace IDA

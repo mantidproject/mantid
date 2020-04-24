@@ -38,8 +38,7 @@ using DefaultParametersType =
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitResult,
-                                                   IIndirectFitOutput {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitResult {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
@@ -112,8 +111,8 @@ public:
 
   // IIndirectFitOutput
   void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm,
-                          TableDatasetIndex index) override;
-  void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+                          TableDatasetIndex index);
+  virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   // Generic
   void setFittingMode(FittingMode mode);
@@ -227,8 +226,10 @@ private:
   // IndirectFitDataCollectionType m_fittingData;
   std::unique_ptr<IIndirectFitData> m_fitDataModel;
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;
+  // stores the single domain function
   Mantid::API::IFunction_sptr m_fitFunction;
   DefaultParametersType m_defaultParameters;
+  // Stores whether the current fit function is the same as
   bool m_previousModelSelected;
   FittingMode m_fittingMode;
 };
