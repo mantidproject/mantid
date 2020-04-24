@@ -1149,15 +1149,14 @@ public:
     load.setPropertyValue("OutputWorkspace", output_ws);
     load.execute();
 
-    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+    auto reloadedWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace.get());
     // should not change as should be filtered as before
-    check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
+    check_log(reloadedWorkspace, "raw_uah_log", 429, 17, 99.4740982879);
     //should not change as should not be filtered as before
-    check_log(workspace, "periods", 37, 1, 1);
-    check_log(workspace, "period 1", 36, 505, true);
-    check_log(workspace, "running", 72, 501, true);
+    check_log(reloadedWorkspace, "periods", 37, 1, 1);
+    check_log(reloadedWorkspace, "period 1", 36, 505, true);
+    check_log(reloadedWorkspace, "running", 72, 501, true);
 
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();

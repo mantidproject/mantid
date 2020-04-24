@@ -246,7 +246,7 @@ void LogManager::filterByLog(
     const std::vector<std::string> & excludedFromFiltering) {
   // This will invalidate the cache
   m_singleValueCache->clear();
-  m_manager->filterByProperty(filter);
+  m_manager->filterByProperty(filter, excludedFromFiltering);
 }
 
 //-----------------------------------------------------------------------------------------------

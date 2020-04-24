@@ -178,7 +178,7 @@ void PropertyManager::filterByProperty(
     if (std::find(excludedFromFiltering.begin(), excludedFromFiltering.end(),
                   orderedProperty->name()) != excludedFromFiltering.end()) {
       // this log should be excluded from filtering
-      break;
+      continue;
     }
 
     Property *currentProp = orderedProperty;
