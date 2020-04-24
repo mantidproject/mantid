@@ -1128,7 +1128,12 @@ public:
     MatrixWorkspace_sptr workspace;
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(group_ws + "_1"));
-    check_raw_uah_log_is_filtered(workspace);
+    //should be filtered
+    check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
+    //should not be filtered
+    check_log(workspace, "periods", 37, 1, 1);
+    check_log(workspace, "period 1", 36, 505, true);
+    check_log(workspace, "running", 72, 501, true);
 
     SaveNexusProcessed save;
     save.initialize();
@@ -1147,24 +1152,53 @@ public:
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
     TS_ASSERT(workspace.get());
-    check_raw_uah_log_is_filtered(workspace);
+    // should not change as should be filtered as before
+    check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
+    //should not change as should not be filtered as before
+    check_log(workspace, "periods", 37, 1, 1);
+    check_log(workspace, "period 1", 36, 505, true);
+    check_log(workspace, "running", 72, 501, true);
 
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
   }
 
 private:
-  void check_raw_uah_log_is_filtered(Mantid::API::MatrixWorkspace_sptr &workspace) {
+  template <typename TYPE>
+  void check_log(Mantid::API::MatrixWorkspace_sptr &workspace, 
+    const std::string & logName, const int noOfEntries, const int firstInterval, 
+    const TYPE firstValue) {
     TS_ASSERT(workspace.get());
     auto run = workspace->run();
 
-    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getLogData("raw_uah_log"));
-    // middle value is invalid and is filtered out
-    TS_ASSERT_EQUALS(pclogFiltered1->size(), 429);
-    TS_ASSERT_EQUALS(pclogFiltered1->nthInterval(0).length().total_seconds(),
-                     17);
-    TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 0.1871410012, 1e-5);
+    auto prop = run.getLogData(logName);
+    TSM_ASSERT(logName + " Log was not found", prop);
+    if (prop) {
+      auto log =
+          dynamic_cast<TimeSeriesProperty<TYPE> *>(run.getLogData(logName));
+      TSM_ASSERT(logName + " Log was not the expected type", log);
+      if (log) {
+        // middle value is invalid and is filtered out
+        TSM_ASSERT_EQUALS(logName + " Log size not as expected", log->size(),
+                          noOfEntries);
+        TSM_ASSERT_EQUALS(logName + " Log first interval not as expected",
+                          log->nthInterval(0).length().total_seconds(),
+                          firstInterval);
+        templated_equality_check(logName + " Log first value not as expected",
+                                 log->nthValue(0), firstValue);
+      }
+    }
+  }
+
+  template <typename TYPE>
+  void templated_equality_check(const std::string &message, const TYPE value,
+                                const TYPE refValue) {
+    TSM_ASSERT_EQUALS(message, value, refValue);
+  }
+  template <>
+  void templated_equality_check(const std::string &message, const double value,
+                                const double refValue) {
+    TSM_ASSERT_DELTA(message, value, refValue, 1e-5);
   }
 
   void doHistoryTest(const MatrixWorkspace_sptr &matrix_ws) {
