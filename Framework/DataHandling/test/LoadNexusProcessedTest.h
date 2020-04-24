@@ -1109,7 +1109,64 @@ public:
     }
   }
 
+  void test_log_filtering_survives_save_and_load() {
+    LoadNexus alg;
+    std::string group_ws =
+        "test_log_filtering_survives_save_and_load";
+    TS_ASSERT_THROWS_NOTHING(
+            alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    testFile = "POLREF00014966.nxs";
+    alg.setPropertyValue("Filename", testFile);
+    testFile = alg.getPropertyValue("Filename");
+
+    alg.setPropertyValue("OutputWorkspace", group_ws);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Test some aspects of the file
+    MatrixWorkspace_sptr workspace;
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(group_ws + "_1"));
+    check_raw_uah_log_is_filtered(workspace);
+
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setProperty("InputWorkspace", workspace);
+    std::string filename =
+        "LoadNexusProcessed_test_log_filtering_survives_save_and_load.nxs";
+    save.setPropertyValue("Filename", filename);
+    filename = save.getPropertyValue("Filename");
+    save.execute();
+    LoadNexusProcessed load;
+    load.initialize();
+    load.setPropertyValue("Filename", filename);
+    load.setPropertyValue("OutputWorkspace", output_ws);
+    load.execute();
+
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace.get());
+    check_raw_uah_log_is_filtered(workspace);
+
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
+
 private:
+  void check_raw_uah_log_is_filtered(Mantid::API::MatrixWorkspace_sptr &workspace) {
+    TS_ASSERT(workspace.get());
+    auto run = workspace->run();
+
+    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("raw_uah_log"));
+    // middle value is invalid and is filtered out
+    TS_ASSERT_EQUALS(pclogFiltered1->size(), 429);
+    TS_ASSERT_EQUALS(pclogFiltered1->nthInterval(0).length().total_seconds(),
+                     17);
+    TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 0.1871410012, 1e-5);
+  }
+
   void doHistoryTest(const MatrixWorkspace_sptr &matrix_ws) {
     const WorkspaceHistory history = matrix_ws->getHistory();
     int nalgs = static_cast<int>(history.size());
