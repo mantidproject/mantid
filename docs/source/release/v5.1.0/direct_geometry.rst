@@ -12,7 +12,8 @@ Direct Geometry Changes
 Improvements
 ############
 
-For ILL time-of-flight instruments, :ref:`LoadILLTOF <algm-LoadILLTOF-v2>` now allows bin edges determined by channel
+- For ILL time-of-flight instruments, :ref:`LoadILLTOF <algm-LoadILLTOF-v2>` now allows bin edges determined by channel
 number by default, but you can still convert to time-of-flight using the `ConvertToTOF` property.
+- The incident energy calibration has been fixed for PANTHER and IN6 in :ref:`DirectILLCollectData <algm-DirectILLCollectData-v1>`.
 
 :ref:`Release 5.1.0 <v5.1.0>`
