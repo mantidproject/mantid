@@ -297,4 +297,55 @@ public:
     TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[1], 0);
     TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[2], 0.5);
   }
+
+  void test_duplicate_workspaces_are_not_combined() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::Crystal;
+
+    PeaksWorkspace_sptr peaksWs =
+        WorkspaceCreationHelper::createPeaksWorkspace(3, true);
+
+    Mantid::Crystal::PredictFractionalPeaks predictAlg;
+    predictAlg.initialize();
+    predictAlg.setProperty("Peaks", peaksWs);
+    predictAlg.setProperty("ModVector1", "0.5, 0, 0.5");
+    predictAlg.setProperty("ModVector2", "0.5, 0, 0.5");
+    predictAlg.setProperty("FracPeaks", "frac_vec1");
+    predictAlg.setProperty("MaxOrder", 1);
+    predictAlg.execute();
+
+    predictAlg.initialize();
+    predictAlg.setProperty("Peaks", peaksWs);
+    predictAlg.setProperty("ModVector1", "0.5, 0, 0.5");
+    predictAlg.setProperty("FracPeaks", "frac_vec2");
+    predictAlg.setProperty("MaxOrder", 1);
+    predictAlg.execute();
+
+    CombinePeaksWorkspaces alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LHSWorkspace", "frac_vec1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RHSWorkspace", "frac_vec2"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "frac_vec_1and2"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    IPeaksWorkspace_const_sptr outWs;
+    TS_ASSERT_THROWS_NOTHING(
+        outWs = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
+            "frac_vec_1and2"));
+
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(0)[0], 0.5);
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(0)[1], 0);
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(0)[2], 0.5);
+
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(1)[0], 0.5);
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(1)[1], 0);
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(1)[2], 0.5);
+
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[0], 0);
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[1], 0);
+    TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[2], 0);
+  }
 };
