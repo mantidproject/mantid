@@ -294,9 +294,20 @@ class DrillView(QMainWindow):
                     c = ':' if ':' in numors else '-'
                     splitted = numors.split(c)
                     try:
-                        r0 = str(int(splitted[1]) + i)
-                        r1 = str(2 * int(splitted[1]) - int(splitted[0]) + i)
-                        return r0 + c + r1
+                        mini = min(int(splitted[0]), int(splitted[1]))
+                        maxi = max(int(splitted[0]), int(splitted[1]))
+                        if (i > 0):
+                            r0 = maxi + i
+                            r1 = 2 * maxi + i - mini
+                            r0 = 0 if r0 < 0 else r0
+                            r1 = 0 if r1 < 0 else r1
+                            return str(r0) + c + str(r1)
+                        else:
+                            r0 = 2 * mini + i - maxi
+                            r1 = mini + i
+                            r0 = 0 if r0 < 0 else r0
+                            r1 = 0 if r1 < 0 else r1
+                            return str(r0) + c + str(r1)
                     except:
                         return numors
                 else:

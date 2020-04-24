@@ -164,7 +164,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="increment"/>
+       <widget class="QSpinBox" name="increment">
+        <property name="minimum">
+         <number>-99</number>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QToolButton" name="fill">
