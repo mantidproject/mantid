@@ -172,8 +172,15 @@ void PropertyManager::splitByTime(
  * @param filter :: A boolean time series to filter each property on
  */
 void PropertyManager::filterByProperty(
-    const Kernel::TimeSeriesProperty<bool> &filter) {
+    const Kernel::TimeSeriesProperty<bool> &filter,
+    const std::vector<std::string> & excludedFromFiltering) {
   for (auto &orderedProperty : m_orderedProperties) {
+    if (std::find(excludedFromFiltering.begin(), excludedFromFiltering.end(),
+                  orderedProperty->name()) != excludedFromFiltering.end()) {
+      // this log should be excluded from filtering
+      break;
+    }
+
     Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {

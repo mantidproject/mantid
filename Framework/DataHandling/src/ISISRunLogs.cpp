@@ -99,5 +99,28 @@ void ISISRunLogs::addPeriodLog(const int period, API::Run &exptRun) {
   exptRun.addLogData(m_logParser->createPeriodLog(period));
 }
 
+std::vector<std::string>
+ISISRunLogs::getLogNamesExcludedFromFiltering(const API::Run &run) {
+  std::vector<std::string> retVal;
+  if (run.hasProperty(LogParser::statusLogName())) {
+    retVal.emplace_back(LogParser::statusLogName());
+  }
+  if (run.hasProperty(LogParser::periodsLogName())) {
+    retVal.emplace_back(LogParser::periodsLogName());
+  }
+  const auto props = run.getProperties();
+  for (const auto prop : props) {
+    // add all properties starting with period
+    if (prop->name().rfind("period", 0) == 0) {
+      // add if not already in the list
+      if (std::find(retVal.begin(), retVal.end(), prop->name()) ==
+          retVal.end()) {
+        retVal.emplace_back(prop->name());
+      }
+    }
+  }
+  return retVal;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

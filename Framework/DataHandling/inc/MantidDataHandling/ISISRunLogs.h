@@ -37,6 +37,9 @@ public:
   /// Add 'period i' log.
   void addPeriodLog(const int period, API::Run &exptRun);
 
+  static std::vector<std::string>
+  getLogNamesExcludedFromFiltering(const API::Run &run);
+
 private:
   /// A LogParser object
   std::unique_ptr<Kernel::LogParser> m_logParser;

@@ -519,6 +519,8 @@ void LoadNexusProcessed::exec() {
         setProperty(prop_name + indexStr, local_workspace);
       }
 
+
+
       // The group is the root property value
       setProperty("OutputWorkspace",
                   std::static_pointer_cast<Workspace>(wksp_group));
