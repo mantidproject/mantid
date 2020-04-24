@@ -39,6 +39,9 @@ SUBPLOT_HSPACE = 0.5
 COLORPLOT_MIN_WIDTH = 8
 COLORPLOT_MIN_HEIGHT = 7
 LOGGER = Logger("workspace.plotting.functions")
+DEFAULT_CONTOUR_LEVELS = 2
+DEFAULT_CONTOUR_COLOUR = 'k'
+DEFAULT_CONTOUR_WIDTH = 0.5
 
 # -----------------------------------------------------------------------------
 # 'Public' Functions
@@ -176,12 +179,13 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
-def pcolormesh(workspaces, fig=None):
+def pcolormesh(workspaces, fig=None, contour=False):
     """
     Create a figure containing pcolor subplots
 
     :param workspaces: A list of workspace handles
     :param fig: An optional figure to contain the new plots. Its current contents will be cleared
+    :param contour: An optional bool for whether to draw contour lines.
     :returns: The figure containing the plots
     """
     # check inputs
@@ -208,6 +212,12 @@ def pcolormesh(workspaces, fig=None):
             else:
                 row_idx += 1
                 col_idx = 0
+
+            if contour:
+                ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
+                           colors=DEFAULT_CONTOUR_COLOUR,
+                           linewidths=DEFAULT_CONTOUR_WIDTH)
+
         else:
             # nothing here
             ax.axis('off')
@@ -265,13 +275,4 @@ def plot_wireframe(workspaces):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())
-        fig.show()
-
-
-@manage_workspace_names
-def plot_contour(workspaces):
-    for ws in workspaces:
-        fig = pcolormesh([ws])
-        ax = fig.get_axes()[0]
-        ax.contour(ws, levels=2, colors='k', linewidths=0.5)
         fig.show()
