@@ -42,6 +42,7 @@ set(SRC_FILES
     src/LoadCalFile.cpp
     src/LoadCanSAS1D.cpp
     src/LoadCanSAS1D2.cpp
+    src/LoadCSNSNexus.cpp
     src/LoadDaveGrp.cpp
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
@@ -249,6 +250,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadCalFile.h
     inc/MantidDataHandling/LoadCanSAS1D.h
     inc/MantidDataHandling/LoadCanSAS1D2.h
+    inc/MantidDataHandling/LoadCSNSNexus.h
     inc/MantidDataHandling/LoadDaveGrp.h
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
@@ -449,6 +451,7 @@ set(TEST_FILES
     LoadBinaryStlTest.h
     LoadCalFileTest.h
     LoadCanSAS1dTest.h
+    LoadCSNSNexusTest.h
     LoadDaveGrpTest.h
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
