@@ -10,8 +10,8 @@ from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion, Pr
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
 import numpy as np
-from scipy import ndimage, signal as ssignal
-import importlib
+from scipy import ndimage
+
 
 class DeltaPDF3D(PythonAlgorithm):
 

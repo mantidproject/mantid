@@ -11,6 +11,7 @@ from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator
 from mantid import mtd, logger
 import numpy as np
 
+
 class FindPeaksAutomatic(DataProcessorAlgorithm):
     _acceptance = 0.01
     _bad_peak_to_consider = 50
