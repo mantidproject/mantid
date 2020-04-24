@@ -208,7 +208,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         eiWS = mtd[eiWSName]
         outWS = mtd[outWSName]
         E_i = outWS.run().getProperty('Ei').value
-        self.assertEqual(eiWS.readY(0)[0], E_i)
+        assert_almost_equal(eiWS.readY(0)[0], E_i, 2)
         assert_almost_equal(E_i, 75.37, 2)
 
 if __name__ == '__main__':
