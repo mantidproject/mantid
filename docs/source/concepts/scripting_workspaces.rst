@@ -167,24 +167,26 @@ Overall Example
     ADS.clear(); print('Clear All Workspaces')
     print('Workspace list:',ADS.getObjectNames())
 
-    Load(filePath,OutputWorkspace='DATA555'); print('Load Data')
-    data = ADS.retrieve('DATA555')
+    Load(filePath,OutputWorkspace='Saved_wsGroup'); print('Load Data')
+    data = ADS.retrieve('Saved_wsGroup')
     print('Workspace list:',ADS.getObjectNames())
+
+    #plotSpectrum(data,[1,2,3],error_bars=True, waterfall=False)
 
 Output:
 
 .. testoutput:: mask_detectors
 
     Create Workspace
-    Workspace list: ['DATA555', 'ws', 'ws1', 'ws2', 'ws3']
+    Workspace list: ['ws']
     Delete Workspace
-    Workspace list: ['DATA555', 'ws1', 'ws2', 'ws3']
+    Workspace list: []
     Create + GroupWorkspaces
-    Workspace list: ['DATA555', 'ws1', 'ws2', 'ws3', 'wsGroup']
+    Workspace list: ['ws1', 'ws2', 'ws3', 'wsGroup']
     Save Workspaces
     Clear All Workspaces
     Workspace list: []
     Load Data
-    Workspace list: ['DATA555', 'ws1', 'ws2', 'ws3']
+    Workspace list: ['Saved_wsGroup', 'ws1', 'ws2', 'ws3']
 
 .. categories:: Concepts
