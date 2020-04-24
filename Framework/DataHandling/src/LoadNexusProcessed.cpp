@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
@@ -23,7 +24,6 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -520,8 +520,6 @@ void LoadNexusProcessed::exec() {
         wksp_group->addWorkspace(local_workspace);
         setProperty(prop_name + indexStr, local_workspace);
       }
-
-
 
       // The group is the root property value
       setProperty("OutputWorkspace",
@@ -2256,7 +2254,8 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
  *
  * @param local_workspace :: the workspace containing logs to be filtered
  */
-void LoadNexusProcessed::applyLogFiltering(Mantid::API::Workspace_sptr local_workspace) {
+void LoadNexusProcessed::applyLogFiltering(
+    Mantid::API::Workspace_sptr local_workspace) {
   auto mWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(local_workspace);
   if (mWorkspace) {
     auto run = mWorkspace->run();

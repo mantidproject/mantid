@@ -243,7 +243,7 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
  */
 void LogManager::filterByLog(
     const Kernel::TimeSeriesProperty<bool> &filter,
-    const std::vector<std::string> & excludedFromFiltering) {
+    const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
   m_singleValueCache->clear();
   m_manager->filterByProperty(filter, excludedFromFiltering);

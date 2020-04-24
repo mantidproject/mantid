@@ -43,6 +43,7 @@ public:
 
   /// applies log filtering for a run
   static void applyLogFiltering(Mantid::API::Run &exptRun);
+
 private:
   /// A LogParser object
   std::unique_ptr<Kernel::LogParser> m_logParser;

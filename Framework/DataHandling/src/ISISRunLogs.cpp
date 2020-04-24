@@ -87,22 +87,24 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
 
   TimeSeriesProperty<bool> *currentPeriodLog = nullptr;
   bool multiperiod = false;
-  try {  
-    auto period = exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
+  try {
+    auto period =
+        exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
     currentPeriodLog = exptRun.getTimeSeriesProperty<bool>(
         LogParser::currentPeriodLogName(period));
   } catch (std::exception &) {
-    g_log.warning(
-        "Cannot find period log. Logs will be not be filtered by current period");
+    g_log.warning("Cannot find period log. Logs will be not be filtered by "
+                  "current period");
   }
 
   try {
     // get the number of periods as the max of the periods log
-    auto periodsLog = exptRun.getTimeSeriesProperty<int>(LogParser::periodsLogName());
+    auto periodsLog =
+        exptRun.getTimeSeriesProperty<int>(LogParser::periodsLogName());
     multiperiod = (periodsLog->getStatistics().maximum > 1.);
   } catch (std::exception &) {
-    g_log.warning(
-        "Cannot find periods log. Logs will be not be filtered by current period");
+    g_log.warning("Cannot find periods log. Logs will be not be filtered by "
+                  "current period");
   }
 
   // If there is more than 1 period filter the logs by period as well

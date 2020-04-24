@@ -256,8 +256,8 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
   if (!periods) {
     throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
   }
-  Kernel::TimeSeriesProperty<bool> *p =
-      new Kernel::TimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
+  Kernel::TimeSeriesProperty<bool> *p = new Kernel::TimeSeriesProperty<bool>(
+      LogParser::currentPeriodLogName(period));
   std::map<Types::Core::DateAndTime, int> pMap = periods->valueAsMap();
   auto it = pMap.begin();
   if (it->second != period)

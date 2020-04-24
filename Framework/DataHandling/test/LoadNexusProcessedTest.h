@@ -1111,10 +1111,8 @@ public:
 
   void test_log_filtering_survives_save_and_load() {
     LoadNexus alg;
-    std::string group_ws =
-        "test_log_filtering_survives_save_and_load";
-    TS_ASSERT_THROWS_NOTHING(
-            alg.initialize());
+    std::string group_ws = "test_log_filtering_survives_save_and_load";
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     testFile = "POLREF00014966.nxs";
     alg.setPropertyValue("Filename", testFile);
@@ -1128,9 +1126,9 @@ public:
     MatrixWorkspace_sptr workspace;
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(group_ws + "_1"));
-    //should be filtered
+    // should be filtered
     check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
-    //should not be filtered
+    // should not be filtered
     check_log(workspace, "periods", 37, 1, 1);
     check_log(workspace, "period 1", 36, 505, true);
     check_log(workspace, "running", 72, 501, true);
@@ -1153,7 +1151,7 @@ public:
         AnalysisDataService::Instance().retrieve(output_ws));
     // should not change as should be filtered as before
     check_log(reloadedWorkspace, "raw_uah_log", 429, 17, 99.4740982879);
-    //should not change as should not be filtered as before
+    // should not change as should not be filtered as before
     check_log(reloadedWorkspace, "periods", 37, 1, 1);
     check_log(reloadedWorkspace, "period 1", 36, 505, true);
     check_log(reloadedWorkspace, "running", 72, 501, true);
@@ -1164,9 +1162,9 @@ public:
 
 private:
   template <typename TYPE>
-  void check_log(Mantid::API::MatrixWorkspace_sptr &workspace, 
-    const std::string & logName, const int noOfEntries, const int firstInterval, 
-    const TYPE firstValue) {
+  void check_log(Mantid::API::MatrixWorkspace_sptr &workspace,
+                 const std::string &logName, const int noOfEntries,
+                 const int firstInterval, const TYPE firstValue) {
     TS_ASSERT(workspace.get());
     auto run = workspace->run();
 

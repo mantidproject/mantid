@@ -351,7 +351,7 @@ public:
               std::vector<PropertyManager *> /* outputs*/) const = 0;
   virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/,
                                 const std::vector<std::string> &
-                                    /* excludedFromFiltering */) = 0;
+                                /* excludedFromFiltering */) = 0;
 
 protected:
   /// Get a property by an index

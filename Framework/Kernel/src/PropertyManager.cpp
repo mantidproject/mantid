@@ -173,7 +173,7 @@ void PropertyManager::splitByTime(
  */
 void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter,
-    const std::vector<std::string> & excludedFromFiltering) {
+    const std::vector<std::string> &excludedFromFiltering) {
   for (auto &orderedProperty : m_orderedProperties) {
     if (std::find(excludedFromFiltering.begin(), excludedFromFiltering.end(),
                   orderedProperty->name()) != excludedFromFiltering.end()) {
