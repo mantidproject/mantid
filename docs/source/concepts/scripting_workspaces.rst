@@ -169,7 +169,6 @@ Overall Example
 
     Load(filePath,OutputWorkspace='DATA555'); print('Load Data')
     data = ADS.retrieve('DATA555')
-    plotSpectrum(data,[1,2,3],error_bars=True, waterfall=False); print('Plot Data')
     print('Workspace list:',ADS.getObjectNames())
 
 Output:
@@ -186,7 +185,6 @@ Output:
     Clear All Workspaces
     Workspace list: []
     Load Data
-    Plot Data
     Workspace list: ['DATA555', 'ws1', 'ws2', 'ws3']
 
 .. categories:: Concepts
