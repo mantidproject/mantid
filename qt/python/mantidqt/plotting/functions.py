@@ -274,3 +274,4 @@ def plot_contour(workspaces):
         fig = pcolormesh([ws])
         ax = fig.get_axes()[0]
         ax.contour(ws, levels=2, colors='k', linewidths=0.5)
+        fig.show()
