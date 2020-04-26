@@ -14,6 +14,7 @@ namespace Mantid {
 namespace DataHandling {
 
 static constexpr uint64_t CONTIN_ID_VALUE = 0x4F;
+static constexpr uint64_t EVENT_ID_MASK = 0x40;
 
 /// Generic event to separate bits.
 struct GenericEvent {
@@ -21,7 +22,10 @@ struct GenericEvent {
   uint64_t reserved2 : 32; // Reserved for non-generics
   uint64_t contin : 8;     // 0x4F Continuation Code
   uint64_t reserved1 : 56; // Reserved for non-generics
-  uint64_t id : 8;         // 0x4E Event ID
+  uint64_t id : 8;         // Event ID
+  bool check() const {
+    return (id & EVENT_ID_MASK) != 0 && contin == CONTIN_ID_VALUE;
+  }
 };
 
 /// Indicate time 0, the start of a new frame.
