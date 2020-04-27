@@ -35,7 +35,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
     def test_wrong_input(self):
         full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".phonon")
 
-        castep_reader = abins.LoadCASTEP(input_ab_initio_filename=full_path_filename)
+        castep_reader = abins.input.CASTEPLoader(input_ab_initio_filename=full_path_filename)
         good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong filename
@@ -96,7 +96,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = abins.LoadCASTEP(
+        castep_reader = abins.input.CASTEPLoader(
             input_ab_initio_filename=abins.test_helpers.find_file(filename=filename + ".phonon"))
         s_data = self._prepare_data(filename=abins.test_helpers.find_file(filename=filename + "_S.txt"))
 

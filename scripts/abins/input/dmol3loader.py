@@ -8,12 +8,13 @@ import io
 import numpy as np
 from math import sqrt
 
-import abins
+from .textparser import TextParser
+from .abinitioloader import AbInitioLoader
 from abins.constants import ATOMIC_LENGTH_2_ANGSTROM, FLOAT_TYPE
 from mantid.kernel import Atom
 
 
-class LoadDMOL3(abins.AbInitioProgram):
+class DMOL3Loader(AbInitioLoader):
     """
     Class for loading DMOL3 ab initio vibrational data.
     """
@@ -21,10 +22,10 @@ class LoadDMOL3(abins.AbInitioProgram):
         """
         :param input_ab_initio_filename: name of file with vibrational data (foo.outmol)
         """
-        super(LoadDMOL3, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "DMOL3"
         self._norm = 0
-        self._parser = abins.AbInitioParser()
+        self._parser = TextParser()
 
     def read_vibrational_or_phonon_data(self):
         """

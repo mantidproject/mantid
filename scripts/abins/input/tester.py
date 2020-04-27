@@ -9,9 +9,10 @@ import json
 import numpy as np
 
 
-class GeneralLoadAbInitioTester(object):
+class Tester(object):
+    """Base class for testing Abins input loaders"""
 
-    _loaders_extensions = {"LoadCASTEP": "phonon", "LoadCRYSTAL": "out", "LoadDMOL3": "outmol", "LoadGAUSSIAN": "log"}
+    _loaders_extensions = {"CASTEPLoader": "phonon", "CRYSTALLoader": "out", "DMOL3Loader": "outmol", "GAUSSIANLoader": "log"}
 
     @staticmethod
     def _prepare_data(seedname):

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import abins
+import abins.input
 
 
 class AbinsData(abins.GeneralData):
@@ -13,7 +14,7 @@ class AbinsData(abins.GeneralData):
     """
     def __init__(self, ):
 
-        super(AbinsData, self).__init__()
+        super().__init__()
         self._atoms_data = None
         self._kpoints_data = None
         self._data = None
@@ -29,8 +30,8 @@ class AbinsData(abins.GeneralData):
         :type ab_initio_program: str
         """
         # This should live closer to the Loaders but for now it is the only place the dict is used.
-        ab_initio_loaders = {"CASTEP": abins.LoadCASTEP, "CRYSTAL": abins.LoadCRYSTAL,
-                             "DMOL3": abins.LoadDMOL3, "GAUSSIAN": abins.LoadGAUSSIAN}
+        ab_initio_loaders = {"CASTEP": abins.input.CASTEPLoader, "CRYSTAL": abins.input.CRYSTALLoader,
+                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader}
 
         if ab_initio_program.upper() not in ab_initio_loaders:
             raise ValueError("No loader available for {}: unknown program. "

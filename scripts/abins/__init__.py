@@ -5,19 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-# flake8: noqa
+# flake8: noqa F401   # "imported but unused" error not applicable
+
+# Submodules
+from . import parameters
+from . import constants
+from . import test_helpers
+from . import input
+
 from .io import IO
+from .input.tester import Tester
 
 # Frequency generator
 from .frequencypowdergenerator import FrequencyPowderGenerator
-
-# Loading modules
-from .abinitioprogram import AbInitioProgram
-from .LoadCASTEP import LoadCASTEP
-from .LoadCRYSTAL import LoadCRYSTAL
-from .LoadDMOL3 import LoadDMOL3
-from .LoadGAUSSIAN import LoadGAUSSIAN
-from .abinitioparser import AbInitioParser
 
 # Calculating modules
 from .powdercalculator import PowderCalculator
@@ -34,9 +34,3 @@ from .sdata import SData
 
 # Instruments
 from .instrumentproducer import InstrumentProducer
-
-from . import parameters
-from . import constants
-from . import test_helpers
-
-from .GeneralLoadAbInitioTester import GeneralLoadAbInitioTester

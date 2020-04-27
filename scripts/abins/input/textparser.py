@@ -9,7 +9,7 @@ import re
 from abins.constants import EOF, ONE_CHARACTER
 
 
-class AbInitioParser(object):
+class TextParser(object):
     """
     Helper class which groups methods used by DFT Loaders for parsing files.
     """

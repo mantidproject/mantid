@@ -7,12 +7,12 @@
 import numpy as np
 import re
 
-import abins
+from .abinitioloader import AbInitioLoader
 from abins.constants import COMPLEX_TYPE
-from  mantid.kernel import Atom
+from mantid.kernel import Atom
 
 
-class LoadCASTEP(abins.AbInitioProgram):
+class CASTEPLoader(AbInitioLoader):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
@@ -23,7 +23,7 @@ class LoadCASTEP(abins.AbInitioProgram):
 
         :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
         """
-        super(LoadCASTEP, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'

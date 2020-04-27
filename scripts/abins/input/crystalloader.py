@@ -7,12 +7,13 @@
 import io
 import numpy as np
 
-import abins
+from .textparser import TextParser
+from .abinitioloader import AbInitioLoader
 from abins.constants import CRYSTAL, FLOAT_TYPE
 from mantid.kernel import Atom, logger
 
 
-class LoadCRYSTAL(abins.AbInitioProgram):
+class CRYSTALLoader(AbInitioLoader):
     """
     Class for loading CRYSTAL ab initio vibrational or phonon data. Special thanks to Leonardo Bernasconi for
     contributing to this module.
@@ -21,7 +22,7 @@ class LoadCRYSTAL(abins.AbInitioProgram):
         """
         :param input_ab_initio_filename: name of a file with vibrational or phonon data (foo.out)
         """
-        super(LoadCRYSTAL, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         self._num_k = None
         self._num_modes = None
@@ -31,7 +32,7 @@ class LoadCRYSTAL(abins.AbInitioProgram):
         # More info in 'Creating a super cell' at
         # http://www.theochem.unito.it/crystal_tuto/mssc2008_cd/tutorials/geometry/geom_tut.html
         self._inv_expansion_matrix = np.eye(3, dtype=FLOAT_TYPE)
-        self._parser = abins.AbInitioParser()
+        self._parser = TextParser()
 
         self._ab_initio_program = "CRYSTAL"
 
