@@ -18,7 +18,7 @@ Algorithms
 - Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
    cost of cloning the inputWorkspace.
-- Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace. 
+- Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
 
 Data Handling
 -------------
@@ -35,11 +35,15 @@ The sample environment xml file now supports the geometry being supplied in the 
 Data Objects
 ------------
 
-- Added MatrixWorkspace::findY to find the histogram and bin with a given value 
+- Added MatrixWorkspace::findY to find the histogram and bin with a given value
 
 Python
 ------
-- A list of spectrum numbers can be got by calling getSpectrumNumbers on a 
+- A list of spectrum numbers can be got by calling getSpectrumNumbers on a
   workspace. For example: spec_nums = ws.getSpectrumNumbers()
+
+Bugfixes
+--------
+- Fix an uncaught exception when loading empty fields from NeXus files. Now returns an empty vector.
 
 :ref:`Release 5.1.0 <v5.1.0>`
