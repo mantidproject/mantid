@@ -1192,11 +1192,6 @@ private:
                                 const TYPE refValue) {
     TSM_ASSERT_EQUALS(message, value, refValue);
   }
-  template <>
-  void templated_equality_check(const std::string &message, const double value,
-                                const double refValue) {
-    TSM_ASSERT_DELTA(message, value, refValue, 1e-5);
-  }
 
   void doHistoryTest(const MatrixWorkspace_sptr &matrix_ws) {
     const WorkspaceHistory history = matrix_ws->getHistory();
@@ -1524,6 +1519,13 @@ private:
   std::string m_savedTmpEventFile;
   static const EventType m_savedTmpType = TOF;
 };
+
+template <>
+void LoadNexusProcessedTest::templated_equality_check(
+    const std::string &message, const double value,
+                              const double refValue) {
+  TSM_ASSERT_DELTA(message, value, refValue, 1e-5);
+}
 
 //------------------------------------------------------------------------------
 // Performance test
