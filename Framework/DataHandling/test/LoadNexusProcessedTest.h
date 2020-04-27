@@ -1522,8 +1522,7 @@ private:
 
 template <>
 void LoadNexusProcessedTest::templated_equality_check(
-    const std::string &message, const double value,
-                              const double refValue) {
+    const std::string &message, const double value, const double refValue) {
   TSM_ASSERT_DELTA(message, value, refValue, 1e-5);
 }
 
