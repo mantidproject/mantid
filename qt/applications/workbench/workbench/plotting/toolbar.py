@@ -17,7 +17,7 @@ from mantidqt.icons import get_icon
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     sig_home_clicked = QtCore.Signal()
-    sig_grid_toggle_triggered = QtCore.Signal()
+    sig_grid_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
@@ -102,7 +102,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.sig_plot_options_triggered.emit()
 
     def toggle_grid(self):
-        self.sig_grid_toggle_triggered.emit()
+        enable = self._actions['toggle_grid'].isChecked()
+        self.sig_grid_toggle_triggered.emit(enable)
 
     def toggle_fit(self):
         fit_action = self._actions['toggle_fit']

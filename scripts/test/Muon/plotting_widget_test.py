@@ -5,8 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from unittest import mock
+
+from Muon.GUI.Common.plotting_widget.external_plotting_model import ExternalPlottingModel
+from Muon.GUI.Common.plotting_widget.external_plotting_view import ExternalPlottingView
 from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
@@ -22,13 +24,17 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.context.fitting_context.number_of_fits = 1
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()
+        self.plotting_model = mock.Mock(spec=ExternalPlottingModel)
+        self.plotting_view = mock.Mock(spec=ExternalPlottingView)
         self.workspace_list = ['MUSR62260; Group; bottom; Asymmetry; MA',
                                'MUSR62261; Group; bottom; Asymmetry; MA']
         self.context.data_context.instrument = "MUSR"
         self.context.group_pair_context.selected_groups = ['bottom']
         self.context.group_pair_context.selected_pairs = []
 
-        self.presenter = PlotWidgetPresenter(self.view, self.model, self.context)
+        self.presenter = PlotWidgetPresenter(view=self.view, model=self.model, context=self.context,
+                                             plotting_view=self.plotting_view, plotting_model=self.plotting_model)
+
         self.presenter.get_plot_title = mock.MagicMock(return_value='MUSR62260-62261 bottom')
         self.view.is_tiled_plot = mock.MagicMock(return_value=False)
         self.view.plot_options.get_errors = mock.MagicMock(return_value=True)
@@ -208,7 +214,6 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.context.fitting_context.plot_guess = True
         self.context.fitting_context.guess_ws = 'ws_guess'
         self.model.plotted_fit_workspaces = ['ws1', 'ws2_guess', 'ws3_guess', 'ws4', 'ws_guess']
-        self.model.number_of_axes = 1
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': 'Fit Function Guess'}
 
         self.presenter.handle_plot_guess_changed()
@@ -224,7 +229,6 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.context.fitting_context.plot_guess = True
         self.context.fitting_context.guess_ws = 'ws_guess'
         self.model.plotted_fit_workspaces = ['ws1', 'ws2_guess', 'ws3_guess', 'ws4']
-        self.model.number_of_axes = 1
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': 'Fit Function Guess'}
 
         self.presenter.handle_plot_guess_changed()
@@ -353,40 +357,18 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.model.replot_workspace.assert_any_call(workspaces[0], self.view.get_axes()[0], errors, mock.ANY)
         self.model.replot_workspace.assert_called_with(workspaces[1], self.view.get_axes()[0], errors, mock.ANY)
 
-    def test_handle_plot_all_data_and_fit_workspaces_calls_add_plot_correctly(self):
-        workspaces = ["fwd", "bwd"]
-        self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
+    def test_handle_external_plot_pressed(self):
+        expected_axes = mock.NonCallableMock()
+        self.view.get_axes.return_value = expected_axes
 
-        self.presenter.plot_data_and_fit_workspaces(workspace_list=workspaces, fit_workspace_list=[])
+        self.presenter.handle_external_plot_requested()
 
-        self.assertEqual(self.model.add_workspace_to_plot.call_count, len(workspaces))
-        self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[0], workspaces[0], [0], errors=True,
-                                                         plot_kwargs=mock.ANY)
-        self.model.add_workspace_to_plot.assert_called_with(self.view.get_axes()[0], workspaces[1], [0], errors=True,
-                                                            plot_kwargs=mock.ANY)
-
-    def test_handle_plot_all_data_and_fit_workspaces_adds_fit_workspaces_correctly(self):
-        fit_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted;']
-
-        self.presenter.plot_data_and_fit_workspaces(workspace_list=[], fit_workspace_list=fit_workspaces)
-
-        # check fit and diff workspaces plotted correctly
-        self.assertEqual(self.model.add_workspace_to_plot.call_count, 2)
-        self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[0],
-                                                         'MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', [1],
-                                                         errors=False, plot_kwargs=mock.ANY)
-        self.model.add_workspace_to_plot.assert_called_with(self.view.get_axes()[0],
-                                                            'MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', [2],
-                                                            errors=False, plot_kwargs=mock.ANY)
-
-    def test_handle_plot_all_data_and_fit_workspaces_does_not_replot_existing_data(self):
-        workspaces = ["fwd", "bwd"]
-        self.model.plotted_workspaces = ["fwd", "bwd"]
-        self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
-
-        self.presenter.plot_data_and_fit_workspaces(workspace_list=workspaces, fit_workspace_list=[])
-
-        self.model.add_workspace_to_plot.assert_not_called()
+        self.view.get_axes.assert_called_once()
+        self.plotting_view.create_external_plot_window.assert_called_once_with(expected_axes)
+        self.plotting_model.get_plotted_workspaces_and_indices_from_axes.assert_called_once_with(expected_axes)
+        self.plotting_view.plot_data.assert_called_once()
+        self.plotting_view.copy_axes_setup.assert_called_once()
+        self.plotting_view.show.assert_called_once()
 
 
 if __name__ == '__main__':

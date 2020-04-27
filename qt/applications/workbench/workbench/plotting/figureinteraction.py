@@ -14,6 +14,8 @@ import numpy as np
 from collections import OrderedDict
 from copy import copy
 from functools import partial
+
+# third party imports
 from matplotlib.container import ErrorbarContainer
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
@@ -22,7 +24,7 @@ from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-# third party imports
+# mantid imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, MantidAxes
 from mantid.plots.utility import zoom, MantidAxType
@@ -100,7 +102,7 @@ class FigureInteraction(object):
     def on_scroll(self, event):
         """Respond to scroll events: zoom in/out"""
         self.canvas.toolbar.push_current()
-        if not getattr(event, 'inaxes', None):
+        if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D):
             return
         zoom_factor = 1.05 + abs(event.step)/6
         if event.button == 'up':  # zoom in
@@ -774,6 +776,8 @@ class FigureInteraction(object):
         for ax in self.canvas.figure.get_axes():
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
-                datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin,
-                                                    image.norm.vmax)
+                if image.norm.vmin is not None and image.norm.vmax is not None:
+                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin,
+                                                        image.norm.vmax)
+
         self.canvas.draw_idle()

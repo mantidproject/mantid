@@ -7,8 +7,9 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MSDFunctionModel.h"
+#include "IFQFitObserver.h"
 #include "ParameterEstimation.h"
+#include "SingleFunctionTemplateModel.h"
 
 #include <QMap>
 #include <QWidget>
@@ -22,18 +23,23 @@ class EditLocalParameterDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class MSDTemplateBrowser;
+class SingleFunctionTemplateBrowser;
 
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL MSDTemplatePresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL SingleFunctionTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit MSDTemplatePresenter(MSDTemplateBrowser *view);
+  explicit SingleFunctionTemplatePresenter(
+      SingleFunctionTemplateBrowser *view,
+      const std::map<std::string, std::string> &functionInitialisationStrings);
+  void updateAvailableFunctions(
+      const std::map<std::string, std::string> &functionInitialisationStrings);
   void setFitType(const QString &name);
+  void init();
 
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
@@ -46,11 +52,9 @@ public:
   void setGlobalParameters(const QStringList &globals);
   void setGlobal(const QString &parName, bool on);
   void updateMultiDatasetParameters(const IFunction &fun);
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
   void setDatasetNames(const QStringList &names);
-  void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
@@ -64,7 +68,6 @@ private slots:
   void viewChangedParameterValue(const QString &parName, double value);
 
 private:
-  void updateViewParameters();
   QStringList getDatasetNames() const;
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
@@ -73,10 +76,9 @@ private:
   void setLocalParameterValue(const QString &parName, int i, double value);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, const QString &tie);
-  void updateViewParameterNames();
   void updateView();
-  MSDTemplateBrowser *m_view;
-  MSDFunctionModel m_model;
+  SingleFunctionTemplateBrowser *m_view;
+  SingleFunctionTemplateModel m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
