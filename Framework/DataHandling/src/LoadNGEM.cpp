@@ -286,17 +286,18 @@ void LoadNGEM::loadSingleFile(
     // Load an event into the variable.
     // Occasionally we may get a file where the first event has been chopped,
     // so we seek to the start of a valid event.
-	// Chopping only seems to occur on a 4 byte word, hence seekg() of 4
+    // Chopping only seems to occur on a 4 byte word, hence seekg() of 4
     EventUnion event, eventBigEndian;
     do {
-        file.read(reinterpret_cast <char*>(&eventBigEndian), sizeof(eventBigEndian));
-        // Correct for the big endian format of nGEM datafile.
-        correctForBigEndian(eventBigEndian, event);
+      file.read(reinterpret_cast<char *>(&eventBigEndian),
+                sizeof(eventBigEndian));
+      // Correct for the big endian format of nGEM datafile.
+      correctForBigEndian(eventBigEndian, event);
     } while (!event.generic.check() &&
-             !file.seekg(skipWordSize, std::ios_base::cur).eof() && ++numWordsSkipped);
-    if (file.eof())
-    {
-        break; // we have either not read an event, or only read part of one
+             !file.seekg(skipWordSize, std::ios_base::cur).eof() &&
+             ++numWordsSkipped);
+    if (file.eof()) {
+      break; // we have either not read an event, or only read part of one
     }
     if (event.coincidence.check()) { // Check for coincidence event.
       ++eventCountInFrame;
@@ -322,13 +323,16 @@ void LoadNGEM::loadSingleFile(
         return;
       }
     } else if (event.generic.check()) { // match all other events and notify.
-      g_log.warning() << "Unexpected event type ID=" << event.generic.id << " loaded.\n";
+      g_log.warning() << "Unexpected event type ID=" << event.generic.id
+                      << " loaded.\n";
     } else { // if we were to get to here, must be a corrupt event
       g_log.warning() << "Corrupt event detected.\n";
     }
   }
   if (numWordsSkipped > 0) {
-      g_log.warning() << skipWordSize * numWordsSkipped << " bytes of file data were skipped when locating valid events.\n";
+    g_log.warning()
+        << skipWordSize * numWordsSkipped
+        << " bytes of file data were skipped when locating valid events.\n";
   }
   g_log.information() << "Finished loading a file.\n";
   ++fileCount;
