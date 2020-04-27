@@ -282,12 +282,9 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
 }
 
 /**
- * Appends an additional entry to a TimeSeriesProperty which is at the end
- * time of the run and contains the last value of the property recorded before
- * the end time.
- *
- * This is a workaround to ensure that time series averaging of log values works
- * correctly for instruments who do not record log values for the entire run.
+ * Templated method to append an additional entry to a TimeSeriesProperty at
+ * the end time of the run containing the last value of the property recorded
+ * before the end time.
  *
  * If the run does not have an end time or if the last time of the time series
  * log is the same as the end time the property is left unmodified.
@@ -295,9 +292,11 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
  * @param prop :: a pointer to a TimeSeriesProperty to modify
  * @param run :: handle to the run object containing the end time.
  */
+
+template <typename T>
 void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
   try {
-    auto tsLog = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+    auto tsLog = dynamic_cast<TimeSeriesProperty<T> *>(prop);
     const auto endTime = run.endTime();
 
     // First check if it is valid to add a additional log entry
@@ -311,6 +310,22 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
   } catch (const std::runtime_error &) {
     // pass
   }
+}
+
+/**
+ * Appends an additional entry to a TimeSeriesProperty which is at the end
+ * time of the run and contains the last value of the property recorded before
+ * the end time. Do this for float and integer time series
+ *
+ * This is a workaround to ensure that time series averaging of log values works
+ * correctly for instruments who do not record log values for the entire run.
+ *
+ * @param prop :: a pointer to a TimeSeriesProperty to modify
+ * @param run :: handle to the run object containing the end time.
+ */
+void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
+  appendEndTimeLog<double>(prop, run);
+  appendEndTimeLog<int>(prop, run);
 }
 
 /**
