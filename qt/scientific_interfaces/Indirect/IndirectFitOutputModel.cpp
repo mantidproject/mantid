@@ -74,9 +74,10 @@ getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &workspace,
 std::vector<std::unordered_map<std::string,
                                MantidQt::CustomInterfaces::IDA::ParameterValue>>
 extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
+  auto rowCount = tableWs->rowCount();
   TableRowExtractor extractRowFromTable(std::move(tableWs));
   std::vector<std::unordered_map<std::string, ParameterValue>> parameterMap;
-  for (size_t rowIndex = 0; rowIndex < tableWs->rowCount(); ++rowIndex) {
+  for (size_t rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
     parameterMap.emplace_back(extractRowFromTable(rowIndex));
   }
   return parameterMap;
@@ -100,7 +101,7 @@ IndirectFitOutputModel::getParameters(FitDomainIndex index) const {
 
 boost::optional<ResultLocationNew>
 IndirectFitOutputModel::getResultLocation(FitDomainIndex index) const {
-  return ResultLocationNew(m_resultWorkspace.lock(),
+  return ResultLocationNew(m_resultGroup.lock(),
                            WorkspaceGroupIndex{index.value});
 }
 

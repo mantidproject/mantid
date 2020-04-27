@@ -381,12 +381,8 @@ bool IndirectFittingModel::isMultiFit() const {
 
 bool IndirectFittingModel::isPreviouslyFit(TableDatasetIndex dataIndex,
                                            WorkspaceIndex spectrum) const {
-  // if (!m_previousModelSelected || !m_fitOutput ||
-  //     m_fittingData.size() <= dataIndex)
-  //   return false;
-  // const auto fitData = m_fittingData[dataIndex].get();
-  // return m_fitOutput->isSpectrumFit(fitData, spectrum);
-  return false;
+  auto domainIndex = m_fitDataModel->getDomainIndex(dataIndex, spectrum);
+  return m_fitOutput->isSpectrumFit(domainIndex);
 }
 
 boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
@@ -515,7 +511,6 @@ void IndirectFittingModel::removeFittingData(TableDatasetIndex index) {
 void IndirectFittingModel::clearWorkspaces() {
   m_fitOutput->clear();
   m_fitDataModel->clear();
-  // return std::move(m_fittingData);
 }
 
 void IndirectFittingModel::clear(){};
@@ -536,8 +531,12 @@ void IndirectFittingModel::setDefaultParameterValue(
 }
 
 void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
-  // addOutput(std::move(fitAlgorithm), m_fittingData.begin(),
-  //           m_fittingData.end());
+  /*addOutput(std::move(fitAlgorithm), m_fittingData.begin(),
+            m_fittingData.end());*/
+  auto group = getOutputGroup(fitAlgorithm);
+  auto parameters = getOutputParameters(fitAlgorithm);
+  auto result = getOutputResult(fitAlgorithm);
+  m_fitOutput->addOutput(group, parameters, result);
 }
 
 void IndirectFittingModel::addOutput(const IAlgorithm_sptr &fitAlgorithm,
