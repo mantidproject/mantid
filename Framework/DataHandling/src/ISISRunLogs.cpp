@@ -70,7 +70,6 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
 
 /**
  * Applies log filtering buy run staus and period if available
- * @param period :: The period that we are adding to
  * @param exptRun :: The run for this period
  */
 void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
