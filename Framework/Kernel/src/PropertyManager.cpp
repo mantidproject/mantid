@@ -170,7 +170,7 @@ void PropertyManager::splitByTime(
  * all time
  * series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each property on
- * @param excludedFromFiltering :: A string list of properties that 
+ * @param excludedFromFiltering :: A string list of properties that
  * will be excluded from filtering
  */
 void PropertyManager::filterByProperty(
