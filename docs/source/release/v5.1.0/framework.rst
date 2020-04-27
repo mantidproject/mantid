@@ -28,6 +28,9 @@ The material definition has been extended to include an optional filename contai
 - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>`
 The attenuation profile filename can also be specified in the materials section of the sample environment xml file
 
+- Fixed a long standing bug where  log filtering was not being applied after Loading a Mantid Processed Nexus file, using :ref:`LoadPRocessedNexus` <algm-LoadProcessedNexus>.  This now works correctly so
+  run status and period filtering will now work as expected, as it did when you first load the file from a raw or NeXus file.
+
 Data Objects
 ------------
 
