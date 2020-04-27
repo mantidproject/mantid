@@ -78,7 +78,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     @mock.patch('workbench.plugins.workspacewidget.pcolormesh', autospec=True)
     def test_plot_with_plot_colorfill(self, mock_plot_colorfill):
         self.ws_widget._do_plot_colorfill([self.ws_names[0]])
-        mock_plot_colorfill.assert_called_once_with(mock.ANY)
+        mock_plot_colorfill.assert_called_once_with(mock.ANY, contour=False)
 
     @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
     def test_plot_with_plot_advanced(self, mock_plot_from_names):
@@ -88,7 +88,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     @mock.patch('workbench.plugins.workspacewidget.pcolormesh', autospec=True)
     def test_plot_with_plot_contour(self, mock_plot_colorfill):
         self.ws_widget._do_plot_colorfill([self.ws_names[0]], contour=True)
-        mock_plot_colorfill.assert_called_once_with([self.ws_names[0]], fig=None, contour=True)
+        mock_plot_colorfill.assert_called_once_with([self.ws_names[0]], contour=True)
 
     @mock.patch('mantidqt.plotting.functions.plot_surface', autospec=True)
     def test_plot_with_plot_surface(self, mock_plot_surface):
