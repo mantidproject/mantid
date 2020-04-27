@@ -278,7 +278,9 @@ void LoadNGEM::loadSingleFile(
   }
 
   const size_t totalNumEvents = verifyFileSize(file) / 16;
+  const size_t skipWordSize = 4;
   size_t numProcessedEvents = 0;
+  size_t numWordsSkipped = 0;
 
   while (true) {
     // Load an event into the variable.
@@ -291,7 +293,7 @@ void LoadNGEM::loadSingleFile(
         // Correct for the big endian format of nGEM datafile.
         correctForBigEndian(eventBigEndian, event);
     } while (!event.generic.check() &&
-             !file.seekg(4, std::ios_base::cur).eof());
+             !file.seekg(skipWordSize, std::ios_base::cur).eof() && ++numWordsSkipped);
     if (file.eof())
     {
         break; // we have either not read an event, or only read part of one
@@ -324,6 +326,9 @@ void LoadNGEM::loadSingleFile(
     } else { // if we were to get to here, must be a corrupt event
       g_log.warning() << "Corrupt event detected.\n";
     }
+  }
+  if (numWordsSkipped > 0) {
+      g_log.warning() << skipWordSize * numWordsSkipped << " bytes of file data were skipped when locating valid events.\n";
   }
   g_log.information() << "Finished loading a file.\n";
   ++fileCount;
