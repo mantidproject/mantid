@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from copy import copy
 import numpy as np
-from scipy import signal, ndimage, interpolate
+from scipy import ndimage, interpolate
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction, StringListValidator, FloatArrayProperty, RebinParamsValidator
 from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing
@@ -130,7 +130,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
     def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, n_gouss=39, sigma=3.0):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
         def moving_average(y, n=n_gouss, sig=sigma):
-            b = signal.gaussian(n, sig)
+            from scipy.signal import gaussian
+            b = gaussian(n, sig)
             average = ndimage.filters.convolve1d(y, b / b.sum())
             var = ndimage.filters.convolve1d(np.power(y - average, 2), b / b.sum())
             return average, var
