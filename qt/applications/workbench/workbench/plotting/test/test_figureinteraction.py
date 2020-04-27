@@ -613,6 +613,23 @@ class FigureInteractionTest(unittest.TestCase):
         self.interactor.mpl_redraw_annotations(event)
         self.assertEqual(1, self.interactor.redraw_annotations.call_count)
 
+    def test_toggle_normalisation_on_contour_plot_maintains_contour_line_colour(self):
+        from mantidqt.plotting.functions import pcolormesh
+        from mantid.plots.legend import convert_color_to_hex
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="test_ws")
+        fig = pcolormesh([ws], contour=True)
+
+        for col in fig.get_axes()[0].collections:
+            col.set_color("#ff9900")
+
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
+                            for col in fig.get_axes()[0].collections))
+
 
 if __name__ == '__main__':
     unittest.main()

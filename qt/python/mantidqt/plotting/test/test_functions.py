@@ -269,6 +269,15 @@ class FunctionsTest(TestCase):
 
         self.assertEqual(len(fills), 3)
 
+    def test_pcolormesh_with_contour_true_draws_contour_lines(self):
+        from mantidqt.plotting.functions import pcolormesh
+        from matplotlib.collections import LineCollection
+        ws = self._test_ws
+        pcolormesh([ws], contour=True)
+        ax = plt.gca()
+
+        self.assertTrue(any(isinstance(col, LineCollection) for col in ax.collections))
+
     # ------------- Failure tests -------------
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):
