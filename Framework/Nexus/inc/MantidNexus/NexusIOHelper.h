@@ -101,14 +101,17 @@ std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
   } else if (std::is_same<T, U>::value) {
     std::vector<T> buf(size);
-    callGetData(file, buf, close_file);
+    if (size > 0)
+      callGetData(file, buf, close_file);
     return buf;
   } else {
-    std::vector<U> buf(size);
     std::vector<T> vec(size);
-    callGetData(file, buf, close_file);
-    std::transform(buf.begin(), buf.end(), vec.begin(),
-                   [](U a) -> T { return static_cast<T>(a); });
+    if (size > 0) {
+      std::vector<U> buf(size);
+      callGetData(file, buf, close_file);
+      std::transform(buf.begin(), buf.end(), vec.begin(),
+                     [](U a) -> T { return static_cast<T>(a); });
+    }
     return vec;
   }
 }
@@ -127,14 +130,17 @@ readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
   } else if (std::is_same<T, U>::value) {
     std::vector<T> buf(size[0]);
-    callGetSlab(file, buf, start, size, close_file);
+    if (size[0] > 0)
+      callGetSlab(file, buf, start, size, close_file);
     return buf;
   } else {
-    std::vector<U> buf(size[0]);
     std::vector<T> vec(size[0]);
-    callGetSlab(file, buf, start, size, close_file);
-    std::transform(buf.begin(), buf.end(), vec.begin(),
-                   [](U a) -> T { return static_cast<T>(a); });
+    if (size[0] > 0) {
+      std::vector<U> buf(size[0]);
+      callGetSlab(file, buf, start, size, close_file);
+      std::transform(buf.begin(), buf.end(), vec.begin(),
+                     [](U a) -> T { return static_cast<T>(a); });
+    }
     return vec;
   }
 }
