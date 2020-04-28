@@ -647,28 +647,18 @@ MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
   bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
   bool const shouldCorrectAngle =
-      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
+      !getPointerToProperty("ThetaIn")->isDefault() && !summingInQ();
   if (shouldCorrectAngle && moreThanOneDetector) {
-    if (inputWS->getNumberHistograms() > 1) {
-      throw std::invalid_argument(
-          "Expected a single group in "
-          "ProcessingInstructions to be able to "
-          "perform angle correction, found " +
-          std::to_string(inputWS->getNumberHistograms()));
-    }
-    MatrixWorkspace_sptr IvsQ = inputWS->clone();
-    auto &XOut0 = IvsQ->mutableX(0);
-    const auto &XIn0 = inputWS->x(0);
-    double const theta = getProperty("ThetaIn");
-    double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
-    std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
-                   [factor](double x) { return factor / x; });
-    auto &Y0 = IvsQ->mutableY(0);
-    auto &E0 = IvsQ->mutableE(0);
-    std::reverse(Y0.begin(), Y0.end());
-    std::reverse(E0.begin(), E0.end());
-    IvsQ->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
+    auto ConvertSingleSpectrumLambdaToQ =
+        this->createChildAlgorithm("ConvertSingleSpectrumLambdaToQ");
+    ConvertSingleSpectrumLambdaToQ->initialize();
+    ConvertSingleSpectrumLambdaToQ->setProperty("InputWorkspace", inputWS);
+    ConvertSingleSpectrumLambdaToQ->setProperty("ThetaIn",
+                                                getPropertyValue("ThetaIn"));
+    ConvertSingleSpectrumLambdaToQ->setProperty("Target", "MomentumTransfer");
+    ConvertSingleSpectrumLambdaToQ->execute();
+    MatrixWorkspace_sptr IvsQ =
+        ConvertSingleSpectrumLambdaToQ->getProperty("OutputWorkspace");
     return IvsQ;
   } else {
     auto convertUnits = this->createChildAlgorithm("ConvertUnits");

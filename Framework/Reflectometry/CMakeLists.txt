@@ -1,6 +1,7 @@
 set(SRC_FILES
     src/ApplyFloodWorkspace.cpp
     src/CalculateSlits.cpp
+    src/ConvertSingleSpectrumLambdaToQ.cpp
     src/ConvertToReflectometryQ.cpp
     src/CreateFloodWorkspace.cpp
     src/CreatePolarizationEfficiencies.cpp
@@ -45,6 +46,7 @@ set(SRC_FILES
 set(INC_FILES
     inc/MantidReflectometry/ApplyFloodWorkspace.h
     inc/MantidReflectometry/CalculateSlits.h
+    inc/MantidReflectometry/ConvertSingleSpectrumLambdaToQ.h
     inc/MantidReflectometry/ConvertToReflectometryQ.h
     inc/MantidReflectometry/CreateFloodWorkspace.h
     inc/MantidReflectometry/CreatePolarizationEfficiencies.h
@@ -89,6 +91,7 @@ set(INC_FILES
 set(TEST_FILES
     ApplyFloodWorkspaceTest.h
     CalculateSlitsTest.h
+    ConvertSingleSpectrumLambdaToQTest.h
     ConvertToReflectometryQTest.h
     CreatePolarizationEfficienciesTest.h
     CreateTransmissionWorkspace2Test.h
