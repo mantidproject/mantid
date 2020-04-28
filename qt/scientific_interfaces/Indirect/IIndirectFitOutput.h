@@ -24,8 +24,8 @@ class MANTIDQT_INDIRECT_DLL IIndirectFitOutput {
 public:
   virtual bool isSpectrumFit(FitDomainIndex index) const = 0;
 
-  virtual std::unordered_map<std::string, ParameterValue> virtual getParameters(
-      FitDomainIndex index) const = 0;
+  virtual std::unordered_map<std::string, ParameterValue>
+  getParameters(FitDomainIndex index) const = 0;
 
   virtual boost::optional<ResultLocationNew>
   getResultLocation(FitDomainIndex index) const = 0;

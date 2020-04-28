@@ -141,8 +141,6 @@ public:
   getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 protected:
-  // virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-  //                           const Spectra &spectra);
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
@@ -156,8 +154,6 @@ protected:
   std::string createSingleFitOutputName(const std::string &formatString,
                                         TableDatasetIndex index,
                                         WorkspaceIndex spectrum) const;
-  void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                       const Spectra &spectra);
   void removeFittingData(TableDatasetIndex index);
 
 private:
