@@ -1,0 +1,485 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAlgorithms/PDFFourierTransform2.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+
+#include <cmath>
+#include <sstream>
+
+namespace Mantid {
+namespace Algorithms {
+
+using std::string;
+using namespace HistogramData;
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(PDFFourierTransform2)
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace DataObjects;
+
+namespace { // anonymous namespace
+/// Crystalline PDF
+const string BIG_G_OF_R("G(r)");
+/// Liquids PDF
+const string LITTLE_G_OF_R("g(r)");
+/// Radial distribution function
+const string RDF_OF_R("RDF(r)");
+
+/// Normalized intensity
+const string S_OF_Q("S(Q)");
+/// Asymptotes to zero
+const string S_OF_Q_MINUS_ONE("S(Q)-1");
+/// Kernel of the Fourier transform
+const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
+
+constexpr double TWO_OVER_PI(2. / M_PI);
+} // namespace
+
+const std::string PDFFourierTransform2::name() const {
+  return "PDFFourierTransform";
+}
+
+int PDFFourierTransform2::version() const { return 2; }
+
+const std::string PDFFourierTransform2::category() const {
+  return "Diffraction\\Utility";
+}
+
+/** Initialize the algorithm's properties.
+ */
+void PDFFourierTransform2::init() {
+
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " +
+                      Q_S_OF_Q_MINUS_ONE);
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
+                  "Result paired-distribution function");
+  
+  // Set up input data type
+  std::vector<std::string> inputTypes;
+  inputTypes.emplace_back(S_OF_Q);
+  inputTypes.emplace_back(S_OF_Q_MINUS_ONE);
+  inputTypes.emplace_back(Q_S_OF_Q_MINUS_ONE);
+  declareProperty("SofQType", S_OF_Q,
+                  std::make_shared<StringListValidator>(inputTypes),
+                  "To identify spectral density function");
+
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+
+  declareProperty("DeltaQ", EMPTY_DBL(), mustBePositive,
+                  "Step size of Q of S(Q) to calculate.  Default = "
+                  ":math:`\\frac{\\pi}{R_{max}}`.");
+  declareProperty(
+      "Qmin", EMPTY_DBL(), mustBePositive,
+      "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
+  declareProperty(
+      "Qmax", EMPTY_DBL(), mustBePositive,
+      "Maximum Q in S(Q) to calculate in Fourier transform. (optional)");
+  declareProperty("Filter", false,
+                  "Set to apply Lorch function filter to the input");
+
+  // Set up output data type
+  std::vector<std::string> outputTypes;
+  outputTypes.emplace_back(BIG_G_OF_R);
+  outputTypes.emplace_back(LITTLE_G_OF_R);
+  outputTypes.emplace_back(RDF_OF_R);
+  declareProperty("PDFType", BIG_G_OF_R,
+                  std::make_shared<StringListValidator>(outputTypes),
+                  "Type of output PDF including G(r)");
+
+  declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
+                  "Step size of r of G(r) to calculate.  Default = "
+                  ":math:`\\frac{\\pi}{Q_{max}}`.");
+  declareProperty("Rmin", 0., mustBePositive,
+                  "Minimum r for G(r) to calculate.");
+  declareProperty("Rmax", 20., mustBePositive,
+                  "Maximum r for G(r) to calculate.");
+  declareProperty(
+      "rho0", EMPTY_DBL(), mustBePositive,
+      "Average number density used for g(r) and RDF(r) conversions (optional)");
+
+  string recipGroup("Reciprocal Space");
+  setPropertyGroup("SofQType", recipGroup);
+  setPropertyGroup("DeltaQ", recipGroup);
+  setPropertyGroup("Qmin", recipGroup);
+  setPropertyGroup("Qmax", recipGroup);
+  setPropertyGroup("Filter", recipGroup);
+
+  string realGroup("Real Space");
+  setPropertyGroup("PDFType", realGroup);
+  setPropertyGroup("DeltaR", realGroup);
+  setPropertyGroup("Rmin", realGroup);
+  setPropertyGroup("Rmax", realGroup);
+  setPropertyGroup("rho0", realGroup);
+}
+
+std::map<string, string> PDFFourierTransform2::validateInputs() {
+  std::map<string, string> result;
+
+  double Qmin = getProperty("Qmin");
+  double Qmax = getProperty("Qmax");
+  if ((!isEmpty(Qmin)) && (!isEmpty(Qmax)))
+    if (Qmax <= Qmin)
+      result["Qmax"] = "Must be greater than Qmin";
+
+  // check for null pointers - this is to protect against workspace groups
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (!inputWS) {
+    return result;
+  }
+
+  if (inputWS->getNumberHistograms() != 1) {
+    result["InputWorkspace"] = "Input workspace must have only one spectrum";
+  }
+  const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
+  if (inputXunit != "MomentumTransfer" && inputXunit != "dSpacing" &&
+      inputXunit != "AtomicDistance") {
+    result["InputWorkspace"] = "Input workspace units not supported";
+  }
+
+  return result;
+}
+
+size_t
+PDFFourierTransform2::determineQminIndex(const std::vector<double> &Q,
+                                        const std::vector<double> &FofQ) {
+  double qmin = getProperty("Qmin");
+
+  // check against available Q-range
+  if (isEmpty(qmin)) {
+    qmin = Q.front();
+  } else if (qmin < Q.front()) {
+    g_log.information(
+        "Specified Qmin < range of data. Adjusting to data range.");
+    qmin = Q.front();
+  }
+
+  // get index for the Qmin from the Q-range
+  auto q_iter = std::upper_bound(Q.begin(), Q.end(), qmin);
+  size_t qmin_index = std::distance(Q.begin(), q_iter);
+  if (qmin_index == 0)
+    qmin_index += 1; // so there doesn't have to be a check in integration loop
+
+  // go to first non-nan value
+  q_iter = std::find_if(std::next(FofQ.begin(), qmin_index), FofQ.end(),
+                        static_cast<bool (*)(double)>(std::isnormal));
+  size_t first_normal_index = std::distance(FofQ.begin(), q_iter);
+  if (first_normal_index > qmin_index) {
+    g_log.information(
+        "Specified Qmin where data is nan/inf. Adjusting to data range.");
+    qmin_index = first_normal_index;
+  }
+
+  return qmin_index;
+}
+
+size_t
+PDFFourierTransform2::determineQmaxIndex(const std::vector<double> &Q,
+                                        const std::vector<double> &FofQ) {
+  double qmax = getProperty("Qmax");
+
+  // check against available Q-range
+  if (isEmpty(qmax)) {
+    qmax = Q.back();
+  } else if (qmax > Q.back()) {
+    g_log.information()
+        << "Specified Qmax > range of data. Adjusting to data range.\n";
+    qmax = Q.back();
+  }
+
+  // get pointers for the data range
+  auto q_iter = std::lower_bound(Q.begin(), Q.end(), qmax);
+  size_t qmax_index = std::distance(Q.begin(), q_iter);
+
+  // go to first non-nan value
+  auto q_back_iter = std::find_if(FofQ.rbegin(), FofQ.rend(),
+                                  static_cast<bool (*)(double)>(std::isnormal));
+  size_t first_normal_index =
+      FofQ.size() - std::distance(FofQ.rbegin(), q_back_iter) - 1;
+  if (first_normal_index < qmax_index) {
+    g_log.information(
+        "Specified Qmax where data is nan/inf. Adjusting to data range.");
+    qmax_index = first_normal_index;
+  }
+
+  return qmax_index;
+}
+
+double PDFFourierTransform2::determineRho0() {
+  double rho0 = getProperty("rho0");
+
+  if (isEmpty(rho0)) {
+    API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+    const Kernel::Material &material = inputWS->sample().getMaterial();
+    double materialDensity = material.numberDensity();
+
+    if (!isEmpty(materialDensity) && materialDensity > 0)
+      rho0 = materialDensity;
+    else
+      rho0 = 1.;
+  }
+
+  return rho0;
+}
+
+void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
+                                             std::vector<double> &Q,
+                                             std::vector<double> &DFOfQ,
+                                             HistogramData::HistogramDx &DQ) {
+  // convert to Q[S(Q)-1]
+  string soqType = getProperty("SofQType");
+  if (soqType == S_OF_Q) {
+    g_log.information() << "Subtracting one from all values\n";
+    // there is no error propagation for subtracting one
+    std::for_each(FOfQ.begin(), FOfQ.end(), [](double &F) { F--; });
+    soqType = S_OF_Q_MINUS_ONE;
+  }
+  if (soqType == Q_S_OF_Q_MINUS_ONE) {
+    g_log.information() << "Dividing all values by Q\n";
+    // error propagation
+    double foo;
+    for (size_t i = 0; i < DFOfQ.size(); ++i) {
+		//DFOfQ[i]
+      foo = (Q[i] / DQ[i] + FOfQ[i] / DFOfQ[i]) *
+                      (FOfQ[i] / Q[i]);
+    }
+    // convert the function
+    std::transform(FOfQ.begin(), FOfQ.end(), FOfQ.begin(),
+                   Q.begin(), std::divides<double>());
+    soqType = S_OF_Q_MINUS_ONE;
+  }
+  if (soqType != S_OF_Q_MINUS_ONE) {
+    // should never get here
+    std::stringstream msg;
+    msg << "Do not understand SofQType = " << soqType;
+    throw std::runtime_error(msg.str());
+  }
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void PDFFourierTransform2::exec() {
+  // get input data
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  auto inputQ = inputWS->x(0).rawData();                  //  x for input
+  HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
+  if (inputWS->sharedDx(0))
+    inputDQ = inputWS->dx(0);
+  auto inputFOfQ = inputWS->y(0).rawData();  //  y for input
+  auto inputDfOfQ = inputWS->e(0).rawData(); // dy for input
+
+  // transform input data into Q/MomentumTransfer
+  const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
+  std::string direction = "forward";
+  if (inputXunit == "MomentumTransfer") {
+    // nothing to do
+  } else if (inputXunit == "dSpacing") {
+    // convert the x-units to Q/MomentumTransfer
+    const double PI_2(2. * M_PI);
+    std::for_each(inputQ.begin(), inputQ.end(),
+                  [&PI_2](double &Q) { Q /= PI_2; });
+    std::transform(inputDQ.begin(), inputDQ.end(), inputQ.begin(),
+                   inputDQ.begin(), std::divides<double>());
+    // reverse all of the arrays
+    std::reverse(inputQ.begin(), inputQ.end());
+    std::reverse(inputDQ.begin(), inputDQ.end());
+    std::reverse(inputFOfQ.begin(), inputFOfQ.end());
+    std::reverse(inputDfOfQ.begin(), inputDfOfQ.end());
+  } else if (inputXunit == "AtomicDistance") {
+    direction = "backward";
+  }
+  g_log.debug() << "Input unit is " << inputXunit << "\n";
+
+  // convert from histogram to density
+  if (!inputWS->isHistogramData()) {
+    g_log.warning() << "This algorithm has not been tested on density data "
+                       "(only on histograms)\n";
+    /* Don't do anything for now
+    double deltaQ;
+    for (size_t i = 0; i < inputFOfQ.size(); ++i)
+    {
+    deltaQ = inputQ[i+1] -inputQ[i];
+    inputFOfQ[i] = inputFOfQ[i]*deltaQ;
+    inputDfOfQ[i] = inputDfOfQ[i]*deltaQ; // TODO feels wrong
+    inputQ[i] += -.5*deltaQ;
+    inputDQ[i] += .5*(inputDQ[i] + inputDQ[i+1]); // TODO running average
+    }
+    inputQ.emplace_back(inputQ.back()+deltaQ);
+    inputDQ.emplace_back(inputDQ.back()); // copy last value
+    */
+  }
+
+  // convert to Q[S(Q)-1]
+  convertToSQMinus1(inputFOfQ, inputQ, inputDfOfQ, inputDQ);
+
+  //string soqType = getProperty("SofQType");
+  //if (soqType == S_OF_Q) {
+  //  g_log.information() << "Subtracting one from all values\n";
+  //  // there is no error propagation for subtracting one
+  //  std::for_each(inputFOfQ.begin(), inputFOfQ.end(), [](double &F) { F--; });
+  //  soqType = S_OF_Q_MINUS_ONE;
+  //}
+  //if (soqType == Q_S_OF_Q_MINUS_ONE) {
+  //  g_log.information() << "Dividing all values by Q\n";
+  //  // error propagation
+  //  for (size_t i = 0; i < inputDfOfQ.size(); ++i) {
+  //    inputDQ[i] = (inputQ[i] / inputDQ[i] + inputFOfQ[i] / inputDfOfQ[i]) *
+  //          (inputFOfQ[i] / inputQ[i]);
+  //  }
+  //  // convert the function
+  //  std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputFOfQ.begin(),
+  //                 inputQ.begin(),
+  //                 std::divides<double>());
+  //  soqType = S_OF_Q_MINUS_ONE;
+  //}
+  //if (soqType != S_OF_Q_MINUS_ONE) {
+  //  // should never get here
+  //  std::stringstream msg;
+  //  msg << "Do not understand SofQType = " << soqType;
+  //  throw std::runtime_error(msg.str());
+  //}
+
+  // determine Q-range
+  size_t qmin_index = determineQminIndex(inputQ, inputFOfQ);
+  size_t qmax_index = determineQmaxIndex(inputQ, inputFOfQ);
+  g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index]
+                 << " Qmax = " << inputQ[qmax_index] << "\n";
+
+  // determine r axis for result
+  const double rmax = getProperty("RMax");
+  double rdelta = getProperty("DeltaR");
+  if (isEmpty(rdelta))
+    rdelta = M_PI / inputQ[qmax_index];
+  auto sizer = static_cast<size_t>(rmax / rdelta);
+
+  bool filter = getProperty("Filter");
+
+  // create the output workspace
+  API::MatrixWorkspace_sptr outputWS = create<Workspace2D>(1, Points(sizer));
+  if (inputXunit == "MomentumTransfer" || inputXunit == "dSpacing") {
+    outputWS->getAxis(0)->unit() =
+        UnitFactory::Instance().create("AtomicDistance");
+  } else if (inputXunit == "AtomicDistance") {
+    outputWS->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+  }
+  outputWS->setYUnitLabel("PDF");
+
+  outputWS->mutableRun().addProperty("Qmin", inputQ[qmin_index], "Angstroms^-1",
+                                     true);
+  outputWS->mutableRun().addProperty("Qmax", inputQ[qmax_index], "Angstroms^-1",
+                                     true);
+
+  BinEdges edges(sizer + 1, LinearGenerator(rdelta, rdelta));
+  outputWS->setBinEdges(0, edges);
+
+  auto &outputR = outputWS->mutableX(0);
+  g_log.information() << "Using rmin = " << outputR.front()
+                      << "Angstroms and rmax = " << outputR.back()
+                      << "Angstroms\n";
+  // always calculate G(r) then convert
+  auto &outputY = outputWS->mutableY(0);
+  auto &outputE = outputWS->mutableE(0);
+
+  // do the math
+
+  double rho0 = determineRho0();
+  double corr;
+  for (size_t r_index = 0; r_index < sizer; r_index++) {
+    const double r = outputR[r_index];
+    if (inputXunit == "MomentumTransfer" || inputXunit == "dSpacing") {
+      corr = 0.5 / M_PI / M_PI / rho0;
+    }
+    else if (inputXunit == "AtomicDistance") {
+      corr = rho0;
+    }
+    const double rfac = corr / (r * r * r);
+
+    double fs = 0;
+    double error = 0;
+    for (size_t q_index = qmin_index; q_index < qmax_index; q_index++) {
+      const double q1 = inputQ[q_index];
+      const double q2 = inputQ[q_index+1];
+      const double sinq1 = sin(q1 * r) - q1 * r * cos(q1 * r);
+      const double sinq2 = sin(q2 * r) - q2 * r * cos(q2 * r);
+      double sinus = sinq2 - sinq1;
+
+      // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
+      if (filter && q1 != 0) {
+        const double lorchKernel = q1 * M_PI / inputQ[qmax_index];
+        sinus *= sin(lorchKernel) / lorchKernel;
+      }
+
+      fs += sinus * inputFOfQ[q_index];
+
+      error += (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
+    }
+
+    // put the information into the output
+    outputY[r_index] = fs * rfac;
+    outputE[r_index] = sqrt(error) * rfac;
+  }
+
+  // convert to the correct form of PDF
+  string outputType = getProperty("PDFType");
+
+  if (outputType == LITTLE_G_OF_R) {
+    for (size_t i = 0; i < outputY.size(); ++i) {
+      // transform the data
+      outputY[i] = outputY[i];
+    }
+  } else if (outputType == BIG_G_OF_R) {
+    const double factor = 4. * M_PI * rho0;
+    for (size_t i = 0; i < outputY.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      outputE[i] = outputE[i] * outputR[i];
+      // transform the data
+      outputY[i] = factor * (outputY[i]) * outputR[i];
+    }
+  } else if (outputType == RDF_OF_R) {
+    const double factor = 4. * M_PI * rho0;
+    for (size_t i = 0; i < outputY.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      outputE[i] = outputE[i] * outputR[i];
+      // transform the data
+      outputY[i] = (outputY[i] + 1.0) * factor * outputR[i] * outputR[i];
+    }
+  } else {
+    // should never get here
+    std::stringstream msg;
+    msg << "Do not understand outputType = " << outputType;
+    throw std::runtime_error(msg.str());
+  }
+
+  // set property
+  setProperty("OutputWorkspace", outputWS);
+}
+
+} // namespace Algorithms
+} // namespace Mantid

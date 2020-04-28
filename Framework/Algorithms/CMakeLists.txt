@@ -222,6 +222,7 @@ set(SRC_FILES
     src/PDCalibration.cpp
     src/PDDetermineCharacterizations.cpp
     src/PDFFourierTransform.cpp
+    src/PDFFourierTransform2.cpp
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
@@ -571,6 +572,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PDCalibration.h
     inc/MantidAlgorithms/PDDetermineCharacterizations.h
     inc/MantidAlgorithms/PDFFourierTransform.h
+    inc/MantidAlgorithms/PDFFourierTransform2.h
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
@@ -925,6 +927,7 @@ set(TEST_FILES
     PDCalibrationTest.h
     PDDetermineCharacterizationsTest.h
     PDFFourierTransformTest.h
+    PDFFourierTransform2Test.h
     PaddingAndApodizationTest.h
     ParallaxCorrectionTest.h
     PauseTest.h
