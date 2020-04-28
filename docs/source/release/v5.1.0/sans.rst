@@ -12,7 +12,7 @@ Bug Fixed
   if there were gaps in the spectrum numbers. The masking will now skip
   over any spectrum numbers not in workspace and emit a warning.
 - :ref:`SANSILLReduction <algm-SANSILLIntegration>` could fail if the detector was
-not aligned with the beam. The integration will now use another algorithm in this case.
+  not aligned with the beam. The integration will now use another algorithm in this case.
 
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
