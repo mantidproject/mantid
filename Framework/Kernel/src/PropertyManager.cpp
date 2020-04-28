@@ -48,8 +48,8 @@ std::string
 PropertyManager::getLogNameFromInvalidValuesFilter(const std::string logName) {
   std::string retVal = "";
   if (PropertyManager::isAnInvalidValuesFilterLog(logName)) {
-    retVal = logName.substr(0, 
-        logName.size() - PropertyManager::INVALID_VALUES_SUFFIX.size());
+    retVal = logName.substr(
+        0, logName.size() - PropertyManager::INVALID_VALUES_SUFFIX.size());
   }
   return retVal;
 }

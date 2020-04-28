@@ -40,7 +40,7 @@ void export_PropertyManager() {
            &PropertyManager::getInvalidValuesFilterLogName)
       .staticmethod("getInvalidValuesFilterLogName")
       .def("getLogNameFromInvalidValuesFilter",
-       &PropertyManager::getLogNameFromInvalidValuesFilter)
+           &PropertyManager::getLogNameFromInvalidValuesFilter)
       .staticmethod("getLogNameFromInvalidValuesFilter")
       .def("isAnInvalidValuesFilterLog",
            &PropertyManager::isAnInvalidValuesFilterLog)

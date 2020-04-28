@@ -82,18 +82,17 @@ public:
     const std::string expected_suffix = "_invalid_values";
     TSM_ASSERT_EQUALS(
         "The expected suffix does not match to the line above this assert",
-        PropertyManager::INVALID_VALUES_SUFFIX,
-        expected_suffix);
+        PropertyManager::INVALID_VALUES_SUFFIX, expected_suffix);
 
     const std::string test_log_name = "testLog";
     TS_ASSERT(!PropertyManager::isAnInvalidValuesFilterLog(test_log_name));
-    TS_ASSERT_EQUALS(PropertyManager::getInvalidValuesFilterLogName(test_log_name),
-      test_log_name + expected_suffix);
+    TS_ASSERT_EQUALS(
+        PropertyManager::getInvalidValuesFilterLogName(test_log_name),
+        test_log_name + expected_suffix);
 
     TS_ASSERT(PropertyManager::isAnInvalidValuesFilterLog(
         PropertyManager::getInvalidValuesFilterLogName(test_log_name)));
 
-    
     // not a valid invalid values log
     TS_ASSERT_EQUALS(
         PropertyManager::getLogNameFromInvalidValuesFilter(test_log_name), "");
