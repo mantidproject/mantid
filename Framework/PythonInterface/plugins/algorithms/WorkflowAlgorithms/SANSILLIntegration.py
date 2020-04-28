@@ -218,12 +218,14 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 if wavelength != 0:
                     run = mtd[self._input_ws].getRun()
-                    if run.hasProperty("Gamma.value") and run.getLogData("Gamma.value") != 0:
-                        if mtd[self._input_ws].getInstrument().getName() == "D16":
-                            pixel_nb = 320
+                    instrument = mtd[self._input_ws].getInstrument()
+                    if instrument.getName() == "D16" and run.hasProperty("Gamma.value") \
+                            and run.getLogData("Gamma.value") != 0:
+                        if instrument.hasParameter('detector-width'):
+                            pixel_nb = instrument.getNumberParameter('detector-width')[0]
                         else:
-                            pixel_nb = 320
                             self.log().warning("Width of the instrument not found. Assuming 320 pixels.")
+                            pixel_nb = 320
                         q_binning = self._pixel_q_binning_non_aligned(q_min, q_max, pixel_nb, binning_factor)
                     else:
                         q_binning = self._pixel_q_binning(q_min, q_max, pixel_size * binning_factor, wavelength, l2, offset)
