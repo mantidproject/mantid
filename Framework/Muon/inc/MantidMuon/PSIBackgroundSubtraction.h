@@ -1,0 +1,40 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidMuon/DllConfig.h"
+
+namespace Mantid {
+namespace Muon {
+
+class MANTID_MUON_DLL PSIBackgroundSubtraction : public API::Algorithm {
+
+public:
+  PSIBackgroundSubtraction() : API::Algorithm() {}
+  const std::string name() const override { return "PSIBackgroundSubtraction"; }
+  int version() const override { return 1; }
+  const std::string summary() const override {
+    return "Removes the background from a loaded PSI workspace.";
+  }
+
+private:
+  void init() override;
+  void exec() override;
+  void calculateBackgroundUsingFit(API::MatrixWorkspace &inputWorkspace);
+  /// setup the child fit algorithm, can be overwritten by the tests with a
+  /// mock.
+  API::IAlgorithm_sptr setupFitAlgorithm(const std::string &wsName);
+  virtual std::tuple<double, double>
+  calculateBackgroundFromFit(API::IAlgorithm_sptr &fit, double maxTime,
+                             int workspaceIndex);
+
+  /// Perform validation of inputs to the algorithm
+  std::map<std::string, std::string> validateInputs() override;
+};
+} // namespace Muon
+} // namespace Mantid

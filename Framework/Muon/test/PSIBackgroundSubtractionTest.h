@@ -1,0 +1,117 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidMuon/PSIBackgroundSubtraction.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
+
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Muon;
+
+namespace {
+
+constexpr char *WORKSPACE_NAME = "DummyWS";
+
+MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms,
+                                               const size_t numberOfBins) {
+
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(
+      numberOfHistograms, numberOfBins);
+  ws->setYUnit("Counts");
+  AnalysisDataService::Instance().addOrReplace(WORKSPACE_NAME, ws);
+
+  return ws;
+}
+
+MatrixWorkspace_sptr createInvalidTestWorkspace(const size_t numberOfHistograms,
+                                                const size_t numberOfBins) {
+
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(
+      numberOfHistograms, numberOfBins);
+  ws->setYUnit("Asymmetry");
+  AnalysisDataService::Instance().addOrReplace(WORKSPACE_NAME, ws);
+
+  return ws;
+}
+void clearADS() { AnalysisDataService::Instance().clear(); }
+
+} // namespace
+
+class MockPSIBackgroundSubtraction : public PSIBackgroundSubtraction {
+public:
+  MockPSIBackgroundSubtraction() {}
+
+  // set return fit and backgrounds
+  void setReturnFitQuality(const double fitQuality) {
+    m_fitQuality = fitQuality;
+  }
+  void setReturnBackground(const double background) {
+    m_background = background;
+  }
+
+private:
+  std::tuple<double, double>
+  calculateBackgroundFromFit(IAlgorithm_sptr &fit, double maxTime,
+                             int workspaceIndex) override {
+    return std::make_tuple(m_background, m_fitQuality);
+  }
+  double m_background{0.00};
+  double m_fitQuality{0.00};
+};
+
+class PSIBackgroundSubtractionTest : public CxxTest::TestSuite {
+public:
+  PSIBackgroundSubtractionTest() { Mantid::API::FrameworkManager::Instance(); }
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PSIBackgroundSubtractionTest *createSuite() {
+    return new PSIBackgroundSubtractionTest();
+  }
+  static void destroySuite(PSIBackgroundSubtractionTest *suite) {
+    delete suite;
+  }
+
+  void test_algorithm_initializes() {
+    PSIBackgroundSubtraction alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+  }
+
+  void test_that_algorithm_does_not_execute_if_invalid_workspace_type() {
+    PSIBackgroundSubtraction alg;
+    auto ws = createInvalidTestWorkspace(2, 100);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    clearADS();
+  }
+
+  void test_background_correctly_removed_from_input_workspace() {
+    MockPSIBackgroundSubtraction alg;
+    double background = 20;
+    double fitQuality = 1.00;
+    auto ws = createCountsTestWorkspace(4, 100);
+    auto wsClone = ws->clone();
+    alg.setReturnBackground(background);
+    alg.setReturnFitQuality(fitQuality);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.execute();
+
+    for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
+      for (size_t i = 0; i < ws->y(index).size(); ++i)
+        TS_ASSERT_EQUALS(ws->y(index)[i], wsClone->y(index)[i] - background)
+    }
+    clearADS();
+  }
+};
