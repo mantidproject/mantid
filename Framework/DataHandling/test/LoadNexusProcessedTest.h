@@ -1126,6 +1126,7 @@ public:
     MatrixWorkspace_sptr workspace;
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
+
     check_log(workspace, "cryo_temp1", 1, 3, 7.0);
 
     SaveNexusProcessed save;
