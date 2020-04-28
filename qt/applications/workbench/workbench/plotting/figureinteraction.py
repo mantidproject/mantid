@@ -102,7 +102,8 @@ class FigureInteraction(object):
     def on_scroll(self, event):
         """Respond to scroll events: zoom in/out"""
         self.canvas.toolbar.push_current()
-        if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D):
+        if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D) or \
+                len(event.inaxes.images) == 0 and len(event.inaxes.lines) == 0:
             return
         zoom_factor = 1.05 + abs(event.step)/6
         if event.button == 'up':  # zoom in
