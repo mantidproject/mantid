@@ -33,6 +33,7 @@ Single Crystal Diffraction
 Improvements
 ^^^^^^^^^^^^
 - :ref:`CombinePeaksWorkspaces <algm-CombinePeaksWorkspaces>` now combines the modulation vectors present in the two workspaces, provided the total number of vectors is less than 3.
+- New algorithm :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` for making UBs for runs at different goniometer angles share common indexing and determine the goniometer axis and rotation required to match UBs to a reference.
 - New instrument geometry for MaNDi instrument at SNS
 
 Imaging
