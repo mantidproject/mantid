@@ -132,6 +132,9 @@ public:
   /// True if the algorithm is running.
   virtual bool isRunning() const = 0;
 
+  /// True if the algorithm is ready for garbage collection.
+  virtual bool isReadyForGarbageCollection() const = 0;
+
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;
 

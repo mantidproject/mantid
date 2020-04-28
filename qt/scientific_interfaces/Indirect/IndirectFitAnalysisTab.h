@@ -118,6 +118,7 @@ protected slots:
   void updateFitBrowserParameterValuesFromAlg();
   void updateDataReferences();
   void updateResultOptions();
+  void respondToFunctionChanged();
 
 private slots:
   void plotSelectedSpectra();
@@ -133,7 +134,6 @@ private slots:
   void respondToPlotSpectrumChanged(WorkspaceIndex);
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double);
-  void respondToFunctionChanged();
 
 private:
   void setup() override;

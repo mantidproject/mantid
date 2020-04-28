@@ -5,6 +5,11 @@ MantidWorkbench Changes
 .. contents:: Table of Contents
    :local:
 
+New
+###
+
+- The Advanced Plotting menu is now in Workbench. This enables creating surface and contour plots of three or more workspaces, and choosing which log value to plot against.
+
 Improvements
 ############
 
@@ -16,6 +21,8 @@ Improvements
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
+- The Help Menu now has an About screen that will pop up automatically on startup to provide links to the release notes and various other resources, and allow you to set some important setting such as Facility, instrument and accept usage tracing.
+  You can choose to hide it until the next release.
 - The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
 
 - On 3D plots you can now double-click on the z-axis to change its limits or label.

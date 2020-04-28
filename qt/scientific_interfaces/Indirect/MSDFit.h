@@ -27,6 +27,7 @@ public:
 
 protected slots:
   void runClicked();
+  void fitFunctionChanged();
 
 protected:
   void setRunIsRunning(bool running) override;
@@ -35,6 +36,7 @@ protected:
 private:
   void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
+  std::string fitTypeString() const;
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };

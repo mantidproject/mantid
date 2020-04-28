@@ -111,7 +111,10 @@ public:
                    std::vector<PropertyManager *> /* outputs*/) const override {
     throw(std::runtime_error("Not yet implmented"));
   }
-  void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/) override {
+
+  void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/,
+                        const std::vector<std::string> &
+                        /* excludedFromFiltering */) override {
     throw(std::runtime_error("Not yet implmented"));
   }
 

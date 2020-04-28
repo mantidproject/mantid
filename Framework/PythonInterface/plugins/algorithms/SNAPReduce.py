@@ -87,7 +87,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                     win_array = temp[i - w:i + w + 1].copy()
                     win_array_reversed = win_array[::-1]
                     average = (win_array + win_array_reversed) / 2
-                    temp[i] = np.min(average[:len(average) / 2])
+                    temp[i] = np.min(average[:int(len(average) / 2)])
 
         if LLS:
             temp = self.Inv_LLS_transformation(temp)

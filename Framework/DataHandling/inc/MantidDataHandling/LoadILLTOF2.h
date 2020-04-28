@@ -59,7 +59,8 @@ private:
 
   void loadTimeDetails(NeXus::NXEntry &entry);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
-                                const std::vector<std::vector<int>> &);
+                                const std::vector<std::vector<int>> &,
+                                bool convertToTOF);
   void loadSpectra(size_t &spec, const size_t numberOfTubes,
                    const std::vector<Mantid::detid_t> &detectorIDs,
                    const NeXus::NXInt &data, Mantid::API::Progress &progress);

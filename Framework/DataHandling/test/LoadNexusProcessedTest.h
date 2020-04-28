@@ -1109,7 +1109,7 @@ public:
     }
   }
 
-    void test_Log_invalid_value_filtering_survives_save_and_load() {
+  void test_Log_invalid_value_filtering_survives_save_and_load() {
     LoadNexus alg;
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -1131,7 +1131,8 @@ public:
     SaveNexusProcessed save;
     save.initialize();
     save.setPropertyValue("InputWorkspace", output_ws);
-    std::string filename = "LoadNexusProcessed_test_Log_invalid_value_filtering_survives_save_and_load.nxs";
+    std::string filename = "LoadNexusProcessed_test_Log_invalid_value_"
+                           "filtering_survives_save_and_load.nxs";
     save.setPropertyValue("Filename", filename);
     filename = save.getPropertyValue("Filename");
     save.execute();
@@ -1148,21 +1149,104 @@ public:
 
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
-    }
+  }
+
+  void test_log_filtering_survives_save_and_load() {
+    LoadNexus alg;
+    std::string group_ws = "test_log_filtering_survives_save_and_load";
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    testFile = "POLREF00014966.nxs";
+    alg.setPropertyValue("Filename", testFile);
+    testFile = alg.getPropertyValue("Filename");
+
+    alg.setPropertyValue("OutputWorkspace", group_ws);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Test some aspects of the file
+    MatrixWorkspace_sptr workspace;
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(group_ws + "_1"));
+    // should be filtered
+    check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
+    // should not be filtered
+    check_log(workspace, "periods", 37, 1, 1);
+    check_log(workspace, "period 1", 36, 505, true);
+    check_log(workspace, "running", 72, 501, true);
+
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setProperty("InputWorkspace", workspace);
+    std::string filename =
+        "LoadNexusProcessed_test_log_filtering_survives_save_and_load.nxs";
+    save.setPropertyValue("Filename", filename);
+    filename = save.getPropertyValue("Filename");
+    save.execute();
+    LoadNexusProcessed load;
+    load.initialize();
+    load.setPropertyValue("Filename", filename);
+    load.setPropertyValue("OutputWorkspace", output_ws);
+    load.execute();
+
+    auto reloadedWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(output_ws));
+    // should not change as should be filtered as before
+    check_log(reloadedWorkspace, "raw_uah_log", 429, 17, 99.4740982879);
+    // should not change as should not be filtered as before
+    check_log(reloadedWorkspace, "periods", 37, 1, 1);
+    check_log(reloadedWorkspace, "period 1", 36, 505, true);
+    check_log(reloadedWorkspace, "running", 72, 501, true);
+
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
 
 private:
-    void check_log_is_filtered(Mantid::API::MatrixWorkspace_sptr &workspace) {
-      TS_ASSERT(workspace.get());
-      auto run = workspace->run();
+  void check_log_is_filtered(Mantid::API::MatrixWorkspace_sptr &workspace) {
+    TS_ASSERT(workspace.get());
+    auto run = workspace->run();
 
-      auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
-          run.getLogData("cryo_temp1"));
-      // middle value is invalid and is filtered out
-      TS_ASSERT_EQUALS(pclogFiltered1->size(), 1);
-      TS_ASSERT_EQUALS(pclogFiltered1->nthInterval(0).length().total_seconds(),
-                       3);
-      TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
+    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("cryo_temp1"));
+    // middle value is invalid and is filtered out
+    TS_ASSERT_EQUALS(pclogFiltered1->size(), 1);
+    TS_ASSERT_EQUALS(pclogFiltered1->nthInterval(0).length().total_seconds(),
+                     3);
+    TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
+  }
+
+  template <typename TYPE>
+  void check_log(Mantid::API::MatrixWorkspace_sptr &workspace,
+                 const std::string &logName, const int noOfEntries,
+                 const int firstInterval, const TYPE firstValue) {
+    TS_ASSERT(workspace.get());
+    auto run = workspace->run();
+
+    auto prop = run.getLogData(logName);
+    TSM_ASSERT(logName + " Log was not found", prop);
+    if (prop) {
+      auto log =
+          dynamic_cast<TimeSeriesProperty<TYPE> *>(run.getLogData(logName));
+      TSM_ASSERT(logName + " Log was not the expected type", log);
+      if (log) {
+        // middle value is invalid and is filtered out
+        TSM_ASSERT_EQUALS(logName + " Log size not as expected", log->size(),
+                          noOfEntries);
+        TSM_ASSERT_EQUALS(logName + " Log first interval not as expected",
+                          log->nthInterval(0).length().total_seconds(),
+                          firstInterval);
+        templated_equality_check(logName + " Log first value not as expected",
+                                 log->nthValue(0), firstValue);
+      }
     }
+  }
+
+  template <typename TYPE>
+  void templated_equality_check(const std::string &message, const TYPE value,
+                                const TYPE refValue) {
+    TSM_ASSERT_EQUALS(message, value, refValue);
+  }
 
   void doHistoryTest(const MatrixWorkspace_sptr &matrix_ws) {
     const WorkspaceHistory history = matrix_ws->getHistory();
@@ -1490,6 +1574,12 @@ private:
   std::string m_savedTmpEventFile;
   static const EventType m_savedTmpType = TOF;
 };
+
+template <>
+void LoadNexusProcessedTest::templated_equality_check(
+    const std::string &message, const double value, const double refValue) {
+  TSM_ASSERT_DELTA(message, value, refValue, 1e-5);
+}
 
 //------------------------------------------------------------------------------
 // Performance test
