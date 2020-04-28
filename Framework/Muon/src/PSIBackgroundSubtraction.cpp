@@ -72,13 +72,13 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(
     auto maxtime = timedata.back();
     auto [background, fitQuality] =
         calculateBackgroundFromFit(fit, maxtime, static_cast<int>(index));
-    // If fit quality is poor, do not subtract the background and instead log a warning
+    // If fit quality is poor, do not subtract the background and instead log a
+    // warning
     if (fitQuality > FIT_TOLERANCE) {
       g_log.warning()
           << "Fit quality obtained in PSIBackgroundSubtraction is poor. "
           << "Skipping background calculation for WorkspaceIndex: "
-          << static_cast<int>(index)
-          << "\n";
+          << static_cast<int>(index) << "\n";
     } else {
       countsdata = countsdata - background;
     }
