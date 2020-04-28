@@ -94,12 +94,12 @@ void callGetSlab(::NeXus::File &file, std::vector<T> &buf,
 template <typename T, typename U>
 std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
                                   bool close_file) {
-  if (sizeof(T) < sizeof(U)) {
+  if constexpr (sizeof(T) < sizeof(U)) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
-  } else if (std::is_same<T, U>::value) {
+  } else if constexpr (std::is_same<T, U>::value) {
     std::vector<T> buf(size);
     if (size > 0)
       callGetData(file, buf, close_file);
@@ -123,12 +123,12 @@ template <typename T, typename U>
 std::vector<T>
 readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
                  const std::vector<int64_t> &size, bool close_file) {
-  if (sizeof(T) < sizeof(U)) {
+  if constexpr (sizeof(T) < sizeof(U)) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
-  } else if (std::is_same<T, U>::value) {
+  } else if constexpr (std::is_same<T, U>::value) {
     std::vector<T> buf(size[0]);
     if (size[0] > 0)
       callGetSlab(file, buf, start, size, close_file);
@@ -147,12 +147,12 @@ readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
 
 template <typename T, typename U>
 T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
-  if (sizeof(T) < sizeof(U)) {
+  if constexpr (sizeof(T) < sizeof(U)) {
     if (close_file)
       file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readAnyVariable");
-  } else if (std::is_same<T, U>::value) {
+  } else if constexpr (std::is_same<T, U>::value) {
     T buf;
     callGetData(file, buf, close_file);
     return buf;
