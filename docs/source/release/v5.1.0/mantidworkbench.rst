@@ -24,7 +24,7 @@ Improvements
 - The Help Menu now has an About screen that will pop up automatically on startup to provide links to the release notes and various other resources, and allow you to set some important setting such as Facility, instrument and accept usage tracing.
   You can choose to hide it until the next release.
 - The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
-
+- The plot toolbar now shows the correct buttons for 3D plots.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 
 
@@ -37,5 +37,6 @@ Bugfixes
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly
 - Opening figure options on a plot with an empty legend no longer causes an unhandled exception.
+- Fixed being able to zoom in and out of colorbars on colorfill plots. 
 
 :ref:`Release 5.1.0 <v5.1.0>`
