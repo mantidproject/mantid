@@ -1,7 +1,7 @@
-.. _GettingStartedWithPyCharm:
+.. _PyCharm:
 
-Getting Started with PyCharm
-============================
+PyCharm
+=======
 
 PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
 
@@ -222,3 +222,12 @@ The following non-default plugins are things our team has found useful for Manti
 - **CMD Support** - Syntax highlighting for ``.BAT`` ~scripts
 
 Please add to this list if you find a useful plugin of your own
+
+Remote Development
+##################
+
+Note: Requires PyCharm Professional.
+
+PyCharm supports deployment and syncronisation of written code to a remote server via SSH.
+
+Open a local copy of the project and then follow the the guides here for `configuring the remote interpreter <https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html>`_ and `creating a deployment configuration <https://www.jetbrains.com/help/pycharm/creating-a-remote-server-configuration.html>`_. 
