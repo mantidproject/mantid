@@ -45,6 +45,7 @@ public:
   // Gets the correct log name for the matching invalid values log for a given
   // log name
   static std::string getInvalidValuesFilterLogName(const std::string logName);
+  static std::string getLogNameFromInvalidValuesFilter(const std::string logName);
   static bool isAnInvalidValuesFilterLog(const std::string logName);
 
   PropertyManager();
