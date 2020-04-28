@@ -1228,7 +1228,7 @@ private:
     }
   }
 
-  //There is also an explicit instantiation of this for doubles
+  // There is also an explicit instantiation of this for doubles
   template <typename TYPE>
   void templated_equality_check(const std::string &message, const TYPE value,
                                 const TYPE refValue) {
