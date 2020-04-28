@@ -1126,7 +1126,7 @@ public:
     MatrixWorkspace_sptr workspace;
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
-    check_log_is_filtered(workspace);
+    check_log(workspace, "cryo_temp1", 1, 3, 5.0);
 
     SaveNexusProcessed save;
     save.initialize();
@@ -1145,8 +1145,7 @@ public:
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
     TS_ASSERT(workspace.get());
-    check_log_is_filtered(workspace);
-
+    check_log(workspace, "cryo_temp1", 1, 3, 5.0);
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
   }
@@ -1203,19 +1202,6 @@ public:
   }
 
 private:
-  void check_log_is_filtered(Mantid::API::MatrixWorkspace_sptr &workspace) {
-    TS_ASSERT(workspace.get());
-    auto run = workspace->run();
-
-    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getLogData("cryo_temp1"));
-    // middle value is invalid and is filtered out
-    TS_ASSERT_EQUALS(pclogFiltered1->size(), 1);
-    TS_ASSERT_EQUALS(pclogFiltered1->nthInterval(0).length().total_seconds(),
-                     3);
-    TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
-  }
-
   template <typename TYPE>
   void check_log(Mantid::API::MatrixWorkspace_sptr &workspace,
                  const std::string &logName, const int noOfEntries,
@@ -1242,6 +1228,7 @@ private:
     }
   }
 
+  //There is also an explicit instantiation of this for doubles
   template <typename TYPE>
   void templated_equality_check(const std::string &message, const TYPE value,
                                 const TYPE refValue) {
