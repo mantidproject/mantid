@@ -44,6 +44,15 @@ std::string
 PropertyManager::getInvalidValuesFilterLogName(const std::string logName) {
   return logName + PropertyManager::INVALID_VALUES_SUFFIX;
 }
+std::string
+PropertyManager::getLogNameFromInvalidValuesFilter(const std::string logName) {
+  std::string retVal = "";
+  if (PropertyManager::isAnInvalidValuesFilterLog(logName)) {
+    retVal = logName.substr(0, 
+        logName.size() - PropertyManager::INVALID_VALUES_SUFFIX.size());
+  }
+  return retVal;
+}
 bool PropertyManager::isAnInvalidValuesFilterLog(const std::string logName) {
   const auto fullString = logName;
   const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
