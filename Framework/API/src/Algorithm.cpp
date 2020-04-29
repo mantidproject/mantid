@@ -67,6 +67,16 @@ public:
 private:
   const std::string &m_value;
 };
+
+template <typename T> struct RunOnFinish {
+
+  RunOnFinish(T &&task) : m_onfinsh(std::move(task)) {}
+  ~RunOnFinish() { m_onfinsh(); }
+
+private:
+  T m_onfinsh;
+};
+
 } // namespace
 
 // Doxygen can't handle member specialization at the moment:
@@ -511,6 +521,19 @@ void Algorithm::unlockWorkspaces() {
   m_writeLockedWorkspaces.clear();
 }
 
+/**
+ * Clear any internal workspace handles so that workspaces will be deleted
+ * promptly after a managed algorithm finishes
+ */
+void Algorithm::clearWorkspaceCaches() {
+  m_groupWorkspaces.clear();
+  m_inputWorkspaceHistories.clear();
+  m_inputWorkspaceProps.clear();
+  m_outputWorkspaceProps.clear();
+  m_pureOutputWorkspaceProps.clear();
+  m_unrolledInputWorkspaces.clear();
+}
+
 //---------------------------------------------------------------------------------------------
 /** Invoced internally in execute()
  */
@@ -524,6 +547,11 @@ bool Algorithm::executeInternal() {
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
+
+  // Register clean up tasks that should happen regardless of the route
+  // out of the algorithm. These tasks will get run after this method
+  // finishes.
+  RunOnFinish onFinish([this]() { this->clearWorkspaceCaches(); });
 
   notificationCenter().postNotification(new StartedNotification(this));
   Mantid::Types::Core::DateAndTime startTime;
@@ -707,7 +735,6 @@ bool Algorithm::executeInternal() {
           new ErrorNotification(this, ex.what()));
       setResultState(ResultState::Failed);
       this->unlockWorkspaces();
-
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
@@ -740,6 +767,7 @@ bool Algorithm::executeInternal() {
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
+
     throw;
   }
 
@@ -755,10 +783,10 @@ bool Algorithm::executeInternal() {
     getLogger().error() << this->name()
                         << ": UNKNOWN Exception is caught in exec()\n";
     this->unlockWorkspaces();
+
     throw;
   }
 
-  // Unlock the locked workspaces
   this->unlockWorkspaces();
 
   m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
