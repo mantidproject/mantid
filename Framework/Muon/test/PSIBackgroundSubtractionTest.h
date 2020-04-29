@@ -57,9 +57,8 @@ public:
   }
 
 private:
-  std::tuple<double, double>
-  calculateBackgroundFromFit(IAlgorithm_sptr &fit, double maxTime,
-                             int workspaceIndex) override {
+  std::tuple<double, double> calculateBackgroundFromFit(IAlgorithm_sptr &,
+                                                        double, int) override {
     return std::make_tuple(m_background, m_fitQuality);
   }
   double m_background{0.00};
@@ -69,8 +68,7 @@ private:
 class PSIBackgroundSubtractionTest : public CxxTest::TestSuite {
 public:
   PSIBackgroundSubtractionTest() { Mantid::API::FrameworkManager::Instance(); }
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
+
   static PSIBackgroundSubtractionTest *createSuite() {
     return new PSIBackgroundSubtractionTest();
   }
