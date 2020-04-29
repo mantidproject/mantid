@@ -338,11 +338,11 @@ createTimeSeriesValidityFilter(::NeXus::File &file,
 
   bool invalidDataFound = false;
   boolValues.reserve(values.size());
-  // convert the integer values to boolean with 0=valid data
+  // convert the integer values to boolean with 0=invalid data
   for (size_t i = 0; i < values.size(); i++) {
-    bool boolValue = (values[i] != 0);
-    boolValues.emplace_back(boolValue);
-    if ((boolValue) && (!invalidDataFound)) {
+    bool isInvalidData = (values[i] == 0);
+    boolValues.emplace_back(!isInvalidData);
+    if (isInvalidData && !invalidDataFound) {
       invalidDataFound = true;
     }
   }

@@ -321,7 +321,7 @@ public:
 
     auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
-    std::vector<bool> correct2{true, true, true};
+    std::vector<bool> correct2{false, false, false};
     TS_ASSERT_EQUALS(pclog2->valuesAsVector(), correct2);
 
     // force the filtering by passing in an empty log
