@@ -9,12 +9,13 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/System.h"
-#include <nexus/NeXusException.hpp>
+#include "MantidKernel/NexusDescriptor.h"
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 /****************************************/
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/LatticeDomain.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 using Mantid::Kernel::V3D;
@@ -51,31 +52,22 @@ public:
 
   Types::Core::DateAndTime getExperimentTime(std::string typeName);
 
-  std::vector<std::string>
-  getModules(std::string inst, const std::vector<std::string> &inputNames);
+  std::vector<std::string> getModules(std::string inst, const std::vector<std::string> &inputNames);
   bool checkBanknames(const std::vector<std::string> &inputNames);
   std::vector<std::string> getGPPDModules(std::string bankName);
   std::vector<int64_t> getPixelId(const std::vector<std::string> &inputList);
   std::vector<uint32_t> getTimeBin(std::string typeName);
   std::vector<uint32_t> getHistData(const vector<string> &inputList);
-  void loadHistData(boost::shared_ptr<API::MatrixWorkspace> workspace,
-                    std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-                    std::vector<uint32_t> &histData);
+  void loadHistData(boost::shared_ptr<API::MatrixWorkspace> workspace, std::vector<uint32_t> &timeOfFlight, size_t pidNums, std::vector<uint32_t> &histData);
 
-  std::multimap<uint32_t, std::pair<float, int64_t>>
-  getEventData(const vector<string> &inputList,
-               const vector<uint32_t> &startList,
-               const vector<uint32_t> &endList, const vector<int64_t> &pids);
-  void
-  loadEventData(boost::shared_ptr<DataObjects::EventWorkspace> workspace,
-                const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-                std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
-
+    std::multimap<uint32_t, std::pair<float, int64_t>> getEventData(const vector<string> &inputList, const vector<uint32_t> &startList, const vector<uint32_t> &endList, const vector<int64_t> &pids);
+void loadEventData(boost::shared_ptr<DataObjects::EventWorkspace> workspace, const std::vector<uint32_t> &timeOfFlight, size_t pidNums, std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
+  
 private:
   void init() override;
   void exec() override;
   std::unique_ptr<::NeXus::File> m_file;
-  std::string m_entry;
+   std::string m_entry;
   std::vector<std::string> m_modules;
   std::vector<std::string> m_monitors;
 };

@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //      NScD Oak Ridge National Laboratory, European Spallation Source,
 //      Institut Laue - Langevin
 //      &  CSNS, Institute of High Energy Physics，Chinese Academy of Sciences.
@@ -52,19 +52,19 @@ public:
     inputFile = "CSNS_GPPD_test.nxs";
     algToBeTested.setPropertyValue("Filename", inputFile);
     algToBeTested.setPropertyValue("Instrument", "GPPD");
-    // algToBeTested.setPropertyValue("LoadBank",true );
+    //algToBeTested.setPropertyValue("LoadBank",true );
     algToBeTested.setPropertyValue("Bankname", "module322");
-    // algToBeTested.setPropertyValue("LoadEvent",false );
-    // algToBeTested.setPropertyValue("LoadMonitor",true );
+    //algToBeTested.setPropertyValue("LoadEvent",false );
+    //algToBeTested.setPropertyValue("LoadMonitor",true );
     algToBeTested.setPropertyValue("Monitorname", "monitor2");
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
     //
     //  test workspace created by LoadCSNSNexus
-    // WorkspaceGroup_sptr output =
+    //WorkspaceGroup_sptr output =
     //    AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
-    // TS_ASSERT_EQUALS(output->getNumberOfEntries(), 4);
+    //TS_ASSERT_EQUALS(output->getNumberOfEntries(), 4);
     // int ii;
     // std::cin >> ii;
     MatrixWorkspace_sptr outputItem1 =
@@ -86,6 +86,7 @@ private:
   std::string outputSpace;
 };
 
+
 class LoadCSNSNexusTestPerformance : public CxxTest::TestSuite {
 public:
   static LoadCSNSNexusTestPerformance *createSuite() {
@@ -96,6 +97,7 @@ public:
     delete suite;
   }
 
+  
   void setUp() override {
     if (!loadCSNSNexusAlg.isInitialized())
       loadCSNSNexusAlg.initialize();
@@ -120,5 +122,6 @@ private:
   std::string inputFile;
   std::string outputSpace;
 };
+
 
 #endif /*LOADCSNSNEXUSTEST_H_*/
