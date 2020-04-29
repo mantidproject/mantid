@@ -44,10 +44,12 @@ private:
   size_t determineQmaxIndex(const std::vector<double> &Q,
                             const std::vector<double> &FofQ);
   double determineRho0();
-  void convertToSQMinus1(std::vector<double> &FOfQ,
-                         std::vector<double> &Q,
+  void convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q,
                          std::vector<double> &DFOfQ,
                          HistogramData::HistogramDx &DQ);
+  void convertToLittleGRPlus1(std::vector<double> &FOfQ, std::vector<double> &Q,
+                              std::vector<double> &DFOfQ,
+                              HistogramData::HistogramDx &DQ);
 };
 
 } // namespace Algorithms

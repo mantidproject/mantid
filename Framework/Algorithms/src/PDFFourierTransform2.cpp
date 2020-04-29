@@ -263,13 +263,11 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
     // error propagation
     double foo;
     for (size_t i = 0; i < DFOfQ.size(); ++i) {
-		//DFOfQ[i]
-      foo = (Q[i] / DQ[i] + FOfQ[i] / DFOfQ[i]) *
-                      (FOfQ[i] / Q[i]);
+      DFOfQ[i] = (Q[i] / DQ[i] + FOfQ[i] / DFOfQ[i]) * (FOfQ[i] / Q[i]);
     }
     // convert the function
-    std::transform(FOfQ.begin(), FOfQ.end(), FOfQ.begin(),
-                   Q.begin(), std::divides<double>());
+    std::transform(FOfQ.begin(), FOfQ.end(), FOfQ.begin(), Q.begin(),
+                   std::divides<double>());
     soqType = S_OF_Q_MINUS_ONE;
   }
   if (soqType != S_OF_Q_MINUS_ONE) {
@@ -279,6 +277,37 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
     throw std::runtime_error(msg.str());
   }
   return;
+}
+
+void PDFFourierTransform2::convertToLittleGRPlus1(
+    std::vector<double> &FOfR,
+	std::vector<double>& R,
+	std::vector<double>& DFOfR,
+	HistogramData::HistogramDx& DR) {
+  string PDFType = getProperty("PDFType");
+  double rho0 = determineRho0();
+  if (PDFType == LITTLE_G_OF_R) {
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // transform the data
+      FOfR[i] = FOfR[i] + 1;
+    }
+  } else if (PDFType == BIG_G_OF_R) {
+    const double factor = 4. * M_PI * rho0;
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = (R[i] / DR[i] + FOfR[i] / DFOfR[i]) * (FOfR[i] / R[i]);
+      // transform the data
+      FOfR[i] = FOfR[i] / factor / R[i];
+    }
+  } else if (PDFType == RDF_OF_R) {
+    const double factor = 4. * M_PI * rho0;
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = (2.0 * R[i] / DR[i] + FOfR[i] / DFOfR[i]) * (FOfR[i] / R[i]);
+      // transform the data
+      FOfR[i] = FOfR[i] / factor / R[i] / R[i];
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -335,35 +364,13 @@ void PDFFourierTransform2::exec() {
     */
   }
 
-  // convert to Q[S(Q)-1]
-  convertToSQMinus1(inputFOfQ, inputQ, inputDfOfQ, inputDQ);
+  // convert to S(Q)-1 or g(R)+1
+  if (direction == "forward") {
+    convertToSQMinus1(inputFOfQ, inputQ, inputDfOfQ, inputDQ);
+  } else if (direction == "backward") {
+    convertToLittleGRPlus1(inputFOfQ, inputQ, inputDfOfQ, inputDQ);
+  }
 
-  //string soqType = getProperty("SofQType");
-  //if (soqType == S_OF_Q) {
-  //  g_log.information() << "Subtracting one from all values\n";
-  //  // there is no error propagation for subtracting one
-  //  std::for_each(inputFOfQ.begin(), inputFOfQ.end(), [](double &F) { F--; });
-  //  soqType = S_OF_Q_MINUS_ONE;
-  //}
-  //if (soqType == Q_S_OF_Q_MINUS_ONE) {
-  //  g_log.information() << "Dividing all values by Q\n";
-  //  // error propagation
-  //  for (size_t i = 0; i < inputDfOfQ.size(); ++i) {
-  //    inputDQ[i] = (inputQ[i] / inputDQ[i] + inputFOfQ[i] / inputDfOfQ[i]) *
-  //          (inputFOfQ[i] / inputQ[i]);
-  //  }
-  //  // convert the function
-  //  std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputFOfQ.begin(),
-  //                 inputQ.begin(),
-  //                 std::divides<double>());
-  //  soqType = S_OF_Q_MINUS_ONE;
-  //}
-  //if (soqType != S_OF_Q_MINUS_ONE) {
-  //  // should never get here
-  //  std::stringstream msg;
-  //  msg << "Do not understand SofQType = " << soqType;
-  //  throw std::runtime_error(msg.str());
-  //}
 
   // determine Q-range
   size_t qmin_index = determineQminIndex(inputQ, inputFOfQ);
@@ -452,7 +459,7 @@ void PDFFourierTransform2::exec() {
   if (outputType == LITTLE_G_OF_R) {
     for (size_t i = 0; i < outputY.size(); ++i) {
       // transform the data
-      outputY[i] = outputY[i];
+      outputY[i] = outputY[i] - 1;
     }
   } else if (outputType == BIG_G_OF_R) {
     const double factor = 4. * M_PI * rho0;
