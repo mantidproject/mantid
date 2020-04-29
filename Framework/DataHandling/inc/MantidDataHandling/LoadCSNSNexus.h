@@ -30,7 +30,7 @@ namespace DataHandling {
 
 using namespace std;
 using namespace DataObjects;
-/** LoadMcStasNexus : TODO: DESCRIPTION
+/** LoadCSNSNexus : TODO: DESCRIPTION
  */
 class DLLExport LoadCSNSNexus
     : public API::IFileLoader<Kernel::NexusDescriptor> {
