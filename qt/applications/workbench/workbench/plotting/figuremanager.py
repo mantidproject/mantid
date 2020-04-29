@@ -428,7 +428,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                     if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                         ax.relim()
                     elif isinstance(ax, Axes3D):
-                        ax.view_init()
+                        import copy
+                        ax.collections[0]._vec = copy.deepcopy(ax.original_data)
+
                     ax.autoscale()
 
             self.canvas.draw()

@@ -1132,6 +1132,33 @@ class MantidAxes3D(Axes3D):
         # it interfering with double-clicking on the axes.
         self.figure.canvas.mpl_disconnect(self._cids[1])
 
+    def set_xlim3d(self, *args):
+        import numpy as np
+        min, max = super().set_xlim3d(*args)
+
+        x = self.original_data[0].copy()
+        x[x < min] = np.nan
+        x[x > max] = np.nan
+        self.collections[0]._vec[0] = x
+
+    def set_ylim3d(self, *args):
+        import numpy as np
+        min, max = super().set_ylim3d(*args)
+
+        y = self.original_data[1].copy()
+        y[y < min] = np.nan
+        y[y > max] = np.nan
+        self.collections[0]._vec[1] = y
+
+    def set_zlim3d(self, *args):
+        import numpy as np
+        min, max = super().set_zlim3d(*args)
+
+        z = self.original_data[2].copy()
+        z[z < min] = np.nan
+        z[z > max] = np.nan
+        self.collections[0]._vec[2] = z
+
     def plot(self, *args, **kwargs):
         """
         If the **mantid3d** projection is chosen, it can be

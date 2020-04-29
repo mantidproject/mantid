@@ -121,7 +121,14 @@ class AxisEditor(PropertiesEditorBase):
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
-        self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
+        from mpl_toolkits.mplot3d.axes3d import Axes3D
+
+        if isinstance(axes, Axes3D):
+            self.lim_setter = getattr(axes, 'set_{}lim3d'.format(axis_id))
+        else:
+            self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.nonposkw = 'nonpos' + axis_id
         # Grid has no direct accessor from the axes
