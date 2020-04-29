@@ -18,9 +18,13 @@ public:
   PSIBackgroundSubtraction() : API::Algorithm() {}
   const std::string name() const override { return "PSIBackgroundSubtraction"; }
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Fit", "LoadPSIMuonBin"};
+  }
   const std::string summary() const override {
     return "Removes the background from a loaded PSI workspace.";
   }
+  const std::string category() const override { return "Muon"; }
 
 private:
   void init() override;
