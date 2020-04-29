@@ -11,6 +11,8 @@ pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad'
 TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 REBIN_STR = 'Rebin'
+FFT_STR = 'FFT'
+MAXENT_STR = 'MaxEnt'
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
@@ -153,7 +155,7 @@ def get_phase_table_workspace_group_name(insertion_workspace_name, instrument, w
 
 def get_fft_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' FFT' + workspace_suffix + '/'
+    group = get_base_run_name(run, instrument) + "".join([' ', FFT_STR]) + workspace_suffix + '/'
 
     return group
 
@@ -174,7 +176,18 @@ def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
 
 
 def get_maxent_workspace_name(input_workspace):
-    return input_workspace + '; MaxEnt'
+    return input_workspace + "".join(['; ', MAXENT_STR])
+
+
+def get_fft_component_from_workspace_name(input_workspace):
+    if 'FD_Re' in input_workspace:
+        fft_component = "".join([FFT_STR, ';', 'Re'])
+    elif 'FD_Im' in input_workspace:
+        fft_component = "".join([FFT_STR, ';', 'Im'])
+    else:
+        fft_component = "".join([FFT_STR, ';', 'Mod'])
+
+    return fft_component
 
 
 def get_run_number_from_workspace_name(workspace_name, instrument):
@@ -184,7 +197,7 @@ def get_run_number_from_workspace_name(workspace_name, instrument):
 
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' Maxent' + workspace_suffix + '/'
+    group = get_base_run_name(run, instrument) + "".join([' ', MAXENT_STR]) + workspace_suffix + '/'
 
     return group
 

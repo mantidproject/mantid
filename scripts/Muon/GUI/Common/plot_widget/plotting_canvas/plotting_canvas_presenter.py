@@ -68,6 +68,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def remove_workspace_from_plot(self, workspace):
         """Removes all references to the input workspace from the plot"""
         self._view.remove_workspace_from_plot(workspace)
+        self._view.redraw_figure()
 
     def replace_workspace_in_plot(self, workspace):
         """Replace specified workspace in the plot with a new and presumably updated instance"""

@@ -116,12 +116,13 @@ class PlottingCanvasModel(object):
         instrument = self._context.data_context.instrument
         fit_label = self._get_fit_label(workspace_name, index)
         rebin_label = self._get_rebin_label(workspace_name)
+        freq_label = self._get_freq_lebel(workspace_name)
         if not self._is_tiled:
-            return "".join([instrument, run, ';', group, fit_label, rebin_label])
+            return "".join([instrument, run, ';', group, fit_label, rebin_label, freq_label])
         if self._tiled_by == "Group/Pair":
-            return "".join([run, fit_label, rebin_label])
+            return "".join([run, fit_label, rebin_label, freq_label])
         else:
-            return "".join([group, fit_label, rebin_label])
+            return "".join([group, fit_label, rebin_label, freq_label])
 
     def _get_workspace_plot_axis(self, workspace_name: str):
         if not self._is_tiled:
@@ -132,17 +133,28 @@ class PlottingCanvasModel(object):
         else:
             return 0
 
-    def _get_rebin_label(self, workspace_name):
+    @staticmethod
+    def _get_rebin_label(workspace_name):
         if REBIN_STR in workspace_name:
             return ''.join([';', REBIN_STR])
         else:
             return ''
 
-    def _get_fit_label(self, workspace_name, index):
+    @staticmethod
+    def _get_freq_lebel(workspace_name):
+        label = ''
+        if FFT_STR in workspace_name:
+            label = ''.join([';', get_fft_component_from_workspace_name(workspace_name)])
+        elif MAXENT_STR in workspace_name:
+            label = ''.join([';', MAXENT_STR])
+        return label
+
+    @staticmethod
+    def _get_fit_label(workspace_name, index):
         label = ''
         fit_function_name = get_fit_function_name_from_workspace(workspace_name)
         if fit_function_name:
-            if index == 1 or index == 3:
+            if index in [1, 3]:
                 workspace_type = 'Calc'
             elif index == 2:
                 workspace_type = 'Diff'

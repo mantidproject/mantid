@@ -65,6 +65,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
         self.plot_type_changed_notifier = GenericObservable()
+        self.input_workspace_observer = GenericObserver(self.handle_data_updated)
 
     def _setup_view_connections(self):
         self._view.on_plot_tiled_checkbox_changed(self.handle_plot_tiled_state_changed)

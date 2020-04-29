@@ -28,6 +28,7 @@ New Features
 Improvements
 -------------
 - Improved the plotting code the Muon Analysis interface, with a significant amount of redundant code removed.
-  This code improvement will lead to more maintainable code, which will be easier to makes changes to in the future.
+  This code improvement will lead to more maintainable code, which will be more stable and
+  easier to add new functionality in the future.
 
 :ref:`Release 5.1.0 <v5.1.0>`

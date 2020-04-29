@@ -157,6 +157,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
         self.transform.new_data_observer(
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
+        self.transform.new_data_observer(
+            self.plot_widget.presenter.input_workspace_observer)
 
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)

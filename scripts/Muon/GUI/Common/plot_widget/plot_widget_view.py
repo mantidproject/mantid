@@ -116,5 +116,7 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         Sets the plot type to the input str
         """
         self.plot_type_combo.blockSignals(True)
-        self.plot_type_combo.setCurrentText(plot_type)
+        index = self.plot_type_combo.findText(plot_type)
+        if index >= 0:  # find text returns -1 if string plot_type doesn't exist
+            self.plot_type_combo.setCurrentIndex(index)
         self.plot_type_combo.blockSignals(False)
