@@ -23,7 +23,7 @@ Setting up PyCharm on Windows
 
    .. code-block:: sh
 
-      <Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe
+      <Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/python.exe
 
    This is the interpreter, so select "Ok" and apply the changes. This should bring up a list of all the packages associated to the interpreter. There should be many packages, however you should not see PyQt (but instead QtPy).
 
@@ -103,7 +103,7 @@ This can be done in two ways:
        <Mantid Build Directory>\bin\Debug;
        <Mantid Source Directory>\external\src\ThirdParty\bin;
        <Mantid Source Directory>\external\src\ThirdParty\bin\mingw;
-       <Mantid Source Directory>\external\src\ThirdParty\lib\python2.7;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\python3.8;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\plugins;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\bin;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\bin;
@@ -190,7 +190,7 @@ To use the remote debugger:
 Setting up PyCharm on Linux
 ###########################
 
-1. Use the native python interpreter (``/usr/bin/python2.7``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe``
+1. Use the native python interpreter (``/usr/bin/python3``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/python.exe``
 2. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for python code.
 
    Within the source directory add the following to your sources:
