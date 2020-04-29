@@ -43,13 +43,17 @@ private:
                             const std::vector<double> &FofQ);
   size_t determineQmaxIndex(const std::vector<double> &Q,
                             const std::vector<double> &FofQ);
+  size_t determineMinIndex(double min, const std::vector<double> &X,
+                           const std::vector<double> &Y);
+  size_t determineMaxIndex(double max, const std::vector<double> &X,
+                           const std::vector<double> &Y);
   double determineRho0();
   void convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q,
-                         std::vector<double> &DFOfQ,
-                         HistogramData::HistogramDx &DQ);
+                         std::vector<double> &DFOfQ, std::vector<double> &DQ);
   void convertToLittleGRPlus1(std::vector<double> &FOfQ, std::vector<double> &Q,
                               std::vector<double> &DFOfQ,
-                              HistogramData::HistogramDx &DQ);
+                              std::vector<double> &DQ);
+  API::MatrixWorkspace_sptr PDFFourierTransform2::createOutputWorkspace();
 };
 
 } // namespace Algorithms
