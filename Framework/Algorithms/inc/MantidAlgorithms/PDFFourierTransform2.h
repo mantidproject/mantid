@@ -39,10 +39,6 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  size_t determineQminIndex(const std::vector<double> &Q,
-                            const std::vector<double> &FofQ);
-  size_t determineQmaxIndex(const std::vector<double> &Q,
-                            const std::vector<double> &FofQ);
   size_t determineMinIndex(double min, const std::vector<double> &X,
                            const std::vector<double> &Y);
   size_t determineMaxIndex(double max, const std::vector<double> &X,
@@ -50,10 +46,17 @@ private:
   double determineRho0();
   void convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q,
                          std::vector<double> &DFOfQ, std::vector<double> &DQ);
-  void convertToLittleGRPlus1(std::vector<double> &FOfQ, std::vector<double> &Q,
-                              std::vector<double> &DFOfQ,
-                              std::vector<double> &DQ);
+  void convertToLittleGRPlus1(std::vector<double> &FOfR, std::vector<double> &R,
+                              std::vector<double> &DFOfR,
+                              std::vector<double> &DR);
   API::MatrixWorkspace_sptr PDFFourierTransform2::createOutputWorkspace();
+  void
+  PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ,
+                                            HistogramData::HistogramX &Q,
+                                            HistogramData::HistogramE &DFOfQ);
+  void PDFFourierTransform2::convertFromLittleGRPlus1(
+      HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
+      HistogramData::HistogramE &DFOfR);
 };
 
 } // namespace Algorithms

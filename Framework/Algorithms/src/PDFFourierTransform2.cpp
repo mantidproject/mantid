@@ -81,7 +81,7 @@ void PDFFourierTransform2::init() {
                                                         Direction::Output),
                   "Result paired-distribution function");
 
-  // Set up input data type
+  // Set up spectral dencity data type
   std::vector<std::string> inputTypes;
   inputTypes.emplace_back(S_OF_Q);
   inputTypes.emplace_back(S_OF_Q_MINUS_ONE);
@@ -93,7 +93,7 @@ void PDFFourierTransform2::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  declareProperty("DeltaQ", EMPTY_DBL(),
+  declareProperty("DeltaQ", EMPTY_DBL(), mustBePositive,
                   "Step size of Q of S(Q) to calculate.  Default = "
                   ":math:`\\frac{\\pi}{R_{max}}`.");
   declareProperty(
@@ -105,7 +105,7 @@ void PDFFourierTransform2::init() {
   declareProperty("Filter", false,
                   "Set to apply Lorch function filter to the input");
 
-  // Set up output data type
+  // Set up PDF data type
   std::vector<std::string> outputTypes;
   outputTypes.emplace_back(BIG_G_OF_R);
   outputTypes.emplace_back(LITTLE_G_OF_R);
@@ -114,11 +114,13 @@ void PDFFourierTransform2::init() {
                   std::make_shared<StringListValidator>(outputTypes),
                   "Type of output PDF including G(r)");
 
-  declareProperty("DeltaR", EMPTY_DBL(),
+  declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
                   "Step size of r of G(r) to calculate.  Default = "
                   ":math:`\\frac{\\pi}{Q_{max}}`.");
-  declareProperty("Rmin", 0., "Minimum r for G(r) to calculate.");
-  declareProperty("Rmax", 20., "Maximum r for G(r) to calculate.");
+  declareProperty("Rmin", EMPTY_DBL(), mustBePositive,
+                  "Minimum r for G(r) to calculate.");
+  declareProperty("Rmax", EMPTY_DBL(), mustBePositive,
+                  "Maximum r for G(r) to calculate.");
   declareProperty(
       "rho0", EMPTY_DBL(), mustBePositive,
       "Average number density used for g(r) and RDF(r) conversions (optional)");
@@ -307,6 +309,54 @@ void PDFFourierTransform2::convertToLittleGRPlus1(std::vector<double> &FOfR,
   return;
 }
 
+void PDFFourierTransform2::convertFromSQMinus1(
+    HistogramData::HistogramY &FOfQ, HistogramData::HistogramX &Q,
+    HistogramData::HistogramE &DFOfQ) {
+  // convert to S(Q)-1
+  string outputType = getProperty("SofQType");
+  if (outputType == S_OF_Q) {
+    for (size_t i = 0; i < FOfQ.size(); ++i) {
+      // transform the data
+      FOfQ[i] = FOfQ[i] + 1.0;
+    }
+  } else if (outputType == Q_S_OF_Q_MINUS_ONE) {
+    for (size_t i = 0; i < FOfQ.size(); ++i) {
+      DFOfQ[i] = Q[i] * DFOfQ[i];
+      FOfQ[i] = FOfQ[i] * Q[i];
+    }
+  }
+  return;
+}
+
+void PDFFourierTransform2::convertFromLittleGRPlus1(
+    HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
+    HistogramData::HistogramE &DFOfR) {
+  // convert to the correct form of PDF
+  double rho0 = determineRho0();
+  string outputType = getProperty("PDFType");
+  if (outputType == LITTLE_G_OF_R) {
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // transform the data
+      FOfR[i] = FOfR[i] - 1;
+    }
+  } else if (outputType == BIG_G_OF_R) {
+    const double factor = 4. * M_PI * rho0;
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = DFOfR[i] * R[i];
+      // transform the data
+      FOfR[i] = factor * (FOfR[i]) * R[i];
+    }
+  } else if (outputType == RDF_OF_R) {
+    const double factor = 4. * M_PI * rho0;
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = DFOfR[i] * R[i];
+      // transform the data
+      FOfR[i] = (FOfR[i] + 1.0) * factor * R[i] * R[i];
+    }
+  }
+}
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -321,12 +371,11 @@ void PDFFourierTransform2::exec() {
   auto inputDY = inputWS->e(0).rawData(); // dy for input
 
   // transform input data into Q/MomentumTransfer
-  string direction = "forward";
-  const std::string inputXunit =
-      inputWS->getAxis(0)->unit()->unitID();
+  string direction = FORWARD;
+  const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
   if (inputXunit == "MomentumTransfer") {
     // nothing to do
-    direction = "forward";
+    direction = FORWARD;
   } else if (inputXunit == "dSpacing") {
     // convert the x-units to Q/MomentumTransfer
     const double PI_2(2. * M_PI);
@@ -339,9 +388,9 @@ void PDFFourierTransform2::exec() {
     std::reverse(inputDX.begin(), inputDX.end());
     std::reverse(inputY.begin(), inputY.end());
     std::reverse(inputDY.begin(), inputDY.end());
-    direction = "forward";
+    direction = FORWARD;
   } else if (inputXunit == "AtomicDistance") {
-    direction = "backward";
+    direction = BACKWARD;
   }
   g_log.debug() << "Input unit is " << inputXunit << "\n";
 
@@ -366,22 +415,34 @@ void PDFFourierTransform2::exec() {
 
   // convert to S(Q)-1 or g(R)+1
   double inDelta, inMin, inMax, outDelta, outMin, outMax;
-  if (direction == "forward") {
+  if (direction == FORWARD) {
     convertToSQMinus1(inputY, inputX, inputDY, inputDX);
     inDelta = getProperty("DeltaQ");
     inMin = getProperty("Qmin");
     inMax = getProperty("Qmax");
     outDelta = getProperty("DeltaR");
     outMin = getProperty("Rmin");
+    if (isEmpty(outMin)) {
+      outMin = 0;
+    }
     outMax = getProperty("Rmax");
-  } else if (direction == "backward") {
+    if (isEmpty(outMax)) {
+      outMax = 20;
+    }
+  } else if (direction == BACKWARD) {
     convertToLittleGRPlus1(inputY, inputX, inputDY, inputDX);
     inDelta = getProperty("DeltaR");
     inMin = getProperty("Rmin");
     inMax = getProperty("Rmax");
     outDelta = getProperty("DeltaQ");
     outMin = getProperty("Qmin");
+    if (isEmpty(outMin)) {
+      outMin = 0;
+    }
     outMax = getProperty("Qmax");
+    if (isEmpty(outMax)) {
+      outMax = 40;
+    }
   }
 
   // determine input-range
@@ -394,18 +455,12 @@ void PDFFourierTransform2::exec() {
     outDelta = M_PI / inputX[Xmax_index];
   auto sizer = static_cast<size_t>(outMax / outDelta);
 
-  g_log.notice() << "direction = " << direction << "\n"
-                 << "input max = " << inputX[Xmin_index] << "\n"
-                 << "input min = " << inputX[Xmax_index] << "\n"
-                 << "out max = " << outMax << "\n"
-                 << "out delta = " << outDelta << "\n";
-
   bool filter = getProperty("Filter");
 
   // create the output workspace
 
   API::MatrixWorkspace_sptr outputWS = create<Workspace2D>(1, Points(sizer));
-  if (direction == "forward") {
+  if (direction == FORWARD) {
     outputWS->getAxis(0)->unit() =
         UnitFactory::Instance().create("AtomicDistance");
     outputWS->setYUnitLabel("PDF");
@@ -413,7 +468,7 @@ void PDFFourierTransform2::exec() {
                                        "Angstroms^-1", true);
     outputWS->mutableRun().addProperty("Qmax", inputX[Xmax_index],
                                        "Angstroms^-1", true);
-  } else if (direction == "Backward") {
+  } else if (direction == BACKWARD) {
     outputWS->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     outputWS->setYUnitLabel("Spectrum Dencity");
@@ -437,9 +492,9 @@ void PDFFourierTransform2::exec() {
   double corr;
   for (size_t r_index = 0; r_index < sizer; r_index++) {
     const double r = outputX[r_index];
-    if (direction == "forward") {
+    if (direction == FORWARD) {
       corr = 0.5 / M_PI / M_PI / rho0;
-    } else if (direction == "backwards") {
+    } else if (direction == BACKWARD) {
       corr = rho0;
     }
     const double rfac = corr / (r * r * r);
@@ -469,35 +524,10 @@ void PDFFourierTransform2::exec() {
     outputE[r_index] = sqrt(error) * rfac;
   }
 
-  // convert to the correct form of PDF
-  string outputType = getProperty("PDFType");
-
-  if (outputType == LITTLE_G_OF_R) {
-    for (size_t i = 0; i < outputY.size(); ++i) {
-      // transform the data
-      outputY[i] = outputY[i] - 1;
-    }
-  } else if (outputType == BIG_G_OF_R) {
-    const double factor = 4. * M_PI * rho0;
-    for (size_t i = 0; i < outputY.size(); ++i) {
-      // error propagation - assuming uncertainty in r = 0
-      outputE[i] = outputE[i] * outputX[i];
-      // transform the data
-      outputY[i] = factor * (outputY[i]) * outputX[i];
-    }
-  } else if (outputType == RDF_OF_R) {
-    const double factor = 4. * M_PI * rho0;
-    for (size_t i = 0; i < outputY.size(); ++i) {
-      // error propagation - assuming uncertainty in r = 0
-      outputE[i] = outputE[i] * outputX[i];
-      // transform the data
-      outputY[i] = (outputY[i] + 1.0) * factor * outputX[i] * outputX[i];
-    }
-  } else {
-    // should never get here
-    std::stringstream msg;
-    msg << "Do not understand outputType = " << outputType;
-    throw std::runtime_error(msg.str());
+  if (direction == FORWARD) {
+    convertFromLittleGRPlus1(outputY, outputX, outputE);
+  } else if (direction == BACKWARD) {
+    convertFromSQMinus1(outputY, outputX, outputE);
   }
 
   // set property
