@@ -33,12 +33,14 @@ using Kernel::ThreadSchedulerFIFO;
                           randomized around 1.0+-0.5
  */
 FakeMD::FakeMD(const std::vector<double> &uniformParams,
-               const std::vector<double> &peakParams, const int randomSeed,
+               const std::vector<double> &peakParams,
+               const std::vector<double> &ellipsoidParams, const int randomSeed,
                const bool randomizeSignal)
     : m_uniformParams(uniformParams), m_peakParams(peakParams),
-      m_randomSeed(randomSeed), m_randomizeSignal(randomizeSignal), m_detIDs(),
-      m_randGen(1), m_uniformDist() {
-  if (uniformParams.empty() && peakParams.empty()) {
+      m_ellipsoidParams(ellipsoidParams), m_randomSeed(randomSeed),
+      m_randomizeSignal(randomizeSignal), m_detIDs(), m_randGen(1),
+      m_uniformDist() {
+  if (uniformParams.empty() && peakParams.empty() && ellipsoidParams.empty()) {
     throw std::invalid_argument(
         "You must specify at least one of peakParams or uniformParams");
   }
@@ -138,6 +140,104 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
 
     // Create and add the event.
+    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+                              centers); // 0 = run index
+  }
+
+  ws->splitBox();
+  auto *ts = new ThreadSchedulerFIFO();
+  ThreadPool tp(ts);
+  ws->splitAllIfNeeded(ts);
+  tp.joinAll();
+  ws->refreshCache();
+}
+
+/**
+ * Function that adds a fake single-crystal peak with a multivariate normal
+ * distribution (an ellipsoid) around a central point (x1,...x_N).
+ * The ellipsoid is defined by N eigenvectors with N elements and
+ * N eigenvalues which correpsond to the variance along the principal axes.
+ * The peak is generated from an affine transformation of a uniform normal
+ * distirbution of variance = 1.
+ *
+ * @param ws A pointer to the workspace that receives the events
+ */
+template <typename MDE, size_t nd>
+void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+  if (m_ellipsoidParams.empty())
+    return;
+
+  if (m_peakParams.size() != 2 + 2 * nd + pow(nd, 2))
+    throw std::invalid_argument(
+        "EllipsoidParams: incorrect number of parameters.");
+  if (m_peakParams[0] <= 0)
+    throw std::invalid_argument(
+        "EllipsoidParams: number_of_events needs to be > 0");
+
+  // extract input parameters
+  auto numEvents = size_t(m_peakParams[0]);
+  double center(nd);
+  Matrix<double> Evec(nd, nd); // hold eigenvectors
+  Matrix<double> std(nd, nd);  // hold sqrt(eigenvals) standard devs on diag
+  for (int n = 0; n < nd; n++) {
+    center[n] = m_peakParams[1 + n];
+    // get row/col index for eigenvector matrix
+    for (int d; d < nd; dd++) {
+      Evec[d, n] = m_peakParams[1 + nd + n * nd + d];
+    }
+    Eval[n, n] = sqrt(m_peakParams[m_peakParams.size() - (1 + nd) + n]);
+  }
+  auto doCounts = m_peakParams[m_peakParams.size() - 1];
+
+  // get affine transformation that maps unit variance spherical
+  // normal dist to ellipsoid
+  auto A = Evec * std;
+
+  // calculate inverse of covariance matrix (if necassary)
+  Matrix<double> invCov(nd, nd);
+  // need to left multiply a matrix with pos so convert to col matrix
+  Matrix<double> posMat(nd, 1);
+  if (doCounts > 0) {
+    auto var = std * std;
+    auto cov = Evec * var * Evec.Invert();
+    invCov = cov.Invert();
+    posMat.setCol(0, pos);
+  }
+  // get chi-squared boost function
+  boost::math::chi_squared chisq(nd);
+
+  // prepare random number generator
+  std::mt19937 rng(static_cast<unsigned int>(m_randomSeed));
+  std::normal_distribution<double> d(0.0, 1.0); // mean = 0, std = 1
+
+  for (size_t iEvent = 0; iEvent < numEvents; ++iEvent) {
+
+    // sample uniform normal distribution
+    std::vector<double> pos;
+    for (int n = 0; n < nd; n++) {
+      pos.push_back(d(rng))
+    }
+    // apply affine transformation
+    pos = A * pos;
+
+    // calculate counts
+    float signal = 1.0;
+    float errorSquared = 1.0;
+    if (doCounts > 0) {
+      // calculate Mahalanobis distance
+      // https://en.wikipedia.org/wiki/Mahalanobis_distance
+      auto md = (posMat * invCov) * pos;
+      // for a multivariate normal dist m-dist is distribute
+      // as chi-squared pdf with nd degrees of freedom
+      signal = boost::math::pdf(chisq, md);
+      errorSquared = signal;
+    }
+    // convert pos to coord_t and offset  by center
+    coord_t eventCenter[nd] for (int n = 0; n < nd; n++) {
+      eventCenter = static_cast<coord_t>(pos[n] + center[n]);
+    }
+
+    // add event (need to convert pos to coord_t)
     eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
                               centers); // 0 = run index
   }
