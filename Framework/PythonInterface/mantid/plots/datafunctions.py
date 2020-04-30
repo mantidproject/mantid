@@ -603,6 +603,7 @@ def get_sample_log(workspace, **kwargs):
     if not run.hasProperty(LogName):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
+
     try:
         units = tsp.units
     except UnicodeDecodeError as exc:
@@ -612,8 +613,14 @@ def get_sample_log(workspace, **kwargs):
                             mantid.kernel.Int32TimeSeriesProperty,
                             mantid.kernel.Int64TimeSeriesProperty)):
         raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
-    times = tsp.times.astype('datetime64[us]')
-    y = tsp.value
+    Filtered = kwargs.pop('Filtered', True)
+    if not Filtered:
+        #these methods access the unfiltered data
+        times = tsp.times.astype('datetime64[us]')
+        y = tsp.value
+    else:
+        times = tsp.filtered_times.astype('datetime64[us]')
+        y = tsp.filtered_value
     FullTime = kwargs.pop('FullTime', False)
     StartFromLog = kwargs.pop('StartFromLog', False)
     if FullTime:

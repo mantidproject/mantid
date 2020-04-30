@@ -197,6 +197,8 @@ public:
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
+  /// Get filtered times as a vector
+  std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;

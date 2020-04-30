@@ -1077,6 +1077,32 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
 }
 
 /**
+     * Return the time series's filtered times as a vector<DateAndTime>
+     * @return A vector of DateAndTime objects
+     */
+    template <typename TYPE>
+std::vector<DateAndTime>
+TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
+  if (m_filter.empty()) {
+    return this->timesAsVector(); // no filtering to do
+  }
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+  sortIfNecessary();
+
+  std::vector<DateAndTime> out;
+
+  for (const auto &value : m_values) {
+    if (isTimeFiltered(value.time())) {
+      out.emplace_back(value.time());
+    }
+  }
+
+  return out;
+}
+
+/**
  * @return Return the series as list of times, where the time is the number of
  * seconds since the start.
  */
