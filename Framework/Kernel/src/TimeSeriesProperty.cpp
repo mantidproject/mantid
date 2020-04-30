@@ -1077,10 +1077,10 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
 }
 
 /**
-     * Return the time series's filtered times as a vector<DateAndTime>
-     * @return A vector of DateAndTime objects
-     */
-    template <typename TYPE>
+ * Return the time series's filtered times as a vector<DateAndTime>
+ * @return A vector of DateAndTime objects
+ */
+template <typename TYPE>
 std::vector<DateAndTime>
 TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
   if (m_filter.empty()) {
