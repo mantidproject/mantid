@@ -12,6 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IndexTypeProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 
@@ -224,6 +225,7 @@ public:
   bool isInitialized() const override;
   bool isExecuted() const override;
   bool isRunning() const override;
+  bool isReadyForGarbageCollection() const override;
 
   using Kernel::PropertyManagerOwner::getProperty;
 
@@ -414,7 +416,10 @@ private:
   void doSetInputProperties(const std::string &name, const T1 &wksp,
                             IndexType type, const T2 &list);
   void lockWorkspaces();
+
   void unlockWorkspaces();
+
+  void clearWorkspaceCaches();
 
   void linkHistoryWithLastChild();
 
@@ -502,6 +507,9 @@ private:
 
   /// (MPI) communicator used when executing the algorithm.
   std::unique_ptr<Parallel::Communicator> m_communicator;
+
+  /// The earliest this class should be considered for garbage collection
+  Mantid::Types::Core::DateAndTime m_gcTime;
 };
 
 /// Typedef for a shared pointer to an Algorithm

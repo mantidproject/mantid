@@ -37,6 +37,31 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  void testWithoutSetMaterial() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    alg.setProperty("Filename", path);
+    alg.setPropertyValue("EnvironmentName", "testName");
+    alg.setProperty("SetMaterial", false);
+    const int nvectors(2), nbins(10);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", "outputWorkspace");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
+    const auto &sample(ws->sample());
+    const Geometry::SampleEnvironment environment = sample.getEnvironment();
+    const auto &can = environment.getContainer();
+    TSM_ASSERT_EQUALS(("expected elements"), environment.nelements(), 1);
+    TS_ASSERT(can.hasValidShape());
+    TS_ASSERT_EQUALS(environment.name(), "testName");
+  }
+
   void testSetMaterial() {
     LoadSampleEnvironment alg;
     alg.initialize();
@@ -97,13 +122,31 @@ public:
     TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12);
   }
 
-private:
-  // load a cube into a meshobject
-  std::unique_ptr<MeshObject> loadCube() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    constexpr ScaleUnits unit = ScaleUnits::metres;
-    auto loader = LoadBinaryStl(path, unit);
-    auto cube = loader.readStl();
-    return cube;
+  void test3MF() {
+#ifdef ENABLE_LIB3MF
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    std::string path = FileFinder::Instance().getFullPath("box.3mf");
+    alg.setProperty("Filename", path);
+    alg.setPropertyValue("EnvironmentName", "testName");
+    alg.setProperty("SetMaterial", false);
+    const int nvectors(2), nbins(10);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", "outputWorkspace");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
+    const auto &sample(ws->sample());
+    const Geometry::SampleEnvironment environment = sample.getEnvironment();
+    const auto &can = environment.getContainer();
+    const auto &material = can.material();
+    TSM_ASSERT_EQUALS(("expected elements"), environment.nelements(), 1);
+    TS_ASSERT(can.hasValidShape());
+    TS_ASSERT_EQUALS(environment.name(), "testName");
+#endif
   }
 };

@@ -578,6 +578,53 @@ public:
     }
   }
 
+  void test_Algorithm_Drops_Workspace_References_When_Stored_In_ADS() {
+    // create an input workspace, add it to the ADS
+    auto inputWorkspace = std::make_shared<WorkspaceTester>();
+    const std::string inputName("testIn"), outputName("testOut");
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace(inputName, inputWorkspace);
+
+    auto workspaceAlg = std::make_unique<StubbedWorkspaceAlgorithm>();
+    workspaceAlg->initialize();
+    workspaceAlg->setProperty("InputWorkspace1", inputName);
+    workspaceAlg->setProperty("OutputWorkspace1", outputName);
+    workspaceAlg->execute();
+
+    // The input workspace should have references from the local inputWorkspace
+    // variable and in the ADS but nothing else
+    TS_ASSERT_EQUALS(2, inputWorkspace.use_count());
+
+    // dropping algorithm shouldn't alter the use count
+    workspaceAlg.reset();
+    TS_ASSERT_EQUALS(2, inputWorkspace.use_count());
+
+    // drop ADS reference and left with local
+    ads.remove(inputName);
+    TS_ASSERT_EQUALS(1, inputWorkspace.use_count());
+  }
+
+  void test_Algorithm_Keeps_Only_WorkspaceProperty_Ref_If_Not_Stored_In_ADS() {
+    // create an input workspace, add it to the ADS
+    auto inputWorkspace = std::make_shared<WorkspaceTester>();
+    const std::string inputName("testIn"), outputName("testOut");
+
+    auto workspaceAlg = std::make_unique<StubbedWorkspaceAlgorithm>();
+    workspaceAlg->initialize();
+    workspaceAlg->setAlwaysStoreInADS(false);
+    workspaceAlg->setProperty("InputWorkspace1", inputWorkspace);
+    workspaceAlg->setProperty("OutputWorkspace1", outputName);
+    workspaceAlg->execute();
+
+    // The input workspace should have references from the algorithm
+    // and the local variable
+    TS_ASSERT_EQUALS(2, inputWorkspace.use_count());
+
+    // dropping algorithm should leave the local variable
+    workspaceAlg.reset();
+    TS_ASSERT_EQUALS(1, inputWorkspace.use_count());
+  }
+
   //------------------------------------------------------------------------
   /** Make a workspace group with:
    *

@@ -16,7 +16,6 @@
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -50,6 +49,10 @@ namespace {
 /// Separator for workspace types in workspaceMethodOnTypes member
 const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
+/// The minimum number of seconds after execution that the algorithm should be
+/// kept alive before garbage collection
+const size_t DELAY_BEFORE_GC = 5;
+
 class WorkspacePropertyValueIs {
 public:
   explicit WorkspacePropertyValueIs(const std::string &value)
@@ -64,6 +67,16 @@ public:
 private:
   const std::string &m_value;
 };
+
+template <typename T> struct RunOnFinish {
+
+  RunOnFinish(T &&task) : m_onfinsh(std::move(task)) {}
+  ~RunOnFinish() { m_onfinsh(); }
+
+private:
+  T m_onfinsh;
+};
+
 } // namespace
 
 // Doxygen can't handle member specialization at the moment:
@@ -193,6 +206,15 @@ void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 /// True if the algorithm is running.
 bool Algorithm::isRunning() const {
   return (executionState() == ExecutionState::Running);
+}
+
+/// True if the algorithm is ready for garbage collection.
+bool Algorithm::isReadyForGarbageCollection() const {
+  if ((executionState() == ExecutionState::Finished) &&
+      (Mantid::Types::Core::DateAndTime::getCurrentTime() > m_gcTime)) {
+    return true;
+  }
+  return false;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -499,6 +521,19 @@ void Algorithm::unlockWorkspaces() {
   m_writeLockedWorkspaces.clear();
 }
 
+/**
+ * Clear any internal workspace handles so that workspaces will be deleted
+ * promptly after a managed algorithm finishes
+ */
+void Algorithm::clearWorkspaceCaches() {
+  m_groupWorkspaces.clear();
+  m_inputWorkspaceHistories.clear();
+  m_inputWorkspaceProps.clear();
+  m_outputWorkspaceProps.clear();
+  m_pureOutputWorkspaceProps.clear();
+  m_unrolledInputWorkspaces.clear();
+}
+
 //---------------------------------------------------------------------------------------------
 /** Invoced internally in execute()
  */
@@ -512,6 +547,11 @@ bool Algorithm::executeInternal() {
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
+
+  // Register clean up tasks that should happen regardless of the route
+  // out of the algorithm. These tasks will get run after this method
+  // finishes.
+  RunOnFinish onFinish([this]() { this->clearWorkspaceCaches(); });
 
   notificationCenter().postNotification(new StartedNotification(this));
   Mantid::Types::Core::DateAndTime startTime;
@@ -674,7 +714,11 @@ bool Algorithm::executeInternal() {
           " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
+      m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+          (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
       setResultState(ResultState::Failed);
+      notificationCenter().postNotification(
+          new ErrorNotification(this, ex.what()));
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
@@ -683,9 +727,12 @@ bool Algorithm::executeInternal() {
             << "Error in execution of algorithm " << this->name() << '\n'
             << ex.what() << '\n';
       }
+
+    } catch (std::logic_error &ex) {
+      m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+          (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
-    } catch (std::logic_error &ex) {
       setResultState(ResultState::Failed);
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
@@ -695,55 +742,63 @@ bool Algorithm::executeInternal() {
             << "Logic Error in execution of algorithm " << this->name() << '\n'
             << ex.what() << '\n';
       }
-      notificationCenter().postNotification(
-          new ErrorNotification(this, ex.what()));
     }
   } catch (CancelException &ex) {
-    setResultState(ResultState::Failed);
     m_runningAsync = false;
     getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
+
     throw;
   }
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (std::exception &ex) {
-    setResultState(ResultState::Failed);
     m_runningAsync = false;
-
-    notificationCenter().postNotification(
-        new ErrorNotification(this, ex.what()));
     getLogger().error() << "Error in execution of algorithm " << this->name()
                         << ":\n"
                         << ex.what() << "\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
+    notificationCenter().postNotification(
+        new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
+
     throw;
   }
 
   catch (...) {
     // Execution failed with an unknown exception object
-    setResultState(ResultState::Failed);
     m_runningAsync = false;
 
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
     notificationCenter().postNotification(
         new ErrorNotification(this, "UNKNOWN Exception is caught in exec()"));
     getLogger().error() << this->name()
                         << ": UNKNOWN Exception is caught in exec()\n";
     this->unlockWorkspaces();
+
     throw;
   }
 
-  // Unlock the locked workspaces
   this->unlockWorkspaces();
 
-  // Only gets to here if algorithm ended normally
+  m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+      (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
   if (algIsExecuted) {
     setResultState(ResultState::Success);
   }
+  // Only gets to here if algorithm ended normally
   notificationCenter().postNotification(
-      new FinishedNotification(this, algIsExecuted));
-  return algIsExecuted;
+      new FinishedNotification(this, isExecuted()));
+
+  return isExecuted();
 }
 
 //---------------------------------------------------------------------------------------------

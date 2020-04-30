@@ -55,7 +55,7 @@ bool convertTimeSeriesToDouble(const Property *property, double &value,
       value = static_cast<double>(log->minValue());
       break;
     case Math::Mean:
-      value = log->getStatistics().mean;
+      value = static_cast<double>(log->mean());
       break;
     case Math::Median:
       value = log->getStatistics().median;

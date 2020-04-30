@@ -315,8 +315,7 @@ namespace IDA {
 
 std::unordered_map<FittingMode, std::string> fitModeToName =
     std::unordered_map<FittingMode, std::string>(
-        {{FittingMode::SEQUENTIAL, "Sequential"},
-         {FittingMode::SIMULTANEOUS, "Simultaneous"}});
+        {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 PrivateFittingData::PrivateFittingData() : m_data() {}
 
@@ -805,7 +804,8 @@ WorkspaceGroup_sptr IndirectFittingModel::getResultGroup() const {
 
 bool IndirectFittingModel::isPreviousModelSelected() const {
   return m_fitFunction &&
-         equivalentFunctions(getFittingFunction(), m_fitFunction);
+         equivalentFunctions(extractFirstInnerFunction(getFittingFunction()),
+                             m_fitFunction);
 }
 
 MultiDomainFunction_sptr IndirectFittingModel::getMultiDomainFunction() const {

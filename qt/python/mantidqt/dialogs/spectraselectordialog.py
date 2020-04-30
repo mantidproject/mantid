@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from typing import Union
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
@@ -23,6 +24,13 @@ PLACEHOLDER_FORMAT = 'valid range: {}' + RANGE_SPECIFIER + '{}'
 PLACEHOLDER_FORMAT_SINGLE_INPUT = 'valid range: {}'
 RED_ASTERISK = None
 
+WORKSPACE_NAME = "Workspace name"
+# A title to refer to the workspace, but as a number for use on an axis label
+WORKSPACE_REFERENCE_NUMBER = "Workspace"
+CUSTOM = "Custom"
+CONTOUR = "Contour"
+SURFACE = "Surface"
+
 
 def red_asterisk():
     global RED_ASTERISK
@@ -38,12 +46,19 @@ class SpectraSelection(object):
     Individual = 0
     Waterfall = 1
     Tiled = 2
+    Surface = 3
+    Contour = 4
 
     def __init__(self, workspaces):
         self.workspaces = workspaces
         self.wksp_indices = None
         self.spectra = None
         self.plot_type = SpectraSelection.Individual
+
+        self.errors = False
+        self.log_name = None
+        self.custom_log_values = None
+        self.axis_name = None
 
 
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
@@ -60,7 +75,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         return matrix_workspaces
 
-    def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False):
+    def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False, advanced=False):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -74,6 +89,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._show_colorfill_button = show_colorfill_btn
         self._overplot = overplot
         self._plottable_spectra = None
+        self._advanced = advanced
 
         self._init_ui()
         self._set_placeholder_text()
@@ -89,6 +105,19 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
         selection.plot_type = self._ui.plotType.currentIndex()
+
+        if self._advanced:
+            selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
+            selection.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
+            selection.axis_name = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
+
+            if selection.log_name == CUSTOM:
+                custom_log_text = self._ui.advanced_options_widget.ui.custom_log_line_edit.text()
+                if self._ui.advanced_options_widget._validate_custom_logs(custom_log_text, plot_all=True):
+                    selection.custom_log_values = [float(value) for value in custom_log_text.split(",")]
+                else:
+                    return
+
         if self._check_number_of_plots(selection):
             self.selection = selection
             self.accept()
@@ -117,6 +146,16 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
+
+        if self._advanced:
+            ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
+            self.setMinimumSize(300,351)
+            ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
+            if len(self._workspaces) > 2:
+                ui.plotType.addItem(SURFACE)
+                ui.plotType.addItem(CONTOUR)
+            self.setWindowTitle("Plot Advanced")
+
         self._ui = ui
         ui.colorfillButton.setVisible(self._show_colorfill_button)
         # overwrite the "Yes to All" button text
@@ -189,10 +228,17 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if self._is_input_valid() or ui.wkspIndices.text() == "":
             ui.wkspIndicesValid.setVisible(False)
             ui.wkspIndicesValid.setToolTip("")
+        elif ui.plotType.currentText() == SURFACE or ui.plotType.currentText() == CONTOUR:
+            ui.wkspIndicesValid.setVisible(True)
+            ui.wkspIndicesValid.setToolTip("Enter one workspace index in " + ui.wkspIndices.placeholderText())
         else:
             ui.wkspIndicesValid.setVisible(True)
             ui.wkspIndicesValid.setToolTip("Not in " + ui.wkspIndices.placeholderText())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
+
+        if self._advanced:
+            ui.advanced_options_widget._validate_custom_logs(
+                self._ui.advanced_options_widget.ui.custom_log_line_edit.text())
 
     def _on_specnums_changed(self):
         ui = self._ui
@@ -204,40 +250,290 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if self._is_input_valid() or ui.specNums.text() == "":
             ui.specNumsValid.setVisible(False)
             ui.specNumsValid.setToolTip("")
+        elif ui.plotType.currentText() == SURFACE or ui.plotType.currentText() == CONTOUR:
+            ui.specNumsValid.setVisible(True)
+            ui.specNumsValid.setToolTip("Enter one spectrum number in " + ui.specNums.placeholderText())
         else:
             ui.specNumsValid.setVisible(True)
             ui.specNumsValid.setToolTip("Not in " + ui.specNums.placeholderText())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
+        if self._advanced:
+            ui.advanced_options_widget._validate_custom_logs(
+                self._ui.advanced_options_widget.ui.custom_log_line_edit.text())
+
     def _on_plot_type_changed(self, new_index):
         if self._overplot:
             self._ui.plotType.setCurrentIndex(0)
             return
+
         if self.selection:
             self.selection.plot_type = new_index
 
+        if self._advanced:
+            new_text = self._ui.plotType.itemText(new_index)
+            contour_or_surface = new_text == SURFACE or new_text == CONTOUR
+            if contour_or_surface:
+                self._ui.advanced_options_widget.ui.error_bars_check_box.setChecked(False)
+                self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(False)
+                self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(True)
+                self._ui.spec_num_label.setText("Spectrum Number")
+                self._ui.wksp_indices_label.setText("Workspace Index")
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, WORKSPACE_REFERENCE_NUMBER)
+
+                if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_NAME:
+                    self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_REFERENCE_NUMBER)
+
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(False)
+            else:
+                self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
+                self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(False)
+                self._ui.spec_num_label.setText("Spectrum Numbers")
+                self._ui.wksp_indices_label.setText("Workspace Indices")
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, WORKSPACE_NAME)
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(new_text != "Tiled")
+
+                if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_REFERENCE_NUMBER:
+                    self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_NAME)
+
+                if new_text == "Tiled":
+                    self._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(0)
+
+            # Changing plot type may change what a valid input for spectrum numbers / workspace indices is so whichever
+            # currently contains input is rechecked.
+            if self._ui.specNums.text() != "":
+                self._on_specnums_changed()
+            elif self._ui.wkspIndices.text() != "":
+                self._on_wkspindices_changed()
+            else:
+                self._ui.advanced_options_widget._validate_custom_logs(
+                    self._ui.advanced_options_widget.ui.custom_log_line_edit.text())
+
     def _parse_wksp_indices(self):
-        wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
+        if self._ui.plotType.currentText() == CONTOUR or self._ui.plotType.currentText() == SURFACE:
+            text = self._ui.wkspIndices.text()
+            if text.isdigit() and self.wi_min <= int(text) <= self.wi_max:
+                wksp_indices = [int(text)]
+            else:
+                wksp_indices = None
+        else:
+            wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
+
         if wksp_indices:
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
             selection.plot_type = self._ui.plotType.currentIndex()
+
+            if self._advanced:
+                selection.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
+                selection.axis_name = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
         else:
             selection = None
         self.selection = selection
 
     def _parse_spec_nums(self):
-        spec_nums = parse_selection_str(self._ui.specNums.text(), allowed_values=self._plottable_spectra)
+        if self._ui.plotType.currentText() == CONTOUR or self._ui.plotType.currentText() == SURFACE:
+            text = self._ui.specNums.text()
+            if text.isdigit() and int(text) in self._plottable_spectra:
+                spec_nums = [int(text)]
+            else:
+                spec_nums = None
+        else:
+            spec_nums = parse_selection_str(self._ui.specNums.text(), allowed_values=self._plottable_spectra)
+
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
             selection.plot_type = self._ui.plotType.currentIndex()
+
+            if self._advanced:
+                selection.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
+                selection.axis_name = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
         else:
             selection = None
         self.selection = selection
 
     def _is_input_valid(self):
         return self.selection is not None
+
+
+AdvancedPlottingOptionsWidgetUI, AdvancedPlottingOptionsWidgetUIBase = load_ui(__file__, 'advancedplotswidget.ui')
+
+
+class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
+    def __init__(self, parent=None):
+        super(AdvancedPlottingOptionsWidget, self).__init__(parent=parent)
+        ui = AdvancedPlottingOptionsWidgetUI()
+        ui.setupUi(self)
+
+        ui.logs_valid.setIcon(red_asterisk())
+        ui.logs_valid.hide()
+
+        ui.log_value_combo_box.currentIndexChanged.connect(self._log_value_changed)
+        ui.error_bars_check_box.clicked.connect(self._toggle_errors)
+        ui.custom_log_line_edit.textEdited.connect(self._validate_custom_logs)
+        ui.plot_axis_label_line_edit.textEdited.connect(self._axis_name_changed)
+
+        self.ui = ui
+        self._parent = parent
+        self._populate_log_combo_box()
+        ui.plot_axis_label_line_edit.setText(ui.log_value_combo_box.currentText())
+
+    def _log_value_changed(self) -> None:
+        # Don't need to do anything while the combo box is being populated.
+        if not self._parent._ui:
+            return
+
+        text = self.ui.log_value_combo_box.currentText()
+
+        self.ui.custom_log_line_edit.setEnabled(text == CUSTOM)
+        self.ui.custom_log_line_edit.clear()
+        self.ui.plot_axis_label_line_edit.setText(text)
+
+        if text != CUSTOM:
+            self.ui.logs_valid.hide()
+            # If the custom log values were the only thing stopping the input from being valid then the OK button can
+            # be re-enabled
+            if not self._parent._ui.specNumsValid.isVisible() and not self._parent._ui.wkspIndicesValid.isVisible()\
+                    and (self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text()):
+                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+        else:
+            self._validate_custom_logs(self.ui.custom_log_line_edit.text())
+
+        if self._parent.selection:
+            self._parent.selection.log_name = text
+            self._parent.selection.axis_name = self.ui.plot_axis_label_line_edit.text()
+
+    def _toggle_errors(self, enable: bool) -> None:
+        if self._parent.selection:
+            self._parent.selection.errors = enable
+
+    def _axis_name_changed(self, text: str) -> None:
+        if self._parent.selection:
+            self._parent.selection.axis_name = text
+
+    def _populate_log_combo_box(self) -> None:
+        self.ui.log_value_combo_box.addItem(WORKSPACE_NAME)
+
+        # Create a map of all logs and their double representation.
+        # Only logs that can be converted to a double and are not all equal will be used.
+        # It is a map of log_name -> [value, is_constant]
+        usable_logs = {}
+        # Add the logs that are present in the first workspace
+        ws = self._parent._workspaces[0]
+        if ws:
+            run_object = ws.getRun()
+            log_data = run_object.getLogData()
+
+            for log in log_data:
+                name = log.name
+
+                try:
+                    value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(name)
+                    usable_logs[name] = [value, True]
+                except:
+                    pass
+
+        # Loop over all of the workspaces to see if each log value has changed.
+        for ws in self._parent._workspaces:
+            if ws:
+                run_object = ws.getRun()
+                for log_name in list(usable_logs):
+                    if run_object.hasProperty(log_name):
+                        if usable_logs[log_name][1]:
+                            try:
+                                value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
+                            except: # the log doesn't have a numeric value for every workspace so remove it
+                                usable_logs.pop(log_name)
+                                continue
+                            # Set the bool to whether the value is the same
+                            usable_logs[log_name][1] = value == usable_logs[log_name][0]
+                    else:
+                        usable_logs.pop(log_name)
+
+        # Add the log names to the combo box if they appear in all workspaces and are non-constant.
+        for log_name in usable_logs:
+            if not usable_logs[log_name][1]:
+                self.ui.log_value_combo_box.addItem(log_name)
+
+        self.ui.log_value_combo_box.addItem(CUSTOM)
+
+    def _validate_custom_logs(self, text: str, plot_all: bool = False) -> Union[bool, None]:
+        if self.ui.log_value_combo_box.currentText() == CUSTOM:
+            valid_options = True
+            values = text.split(',')
+            first_value = True
+            previous_value = 0.0
+
+            for value in values:
+                try:
+                    current_value = float(value)
+                except ValueError:
+                    self.ui.logs_valid.show()
+                    self.ui.logs_valid.setToolTip(f"A custom log value is not valid: {value}")
+                    valid_options = False
+                    break
+
+                if first_value:
+                    first_value = False
+                    previous_value = current_value
+                else:
+                    if previous_value < current_value:
+                        previous_value = current_value
+                    else:
+                        self.ui.logs_valid.setToolTip("The custom log values must be in numerical order and distinct.")
+                        valid_options = False
+                        break
+
+            if valid_options:
+                number_of_custom_log_values = len(values)
+                number_of_workspaces = len(self._parent._workspaces)
+
+                plot_type = self._parent._ui.plotType.currentText()
+                if (plot_type == SURFACE or plot_type == CONTOUR) \
+                        and number_of_custom_log_values != number_of_workspaces:
+                    self.ui.logs_valid.show()
+                    self.ui.logs_valid.setToolTip(f"The number of custom log values ({number_of_custom_log_values}) is "
+                                                  f"not equal to the number of workspaces ({number_of_workspaces}).")
+                    valid_options = False
+                else:
+                    if plot_all or not (self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text()):
+                        # If the user has not entered spectrum numbers or workspace indices assume they are going to
+                        # plot all and validate for this.
+                        index_length = self._parent.wi_max - self._parent.wi_min + 1
+                    else:
+                        if self._parent.selection:
+                            if self._parent.selection.wksp_indices:
+                                index_length = len(self._parent.selection.wksp_indices)
+                            elif self._parent.selection.spectra:
+                                index_length = len(self._parent.selection.spectra)
+                        else:
+                            index_length = 0
+
+                    number_of_plots = number_of_workspaces * index_length
+
+                    if number_of_custom_log_values != number_of_plots:
+                        self.ui.logs_valid.show()
+                        self.ui.logs_valid.setToolTip(f"The number of custom log values ({number_of_custom_log_values}) "
+                                                      f"is not equal to the number of plots ({number_of_plots}).")
+
+                        valid_options = False
+
+            if valid_options:
+                self.ui.logs_valid.hide()
+                self.ui.logs_valid.setToolTip("")
+
+                if self._parent.selection and not plot_all:
+                    values = [float(value) for value in values]
+                    self._parent.selection.custom_log_values = values
+
+                if self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text():
+                    self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+            else:
+                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+
+            return valid_options
 
 
 def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):

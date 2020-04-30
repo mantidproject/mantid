@@ -2039,7 +2039,7 @@ public:
   }
 
   void test_findY() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 2);
     ws->mutableY(0) = 1.;
     ws->mutableY(1) = 2.;

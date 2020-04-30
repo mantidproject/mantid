@@ -42,7 +42,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)),
       m_showAlgorithmHistory(new QAction("Show History", this)),
-      m_showDetectors(new QAction("Show Detectors", this)) {
+      m_showDetectors(new QAction("Show Detectors", this)),
+      m_plotAdvanced(new QAction("Advanced...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) {
@@ -72,6 +73,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
           SLOT(onShowAlgorithmHistoryClicked()));
   connect(m_showDetectors, SIGNAL(triggered()), this,
           SLOT(onShowDetectorsClicked()));
+  connect(m_plotAdvanced, SIGNAL(triggered()), this,
+          SLOT(onPlotAdvancedClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -124,6 +127,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_overplotSpectrum);
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+        plotSubMenu->addAction(m_plotAdvanced);
       } else {
         plotSubMenu->addAction(m_plotBin);
       }
@@ -177,6 +181,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_overplotSpectrum);
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+        plotSubMenu->addAction(m_plotAdvanced);
 
         plotSubMenu->addSeparator();
         plotSubMenu->addAction(m_plotColorfill);
@@ -248,6 +253,10 @@ void WorkspaceTreeWidgetSimple::onShowAlgorithmHistoryClicked() {
 
 void WorkspaceTreeWidgetSimple::onShowDetectorsClicked() {
   emit showDetectorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotAdvancedClicked() {
+  emit plotAdvancedClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

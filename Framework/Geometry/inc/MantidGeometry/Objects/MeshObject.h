@@ -15,6 +15,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Matrix.h"
 #include <map>
 #include <memory>
 
@@ -144,6 +145,8 @@ public:
 
   void rotate(const Kernel::Matrix<double> &);
   void translate(const Kernel::V3D &);
+  void multiply(const Kernel::Matrix<double> &);
+  void scale(const double scaleFactor);
   void updateGeometryHandler();
 
 private:

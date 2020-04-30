@@ -8,7 +8,7 @@
 from mantidqt.dialogs.spectraselectordialog import SpectraSelectionDialog, SpectraSelection
 
 
-def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=False, overplot=False):
+def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=False, overplot=False, advanced=False):
     """
     Decides whether it is necessary to request user input when asked to
     plot a list of workspaces. The input dialog will only be shown in
@@ -18,6 +18,7 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
     :param parent_widget: An optional parent_widget to use for the input selection dialog
     :param show_colorfill_btn: An optional flag controlling whether the colorfill button should be shown
     :param overplot: An optional flag detailing whether to overplot onto the current figure
+    :param advanced: If true then the advanced options will be shown in the spectra selector dialog.
     :returns: Either a SpectraSelection object containing the details of workspaces to plot or None indicating
     the request was cancelled
     :raises ValueError: if the workspaces are not of type MatrixWorkspace
@@ -38,7 +39,7 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
             for sp_set in ws_spectra[1:]:
                 plottable = plottable.intersection(sp_set)
 
-    if len(single_spectra_ws) == len(workspaces) or len(plottable) == 0:
+    if (len(single_spectra_ws) == len(workspaces) or len(plottable) == 0) and not advanced:
         # At least 1 workspace contains only a single spectrum and these are no
         # common spectra
         selection = SpectraSelection(workspaces)
@@ -46,7 +47,8 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
         return selection
     else:
         selection_dlg = SpectraSelectionDialog(workspaces, parent=parent_widget,
-                                               show_colorfill_btn=show_colorfill_btn, overplot=overplot)
+                                               show_colorfill_btn=show_colorfill_btn, overplot=overplot,
+                                               advanced=advanced)
         res = selection_dlg.exec_()
         if res == SpectraSelectionDialog.Rejected:
             # cancelled

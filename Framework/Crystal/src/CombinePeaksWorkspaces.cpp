@@ -7,6 +7,7 @@
 #include "MantidCrystal/CombinePeaksWorkspaces.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
@@ -84,6 +85,63 @@ void CombinePeaksWorkspaces::exec() {
   auto &rhsPeaks = RHSWorkspace->getPeaks();
 
   Progress progress(this, 0.0, 1.0, rhsPeaks.size());
+
+  // Combine modulation vectors
+  // Currently, the lattice can only support up to 3 modulation vectors. If any
+  // more than that are combined, a warning is shown and the LHS values are
+  // used.
+  try {
+    std::vector<Kernel::V3D> rhsModVectors;
+    std::vector<Kernel::V3D> lhsModVectors;
+
+    // Collect modulation vectors for both workspaces.
+    for (int i = 0; i < 3; ++i) { // Currently contains up to 3 vectors.
+      const auto modVecR =
+          RHSWorkspace->sample().getOrientedLattice().getModVec(i);
+      // Each vector contains 3 values, check that at least one is not 0.
+      if (!(modVecR[0] == 0 && modVecR[1] == 0 && modVecR[2] == 0)) {
+        rhsModVectors.push_back(modVecR);
+      }
+      const auto modVecL =
+          LHSWorkspace->sample().getOrientedLattice().getModVec(i);
+      if (!(modVecL[0] == 0 && modVecL[1] == 0 && modVecL[2] == 0)) {
+        lhsModVectors.push_back(modVecL);
+      }
+    }
+
+    // Add only unique mod vectors from the rhs list to the lhs list.
+    std::remove_copy_if(
+        rhsModVectors.begin(), rhsModVectors.end(),
+        back_inserter(lhsModVectors), [lhsModVectors](Kernel::V3D modVec) {
+          return lhsModVectors.end() !=
+                 std::find(lhsModVectors.begin(), lhsModVectors.end(), modVec);
+        });
+
+    // Hard limit of 3 mod vectors until PeaksWorkspace is refactored.
+    if (lhsModVectors.size() > 3) {
+      g_log.warning("There are too many modulation vectors. Using vectors from "
+                    "LHSWorkspace");
+    } else {
+      // This is horrible, but setting mod vectors has to be done by 3 separate
+      // methods.
+      for (size_t i = 0; i < lhsModVectors.size(); ++i) {
+        if (i == 0) {
+          output->mutableSample().getOrientedLattice().setModVec1(
+              lhsModVectors[i]);
+        } else if (i == 1) {
+          output->mutableSample().getOrientedLattice().setModVec2(
+              lhsModVectors[i]);
+        } else if (i == 2) {
+          output->mutableSample().getOrientedLattice().setModVec3(
+              lhsModVectors[i]);
+        }
+      }
+    }
+  } catch (std::runtime_error &e) {
+    g_log.error() << "Failed to combine modulation vectors with the following "
+                     "error: "
+                  << e.what();
+  }
 
   // If not checking for matching peaks, then it's easy...
   if (!CombineMatchingPeaks) {
