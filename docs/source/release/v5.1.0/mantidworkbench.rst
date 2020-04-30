@@ -23,6 +23,7 @@ Improvements
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 - The Help Menu now has an About screen that will pop up automatically on startup to provide links to the release notes and various other resources, and allow you to set some important setting such as Facility, instrument and accept usage tracing.
   You can choose to hide it until the next release.
+- The Sample Logs Dialof now lets you view the complete log data as well as filtered data which only includes values for the current period, running status and with invalid values removed.  Just click the "Filtered Data" checkbox to swap between them.
 - The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
 
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
