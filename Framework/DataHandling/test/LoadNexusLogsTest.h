@@ -319,7 +319,7 @@ public:
     std::vector<bool> correct{true, false, true};
     const auto pcValues = pclog1->valuesAsVector();
     TS_ASSERT_EQUALS(pcValues.size(), correct.size());
-    for(int i = 0; i < pcValues.size; ++i) {
+    for (int i = 0; i < pcValues.size; ++i) {
       TS_ASSERT_EQUALS(pcValues[i], correct[i]);
     }
 
@@ -328,7 +328,7 @@ public:
     std::vector<bool> correct2{false, false, false};
     const auto pcValues2 = pclog2->valuesAsVector();
     TS_ASSERT_EQUALS(pcValues2.size(), correct2.size());
-    for(int i = 0; i < pcValues2.size; ++i) {
+    for (int i = 0; i < pcValues2.size; ++i) {
       TS_ASSERT_EQUALS(pcValues2[i], correct2[i]);
     }
 
