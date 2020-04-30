@@ -1137,8 +1137,8 @@ class MantidAxes3D(Axes3D):
         min, max = super().set_xlim3d(*args)
 
         x = self.original_data[0].copy()
-        x[x < min] = np.nan
-        x[x > max] = np.nan
+        x[np.less(x, min, where=~np.isnan(x))] = np.nan
+        x[np.greater(x, max, where=~np.isnan(x))] = np.nan
         self.collections[0]._vec[0] = x
 
     def set_ylim3d(self, *args):
@@ -1146,8 +1146,8 @@ class MantidAxes3D(Axes3D):
         min, max = super().set_ylim3d(*args)
 
         y = self.original_data[1].copy()
-        y[y < min] = np.nan
-        y[y > max] = np.nan
+        y[np.less(y, min, where=~np.isnan(y))] = np.nan
+        y[np.greater(y, max, where=~np.isnan(y))] = np.nan
         self.collections[0]._vec[1] = y
 
     def set_zlim3d(self, *args):
@@ -1155,8 +1155,8 @@ class MantidAxes3D(Axes3D):
         min, max = super().set_zlim3d(*args)
 
         z = self.original_data[2].copy()
-        z[z < min] = np.nan
-        z[z > max] = np.nan
+        z[np.less(z, min, where=~np.isnan(z))] = np.nan
+        z[np.greater(z, max, where=~np.isnan(z))] = np.nan
         self.collections[0]._vec[2] = z
 
     def plot(self, *args, **kwargs):
