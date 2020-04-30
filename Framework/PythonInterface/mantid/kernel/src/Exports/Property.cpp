@@ -24,6 +24,8 @@
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 
+#include <iostream>
+
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::Property;
 using Mantid::PythonInterface::std_vector_exporter;
@@ -49,6 +51,51 @@ constexpr inline double emptyDouble() { return Mantid::EMPTY_DBL(); }
 constexpr inline int emptyInt() { return Mantid::EMPTY_INT(); }
 
 constexpr inline long emptyLong() { return Mantid::EMPTY_LONG(); }
+
+/**
+ * Return the units string as a Python unicode object. Tries encoding as utf-8
+ * first followed by a list of fallback encodings to catch things like windows
+ * encodings in old ISIS files
+ */
+PyObject *unitAsUnicode(const Property &self) {
+  static constexpr std::array<const char *, 2> codecs{"utf-8", "windows-1252"};
+  const auto &unitsBytes = self.units();
+  for (const auto &encoding : codecs) {
+    auto unitsPy = PyUnicode_Decode(unitsBytes.c_str(), unitsBytes.size(),
+                                    encoding, "strict");
+    if (unitsPy)
+      return unitsPy;
+    // encoding failed. Try next
+    PyErr_Clear();
+  }
+  // All attempts failed, create an appropriate error string
+  const std::string allCodecsStr = []() {
+    auto it = codecs.begin();
+    std::string result = *it++;
+    for (; it != codecs.end(); ++it) {
+      result.append(",");
+      result.append(*it);
+    }
+    return result;
+  }();
+  const std::string helpMessage =
+      std::string("Can't decode units string. Tried codecs=")
+          .append(allCodecsStr)
+          .append(
+              "\nTo try other codecs use Property.unitsAsBytes to retrieve the "
+              "original bytes object and use .decode().");
+  PyErr_SetString(PyExc_RuntimeError, helpMessage.c_str());
+  throw error_already_set();
+}
+
+/**
+ * Return the units string as a Python bytes object. Provides access
+ * to the raw bytes in case the standar .units conversion fails with an decoding
+ * error
+ */
+PyObject *unitsAsBytes(const Property &self) {
+  return PyBytes_FromString(self.units().c_str());
+}
 
 } // namespace
 
@@ -105,10 +152,13 @@ void export_Property() {
       .add_property("type", make_function(&Property::type),
                     "Returns a string identifier for the type")
 
-      .add_property("units",
-                    make_function(&Property::units,
-                                  return_value_policy<copy_const_reference>()),
-                    &Property::setUnits, "The units attached to this property")
+      .add_property("units", &unitAsUnicode, &Property::setUnits,
+                    "The units attached to this property")
+
+      .add_property(
+          "unitsAsBytes", &unitsAsBytes,
+          "The units attached to this property as a encoded bytes object. It "
+          "is assumed the caller knows the correct endcoding used.")
 
       .add_property("valueAsStr", &Property::value, &Property::setValue,
                     "The value of the property as a string. "
