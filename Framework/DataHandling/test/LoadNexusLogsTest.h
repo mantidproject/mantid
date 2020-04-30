@@ -316,21 +316,19 @@ public:
     // these two both contain invalid data
     auto pclog1 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
-    std::vector<bool> correct{true, false, true};
     const auto pcValues = pclog1->valuesAsVector();
-    TS_ASSERT_EQUALS(pcValues.size(), correct.size());
-    for (size_t i = 0; i < pcValues.size(); ++i) {
-      TS_ASSERT_EQUALS(pcValues[i], correct[i]);
-    }
+    TS_ASSERT_EQUALS(pcValues.size(), 3);
+    TS_ASSERT_EQUALS(pcValues[0], true);
+    TS_ASSERT_EQUALS(pcValues[1], false);
+    TS_ASSERT_EQUALS(pcValues[2], true);
 
     auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
-    std::vector<bool> correct2{false, false, false};
-    const auto pcValues2 = pclog2->valuesAsVector();
-    TS_ASSERT_EQUALS(pcValues2.size(), correct2.size());
-    for (size_t i = 0; i < pcValues2.size(); ++i) {
-      TS_ASSERT_EQUALS(pcValues2[i], correct2[i]);
-    }
+    const auto pcValues2 = pclog2 -> valuesAsVector();
+    TS_ASSERT_EQUALS(pcValues2.size(), 3);
+    TS_ASSERT_EQUALS(pcValues2[0], false);
+    TS_ASSERT_EQUALS(pcValues2[1], false);
+    TS_ASSERT_EQUALS(pcValues2[2], false);
 
     // force the filtering by passing in an empty log
     auto emptyProperty = new TimeSeriesProperty<bool>("empty");
