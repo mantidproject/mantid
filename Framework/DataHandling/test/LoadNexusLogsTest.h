@@ -317,7 +317,7 @@ public:
     auto pclog1 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
     std::vector<bool> correct{true, false, true};
-    const auto pcValues = pclog1->valuesAsVector()
+    const auto pcValues = pclog1->valuesAsVector();
     TS_ASSERT_EQUALS(pcValues.size(), correct.size());
     for(int i = 0; i < pcValues.size; ++i) {
         TS_ASSERT_EQUALS(pcValues[i], correct[i]);
@@ -326,7 +326,7 @@ public:
     auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
     std::vector<bool> correct2{false, false, false};
-    const auto pcValues2 = pclog2->valuesAsVector()
+    const auto pcValues2 = pclog2->valuesAsVector();
     TS_ASSERT_EQUALS(pcValues2.size(), correct2.size());
     for(int i = 0; i < pcValues2.size; ++i) {
         TS_ASSERT_EQUALS(pcValues2[i], correct2[i]);
