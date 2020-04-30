@@ -20,8 +20,8 @@ TimeSeriesProperties = (BoolTimeSeriesProperty,
                         FloatTimeSeriesProperty, Int32TimeSeriesProperty,
                         Int64TimeSeriesProperty, StringTimeSeriesProperty)
 FilteredTimeSeriesProperties = (BoolFilteredTimeSeriesProperty,
-                        FloatFilteredTimeSeriesProperty, Int32FilteredTimeSeriesProperty,
-                        Int64FilteredTimeSeriesProperty, StringFilteredTimeSeriesProperty)
+                                FloatFilteredTimeSeriesProperty, Int32FilteredTimeSeriesProperty,
+                                Int64FilteredTimeSeriesProperty, StringFilteredTimeSeriesProperty)
 
 
 def get_type(log):
@@ -105,7 +105,7 @@ class SampleLogsModel(object):
         """Return if the log of given LogName is filtered"""
         log = self.get_log(LogName)
         return isinstance(log, FilteredTimeSeriesProperties)
-2g
+
     def get_log_names(self):
         """Returns a list of logs in workspace"""
         return self.run.keys()
