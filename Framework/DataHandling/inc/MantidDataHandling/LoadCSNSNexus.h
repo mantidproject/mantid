@@ -10,7 +10,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
-#include <nexus/NeXusException.hpp>
+//#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
 /****************************************/
 #include "MantidAPI/FunctionFactory.h"

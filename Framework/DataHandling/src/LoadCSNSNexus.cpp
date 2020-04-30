@@ -40,7 +40,7 @@
 /************************/
 // clang-format off
 #include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
+//#include <nexus/NeXusException.hpp>
 // clang-format on
 
 #include <boost/algorithm/string.hpp>
@@ -200,19 +200,25 @@ vector<string> LoadCSNSNexus::getGPPDModules(string bankName) {
   if (bankName == "bank3") {
     for (auto it = entries.begin(); it != entries.end(); ++it) {
       std::string name = it->first;
-      if (!name.find("module1") || !name.find("module2"))
+	string tmp = name.substr(0,7);
+      //if (!name.find("module1") || !name.find("module2"))
+	if (tmp=="module1" || tmp=="module2")
         data.push_back(name);
     }
   } else if (bankName == "bank2") {
     for (auto it = entries.begin(); it != entries.end(); ++it) {
       std::string name = it->first;
-      if (!name.find("module3") || !name.find("module4"))
+	string tmp = name.substr(0,7);
+      //if (!name.find("module3") || !name.find("module4"))
+	if (tmp=="module3" || tmp=="module4")
         data.push_back(name);
     }
   } else if (bankName == "bank1") {
     for (auto it = entries.begin(); it != entries.end(); ++it) {
       std::string name = it->first;
-      if (!name.find("module5") || !name.find("module6"))
+	string tmp = name.substr(0,7);
+      //if (!name.find("module5") || !name.find("module6"))
+	if (tmp=="module5" || tmp=="module6")
         data.push_back(name);
     }
   }
