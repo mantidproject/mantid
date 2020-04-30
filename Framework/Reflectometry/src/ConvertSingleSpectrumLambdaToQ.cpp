@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/SingleSpectrumValidator.h"
 #include <MantidAPI/WorkspaceUnitValidator.h>
 #include <MantidKernel/CompositeValidator.h>
 
@@ -26,6 +27,7 @@ void ConvertSingleSpectrumLambdaToQ::init() {
   auto inputWsValidator = std::make_shared<CompositeValidator>();
   const std::string inputUnit = std::string("Wavelength");
   inputWsValidator->add<WorkspaceUnitValidator>(inputUnit);
+  inputWsValidator->add<SingleSpectrumValidator>(true);
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, inputWsValidator),
                   "Name of the input workspace");
@@ -44,6 +46,12 @@ void ConvertSingleSpectrumLambdaToQ::init() {
 /// Execute the algorithm
 void ConvertSingleSpectrumLambdaToQ::exec() {
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
+  if (!inputWs) {
+    throw std::invalid_argument("No input workspace exists.");
+    return;
+  } else {
+    // somehow call SingleSpectrumValidator::checkValidity here
+  }
   setupMemberVariables(inputWs);
   try {
     checkSingleSpectrumLambda();

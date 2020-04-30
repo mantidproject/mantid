@@ -65,6 +65,7 @@ public:
 
   void setUp() override { inputWs = "testWorkspace"; }
   void testInit() {
+    ConvertSingleSpectrumLambdaToQ alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
@@ -73,31 +74,25 @@ public:
   /// workspace
   void testExecSingleSpectrumLambdaInput() {
     setUpSingleSpectrumLambdaWs(inputWs);
-
-    ConvertSingleSpectrumLambdaToQ ConvertSingleSpectrumLambdaToQ;
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.initialize());
-    TS_ASSERT(ConvertSingleSpectrumLambdaToQ.isInitialized());
-    ConvertSingleSpectrumLambdaToQ.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.setPropertyValue(
+    ConvertSingleSpectrumLambdaToQ alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.setPropertyValue(
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "OutputWorkspace", "outputWs"));
     TS_ASSERT_THROWS_NOTHING(
-        ConvertSingleSpectrumLambdaToQ.setPropertyValue("ThetaIn", "1.5"));
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.setPropertyValue(
+        alg.setPropertyValue("ThetaIn", "1.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "Target", "MomentumTransfer"));
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.execute());
-    TS_ASSERT(ConvertSingleSpectrumLambdaToQ.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWs));
+    MatrixWorkspace_const_sptr input = alg.getProperty("InputWorkspace");
 
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outputWs"));
+    MatrixWorkspace_const_sptr output = alg.getProperty("OutputWorkspace");
 
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
@@ -122,31 +117,26 @@ public:
   /// workspace
   void testExecMultiSpectraLambdaInputThrows() {
     setUpMultiSpectraLambdaWs(inputWs);
-
-    ConvertSingleSpectrumLambdaToQ ConvertSingleSpectrumLambdaToQ;
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.initialize());
-    TS_ASSERT(ConvertSingleSpectrumLambdaToQ.isInitialized());
-    ConvertSingleSpectrumLambdaToQ.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.setPropertyValue(
+    ConvertSingleSpectrumLambdaToQ alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.setPropertyValue(
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "OutputWorkspace", "outputWs"));
     TS_ASSERT_THROWS_NOTHING(
-        ConvertSingleSpectrumLambdaToQ.setPropertyValue("ThetaIn", "1.5"));
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.setPropertyValue(
+        alg.setPropertyValue("ThetaIn", "1.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "Target", "MomentumTransfer"));
-    TS_ASSERT_THROWS_ANYTHING(ConvertSingleSpectrumLambdaToQ.execute());
-    TS_ASSERT(!ConvertSingleSpectrumLambdaToQ.isExecuted());
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
 
-    MatrixWorkspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWs));
+    MatrixWorkspace_const_sptr input = alg.getProperty("InputWorkspace");
 
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_ANYTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outputWs"));
+    MatrixWorkspace_const_sptr output = alg.getProperty("OutputWorkspace");
+    std::cout << output->getName();
 
     // Check that the unit remains unchanged
     TS_ASSERT_EQUALS(input->getAxis(0)->unit()->unitID(), "Wavelength");
@@ -156,36 +146,36 @@ public:
   /// workspace
   void testExecSingleSpectrumMomentumInputThrows() {
     setUpSingleSpectrumMomentumWs(inputWs);
-
-    ConvertSingleSpectrumLambdaToQ ConvertSingleSpectrumLambdaToQ;
-    TS_ASSERT_THROWS_NOTHING(ConvertSingleSpectrumLambdaToQ.initialize());
-    TS_ASSERT(ConvertSingleSpectrumLambdaToQ.isInitialized());
-    ConvertSingleSpectrumLambdaToQ.setRethrows(true);
-    TS_ASSERT_THROWS(ConvertSingleSpectrumLambdaToQ.setPropertyValue(
+    ConvertSingleSpectrumLambdaToQ alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS(alg.setPropertyValue(
                          "InputWorkspace", inputWs),
                      std::invalid_argument);
-    TS_ASSERT(!ConvertSingleSpectrumLambdaToQ.isExecuted());
-
-    MatrixWorkspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWs));
+        alg.setPropertyValue("OutputWorkspace", "outputWs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ThetaIn", "1.5"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Target", "MomentumTransfer"));
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
 
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_ANYTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outputWs"));
+    MatrixWorkspace_const_sptr input = alg.getProperty("InputWorkspace");
+
+    //TS_ASSERT_THROWS_ANYTHING(MatrixWorkspace_const_sptr output =
+    //                             alg.getProperty("OutputWorkspace"));
 
     // Check that the unit remains unchanged
     TS_ASSERT_EQUALS(input->getAxis(0)->unit()->unitID(), "MomentumTransfer");
   }
 
 private:
-  ConvertSingleSpectrumLambdaToQ alg;
   std::string inputWs;
   std::string outputWs;
 };
-//
+
 // class ConvertSingleSpectrumLambdaToQTestPerformance
 //    : public CxxTest::TestSuite {
 // public:

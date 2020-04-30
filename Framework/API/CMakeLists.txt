@@ -136,6 +136,7 @@ set(SRC_FILES
     src/ScriptRepositoryFactory.cpp
     src/SerialAlgorithm.cpp
     src/SingleCountValidator.cpp
+    src/SingleSpectrumValidator.cpp
     src/SpectraAxis.cpp
     src/SpectraAxisValidator.cpp
     src/SpectrumDetectorMapping.cpp
@@ -336,6 +337,7 @@ set(INC_FILES
     inc/MantidAPI/ScriptRepositoryFactory.h
     inc/MantidAPI/SerialAlgorithm.h
     inc/MantidAPI/SingleCountValidator.h
+    inc/MantidAPI/SingleSpectrumValidator.h
     inc/MantidAPI/SingleValueParameter.h
     inc/MantidAPI/SingleValueParameterParser.h
     inc/MantidAPI/SpectraAxis.h
