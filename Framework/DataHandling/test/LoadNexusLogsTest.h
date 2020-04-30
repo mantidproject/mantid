@@ -324,7 +324,7 @@ public:
 
     auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
         LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
-    const auto pcValues2 = pclog2 -> valuesAsVector();
+    const auto pcValues2 = pclog2->valuesAsVector();
     TS_ASSERT_EQUALS(pcValues2.size(), 3);
     TS_ASSERT_EQUALS(pcValues2[0], false);
     TS_ASSERT_EQUALS(pcValues2[1], false);
