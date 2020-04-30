@@ -78,6 +78,7 @@ public:
   int getSpectrum(FitDomainIndex index) const override;
   std::vector<double>
   getExcludeRegionVector(FitDomainIndex index) const override;
+  std::string getExcludeRegion(FitDomainIndex index) const override;
 
 protected:
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,

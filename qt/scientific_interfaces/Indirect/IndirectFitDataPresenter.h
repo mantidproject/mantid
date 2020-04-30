@@ -29,9 +29,6 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
                            IIndirectFitDataView *view);
-  IndirectFitDataPresenter(
-      IndirectFittingModel *model, IIndirectFitDataView *view,
-      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -89,6 +86,9 @@ signals:
   void updateAvailableFitTypes();
 
 protected:
+  IndirectFitDataPresenter(
+      IndirectFittingModel *model, IIndirectFitDataView *view,
+      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);

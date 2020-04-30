@@ -278,6 +278,11 @@ IndirectFitDataModel::getExcludeRegionVector(FitDomainIndex index) const {
   return getExcludeRegionVector(subIndices.first, subIndices.second);
 };
 
+std::string IndirectFitDataModel::getExcludeRegion(FitDomainIndex index) const {
+  auto subIndices = getSubIndices(index);
+  return getExcludeRegion(subIndices.first, subIndices.second);
+}
+
 std::pair<TableDatasetIndex, WorkspaceIndex>
 IndirectFitDataModel::getSubIndices(FitDomainIndex index) const {
   int sum{0};

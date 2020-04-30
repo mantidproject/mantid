@@ -92,6 +92,7 @@ public:
   virtual int getSpectrum(FitDomainIndex index) const = 0;
   virtual std::vector<double>
   getExcludeRegionVector(FitDomainIndex index) const = 0;
+  virtual std::string getExcludeRegion(FitDomainIndex index) const = 0;
 };
 
 } // namespace IDA

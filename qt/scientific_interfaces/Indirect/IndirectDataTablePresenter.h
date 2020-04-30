@@ -29,11 +29,6 @@ public:
   IndirectDataTablePresenter(IndirectFittingModel *model,
                              QTableWidget *dataTable);
 
-  IndirectDataTablePresenter(IndirectFittingModel *model,
-                             QTableWidget *dataTable,
-                             const QStringList &headers);
-
-  bool tableDatasetsMatchModel() const;
   bool isTableEmpty() const;
 
   void setStartX(double startX, TableDatasetIndex dataIndex,
@@ -44,6 +39,7 @@ public:
   void setEndX(double endX, TableDatasetIndex dataIndex);
   void setExclude(const std::string &exclude, TableDatasetIndex dataIndex,
                   WorkspaceIndex spectrumIndex);
+  void updateTableFromModel(IIndirectFitData *model);
 
 signals:
   void startXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/,
@@ -53,23 +49,14 @@ signals:
   void excludeRegionChanged(const std::string & /*_t1*/,
                             TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
 
-public slots:
-  void addData(TableDatasetIndex index);
-  void updateData(TableDatasetIndex index);
-  void removeSelectedData();
-  void setStartX(double startX, FitDomainIndex index);
-  void setEndX(double endX, FitDomainIndex index);
-  void setExcludeRegion(const std::string &exclude, FitDomainIndex index);
-  void setGlobalFittingRange(bool global);
-  void enableTable();
-  void disableTable();
-  void clearTable();
-
 private slots:
-  void setModelFittingRange(int row, int column);
+  void handleCellChanged(int row, int column);
   void updateAllFittingRangeFrom(int row, int column);
 
 protected:
+  IndirectDataTablePresenter(IndirectFittingModel *model,
+                             QTableWidget *dataTable,
+                             const QStringList &headers);
   FitDomainIndex getFirstRow(TableDatasetIndex dataIndex) const;
   std::string getString(FitDomainIndex row, int column) const;
 
@@ -82,6 +69,9 @@ protected:
   void setCellText(const QString &text, FitDomainIndex row, int column);
 
 private:
+  void setExcludeRegion(const std::string &exclude, FitDomainIndex index);
+  void setStartX(double startX, FitDomainIndex index);
+  void setEndX(double endX, FitDomainIndex index);
   virtual int workspaceIndexColumn() const;
   virtual int startXColumn() const;
   virtual int endXColumn() const;
@@ -135,6 +125,7 @@ private:
   DataPositionType m_dataPositions;
   IndirectFittingModel *m_model;
   QTableWidget *m_dataTable;
+  bool m_emitCellChanged = true;
 };
 
 } // namespace IDA

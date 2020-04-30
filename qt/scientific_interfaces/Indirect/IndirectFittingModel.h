@@ -139,6 +139,7 @@ public:
                        TableDatasetIndex index);
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const;
+  std::unique_ptr<IIndirectFitData> m_fitDataModel;
 
 protected:
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
@@ -218,9 +219,8 @@ private:
                          IndirectFitData *fitData,
                          WorkspaceIndex spectrum) const;
 
-  std::unique_ptr<IIndirectFitOutput> m_fitOutput;
   // IndirectFitDataCollectionType m_fittingData;
-  std::unique_ptr<IIndirectFitData> m_fitDataModel;
+  std::unique_ptr<IIndirectFitOutput> m_fitOutput;
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;
   // stores the single domain function
   Mantid::API::IFunction_sptr m_fitFunction;

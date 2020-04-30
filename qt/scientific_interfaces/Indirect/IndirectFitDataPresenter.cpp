@@ -171,14 +171,11 @@ void IndirectFitDataPresenter::setModelFromMultipleData() {
 void IndirectFitDataPresenter::updateSpectraInTable(
     TableDatasetIndex dataIndex) {
   if (m_view->isMultipleDataTabSelected())
-    m_tablePresenter->updateData(dataIndex);
+    m_tablePresenter->updateTableFromModel(m_model->m_fitDataModel.get());
 }
 
 void IndirectFitDataPresenter::updateDataInTable(TableDatasetIndex dataIndex) {
-  if (m_tablePresenter->isTableEmpty())
-    m_tablePresenter->addData(dataIndex);
-  else
-    m_tablePresenter->updateData(dataIndex);
+  m_tablePresenter->updateTableFromModel(m_model->m_fitDataModel.get());
 }
 
 void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
@@ -263,8 +260,7 @@ void IndirectFitDataPresenter::closeDialog() {
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
   try {
     addDataToModel(dialog);
-    m_tablePresenter->addData(m_model->numberOfWorkspaces() -
-                              TableDatasetIndex{1});
+    m_tablePresenter->updateTableFromModel(m_model->m_fitDataModel.get());
     emit dataAdded();
     emit dataChanged();
   } catch (const std::runtime_error &ex) {

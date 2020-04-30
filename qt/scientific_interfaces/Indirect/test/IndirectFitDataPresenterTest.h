@@ -142,11 +142,10 @@ public:
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
 
-    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
-        std::move(m_model.get()), std::move(m_table.get()));
+    // m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
+    //     std::move(m_model.get()), std::move(m_table.get()));
     m_presenter = std::make_unique<IndirectFitDataPresenter>(
-        std::move(m_model.get()), std::move(m_view.get()),
-        std::move(m_dataTablePresenter));
+        std::move(m_model.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
@@ -282,7 +281,7 @@ private:
     m_model.reset();
     m_view.reset();
 
-    m_dataTablePresenter.reset();
+    // m_dataTablePresenter.reset();
     m_table.reset();
   }
 
@@ -296,7 +295,7 @@ private:
   }
 
   std::unique_ptr<QTableWidget> m_table;
-  std::unique_ptr<IndirectDataTablePresenter> m_dataTablePresenter;
+  // std::unique_ptr<IndirectDataTablePresenter> m_dataTablePresenter;
 
   std::unique_ptr<MockIIndirectFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;
