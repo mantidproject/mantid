@@ -18,22 +18,25 @@ from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar
+from .peaksviewer.workspaceselection import \
+    (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter,
+     PeaksWorkspaceSelectorView)
+from .peaksviewer.view import PeaksViewerCollectionView
+from .peaksviewer.representation.painter import MplPainter
 
 import numpy as np
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QComboBox, QLabel, QHBoxLayout, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QVBoxLayout, QWidget
 
 
-class SliceViewerView(QWidget):
+class SliceViewerDataView(QWidget):
+    """The view for the data portion of the sliceviewer"""
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
-        super(SliceViewerView, self).__init__(parent)
+        super().__init__(parent)
 
         self.presenter = presenter
-
-        self.setWindowTitle("SliceViewer")
-        self.setWindowFlags(Qt.Window)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.line_plots = False
         self.can_normalise = can_normalise
@@ -41,8 +44,8 @@ class SliceViewerView(QWidget):
         # Dimension widget
         self.dimensions_layout = QHBoxLayout()
         self.dimensions = DimensionWidget(dims_info, parent=self)
-        self.dimensions.dimensionsChanged.connect(self.presenter.new_plot)
-        self.dimensions.valueChanged.connect(self.presenter.update_plot_data)
+        self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
+        self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
         self.dimensions_layout.addWidget(self.dimensions)
 
         self.colorbar_layout = QVBoxLayout()
@@ -61,8 +64,8 @@ class SliceViewerView(QWidget):
         # MPL figure + colorbar
         self.mpl_layout = QHBoxLayout()
         self.fig = Figure()
+        self.ax = None
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
-        self.fig.set_tight_layout(True)
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
         self.create_axes()
@@ -80,29 +83,66 @@ class SliceViewerView(QWidget):
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
 
         # layout
-        self.layout = QVBoxLayout(self)
-        self.layout.addLayout(self.dimensions_layout)
-        self.layout.addWidget(self.mpl_toolbar)
-        self.layout.addLayout(self.mpl_layout, stretch=1)
-
-        self.show()
+        self.layout = QGridLayout(self)
+        self.layout.addLayout(self.dimensions_layout, 0, 0)
+        self.layout.addWidget(self.mpl_toolbar, 1, 0)
+        self.layout.addLayout(self.mpl_layout, 2, 0)
 
     def create_axes(self):
         self.fig.clf()
+        self.ax = self.fig.add_subplot(111, projection='mantid')
         if self.line_plots:
-            gs = gridspec.GridSpec(2, 2,
-                                   width_ratios=[1, 4],
-                                   height_ratios=[4, 1],
-                                   wspace=0.0, hspace=0.0)
-            self.ax = self.fig.add_subplot(gs[1], projection='mantid')
-            self.ax.xaxis.set_visible(False)
-            self.ax.yaxis.set_visible(False)
-            self.axx=self.fig.add_subplot(gs[3], sharex=self.ax)
-            self.axx.yaxis.tick_right()
-            self.axy=self.fig.add_subplot(gs[0], sharey=self.ax)
-            self.axy.xaxis.tick_top()
-        else:
-            self.ax = self.fig.add_subplot(111, projection='mantid')
+            self.add_line_plots()
+
+        self.canvas.draw_idle()
+
+    def add_line_plots(self):
+        """Assuming line plots are currently disabled, enable them on the current figure
+        The image axes must have been created first.
+        """
+        if self.line_plots:
+            return
+        image_axes = self.ax
+        if image_axes is None:
+            return
+
+        # Create a new GridSpec and reposition the existing image Axes
+        gs = gridspec.GridSpec(
+            2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
+        image_axes.set_position(gs[1].get_position(self.fig))
+        image_axes.xaxis.set_visible(False)
+        image_axes.yaxis.set_visible(False)
+        self.axx = self.fig.add_subplot(gs[3], sharex=image_axes)
+        self.axx.yaxis.tick_right()
+        self.axy = self.fig.add_subplot(gs[0], sharey=image_axes)
+        self.axy.xaxis.tick_top()
+
+        self.mpl_toolbar.update()  # sync list of axes in navstack
+        self.canvas.draw_idle()
+
+    def remove_line_plots(self):
+        """Assuming line plots are currently enabled, remove them from the current figure
+        """
+        if not self.line_plots:
+            return
+        image_axes = self.ax
+        if image_axes is None:
+            return
+
+        self.clear_line_plots()
+        all_axes = self.fig.axes
+        # The order is defined by the order of the add_subplot calls so we always want to remove
+        # the last two Axes. Do it backwards to cope with the container size change
+        all_axes[2].remove()
+        all_axes[1].remove()
+
+        gs = gridspec.GridSpec(1, 1)
+        image_axes.set_position(gs[0].get_position(self.fig))
+        image_axes.xaxis.set_visible(True)
+        image_axes.yaxis.set_visible(True)
+        self.axx, self.axy = None, None
+
+        self.mpl_toolbar.update()  # sync list of axes in navstack
         self.canvas.draw_idle()
 
     def plot_MDH(self, ws, **kwargs):
@@ -110,9 +150,13 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.ax.clear()
-        self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
-                                 transpose=self.dimensions.transpose,
-                                 norm=self.colorbar.get_norm(), **kwargs)
+        self.im = self.ax.imshow(
+            ws,
+            origin='lower',
+            aspect='auto',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -120,10 +164,15 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MatrixWorkspace
         """
         self.ax.clear()
-        self.im = imshow_sampling(self.ax, ws, origin='lower', aspect='auto',
-                                  interpolation='none',
-                                  transpose=self.dimensions.transpose,
-                                  norm=self.colorbar.get_norm(), **kwargs)
+        self.im = imshow_sampling(
+            self.ax,
+            ws,
+            origin='lower',
+            aspect='auto',
+            interpolation='none',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.im._resample_image()
         self.draw_plot()
 
@@ -131,7 +180,7 @@ class SliceViewerView(QWidget):
         self.ax.set_title('')
         self.colorbar.set_mappable(self.im)
         self.colorbar.update_clim()
-        self.mpl_toolbar.update() # clear nav stack
+        self.mpl_toolbar.update()  # clear nav stack
         self.clear_line_plots()
         self.canvas.draw_idle()
 
@@ -143,9 +192,8 @@ class SliceViewerView(QWidget):
         self.colorbar.update_clim()
 
     def line_plots_toggle(self, state):
+        self.presenter.line_plots(state)
         self.line_plots = state
-        self.clear_line_plots()
-        self.presenter.line_plots()
 
     def clear_line_plots(self):
         try:  # clear old plots
@@ -168,9 +216,8 @@ class SliceViewerView(QWidget):
         self.canvas.draw_idle()
 
     def mouse_move(self, event):
-        if event.inaxes == self.ax:
-            if self.line_plots:
-                self.update_line_plots(event.xdata, event.ydata)
+        if self.line_plots and event.inaxes == self.ax:
+            self.update_line_plots(event.xdata, event.ydata)
 
     def plot_x_line(self, x, y):
         try:
@@ -203,9 +250,9 @@ class SliceViewerView(QWidget):
             return
         i, j = point.astype(int)
         if 0 <= i < arr.shape[0]:
-            self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i,:])
+            self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
         if 0 <= j < arr.shape[1]:
-            self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:,j])
+            self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
 
     def set_normalization(self, ws, **kwargs):
         normalize_by_bin_width, _ = get_normalize_by_bin_width(ws, self.ax, **kwargs)
@@ -217,6 +264,82 @@ class SliceViewerView(QWidget):
             self.presenter.normalization = mantid.api.MDNormalization.NoNormalization
             self.norm_opts.setCurrentIndex(0)
 
+
+class SliceViewerView(QWidget):
+    """Combines the data view for the slice viewer with the optional peaks viewer."""
+
+    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+        super().__init__(parent)
+
+        self.presenter = presenter
+
+        self.setWindowTitle("SliceViewer")
+        self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        self._splitter = QSplitter(self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self)
+        self._splitter.addWidget(self._data_view)
+        #  peaks viewer off by default
+        self._peaks_view = None
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._splitter)
+        self.setLayout(layout)
+
+        # connect up additional peaks signals
+        self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
+
+    @property
+    def data_view(self):
+        return self._data_view
+
+    @property
+    def dimensions(self):
+        return self._data_view.dimensions
+
+    @property
+    def peaks_view(self):
+        """Lazily instantiates PeaksViewer and returns it"""
+        if self._peaks_view is None:
+            self._peaks_view = PeaksViewerCollectionView(
+                MplPainter(self.data_view.ax), self.presenter)
+            self._splitter.addWidget(self._peaks_view)
+
+        return self._peaks_view
+
+    def peaks_overlay_clicked(self):
+        """Peaks overlay button has been toggled
+        """
+        self.presenter.overlay_peaks_workspaces()
+
+    def draw_peak(self, peak_info):
+        """
+        :param peak_info: A PeakRepresentation object
+        """
+        return peak_info.draw(self.ax)
+
+    def query_peaks_to_overlay(self, current_overlayed_names):
+        """Display a dialog to the user to ask which peaks to overlay
+        :param current_overlayed_names: A list of names that are currently overlayed
+        :returns: A list of workspace names to overlay on the display
+        """
+        model = PeaksWorkspaceSelectorModel(
+            mantid.api.AnalysisDataService.Instance(), checked_names=current_overlayed_names)
+        view = PeaksWorkspaceSelectorView(self)
+        presenter = PeaksWorkspaceSelectorPresenter(view, model)
+        return presenter.select_peaks_workspaces()
+
+    def set_peaks_viewer_visible(self, on):
+        """
+        Set the visiblity of the PeaksViewer.
+        :param on: If True make the view visible, else make it invisible
+        :return: The PeaksViewerCollectionView
+        """
+        self.peaks_view.set_visible(on)
+
+    # event handlers
     def closeEvent(self, event):
         self.deleteLater()
-        super(SliceViewerView, self).closeEvent(event)
+        super().closeEvent(event)
