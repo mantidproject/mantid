@@ -126,7 +126,7 @@ class FigureWindow(QMainWindow, ObservingView):
         fig = self._canvas.figure
         fig_type = figure_type(fig, ax)
         if fig_type == FigureType.Image:
-            pcolormesh_from_names(names, fig=fig, ax=ax)
+            pcolormesh_from_names(names, fig=fig)
         else:
             plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
                             overplot=ax, fig=fig)
