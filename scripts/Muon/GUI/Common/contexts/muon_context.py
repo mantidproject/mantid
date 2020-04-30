@@ -10,12 +10,12 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_group_asymmetry_unnorm_name,
                                                          get_deadtime_data_workspace_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
-    estimate_group_asymmetry_data
+    estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
 from mantidqt.utils.observer_pattern import Observable
 
 
@@ -92,54 +92,57 @@ class MuonContext(object):
     def show_all_groups(self):
         self.calculate_all_groups()
         for run in self._data_context.current_runs:
-            for group_name in self._group_pair_context.group_names:
-                run_as_string = run_list_to_string(run)
+            with WorkspaceGroupDefinition() as workspace_group_context:
+                for group_name in self._group_pair_context.group_names:
+                    run_as_string = run_list_to_string(run)
 
-                directory = get_base_data_directory(self, run_as_string)
+                    directory = get_base_data_directory(self, run_as_string)
 
-                name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=False)
-                asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=False)
-                asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=False)
+                    name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=False)
+                    asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=False)
+                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=False)
 
-                self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name,
-                                                             asym_name_unnorm)
+                    self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name,
+                                                                 asym_name_unnorm)
 
-                if self._do_rebin():
-                    name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=True)
-                    asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=True)
-                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=True)
+                    if self._do_rebin():
+                        name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=True)
+                        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=True)
+                        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=True)
 
-                    self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name,
-                                                                   asym_name_unnorm)
+                        self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name,
+                                                                       asym_name_unnorm)
 
     def show_all_pairs(self):
         self.calculate_all_pairs()
         for run in self._data_context.current_runs:
-            for pair_name in self._group_pair_context.pair_names:
-                run_as_string = run_list_to_string(run)
-                name = get_pair_data_workspace_name(
-                    self,
-                    pair_name,
-                    run_as_string,
-                    rebin=False)
-                directory = get_base_data_directory(
-                    self,
-                    run_as_string)
-
-                self.group_pair_context[
-                    pair_name].show_raw(run, directory + name)
-
-                if self._do_rebin():
+            with WorkspaceGroupDefinition() as workspace_group_context:
+                for pair_name in self._group_pair_context.pair_names:
+                    run_as_string = run_list_to_string(run)
                     name = get_pair_data_workspace_name(
                         self,
                         pair_name,
                         run_as_string,
-                        rebin=True)
+                        rebin=False)
+                    directory = get_base_data_directory(
+                        self,
+                        run_as_string)
+
                     self.group_pair_context[
-                        pair_name].show_rebin(run, directory + name)
+                        pair_name].show_raw(run, directory + name)
+
+                    if self._do_rebin():
+                        name = get_pair_data_workspace_name(
+                            self,
+                            pair_name,
+                            run_as_string,
+                            rebin=True)
+                        self.group_pair_context[
+                            pair_name].show_rebin(run, directory + name)
 
     def calculate_all_pairs(self):
         for run in self._data_context.current_runs:
+            run_pre_processing(context=self, run=run, rebin=self._do_rebin())
             for pair_name in self._group_pair_context.pair_names:
                 pair_asymmetry_workspace = self.calculate_pair(pair_name, run)
                 self.group_pair_context[
@@ -158,8 +161,8 @@ class MuonContext(object):
 
     def calculate_all_groups(self):
         for run in self._data_context.current_runs:
+            run_pre_processing(context=self, run=run, rebin=self._do_rebin())
             for group_name in self._group_pair_context.group_names:
-
                 group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name, run)
                 self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
                                                                       group_asymmetry_unormalised, rebin=False)
@@ -188,36 +191,37 @@ class MuonContext(object):
     def show_raw_data(self):
         self.ads_observer.observeRename(False)
         for run in self.data_context.current_runs:
-            run_string = run_list_to_string(run)
-            loaded_workspace = \
-                self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
-                    'OutputWorkspace']
-            loaded_workspace_deadtime_table = self.data_context._loaded_data.get_data(
-                run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
-            directory = get_base_data_directory(
-                self,
-                run_string)
+            with WorkspaceGroupDefinition() as workspace_group_context:
+                run_string = run_list_to_string(run)
+                loaded_workspace = \
+                    self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
+                        'OutputWorkspace']
+                loaded_workspace_deadtime_table = self.data_context._loaded_data.get_data(
+                    run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
+                directory = get_base_data_directory(
+                    self,
+                    run_string)
 
-            deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
-                                                             str(run[0]), workspace_suffix=self.workspace_suffix)
-            MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
-            self.data_context._loaded_data.get_data(
-                run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable'] = deadtime_name
+                deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
+                                                                 str(run[0]), workspace_suffix=self.workspace_suffix)
+                MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
+                self.data_context._loaded_data.get_data(
+                    run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable'] = deadtime_name
 
-            if len(loaded_workspace) > 1:
-                # Multi-period data
-                for i, single_ws in enumerate(loaded_workspace):
+                if len(loaded_workspace) > 1:
+                    # Multi-period data
+                    for i, single_ws in enumerate(loaded_workspace):
+                        name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
+                                                                       self.data_context.is_multi_period(),
+                                                                       period=str(i + 1),
+                                                                       workspace_suffix=self.workspace_suffix)
+                        single_ws.show(name)
+                else:
+                    # Single period data
                     name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
                                                                    self.data_context.is_multi_period(),
-                                                                   period=str(i + 1),
                                                                    workspace_suffix=self.workspace_suffix)
-                    single_ws.show(name)
-            else:
-                # Single period data
-                name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                               self.data_context.is_multi_period(),
-                                                               workspace_suffix=self.workspace_suffix)
-                loaded_workspace[0].show(name)
+                    loaded_workspace[0].show(name)
 
         self.ads_observer.observeRename(True)
 

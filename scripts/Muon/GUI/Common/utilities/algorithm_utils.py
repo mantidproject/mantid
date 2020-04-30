@@ -9,7 +9,6 @@ from mantid.kernel import Logger
 
 muon_logger = Logger('Muon-Algs')
 
-
 def run_MuonPreProcess(parameter_dict):
     """
     Apply the MuonPreProcess algorithm with the properties supplied through
@@ -19,16 +18,15 @@ def run_MuonPreProcess(parameter_dict):
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperty("OutputWorkspace", "__pre_processed_data")
     alg.setProperties(parameter_dict)
     alg.execute()
-    return "__pre_processed_data"
+    return parameter_dict["OutputWorkspace"]
 
 
 def run_MuonGroupingCounts(parameter_dict, workspace_name):
     """
     Apply the MuonGroupingCounts algorithm with the properties supplied through
-    the input dictionary of {proeprty_name:property_value} pairs.
+    the input dictionary of {property_name:property_value} pairs.
     Returns the calculated workspace name.
     """
     alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
@@ -44,7 +42,7 @@ def run_MuonGroupingCounts(parameter_dict, workspace_name):
 def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
     """
     Apply the MuonPairingAsymmetry algorithm with the properties supplied through
-    the input dictionary of {proeprty_name:property_value} pairs.
+    the input dictionary of {property_name:property_value} pairs.
     Returns the calculated workspace name.
     """
     alg = mantid.AlgorithmManager.create("MuonPairingAsymmetry")
@@ -59,7 +57,7 @@ def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
 def run_MuonGroupingAsymmetry(parameter_dict, workspace_name, unormalised_workspace_name):
     """
     Apply the MuonGroupingCounts algorithm with the properties supplied through
-    the input dictionary of {proeprty_name:property_value} pairs.
+    the input dictionary of {property_name:property_value} pairs.
     Returns the calculated workspace name.
     """
     alg = mantid.AlgorithmManager.create("MuonGroupingAsymmetry")

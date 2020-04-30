@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=F0401
+from Muon.GUI.Common.ADSHandler.workspace_group_definition import WorkspaceGroupDefinition
 from mantid.api import Workspace, AnalysisDataService
-from mantid.simpleapi import RenameWorkspace, GroupWorkspaces
+from mantid.simpleapi import RenameWorkspace
 
 
 def _add_workspace_to_group(group_name, workspace_name):
@@ -15,7 +16,8 @@ def _add_workspace_to_group(group_name, workspace_name):
     else:
         workspaces_to_group = []
     workspaces_to_group.append(workspace_name)
-    GroupWorkspaces(InputWorkspaces=workspaces_to_group, OutputWorkspace=group_name)
+    WorkspaceGroupDefinition().add_workspaces_to_group(group_name, workspaces_to_group)
+    WorkspaceGroupDefinition().execute_grouping()
 
 
 class MuonWorkspaceWrapper(object):
@@ -118,6 +120,7 @@ class MuonWorkspaceWrapper(object):
         if len(self.name) > 0:
             # add workspace to ADS
             if self.is_hidden:
+                print(self.name, self._workspace_name, self.workspace)
                 AnalysisDataService.addOrReplace(self._workspace_name, self.workspace)
 
             self._add_to_appropriate_groups()
