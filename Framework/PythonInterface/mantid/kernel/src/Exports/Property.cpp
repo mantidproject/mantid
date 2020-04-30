@@ -24,8 +24,6 @@
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-#include <iostream>
-
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::Property;
 using Mantid::PythonInterface::std_vector_exporter;
