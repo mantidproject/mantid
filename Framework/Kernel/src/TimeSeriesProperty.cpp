@@ -1269,6 +1269,12 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::maxValue() const {
       ->value();
 }
 
+template <typename TYPE> double TimeSeriesProperty<TYPE>::mean() const {
+  Mantid::Kernel::Statistics raw_stats = Mantid::Kernel::getStatistics(
+      this->filteredValuesAsVector(), StatOptions::Mean);
+  return raw_stats.mean;
+}
+
 /// Returns the number of values at UNIQUE time intervals in the time series
 /// @returns The number of unique time interfaces
 template <typename TYPE> int TimeSeriesProperty<TYPE>::size() const {
