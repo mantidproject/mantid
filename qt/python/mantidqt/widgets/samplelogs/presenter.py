@@ -24,12 +24,6 @@ class SampleLogs(object):
                                                      self.model.getNumExperimentInfo())
         self.setup_table()
 
-    def selectionChanged(self, selected, deselected):
-        """When the selection is changed update stats with selected log and replot the
-                logs
-                """
-        self.update()
-
     def update(self):
         """Update stats with selected log and replot the
         logs
