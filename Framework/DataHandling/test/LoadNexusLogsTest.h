@@ -320,7 +320,7 @@ public:
     const auto pcValues = pclog1->valuesAsVector();
     TS_ASSERT_EQUALS(pcValues.size(), correct.size());
     for(int i = 0; i < pcValues.size; ++i) {
-        TS_ASSERT_EQUALS(pcValues[i], correct[i]);
+      TS_ASSERT_EQUALS(pcValues[i], correct[i]);
     }
 
     auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
@@ -329,7 +329,7 @@ public:
     const auto pcValues2 = pclog2->valuesAsVector();
     TS_ASSERT_EQUALS(pcValues2.size(), correct2.size());
     for(int i = 0; i < pcValues2.size; ++i) {
-        TS_ASSERT_EQUALS(pcValues2[i], correct2[i]);
+      TS_ASSERT_EQUALS(pcValues2[i], correct2[i]);
     }
 
     // force the filtering by passing in an empty log
