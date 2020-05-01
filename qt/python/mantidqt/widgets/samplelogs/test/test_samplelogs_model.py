@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.simpleapi import LoadEventNexus, CreateMDWorkspace
+from mantid.simpleapi import Load, LoadEventNexus, CreateMDWorkspace
 from mantidqt.widgets.samplelogs.model import SampleLogsModel
 
 import unittest
@@ -39,6 +39,7 @@ class SampleLogsModelTest(unittest.TestCase):
 
         self.assertTrue(model.is_log_plottable("Speed5"))
         self.assertFalse(model.is_log_plottable("duration"))
+        self.assertTrue(model.are_any_logs_plottable())
 
         stats = model.get_statistics("Speed5")
         self.assertEqual(stats.maximum, 300.0)
@@ -55,6 +56,24 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(itemModel.item(0,1).text(), "float series")
         self.assertEqual(itemModel.item(0,2).text(), "4.0 (2 entries)")
         self.assertEqual(itemModel.item(0,3).text(), "")
+
+    def test_model_no_time_series_logs(self):
+        #test with some reactor based data without time series logs
+        ws = Load('ILL/D22/192068.nxs')
+        model = SampleLogsModel(ws)
+
+        log_names = model.get_log_names()
+        self.assertEqual(len(log_names), 293)
+        self.assertIn("Beam.sample_pressure", log_names)
+
+        values = model.get_log_display_values("Beam.sample_pressure")
+        self.assertEqual(values[0], "Beam.sample_pressure")
+        self.assertEqual(values[1], "number")
+        self.assertEqual(values[2], 0.0)
+        self.assertEqual(values[3], "Pa")
+
+        self.assertFalse(model.is_log_plottable("Beam.sample_pressure"))
+        self.assertFalse(model.are_any_logs_plottable())
 
     def test_model_MD(self):
         ws1 = LoadEventNexus("CNCS_7860", MetaDataOnly=True)

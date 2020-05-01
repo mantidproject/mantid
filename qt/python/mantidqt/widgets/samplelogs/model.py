@@ -104,6 +104,17 @@ class SampleLogsModel(object):
         log = self.get_log(LogName)
         return log.name, get_type(log), get_value(log), log.units
 
+    def are_any_logs_plottable(self):
+        """returns true if any of the logs are plottable.
+        Only Float, Int32 and Int64
+        TimeSeriesProperties are plottable at this point.
+        """
+        log_names = self.get_log_names()
+        for log_name in log_names:
+            if self.is_log_plottable(log_name):
+                return True
+        return False
+
     def is_log_plottable(self, LogName):
         """Checks if logs is plottable. Only Float, Int32 and Int64
         TimeSeriesProperties are plottable at this point.

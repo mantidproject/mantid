@@ -95,4 +95,5 @@ class SampleLogs(object):
 
     def setup_table(self):
         """Set the model in the view to the one create from the model"""
+        self.view.show_plot_and_stats(self.model.are_any_logs_plottable())
         self.view.set_model(self.model.getItemModel())
