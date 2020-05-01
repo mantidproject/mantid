@@ -83,7 +83,6 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(values[2], 4.616606712341309)
         self.assertEqual(values[3], "second")
 
-
     def test_Invalid_data_logs(self):
         ws = Load('ENGINX00228061_log_alarm_data.nxs')
 
@@ -101,6 +100,7 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(2, len(hidden_logs))
         self.assertIn('cryo_temp1_invalid_values',hidden_logs)
         self.assertIn('cryo_temp2_invalid_values',hidden_logs)
+
 
 if __name__ == '__main__':
     unittest.main()

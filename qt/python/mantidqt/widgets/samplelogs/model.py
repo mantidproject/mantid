@@ -119,7 +119,6 @@ class SampleLogsModel(object):
         for log_name in log_list:
             if PropertyManager.isAnInvalidValuesFilterLog(log_name):
                 log = self.get_log(log_name)
-                bgColor = QColor.fromHsv(0, 100, 255)
                 #determine if the entire log is invalid
                 invalid_value_count = 0
                 for log_value in log.value:
