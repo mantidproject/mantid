@@ -127,32 +127,32 @@ void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes(
 void IndirectFitDataPresenter::setStartX(double startX,
                                          TableDatasetIndex dataIndex,
                                          WorkspaceIndex spectrumIndex) {
-  m_tablePresenter->setStartX(startX, dataIndex, spectrumIndex);
+  m_tablePresenter->updateTableFromModel();
   m_view->setStartX(startX);
 }
 
 void IndirectFitDataPresenter::setStartX(double startX,
                                          TableDatasetIndex dataIndex) {
-  m_tablePresenter->setStartX(startX, dataIndex);
+  m_tablePresenter->updateTableFromModel();
   m_view->setStartX(startX);
 }
 
 void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex dataIndex,
                                        WorkspaceIndex spectrumIndex) {
-  m_tablePresenter->setEndX(endX, dataIndex, spectrumIndex);
   m_view->setEndX(endX);
+  m_tablePresenter->updateTableFromModel();
 }
 
 void IndirectFitDataPresenter::setEndX(double endX,
                                        TableDatasetIndex dataIndex) {
-  m_tablePresenter->setEndX(endX, dataIndex);
+  m_tablePresenter->updateTableFromModel();
   m_view->setEndX(endX);
 }
 
 void IndirectFitDataPresenter::setExclude(const std::string &exclude,
                                           TableDatasetIndex dataIndex,
                                           WorkspaceIndex spectrumIndex) {
-  m_tablePresenter->setExclude(exclude, dataIndex, spectrumIndex);
+  m_tablePresenter->updateTableFromModel();
 }
 
 void IndirectFitDataPresenter::setModelFromSingleData() {
@@ -172,11 +172,11 @@ void IndirectFitDataPresenter::setModelFromMultipleData() {
 void IndirectFitDataPresenter::updateSpectraInTable(
     TableDatasetIndex dataIndex) {
   if (m_view->isMultipleDataTabSelected())
-    m_tablePresenter->updateTableFromModel(m_model->m_fitDataModel.get());
+    m_tablePresenter->updateTableFromModel();
 }
 
 void IndirectFitDataPresenter::updateDataInTable(TableDatasetIndex dataIndex) {
-  m_tablePresenter->updateTableFromModel(m_model->m_fitDataModel.get());
+  m_tablePresenter->updateTableFromModel();
 }
 
 void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
@@ -261,7 +261,7 @@ void IndirectFitDataPresenter::closeDialog() {
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
   try {
     addDataToModel(dialog);
-    m_tablePresenter->updateTableFromModel(m_model->m_fitDataModel.get());
+    m_tablePresenter->updateTableFromModel();
     emit dataAdded();
     emit dataChanged();
   } catch (const std::runtime_error &ex) {

@@ -239,87 +239,6 @@ IndirectDataTablePresenter::getRowIndex(TableDatasetIndex dataIndex,
   return boost::none;
 }
 
-void IndirectDataTablePresenter::setStartX(double startX,
-                                           TableDatasetIndex dataIndex,
-                                           WorkspaceIndex spectrumIndex) {
-  if (auto const row = getRowIndex(dataIndex, spectrumIndex))
-    setStartX(startX, *row);
-}
-
-void IndirectDataTablePresenter::setStartX(double startX,
-                                           TableDatasetIndex dataIndex) {
-  if (auto const spectra = getSpectra(dataIndex)) {
-    for (auto const spectrumIndex : *spectra) {
-      if (auto const row = getRowIndex(dataIndex, spectrumIndex))
-        setStartX(startX, *row);
-    }
-  }
-}
-
-void IndirectDataTablePresenter::setStartX(double startX,
-                                           FitDomainIndex index) {
-  MantidQt::API::SignalBlocker blocker(m_dataTable);
-  m_dataTable->item(index.value, startXColumn())->setText(makeNumber(startX));
-}
-
-void IndirectDataTablePresenter::setStartX(double startX) {
-  setColumnValues(startXColumn(), makeNumber(startX));
-}
-
-void IndirectDataTablePresenter::setEndX(double endX,
-                                         TableDatasetIndex dataIndex,
-                                         WorkspaceIndex spectrumIndex) {
-  if (auto const row = getRowIndex(dataIndex, spectrumIndex))
-    setEndX(endX, *row);
-}
-
-void IndirectDataTablePresenter::setEndX(double endX,
-                                         TableDatasetIndex dataIndex) {
-  if (auto const spectra = getSpectra(dataIndex)) {
-    for (auto const spectrumIndex : *spectra) {
-      if (auto const row = getRowIndex(dataIndex, spectrumIndex))
-        setEndX(endX, *row);
-    }
-  }
-}
-
-void IndirectDataTablePresenter::setEndX(double endX, FitDomainIndex index) {
-  MantidQt::API::SignalBlocker blocker(m_dataTable);
-  m_dataTable->item(index.value, endXColumn())->setText(makeNumber(endX));
-}
-
-void IndirectDataTablePresenter::setEndX(double endX) {
-  setColumnValues(endXColumn(), makeNumber(endX));
-}
-
-void IndirectDataTablePresenter::setExclude(const std::string &exclude,
-                                            TableDatasetIndex dataIndex,
-                                            WorkspaceIndex spectrumIndex) {
-  // auto const row = getRowIndex(dataIndex, spectrumIndex);
-  // if (FittingMode::SEQUENTIAL == m_model->getFittingMode() || !row)
-  //   setExcludeRegion(exclude);
-  // else if (row)
-  //   setExcludeRegion(exclude, *row);
-}
-
-void IndirectDataTablePresenter::setExcludeRegion(const std::string &exclude,
-                                                  FitDomainIndex index) {
-  // MantidQt::API::SignalBlocker blocker(m_dataTable);
-  // if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
-  //   setExcludeRegion(exclude);
-  // else
-  //   m_dataTable->item(index.value, excludeColumn())
-  //       ->setText(QString::fromStdString(exclude));
-}
-
-void IndirectDataTablePresenter::setExcludeRegion(const std::string &exclude) {
-  setExcludeRegion(QString::fromStdString(exclude));
-}
-
-void IndirectDataTablePresenter::setExcludeRegion(const QString &exclude) {
-  setColumnValues(excludeColumn(), exclude);
-}
-
 void IndirectDataTablePresenter::removeSelectedData() {
   auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
 
@@ -327,16 +246,16 @@ void IndirectDataTablePresenter::removeSelectedData() {
     m_model->removeDataByIndex(FitDomainIndex(item.row()));
   }
 
-  updateTableFromModel(m_model);
+  updateTableFromModel();
 }
 
-void IndirectDataTablePresenter::updateTableFromModel(IIndirectFitData *model) {
+void IndirectDataTablePresenter::updateTableFromModel() {
   ScopedFalse _signalBlock(m_emitCellChanged);
   m_dataTable->setRowCount(0);
 
   for (auto domainIndex = FitDomainIndex{0};
-       domainIndex < model->getNumberOfDomains(); domainIndex++) {
-    addTableEntry(model, domainIndex);
+       domainIndex < m_model->getNumberOfDomains(); domainIndex++) {
+    addTableEntry(m_model, domainIndex);
   }
 };
 
@@ -345,35 +264,35 @@ void IndirectDataTablePresenter::handleCellChanged(int irow, int column) {
     return;
   }
   FitDomainIndex row{irow};
-  const auto workspaceIndex = getWorkspaceIndex(row);
-  const auto dataIndex = getDataIndex(row);
 
   if (startXColumn() == column) {
-    setModelStartXAndEmit(getDouble(row, column), dataIndex, workspaceIndex);
+    setModelStartXAndEmit(getDouble(row, column), row);
   } else if (endXColumn() == column) {
-    setModelEndXAndEmit(getDouble(row, column), dataIndex, workspaceIndex);
+    setModelEndXAndEmit(getDouble(row, column), row);
   } else if (excludeColumn() == column) {
-    setModelExcludeAndEmit(getString(row, column), dataIndex, workspaceIndex);
+    setModelExcludeAndEmit(getString(row, column), row);
   }
 }
 
-void IndirectDataTablePresenter::setModelStartXAndEmit(
-    double startX, TableDatasetIndex dataIndex, WorkspaceIndex workspaceIndex) {
-  m_model->setStartX(startX, dataIndex, workspaceIndex);
-  emit startXChanged(startX, dataIndex, workspaceIndex);
+void IndirectDataTablePresenter::setModelStartXAndEmit(double startX,
+                                                       FitDomainIndex row) {
+  auto subIndices = m_model->getSubIndices(row);
+  m_model->setStartX(startX, subIndices.first, subIndices.second);
+  emit startXChanged(startX, subIndices.first, subIndices.second);
 }
 
-void IndirectDataTablePresenter::setModelEndXAndEmit(
-    double endX, TableDatasetIndex dataIndex, WorkspaceIndex workspaceIndex) {
-  m_model->setEndX(endX, dataIndex, workspaceIndex);
-  emit endXChanged(endX, dataIndex, workspaceIndex);
+void IndirectDataTablePresenter::setModelEndXAndEmit(double endX,
+                                                     FitDomainIndex row) {
+  auto subIndices = m_model->getSubIndices(row);
+  m_model->setEndX(endX, subIndices.first, subIndices.second);
+  emit endXChanged(endX, subIndices.first, subIndices.second);
 }
 
 void IndirectDataTablePresenter::setModelExcludeAndEmit(
-    const std::string &exclude, TableDatasetIndex dataIndex,
-    WorkspaceIndex workspaceIndex) {
-  m_model->setExcludeRegion(exclude, dataIndex, workspaceIndex);
-  emit excludeRegionChanged(exclude, dataIndex, workspaceIndex);
+    const std::string &exclude, FitDomainIndex row) {
+  auto subIndices = m_model->getSubIndices(row);
+  m_model->setExcludeRegion(exclude, subIndices.first, subIndices.second);
+  emit excludeRegionChanged(exclude, subIndices.first, subIndices.second);
 }
 
 void IndirectDataTablePresenter::clearTable() {

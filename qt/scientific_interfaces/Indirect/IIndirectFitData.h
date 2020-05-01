@@ -96,6 +96,9 @@ public:
   virtual std::vector<double>
   getExcludeRegionVector(FitDomainIndex index) const = 0;
   virtual std::string getExcludeRegion(FitDomainIndex index) const = 0;
+
+  virtual std::pair<TableDatasetIndex, WorkspaceIndex>
+      getSubIndices(FitDomainIndex) const = 0;
 };
 
 } // namespace IDA

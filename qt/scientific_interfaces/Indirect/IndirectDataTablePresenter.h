@@ -30,15 +30,7 @@ public:
 
   bool isTableEmpty() const;
 
-  void setStartX(double startX, TableDatasetIndex dataIndex,
-                 WorkspaceIndex spectrumIndex);
-  void setStartX(double startX, TableDatasetIndex dataIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex,
-               WorkspaceIndex spectrumIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex);
-  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex,
-                  WorkspaceIndex spectrumIndex);
-  void updateTableFromModel(IIndirectFitData *model);
+  void updateTableFromModel();
   void clearTable();
 
 public slots:
@@ -70,7 +62,6 @@ protected:
   void setCellText(const QString &text, FitDomainIndex row, int column);
 
 private:
-  void setExcludeRegion(const std::string &exclude, FitDomainIndex index);
   void setStartX(double startX, FitDomainIndex index);
   void setEndX(double endX, FitDomainIndex index);
   virtual int workspaceIndexColumn() const;
@@ -92,18 +83,10 @@ private:
   boost::optional<FitDomainIndex>
   getRowIndex(TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex) const;
 
-  void setModelStartXAndEmit(double startX, TableDatasetIndex dataIndex,
-                             WorkspaceIndex workspaceIndex);
-  void setModelEndXAndEmit(double endX, TableDatasetIndex dataIndex,
-                           WorkspaceIndex workspaceIndex);
-  void setModelExcludeAndEmit(const std::string &exclude,
-                              TableDatasetIndex dataIndex,
-                              WorkspaceIndex workspaceIndex);
+  void setModelStartXAndEmit(double startX, FitDomainIndex row);
+  void setModelEndXAndEmit(double endX, FitDomainIndex row);
+  void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
 
-  void setStartX(double startX);
-  void setEndX(double endX);
-  void setExcludeRegion(const std::string &exclude);
-  void setExcludeRegion(const QString &exclude);
   void setColumnValues(int column, const QString &value);
   void setHorizontalHeaders(const QStringList &headers);
 
