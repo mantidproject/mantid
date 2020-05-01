@@ -101,7 +101,7 @@ void PDFFourierTransform2::init() {
       "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
   declareProperty(
       "Qmax", EMPTY_DBL(), mustBePositive,
-      "Maximum Q in S(Q) to calculate in Fourier transform. (optional)");
+      "Maximum Q in S(Q) to calculate in Fourier transform. (optional, defaults to 40 on output.)");
   declareProperty("Filter", false,
                   "Set to apply Lorch function filter to the input");
 
@@ -118,9 +118,9 @@ void PDFFourierTransform2::init() {
                   "Step size of r of G(r) to calculate.  Default = "
                   ":math:`\\frac{\\pi}{Q_{max}}`.");
   declareProperty("Rmin", EMPTY_DBL(), mustBePositive,
-                  "Minimum r for G(r) to calculate.");
+                  "Minimum r for G(r) to calculate. (optional)");
   declareProperty("Rmax", EMPTY_DBL(), mustBePositive,
-                  "Maximum r for G(r) to calculate.");
+                  "Maximum r for G(r) to calculate. (optional, defaults to 20 on output.)");
   declareProperty(
       "rho0", EMPTY_DBL(), mustBePositive,
       "Average number density used for g(r) and RDF(r) conversions (optional)");
