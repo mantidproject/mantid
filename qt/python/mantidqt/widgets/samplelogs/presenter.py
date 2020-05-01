@@ -40,7 +40,7 @@ class SampleLogs(object):
         self.print_selected_logs()
 
     def log_changed(self):
-        """Update interface aspectrs
+        """Update interface aspects
         """
         #determine if any of the logs might support filtering
         are_any_logs_filtered = False
