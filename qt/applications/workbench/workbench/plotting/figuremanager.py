@@ -96,6 +96,9 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
                 to_redraw = ax.remove_workspace_artists(workspace)
+                if ax.is_waterfall() and ax.waterfall_has_fill():
+                    datafunctions.waterfall_update_fill(ax)
+
             else:
                 to_redraw = False
             # We check for images and lines below as a pseudo check for an axes being
