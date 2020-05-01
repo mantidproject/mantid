@@ -17,6 +17,9 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Utils.h"
 
+#include "boost/math/distributions.hpp"
+// #include "boost/math/distributions/chi_squared.hpp"
+
 namespace Mantid {
 namespace DataObjects {
 
@@ -55,6 +58,7 @@ void FakeMD::fill(API::IMDEventWorkspace_sptr workspace) {
   setupDetectorCache(*workspace);
 
   CALL_MDEVENT_FUNCTION(this->addFakePeak, workspace)
+  CALL_MDEVENT_FUNCTION(this->addFakeEllipsoid, workspace)
   CALL_MDEVENT_FUNCTION(this->addFakeUniformData, workspace)
 
   // Mark that events were added, so the file back end (if any) needs updating
@@ -167,41 +171,39 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (m_ellipsoidParams.empty())
     return;
 
-  if (m_peakParams.size() != 2 + 2 * nd + pow(nd, 2))
+  if (m_ellipsoidParams.size() != 2 + 2 * nd + pow(nd, 2))
     throw std::invalid_argument(
         "EllipsoidParams: incorrect number of parameters.");
-  if (m_peakParams[0] <= 0)
+  if (m_ellipsoidParams[0] <= 0)
     throw std::invalid_argument(
         "EllipsoidParams: number_of_events needs to be > 0");
 
   // extract input parameters
-  auto numEvents = size_t(m_peakParams[0]);
-  double center(nd);
-  Matrix<double> Evec(nd, nd); // hold eigenvectors
-  Matrix<double> std(nd, nd);  // hold sqrt(eigenvals) standard devs on diag
-  for (int n = 0; n < nd; n++) {
-    center[n] = m_peakParams[1 + n];
+  auto numEvents = size_t(m_ellipsoidParams[0]);
+  coord_t center[nd];
+  Kernel::Matrix<double> Evec(nd, nd); // hold eigenvectors
+  Kernel::Matrix<double> std(nd, nd); // hold sqrt(eigenvals) standard devs on diag
+  for (size_t n = 0; n < nd; n++) {
+    center[n] = m_ellipsoidParams[n + 1];
     // get row/col index for eigenvector matrix
-    for (int d; d < nd; dd++) {
-      Evec[d, n] = m_peakParams[1 + nd + n * nd + d];
+    for (size_t d = 0; d < nd; d++) {
+      Evec[d][n] = m_ellipsoidParams[1 + nd + n * nd + d];
     }
-    Eval[n, n] = sqrt(m_peakParams[m_peakParams.size() - (1 + nd) + n]);
+    std[n][n] =
+        sqrt(m_ellipsoidParams[m_ellipsoidParams.size() - (1 + nd) + n]);
   }
-  auto doCounts = m_peakParams[m_peakParams.size() - 1];
+  auto doCounts = m_ellipsoidParams[m_ellipsoidParams.size() - 1];
 
   // get affine transformation that maps unit variance spherical
   // normal dist to ellipsoid
   auto A = Evec * std;
 
   // calculate inverse of covariance matrix (if necassary)
-  Matrix<double> invCov(nd, nd);
-  // need to left multiply a matrix with pos so convert to col matrix
-  Matrix<double> posMat(nd, 1);
+  Kernel::Matrix<double> invCov(nd, nd);
   if (doCounts > 0) {
     auto var = std * std;
     auto cov = Evec * var * Evec.Invert();
     invCov = cov.Invert();
-    posMat.setCol(0, pos);
   }
   // get chi-squared boost function
   boost::math::chi_squared chisq(nd);
@@ -210,12 +212,16 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   std::mt19937 rng(static_cast<unsigned int>(m_randomSeed));
   std::normal_distribution<double> d(0.0, 1.0); // mean = 0, std = 1
 
+  // Inserter to help choose the correct event type
+  auto eventHelper =
+      MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
+
   for (size_t iEvent = 0; iEvent < numEvents; ++iEvent) {
 
     // sample uniform normal distribution
     std::vector<double> pos;
     for (int n = 0; n < nd; n++) {
-      pos.push_back(d(rng))
+      pos.push_back(d(rng));
     }
     // apply affine transformation
     pos = A * pos;
@@ -226,20 +232,29 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (doCounts > 0) {
       // calculate Mahalanobis distance
       // https://en.wikipedia.org/wiki/Mahalanobis_distance
+
+      // need to left multiply a matrix with pos so convert to col matrix
+      Kernel::Matrix<double> posMat(nd, 1);
+      posMat.setColumn(0, pos);
+
       auto md = (posMat * invCov) * pos;
       // for a multivariate normal dist m-dist is distribute
       // as chi-squared pdf with nd degrees of freedom
-      signal = boost::math::pdf(chisq, md);
+      signal = boost::math::pdf(chisq, md[0]);
       errorSquared = signal;
     }
     // convert pos to coord_t and offset  by center
-    coord_t eventCenter[nd] for (int n = 0; n < nd; n++) {
-      eventCenter = static_cast<coord_t>(pos[n] + center[n]);
+    coord_t eventCenter[nd];
+    for (int n = 0; n < nd; n++) {
+      eventCenter[n] = static_cast<coord_t>(pos[n] + center[n]);
     }
+    //// DEBUG
+    //std::cout << eventCenter[0] << "\t\t" << eventCenter[1] << "\t\t"
+    //          << eventCenter[2] << std::endl;
 
     // add event (need to convert pos to coord_t)
     eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
-                              centers); // 0 = run index
+                              eventCenter); // 0 = run index
   }
 
   ws->splitBox();

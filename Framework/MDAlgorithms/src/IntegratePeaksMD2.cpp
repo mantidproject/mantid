@@ -412,8 +412,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // correct bg signal by Vpeak/Vshell (same for sphere and ellipse)
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
-        // ALSO NEED TO CORRECT IF ON EDGE
-      } // static_cast<coord_t>pow
+      }
       // if ellipsoid find covariance and centroid in spherical region
       // using one-pass algorithm from https://doi.org/10.1145/359146.359153
       // which might not work if iterating in over boxes that are adjacent...

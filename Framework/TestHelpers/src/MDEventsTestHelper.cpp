@@ -147,7 +147,7 @@ makeFakeMDEventWorkspace(const std::string &wsName, long numEvents,
   API::AnalysisDataService::Instance().addOrReplace(
       wsName, boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
   FakeMD dataFaker(std::vector<double>(1, static_cast<double>(numEvents)),
-                   std::vector<double>(), 0, true);
+                   std::vector<double>(), std::vector<double>(), 0, true);
   dataFaker.fill(ws1);
   return boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(
       API::AnalysisDataService::Instance().retrieve(wsName));
