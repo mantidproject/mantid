@@ -785,7 +785,6 @@ void IndirectFitAnalysisTab::respondToDataRemoved() {
 void IndirectFitAnalysisTab::respondToSelectedFitDataChanged(
     TableDatasetIndex i) {
   m_spectrumPresenter->setActiveModelIndex(i);
-  updateParameterValues();
 }
 
 void IndirectFitAnalysisTab::respondToNoFitDataSelected() {

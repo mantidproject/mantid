@@ -84,6 +84,8 @@ public:
   virtual void setExcludeRegion(const std::string &exclude,
                                 TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) = 0;
+  virtual void setResolution(const std::string &name,
+                             TableDatasetIndex index) = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(FitDomainIndex index) const = 0;

@@ -39,8 +39,6 @@ public:
   //                   const Spectra &spectra);
   void removeWorkspace(TableDatasetIndex index) override;
   void setResolution(const std::string &name, TableDatasetIndex index);
-  void setResolution(const Mantid::API::MatrixWorkspace_sptr &resolution,
-                     TableDatasetIndex index);
   void setFitTypeString(const std::string &fitType);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
@@ -85,7 +83,6 @@ private:
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                  IndirectFitData *fitData,
                  WorkspaceIndex spectrum) const override;
-  void addExtendedResolution(TableDatasetIndex index);
   void addSampleLogs();
 
   void setParameterNameChanges(const Mantid::API::IFunction &model,

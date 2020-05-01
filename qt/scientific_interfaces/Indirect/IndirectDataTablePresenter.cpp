@@ -455,30 +455,7 @@ void IndirectDataTablePresenter::updateTableFromModel(IIndirectFitData *model) {
 
   for (auto domainIndex = FitDomainIndex{0};
        domainIndex < model->getNumberOfDomains(); domainIndex++) {
-    m_dataTable->insertRow(domainIndex.value);
-    const auto &name = model->getWorkspace(domainIndex)->getName();
-    auto cell =
-        std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
-    auto flags = cell->flags();
-    flags ^= Qt::ItemIsEditable;
-    cell->setFlags(flags);
-    setCell(std::move(cell), domainIndex.value, 0);
-
-    cell = std::make_unique<QTableWidgetItem>(
-        QString::number(model->getSpectrum(domainIndex)));
-    cell->setFlags(flags);
-    setCell(std::move(cell), domainIndex.value, workspaceIndexColumn());
-
-    const auto range = model->getFittingRange(domainIndex);
-    cell = std::make_unique<QTableWidgetItem>(makeNumber(range.first));
-    setCell(std::move(cell), domainIndex.value, startXColumn());
-
-    cell = std::make_unique<QTableWidgetItem>(makeNumber(range.second));
-    setCell(std::move(cell), domainIndex.value, endXColumn());
-
-    const auto exclude = model->getExcludeRegion(domainIndex);
-    cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(exclude));
-    setCell(std::move(cell), domainIndex.value, excludeColumn());
+    addTableEntry(model, domainIndex);
   }
 };
 
@@ -587,40 +564,31 @@ void IndirectDataTablePresenter::setHorizontalHeaders(
 #endif
 }
 
-void IndirectDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
-                                               WorkspaceIndex spectrum) {
-  const auto row = FitDomainIndex{m_dataTable->rowCount()};
-  addTableEntry(dataIndex, spectrum, row);
-  m_dataTable->item(row.value, 0)
-      ->setData(Qt::UserRole, getVariant(dataIndex.value));
-}
-
-void IndirectDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
-                                               WorkspaceIndex spectrum,
+void IndirectDataTablePresenter::addTableEntry(IIndirectFitData *model,
                                                FitDomainIndex row) {
   m_dataTable->insertRow(row.value);
-
-  const auto &name = m_model->getWorkspace(dataIndex)->getName();
+  const auto &name = model->getWorkspace(row)->getName();
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
-  setCell(std::move(cell), row, 0);
+  setCell(std::move(cell), row.value, 0);
 
-  cell = std::make_unique<QTableWidgetItem>(QString::number(spectrum.value));
+  cell = std::make_unique<QTableWidgetItem>(
+      QString::number(model->getSpectrum(row)));
   cell->setFlags(flags);
-  setCell(std::move(cell), row, workspaceIndexColumn());
+  setCell(std::move(cell), row.value, workspaceIndexColumn());
 
-  const auto range = m_model->getFittingRange(dataIndex, spectrum);
+  const auto range = model->getFittingRange(row);
   cell = std::make_unique<QTableWidgetItem>(makeNumber(range.first));
-  setCell(std::move(cell), row, startXColumn());
+  setCell(std::move(cell), row.value, startXColumn());
 
   cell = std::make_unique<QTableWidgetItem>(makeNumber(range.second));
-  setCell(std::move(cell), row, endXColumn());
+  setCell(std::move(cell), row.value, endXColumn());
 
-  const auto exclude = m_model->getExcludeRegion(dataIndex, spectrum);
+  const auto exclude = model->getExcludeRegion(row);
   cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(exclude));
-  setCell(std::move(cell), row, excludeColumn());
+  setCell(std::move(cell), row.value, excludeColumn());
 }
 
 void IndirectDataTablePresenter::setCell(std::unique_ptr<QTableWidgetItem> cell,

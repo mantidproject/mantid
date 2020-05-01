@@ -60,8 +60,7 @@ protected:
   FitDomainIndex getFirstRow(TableDatasetIndex dataIndex) const;
   std::string getString(FitDomainIndex row, int column) const;
 
-  virtual void addTableEntry(TableDatasetIndex dataIndex,
-                             WorkspaceIndex spectrum, FitDomainIndex row);
+  virtual void addTableEntry(IIndirectFitData *model, FitDomainIndex row);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row,
                int column);
   virtual void updateTableEntry(TableDatasetIndex dataIndex,
@@ -104,7 +103,6 @@ private:
 
   void updateExistingData(TableDatasetIndex index);
   void addNewData(TableDatasetIndex index);
-  void addTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   TableDatasetIndex removeTableEntry(FitDomainIndex row);
   std::pair<std::vector<TableDatasetIndex>, std::vector<FitDomainIndex>>
   removeTableRows(QModelIndexList &selectedRows);

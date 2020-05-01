@@ -52,13 +52,12 @@ ConvFitDataTablePresenter::getResolutionName(FitDomainIndex row) const {
   return getString(row, 1);
 }
 
-void ConvFitDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
-                                              WorkspaceIndex spectrum,
+void ConvFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
                                               FitDomainIndex row) {
-  IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
+  IndirectDataTablePresenter::addTableEntry(model, row);
 
-  const auto resolution = m_convFitModel->getResolution(dataIndex);
-  const auto name = resolution ? resolution->getName() : "";
+  auto resolutionVector = model->getResolutionsForFit();
+  const auto name = resolutionVector.at(row.value).first;
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;

@@ -24,6 +24,10 @@ bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
     return lhs == rhs;
   return lhs->getName() == rhs->getName();
 }
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName);
+}
 } // namespace
 
 namespace MantidQt {
@@ -91,7 +95,38 @@ std::vector<double> IndirectFitDataModel::getQValuesForData() const {
 
 std::vector<std::pair<std::string, int>>
 IndirectFitDataModel::getResolutionsForFit() const {
-  return std::vector<std::pair<std::string, int>>();
+  std::vector<std::pair<std::string, int>> resolutionVector;
+  for (auto index = 0; index < m_resolutions.size(); ++index) {
+
+    auto spectra = getSpectra(TableDatasetIndex{index});
+    auto singleSpectraResolution =
+        m_resolutions[index].lock()->getNumberHistograms() == 1;
+    for (auto &spectraIndex : spectra) {
+      auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
+      resolutionVector.emplace_back(std::make_pair(
+          m_resolutions[index].lock()->getName(), resolutionIndex));
+    }
+  }
+  return resolutionVector;
+}
+
+void IndirectFitDataModel::setResolution(const std::string &name,
+                                         TableDatasetIndex index) {
+  if (!name.empty() && doesExistInADS(name)) {
+    auto resolution =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    if (m_resolutions.size() > index.value) {
+      m_resolutions[index.value] = resolution;
+    } else if (m_resolutions.size() == index.value) {
+      m_resolutions.emplace_back(resolution);
+    } else {
+      throw std::out_of_range("Provided resolution index '" +
+                              std::to_string(index.value) +
+                              "' was out of range.");
+    }
+  } else {
+    throw std::runtime_error("A valid resolution file needs to be selected.");
+  }
 }
 
 void IndirectFitDataModel::setSpectra(const std::string &spectra,

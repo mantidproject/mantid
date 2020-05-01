@@ -416,38 +416,36 @@ void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
 
 void ConvFitModel::setResolution(const std::string &name,
                                  TableDatasetIndex index) {
-  if (!name.empty() && doesExistInADS(name))
-    setResolution(getADSMatrixWorkspace(name), index);
-  else
-    throw std::runtime_error("A valid resolution file needs to be selected.");
+  m_fitDataModel->setResolution(name, index);
 }
 
-void ConvFitModel::setResolution(const MatrixWorkspace_sptr &resolution,
-                                 TableDatasetIndex index) {
-  if (m_resolution.size() > index)
-    m_resolution[index] = resolution;
-  else if (m_resolution.size() == index)
-    m_resolution.emplace_back(resolution);
-  else
-    throw std::out_of_range("Provided resolution index '" +
-                            std::to_string(index.value) +
-                            "' was out of range.");
+// void ConvFitModel::setResolution(const MatrixWorkspace_sptr &resolution,
+//                                  TableDatasetIndex index) {
+//   if (m_resolution.size() > index)
+//     m_resolution[index] = resolution;
+//   else if (m_resolution.size() == index)
+//     m_resolution.emplace_back(resolution);
+//   else
+//     throw std::out_of_range("Provided resolution index '" +
+//                             std::to_string(index.value) +
+//                             "' was out of range.");
 
-  if (numberOfWorkspaces() > index)
-    addExtendedResolution(index);
-}
+//   if (numberOfWorkspaces() > index)
+//     addExtendedResolution(index);
+// }
 
-void ConvFitModel::addExtendedResolution(TableDatasetIndex index) {
-  const std::string name = "__ConvFitResolution" + std::to_string(index.value);
+// void ConvFitModel::addExtendedResolution(TableDatasetIndex index) {
+//   const std::string name = "__ConvFitResolution" +
+//   std::to_string(index.value);
 
-  extendResolutionWorkspace(m_resolution[index].lock(),
-                            getNumberHistograms(index), name);
+//   extendResolutionWorkspace(m_resolution[index].lock(),
+//                             getNumberHistograms(index), name);
 
-  if (m_extendedResolution.size() > index)
-    m_extendedResolution[index] = name;
-  else
-    m_extendedResolution.emplace_back(name);
-}
+//   if (m_extendedResolution.size() > index)
+//     m_extendedResolution[index] = name;
+//   else
+//     m_extendedResolution.emplace_back(name);
+// }
 
 void ConvFitModel::setFitTypeString(const std::string &fitType) {
   m_fitType = fitType;
@@ -558,20 +556,7 @@ void ConvFitModel::setParameterNameChanges(
 
 std::vector<std::pair<std::string, int>>
 ConvFitModel::getResolutionsForFit() const {
-  std::vector<std::pair<std::string, int>> resolutionVector;
-  for (TableDatasetIndex index = TableDatasetIndex{0};
-       index < m_resolution.size(); ++index) {
-
-    auto spectra = getSpectra(index);
-    auto singleSpectraResolution =
-        getResolution(index)->getNumberHistograms() == 1;
-    for (auto &spectraIndex : spectra) {
-      auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
-      resolutionVector.emplace_back(
-          std::make_pair(getResolution(index)->getName(), resolutionIndex));
-    }
-  }
-  return resolutionVector;
+  return m_fitDataModel->getResolutionsForFit();
 }
 
 } // namespace IDA

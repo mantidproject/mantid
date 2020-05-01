@@ -70,6 +70,7 @@ public:
   void setEndX(double endX, TableDatasetIndex dataIndex) override;
   void setExcludeRegion(const std::string &exclude, TableDatasetIndex dataIndex,
                         WorkspaceIndex spectrum) override;
+  void setResolution(const std::string &name, TableDatasetIndex index) override;
 
   Mantid::API::MatrixWorkspace_sptr
   getWorkspace(FitDomainIndex index) const override;
@@ -93,6 +94,7 @@ private:
       getSubIndices(FitDomainIndex) const;
 
   std::vector<IndirectFitData> m_fittingData;
+  std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>> m_resolutions;
 };
 
 } // namespace IDA

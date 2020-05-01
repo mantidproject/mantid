@@ -46,13 +46,11 @@ int JumpFitDataTablePresenter::endXColumn() const { return 4; }
 
 int JumpFitDataTablePresenter::excludeColumn() const { return 5; }
 
-void JumpFitDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
-                                              WorkspaceIndex spectrum,
+void JumpFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
                                               FitDomainIndex row) {
-  IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
+  IndirectDataTablePresenter::addTableEntry(model, row);
 
-  const auto parameter =
-      m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
+  const auto parameter = "";
   auto cell =
       std::make_unique<QTableWidgetItem>(QString::fromStdString(parameter));
   auto flags = cell->flags();
