@@ -120,6 +120,7 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
   const Spectra &spectra() const;
+  Spectra getMutableSpectra();
   WorkspaceIndex getSpectrum(FitDomainIndex index) const;
   FitDomainIndex numberOfSpectra() const;
   bool zeroSpectra() const;

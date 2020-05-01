@@ -287,7 +287,9 @@ void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {
 
 void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
   auto subIndices = getSubIndices(fitDomainIndex);
-  //m_fittingData.at(subIndices.first.value).spectra().erase(subIndices.second);
+  m_fittingData.at(subIndices.first.value)
+      .getMutableSpectra()
+      .erase(subIndices.second);
 }
 
 std::vector<double>

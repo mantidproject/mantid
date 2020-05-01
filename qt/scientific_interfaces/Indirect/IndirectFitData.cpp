@@ -348,6 +348,8 @@ Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {
 
 const Spectra &IndirectFitData::spectra() const { return m_spectra; }
 
+Spectra IndirectFitData::getMutableSpectra() { return m_spectra; }
+
 WorkspaceIndex IndirectFitData::getSpectrum(FitDomainIndex index) const {
   return m_spectra[index];
 }
