@@ -35,7 +35,6 @@ set(
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
         IndirectFitDataView.cpp
-        IndirectFitOutput.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
@@ -107,7 +106,6 @@ set(
         IndexTypes.h
         IndirectDataValidationHelper.h
         IndirectFitData.h
-        IndirectFitOutput.h
         IndirectFitOutputOptionsModel.h
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
@@ -334,7 +332,6 @@ set(
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
         IndirectFitDataView.cpp
-        IndirectFitOutput.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
@@ -485,7 +482,6 @@ set(
         ConvFitModel.h
         IndirectDataValidationHelper.h
         IndirectFitData.h
-        IndirectFitOutput.h
         IndirectFitOutputOptionsModel.h
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h

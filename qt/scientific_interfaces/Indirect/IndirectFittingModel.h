@@ -11,12 +11,12 @@
 #include "IIndirectFitResult.h"
 #include "IndexTypes.h"
 #include "IndirectFitData.h"
-#include "IndirectFitOutput.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -181,43 +181,43 @@ private:
 
   bool isPreviousModelSelected() const;
 
-  virtual IndirectFitOutput
-  createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  const FitDataIterator &fitDataBegin,
-                  const FitDataIterator &fitDataEnd) const;
-  virtual IndirectFitOutput
-  createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  IndirectFitData *fitData, WorkspaceIndex spectrum) const;
+  // virtual IndirectFitOutput
+  // createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                 Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                 const FitDataIterator &fitDataBegin,
+  //                 const FitDataIterator &fitDataEnd) const;
+  // virtual IndirectFitOutput
+  // createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                 Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                 IndirectFitData *fitData, WorkspaceIndex spectrum) const;
 
-  void addOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm,
-                 const FitDataIterator &fitDataBegin,
-                 const FitDataIterator &fitDataEnd);
-  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-                 const Mantid::API::ITableWorkspace_sptr &parameterTable,
-                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
-                 const FitDataIterator &fitDataBegin,
-                 const FitDataIterator &fitDataEnd);
-  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-                 const Mantid::API::ITableWorkspace_sptr &parameterTable,
-                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
-                 IndirectFitData *fitData, WorkspaceIndex spectrum);
+  // void addOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm,
+  //                const FitDataIterator &fitDataBegin,
+  //                const FitDataIterator &fitDataEnd);
+  // void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+  //                const Mantid::API::ITableWorkspace_sptr &parameterTable,
+  //                const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+  //                const FitDataIterator &fitDataBegin,
+  //                const FitDataIterator &fitDataEnd);
+  // void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+  //                const Mantid::API::ITableWorkspace_sptr &parameterTable,
+  //                const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+  //                IndirectFitData *fitData, WorkspaceIndex spectrum);
 
-  virtual void addOutput(IndirectFitOutput *fitOutput,
-                         Mantid::API::WorkspaceGroup_sptr resultGroup,
-                         Mantid::API::ITableWorkspace_sptr parameterTable,
-                         Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                         const FitDataIterator &fitDataBegin,
-                         const FitDataIterator &fitDataEnd) const;
-  virtual void addOutput(IndirectFitOutput *fitOutput,
-                         Mantid::API::WorkspaceGroup_sptr resultGroup,
-                         Mantid::API::ITableWorkspace_sptr parameterTable,
-                         Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                         IndirectFitData *fitData,
-                         WorkspaceIndex spectrum) const;
+  // virtual void addOutput(IndirectFitOutput *fitOutput,
+  //                        Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                        Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                        Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                        const FitDataIterator &fitDataBegin,
+  //                        const FitDataIterator &fitDataEnd) const;
+  // virtual void addOutput(IndirectFitOutput *fitOutput,
+  //                        Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                        Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                        Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                        IndirectFitData *fitData,
+  //                        WorkspaceIndex spectrum) const;
 
   // IndirectFitDataCollectionType m_fittingData;
   std::unique_ptr<IIndirectFitOutput> m_fitOutput;

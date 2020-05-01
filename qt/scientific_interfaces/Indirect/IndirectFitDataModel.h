@@ -50,6 +50,7 @@ public:
   void addWorkspace(const std::string &workspaceName,
                     const Spectra &spectra) override;
   void removeWorkspace(TableDatasetIndex index) override;
+  void removeDataByIndex(FitDomainIndex fitDomainIndex) override;
 
   void clear() override;
 

@@ -531,24 +531,22 @@ void IndirectFittingModel::setDefaultParameterValue(
 }
 
 void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
-  /*addOutput(std::move(fitAlgorithm), m_fittingData.begin(),
-            m_fittingData.end());*/
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
   m_fitOutput->addOutput(group, parameters, result);
 }
 
-void IndirectFittingModel::addOutput(const IAlgorithm_sptr &fitAlgorithm,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) {
-  auto group = getOutputGroup(fitAlgorithm);
-  auto parameters = getOutputParameters(fitAlgorithm);
-  auto result = getOutputResult(fitAlgorithm);
-  m_fitFunction =
-      extractFirstInnerFunction(fitAlgorithm->getPropertyValue("Function"));
-  addOutput(group, parameters, result, fitDataBegin, fitDataEnd);
-}
+// void IndirectFittingModel::addOutput(const IAlgorithm_sptr &fitAlgorithm,
+//                                      const FitDataIterator &fitDataBegin,
+//                                      const FitDataIterator &fitDataEnd) {
+//   auto group = getOutputGroup(fitAlgorithm);
+//   auto parameters = getOutputParameters(fitAlgorithm);
+//   auto result = getOutputResult(fitAlgorithm);
+//   m_fitFunction =
+//       extractFirstInnerFunction(fitAlgorithm->getPropertyValue("Function"));
+//   addOutput(group, parameters, result, fitDataBegin, fitDataEnd);
+// }
 
 void IndirectFittingModel::addSingleFitOutput(
     const IAlgorithm_sptr &fitAlgorithm, TableDatasetIndex index) {
@@ -562,73 +560,76 @@ void IndirectFittingModel::addSingleFitOutput(
   //           WorkspaceIndex{spectrum});
 }
 
-void IndirectFittingModel::addOutput(const WorkspaceGroup_sptr &resultGroup,
-                                     const ITableWorkspace_sptr &parameterTable,
-                                     const WorkspaceGroup_sptr &resultWorkspace,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) {
-  // if (m_previousModelSelected && m_fitOutput)
-  //   addOutput(m_fitOutput.get(), resultGroup, parameterTable,
-  //   resultWorkspace,
-  //             fitDataBegin, fitDataEnd);
-  // else
-  //   m_fitOutput = std::make_unique<IndirectFitOutput>(
-  //       createFitOutput(resultGroup, parameterTable, resultWorkspace,
-  //                       fitDataBegin, fitDataEnd));
-  // m_previousModelSelected = isPreviousModelSelected();
-}
+// void IndirectFittingModel::addOutput(const WorkspaceGroup_sptr &resultGroup,
+//                                      const ITableWorkspace_sptr
+//                                      &parameterTable, const
+//                                      WorkspaceGroup_sptr &resultWorkspace,
+//                                      const FitDataIterator &fitDataBegin,
+//                                      const FitDataIterator &fitDataEnd) {
+//   // if (m_previousModelSelected && m_fitOutput)
+//   //   addOutput(m_fitOutput.get(), resultGroup, parameterTable,
+//   //   resultWorkspace,
+//   //             fitDataBegin, fitDataEnd);
+//   // else
+//   //   m_fitOutput = std::make_unique<IndirectFitOutput>(
+//   //       createFitOutput(resultGroup, parameterTable, resultWorkspace,
+//   //                       fitDataBegin, fitDataEnd));
+//   // m_previousModelSelected = isPreviousModelSelected();
+// }
 
-void IndirectFittingModel::addOutput(const WorkspaceGroup_sptr &resultGroup,
-                                     const ITableWorkspace_sptr &parameterTable,
-                                     const WorkspaceGroup_sptr &resultWorkspace,
-                                     IndirectFitData *fitData,
-                                     WorkspaceIndex spectrum) {
-  // if (m_previousModelSelected && m_fitOutput)
-  //   addOutput(m_fitOutput.get(), resultGroup, parameterTable,
-  //   resultWorkspace,
-  //             fitData, spectrum);
-  // else
-  //   m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
-  //       resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
-  // m_previousModelSelected = isPreviousModelSelected();
-}
+// void IndirectFittingModel::addOutput(const WorkspaceGroup_sptr &resultGroup,
+//                                      const ITableWorkspace_sptr
+//                                      &parameterTable, const
+//                                      WorkspaceGroup_sptr &resultWorkspace,
+//                                      IndirectFitData *fitData,
+//                                      WorkspaceIndex spectrum) {
+//   // if (m_previousModelSelected && m_fitOutput)
+//   //   addOutput(m_fitOutput.get(), resultGroup, parameterTable,
+//   //   resultWorkspace,
+//   //             fitData, spectrum);
+//   // else
+//   //   m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
+//   //       resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
+//   // m_previousModelSelected = isPreviousModelSelected();
+// }
 
-IndirectFitOutput IndirectFittingModel::createFitOutput(
-    WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) const {
-  return IndirectFitOutput(std::move(resultGroup), std::move(parameterTable),
-                           std::move(resultWorkspace), fitDataBegin,
-                           fitDataEnd);
-}
+// IndirectFitOutput IndirectFittingModel::createFitOutput(
+//     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
+//     WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
+//     const FitDataIterator &fitDataEnd) const {
+//   return IndirectFitOutput(std::move(resultGroup), std::move(parameterTable),
+//                            std::move(resultWorkspace), fitDataBegin,
+//                            fitDataEnd);
+// }
 
-IndirectFitOutput IndirectFittingModel::createFitOutput(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitData *fitData,
-    WorkspaceIndex spectrum) const {
-  return IndirectFitOutput(std::move(resultGroup), std::move(parameterTable),
-                           std::move(resultWorkspace), fitData, spectrum);
-}
+// IndirectFitOutput IndirectFittingModel::createFitOutput(
+//     Mantid::API::WorkspaceGroup_sptr resultGroup,
+//     Mantid::API::ITableWorkspace_sptr parameterTable,
+//     Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitData
+//     *fitData, WorkspaceIndex spectrum) const {
+//   return IndirectFitOutput(std::move(resultGroup), std::move(parameterTable),
+//                            std::move(resultWorkspace), fitData, spectrum);
+// }
 
-void IndirectFittingModel::addOutput(IndirectFitOutput *fitOutput,
-                                     WorkspaceGroup_sptr resultGroup,
-                                     ITableWorkspace_sptr parameterTable,
-                                     WorkspaceGroup_sptr resultWorkspace,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) const {
-  fitOutput->addOutput(std::move(resultGroup), std::move(parameterTable),
-                       std::move(resultWorkspace), fitDataBegin, fitDataEnd);
-}
+// void IndirectFittingModel::addOutput(IndirectFitOutput *fitOutput,
+//                                      WorkspaceGroup_sptr resultGroup,
+//                                      ITableWorkspace_sptr parameterTable,
+//                                      WorkspaceGroup_sptr resultWorkspace,
+//                                      const FitDataIterator &fitDataBegin,
+//                                      const FitDataIterator &fitDataEnd) const
+//                                      {
+//   fitOutput->addOutput(std::move(resultGroup), std::move(parameterTable),
+//                        std::move(resultWorkspace), fitDataBegin, fitDataEnd);
+// }
 
-void IndirectFittingModel::addOutput(
-    IndirectFitOutput *fitOutput, Mantid::API::WorkspaceGroup_sptr resultGroup,
-    Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitData *fitData,
-    WorkspaceIndex spectrum) const {
-  fitOutput->addOutput(std::move(resultGroup), std::move(parameterTable),
-                       std::move(resultWorkspace), fitData, spectrum);
-}
+// void IndirectFittingModel::addOutput(
+//     IndirectFitOutput *fitOutput, Mantid::API::WorkspaceGroup_sptr
+//     resultGroup, Mantid::API::ITableWorkspace_sptr parameterTable,
+//     Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitData
+//     *fitData, WorkspaceIndex spectrum) const {
+//   fitOutput->addOutput(std::move(resultGroup), std::move(parameterTable),
+//                        std::move(resultWorkspace), fitData, spectrum);
+// }
 
 FittingMode IndirectFittingModel::getFittingMode() const {
   return m_fittingMode;

@@ -65,6 +65,7 @@ public:
   virtual void addWorkspace(const std::string &workspaceName,
                             const Spectra &spectra) = 0;
   virtual void removeWorkspace(TableDatasetIndex index) = 0;
+  virtual void removeDataByIndex(FitDomainIndex fitDomainIndex) = 0;
   virtual void clear() = 0;
 
   virtual std::pair<double, double>

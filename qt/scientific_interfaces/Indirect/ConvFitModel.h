@@ -58,31 +58,31 @@ private:
   createDefaultParameters(TableDatasetIndex index) const override;
   std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const override;
-  IndirectFitOutput
-  createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  const FitDataIterator &fitDataBegin,
-                  const FitDataIterator &fitDataEnd) const override;
-  IndirectFitOutput
-  createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  IndirectFitData *fitData,
-                  WorkspaceIndex spectrum) const override;
+  // IndirectFitOutput
+  // createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                 Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                 const FitDataIterator &fitDataBegin,
+  //                 const FitDataIterator &fitDataEnd) const override;
+  // IndirectFitOutput
+  // createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                 Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                 IndirectFitData *fitData,
+  //                 WorkspaceIndex spectrum) const override;
 
-  void addOutput(IndirectFitOutput *fitOutput,
-                 Mantid::API::WorkspaceGroup_sptr resultGroup,
-                 Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 const FitDataIterator &fitDataBegin,
-                 const FitDataIterator &fitDataEnd) const override;
-  void addOutput(IndirectFitOutput *fitOutput,
-                 Mantid::API::WorkspaceGroup_sptr resultGroup,
-                 Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitData *fitData,
-                 WorkspaceIndex spectrum) const override;
+  // void addOutput(IndirectFitOutput *fitOutput,
+  //                Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                const FitDataIterator &fitDataBegin,
+  //                const FitDataIterator &fitDataEnd) const override;
+  // void addOutput(IndirectFitOutput *fitOutput,
+  //                Mantid::API::WorkspaceGroup_sptr resultGroup,
+  //                Mantid::API::ITableWorkspace_sptr parameterTable,
+  //                Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+  //                IndirectFitData *fitData,
+  //                WorkspaceIndex spectrum) const override;
   void addSampleLogs();
 
   void setParameterNameChanges(const Mantid::API::IFunction &model,

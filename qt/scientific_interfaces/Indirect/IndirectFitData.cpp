@@ -297,6 +297,12 @@ void Spectra::checkContinuous() {
   }
 }
 
+void Spectra::erase(WorkspaceIndex workspaceIndex) {
+  auto iteratorToErase = std::find(m_vec.begin(), m_vec.end(), workspaceIndex);
+  m_vec.erase(iteratorToErase);
+  checkContinuous();
+}
+
 IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace,
                                  const Spectra &spectra)
     : m_workspace(workspace), m_spectra(Spectra("")) {

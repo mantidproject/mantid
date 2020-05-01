@@ -113,8 +113,8 @@ IndirectFitDataModel::getResolutionsForFit() const {
 void IndirectFitDataModel::setResolution(const std::string &name,
                                          TableDatasetIndex index) {
   if (!name.empty() && doesExistInADS(name)) {
-    auto resolution =
-      Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    auto resolution = Mantid::API::AnalysisDataService::Instance()
+                          .retrieveWS<Mantid::API::MatrixWorkspace>(name);
     if (m_resolutions.size() > index.value) {
       m_resolutions[index.value] = resolution;
     } else if (m_resolutions.size() == index.value) {
@@ -281,7 +281,14 @@ void IndirectFitDataModel::addNewWorkspace(
   m_fittingData.emplace_back(IndirectFitData(std::move(workspace), spectra));
 }
 
-void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {}
+void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {
+  m_fittingData.erase(m_fittingData.begin() + index.value);
+}
+
+void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
+  auto subIndices = getSubIndices(fitDomainIndex);
+  //m_fittingData.at(subIndices.first.value).spectra().erase(subIndices.second);
+}
 
 std::vector<double>
 IndirectFitDataModel::getExcludeRegionVector(TableDatasetIndex dataIndex,

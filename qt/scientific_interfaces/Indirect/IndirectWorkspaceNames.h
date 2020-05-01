@@ -10,7 +10,6 @@
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
-#include "IndirectFitOutput.h"
 #include "IndirectFitdata.h"
 #include "MantidAPI/MatrixWorkspace.h"
 

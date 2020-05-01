@@ -56,6 +56,7 @@ public:
   bool isContinuous() const;
   FitDomainIndex indexOf(WorkspaceIndex i) const;
   Spectra combine(const Spectra &other) const;
+  void erase(WorkspaceIndex index);
 
 private:
   explicit Spectra(const std::set<WorkspaceIndex> &indices);

@@ -8,7 +8,10 @@
 
 #include "DllConfig.h"
 #include "Indextypes.h"
-#include "IndirectFitOutput.h"
+//#include "IndirectFitOutput.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 #include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidAPI/IAlgorithm.h"
@@ -16,6 +19,22 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+struct ParameterValue {
+  ParameterValue() : value(0) {}
+  explicit ParameterValue(double val) : value(val) {}
+  ParameterValue(double val, double err) : value(val), error(err) {}
+  double value;
+  boost::optional<double> error;
+};
+
+struct ResultLocationNew {
+  ResultLocationNew() = default;
+  ResultLocationNew(const Mantid::API::WorkspaceGroup_sptr &group,
+                    WorkspaceGroupIndex i)
+      : result(group), index(i) {}
+  std::weak_ptr<Mantid::API::WorkspaceGroup> result;
+  WorkspaceGroupIndex index = WorkspaceGroupIndex{0};
+};
 /*
     IIndirectFitData - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs

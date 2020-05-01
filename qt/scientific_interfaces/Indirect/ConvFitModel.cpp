@@ -498,55 +498,58 @@ void ConvFitModel::addSampleLogs() {
   }
 }
 
-IndirectFitOutput ConvFitModel::createFitOutput(
-    WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) const {
-  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
-                                  fitDataBegin, fitDataEnd);
-  output.mapParameterNames(m_parameterNameChanges, fitDataBegin, fitDataEnd);
-  return output;
-}
+// IndirectFitOutput ConvFitModel::createFitOutput(
+//     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
+//     WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
+//     const FitDataIterator &fitDataEnd) const {
+//   auto output = IndirectFitOutput(resultGroup, parameterTable,
+//   resultWorkspace,
+//                                   fitDataBegin, fitDataEnd);
+//   output.mapParameterNames(m_parameterNameChanges, fitDataBegin, fitDataEnd);
+//   return output;
+// }
 
-IndirectFitOutput
-ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                              Mantid::API::ITableWorkspace_sptr parameterTable,
-                              Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                              IndirectFitData *fitData,
-                              WorkspaceIndex spectrum) const {
-  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
-                                  fitData, spectrum);
-  output.mapParameterNames(m_parameterNameChanges, fitData, spectrum);
-  return output;
-}
+// IndirectFitOutput
+// ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+//                               Mantid::API::ITableWorkspace_sptr
+//                               parameterTable,
+//                               Mantid::API::WorkspaceGroup_sptr
+//                               resultWorkspace, IndirectFitData *fitData,
+//                               WorkspaceIndex spectrum) const {
+//   auto output = IndirectFitOutput(resultGroup, parameterTable,
+//   resultWorkspace,
+//                                   fitData, spectrum);
+//   output.mapParameterNames(m_parameterNameChanges, fitData, spectrum);
+//   return output;
+// }
 
 void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   IndirectFittingModel::addOutput(fitAlgorithm);
   addSampleLogs();
 }
 
-void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
-                             WorkspaceGroup_sptr resultGroup,
-                             ITableWorkspace_sptr parameterTable,
-                             WorkspaceGroup_sptr resultWorkspace,
-                             const FitDataIterator &fitDataBegin,
-                             const FitDataIterator &fitDataEnd) const {
-  fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
-                       fitDataBegin, fitDataEnd);
-  fitOutput->mapParameterNames(m_parameterNameChanges, fitDataBegin,
-                               fitDataEnd);
-}
+// void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
+//                              WorkspaceGroup_sptr resultGroup,
+//                              ITableWorkspace_sptr parameterTable,
+//                              WorkspaceGroup_sptr resultWorkspace,
+//                              const FitDataIterator &fitDataBegin,
+//                              const FitDataIterator &fitDataEnd) const {
+//   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
+//                        fitDataBegin, fitDataEnd);
+//   fitOutput->mapParameterNames(m_parameterNameChanges, fitDataBegin,
+//                                fitDataEnd);
+// }
 
-void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
-                             WorkspaceGroup_sptr resultGroup,
-                             ITableWorkspace_sptr parameterTable,
-                             WorkspaceGroup_sptr resultWorkspace,
-                             IndirectFitData *fitData,
-                             WorkspaceIndex spectrum) const {
-  fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,
-                       spectrum);
-  fitOutput->mapParameterNames(m_parameterNameChanges, fitData, spectrum);
-}
+// void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
+//                              WorkspaceGroup_sptr resultGroup,
+//                              ITableWorkspace_sptr parameterTable,
+//                              WorkspaceGroup_sptr resultWorkspace,
+//                              IndirectFitData *fitData,
+//                              WorkspaceIndex spectrum) const {
+//   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,
+//                        spectrum);
+//   fitOutput->mapParameterNames(m_parameterNameChanges, fitData, spectrum);
+// }
 
 void ConvFitModel::setParameterNameChanges(
     const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
