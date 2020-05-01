@@ -9,6 +9,7 @@ from mantid.kernel import Logger
 
 muon_logger = Logger('Muon-Algs')
 
+
 def run_MuonPreProcess(parameter_dict):
     """
     Apply the MuonPreProcess algorithm with the properties supplied through
@@ -139,7 +140,8 @@ def run_Fit(parameters_dict, alg):
     alg.setProperty('StartX', parameters_dict['StartX'])
     alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
-    return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty("OutputParameters").valueAsStr, alg.getProperty(
+    return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty(
+        "OutputParameters").valueAsStr, alg.getProperty(
         "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
         alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
@@ -161,8 +163,9 @@ def run_simultaneous_Fit(parameters_dict, alg):
 
     alg.execute()
 
-    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr,\
-        alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value,\
+    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
+        alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty(
+        'OutputChi2overDoF').value, \
         alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
@@ -172,8 +175,8 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.setRethrows(True)
     alg.setProperties(parameters_dict)
     alg.execute()
-    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr,\
-        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
+    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
+        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value, \
         alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
@@ -238,7 +241,6 @@ def convert_to_field(workspace_name):
 
 
 def extract_single_spec(ws, spec, output_workspace_name):
-
     alg = mantid.AlgorithmManager.create("ExtractSingleSpectrum")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)

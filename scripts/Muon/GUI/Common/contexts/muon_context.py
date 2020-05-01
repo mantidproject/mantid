@@ -92,7 +92,7 @@ class MuonContext(object):
     def show_all_groups(self):
         self.calculate_all_groups()
         for run in self._data_context.current_runs:
-            with WorkspaceGroupDefinition() as workspace_group_context:
+            with WorkspaceGroupDefinition():
                 for group_name in self._group_pair_context.group_names:
                     run_as_string = run_list_to_string(run)
 
@@ -116,7 +116,7 @@ class MuonContext(object):
     def show_all_pairs(self):
         self.calculate_all_pairs()
         for run in self._data_context.current_runs:
-            with WorkspaceGroupDefinition() as workspace_group_context:
+            with WorkspaceGroupDefinition():
                 for pair_name in self._group_pair_context.pair_names:
                     run_as_string = run_list_to_string(run)
                     name = get_pair_data_workspace_name(
@@ -191,7 +191,7 @@ class MuonContext(object):
     def show_raw_data(self):
         self.ads_observer.observeRename(False)
         for run in self.data_context.current_runs:
-            with WorkspaceGroupDefinition() as workspace_group_context:
+            with WorkspaceGroupDefinition():
                 run_string = run_list_to_string(run)
                 loaded_workspace = \
                     self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
