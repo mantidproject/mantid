@@ -26,8 +26,7 @@ using DataPositionType = IndexCollectionType<TableDatasetIndex, FitDomainIndex>;
 class MANTIDQT_INDIRECT_DLL IndirectDataTablePresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectDataTablePresenter(IndirectFittingModel *model,
-                             QTableWidget *dataTable);
+  IndirectDataTablePresenter(IIndirectFitData *model, QTableWidget *dataTable);
 
   bool isTableEmpty() const;
 
@@ -40,6 +39,10 @@ public:
   void setExclude(const std::string &exclude, TableDatasetIndex dataIndex,
                   WorkspaceIndex spectrumIndex);
   void updateTableFromModel(IIndirectFitData *model);
+  void clearTable();
+
+public slots:
+  void removeSelectedData();
 
 signals:
   void startXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/,
@@ -51,11 +54,10 @@ signals:
 
 private slots:
   void handleCellChanged(int row, int column);
-  void updateAllFittingRangeFrom(int row, int column);
+  // void updateAllFittingRangeFrom(int row, int column);
 
 protected:
-  IndirectDataTablePresenter(IndirectFittingModel *model,
-                             QTableWidget *dataTable,
+  IndirectDataTablePresenter(IIndirectFitData *model, QTableWidget *dataTable,
                              const QStringList &headers);
   FitDomainIndex getFirstRow(TableDatasetIndex dataIndex) const;
   std::string getString(FitDomainIndex row, int column) const;
@@ -98,14 +100,6 @@ private:
                               TableDatasetIndex dataIndex,
                               WorkspaceIndex workspaceIndex);
 
-  void enableGlobalFittingRange();
-  void disableGlobalFittingRange();
-
-  void updateExistingData(TableDatasetIndex index);
-  void addNewData(TableDatasetIndex index);
-  TableDatasetIndex removeTableEntry(FitDomainIndex row);
-  std::pair<std::vector<TableDatasetIndex>, std::vector<FitDomainIndex>>
-  removeTableRows(QModelIndexList &selectedRows);
   void setStartX(double startX);
   void setEndX(double endX);
   void setExcludeRegion(const std::string &exclude);
@@ -113,15 +107,8 @@ private:
   void setColumnValues(int column, const QString &value);
   void setHorizontalHeaders(const QStringList &headers);
 
-  void collapseData(FitDomainIndex from, FitDomainIndex to,
-                    FitDomainIndex initialSize, TableDatasetIndex dataIndex);
-  void updateFromRemovedIndices(const std::vector<TableDatasetIndex> &indices);
-  void shiftDataPositions(FitDomainIndex value, TableDatasetIndex from,
-                          TableDatasetIndex to);
-  void updateDataPositionsInCells(TableDatasetIndex from, TableDatasetIndex to);
-
   DataPositionType m_dataPositions;
-  IndirectFittingModel *m_model;
+  IIndirectFitData *m_model;
   QTableWidget *m_dataTable;
   bool m_emitCellChanged = true;
 };

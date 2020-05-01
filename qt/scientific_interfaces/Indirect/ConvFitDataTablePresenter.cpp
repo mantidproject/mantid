@@ -29,8 +29,8 @@ namespace IDA {
 
 ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model,
                                                      QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model, dataTable, convFitHeaders()),
-      m_convFitModel(model) {
+    : IndirectDataTablePresenter(model->m_fitDataModel.get(), dataTable,
+                                 convFitHeaders()) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -68,10 +68,10 @@ void ConvFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
 void ConvFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
                                                  WorkspaceIndex spectrum,
                                                  FitDomainIndex row) {
-  IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
+  // IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
 
-  const auto &name = m_convFitModel->getResolution(dataIndex)->getName();
-  setCellText(QString::fromStdString(name), row, 1);
+  // const auto &name = m_convFitModel->getResolution(dataIndex)->getName();
+  // setCellText(QString::fromStdString(name), row, 1);
 }
 
 } // namespace IDA

@@ -28,8 +28,8 @@ namespace IDA {
 
 JumpFitDataTablePresenter::JumpFitDataTablePresenter(JumpFitModel *model,
                                                      QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model, dataTable, jumpFitHeaders()),
-      m_jumpFitModel(model) {
+    : IndirectDataTablePresenter(model->m_fitDataModel.get(), dataTable,
+                                 jumpFitHeaders()) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -62,11 +62,11 @@ void JumpFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
 void JumpFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
                                                  WorkspaceIndex spectrum,
                                                  FitDomainIndex row) {
-  IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
+  // IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
 
-  const auto parameter =
-      m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
-  setCellText(QString::fromStdString(parameter), row, 1);
+  // const auto parameter =
+  //     m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
+  // setCellText(QString::fromStdString(parameter), row, 1);
 }
 
 } // namespace IDA

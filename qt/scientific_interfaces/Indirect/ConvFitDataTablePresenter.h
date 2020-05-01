@@ -37,8 +37,6 @@ private:
   int endXColumn() const override;
   int excludeColumn() const override;
   std::string getResolutionName(FitDomainIndex row) const;
-
-  ConvFitModel *m_convFitModel;
 };
 
 } // namespace IDA

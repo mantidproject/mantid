@@ -55,8 +55,66 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the model
-class MockIndirectDataTableModel : public IndirectFittingModel {
+class MockIndirectDataTableModel : public IIndirectFitData {
 public:
+  virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
+  MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName))
+  virtual Mantid::API::MatrixWorkspace_sptr
+  getWorkspace(TableDatasetIndex index) const = 0;
+  virtual Spectra getSpectra(TableDatasetIndex index) const = 0;
+  virtual bool isMultiFit() const = 0;
+  virtual TableDatasetIndex numberOfWorkspaces() const = 0;
+  virtual int getNumberOfSpectra(TableDatasetIndex index) const = 0;
+  virtual int getNumberOfDomains() const = 0;
+  virtual FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
+                                        WorkspaceIndex spectrum) const = 0;
+  virtual std::vector<double> getQValuesForData() const = 0;
+  virtual std::vector<std::pair<std::string, int>>
+  getResolutionsForFit() const = 0;
+  virtual std::vector<std::string> getWorkspaceNames() const = 0;
+
+  virtual void setSpectra(const std::string &spectra,
+                          TableDatasetIndex dataIndex) = 0;
+  virtual void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex) = 0;
+  virtual void setSpectra(const Spectra &spectra,
+                          TableDatasetIndex dataIndex) = 0;
+  virtual void addWorkspace(const std::string &workspaceName) = 0;
+  virtual void addWorkspace(const std::string &workspaceName,
+                            const std::string &spectra) = 0;
+  virtual void addWorkspace(const std::string &workspaceName,
+                            const Spectra &spectra) = 0;
+  virtual void removeWorkspace(TableDatasetIndex index) = 0;
+  virtual void removeDataByIndex(FitDomainIndex fitDomainIndex) = 0;
+  virtual void clear() = 0;
+
+  virtual std::pair<double, double>
+  getFittingRange(TableDatasetIndex dataIndex,
+                  WorkspaceIndex spectrum) const = 0;
+  virtual std::string getExcludeRegion(TableDatasetIndex dataIndex,
+                                       WorkspaceIndex index) const = 0;
+  virtual std::vector<double>
+  getExcludeRegionVector(TableDatasetIndex dataIndex,
+                         WorkspaceIndex index) const = 0;
+  virtual void setStartX(double startX, TableDatasetIndex dataIndex,
+                         WorkspaceIndex spectrum) = 0;
+  virtual void setStartX(double startX, TableDatasetIndex dataIndex) = 0;
+  virtual void setEndX(double endX, TableDatasetIndex dataIndex,
+                       WorkspaceIndex spectrum) = 0;
+  virtual void setEndX(double endX, TableDatasetIndex dataIndex) = 0;
+  virtual void setExcludeRegion(const std::string &exclude,
+                                TableDatasetIndex dataIndex,
+                                WorkspaceIndex spectrum) = 0;
+  virtual void setResolution(const std::string &name,
+                             TableDatasetIndex index) = 0;
+
+  virtual Mantid::API::MatrixWorkspace_sptr
+  getWorkspace(FitDomainIndex index) const = 0;
+  virtual std::pair<double, double>
+  getFittingRange(FitDomainIndex index) const = 0;
+  virtual int getSpectrum(FitDomainIndex index) const = 0;
+  virtual std::vector<double>
+  getExcludeRegionVector(FitDomainIndex index) const = 0;
+  virtual std::string getExcludeRegion(FitDomainIndex index) const = 0;
   /// Public methods
   MOCK_CONST_METHOD2(getFittingRange,
                      std::pair<double, double>(TableDatasetIndex dataIndex,
@@ -77,16 +135,6 @@ public:
   MOCK_METHOD3(setExcludeRegion,
                void(std::string const &exclude, TableDatasetIndex dataIndex,
                     IDA::WorkspaceIndex spectrum));
-
-private:
-  std::string sequentialFitOutputName() const override { return ""; };
-  std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(TableDatasetIndex index,
-                                  IDA::WorkspaceIndex spectrum) const override {
-    UNUSED_ARG(index);
-    UNUSED_ARG(spectrum);
-    return "";
-  };
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

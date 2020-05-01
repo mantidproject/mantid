@@ -36,8 +36,6 @@ private:
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-
-  JumpFitModel *m_jumpFitModel;
 };
 
 } // namespace IDA
