@@ -67,7 +67,7 @@ Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
 class PDFFourierTransformTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
-    PDFFourierTransform alg;
+    PDFFourierTransform2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -77,11 +77,11 @@ public:
     API::Workspace_sptr ws =
         createWS(20, 0.1, "TestInput1", "MomentumTransfer");
 
-    PDFFourierTransform pdfft;
+    PDFFourierTransform2 pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
-    pdfft.setProperty("InputSofQType", "S(Q)");
+    pdfft.setProperty("SofQType", "S(Q)");
     pdfft.setProperty("Rmax", 20.0);
     pdfft.setProperty("DeltaR", 0.01);
     pdfft.setProperty("Qmin", 0.0);
@@ -105,7 +105,7 @@ public:
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
     pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("InputSofQType", "S(Q)");
+    pdfft->setProperty("SofQType", "S(Q)");
     pdfft->setProperty("Rmax", 20.0);
     pdfft->setProperty("DeltaR", 0.01);
     pdfft->setProperty("Qmin", 0.0);
@@ -140,7 +140,7 @@ public:
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
     pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("InputSofQType", "S(Q)");
+    pdfft->setProperty("SofQType", "S(Q)");
     pdfft->setProperty("Rmax", 20.0);
     pdfft->setProperty("DeltaR", 0.01);
     pdfft->setProperty("Qmin", 0.0);
@@ -178,7 +178,7 @@ public:
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
     pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("InputSofQType", "S(Q)-1");
+    pdfft->setProperty("SofQType", "S(Q)-1");
     pdfft->setProperty("Qmax", 20.0);
     pdfft->setProperty("PDFType", "G(r)");
     pdfft->setProperty("Filter", true);
@@ -219,7 +219,7 @@ public:
 
     pdfft->setProperty("InputWorkspace", ws);
     pdfft->setProperty("OutputWorkspace", "outputWS");
-    pdfft->setProperty("InputSofQType", "S(Q)");
+    pdfft->setProperty("SofQType", "S(Q)");
     pdfft->setProperty("Rmax", 20.0);
     pdfft->setProperty("DeltaR", 0.01);
     pdfft->setProperty("Qmin", 0.0);

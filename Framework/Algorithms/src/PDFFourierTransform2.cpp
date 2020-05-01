@@ -477,6 +477,7 @@ void PDFFourierTransform2::exec() {
     outputWS->mutableRun().addProperty("Rmax", inputX[Xmax_index], "Angstroms",
                                        true);
   }
+  outputWS->setDistribution(TRUE);
   BinEdges edges(sizer + 1, LinearGenerator(outDelta, outDelta));
   outputWS->setBinEdges(0, edges);
   auto &outputX = outputWS->mutableX(0);
@@ -495,7 +496,7 @@ void PDFFourierTransform2::exec() {
     if (direction == FORWARD) {
       corr = 0.5 / M_PI / M_PI / rho0;
     } else if (direction == BACKWARD) {
-      corr = rho0;
+      corr = 4.0 * M_PI * rho0;
     }
     const double rfac = corr / (r * r * r);
 
