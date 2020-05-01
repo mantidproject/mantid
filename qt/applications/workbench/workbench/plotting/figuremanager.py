@@ -8,6 +8,7 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
+import copy
 import sys
 from functools import wraps
 
@@ -428,8 +429,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                     if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                         ax.relim()
                     elif isinstance(ax, Axes3D):
-                        import copy
-                        ax.collections[0]._vec = copy.deepcopy(ax.original_data)
+                        if hasattr(ax, 'original_data'):
+                            ax.collections[0]._vec = copy.deepcopy(ax.original_data)
+                        else:
+                            ax.view_init()
 
                     ax.autoscale()
 

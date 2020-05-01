@@ -10,6 +10,8 @@ try:
 except ImportError:
    # check Python 2 location
    from collections import Iterable
+import copy
+import numpy as np
 
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
@@ -1133,31 +1135,31 @@ class MantidAxes3D(Axes3D):
         self.figure.canvas.mpl_disconnect(self._cids[1])
 
     def set_xlim3d(self, *args):
-        import numpy as np
         min, max = super().set_xlim3d(*args)
 
-        x = self.original_data[0].copy()
-        x[np.less(x, min, where=~np.isnan(x))] = np.nan
-        x[np.greater(x, max, where=~np.isnan(x))] = np.nan
-        self.collections[0]._vec[0] = x
+        if hasattr(self, 'original_data'):
+            x = self.original_data[0].copy()
+            x[np.less(x, min, where=~np.isnan(x))] = np.nan
+            x[np.greater(x, max, where=~np.isnan(x))] = np.nan
+            self.collections[0]._vec[0] = x
 
     def set_ylim3d(self, *args):
-        import numpy as np
         min, max = super().set_ylim3d(*args)
 
-        y = self.original_data[1].copy()
-        y[np.less(y, min, where=~np.isnan(y))] = np.nan
-        y[np.greater(y, max, where=~np.isnan(y))] = np.nan
-        self.collections[0]._vec[1] = y
+        if hasattr(self, 'original_data'):
+            y = self.original_data[1].copy()
+            y[np.less(y, min, where=~np.isnan(y))] = np.nan
+            y[np.greater(y, max, where=~np.isnan(y))] = np.nan
+            self.collections[0]._vec[1] = y
 
     def set_zlim3d(self, *args):
-        import numpy as np
         min, max = super().set_zlim3d(*args)
 
-        z = self.original_data[2].copy()
-        z[np.less(z, min, where=~np.isnan(z))] = np.nan
-        z[np.greater(z, max, where=~np.isnan(z))] = np.nan
-        self.collections[0]._vec[2] = z
+        if hasattr(self, 'original_data'):
+            z = self.original_data[2].copy()
+            z[np.less(z, min, where=~np.isnan(z))] = np.nan
+            z[np.greater(z, max, where=~np.isnan(z))] = np.nan
+            self.collections[0]._vec[2] = z
 
     def plot(self, *args, **kwargs):
         """
@@ -1255,9 +1257,14 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return axesfunctions3D.plot_surface(self, *args, **kwargs)
+            polyc = axesfunctions3D.plot_surface(self, *args, **kwargs)
         else:
-            return Axes3D.plot_surface(self, *args, **kwargs)
+            polyc = Axes3D.plot_surface(self, *args, **kwargs)
+
+        # Create a copy of the original data points because data are set to nan when the axis limits are changed.
+        self.original_data = copy.deepcopy(polyc._vec)
+
+        return polyc
 
     def contour(self, *args, **kwargs):
         """
