@@ -137,7 +137,6 @@ class SampleLogsView(QSplitter):
             self.frame_right.setVisible(show_plot_and_stats)
             self.setUpdatesEnabled(True)
 
-
     def plot_selected_logs(self, ws, exp, rows):
         """Update the plot with the selected rows"""
         if self.frame_right.isVisible():
