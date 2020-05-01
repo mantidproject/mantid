@@ -101,17 +101,36 @@ class SampleLogsModel(object):
         """Returns a list of logs in workspace"""
         return self.run.keys()
 
-    def get_logs_with_invalid_data(self):
-        """Returns a list of log names with invalid data, and the invalid filter logs"""
-        invalid_data_logs = []
+    def get_hidden_logs(self):
+        """Returns a list of log names that should be hidden and not displayed"""
+        hidden_logs = []
         log_list = self.get_log_names()
         for log_name in log_list:
             if PropertyManager.isAnInvalidValuesFilterLog(log_name):
-                #both this long and the log it is a filter for should be added
-                invalid_data_logs.append(log_name)
+                hidden_logs.append(log_name)
+        return hidden_logs
+
+    def get_logs_with_invalid_data(self):
+        """Returns a map of log names with invalid data, and the invalid filter logs
+        The value of each log is the number of invalid entries,
+         with -1 meaning all of the entries are invalid"""
+        invalid_data_logs = {}
+        log_list = self.get_log_names()
+        for log_name in log_list:
+            if PropertyManager.isAnInvalidValuesFilterLog(log_name):
+                log = self.get_log(log_name)
+                bgColor = QColor.fromHsv(0, 100, 255)
+                #determine if the entire log is invalid
+                invalid_value_count = 0
+                for log_value in log.value:
+                    if not log_value:
+                        invalid_value_count += 1
+                if invalid_value_count == log.size():
+                    invalid_value_count = -1
+
                 filtered_log = PropertyManager.getLogNameFromInvalidValuesFilter(log_name)
                 if filtered_log:
-                    invalid_data_logs.append(filtered_log)
+                    invalid_data_logs[filtered_log] = invalid_value_count
         return invalid_data_logs
 
     def get_log_display_values(self, LogName):
@@ -142,11 +161,18 @@ class SampleLogsModel(object):
         onto a QTableView
         """
 
-        def create_table_item(column, itemname, background_color, callable, *args):
+        def create_table_item(column, itemname, invalid_value_count, callable, *args):
             item = QStandardItem()
             item.setEditable(False)
-            if background_color:
-                item.setData(background_color, Qt.BackgroundRole)
+            #format if there is invalid data entries
+            if invalid_value_count == -1:
+                item.setData(QColor.fromHsv(0, 180, 255), Qt.BackgroundRole)
+                item.setToolTip("All of the values in the log are marked invalid, none of them are filtered.")
+            elif invalid_value_count > 0:
+                item.setData(QColor.fromHsv(0, 100, 255), Qt.BackgroundRole)
+                tooltip_string = "{count} of the values in the log {aux_verb} marked invalid, and {aux_verb} filtered."
+                item.setToolTip(tooltip_string.format(count=invalid_value_count,
+                                                      aux_verb = "is" if invalid_value_count == 1 else "are"))
             try:
                 item.setText(callable(*args))
             except Exception as exc:
@@ -158,15 +184,18 @@ class SampleLogsModel(object):
         model.setHorizontalHeaderLabels(["Name", "Type", "Value", "Units"])
         model.setColumnCount(4)
         logs_to_highlight = self.get_logs_with_invalid_data()
+        logs_to_hide = self.get_hidden_logs()
         for key in self.get_log_names():
-            bg_color = None
-            if key in logs_to_highlight:
-                bg_color = QColor.fromHsv(0,100,255)
+            if key in logs_to_hide:
+                continue
+            invalid_value_count = 0
+            if key in logs_to_highlight.keys():
+                invalid_value_count = logs_to_highlight[key]
             log = self.run.getLogData(key)
-            name = create_table_item("Name", key, bg_color, lambda: log.name)
-            log_type = create_table_item("Type", key, bg_color, get_type, log)
-            value = create_table_item("Value", key, bg_color, lambda log: str(get_value(log)), log)
-            unit = create_table_item("Units", key, bg_color, lambda: log.units)
+            name = create_table_item("Name", key, invalid_value_count, lambda: log.name)
+            log_type = create_table_item("Type", key, invalid_value_count, get_type, log)
+            value = create_table_item("Value", key, invalid_value_count, lambda log: str(get_value(log)), log)
+            unit = create_table_item("Units", key, invalid_value_count, lambda: log.units)
             model.appendRow((name, log_type, value, unit))
 
         model.sort(0)

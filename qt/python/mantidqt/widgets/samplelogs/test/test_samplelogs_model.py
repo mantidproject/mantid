@@ -91,11 +91,16 @@ class SampleLogsModelTest(unittest.TestCase):
         log_names = model.get_log_names()
         self.assertEqual(len(log_names), 60)
         invalid_logs = model.get_logs_with_invalid_data()
-        self.assertEqual(invalid_logs,
-                         ['cryo_temp1_invalid_values',
-                          'cryo_temp1',
-                          'cryo_temp2_invalid_values',
-                          'cryo_temp2'])
+        self.assertEqual(2, len(invalid_logs.keys()))
+        self.assertIn('cryo_temp1',invalid_logs.keys())
+        self.assertEqual(1, invalid_logs['cryo_temp1'])
+        self.assertIn('cryo_temp2',invalid_logs.keys())
+        self.assertEqual(-1, invalid_logs['cryo_temp2'])
+
+        hidden_logs = model.get_hidden_logs()
+        self.assertEqual(2, len(hidden_logs))
+        self.assertIn('cryo_temp1_invalid_values',hidden_logs)
+        self.assertIn('cryo_temp2_invalid_values',hidden_logs)
 
 if __name__ == '__main__':
     unittest.main()
