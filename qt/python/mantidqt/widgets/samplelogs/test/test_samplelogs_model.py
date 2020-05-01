@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.simpleapi import LoadEventNexus, CreateMDWorkspace
+from mantid.simpleapi import Load, LoadEventNexus, CreateMDWorkspace
 from mantidqt.widgets.samplelogs.model import SampleLogsModel
 
 import unittest
@@ -83,6 +83,19 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(values[2], 4.616606712341309)
         self.assertEqual(values[3], "second")
 
+
+    def test_Invalid_data_logs(self):
+        ws = Load('ENGINX00228061_log_alarm_data.nxs')
+
+        model = SampleLogsModel(ws)
+        log_names = model.get_log_names()
+        self.assertEqual(len(log_names), 60)
+        invalid_logs = model.get_logs_with_invalid_data()
+        self.assertEqual(invalid_logs,
+                         ['cryo_temp1_invalid_values',
+                          'cryo_temp1',
+                          'cryo_temp2_invalid_values',
+                          'cryo_temp2'])
 
 if __name__ == '__main__':
     unittest.main()

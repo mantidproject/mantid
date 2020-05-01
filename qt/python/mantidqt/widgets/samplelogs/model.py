@@ -11,7 +11,9 @@ from mantid.kernel import (BoolTimeSeriesProperty,
                            FloatTimeSeriesProperty, Int32TimeSeriesProperty,
                            Int64TimeSeriesProperty, StringTimeSeriesProperty, logger)
 from mantid.api import MultipleExperimentInfos
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from mantid.kernel import PropertyManager
+from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
+from qtpy.QtCore import Qt
 
 TimeSeriesProperties = (BoolTimeSeriesProperty,
                         FloatTimeSeriesProperty, Int32TimeSeriesProperty,
@@ -99,6 +101,19 @@ class SampleLogsModel(object):
         """Returns a list of logs in workspace"""
         return self.run.keys()
 
+    def get_logs_with_invalid_data(self):
+        """Returns a list of log names with invalid data, and the invalid filter logs"""
+        invalid_data_logs = []
+        log_list = self.get_log_names()
+        for log_name in log_list:
+            if PropertyManager.isAnInvalidValuesFilterLog(log_name):
+                #both this long and the log it is a filter for should be added
+                invalid_data_logs.append(log_name)
+                filtered_log = PropertyManager.getLogNameFromInvalidValuesFilter(log_name)
+                if filtered_log:
+                    invalid_data_logs.append(filtered_log)
+        return invalid_data_logs
+
     def get_log_display_values(self, LogName):
         """Return a row to display for a log (name, type, value, units)"""
         log = self.get_log(LogName)
@@ -127,9 +142,11 @@ class SampleLogsModel(object):
         onto a QTableView
         """
 
-        def create_table_item(column, itemname, callable, *args):
+        def create_table_item(column, itemname, background_color, callable, *args):
             item = QStandardItem()
             item.setEditable(False)
+            if background_color:
+                item.setData(background_color, Qt.BackgroundRole)
             try:
                 item.setText(callable(*args))
             except Exception as exc:
@@ -140,12 +157,16 @@ class SampleLogsModel(object):
         model = QStandardItemModel()
         model.setHorizontalHeaderLabels(["Name", "Type", "Value", "Units"])
         model.setColumnCount(4)
+        logs_to_highlight = self.get_logs_with_invalid_data()
         for key in self.get_log_names():
+            bg_color = None
+            if key in logs_to_highlight:
+                bg_color = QColor.fromHsv(0,100,255)
             log = self.run.getLogData(key)
-            name = create_table_item("Name", key, lambda: log.name)
-            log_type = create_table_item("Type", key, get_type, log)
-            value = create_table_item("Value", key, lambda log: str(get_value(log)), log)
-            unit = create_table_item("Units", key, lambda: log.units)
+            name = create_table_item("Name", key, bg_color, lambda: log.name)
+            log_type = create_table_item("Type", key, bg_color, get_type, log)
+            value = create_table_item("Value", key, bg_color, lambda log: str(get_value(log)), log)
+            unit = create_table_item("Units", key, bg_color, lambda: log.units)
             model.appendRow((name, log_type, value, unit))
 
         model.sort(0)
