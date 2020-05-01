@@ -36,7 +36,7 @@ class PreciseDoubleFactory(QItemEditorFactory):
 class TableWorkspaceDisplayView(QTableWidget):
     repaint_signal = Signal()
 
-    def __init__(self, presenter, parent=None):
+    def __init__(self, presenter=None, parent=None):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
@@ -53,6 +53,12 @@ class TableWorkspaceDisplayView(QTableWidget):
 
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
+
+    def subscribe(self, presenter):
+        """
+        :param presenter: A reference to the controlling presenter
+        """
+        self.presenter = presenter
 
     def resizeEvent(self, event):
         QTableWidget.resizeEvent(self, event)
