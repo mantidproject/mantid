@@ -38,6 +38,7 @@ Bugfixes
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly
 - Opening figure options on a plot with an empty legend no longer causes an unhandled exception.
 - Fixed being able to zoom in and out of colorbars on colorfill plots.
+- Fixed the default axis scale settings applying to the wrong axis.
 - Performing an overplot by dragging workspaces onto colorfill plots now correctly replaces the workspace.
 
 :ref:`Release 5.1.0 <v5.1.0>`
