@@ -27,6 +27,7 @@ class PlusMDTest(systemtesting.MantidSystemTest):
         """ Compare the given workspace to the previously-binned original """
         BinMD(InputWorkspace=wsname,AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',
               AlignedDim2='Q_lab_z, -3, 3, 100',ForceOrthogonal='1',OutputWorkspace="test_binned")
+        AlgorithmManager.Instance().clear()
         ws = mtd["test_binned"]
         EqualToMD(LHSWorkspace=ws, RHSWorkspace=self.original_binned, OutputWorkspace='comparison')
         comparison = mtd['comparison']
