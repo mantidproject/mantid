@@ -73,8 +73,7 @@ class SampleLogsTest(unittest.TestCase):
         self.view.reset_mock()
 
         presenter.update()
-        self.assertEqual(self.view.get_selected_row_indexes.call_count, 2)
-
+        self.assertEqual(self.view.get_selected_row_indexes.call_count, 3)
         # plot clicked
         self.model.reset_mock()
         self.view.reset_mock()
