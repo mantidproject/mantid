@@ -15,6 +15,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/InvisibleProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -75,52 +76,69 @@ void PDFFourierTransform2::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
-                  S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " +
-                      Q_S_OF_Q_MINUS_ONE);
+                  "Input spectrum density or paired-distribution function");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
-                  "Result paired-distribution function");
+                  "Result paired-distribution function or Input spectrum density");
+
+  std::vector<std::string> directionOptions;
+  directionOptions.emplace_back(FORWARD);
+  directionOptions.emplace_back(BACKWARD);
+  declareProperty("Direction", FORWARD,
+                  std::make_shared<StringListValidator>(directionOptions),
+                  "The direction of the fourier transform");
 
   // Set up spectral dencity data type
-  std::vector<std::string> inputTypes;
-  inputTypes.emplace_back(S_OF_Q);
-  inputTypes.emplace_back(S_OF_Q_MINUS_ONE);
-  inputTypes.emplace_back(Q_S_OF_Q_MINUS_ONE);
-  declareProperty("SofQType", S_OF_Q,
-                  std::make_shared<StringListValidator>(inputTypes),
+  std::vector<std::string> soqTypes;
+  soqTypes.emplace_back(S_OF_Q);
+  soqTypes.emplace_back(S_OF_Q_MINUS_ONE);
+  soqTypes.emplace_back(Q_S_OF_Q_MINUS_ONE);
+  declareProperty("InputSofQType", S_OF_Q,
+                  std::make_shared<StringListValidator>(soqTypes),
                   "To identify spectral density function");
-
+  setPropertySettings("InputSofQType", std::make_unique<InvisibleProperty>());
+  declareProperty("SofQType", S_OF_Q,
+                  std::make_shared<StringListValidator>(soqTypes),
+                  "To identify spectral density function");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty("DeltaQ", EMPTY_DBL(), mustBePositive,
                   "Step size of Q of S(Q) to calculate.  Default = "
                   ":math:`\\frac{\\pi}{R_{max}}`.");
+  setPropertySettings("DeltaQ", std::make_unique<EnabledWhenProperty>(
+                                    "Direction", IS_EQUAL_TO, BACKWARD));
   declareProperty(
       "Qmin", EMPTY_DBL(), mustBePositive,
       "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
+  setPropertySettings("Qmin", std::make_unique<EnabledWhenProperty>(
+                                  "Direction", IS_EQUAL_TO, FORWARD));
   declareProperty(
       "Qmax", EMPTY_DBL(), mustBePositive,
-      "Maximum Q in S(Q) to calculate in Fourier transform. (optional, defaults to 40 on output.)");
+      "Maximum Q in S(Q) to calculate in Fourier transform. (optional, defaults to 40 on backward transform.)");
   declareProperty("Filter", false,
                   "Set to apply Lorch function filter to the input");
 
   // Set up PDF data type
-  std::vector<std::string> outputTypes;
-  outputTypes.emplace_back(BIG_G_OF_R);
-  outputTypes.emplace_back(LITTLE_G_OF_R);
-  outputTypes.emplace_back(RDF_OF_R);
+  std::vector<std::string> pdfTypes;
+  pdfTypes.emplace_back(BIG_G_OF_R);
+  pdfTypes.emplace_back(LITTLE_G_OF_R);
+  pdfTypes.emplace_back(RDF_OF_R);
   declareProperty("PDFType", BIG_G_OF_R,
-                  std::make_shared<StringListValidator>(outputTypes),
+                  std::make_shared<StringListValidator>(pdfTypes),
                   "Type of output PDF including G(r)");
 
   declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
                   "Step size of r of G(r) to calculate.  Default = "
                   ":math:`\\frac{\\pi}{Q_{max}}`.");
+  setPropertySettings("DeltaR", std::make_unique<EnabledWhenProperty>(
+                                    "Direction", IS_EQUAL_TO, FORWARD));
   declareProperty("Rmin", EMPTY_DBL(), mustBePositive,
                   "Minimum r for G(r) to calculate. (optional)");
+  setPropertySettings("Rmin", std::make_unique<EnabledWhenProperty>(
+                                    "Direction", IS_EQUAL_TO, BACKWARD));
   declareProperty("Rmax", EMPTY_DBL(), mustBePositive,
-                  "Maximum r for G(r) to calculate. (optional, defaults to 20 on output.)");
+                  "Maximum r for G(r) to calculate. (optional, defaults to 20 on forward transform.)");
   declareProperty(
       "rho0", EMPTY_DBL(), mustBePositive,
       "Average number density used for g(r) and RDF(r) conversions (optional)");
@@ -252,6 +270,10 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
                                              std::vector<double> &DQ) {
   // convert to Q[S(Q)-1]
   string soqType = getProperty("SofQType");
+  if (!isDefault("InputSofQType") && isDefault("SofQType")) {
+	soqType = getProperty("InputSofQType");
+    g_log.warning() << "InputSofQType has been deprecated and replaced by SofQType\n";
+  } 
   if (soqType == S_OF_Q) {
     g_log.information() << "Subtracting one from all values\n";
     // there is no error propagation for subtracting one
@@ -312,14 +334,19 @@ void PDFFourierTransform2::convertToLittleGRPlus1(std::vector<double> &FOfR,
 void PDFFourierTransform2::convertFromSQMinus1(
     HistogramData::HistogramY &FOfQ, HistogramData::HistogramX &Q,
     HistogramData::HistogramE &DFOfQ) {
-  // convert to S(Q)-1
-  string outputType = getProperty("SofQType");
-  if (outputType == S_OF_Q) {
+  // convert to S(Q)-1string
+  string soqType = getProperty("SofQType");
+  if (!isDefault("InputSofQType") && isDefault("SofQType")) {
+    soqType = getProperty("InputSofQType");
+    g_log.warning()
+        << "InputSofQType has been deprecated and replaced by SofQType\n";
+  } 
+  if (soqType == S_OF_Q) {
     for (size_t i = 0; i < FOfQ.size(); ++i) {
       // transform the data
       FOfQ[i] = FOfQ[i] + 1.0;
     }
-  } else if (outputType == Q_S_OF_Q_MINUS_ONE) {
+  } else if (soqType == Q_S_OF_Q_MINUS_ONE) {
     for (size_t i = 0; i < FOfQ.size(); ++i) {
       DFOfQ[i] = Q[i] * DFOfQ[i];
       FOfQ[i] = FOfQ[i] * Q[i];
