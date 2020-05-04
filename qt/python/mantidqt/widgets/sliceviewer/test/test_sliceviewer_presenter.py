@@ -16,15 +16,23 @@ import mantid.api
 from unittest import mock
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
-from mantidqt.widgets.sliceviewer.view import SliceViewerView
+from mantidqt.widgets.sliceviewer.view import SliceViewerView, SliceViewerDataView
 from mantidqt.widgets.sliceviewer.presenter import PeaksViewerCollectionPresenter
 
 
 class SliceViewerTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.Mock(spec=SliceViewerView)
-        self.view.data_view.dimensions = mock.Mock()
-        self.view.data_view.norm_opts = mock.Mock()
+        data_view = mock.Mock(spec=SliceViewerDataView)
+        data_view.plot_MDH = mock.Mock()
+        data_view.dimensions = mock.Mock()
+        data_view.norm_opts = mock.Mock()
+        dimensions = mock.Mock()
+        dimensions.get_slicepoint.return_value = [None, None, 0.5]
+        dimensions.transpose = False
+        dimensions.get_slicerange.return_value = (-15, 15)
+        data_view.dimensions = dimensions
+        self.view.data_view = data_view
 
         self.model = mock.Mock(spec=SliceViewerModel)
         self.model.get_ws = mock.Mock()
@@ -115,10 +123,45 @@ class SliceViewerTest(unittest.TestCase):
         self.view.data_view.plot_matrix.assert_called_with(
             self.model.get_ws(), normalize=mantid.api.MDNormalization.VolumeNormalization)
 
+    def test_non_orthogonal_axes_toggled_on(self):
+        self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
+        data_view_mock = self.view.data_view
+        data_view_mock.plot_matrix = mock.Mock()
+
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        data_view_mock.plot_matrix.reset_mock()  # clear initial plot call
+        data_view_mock.create_axes_orthogonal.reset_mock()
+        presenter.nonorthogonal_axes(True)
+
+        data_view_mock.remove_line_plots.assert_called_once()
+        data_view_mock.create_axes_nonorthogonal.assert_called_once()
+        data_view_mock.create_axes_orthogonal.assert_not_called()
+        data_view_mock.plot_matrix.assert_called_once()
+        data_view_mock.disable_lineplots_button.assert_called_once()
+        data_view_mock.disable_peaks_button.assert_called_once()
+
+    def test_non_orthogonal_axes_toggled_off(self):
+        self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
+        data_view_mock = self.view.data_view
+        data_view_mock.plot_matrix = mock.Mock()
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter.nonorthogonal_axes(True)
+        data_view_mock.plot_matrix.reset_mock()  # clear initial plot call
+        data_view_mock.create_axes_orthogonal.reset_mock()
+        data_view_mock.create_axes_nonorthogonal.reset_mock()
+        data_view_mock.remove_line_plots.reset_mock()
+
+        presenter.nonorthogonal_axes(False)
+
+        data_view_mock.create_axes_orthogonal.assert_called_once()
+        data_view_mock.create_axes_nonorthogonal.assert_not_called()
+        data_view_mock.plot_matrix.assert_called_once()
+        data_view_mock.enable_lineplots_button.assert_called_once()
+        data_view_mock.enable_peaks_button.assert_called_once()
+
     @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter")
-    @mock.patch(
-        "mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
-        spec=PeaksViewerCollectionPresenter)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
+                spec=PeaksViewerCollectionPresenter)
     def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
 
