@@ -28,8 +28,6 @@ public:
 
 protected:
   void addTableEntry(IIndirectFitData *model, FitDomainIndex row) override;
-  void updateTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                        FitDomainIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;

@@ -65,15 +65,6 @@ void ConvFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
   setCell(std::move(cell), row, 1);
 }
 
-void ConvFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
-                                                 WorkspaceIndex spectrum,
-                                                 FitDomainIndex row) {
-  // IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
-
-  // const auto &name = m_convFitModel->getResolution(dataIndex)->getName();
-  // setCellText(QString::fromStdString(name), row, 1);
-}
-
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

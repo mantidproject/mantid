@@ -59,16 +59,6 @@ void JumpFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
   setCell(std::move(cell), row, 1);
 }
 
-void JumpFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
-                                                 WorkspaceIndex spectrum,
-                                                 FitDomainIndex row) {
-  // IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
-
-  // const auto parameter =
-  //     m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
-  // setCellText(QString::fromStdString(parameter), row, 1);
-}
-
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

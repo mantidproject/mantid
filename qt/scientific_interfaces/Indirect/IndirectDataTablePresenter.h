@@ -51,38 +51,20 @@ private slots:
 protected:
   IndirectDataTablePresenter(IIndirectFitData *model, QTableWidget *dataTable,
                              const QStringList &headers);
-  FitDomainIndex getFirstRow(TableDatasetIndex dataIndex) const;
   std::string getString(FitDomainIndex row, int column) const;
 
   virtual void addTableEntry(IIndirectFitData *model, FitDomainIndex row);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row,
                int column);
-  virtual void updateTableEntry(TableDatasetIndex dataIndex,
-                                WorkspaceIndex spectrum, FitDomainIndex row);
   void setCellText(const QString &text, FitDomainIndex row, int column);
 
 private:
-  void setStartX(double startX, FitDomainIndex index);
-  void setEndX(double endX, FitDomainIndex index);
   virtual int workspaceIndexColumn() const;
   virtual int startXColumn() const;
   virtual int endXColumn() const;
   virtual int excludeColumn() const;
-  double startX(FitDomainIndex row) const;
-  double endX(FitDomainIndex row) const;
-  std::string getExcludeString(FitDomainIndex row) const;
-  std::string getWorkspaceName(FitDomainIndex row) const;
-  WorkspaceIndex getWorkspaceIndex(FitDomainIndex row) const;
   double getDouble(FitDomainIndex row, int column) const;
   QString getText(FitDomainIndex row, int column) const;
-  FitDomainIndex getNextPosition(TableDatasetIndex index) const;
-  TableDatasetIndex getDataIndex(FitDomainIndex row) const;
-  boost::optional<Spectra> getSpectra(TableDatasetIndex dataIndex) const;
-  boost::optional<Spectra> getSpectra(FitDomainIndex start,
-                                      FitDomainIndex end) const;
-  boost::optional<FitDomainIndex>
-  getRowIndex(TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex) const;
-
   void setModelStartXAndEmit(double startX, FitDomainIndex row);
   void setModelEndXAndEmit(double endX, FitDomainIndex row);
   void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
