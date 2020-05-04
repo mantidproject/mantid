@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -37,6 +37,10 @@ void loadSampleGeometry(API::Sample &sample, const NeXus::NXEntry &entry,
 // Load details about the run
 void loadRunDetails(API::Run &runDetails, const NeXus::NXEntry &entry,
                     const bool hasVMSBlock);
+
+// Load time axis data
+std::shared_ptr<HistogramData::HistogramX>
+loadTimeData(const NeXus::NXEntry &entry);
 
 } // namespace LoadISISNexusHelper
 

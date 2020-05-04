@@ -288,13 +288,11 @@ void LoadISISNexus2::exec() {
 
   // Load first period outside loop
   m_progress->report("Loading data");
+  // Get X Data
   if (ndets > 0) {
-    // Get the X data
-    NXFloat timeBins = entry.openNXFloat("detector_1/time_of_flight");
-    timeBins.load();
-    m_tof_data =
-        std::make_shared<HistogramX>(timeBins(), timeBins() + x_length);
+    m_tof_data = LoadISISNexusHelper::loadTimeData(entry);
   }
+
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
   loadPeriodData(firstentry, entry, local_workspace, m_load_selected_spectra);
 
@@ -787,7 +785,6 @@ void LoadISISNexus2::loadPeriodData(
     bool update_spectra2det_mapping) {
   int64_t hist_index = 0;
   int64_t period_index(period - 1);
-  // int64_t first_monitor_spectrum = 0;
 
   for (const auto &spectraBlock : m_spectraBlocks) {
     if (spectraBlock.isMonitor) {
@@ -802,8 +799,6 @@ void LoadISISNexus2::loadPeriodData(
           Counts(mondata(), mondata() + m_monBlockInfo.getNumberOfChannels()));
 
       if (update_spectra2det_mapping) {
-        // local_workspace->getAxis(1)->setValue(hist_index,
-        // static_cast<specnum_t>(it->first));
         auto &spec = local_workspace->getSpectrum(hist_index);
         specnum_t specNum = m_wsInd2specNum_map.at(hist_index);
         spec.setDetectorIDs(
@@ -893,8 +888,6 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
     data_start += m_detBlockInfo.getNumberOfChannels();
     data_end += m_detBlockInfo.getNumberOfChannels();
     if (m_load_selected_spectra) {
-      // local_workspace->getAxis(1)->setValue(hist,
-      // static_cast<specnum_t>(spec_num));
       auto &spec = local_workspace->getSpectrum(hist);
       specnum_t specNum = m_wsInd2specNum_map.at(hist);
       // set detectors corresponding to spectra Number

@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -49,7 +49,8 @@ int64_t findNumberOfSpectra(const NXEntry &entry, const bool hasVMSBlock) {
  *   @param entry :: The Nexus entry
  *   @param hasVMSBlock :: Whether the current nexus entry has a vms_compat
  * block
- *   @return Returns a pair of Detector IDs and Spectrum numbers
+ *   @return Returns a pair containing the Detector IDs corresponding Spectrum
+ * numbers
  */
 std::tuple<NXInt, NXInt>
 findDetectorIDsAndSpectrumNumber(const NXEntry &entry, const bool hasVMSBlock) {
@@ -63,9 +64,11 @@ findDetectorIDsAndSpectrumNumber(const NXEntry &entry, const bool hasVMSBlock) {
     NXClass det_class = entry.openNXGroup("detector_1");
     NXInt spectrum_index = det_class.openNXInt("spectrum_index");
     spectrum_index.load();
-    // Currently there is no UDET variable anywhere, so
-    // setting it to spectrum index assumes a 1 to 1 correspondence between
-    // detector id and spectrum i.e detector 1 maps to spectrum 1
+    // In the new v2 file there is no UDET variable
+    // Setting it to spectrum index assumes a 1 to 1 correspondence between
+    // detector id and spectrum number, i.e detector 1 maps to spectrum 1
+    // This is typical of a Muon Nexus file, as stated in the Nexus V2
+    // specification.
     NXInt udet = spectrum_index;
     NXInt spec = spectrum_index;
     return std::make_tuple(udet, spec);
@@ -118,7 +121,6 @@ void loadSampleGeometry(Sample &sample, const NXEntry &entry,
     sample.setWidth(width);
   }
 }
-
 /**
  * Load data about the run
  *   @param run :: The run where the information will be stored
@@ -174,7 +176,6 @@ void loadRunDetails(API::Run &run, const NXEntry &entry,
     run.addProperty("rb_proposal", rpb_int[21]); // RB (proposal)
     vms_compat.close();
   } else {
-
     NXFloat floatData = entry.openNXFloat("duration");
     floatData.load();
     run.addProperty("dur", static_cast<double>(floatData[0]),
@@ -191,7 +192,8 @@ void loadRunDetails(API::Run &run, const NXEntry &entry,
     run.addProperty("tot_prtn_chrg", static_cast<double>(floatData[0]),
                     floatData.attributes("units"), true);
 
-    if (entry.containsGroup("instrument/source/frequency")) {
+    auto sourceEntry = entry.openNXGroup("instrument/source");
+    if (sourceEntry.containsDataSet("frequency")) {
       run.addProperty("freq", entry.getFloat("instrument/source/frequency"));
     } else {
       // If no entry, assume 50hz source (suggested by Freddie Akeroyd)
@@ -202,6 +204,32 @@ void loadRunDetails(API::Run &run, const NXEntry &entry,
     run.addProperty("rawfrm", entry.getInt("raw_frames"));
     run.addProperty("rb_proposal",
                     entry.getString("experiment_identifier")); // RB (proposal)
+  }
+}
+/**
+ * Load the time data from nexus entry
+ *   @param entry :: The Nexus entry
+ *   @return Returns a shared pointer to a HistogramX instance storing the time
+ * bins.
+ */
+std::shared_ptr<HistogramData::HistogramX> loadTimeData(const NXEntry &entry) {
+  // if neturon file time bins stored in dector_1/time_of_flight
+  auto detectorEntry = entry.openNXGroup("detector_1");
+  if (detectorEntry.containsDataSet("time_of_flight")) {
+    auto timeBins = entry.openNXFloat("detector_1/time_of_flight");
+    auto x_length = timeBins.dim0();
+    timeBins.load();
+    auto timeData = std::make_shared<HistogramData::HistogramX>(
+        timeBins(), timeBins() + x_length);
+    return timeData;
+  } else { // Muon V2 file
+    auto timeBins = entry.openNXFloat("detector_1/raw_time");
+    timeBins = entry.openNXFloat("detector_1/raw_time");
+    auto x_length = timeBins.dim0();
+    timeBins.load();
+    auto timeData = std::make_shared<HistogramData::HistogramX>(
+        timeBins(), timeBins() + x_length);
+    return timeData;
   }
 }
 } // namespace LoadISISNexusHelper
