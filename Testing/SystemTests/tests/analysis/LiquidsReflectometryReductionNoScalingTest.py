@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import os
 import systemtesting
 from mantid import *
 
 from mantid.simpleapi import *
+
 
 class ApplyScalingFactorTest(systemtesting.MantidSystemTest):
     def runTest(self):
