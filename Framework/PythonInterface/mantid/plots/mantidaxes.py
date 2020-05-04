@@ -268,9 +268,10 @@ class MantidAxes(Axes):
             if any([workspace.readE(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
                 return True
         else:
-            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-            if any(workspace.readE(workspace_index) != 0):
-                return True
+            if spec_num is not None:
+                workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+                if any(workspace.readE(workspace_index) != 0):
+                    return True
         return False
 
     def get_tracked_artists(self):
