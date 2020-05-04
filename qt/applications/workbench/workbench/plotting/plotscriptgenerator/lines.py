@@ -144,4 +144,3 @@ def _get_mantid_specific_plot_kwargs(artist):
         if sample_log_plot_details[2] is not None:
             sample_log_details_map['ExperimentInfo'] = sample_log_plot_details[2]
         return sample_log_details_map
-
