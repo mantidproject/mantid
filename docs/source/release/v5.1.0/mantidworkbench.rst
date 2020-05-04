@@ -33,6 +33,7 @@ Bugfixes
 
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly.
 - Fixed a crash when you selected a spectra to plot that was not present in a workspace.
+- Fixed a crash when opening the plot options for a sample logs plot.
 - Fixed a crash when you defined a new Fit Function after deleting a plot.
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly
