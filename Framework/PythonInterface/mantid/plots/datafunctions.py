@@ -351,7 +351,7 @@ def get_detectors_indices(workspace):
     """
     total_range = workspace.getNumberHistograms()
     spectrum_info = workspace.spectrumInfo()
-    monitors_indices = [i for i in range(total_range) if spectrum_info.isMonitor(i)]
+    monitors_indices = [i for i in range(total_range) if spectrum_info.hasDetectors(i) and spectrum_info.isMonitor(i)]
     monitor_count = len(monitors_indices)
 
     # If possible, ie the detectors' indices are continuous, we return a range.
