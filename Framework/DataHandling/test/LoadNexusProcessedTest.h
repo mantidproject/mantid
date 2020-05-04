@@ -1123,8 +1123,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // Test some aspects of the file
-    MatrixWorkspace_sptr workspace;
-    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+    auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(group_ws + "_1"));
     // should be filtered
     check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);

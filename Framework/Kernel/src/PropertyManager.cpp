@@ -177,8 +177,8 @@ void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter,
     const std::vector<std::string> &excludedFromFiltering) {
   for (auto &orderedProperty : m_orderedProperties) {
-    if (std::find(excludedFromFiltering.begin(), excludedFromFiltering.end(),
-                  orderedProperty->name()) != excludedFromFiltering.end()) {
+    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(),
+                  orderedProperty->name()) != excludedFromFiltering.cend()) {
       // this log should be excluded from filtering
       continue;
     }

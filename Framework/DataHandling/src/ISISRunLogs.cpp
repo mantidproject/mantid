@@ -61,12 +61,12 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
   exptRun.addProperty(m_logParser->createCurrentPeriodLog(period));
   try {
     exptRun.addLogData(m_logParser->createAllPeriodsLog());
-  } catch (std::runtime_error &) {
+  } catch (const std::runtime_error &) {
     // Already has one
   }
 
   ISISRunLogs::applyLogFiltering(exptRun);
-} // namespace DataHandling
+}
 
 /**
  * Applies log filtering buy run staus and period if available
@@ -91,7 +91,7 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
         exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
     currentPeriodLog = exptRun.getTimeSeriesProperty<bool>(
         LogParser::currentPeriodLogName(period));
-  } catch (std::exception &) {
+  } catch (const std::exception &) {
     g_log.warning("Cannot find period log. Logs will be not be filtered by "
                   "current period");
   }
@@ -101,7 +101,7 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
     auto periodsLog =
         exptRun.getTimeSeriesProperty<int>(LogParser::periodsLogName());
     multiperiod = (periodsLog->getStatistics().maximum > 1.);
-  } catch (std::exception &) {
+  } catch (const std::exception &) {
     g_log.warning("Cannot find periods log. Logs will be not be filtered by "
                   "current period");
   }
@@ -141,13 +141,13 @@ ISISRunLogs::getLogNamesExcludedFromFiltering(const API::Run &run) {
   if (run.hasProperty(LogParser::periodsLogName())) {
     retVal.emplace_back(LogParser::periodsLogName());
   }
-  const auto props = run.getProperties();
+  const auto &props = run.getProperties();
   for (const auto prop : props) {
     // add all properties starting with period
     if (prop->name().rfind("period", 0) == 0) {
       // add if not already in the list
-      if (std::find(retVal.begin(), retVal.end(), prop->name()) ==
-          retVal.end()) {
+      if (std::find(retVal.cbegin(), retVal.cend(), prop->name()) ==
+          retVal.cend()) {
         retVal.emplace_back(prop->name());
       }
     }
