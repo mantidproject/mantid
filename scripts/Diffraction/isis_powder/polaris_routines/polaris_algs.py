@@ -211,8 +211,8 @@ def fast_fourier_filter(ws, freq_params=None):
             r_max = min(freq_params[1], 1000)
         else:
             r_max = 200
-
-        mantid.PDFFourierTransform(Inputworkspace=ws, OutputWorkspace=ws, SofQType="S(Q)-1", PDFType="G(r)",
+        ws_name = str(ws)
+        mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
                                    Filter=True, DeltaR=0.01, Rmax=r_max)
-        mantid.PDFFourierTransform(Inputworkspace=ws, OutputWorkspace=ws, SofQType="S(Q)-1", PDFType="G(r)",
+        mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
                                    Filter=True, Qmin=q_min, Qmax=q_max, deltaQ=q_delta, Rmin=r_min, Rmax=r_max)
