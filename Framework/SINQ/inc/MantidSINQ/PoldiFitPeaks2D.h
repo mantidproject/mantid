@@ -133,8 +133,8 @@ protected:
 
   void addBackgroundTerms(const Poldi2DFunction_sptr &poldi2DFunction) const;
 
-  boost::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
-      const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
+  std::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
+      const std::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
       size_t parameterOffset, size_t nParams) const;
 
   // Poldi instrument book-keeping

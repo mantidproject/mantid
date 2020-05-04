@@ -160,8 +160,8 @@ private:
 };
 
 /// Shared pointer to the IMDWorkspace base class
-using IMDWorkspace_sptr = boost::shared_ptr<IMDWorkspace>;
+using IMDWorkspace_sptr = std::shared_ptr<IMDWorkspace>;
 /// Shared pointer to the IMDWorkspace base class (const version)
-using IMDWorkspace_const_sptr = boost::shared_ptr<const IMDWorkspace>;
+using IMDWorkspace_const_sptr = std::shared_ptr<const IMDWorkspace>;
 } // namespace API
 } // namespace Mantid

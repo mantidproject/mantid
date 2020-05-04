@@ -593,7 +593,7 @@ void PreviewPlot::onWorkspaceRemoved(
     return;
   }
   // Ignore non matrix workspaces
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     // the artist may have already been removed. ignore the event is that is the
     // case
     bool removed = false;
@@ -618,9 +618,9 @@ void PreviewPlot::onWorkspaceReplaced(
   }
   // Ignore non matrix workspaces
   if (auto oldWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+          std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+            std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
       if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
         this->replot();
       }

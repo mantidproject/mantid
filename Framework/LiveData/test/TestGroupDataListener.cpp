@@ -57,7 +57,7 @@ void TestGroupDataListener::createWorkspace() {
   API::AnalysisDataService::Instance().deepRemoveGroup("tst");
 }
 
-boost::shared_ptr<Workspace> TestGroupDataListener::extractData() {
+std::shared_ptr<Workspace> TestGroupDataListener::extractData() {
   // Copy the workspace pointer to a temporary variable
   API::WorkspaceGroup_sptr extracted = m_buffer;
   this->createWorkspace();

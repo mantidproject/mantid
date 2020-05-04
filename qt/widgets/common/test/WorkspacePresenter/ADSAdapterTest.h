@@ -26,7 +26,7 @@ public:
   void setUp() override {
     mockPresenter.reset();
     mockPresenter =
-        boost::make_shared<NiceMock<MockWorkspaceProviderNotifiable>>();
+        std::make_shared<NiceMock<MockWorkspaceProviderNotifiable>>();
     adapter.registerPresenter(mockPresenter);
     AnalysisDataService::Instance().clear();
   }
@@ -131,6 +131,6 @@ public:
   }
 
 private:
-  boost::shared_ptr<NiceMock<MockWorkspaceProviderNotifiable>> mockPresenter;
+  std::shared_ptr<NiceMock<MockWorkspaceProviderNotifiable>> mockPresenter;
   ADSAdapter adapter;
 };

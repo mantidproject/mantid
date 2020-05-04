@@ -16,4 +16,5 @@
 # ws = LoadMD('ExternalData/Testing/SystemTests/tests/analysis/reference/ConvertWANDSCDtoQTest_HKL.nxs')
 # app = QApplication([])
 # window = SliceViewer(ws)
+# window.show()
 # app.exec_()

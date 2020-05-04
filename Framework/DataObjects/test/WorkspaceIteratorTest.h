@@ -7,8 +7,8 @@
 #pragma once
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
@@ -37,10 +37,10 @@ public:
 
 class WorkspaceIteratorTest : public CxxTest::TestSuite {
 private:
-  using parray = boost::shared_ptr<MantidVec>;
-  using W2D = boost::shared_ptr<Workspace2D>;
-  using WSV = boost::shared_ptr<WorkspaceSingleValue>;
-  using Wbase = boost::shared_ptr<MatrixWorkspace>;
+  using parray = std::shared_ptr<MantidVec>;
+  using W2D = std::shared_ptr<Workspace2D>;
+  using WSV = std::shared_ptr<WorkspaceSingleValue>;
+  using Wbase = std::shared_ptr<MatrixWorkspace>;
 
 public:
   void testIteratorWorkspace2DAsBase() {

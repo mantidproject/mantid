@@ -621,7 +621,7 @@ template <typename FD>
 void LoadEMU<FD>::createWorkspace(const std::string &title) {
 
   // Create the workspace
-  m_localWorkspace = boost::make_shared<DataObjects::EventWorkspace>();
+  m_localWorkspace = std::make_shared<DataObjects::EventWorkspace>();
   m_localWorkspace->initialize(HISTOGRAMS, 2, 1);
 
   // set the units
@@ -1363,7 +1363,7 @@ void LoadEMUTar::exec() {
       tarFile.select(itf->c_str());
   };
   auto extractFile = [&](Poco::TemporaryFile &tfile) {
-    boost::shared_ptr<FILE> handle(fopen(tfile.path().c_str(), "wb"), fclose);
+    std::shared_ptr<FILE> handle(fopen(tfile.path().c_str(), "wb"), fclose);
     if (handle) {
       // copy content
       char buffer[4096];

@@ -101,7 +101,7 @@ const double GroupDetectors2::READFILE = 0.15;
 void GroupDetectors2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
+                      std::make_shared<CommonBinsValidator>()),
                   "The name of the input 2D workspace");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -138,7 +138,7 @@ void GroupDetectors2::init() {
   const std::vector<std::string> groupTypes{"Sum", "Average"};
   using Mantid::Kernel::StringListValidator;
   declareProperty(
-      "Behaviour", "Sum", boost::make_shared<StringListValidator>(groupTypes),
+      "Behaviour", "Sum", std::make_shared<StringListValidator>(groupTypes),
       "Whether to sum or average the values when grouping detectors.");
   // Are we preserving event workspaces?
   declareProperty("PreserveEvents", true,
@@ -162,7 +162,7 @@ void GroupDetectors2::exec() {
   // Check if it is an event workspace
   const bool preserveEvents = getProperty("PreserveEvents");
   EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != nullptr && preserveEvents) {
     this->execEvent();
     return;
@@ -194,7 +194,7 @@ void GroupDetectors2::exec() {
   // doesn't want them
   const size_t numUnGrouped = keepAll ? unGroupedSet.size() - 1 : 0;
 
-  auto outputWS = boost::dynamic_pointer_cast<Workspace2D>(
+  auto outputWS = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create(
           inputWS, m_GroupWsInds.size() + numUnGrouped, inputWS->x(0).size(),
           inputWS->blocksize()));
@@ -239,7 +239,7 @@ void GroupDetectors2::execEvent() {
   const MatrixWorkspace_const_sptr matrixInputWS =
       getProperty("InputWorkspace");
   EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   const size_t numInHists = inputWS->getNumberHistograms();
   progress(m_FracCompl = CHECKBINS);
@@ -270,7 +270,7 @@ void GroupDetectors2::execEvent() {
   const size_t numUnGrouped = keepAll ? unGroupedSet.size() - 1 : 0;
 
   // Make a brand new EventWorkspace
-  EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+  EventWorkspace_sptr outputWS = std::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create(
           "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
           inputWS->x(0).size(), inputWS->blocksize()));
@@ -324,7 +324,7 @@ void GroupDetectors2::getGroups(
       getProperty("CopyGroupingFromWorkspace");
   if (groupingWS_sptr) {
     DataObjects::GroupingWorkspace_const_sptr groupWS =
-        boost::dynamic_pointer_cast<const DataObjects::GroupingWorkspace>(
+        std::dynamic_pointer_cast<const DataObjects::GroupingWorkspace>(
             groupingWS_sptr);
     if (groupWS) {
       g_log.debug() << "Extracting grouping from GroupingWorkspace ("

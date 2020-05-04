@@ -16,18 +16,19 @@ Experiment::Experiment()
     : m_analysisMode(AnalysisMode::PointDetector),
       m_reductionType(ReductionType::Normal),
       m_summationType(SummationType::SumInLambda), m_includePartialBins(false),
-      m_debug(false), m_polarizationCorrections(PolarizationCorrections(
-                          PolarizationCorrectionType::None)),
+      m_debug(false), m_backgroundSubtraction(BackgroundSubtraction()),
+      m_polarizationCorrections(
+          PolarizationCorrections(PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)),
       m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
       m_perThetaDefaults(std::vector<PerThetaDefaults>({PerThetaDefaults(
           boost::none, TransmissionRunPair(), boost::none, RangeInQ(),
-          boost::none, ProcessingInstructions())})) {}
+          boost::none, ProcessingInstructions(), boost::none)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        SummationType summationType, bool includePartialBins,
-                       bool debug,
+                       bool debug, BackgroundSubtraction backgroundSubtraction,
                        PolarizationCorrections polarizationCorrections,
                        FloodCorrections floodCorrections,
                        TransmissionStitchOptions transmissionStitchOptions,
@@ -37,7 +38,7 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        std::vector<PerThetaDefaults> perThetaDefaults)
     : m_analysisMode(analysisMode), m_reductionType(reductionType),
       m_summationType(summationType), m_includePartialBins(includePartialBins),
-      m_debug(debug),
+      m_debug(debug), m_backgroundSubtraction(std::move(backgroundSubtraction)),
       m_polarizationCorrections(std::move(polarizationCorrections)),
       m_floodCorrections(std::move(floodCorrections)),
       m_transmissionStitchOptions(std::move(transmissionStitchOptions)),
@@ -49,6 +50,11 @@ ReductionType Experiment::reductionType() const { return m_reductionType; }
 SummationType Experiment::summationType() const { return m_summationType; }
 bool Experiment::includePartialBins() const { return m_includePartialBins; }
 bool Experiment::debug() const { return m_debug; }
+
+BackgroundSubtraction const &Experiment::backgroundSubtraction() const {
+  return m_backgroundSubtraction;
+}
+
 PolarizationCorrections const &Experiment::polarizationCorrections() const {
   return m_polarizationCorrections;
 }
@@ -119,6 +125,7 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.summationType() == rhs.summationType() &&
          lhs.includePartialBins() == rhs.includePartialBins() &&
          lhs.debug() == rhs.debug() &&
+         lhs.backgroundSubtraction() == rhs.backgroundSubtraction() &&
          lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
          lhs.floodCorrections() == rhs.floodCorrections() &&
          lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&

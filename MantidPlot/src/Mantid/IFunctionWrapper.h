@@ -7,7 +7,7 @@
 #pragma once
 
 #include <QObject>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -27,22 +27,22 @@ public:
   IFunctionWrapper() : m_function(), m_compositeFunction(), m_peakFunction() {}
 
   /// IFunction pointer
-  boost::shared_ptr<Mantid::API::IFunction> function() { return m_function; }
-  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() {
+  std::shared_ptr<Mantid::API::IFunction> function() { return m_function; }
+  std::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() {
     return m_compositeFunction;
   }
-  boost::shared_ptr<Mantid::API::IPeakFunction> peakFunction() {
+  std::shared_ptr<Mantid::API::IPeakFunction> peakFunction() {
     return m_peakFunction;
   }
 
   /// Set a new function from a string
   void setFunction(const QString &name);
   /// Set a new function from a pointer
-  void setFunction(boost::shared_ptr<Mantid::API::IFunction> function);
+  void setFunction(const std::shared_ptr<Mantid::API::IFunction> &function);
 
 private:
   /// Pointer to the function
-  boost::shared_ptr<Mantid::API::IFunction> m_function;
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
-  boost::shared_ptr<Mantid::API::IPeakFunction> m_peakFunction;
+  std::shared_ptr<Mantid::API::IFunction> m_function;
+  std::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  std::shared_ptr<Mantid::API::IPeakFunction> m_peakFunction;
 };

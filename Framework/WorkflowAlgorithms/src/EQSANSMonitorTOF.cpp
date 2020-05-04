@@ -28,7 +28,7 @@ using namespace Geometry;
 void EQSANSMonitorTOF::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
 
   // Output parameters

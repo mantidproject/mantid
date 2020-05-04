@@ -125,7 +125,7 @@ void IndirectPlotOptionsPresenter::onWorkspaceRemoved(
     WorkspacePreDeleteNotification_ptr nf) {
   // Ignore non matrix workspaces
   if (auto const removedWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+          std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     auto const removedName = removedWorkspace->getName();
     if (removedName == m_view->selectedWorkspace().toStdString())
       m_model->removeWorkspace();
@@ -137,7 +137,7 @@ void IndirectPlotOptionsPresenter::onWorkspaceReplaced(
     WorkspaceBeforeReplaceNotification_ptr nf) {
   // Ignore non matrix workspaces
   if (auto const newWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+          std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
     auto const newName = newWorkspace->getName();
     if (newName == m_view->selectedWorkspace().toStdString())
       workspaceChanged(newName);

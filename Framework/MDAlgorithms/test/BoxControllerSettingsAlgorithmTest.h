@@ -65,7 +65,7 @@ private:
   MatrixWorkspace_sptr
   create_workspace_with_splitting_params(int splitThreshold, int splitInto,
                                          int maxRecursionDepth) {
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, 2, 1);
     ws->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0.0));
@@ -232,7 +232,7 @@ public:
   void test_with_no_instrument_parameters() {
     // Create a workspace with an instrument, but no instrument parameters for
     // box splitting.
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, 2, 1);
     ws->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));

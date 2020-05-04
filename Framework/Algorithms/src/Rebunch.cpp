@@ -41,7 +41,7 @@ void Rebunch::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The result of rebinning");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("NBunch", 1, mustBePositive,
                   "The number of bins that will be summed in each bunch");

@@ -205,7 +205,7 @@ JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
   Points xVals(maxSize, LinearGenerator(startX, dX));
   auto newHisto = Histogram(xVals, yVals);
   interpolateLinearInplace(ws->histogram(0), newHisto);
-  auto interpolatedWS = boost::make_shared<Workspace2D>();
+  auto interpolatedWS = std::make_shared<Workspace2D>();
   interpolatedWS->initialize(1, newHisto);
   assert(interpolatedWS->y(0).size() == maxSize);
   return interpolatedWS;

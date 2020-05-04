@@ -116,9 +116,9 @@ void PeakHKLErrors::setUpOptRuns() {
  *                   to the given component or subchild are added to pmap
  */
 void PeakHKLErrors::cLone(
-    boost::shared_ptr<Geometry::ParameterMap> &pmap,
-    const boost::shared_ptr<const Geometry::IComponent> &component,
-    boost::shared_ptr<const Geometry::ParameterMap> &pmapSv) {
+    std::shared_ptr<Geometry::ParameterMap> &pmap,
+    const std::shared_ptr<const Geometry::IComponent> &component,
+    std::shared_ptr<const Geometry::ParameterMap> &pmapSv) {
   if (!component)
     return;
   if (component->isParametrized()) {
@@ -161,14 +161,14 @@ void PeakHKLErrors::cLone(
       }
     }
 
-    boost::shared_ptr<const CompAssembly> parent =
-        boost::dynamic_pointer_cast<const CompAssembly>(component);
+    std::shared_ptr<const CompAssembly> parent =
+        std::dynamic_pointer_cast<const CompAssembly>(component);
     if (parent && parent->nelements() < 180) //# need speed up. Assume pixel
       // elements of a Panel have no
       // attributes
       for (int child = 0; child < parent->nelements(); child++) {
-        boost::shared_ptr<const Geometry::IComponent> kid =
-            boost::const_pointer_cast<const Geometry::IComponent>(
+        std::shared_ptr<const Geometry::IComponent> kid =
+            std::const_pointer_cast<const Geometry::IComponent>(
                 parent->getChild(child));
         if (kid)
           cLone(pmap, kid, pmapSv);
@@ -186,10 +186,10 @@ void PeakHKLErrors::cLone(
  *
  * NOTE: All the peaks in the PeaksWorkspace must use the same instrument.
  */
-boost::shared_ptr<Geometry::Instrument>
+std::shared_ptr<Geometry::Instrument>
 PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
-  auto pmap = boost::make_shared<Geometry::ParameterMap>();
+  auto pmap = std::make_shared<Geometry::ParameterMap>();
 
   if (!instSave) {
     g_log.error(" Peaks workspace does not have an instrument");
@@ -201,15 +201,15 @@ PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
     hasParameterMap = true;
     if (!instSave->isParametrized()) {
 
-      boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-      auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
+      std::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
+      auto Pinsta = std::make_shared<Geometry::Instrument>(instSave, pmap);
 
       instChange = Pinsta;
       IComponent_const_sptr sample = instChange->getSample();
       sampPos = sample->getRelativePos();
     } else // catch(... )
     {
-      auto P1 = boost::make_shared<Geometry::Instrument>(
+      auto P1 = std::make_shared<Geometry::Instrument>(
           instSave->baseInstrument(), instSave->makeLegacyParameterMap());
       instChange = P1;
       IComponent_const_sptr sample = instChange->getSample();
@@ -361,7 +361,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
       AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
           PeakWorkspaceName);
 
-  boost::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
+  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
 
   if (!Peaks)
     throw std::invalid_argument("Peaks not stored under the name " +
@@ -444,7 +444,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   PeaksWorkspace_sptr Peaks =
       AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
           PeakWorkspaceName);
-  boost::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
+  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
 
   const DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
   DblMatrix UBinv(UB);

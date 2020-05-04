@@ -29,7 +29,7 @@ void SmoothData::init() {
                                             Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   std::vector<int> npts0{3};
-  auto min = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
+  auto min = std::make_shared<Kernel::ArrayBoundedValidator<int>>();
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(

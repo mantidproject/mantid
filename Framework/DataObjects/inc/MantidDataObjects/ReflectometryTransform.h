@@ -12,7 +12,7 @@
 #include "MantidDataObjects/DllConfig.h"
 
 #include "MantidDataObjects/MDEventFactory.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -50,14 +50,14 @@ protected:
   const std::string m_d1Label;
   const std::string m_d0ID;
   const std::string m_d1ID;
-  boost::shared_ptr<CalculateReflectometry> m_calculator;
+  std::shared_ptr<CalculateReflectometry> m_calculator;
 
   /// Two theta angles cache
   mutable std::vector<double> m_theta;
   /// Two theta widths cache
   mutable std::vector<double> m_thetaWidths;
 
-  boost::shared_ptr<DataObjects::MDEventWorkspace2Lean>
+  std::shared_ptr<DataObjects::MDEventWorkspace2Lean>
   createMDWorkspace(const Geometry::IMDDimension_sptr &,
                     const Geometry::IMDDimension_sptr &,
                     const API::BoxController_sptr &boxController) const;
@@ -77,7 +77,7 @@ public:
   /// Execuate transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr executeNormPoly(
       const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
-      boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
+      std::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
       bool dumpVertexes, const std::string &outputDimensions) const;
 
   Mantid::API::IMDHistoWorkspace_sptr executeMDNormPoly(
@@ -108,6 +108,6 @@ MANTID_DATAOBJECTS_DLL DetectorAngularCache
 initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
 
 // Helper typedef for scoped pointer of this type.
-using ReflectometryTransform_sptr = boost::shared_ptr<ReflectometryTransform>;
+using ReflectometryTransform_sptr = std::shared_ptr<ReflectometryTransform>;
 } // namespace DataObjects
 } // namespace Mantid

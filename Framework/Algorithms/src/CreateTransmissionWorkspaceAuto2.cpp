@@ -33,19 +33,19 @@ void CreateTransmissionWorkspaceAuto2::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Second transmission run workspace in TOF.");
 
   // Analysis mode
   const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
                                               "MultiDetectorAnalysis"};
   auto analysisModeValidator =
-      boost::make_shared<StringListValidator>(analysisMode);
+      std::make_shared<StringListValidator>(analysisMode);
   declareProperty("AnalysisMode", analysisMode[0], analysisModeValidator,
                   "Analysis mode. This property is only used when "
                   "ProcessingInstructions is not set.",

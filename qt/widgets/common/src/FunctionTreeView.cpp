@@ -433,7 +433,7 @@ bool FunctionTreeView::addFunction(QtProperty *prop,
     if (!parentFun)
       return false;
     auto cf =
-        boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(parentFun);
+        std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(parentFun);
     if (!cf) {
       throw std::logic_error(
           "FunctionTreeView: CompositeFunction is expected for addFunction");
@@ -642,7 +642,7 @@ void FunctionTreeView::addAttributeAndParameterProperties(
     addAttributeProperty(prop, attName, fun->getAttribute(*att));
   }
 
-  auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+  auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (cf) { // if composite add members
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       AProperty ap = addFunctionProperty(
@@ -1108,7 +1108,7 @@ void FunctionTreeView::popupMenu(const QPoint &) {
     Mantid::API::IFunction_sptr fun =
         Mantid::API::FunctionFactory::Instance().createFunction(
             prop->propertyName().toStdString());
-    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
     if (cf || m_properties[prop].parent == nullptr) {
       context.addAction(m_actionAddFunction);
     }
@@ -1200,7 +1200,7 @@ void FunctionTreeView::addFunctionEnd(int result) {
     Mantid::API::IFunction_sptr fun =
         Mantid::API::FunctionFactory::Instance().createFunction(
             prop->propertyName().toStdString());
-    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
     if (cf) {
       auto const isAdded = addFunction(prop, f);
       if (!isAdded)
@@ -1263,7 +1263,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop,
   // construct the function
   auto fun = Mantid::API::FunctionFactory::Instance().createFunction(
       prop->propertyName().toStdString());
-  auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+  auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (cf) {
     auto children = prop->subProperties();
     foreach (QtProperty *child, children) {
@@ -1444,7 +1444,7 @@ void FunctionTreeView::removeFunction() {
     auto topProp = props[0];
     auto fun = Mantid::API::FunctionFactory::Instance().createFunction(
         topProp->propertyName().toStdString());
-    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
     if (cf) {
       // If it is a composite function
       // check that there are more than one function

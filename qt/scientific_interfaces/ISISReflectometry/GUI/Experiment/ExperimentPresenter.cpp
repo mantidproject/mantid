@@ -100,6 +100,7 @@ void ExperimentPresenter::updateWidgetEnabledState() {
 
   m_view->enableAll();
   updateSummationTypeEnabledState();
+  updateBackgroundSubtractionEnabledState();
   updatePolarizationCorrectionEnabledState();
   updateFloodCorrectionEnabledState();
 }
@@ -141,6 +142,17 @@ void ExperimentPresenter::restoreDefaults() {
   updateViewFromModel();
 }
 
+BackgroundSubtraction ExperimentPresenter::backgroundSubtractionFromView() {
+  auto const subtractBackground = m_view->getSubtractBackground();
+  auto const subtractionType = backgroundSubtractionTypeFromString(
+      m_view->getBackgroundSubtractionMethod());
+  auto const degreeOfPolynomial = m_view->getPolynomialDegree();
+  auto const costFunction =
+      costFunctionTypeFromString(m_view->getCostFunction());
+  return BackgroundSubtraction(subtractBackground, subtractionType,
+                               degreeOfPolynomial, costFunction);
+}
+
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = m_view->getPolarizationCorrectionOption()
                                   ? PolarizationCorrectionType::ParameterFile
@@ -157,6 +169,23 @@ FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
   }
 
   return FloodCorrections(correctionType);
+}
+
+void ExperimentPresenter::updateBackgroundSubtractionEnabledState() {
+  if (m_view->getSubtractBackground()) {
+    m_view->enableBackgroundSubtractionMethod();
+    if (m_view->getBackgroundSubtractionMethod() == "Polynomial") {
+      m_view->enablePolynomialDegree();
+      m_view->enableCostFunction();
+    } else {
+      m_view->disablePolynomialDegree();
+      m_view->disableCostFunction();
+    }
+  } else {
+    m_view->disableBackgroundSubtractionMethod();
+    m_view->disablePolynomialDegree();
+    m_view->disableCostFunction();
+  }
 }
 
 void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
@@ -251,14 +280,15 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
     auto const includePartialBins = m_view->getIncludePartialBins();
     auto const debugOption = m_view->getDebugOption();
     auto transmissionStitchOptions = transmissionStitchOptionsFromView();
+    auto backgroundSubtraction = backgroundSubtractionFromView();
     auto polarizationCorrections = polarizationCorrectionsFromView();
     auto floodCorrections = floodCorrectionsFromView();
     auto stitchParameters = stitchParametersFromView();
-    return ExperimentValidationResult(
-        Experiment(analysisMode, reductionType, summationType,
-                   includePartialBins, debugOption, polarizationCorrections,
-                   floodCorrections, transmissionStitchOptions,
-                   stitchParameters, perThetaValidationResult.assertValid()));
+    return ExperimentValidationResult(Experiment(
+        analysisMode, reductionType, summationType, includePartialBins,
+        debugOption, backgroundSubtraction, polarizationCorrections,
+        floodCorrections, transmissionStitchOptions, stitchParameters,
+        perThetaValidationResult.assertValid()));
   } else {
     return ExperimentValidationResult(
         ExperimentValidationErrors(perThetaValidationResult.assertError()));
@@ -304,6 +334,7 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setIncludePartialBins(m_model.includePartialBins());
   m_view->setDebugOption(m_model.debug());
   m_view->setPerAngleOptions(m_model.perThetaDefaultsArray());
+  // Transmission
   if (m_model.transmissionStitchOptions().overlapRange()) {
     m_view->setTransmissionStartOverlap(
         m_model.transmissionStitchOptions().overlapRange()->min());
@@ -317,6 +348,16 @@ void ExperimentPresenter::updateViewFromModel() {
       m_model.transmissionStitchOptions().rebinParameters());
   m_view->setTransmissionScaleRHSWorkspace(
       m_model.transmissionStitchOptions().scaleRHS());
+  // Background subtraction
+  m_view->setSubtractBackground(
+      m_model.backgroundSubtraction().subtractBackground());
+  m_view->setBackgroundSubtractionMethod(backgroundSubtractionTypeToString(
+      m_model.backgroundSubtraction().subtractionType()));
+  m_view->setPolynomialDegree(
+      m_model.backgroundSubtraction().degreeOfPolynomial());
+  m_view->setCostFunction(
+      costFunctionTypeToString(m_model.backgroundSubtraction().costFunction()));
+  // Corrections
   m_view->setPolarizationCorrectionOption(
       m_model.polarizationCorrections().correctionType() !=
       PolarizationCorrectionType::None);

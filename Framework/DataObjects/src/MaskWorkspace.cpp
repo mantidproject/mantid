@@ -255,7 +255,7 @@ const std::string MaskWorkspace::id() const { return "MaskWorkspace"; }
 /** Copy from
  */
 void MaskWorkspace::copyFrom(
-    boost::shared_ptr<const SpecialWorkspace2D> sourcews) {
+    std::shared_ptr<const SpecialWorkspace2D> sourcews) {
   SpecialWorkspace2D::copyFrom(sourcews);
 }
 

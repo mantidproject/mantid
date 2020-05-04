@@ -106,9 +106,9 @@ private:
 };
 
 /// shared pointer to the Workspace2D class
-using Workspace2D_sptr = boost::shared_ptr<Workspace2D>;
+using Workspace2D_sptr = std::shared_ptr<Workspace2D>;
 /// shared pointer to a const Workspace2D
-using Workspace2D_const_sptr = boost::shared_ptr<const Workspace2D>;
+using Workspace2D_const_sptr = std::shared_ptr<const Workspace2D>;
 
 } // namespace DataObjects
 } // Namespace Mantid

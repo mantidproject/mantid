@@ -109,7 +109,7 @@ void DataComparison::addData() {
       AnalysisDataService::Instance().retrieveWS<Workspace>(
           dataName.toStdString());
   WorkspaceGroup_const_sptr wsGroup =
-      boost::dynamic_pointer_cast<const WorkspaceGroup>(ws);
+      std::dynamic_pointer_cast<const WorkspaceGroup>(ws);
 
   m_uiForm.twCurrentData->blockSignals(true);
 
@@ -142,7 +142,7 @@ void DataComparison::addData() {
 void DataComparison::addDataItem(const Workspace_const_sptr &ws) {
   // Check that the workspace is the correct type
   MatrixWorkspace_const_sptr matrixWs =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!matrixWs) {
     g_log.error() << "Workspace " << ws->getName() << "is of incorrect type!\n";
     return;
@@ -385,7 +385,7 @@ void DataComparison::plotWorkspaces() {
             .value<QColor>();
 
     // Create a new curve and attach it to the plot
-    auto curve = boost::make_shared<QwtPlotCurve>();
+    auto curve = std::make_shared<QwtPlotCurve>();
     curve->setData(wsData);
     curve->setPen(curveColour);
     curve->attach(m_plot);
@@ -554,7 +554,7 @@ void DataComparison::plotDiffWorkspace() {
 
   // Create curve and add to plot
   QwtWorkspaceSpectrumData wsData(*diffWorkspace, 0, false, false);
-  auto curve = boost::make_shared<QwtPlotCurve>();
+  auto curve = std::make_shared<QwtPlotCurve>();
   curve->setData(wsData);
   curve->setPen(QColor(Qt::green));
   curve->attach(m_plot);
@@ -671,7 +671,7 @@ void DataComparison::resetView() {
  */
 void DataComparison::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(ws);
   QString oldWsName = QString::fromStdString(wsName);
 
@@ -734,7 +734,7 @@ void DataComparison::renameHandle(const std::string &oldName,
  */
 void DataComparison::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(wsName);
   UNUSED_ARG(ws);
 

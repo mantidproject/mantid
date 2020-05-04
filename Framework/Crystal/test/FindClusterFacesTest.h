@@ -384,7 +384,7 @@ public:
     IMDHistoWorkspace_sptr inWS =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 2, 1);
 
-    IPeaksWorkspace_sptr filterWS = boost::make_shared<PeaksWorkspace>();
+    IPeaksWorkspace_sptr filterWS = std::make_shared<PeaksWorkspace>();
     TS_ASSERT_THROWS(doExecuteWithFilter(inWS, filterWS),
                      std::invalid_argument &);
   }

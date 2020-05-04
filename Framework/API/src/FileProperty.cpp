@@ -15,7 +15,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 //#include <cstdlib>
 #include <iterator>
@@ -40,11 +40,11 @@ IValidator_sptr createValidator(unsigned int action,
                                 const std::vector<std::string> &exts) {
   if (action == FileProperty::Directory ||
       action == FileProperty::OptionalDirectory) {
-    return boost::make_shared<DirectoryValidator>(action ==
-                                                  FileProperty::Directory);
+    return std::make_shared<DirectoryValidator>(action ==
+                                                FileProperty::Directory);
   } else {
-    return boost::make_shared<FileValidator>(exts,
-                                             (action == FileProperty::Load));
+    return std::make_shared<FileValidator>(exts,
+                                           (action == FileProperty::Load));
   }
 }
 

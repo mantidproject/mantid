@@ -83,7 +83,7 @@ public:
       return;
 
     auto outWS = listener->extractData();
-    auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(outWS);
+    auto ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(outWS);
     // TS_ASSERT( ws );
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 11);
     TS_ASSERT_EQUALS(ws->blocksize(), 30);
@@ -160,12 +160,12 @@ public:
       return;
 
     auto outWS = listener->extractData();
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     TS_ASSERT(group);
     TS_ASSERT_EQUALS(group->size(), 2);
-    auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT(ws1);
-    auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    auto ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT(ws2);
 
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 100);
@@ -276,17 +276,17 @@ public:
       return;
 
     auto outWS = listener->extractData();
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     TS_ASSERT(group);
     TS_ASSERT_EQUALS(group->size(), 2);
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->y(2)[0], 1003);
     TS_ASSERT_EQUALS(ws->y(2)[5], 1003);
     TS_ASSERT_EQUALS(ws->y(2)[29], 1003);
 
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->y(2)[0], 2003);
     TS_ASSERT_EQUALS(ws->y(2)[5], 2003);
@@ -329,11 +329,11 @@ public:
       return;
 
     auto outWS = listener->extractData();
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     TS_ASSERT(group);
     TS_ASSERT_EQUALS(group->size(), 2);
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT(ws);
     // monitors in FakeISISHistoDAE have twice the number of bins of normal
     // spectra
@@ -342,7 +342,7 @@ public:
     TS_ASSERT_EQUALS(ws->y(2)[5], 13);
     TS_ASSERT_EQUALS(ws->y(2)[29], 13);
 
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->y(2).size(), 40);
     TS_ASSERT_EQUALS(ws->y(2)[0], 2013);

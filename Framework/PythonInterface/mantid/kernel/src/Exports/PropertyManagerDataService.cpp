@@ -12,7 +12,7 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -21,7 +21,7 @@ using Mantid::PythonInterface::Registry::createPropertyManager;
 using namespace boost::python;
 
 /// Weak pointer to DataItem typedef
-using PropertyManager_wptr = boost::weak_ptr<PropertyManager>;
+using PropertyManager_wptr = std::weak_ptr<PropertyManager>;
 
 namespace {
 /**

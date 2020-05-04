@@ -37,7 +37,7 @@ void GeneralisedSecondDifference::init() {
           "OutputWorkspace", "", Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "M", 0, mustBePositive,
@@ -99,8 +99,8 @@ void GeneralisedSecondDifference::exec() {
 
   const int nsteps = 2 * n_av + 1;
 
-  boost::shared_ptr<API::Progress> progress =
-      boost::make_shared<API::Progress>(this, 0.0, 1.0, (spec_max - spec_min));
+  std::shared_ptr<API::Progress> progress =
+      std::make_shared<API::Progress>(this, 0.0, 1.0, (spec_max - spec_min));
   for (int i = spec_min; i <= spec_max; i++) {
     int out_index = i - spec_min;
     const auto &refX = inputWS->x(i);

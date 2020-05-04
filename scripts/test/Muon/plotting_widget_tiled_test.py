@@ -75,7 +75,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         for i in range(num_axes):
             axes[i] = mock.MagicMock()
         self.view.get_axes.return_value = axes
-        self.model.number_of_axes = num_axes
+        self.view.num_axes.return_value = num_axes
 
     def test_handle_tiled_plot_by_group_creates_figure_correctly(self):
         self.view.get_tiled_by_type.return_value = 'group'
@@ -149,8 +149,8 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
 
         self.presenter.handle_plot_guess_changed()
 
-        self.assertEqual(self.model.number_of_axes, self.model.add_workspace_to_plot.call_count)
-        for i in range(self.model.number_of_axes):
+        self.assertEqual(self.view.num_axes(), self.model.add_workspace_to_plot.call_count)
+        for i in range(self.view.num_axes()):
             self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[i], 'ws_guess',
                                                              workspace_indices=[1], errors=False,
                                                              plot_kwargs=plot_kwargs)
@@ -186,7 +186,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.presenter.handle_data_updated()
 
         # check each workspace was plotted to the correct axis
-        self.assertEqual(self.model.add_workspace_to_plot.call_count, self.model.number_of_axes)
+        self.assertEqual(self.model.add_workspace_to_plot.call_count, self.view.num_axes())
 
         for i, ws in enumerate(workspace_list):
             self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[i],
@@ -210,7 +210,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.presenter.handle_plot_type_changed()
 
         # check each workspace was plotted to the correct axis
-        self.assertEqual(self.model.add_workspace_to_plot.call_count, self.model.number_of_axes)
+        self.assertEqual(self.model.add_workspace_to_plot.call_count, self.view.num_axes())
 
         for i, ws in enumerate(workspace_list):
             self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[i],
@@ -347,6 +347,26 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.presenter.handle_y_axis_limits_changed_in_figure_view(axis)
 
         self.view.plot_options.set_plot_y_range.assert_not_called()
+
+    def test_handle_changed_to_tiled_plots_replots_previous_workspaces(self):
+        workspace_list = self.group_workspace_list
+        self.model.plotted_workspaces = workspace_list
+        self.model.plotted_fit_workspaces = []
+        self.presenter.plot_data_and_fit_workspaces = mock.MagicMock()
+
+        self.presenter.handle_plot_tiled_changed(state=2)
+
+        self.presenter.plot_data_and_fit_workspaces.assert_called_with(workspace_list, [])
+
+    def test_handle_changed_tiled_plot_type_replots_previous_workspaces(self):
+        workspace_list = self.group_workspace_list
+        self.model.plotted_workspaces = workspace_list
+        self.model.plotted_fit_workspaces = []
+        self.presenter.plot_data_and_fit_workspaces = mock.MagicMock()
+
+        self.presenter.handle_tiled_by_changed_on_view(1)
+
+        self.presenter.plot_data_and_fit_workspaces.assert_called_with(workspace_list, [])
 
 
 if __name__ == '__main__':

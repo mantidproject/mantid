@@ -549,7 +549,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     const std::vector<unsigned int> &vec_counts) {
   // Create matrix workspace
   size_t numspec = vec_counts.size();
-  MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
 
   g_log.information("Workspace created");
@@ -591,10 +591,10 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
 
   if (loadinstrument) {
     size_t numspec = numpixelx * numpixely;
-    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
   } else {
-    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx,
                                             numpixelx));
   }
@@ -850,10 +850,10 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
 
   if (loadinstrument) {
     size_t numspec = num_pixel_x * num_pixel_y;
-    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
   } else {
-    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", num_pixel_y,
                                             num_pixel_x, num_pixel_x));
   }

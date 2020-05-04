@@ -74,7 +74,7 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
     // boost 1.41 (RHEL6) can't handle registering IAlgorithm_const_sptr so we
     // have to cast to IAlgorithm_sptr and then convert to Python
     // The constness is pretty-irrelevant by this point anyway
-    algs.append(boost::const_pointer_cast<IAlgorithm>(mgrAlg));
+    algs.append(std::const_pointer_cast<IAlgorithm>(mgrAlg));
   }
 
   return algs;

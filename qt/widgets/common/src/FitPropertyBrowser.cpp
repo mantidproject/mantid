@@ -713,6 +713,12 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser() {
   m_compositeFunction.reset();
+
+  // remove the FunctionFactory Observer
+  using Mantid::API::FunctionFactory;
+  FunctionFactory::Instance().notificationCenter.removeObserver(
+      m_updateObserver);
+
   m_browser->unsetFactoryForManager(m_enumManager);
   m_browser->unsetFactoryForManager(m_boolManager);
   m_browser->unsetFactoryForManager(m_intManager);
@@ -766,7 +772,7 @@ void FitPropertyBrowser::addFunction() {
 
 void FitPropertyBrowser::acceptFit() {
   QtBrowserItem *ci = m_browser->currentItem();
-  boost::shared_ptr<const Mantid::API::CompositeFunction> cf =
+  std::shared_ptr<const Mantid::API::CompositeFunction> cf =
       getHandler()->findCompositeFunction(ci);
   if (!cf)
     return;
@@ -796,7 +802,7 @@ void FitPropertyBrowser::createCompositeFunction(
   if (!func) {
     m_compositeFunction.reset(new Mantid::API::CompositeFunction);
   } else {
-    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(func);
+    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(func);
     if (!cf || (cf->name() != "CompositeFunction" && cf->name() != "MultiBG" &&
                 cf->name() != "MultiDomainFunction")) {
       m_compositeFunction.reset(new Mantid::API::CompositeFunction);
@@ -1116,15 +1122,15 @@ void FitPropertyBrowser::setDefaultBackgroundType(const std::string &fnType) {
   setDefaultFunctionType(fnType);
 }
 
-boost::shared_ptr<Mantid::API::Workspace>
+std::shared_ptr<Mantid::API::Workspace>
 FitPropertyBrowser::getWorkspace() const {
   std::string wsName = workspaceName();
   if (wsName.empty())
-    return boost::shared_ptr<Mantid::API::Workspace>();
+    return std::shared_ptr<Mantid::API::Workspace>();
   try {
     return Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
   } catch (...) {
-    return boost::shared_ptr<Mantid::API::Workspace>();
+    return std::shared_ptr<Mantid::API::Workspace>();
   }
 }
 
@@ -1151,7 +1157,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     m_enumManager->setValue(m_workspace, i);
     Mantid::API::MatrixWorkspace_sptr mws;
     try {
-      mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               wsName.toStdString()));
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
@@ -1325,7 +1331,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     auto f = h->changeType(prop);
     if (!h->parentHandler()) {
       m_compositeFunction =
-          boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
+          std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
     }
     if (f)
       setCurrentFunction(f);
@@ -1650,7 +1656,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     alg->setPropertyValue("Function", funStr);
     alg->setProperty("InputWorkspace", ws);
-    auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+    auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     if (!tbl) {
       alg->setProperty("WorkspaceIndex", workspaceIndex());
     } else {
@@ -1737,7 +1743,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   if (m_displayActionQuality->isChecked()) {
     double quality = alg->getProperty("OutputChi2overDoF");
     std::string costFunction = alg->getProperty("CostFunction");
-    boost::shared_ptr<Mantid::API::ICostFunction> costfun =
+    std::shared_ptr<Mantid::API::ICostFunction> costfun =
         Mantid::API::CostFunctionFactory::Instance().create(costFunction);
     if (status != "success") {
       status = "failed";
@@ -1831,7 +1837,7 @@ void FitPropertyBrowser::setADSObserveEnabled(bool enabled) {
 /// workspace was added
 void FitPropertyBrowser::addHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   auto const qName = QString::fromStdString(wsName);
   if (!isWorkspaceValid(ws) ||
       (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName) &&
@@ -1984,8 +1990,8 @@ void FitPropertyBrowser::setXRange(double start, double end) {
 
 QVector<double> FitPropertyBrowser::getXRange() {
   auto ws = getWorkspace();
-  auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
-  auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
+  auto mws = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   QVector<double> range;
   if (tbl) {
     auto xColumnIndex = m_columnManager->value(m_xColumn);
@@ -2013,7 +2019,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
 
 QString FitPropertyBrowser::getXColumnName() const {
   const auto ws = getWorkspace();
-  auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+  auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
   QString columnName = "";
   if (tbl) {
     auto columns = tbl->getColumnNames();
@@ -2029,7 +2035,7 @@ QString FitPropertyBrowser::getXColumnName() const {
 
 QString FitPropertyBrowser::getYColumnName() const {
   const auto ws = getWorkspace();
-  auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+  auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
   QString columnName = "";
   if (tbl) {
     auto columns = tbl->getColumnNames();
@@ -2045,7 +2051,7 @@ QString FitPropertyBrowser::getYColumnName() const {
 
 QString FitPropertyBrowser::getErrColumnName() const {
   const auto ws = getWorkspace();
-  auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+  auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
   QString columnName = "";
   if (tbl) {
     auto columns = tbl->getColumnNames();
@@ -2149,7 +2155,7 @@ void FitPropertyBrowser::getFitResults() {
   std::string wsName = outputName() + "_Parameters";
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
     Mantid::API::ITableWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
 
     Mantid::API::TableRow row = ws->getFirstRow();
@@ -2602,7 +2608,7 @@ void FitPropertyBrowser::checkFunction() {}
  */
 int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
   auto const workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(getWorkspace());
+      std::dynamic_pointer_cast<MatrixWorkspace>(getWorkspace());
 
   if (!workspace) {
     return 0;
@@ -2735,7 +2741,7 @@ void FitPropertyBrowser::setWorkspace(
   if (!wsName.empty()) {
     try {
       auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-      auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+      auto mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
       if (mws) {
         function->setMatrixWorkspace(mws, workspaceIndex(), startX(), endX());
       } else {
@@ -2806,8 +2812,8 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString &aName) {
     if (nameList.isEmpty())
       return;
     QString name = nameList[0];
-    boost::shared_ptr<Mantid::API::IFunction> f =
-        boost::shared_ptr<Mantid::API::IFunction>(
+    std::shared_ptr<Mantid::API::IFunction> f =
+        std::shared_ptr<Mantid::API::IFunction>(
             Mantid::API::FunctionFactory::Instance().createFunction(
                 name.toStdString()));
     m_auto_back = true;
@@ -2836,7 +2842,7 @@ void FitPropertyBrowser::setLogValue(const QString &lv) {
     /* if (!m_groupMember.empty())
      {
        Mantid::API::MatrixWorkspace_sptr ws =
-         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+         std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
          Mantid::API::AnalysisDataService::Instance().retrieve(m_groupMember)
          );
        if (ws)
@@ -2915,14 +2921,14 @@ void FitPropertyBrowser::findPeaks() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   Mantid::API::MatrixWorkspace_sptr inputWS =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               workspaceName()));
 
   try {
     alg->execute();
     Mantid::API::ITableWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 peakListName));
 
@@ -2933,7 +2939,7 @@ void FitPropertyBrowser::findPeaks() {
     for (size_t i = 0; i < centre.size(); ++i) {
       if (centre[i] < startX() || centre[i] > endX())
         continue;
-      auto f = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
+      auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
           Mantid::API::FunctionFactory::Instance().createFunction(
               defaultPeakType()));
       if (!f)
@@ -3036,7 +3042,7 @@ void FitPropertyBrowser::setupMultifit() {
   if (!ties.isEmpty()) {
     QString wsName = QString::fromStdString(workspaceName());
     Mantid::API::MatrixWorkspace_sptr mws =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 workspaceName()));
     if (mws) {
@@ -3180,7 +3186,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   settings->property()->removeSubProperty(m_evaluationType);
   m_evaluationType->setEnabled(false);
   // if it is a MatrixWorkspace insert WorkspaceIndex
-  auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  auto mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
   if (mws) {
     addWorkspaceIndexToBrowser();
     auto isHistogram = mws->isHistogramData();
@@ -3192,7 +3198,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   }
 
   // if it is a TableWorkspace insert the column properties
-  auto tws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+  auto tws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
   if (tws) {
     setWorkspaceIndex(0);
     // insert properties
@@ -3281,7 +3287,7 @@ void FitPropertyBrowser::columnChanged(QtProperty *prop) {
     try {
       auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
           workspaceName());
-      auto tws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+      auto tws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
       if (!tws)
         return;
       int i = m_columnManager->value(m_xColumn);

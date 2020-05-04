@@ -24,8 +24,8 @@ class SampleLogs(object):
                                                      self.model.getNumExperimentInfo())
         self.setup_table()
 
-    def clicked(self):
-        """When a log is clicked update stats with selected log and replot the
+    def update(self):
+        """Update stats with selected log and replot the
         logs
         """
         self.update_stats()

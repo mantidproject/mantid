@@ -74,7 +74,7 @@ private:
 
   void doRotation(Kernel::V3D rX, Kernel::V3D rY,
                   Geometry::ComponentInfo &componentInfo,
-                  const boost::shared_ptr<const Geometry::IComponent> &comp,
+                  const std::shared_ptr<const Geometry::IComponent> &comp,
                   bool doWishCorrection = false);
   void applyScalings(
       API::Workspace_sptr &ws,

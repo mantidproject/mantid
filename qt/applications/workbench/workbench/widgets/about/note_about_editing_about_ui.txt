@@ -1,0 +1,79 @@
+IMPORTANT READ THIS BEFORE EDITING about.ui
+
+There are a couple of bugs in QtDesigner and dynamic loading of .ui files that need special attention here.
+
+Avoiding Font size warnings
+===========================
+After saving the .ui file in QtDesigner it mistakenly includes an invalid value for the font sizes of most of
+the controls.  For this form the font sizes are all overriden in the stylesheets, but a point size of -1 is 
+entered in the file and this will cause a warning whenever the form is opened.
+
+The solution here is to open the ui file in a text editor after saving from Qt Designer and change the  font 
+sizes from -1 to another valid value e.g. 10.  This makes no difference as the font vales are overriden in 
+stylesheets but it suppresses the warnings.
+
+Find all instances of 
+
+<pointsize>-1</pointsize>
+
+and replace them with
+
+<pointsize>10</pointsize>
+
+Seeing the images in Qt Designer AND REMOVING THEM AFTERWARDS
+=============================================================
+So when you have the resources file linked into the .ui file them dynamic loading of the file will fail.
+This is not needed in the workbench as the resources are already loaded on startup before the form is loaded.
+If you leave the resource file link in the ui file you will see an error like this:
+
+E:\buildarea>python bin\Debug\workbench-script.pyw
+Traceback (most recent call last):
+  File "bin\Debug\workbench-script.pyw", line 11, in <module>
+    load_entry_point('MantidWorkbench', 'gui_scripts', 'workbench')()
+  File "E:\mantid\code\external\src\ThirdParty\lib\python3.8\lib\site-packages\pkg_resources\__init__.py", line 489, in load_entry_point
+    return get_distribution(dist).load_entry_point(group, name)
+  File "E:\mantid\code\external\src\ThirdParty\lib\python3.8\lib\site-packages\pkg_resources\__init__.py", line 2852, in load_entry_point
+    return ep.load()
+  File "E:\mantid\code\external\src\ThirdParty\lib\python3.8\lib\site-packages\pkg_resources\__init__.py", line 2443, in load
+    return self.resolve()
+  File "E:\mantid\code\external\src\ThirdParty\lib\python3.8\lib\site-packages\pkg_resources\__init__.py", line 2449, in resolve
+    module = __import__(self.module_name, fromlist=['__name__'], level=0)
+  File "e:\mantid\code\qt\applications\workbench\workbench\app\mainwindow.py", line 27, in <module>
+    from workbench.widgets.about.presenter import AboutPresenter
+  File "e:\mantid\code\qt\applications\workbench\workbench\widgets\about\presenter.py", line 11, in <module>
+    from workbench.widgets.about.view import AboutView
+  File "e:\mantid\code\qt\applications\workbench\workbench\widgets\about\view.py", line 13, in <module>
+    form, base = load_ui(__file__, "about.ui")
+  File "e:\mantid\code\qt\python\mantidqt\utils\qt\__init__.py", line 94, in load_ui
+    return loadUiType(filepath)
+  File "E:\buildarea\bin\Debug\PyQt5\uic\__init__.py", line 201, in loadUiType
+    exec(code_string.getvalue(), ui_globals)
+  File "<string>", line 524, in <module>
+ModuleNotFoundError: No module named 'resources_rc'
+
+The solution is to remove the resources file from the .ui file, however that removes all of the images and 
+makes it very hard to work with the file in Qt Designer as this dialog has a lot of images.  So here are 
+the instructions to both add and remove again the resource file.  Make sure you remeber to remove it before 
+committing the file, or trying to start workbench (also don't forget the font size edit above).
+
+Adding the reource file to see the images
+-----------------------------------------
+1. open about.ui in Qt Designer
+2. Select the Resource Browser in the botton right corner
+3. Click the pencil icon "Edit Resources"
+4. Click the middle icon under the left hand box "Open Resource File"
+5. Enter [root]\qt\applications\workbench\resources.qrc
+6. All of the images should be added to the window
+
+Removing the resources file THIS MUST BE DONE BEFORE SAVING
+-----------------------------------------------------------
+1. Select the Resource Browser in the botton right corner
+2. Click the pencil icon "Edit Resources"
+3. Select resources.qrc in the left hand box
+4. Click the third icon (x) under the left hand box. "Remove"
+5. Click Ok
+6. The images should disappear from the window
+
+ <resources>
+  <include location="../../../resources.qrc"/>
+ </resources>

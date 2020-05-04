@@ -105,7 +105,7 @@ void SaveCSV::exec() {
 
   if (workspaceID.find("Workspace2D") != std::string::npos) {
     const Workspace2D_sptr localworkspace =
-        boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
+        std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Get info from 2D workspace
     const size_t numberOfHist = localworkspace->getNumberHistograms();

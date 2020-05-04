@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -49,9 +49,9 @@ class Instrument;
 class MANTID_GEOMETRY_DLL DetectorInfo {
 public:
   DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
-               boost::shared_ptr<const Geometry::Instrument> instrument,
-               boost::shared_ptr<const std::vector<detid_t>> detectorIds,
-               boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+               std::shared_ptr<const Geometry::Instrument> instrument,
+               std::shared_ptr<const std::vector<detid_t>> detectorIds,
+               std::shared_ptr<const std::unordered_map<detid_t, size_t>>
                    detIdToIndexMap);
   DetectorInfo(const DetectorInfo &other);
   DetectorInfo &operator=(const DetectorInfo &rhs);
@@ -120,17 +120,17 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  boost::shared_ptr<const Geometry::IDetector>
+  std::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
 
   /// Pointer to the actual DetectorInfo object (non-wrapping part).
   std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
 
-  boost::shared_ptr<const Geometry::Instrument> m_instrument;
-  boost::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
+  std::shared_ptr<const Geometry::Instrument> m_instrument;
+  std::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
+  std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
 
-  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
+  mutable std::vector<std::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };

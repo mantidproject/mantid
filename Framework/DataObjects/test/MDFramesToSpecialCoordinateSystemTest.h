@@ -27,8 +27,8 @@ class MDFramesToSpecialCoordinateSystemTest : public CxxTest::TestSuite {
 public:
   void test_that_throws_for_non_md_workspace() {
     // Arrange
-    const boost::shared_ptr<MatrixWorkspace> ws =
-        boost::make_shared<WorkspaceTester>();
+    const std::shared_ptr<MatrixWorkspace> ws =
+        std::make_shared<WorkspaceTester>();
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
     // Act + Assert
     TSM_ASSERT_THROWS(
@@ -43,11 +43,11 @@ public:
     Mantid::coord_t min = 0;
     Mantid::coord_t max = 10;
     size_t bins = 2;
-    auto dimension1 = boost::make_shared<MDHistoDimension>(
+    auto dimension1 = std::make_shared<MDHistoDimension>(
         "QLabX", "QLabX", frame1, min, max, bins);
-    auto dimension2 = boost::make_shared<MDHistoDimension>(
+    auto dimension2 = std::make_shared<MDHistoDimension>(
         "QSampleY", "QSampleY", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
@@ -64,11 +64,11 @@ public:
     Mantid::coord_t min = 0;
     Mantid::coord_t max = 10;
     size_t bins = 2;
-    auto dimension1 = boost::make_shared<MDHistoDimension>(
+    auto dimension1 = std::make_shared<MDHistoDimension>(
         "QLabX", "QLabX", frame1, min, max, bins);
-    auto dimension2 = boost::make_shared<MDHistoDimension>(
+    auto dimension2 = std::make_shared<MDHistoDimension>(
         "General Frame", "General Frame", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
@@ -91,11 +91,11 @@ public:
     Mantid::coord_t min = 0;
     Mantid::coord_t max = 10;
     size_t bins = 2;
-    auto dimension1 = boost::make_shared<MDHistoDimension>(
+    auto dimension1 = std::make_shared<MDHistoDimension>(
         "QLabX", "QLabX", frame1, min, max, bins);
-    auto dimension2 = boost::make_shared<MDHistoDimension>(
+    auto dimension2 = std::make_shared<MDHistoDimension>(
         "QLabY", "QLabY", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
@@ -115,11 +115,11 @@ public:
     Mantid::coord_t min = 0;
     Mantid::coord_t max = 10;
     size_t bins = 2;
-    auto dimension1 = boost::make_shared<MDHistoDimension>(
+    auto dimension1 = std::make_shared<MDHistoDimension>(
         "QSampleX", "QSampleX", frame1, min, max, bins);
-    auto dimension2 = boost::make_shared<MDHistoDimension>(
+    auto dimension2 = std::make_shared<MDHistoDimension>(
         "QSampleY", "QSampleY", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
@@ -140,10 +140,10 @@ public:
     Mantid::coord_t max = 10;
     size_t bins = 2;
     auto dimension1 =
-        boost::make_shared<MDHistoDimension>("H", "H", frame1, min, max, bins);
+        std::make_shared<MDHistoDimension>("H", "H", frame1, min, max, bins);
     auto dimension2 =
-        boost::make_shared<MDHistoDimension>("K", "K", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+        std::make_shared<MDHistoDimension>("K", "K", frame2, min, max, bins);
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
@@ -164,10 +164,10 @@ public:
     Mantid::coord_t max = 10;
     size_t bins = 2;
     auto dimension1 =
-        boost::make_shared<MDHistoDimension>("H", "H", frame1, min, max, bins);
+        std::make_shared<MDHistoDimension>("H", "H", frame1, min, max, bins);
     auto dimension2 =
-        boost::make_shared<MDHistoDimension>("K", "K", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+        std::make_shared<MDHistoDimension>("K", "K", frame2, min, max, bins);
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
@@ -187,10 +187,10 @@ public:
     Mantid::coord_t max = 10;
     size_t bins = 2;
     auto dimension1 =
-        boost::make_shared<MDHistoDimension>("H", "H", frame1, min, max, bins);
+        std::make_shared<MDHistoDimension>("H", "H", frame1, min, max, bins);
     auto dimension2 =
-        boost::make_shared<MDHistoDimension>("K", "K", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+        std::make_shared<MDHistoDimension>("K", "K", frame2, min, max, bins);
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 

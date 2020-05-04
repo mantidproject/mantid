@@ -182,7 +182,7 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
     auto info = makeWorkspaceInfoObject(ws);
 
     if (ws->id() == "WorkspaceGroup") {
-      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
       for (int i = 0; i < group->getNumberOfEntries(); ++i) {
         auto subInfo = makeWorkspaceInfoObject(group->getItem(i));
         info.subWorkspaces.emplace_back(subInfo);

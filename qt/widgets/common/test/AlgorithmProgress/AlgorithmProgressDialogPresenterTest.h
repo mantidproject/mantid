@@ -17,11 +17,10 @@
 #include <QProgressBar>
 #include <QTreeWidgetItem>
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 using namespace testing;
 using namespace Mantid::API;

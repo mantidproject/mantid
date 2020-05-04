@@ -207,7 +207,7 @@ public:
    * ISIS HRPD Data
    */
   void create2BankProf9Table(const string &workspacename) {
-    TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr partablews = std::make_shared<TableWorkspace>();
     partablews->addColumn("str", "Name");
     partablews->addColumn("double", "Value_1");
     partablews->addColumn("double", "Value_2");
@@ -277,7 +277,7 @@ public:
 
     // Crate table workspace
     DataObjects::TableWorkspace_sptr geomws =
-        boost::make_shared<TableWorkspace>();
+        std::make_shared<TableWorkspace>();
 
     geomws->addColumn("str", "Name");
     geomws->addColumn("double", "Value");

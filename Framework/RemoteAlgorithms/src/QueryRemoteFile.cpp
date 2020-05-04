@@ -30,14 +30,14 @@ using namespace Mantid::API;
 void QueryRemoteFile::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
@@ -51,12 +51,12 @@ void QueryRemoteFile::init() {
 }
 
 void QueryRemoteFile::exec() {
-  boost::shared_ptr<RemoteJobManager> jobManager =
+  std::shared_ptr<RemoteJobManager> jobManager =
       Mantid::Kernel::ConfigService::Instance()
           .getFacility()
           .getRemoteJobManager(getPropertyValue("ComputeResource"));
 
-  // jobManager is a boost::shared_ptr...
+  // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??

@@ -12,7 +12,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::DataHandling::SampleEnvironmentSpec;
 
@@ -36,7 +36,7 @@ public:
   void test_Add_Container_Stores_Container_Linked_To_ID() {
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
-    auto testContainer = boost::make_shared<Container>("");
+    auto testContainer = std::make_shared<Container>("");
     testContainer->setID("8mm");
 
     TS_ASSERT_EQUALS(0, spec.ncans());
@@ -61,10 +61,10 @@ public:
     using Mantid::Kernel::V3D;
 
     ShapeFactory factory;
-    auto small = boost::make_shared<Container>(factory.createShape(
+    auto small = std::make_shared<Container>(factory.createShape(
         ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1")));
     small->setID("8mm");
-    auto large = boost::make_shared<Container>(factory.createShape(
+    auto large = std::make_shared<Container>(factory.createShape(
         ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2")));
     large->setID("10mm");
 
@@ -86,7 +86,7 @@ public:
   void test_Add_Container_With_Empty_ID_Throws_Invalid_Argument() {
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
-    auto testContainer = boost::make_shared<const Container>("");
+    auto testContainer = std::make_shared<const Container>("");
 
     TS_ASSERT_THROWS(spec.addContainer(testContainer),
                      const std::invalid_argument &);

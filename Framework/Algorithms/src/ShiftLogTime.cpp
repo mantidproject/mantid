@@ -106,10 +106,10 @@ void ShiftLogTime::exec() {
     IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
     duplicate->initialize();
     duplicate->setProperty<Workspace_sptr>(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWS));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWS));
     duplicate->execute();
     Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-    outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     setProperty("OutputWorkspace", outputWS);
   }

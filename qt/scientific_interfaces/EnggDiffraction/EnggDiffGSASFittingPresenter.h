@@ -16,7 +16,6 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -30,8 +29,8 @@ public:
   EnggDiffGSASFittingPresenter(
       std::unique_ptr<IEnggDiffGSASFittingModel> model,
       IEnggDiffGSASFittingView *view,
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
-      boost::shared_ptr<IEnggDiffractionParam> mainSettings);
+      std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+      std::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
@@ -87,9 +86,9 @@ private:
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
-  boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
+  std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
 
-  boost::shared_ptr<IEnggDiffractionParam> m_mainSettings;
+  std::shared_ptr<IEnggDiffractionParam> m_mainSettings;
 
   IEnggDiffGSASFittingView *m_view;
 

@@ -286,7 +286,7 @@ void FindClusterFaces::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "MaximumRows", 100000,
-                      boost::make_shared<BoundedValidator<int>>(),
+                      std::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
   setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(

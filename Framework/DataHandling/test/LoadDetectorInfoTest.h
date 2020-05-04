@@ -290,7 +290,7 @@ public:
     TS_ASSERT(grouper.isInitialized());
 
     loadRawFile();
-    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(m_MariWS));
 
     // check the X-values for a sample of spectra avoiding the monitors
@@ -357,9 +357,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
     TS_ASSERT(grouper.isExecuted());
 
-    MatrixWorkspace_const_sptr WS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(m_InoutWS));
+    MatrixWorkspace_const_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(m_InoutWS));
 
     const auto &pmap = WS->constInstrumentParameters();
     const auto &detInfo = WS->detectorInfo();

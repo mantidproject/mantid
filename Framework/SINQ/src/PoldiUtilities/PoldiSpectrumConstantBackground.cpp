@@ -39,9 +39,9 @@ void PoldiSpectrumConstantBackground::functionDeriv1D(Jacobian *out,
 }
 
 void PoldiSpectrumConstantBackground::setWorkspace(
-    boost::shared_ptr<const API::Workspace> ws) {
+    std::shared_ptr<const API::Workspace> ws) {
   MatrixWorkspace_const_sptr matrixWs =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   if (matrixWs && matrixWs->getNumberHistograms() > 0) {
     m_timeBinCount = matrixWs->x(0).size();
@@ -97,7 +97,7 @@ double PoldiSpectrumConstantBackground::getParameter(size_t i) const {
 }
 
 void PoldiSpectrumConstantBackground::init() {
-  m_flatBackground = boost::dynamic_pointer_cast<IFunction1D>(
+  m_flatBackground = std::dynamic_pointer_cast<IFunction1D>(
       FunctionFactory::Instance().createFunction("FlatBackground"));
 
   declareParameter("A0");

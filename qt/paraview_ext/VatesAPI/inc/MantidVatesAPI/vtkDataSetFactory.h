@@ -13,8 +13,8 @@
 
 #include "vtkDataSet.h"
 #include "vtkSmartPointer.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <memory>
 #include <string>
 
 class vtkFloatArray;
@@ -136,11 +136,11 @@ protected:
    checks fail.
    */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  boost::shared_ptr<IMDWorkspaceType>
+  std::shared_ptr<IMDWorkspaceType>
   castAndCheck(Mantid::API::Workspace_sptr workspace,
                bool bExactMatch = true) const {
-    boost::shared_ptr<IMDWorkspaceType> imdws =
-        boost::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
+    std::shared_ptr<IMDWorkspaceType> imdws =
+        std::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
     if (imdws && this->checkWorkspace<IMDWorkspaceType, ExpectedNDimensions>(
                      *imdws, bExactMatch)) {
       return imdws;
@@ -161,7 +161,7 @@ protected:
   checks fail.
   */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  boost::shared_ptr<IMDWorkspaceType>
+  std::shared_ptr<IMDWorkspaceType>
   doInitialize(Mantid::API::Workspace_sptr workspace,
                bool bExactMatch = true) const {
     if (!workspace) {
@@ -169,7 +169,7 @@ protected:
                             " initialize cannot operate on a null workspace";
       throw std::invalid_argument(message);
     }
-    boost::shared_ptr<IMDWorkspaceType> imdws =
+    std::shared_ptr<IMDWorkspaceType> imdws =
         castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace,
                                                             bExactMatch);
     if (!imdws) {
@@ -200,7 +200,7 @@ protected:
   tryDelegatingCreation(Mantid::API::Workspace_sptr workspace,
                         ProgressAction &progressUpdate,
                         bool bExactMatch = true) const {
-    boost::shared_ptr<IMDWorkspaceType> imdws =
+    std::shared_ptr<IMDWorkspaceType> imdws =
         castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace,
                                                             bExactMatch);
     if (!imdws) {
@@ -228,7 +228,7 @@ private:
   bool m_bCheckDimensionality;
 };
 
-using vtkDataSetFactory_sptr = boost::shared_ptr<vtkDataSetFactory>;
+using vtkDataSetFactory_sptr = std::shared_ptr<vtkDataSetFactory>;
 using vtkDataSetFactory_uptr = std::unique_ptr<vtkDataSetFactory>;
 } // namespace VATES
 } // namespace Mantid

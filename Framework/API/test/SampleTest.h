@@ -62,8 +62,8 @@ public:
     Sample sample;
     const std::string envName("TestKit");
     auto kit = std::make_unique<SampleEnvironment>(
-        envName, boost::make_shared<const Container>(""));
-    kit->add(boost::make_shared<const CSGObject>());
+        envName, std::make_shared<const Container>(""));
+    kit->add(std::make_shared<const CSGObject>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(std::move(kit)));
 
@@ -287,7 +287,7 @@ public:
   void test_Multiple_Samples() {
     Sample sample;
     sample.setName("test name for test_Multiple_Sample");
-    auto sample2 = boost::make_shared<Sample>();
+    auto sample2 = std::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
 
     TS_ASSERT_EQUALS(sample.size(), 1);
@@ -316,7 +316,7 @@ public:
     sample.setWidth(1.234);
     sample.setOrientedLattice(
         std::make_unique<OrientedLattice>(4, 5, 6, 90, 91, 92));
-    auto sample2 = boost::make_shared<Sample>();
+    auto sample2 = std::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
     TS_ASSERT(
@@ -401,14 +401,14 @@ public:
 
   void test_not_equal_when_sample_differs_in_environment() {
     auto kit1 = std::make_unique<SampleEnvironment>(
-        "Env", boost::make_shared<const Container>(""));
+        "Env", std::make_shared<const Container>(""));
 
     auto kit2 = std::make_unique<SampleEnvironment>(
-        "Env2", boost::make_shared<const Container>(""));
+        "Env2", std::make_shared<const Container>(""));
 
     // same as kit1
     auto kit3 = std::make_unique<SampleEnvironment>(
-        kit1->name(), boost::make_shared<const Container>(""));
+        kit1->name(), std::make_shared<const Container>(""));
 
     Sample a;
     auto b = a;

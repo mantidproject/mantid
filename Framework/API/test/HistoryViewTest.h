@@ -56,7 +56,7 @@ private:
     alg.execute();
 
     AlgorithmHistory history(&alg, execTime, 14.0, m_execCount++);
-    return boost::make_shared<AlgorithmHistory>(history);
+    return std::make_shared<AlgorithmHistory>(history);
   }
 
 public:

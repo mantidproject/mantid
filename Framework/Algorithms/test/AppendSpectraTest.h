@@ -224,7 +224,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        out = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(ws1Name));)
     TS_ASSERT(out);
     if (!out)

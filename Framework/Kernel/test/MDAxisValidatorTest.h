@@ -16,7 +16,7 @@
 #include <vector>
 
 using Mantid::Kernel::MDAxisValidator;
-using MDAxisValidator_sptr = boost::shared_ptr<MDAxisValidator>;
+using MDAxisValidator_sptr = std::shared_ptr<MDAxisValidator>;
 
 class MDAxisValidatorTest : public CxxTest::TestSuite {
 public:
@@ -97,7 +97,7 @@ private:
       axes.emplace_back(i);
     }
     auto checker =
-        boost::make_shared<MDAxisValidator>(axes, nDimensions, checkIfEmpty);
+        std::make_shared<MDAxisValidator>(axes, nDimensions, checkIfEmpty);
     return checker;
   }
 };

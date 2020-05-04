@@ -79,10 +79,8 @@ void CatalogPublish::exec() {
   }
 
   // Cast a catalog to a catalogInfoService to access publishing functionality.
-  auto catalogInfoService =
-      boost::dynamic_pointer_cast<API::ICatalogInfoService>(
-          API::CatalogManager::Instance().getCatalog(
-              getPropertyValue("Session")));
+  auto catalogInfoService = std::dynamic_pointer_cast<API::ICatalogInfoService>(
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
 
   // Check if the catalog created supports publishing functionality.
   if (!catalogInfoService)

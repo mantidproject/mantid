@@ -109,7 +109,7 @@ QString PeakHKL::formatNumber(double h, int prec) {
 
 /// Extract minimum and maximum intensity from peaks workspace for scaling.
 void AbstractIntensityScale::setPeaksWorkspace(
-    const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
+    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
   m_maxIntensity = 0.0;
   m_minIntensity = 0.0;
 
@@ -178,7 +178,7 @@ int QualitativeIntensityScale::getIntensityLevel(double intensity) const {
  */
 PeakOverlay::PeakOverlay(
     UnwrappedSurface *surface,
-    const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
+    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
     : Shape2DCollection(), m_peaksWorkspace(pws), m_surface(surface),
       m_precision(6), m_showRows(true), m_showLabels(true),
       m_peakIntensityScale(std::make_unique<QualitativeIntensityScale>(pws)) {
@@ -383,9 +383,9 @@ PeakMarker2D::Style PeakOverlay::getCurrentStyle() const {
  * @param ws :: The shared pointer to the modified workspace.
  */
 void PeakOverlay::afterReplaceHandle(const std::string &wsName,
-                                     const Mantid::API::Workspace_sptr ws) {
+                                     const Mantid::API::Workspace_sptr &ws) {
   Q_UNUSED(wsName);
-  auto peaksWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
+  auto peaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
   if (peaksWS && peaksWS == m_peaksWorkspace && m_surface) {
     m_peakIntensityScale->setPeaksWorkspace(peaksWS);
 

@@ -39,7 +39,7 @@ const std::string CarpenterSampleCorrection::category() const {
  */
 void CarpenterSampleCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -76,11 +76,11 @@ void CarpenterSampleCorrection::exec() {
       inputWksp, radius, coeff1, coeff2, coeff3, true, true);
   Workspace_sptr absPtr = calcOutput->getItem(0);
   Workspace_sptr msPtr = calcOutput->getItem(1);
-  auto absWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
-  auto msWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
+  auto absWksp = std::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
+  auto msWksp = std::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
 
   EventWorkspace_sptr inputWkspEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWksp);
+      std::dynamic_pointer_cast<EventWorkspace>(inputWksp);
 
   // Inverse the absorption correction ( 1/A)
   const auto NUM_HIST = static_cast<int64_t>(inputWksp->getNumberHistograms());
@@ -106,7 +106,7 @@ void CarpenterSampleCorrection::exec() {
   // Output workspace
   if (inputWkspEvent) {
     auto outputWkspEvent =
-        boost::dynamic_pointer_cast<EventWorkspace>(outputWksp);
+        std::dynamic_pointer_cast<EventWorkspace>(outputWksp);
     setProperty("OutputWorkspace", outputWkspEvent);
   }
   setProperty("OutputWorkspace", outputWksp);

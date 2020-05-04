@@ -66,7 +66,7 @@ void ShowPeakHKLOffsets::exec() {
   UBinv.Invert();
   UBinv /= 2 * M_PI;
 
-  boost::shared_ptr<ITableWorkspace> Res =
+  std::shared_ptr<ITableWorkspace> Res =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
   Res->setTitle("HKL int offsets for " + Peaks->getName());
 

@@ -450,8 +450,7 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
   int rank;
   int dims[4];
 #endif
-  int nbuff = 127;
-  boost::shared_array<char> buff(new char[nbuff + 1]);
+  std::vector<char> buff(128);
 
 #ifdef NEXUS43
   while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
@@ -470,13 +469,12 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
 
     switch (iType) {
     case NX_CHAR: {
-      if (iLength > nbuff + 1) {
-        nbuff = iLength;
-        buff.reset(new char[nbuff + 1]);
+      if (iLength > static_cast<int>(buff.size())) {
+        buff.resize(iLength);
       }
       int nz = iLength + 1;
-      NXgetattr(nxfileID, pName, buff.get(), &nz, &iType);
-      g_log.debug() << indentStr << buff.get() << '\n';
+      NXgetattr(nxfileID, pName, buff.data(), &nz, &iType);
+      g_log.debug() << indentStr << buff.data() << '\n';
       break;
     }
     case NX_INT16: {

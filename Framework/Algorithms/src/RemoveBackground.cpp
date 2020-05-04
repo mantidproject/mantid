@@ -40,7 +40,7 @@ using namespace API;
  *
  */
 void RemoveBackground::init() {
-  auto sourceValidator = boost::make_shared<CompositeValidator>();
+  auto sourceValidator = std::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
   sourceValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -50,7 +50,7 @@ void RemoveBackground::init() {
                                                         Direction::Output),
                   "The name to give the output workspace");
 
-  auto vsValidator = boost::make_shared<CompositeValidator>();
+  auto vsValidator = std::make_shared<CompositeValidator>();
   vsValidator->add<WorkspaceUnitValidator>("TOF");
   vsValidator->add<HistogramValidator>();
   declareProperty(
@@ -70,7 +70,7 @@ void RemoveBackground::init() {
 
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("EMode", dE_modes[Kernel::DeltaEMode::Direct],
-                  boost::make_shared<Kernel::StringListValidator>(dE_modes),
+                  std::make_shared<Kernel::StringListValidator>(dE_modes),
                   "The energy conversion mode used to define the conversion "
                   "from the units of the InputWorkspace to TOF",
                   Direction::Input);

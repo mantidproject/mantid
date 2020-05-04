@@ -7,12 +7,12 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
-
 #include <utility>
 
-#include "IndirectFitPlotModelLegacy.h"
+#include "IndirectFitPlotModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
@@ -22,6 +22,7 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace MantidQt::CustomInterfaces;
 
 using ConvolutionFitSequential =
     Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
@@ -41,22 +42,25 @@ std::string getFittingFunctionString(std::string const &workspaceName) {
          "0175)))";
 }
 
-IFunction_sptr getFunction(std::string const &functionString) {
-  return FunctionFactory::Instance().createInitialized(functionString);
+MultiDomainFunction_sptr getFunction(std::string const &functionString,
+                                     size_t numDomains) {
+
+  return FunctionFactory::Instance().createInitializedMultiDomainFunction(
+      functionString, numDomains);
 }
 
-/// A dummy class used to create a model to pass to IndirectFitPlotModelLegacy's
+/// A dummy class used to create a model to pass to IndirectFitPlotModel's
 /// constructor
 class DummyModel
-    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModelLegacy {
+    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
 public:
   ~DummyModel(){};
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override {
+  std::string singleFitOutputName(TableDatasetIndex index,
+                                  IDA::WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -67,54 +71,36 @@ private:
   }
 };
 
-void setFittingFunction(IndirectFittingModelLegacy *model,
-                        std::string const &functionString,
-                        bool setFitFunction) {
+void setFittingFunction(IndirectFittingModel *model,
+                        std::string const &functionString, bool setFitFunction,
+                        size_t numDomains) {
   if (setFitFunction)
-    model->setFitFunction(getFunction(functionString));
+    model->setFitFunction(getFunction(functionString, numDomains));
 }
 
-IndirectFittingModelLegacy *getEmptyDummyModel() { return new DummyModel(); }
+IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
 
-IndirectFittingModelLegacy *
-createModelWithSingleWorkspace(std::string const &workspaceName,
-                               int const &numberOfSpectra,
-                               bool setFitFunction) {
-  auto model = getEmptyDummyModel();
-  SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
-  model->addWorkspace(workspaceName);
-  setFittingFunction(model, getFittingFunctionString(workspaceName),
-                     setFitFunction);
-  return model;
-}
-
-void addWorkspacesToModel(IndirectFittingModelLegacy *model,
-                          int const &numberOfSpectra) {
-  UNUSED_ARG(model);
-  UNUSED_ARG(numberOfSpectra);
-}
-
-template <typename Name, typename... Names>
-void addWorkspacesToModel(IndirectFittingModelLegacy *model,
-                          int const &numberOfSpectra, Name const &workspaceName,
-                          Names const &... workspaceNames) {
+void addWorkspaceToModel(IndirectFittingModel *model,
+                         int const &numberOfSpectra,
+                         std::string workspaceName) {
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
-  addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
 }
 
-template <typename Name, typename... Names>
-IndirectFittingModelLegacy *createModelWithMultipleWorkspaces(
-    int const &numberOfSpectra, bool setFitFunction, Name const &workspaceName,
-    Names const &... workspaceNames) {
-  auto model = createModelWithSingleWorkspace(workspaceName, numberOfSpectra,
-                                              setFitFunction);
-  addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
+IndirectFittingModel *createModelWithMultipleWorkspaces(
+    int const &numberOfSpectra, bool setFitFunction,
+    const std::vector<std::string> &workspaceNames) {
+  auto model = getEmptyDummyModel();
+  for (auto name : workspaceNames) {
+    addWorkspaceToModel(model, numberOfSpectra, name);
+  }
+  setFittingFunction(model, getFittingFunctionString(workspaceNames[0]),
+                     setFitFunction, numberOfSpectra * workspaceNames.size());
   return model;
 }
 
-IndirectFittingModelLegacy *createModelWithSingleInstrumentWorkspace(
+IndirectFittingModel *createModelWithSingleInstrumentWorkspace(
     std::string const &workspaceName, int const &xLength, int const &yLength) {
   auto model = getEmptyDummyModel();
   SetUpADSWithWorkspace ads(workspaceName,
@@ -125,7 +111,7 @@ IndirectFittingModelLegacy *createModelWithSingleInstrumentWorkspace(
 
 IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
                                   std::string const &functionString) {
-  auto alg = boost::make_shared<ConvolutionFitSequential>();
+  auto alg = std::make_shared<ConvolutionFitSequential>();
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);
@@ -141,16 +127,16 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
   return alg;
 }
 
-IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModelLegacy *model,
+IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
                                      const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
-  setFittingFunction(model, getFittingFunctionString(workspaceName), true);
+  setFittingFunction(model, getFittingFunctionString(workspaceName), true, 20);
   auto alg = setupFitAlgorithm(std::move(workspace),
                                getFittingFunctionString(workspaceName));
   return alg;
 }
 
-IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModelLegacy *model,
+IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model,
                                         MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
   auto const alg =
@@ -159,22 +145,23 @@ IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModelLegacy *model,
   return alg;
 }
 
-IndirectFittingModelLegacy *getModelWithFitOutputData() {
+IndirectFittingModel *getModelWithFitOutputData() {
   auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
-  auto const modelWorkspace = model->getWorkspace(0);
+  auto const modelWorkspace = model->getWorkspace(TableDatasetIndex{0});
 
   auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
   model->addOutput(alg);
   return model;
 }
 
-IndirectFitPlotModelLegacy getFitPlotModel(bool setFitFunction = true) {
-  return IndirectFitPlotModelLegacy(createModelWithMultipleWorkspaces(
-      10, setFitFunction, "Workspace1", "Workspace2"));
+IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
+  return IndirectFitPlotModel(createModelWithMultipleWorkspaces(
+      10, setFitFunction,
+      std::vector<std::string>({"Workspace1", "Workspace2"})));
 }
 
-IndirectFitPlotModelLegacy getFitPlotModelWithFitData() {
-  return IndirectFitPlotModelLegacy(getModelWithFitOutputData());
+IndirectFitPlotModel getFitPlotModelWithFitData() {
+  return IndirectFitPlotModel(getModelWithFitOutputData());
 }
 
 } // namespace
@@ -184,21 +171,15 @@ public:
   /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
   IndirectFitPlotModelTest() { FrameworkManager::Instance(); }
 
-  static IndirectFitPlotModelTest *createSuite() {
-    return new IndirectFitPlotModelTest();
-  }
-
-  static void destroySuite(IndirectFitPlotModelTest *suite) { delete suite; }
-
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void
   test_that_IndirectFittingModel_instantiates_a_model_with_the_correct_starting_member_variables() {
     auto const model = getFitPlotModel();
 
-    TS_ASSERT_EQUALS(model.getActiveDataIndex(), 0);
-    TS_ASSERT_EQUALS(model.getActiveSpectrum(), 0);
-    TS_ASSERT_EQUALS(model.numberOfWorkspaces(), 2);
+    TS_ASSERT_EQUALS(model.getActiveDataIndex(), TableDatasetIndex{0});
+    TS_ASSERT_EQUALS(model.getActiveSpectrum(), IDA::WorkspaceIndex{0});
+    TS_ASSERT_EQUALS(model.numberOfWorkspaces(), TableDatasetIndex{2});
   }
 
   void
@@ -232,10 +213,11 @@ public:
   test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
     auto const model = getFitPlotModel();
 
-    SpectraLegacy const spectra = std::make_pair(0u, 9u);
-    SpectraLegacy const storedSpectra = model.getSpectra();
+    Spectra const spectra =
+        Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9});
+    Spectra const storedSpectra = model.getSpectra();
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), storedSpectra, spectra));
+    TS_ASSERT_EQUALS(storedSpectra, spectra);
   }
 
   void
@@ -249,7 +231,8 @@ public:
     TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(0), "Sample");
     TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(1), "Guess");
     /// Only two spectra because the guessWorkspace will only ever have one
-    /// spectra, and then spectra are extracted from the input workspace between
+    /// spectra, and then spectra are extracted from the input workspace
+    /// between
     /// m_activeSpectrum and m_activeSpectrum and so only 1 spectrum is
     /// extracted. 1 + 1 = 2
     TS_ASSERT_EQUALS(resultWorkspace->getNumberHistograms(), 2);
@@ -259,31 +242,32 @@ public:
   test_that_getActiveDataIndex_returns_the_index_which_it_has_been_set_to() {
     auto model = getFitPlotModel();
 
-    model.setActiveIndex(2);
+    model.setActiveIndex(TableDatasetIndex{2});
 
-    TS_ASSERT_EQUALS(model.getActiveDataIndex(), 2);
+    TS_ASSERT_EQUALS(model.getActiveDataIndex(), TableDatasetIndex{2});
   }
 
   void
   test_that_getActiveSpectrum_returns_the_spectrum_which_it_has_been_set_to() {
     auto model = getFitPlotModel();
 
-    model.setActiveSpectrum(3);
+    model.setActiveSpectrum(IDA::WorkspaceIndex{3});
 
-    TS_ASSERT_EQUALS(model.getActiveSpectrum(), 3);
+    TS_ASSERT_EQUALS(model.getActiveSpectrum(), IDA::WorkspaceIndex{3});
   }
 
   void test_that_getFitDataName_returns_the_correctly_calculated_name() {
     auto const model = getFitPlotModel();
 
     TS_ASSERT_EQUALS(model.getFitDataName(), "Workspace1 (0-9)");
-    TS_ASSERT_EQUALS(model.getFitDataName(1), "Workspace2 (0-9)");
+    TS_ASSERT_EQUALS(model.getFitDataName(TableDatasetIndex{1}),
+                     "Workspace2 (0-9)");
   }
 
   void
   test_that_getFitDataName_does_not_throw_when_provided_an_out_of_range_index() {
     auto const model = getFitPlotModel();
-    TS_ASSERT_THROWS_NOTHING(model.getFitDataName(10000000));
+    TS_ASSERT_THROWS_NOTHING(model.getFitDataName(TableDatasetIndex{10000000}));
   }
 
   void

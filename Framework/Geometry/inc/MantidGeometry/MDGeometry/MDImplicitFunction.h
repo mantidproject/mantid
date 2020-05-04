@@ -10,7 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -278,7 +278,7 @@ protected:
   size_t m_numPlanes;
 };
 
-using MDImplicitFunction_sptr = boost::shared_ptr<MDImplicitFunction>;
+using MDImplicitFunction_sptr = std::shared_ptr<MDImplicitFunction>;
 
 } // namespace Geometry
 } // namespace Mantid

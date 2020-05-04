@@ -32,7 +32,7 @@ public:
   static void destroySuite(LatticeDomainCreatorTest *suite) { delete suite; }
 
   void testGetDomainSizeIPeaksWorkspace() {
-    Workspace_sptr peaksWs = boost::dynamic_pointer_cast<Workspace>(
+    Workspace_sptr peaksWs = std::dynamic_pointer_cast<Workspace>(
         WorkspaceCreationHelper::createPeaksWorkspace(5));
 
     TestableLatticeDomainCreator dc;
@@ -64,8 +64,8 @@ public:
     TS_ASSERT_EQUALS(domain->size(), 3);
     TS_ASSERT_EQUALS(values->size(), 3);
 
-    boost::shared_ptr<LatticeDomain> latticeDomain =
-        boost::dynamic_pointer_cast<LatticeDomain>(domain);
+    std::shared_ptr<LatticeDomain> latticeDomain =
+        std::dynamic_pointer_cast<LatticeDomain>(domain);
 
     TS_ASSERT(latticeDomain);
 
@@ -117,7 +117,7 @@ public:
   }
 
   void testCreateDomainPeaksWorkspace() {
-    IPeaksWorkspace_sptr peaksWs = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr peaksWs = std::dynamic_pointer_cast<IPeaksWorkspace>(
         WorkspaceCreationHelper::createPeaksWorkspace(2));
     peaksWs->getPeak(0).setHKL(V3D(1, 1, 1));
     peaksWs->getPeak(1).setHKL(V3D(2, 2, 0));
@@ -133,8 +133,8 @@ public:
     TS_ASSERT_EQUALS(domain->size(), 2);
     TS_ASSERT_EQUALS(values->size(), 2);
 
-    boost::shared_ptr<LatticeDomain> latticeDomain =
-        boost::dynamic_pointer_cast<LatticeDomain>(domain);
+    std::shared_ptr<LatticeDomain> latticeDomain =
+        std::dynamic_pointer_cast<LatticeDomain>(domain);
 
     TS_ASSERT(latticeDomain);
 
@@ -152,7 +152,7 @@ public:
     ITableWorkspace_sptr table = getValidTableWs();
 
     // Function that does nothing.
-    IFunction_sptr fn = boost::make_shared<EmptyLatticeFunction>();
+    IFunction_sptr fn = std::make_shared<EmptyLatticeFunction>();
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
@@ -169,7 +169,7 @@ public:
         outputWs = dc.createOutputWorkspace("base", fn, domain, values, "pp"));
 
     ITableWorkspace_sptr tableWs =
-        boost::dynamic_pointer_cast<ITableWorkspace>(outputWs);
+        std::dynamic_pointer_cast<ITableWorkspace>(outputWs);
     TS_ASSERT(tableWs);
 
     TS_ASSERT_EQUALS(tableWs->rowCount(), 3);

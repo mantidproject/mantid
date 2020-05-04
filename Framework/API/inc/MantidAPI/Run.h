@@ -45,7 +45,7 @@ public:
   bool operator!=(const Run &other);
 
   /// Clone
-  boost::shared_ptr<Run> clone();
+  std::shared_ptr<Run> clone();
 
   /// Addition
   Run &operator+=(const Run &rhs);

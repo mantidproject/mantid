@@ -52,15 +52,15 @@ public:
                        Kernel::IPropertyManager &manager,
                        const std::string &workspacePropertyName);
 
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
 
   API::Workspace_sptr
   createOutputWorkspace(const std::string &baseName,
                         API::IFunction_sptr function,
-                        boost::shared_ptr<API::FunctionDomain> domain,
-                        boost::shared_ptr<API::FunctionValues> values,
+                        std::shared_ptr<API::FunctionDomain> domain,
+                        std::shared_ptr<API::FunctionValues> values,
                         const std::string &outputWorkspacePropertyName =
                             "OutputWorkspace") override;
 
@@ -71,7 +71,7 @@ public:
 
 private:
   /// Retrive the input workspace from the property manager.
-  boost::shared_ptr<API::ITableWorkspace> getInputWorkspace() const;
+  std::shared_ptr<API::ITableWorkspace> getInputWorkspace() const;
   // Names of additional properties
   /// Property names for columns in a TableWorkspace to be passed to
   /// the domain.

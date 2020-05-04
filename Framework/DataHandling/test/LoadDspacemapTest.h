@@ -48,7 +48,7 @@ public:
 
     // Get the offsets out
     OffsetsWorkspace_sptr offsetsWS =
-        boost::dynamic_pointer_cast<OffsetsWorkspace>(
+        std::dynamic_pointer_cast<OffsetsWorkspace>(
             AnalysisDataService::Instance().retrieve("ines_offsets"));
     TS_ASSERT(offsetsWS);
     if (!offsetsWS)
@@ -75,7 +75,7 @@ public:
 
     // Get the offsets out
     OffsetsWorkspace_sptr offsetsWS =
-        boost::dynamic_pointer_cast<OffsetsWorkspace>(
+        std::dynamic_pointer_cast<OffsetsWorkspace>(
             AnalysisDataService::Instance().retrieve("test_vulcan_offset"));
     TS_ASSERT(offsetsWS);
     if (!offsetsWS)

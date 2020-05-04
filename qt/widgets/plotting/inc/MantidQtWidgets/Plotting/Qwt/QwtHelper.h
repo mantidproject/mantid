@@ -17,13 +17,13 @@ namespace MantidQt {
 namespace API {
 namespace QwtHelper {
 /// Create Qwt curve data from a workspace
-EXPORT_OPT_MANTIDQT_PLOTTING boost::shared_ptr<QwtData>
+EXPORT_OPT_MANTIDQT_PLOTTING std::shared_ptr<QwtData>
 curveDataFromWs(const Mantid::API::MatrixWorkspace_const_sptr &ws,
                 size_t wsIndex);
 
 /// Create vector of Qwt curve data from a workspace, used for EnggDiffraction
 /// GUI
-EXPORT_OPT_MANTIDQT_PLOTTING std::vector<boost::shared_ptr<QwtData>>
+EXPORT_OPT_MANTIDQT_PLOTTING std::vector<std::shared_ptr<QwtData>>
 curveDataFromWs(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
 /// Create error vector from a workspace
@@ -32,7 +32,7 @@ curveErrorsFromWs(const Mantid::API::MatrixWorkspace_const_sptr &ws,
                   size_t wsIndex);
 
 /// Create Qwt curve data from a function
-EXPORT_OPT_MANTIDQT_PLOTTING boost::shared_ptr<QwtData>
+EXPORT_OPT_MANTIDQT_PLOTTING std::shared_ptr<QwtData>
 curveDataFromFunction(const Mantid::API::IFunction_const_sptr &func,
                       const std::vector<double> &xValues);
 
@@ -42,7 +42,7 @@ createWsFromFunction(const Mantid::API::IFunction_const_sptr &func,
                      const std::vector<double> &xValues);
 
 /// Creates empty Qwt curve data
-EXPORT_OPT_MANTIDQT_PLOTTING boost::shared_ptr<QwtData> emptyCurveData();
+EXPORT_OPT_MANTIDQT_PLOTTING std::shared_ptr<QwtData> emptyCurveData();
 
 } // namespace QwtHelper
 } // namespace API

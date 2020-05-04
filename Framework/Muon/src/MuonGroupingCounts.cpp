@@ -175,10 +175,10 @@ void MuonGroupingCounts::exec() {
 
   // Group detectors in each period
   std::vector<int> group = getProperty("Grouping");
-  auto groupedPeriods = boost::make_shared<WorkspaceGroup>();
+  auto groupedPeriods = std::make_shared<WorkspaceGroup>();
   for (auto &&workspace : *inputWS) {
     groupedPeriods->addWorkspace(groupDetectors(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), group));
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace), group));
   }
 
   std::vector<int> summedPeriods = getProperty("SummedPeriods");

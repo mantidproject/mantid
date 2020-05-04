@@ -299,7 +299,7 @@ bool StepScan::mergeRuns() {
   for (size_t i = 0; i < wsGroup->size(); ++i) {
     // Add a scan_index variable to each workspace, counting from 1
     MatrixWorkspace_sptr ws =
-        boost::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+        std::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (!ws)
       return true; // Again, shouldn't be possible (unless there's a group
                    // within a group?)

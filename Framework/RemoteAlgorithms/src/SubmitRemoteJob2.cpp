@@ -23,17 +23,17 @@ using namespace Mantid::Kernel;
 void SubmitRemoteJob2::init() {
   // Unlike most algorithms, this wone doesn't deal with workspaces....
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty(
-      "ComputeResource", "", boost::make_shared<StringListValidator>(computes),
+      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
       "The name of the remote computer to submit the job to", Direction::Input);
 
   // Note: these 2 properties are 'implementation specific'.  We know that for

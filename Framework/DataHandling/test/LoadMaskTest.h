@@ -286,7 +286,7 @@ public:
     masker->setProperty("SpectraList", masked_spectra);
     masker->execute();
     Workspace_sptr tsource = masker->getProperty("Workspace");
-    source = boost::dynamic_pointer_cast<MatrixWorkspace>(tsource);
+    source = std::dynamic_pointer_cast<MatrixWorkspace>(tsource);
     TS_ASSERT(source);
 
     /* This is proper way of extracting mask this but does not work from

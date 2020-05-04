@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -27,14 +27,14 @@ public:
   PeakTransform_sptr
   createTransform(const std::string &xPlotLabel,
                   const std::string &yPlotLabel) const override {
-    return boost::make_shared<PeakTransformProduct>(xPlotLabel, yPlotLabel);
+    return std::make_shared<PeakTransformProduct>(xPlotLabel, yPlotLabel);
   }
 
   /**
   Overriden Factory Method.
   */
   PeakTransform_sptr createDefaultTransform() const override {
-    return boost::make_shared<PeakTransformProduct>();
+    return std::make_shared<PeakTransformProduct>();
   }
 };
 } // namespace Geometry

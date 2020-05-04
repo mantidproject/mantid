@@ -55,7 +55,7 @@ public:
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWSName)));
     TS_ASSERT(ws);
     if (!ws)
@@ -103,7 +103,7 @@ public:
     std::string outWSName("CalculateDIFCTest_withCalib_OutputWS");
 
     ITableWorkspace_sptr calibWksp =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     calibWksp->addColumn("int", "detid");
     calibWksp->addColumn("double", "difc");
     for (size_t i = 0; i < NUM_SPEC; ++i) {
@@ -125,7 +125,7 @@ public:
 
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWSName)));
     TS_ASSERT(ws);
     if (!ws)

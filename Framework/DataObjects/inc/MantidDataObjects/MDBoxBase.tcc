@@ -9,8 +9,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 
-#include <boost/make_shared.hpp>
 #include <limits>
+#include <memory>
 
 namespace Mantid {
 namespace DataObjects {

@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidKernel/NexusHDF5Descriptor.h"
+
+#include <boost/multi_index/detail/index_matcher.hpp>
+
 #include "MantidKernel/NexusDescriptor.h"
 
 #include <hdf5.h>
@@ -13,6 +16,8 @@
 #include <cstdlib>   // malloc, calloc
 #include <cstring>   // strcpy
 #include <stdexcept> // std::invalid_argument
+
+using boost::multi_index::detail::index_matcher::entry;
 
 namespace Mantid::Kernel {
 
@@ -200,11 +205,15 @@ NexusHDF5Descriptor::getAllEntries() const noexcept {
 std::map<std::string, std::set<std::string>>
 NexusHDF5Descriptor::initAllEntries() {
 
-  hid_t fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+
+  hid_t fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, fapl);
   if (fileID < 0) {
+
     throw std::invalid_argument(
         "ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " +
-        m_filename + "\n");
+        m_filename + " with fapl " + std::to_string(fapl) + "\n");
   }
 
   hid_t groupID = H5Gopen2(fileID, "/", H5P_DEFAULT);
@@ -217,6 +226,33 @@ NexusHDF5Descriptor::initAllEntries() {
 
   // rely on move semantics
   return allEntries;
+}
+
+bool NexusHDF5Descriptor::isEntry(const std::string &entryName,
+                                  const std::string &groupClass) const
+    noexcept {
+
+  auto itClass = m_allEntries.find(groupClass);
+  if (itClass == m_allEntries.end()) {
+    return false;
+  }
+
+  if (itClass->second.count(entryName) == 1) {
+    return true;
+  }
+
+  return false;
+}
+
+bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
+
+  for (auto itClass = m_allEntries.rbegin(); itClass != m_allEntries.rend();
+       ++itClass) {
+    if (itClass->second.count(entryName) == 1) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace Mantid::Kernel

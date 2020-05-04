@@ -39,10 +39,10 @@ GET_POINTER_SPECIALIZATION(AlgorithmObserver)
 
 void export_algorithm_observer() {
 
-  register_ptr_to_python<boost::shared_ptr<AlgorithmObserver>>();
+  register_ptr_to_python<std::shared_ptr<AlgorithmObserver>>();
 
-  class_<AlgorithmObserver, bases<>,
-         boost::shared_ptr<AlgorithmObserverAdapter>, boost::noncopyable>(
+  class_<AlgorithmObserver, bases<>, std::shared_ptr<AlgorithmObserverAdapter>,
+         boost::noncopyable>(
       "AlgorithmObserver",
       "Observes Algorithm notifications: start,progress,finish,error.")
       .def("observeStarting", &AlgorithmObserver::observeStarting, arg("self"),

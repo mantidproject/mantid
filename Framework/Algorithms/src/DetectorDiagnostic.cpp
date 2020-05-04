@@ -61,7 +61,7 @@ void DetectorDiagnostic::init() {
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                             Direction::Output),
       "A MaskWorkspace containing the masked spectra as zeroes and ones.");
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   this->declareProperty(
       "StartWorkspaceIndex", 0, mustBePosInt,
@@ -95,7 +95,7 @@ void DetectorDiagnostic::init() {
   this->setPropertyGroup("HighThreshold", findDetOutLimGrp);
 
   string medianDetTestGrp("Median Detector Test");
-  auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0);
   this->declareProperty(
       "LevelsUp", 0, mustBePosInt,
@@ -507,8 +507,7 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
   // Convert to 2D if desired, and if the input was an EventWorkspace.
   MatrixWorkspace_sptr outputW = childAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr finalOutputW = outputW;
-  if (outputWorkspace2D &&
-      boost::dynamic_pointer_cast<EventWorkspace>(outputW)) {
+  if (outputWorkspace2D && std::dynamic_pointer_cast<EventWorkspace>(outputW)) {
     g_log.debug() << "Converting output Event Workspace into a Workspace2D.\n";
     childAlg = createChildAlgorithm("ConvertToMatrixWorkspace", t0, t1);
     childAlg->setProperty("InputWorkspace", outputW);

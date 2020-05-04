@@ -69,7 +69,7 @@ double relativeMolecularMass(Material &self) {
 
 void export_Material() {
   register_ptr_to_python<Material *>();
-  register_ptr_to_python<boost::shared_ptr<Material>>();
+  register_ptr_to_python<std::shared_ptr<Material>>();
 
   class_<Material>("Material", no_init)
       .def("name", &Material::name, arg("self"),

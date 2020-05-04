@@ -60,7 +60,7 @@ void ConvertCWPDMDToSpectra::init() {
 
   std::array<std::string, 3> vecunits = {
       {"2theta", "dSpacing", "Momentum Transfer (Q)"}};
-  auto unitval = boost::make_shared<ListValidator<std::string>>(vecunits);
+  auto unitval = std::make_shared<ListValidator<std::string>>(vecunits);
   declareProperty("UnitOutput", "2theta", unitval,
                   "Unit of the output workspace.");
 

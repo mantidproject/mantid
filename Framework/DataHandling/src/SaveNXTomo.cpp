@@ -47,7 +47,7 @@ SaveNXTomo::SaveNXTomo() : API::Algorithm() {
  * Initialise the algorithm
  */
 void SaveNXTomo::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   // Note: this would be better, but it is too restrictive in
   // practice when saving image workspaces loaded from different
   // formats than FITS or not so standard FITS.
@@ -83,7 +83,7 @@ void SaveNXTomo::init() {
 void SaveNXTomo::exec() {
   try {
     MatrixWorkspace_sptr m = getProperty("InputWorkspaces");
-    m_workspaces.emplace_back(boost::dynamic_pointer_cast<Workspace2D>(m));
+    m_workspaces.emplace_back(std::dynamic_pointer_cast<Workspace2D>(m));
   } catch (...) {
   }
 
@@ -102,7 +102,7 @@ bool SaveNXTomo::processGroups() {
 
     for (int i = 0; i < groupWS->getNumberOfEntries(); ++i) {
       m_workspaces.emplace_back(
-          boost::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
+          std::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
     }
   } catch (...) {
   }

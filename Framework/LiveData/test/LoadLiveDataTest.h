@@ -52,7 +52,7 @@ public:
    * @return the created processed WS
    */
   template <typename TYPE>
-  boost::shared_ptr<TYPE>
+  std::shared_ptr<TYPE>
   doExec(const std::string &AccumulationMethod,
          const std::string &ProcessingAlgorithm = "",
          const std::string &ProcessingProperties = "",
@@ -94,7 +94,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    boost::shared_ptr<TYPE> ws;
+    std::shared_ptr<TYPE> ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake"));
     TS_ASSERT(ws);

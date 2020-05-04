@@ -25,8 +25,8 @@ class Algorithm;
 class AlgorithmHistory;
 
 // typedefs for algorithm history pointers
-using AlgorithmHistory_sptr = boost::shared_ptr<AlgorithmHistory>;
-using AlgorithmHistory_const_sptr = boost::shared_ptr<const AlgorithmHistory>;
+using AlgorithmHistory_sptr = std::shared_ptr<AlgorithmHistory>;
+using AlgorithmHistory_const_sptr = std::shared_ptr<const AlgorithmHistory>;
 using AlgorithmHistories = std::vector<AlgorithmHistory_sptr>;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
@@ -107,9 +107,9 @@ public:
     return (execCount() == other.execCount() && name() == other.name());
   }
   /// Create a concrete algorithm based on a history record
-  boost::shared_ptr<IAlgorithm> createAlgorithm() const;
+  std::shared_ptr<IAlgorithm> createAlgorithm() const;
   /// Create an child algorithm from a history record at a given index
-  boost::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
+  std::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
   /// Write this history object to a nexus file
   void saveNexus(::NeXus::File *file, int &algCount) const;
   // Set the execution count

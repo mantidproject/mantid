@@ -51,7 +51,7 @@ public:
 };
 
 /// Helper typedef
-using VecCommands = std::vector<boost::shared_ptr<Command>>;
+using VecCommands = std::vector<std::shared_ptr<Command>>;
 
 /**
  * Command yielding no result.
@@ -146,7 +146,7 @@ public:
 };
 
 /// Helper typedef for vector of command parsers
-using VecCommandParsers = std::vector<boost::shared_ptr<CommandParser>>;
+using VecCommandParsers = std::vector<std::shared_ptr<CommandParser>>;
 
 /**
  * Command parser base class for common concrete command parser types.
@@ -294,17 +294,17 @@ VecCommands interpret(const std::string &processingInstructions) {
   boost::split(processingInstructionsSplit, processingInstructions,
                boost::is_any_of(","));
 
-  VecCommandParsers commandParsers{boost::make_shared<AdditionParserRange>(),
-                                   boost::make_shared<CropParserRange>(),
-                                   boost::make_shared<CropParserIndex>(),
-                                   boost::make_shared<AdditionParser>()};
+  VecCommandParsers commandParsers{std::make_shared<AdditionParserRange>(),
+                                   std::make_shared<CropParserRange>(),
+                                   std::make_shared<CropParserIndex>(),
+                                   std::make_shared<AdditionParser>()};
 
   VecCommands commands;
   for (const auto &candidate : processingInstructionsSplit) {
     bool parserFound = false;
     for (const auto &commandParser : commandParsers) {
       Command *command = commandParser->interpret(candidate);
-      boost::shared_ptr<Command> commandSptr(command);
+      std::shared_ptr<Command> commandSptr(command);
       if (commandSptr->isValid()) // Do not record invalid commands.
       {
         parserFound = true;
@@ -340,7 +340,7 @@ void PerformIndexOperations::exec() {
     cloneWS->execute();
     Workspace_sptr tmp = cloneWS->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+        std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
     this->setProperty("OutputWorkspace", outWS);
   } else {
     // Interpret the instructions.

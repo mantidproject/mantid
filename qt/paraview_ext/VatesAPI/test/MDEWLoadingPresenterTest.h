@@ -162,7 +162,7 @@ public:
     Mantid::API::Workspace_sptr ws =
         get3DWorkspace(true, true); // Integrated T Dimension
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+        *std::dynamic_pointer_cast<IMDEventWorkspace>(ws));
 
     TSM_ASSERT("This is a 4D workspace with an integrated T dimension",
                !presenter.hasTDimensionAvailable());
@@ -177,7 +177,7 @@ public:
     Mantid::API::Workspace_sptr ws =
         get3DWorkspace(false, true); // Non-integrated T Dimension
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+        *std::dynamic_pointer_cast<IMDEventWorkspace>(ws));
 
     TSM_ASSERT("This is a 4D workspace with an integrated T dimension",
                presenter.hasTDimensionAvailable());
@@ -192,7 +192,7 @@ public:
     Mantid::API::Workspace_sptr ws =
         get3DWorkspace(false, true); // Non-integrated T Dimension
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+        *std::dynamic_pointer_cast<IMDEventWorkspace>(ws));
 
     TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)",
                       presenter.getTimeStepLabel());
@@ -206,7 +206,7 @@ public:
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true);
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+        *std::dynamic_pointer_cast<IMDEventWorkspace>(ws));
     auto ds = vtkSmartPointer<vtkDataSet>::Take(vtkUnstructuredGrid::New());
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",
@@ -225,7 +225,7 @@ public:
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true);
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+        *std::dynamic_pointer_cast<IMDEventWorkspace>(ws));
     auto ds = vtkSmartPointer<vtkDataSet>::Take(vtkUnstructuredGrid::New());
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",

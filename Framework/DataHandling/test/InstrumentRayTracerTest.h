@@ -12,8 +12,8 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using Mantid::API::AnalysisDataService;

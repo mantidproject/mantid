@@ -47,8 +47,7 @@ void CopyLogs::init() {
   std::vector<std::string> strategies{"WipeExisting", "MergeKeepExisting",
                                       "MergeReplaceExisting"};
 
-  auto strategiesValidator =
-      boost::make_shared<StringListValidator>(strategies);
+  auto strategiesValidator = std::make_shared<StringListValidator>(strategies);
   declareProperty("MergeStrategy", "MergeReplaceExisting", strategiesValidator,
                   "The type of merge strategy to use on the logs");
 }

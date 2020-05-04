@@ -45,8 +45,8 @@ private:
 
   void addNormalization(const std::string &wsName) {
     auto ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
-    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
-    auto histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+    auto histoWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
     if (eventWS) {
       eventWS->setDisplayNormalization(eventNorm);
       eventWS->setDisplayNormalizationHisto(histoNorm);
@@ -76,7 +76,7 @@ private:
     IMDWorkspace_sptr cutMDtestws =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
 
-    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(cutMDtestws);
+    auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(cutMDtestws);
 
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
@@ -138,7 +138,7 @@ public:
 
     m_inWS =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(sharedWSName);
-    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
+    auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
     eventWS->setDisplayNormalization(eventNorm);
     eventWS->setDisplayNormalizationHisto(histoNorm);
   }
@@ -650,7 +650,7 @@ public:
         10, dim->getNBins());
 
     // Check the data.
-    auto histoOutWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(outWS);
+    auto histoOutWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(outWS);
     TS_ASSERT(histoOutWS);
     TSM_ASSERT_DELTA("Wrong integrated value", 6.0, histoOutWS->getSignalAt(0),
                      1e-4);

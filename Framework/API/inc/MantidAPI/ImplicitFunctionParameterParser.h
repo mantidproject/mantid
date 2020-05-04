@@ -23,11 +23,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <memory>
 #include <vector>
 
 #ifndef Q_MOC_RUN
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include "ImplicitFunctionParameter.h"

@@ -89,7 +89,7 @@ public:
     const int nCells = 30;
     MatrixWorkspace_sptr ws1 =
         WorkspaceFactory::Instance().create("Workspace2D", 3, nCells, nCells);
-    Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(ws1);
+    Workspace2D_sptr ws = std::dynamic_pointer_cast<Workspace2D>(ws1);
 
     const double background = 0.05;
     const double intensity = 562.95;
@@ -154,7 +154,7 @@ public:
 
     std::vector<double> out(nCells);
 
-    boost::shared_ptr<Jacob> Jac = boost::make_shared<Jacob>(7, nCells);
+    std::shared_ptr<Jacob> Jac = std::make_shared<Jacob>(7, nCells);
 
     NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
 

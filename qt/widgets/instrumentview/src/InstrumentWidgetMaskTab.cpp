@@ -686,7 +686,7 @@ InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   alg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
   alg->execute();
 
-  outputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  outputWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(
           outputWorkspaceName));
 
@@ -878,7 +878,7 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
           Mantid::API::AlgorithmManager::Instance().create("SaveMask", -1);
       alg->setProperty(
           "InputWorkspace",
-          boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
+          std::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->execute();
     }
@@ -952,7 +952,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   Mantid::API::ITableWorkspace_sptr temptablews;
   bool overwrite = false;
   try {
-    temptablews = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+    temptablews = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             outputWorkspaceName));
   } catch (const Mantid::Kernel::Exception::NotFoundError &) {
@@ -983,7 +983,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   if (alg->isExecuted()) {
     // Mantid::API::MatrixWorkspace_sptr outputWS
     Mantid::API::ITableWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWorkspaceName));
 
@@ -1127,7 +1127,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       // need to invert the mask before adding the new shape
       // but not if the mask is fresh and empty
       if (wsMask->getNumberMasked() > 0) {
-        wsFresh = boost::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
+        wsFresh = std::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
             actor.extractCurrentMask());
         actor.invertMaskWorkspace();
       }
@@ -1151,8 +1151,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       if (isROI) {
         if (wsFresh)
           m_instrWidget->getInstrumentActor().setMaskMatrixWorkspace(
-              boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                  wsFresh));
+              std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsFresh));
         // need to invert the mask before displaying
         m_instrWidget->getInstrumentActor().invertMaskWorkspace();
       }
@@ -1381,7 +1380,7 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
       auto alg = AlgorithmManager::Instance().createUnmanaged("SaveMask", -1);
       alg->setChild(true);
       alg->setProperty("InputWorkspace",
-                       boost::dynamic_pointer_cast<Workspace>(outputWS));
+                       std::dynamic_pointer_cast<Workspace>(outputWS));
       alg->setPropertyValue("OutputFile", fileName);
       alg->setLogging(false);
       alg->execute();

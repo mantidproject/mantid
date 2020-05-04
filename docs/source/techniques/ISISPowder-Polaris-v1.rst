@@ -194,7 +194,9 @@ The output PDF can be customized with the following parameters:
 - By calling with `delta_r` which will calculate the PDF with bin width of `delta_q`.
 - By calling with `freq_params` a fourier filter will be performed on the focused signal removing any
   components from atomic distances outside of the parameters. The parameters must be given as list:
-  [lower], or [lower, upper].
+  [lower], or [lower, upper]. By default this produces a sharp cut off that can produce artifacts in
+  the PDF around the cutoff points, by also calling with `bw_order` a butterworth filter will be
+  performed with the specified order.
 
 Example
 =======

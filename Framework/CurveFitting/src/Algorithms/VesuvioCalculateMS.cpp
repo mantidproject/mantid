@@ -29,7 +29,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -66,7 +66,7 @@ VesuvioCalculateMS::VesuvioCalculateMS()
  */
 void VesuvioCalculateMS::init() {
   // Inputs
-  auto inputWSValidator = boost::make_shared<CompositeValidator>();
+  auto inputWSValidator = std::make_shared<CompositeValidator>();
   inputWSValidator->add<WorkspaceUnitValidator>("TOF");
   inputWSValidator->add<SampleShapeValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -74,18 +74,18 @@ void VesuvioCalculateMS::init() {
                   "Input workspace to be corrected, in units of TOF.");
 
   // -- Sample --
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NoOfMasses", -1, positiveInt,
                   "The number of masses contained within the sample");
 
-  auto positiveNonZero = boost::make_shared<BoundedValidator<double>>();
+  auto positiveNonZero = std::make_shared<BoundedValidator<double>>();
   positiveNonZero->setLower(0.0);
   positiveNonZero->setLowerExclusive(true);
   declareProperty("SampleDensity", -1.0, positiveNonZero,
                   "The density of the sample in gm/cm^3");
 
-  auto nonEmptyArray = boost::make_shared<ArrayLengthValidator<double>>();
+  auto nonEmptyArray = std::make_shared<ArrayLengthValidator<double>>();
   nonEmptyArray->setLengthMin(3);
   declareProperty(std::make_unique<ArrayProperty<double>>("AtomicProperties",
                                                           nonEmptyArray),

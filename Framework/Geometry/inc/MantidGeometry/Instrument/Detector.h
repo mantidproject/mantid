@@ -35,7 +35,7 @@ public:
 
   Detector(const std::string &name, int id, IComponent *parent);
   Detector(const std::string &name, int id,
-           const boost::shared_ptr<IObject> &shape, IComponent *parent);
+           const std::shared_ptr<IObject> &shape, IComponent *parent);
   // functions inherited from IObjectComponent
   Component *clone() const override { return new Detector(*this); }
 

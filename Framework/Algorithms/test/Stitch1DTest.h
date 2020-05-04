@@ -24,9 +24,9 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <math.h>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -49,7 +49,7 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
                                      const HistogramDx &Dx,
                                      const int nSpec = 1) {
 
-  Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
+  Workspace2D_sptr outWS = std::make_shared<Workspace2D>();
   outWS->initialize(nSpec, xData.size(), yData.size());
   for (int i = 0; i < nSpec; ++i) {
     outWS->mutableY(i) = yData;
@@ -65,7 +65,7 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
 
 MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
                                        const HistogramY &yData) {
-  Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
+  Workspace2D_sptr outWS = std::make_shared<Workspace2D>();
   outWS->initialize(1, xData.size(), yData.size());
   outWS->mutableY(0) = yData;
   outWS->mutableX(0) = xData;
@@ -356,13 +356,13 @@ public:
   void test_point_data_without_dx() {
     const auto &x1 = Points(3, LinearGenerator(1., 1.));
     const auto &y1 = Counts(3, LinearGenerator(1., 1.));
-    Workspace2D_sptr ws1 = boost::make_shared<Workspace2D>();
+    Workspace2D_sptr ws1 = std::make_shared<Workspace2D>();
     Mantid::HistogramData::Histogram histogram1(x1, y1);
     ws1->initialize(1, histogram1);
     const auto &x2 = Points(3, LinearGenerator(1.5, 1.));
     const auto &y2 = Counts(3, LinearGenerator(5., 1.));
     Mantid::HistogramData::Histogram histogram2(x2, y2);
-    Workspace2D_sptr ws2 = boost::make_shared<Workspace2D>();
+    Workspace2D_sptr ws2 = std::make_shared<Workspace2D>();
     ws2->initialize(1, histogram2);
     Stitch1D alg;
     alg.setChild(true);

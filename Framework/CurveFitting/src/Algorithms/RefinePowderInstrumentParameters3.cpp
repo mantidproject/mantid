@@ -74,7 +74,7 @@ void RefinePowderInstrumentParameters3::init() {
 
   // Refinement algorithm
   vector<string> algoptions{"OneStepFit", "MonteCarlo"};
-  auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
+  auto validator = std::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
 
@@ -89,7 +89,7 @@ void RefinePowderInstrumentParameters3::init() {
   // Method to calcualte the standard error of peaks
   vector<string> stdoptions{"ConstantValue", "UseInputValue"};
   auto listvalidator =
-      boost::make_shared<Kernel::StringListValidator>(stdoptions);
+      std::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
       "StandardError", "ConstantValue", listvalidator,
       "Algorithm to calculate the standard error of peak positions.");
@@ -122,7 +122,7 @@ void RefinePowderInstrumentParameters3::exec() {
   parseTableWorkspaces();
 
   // 3. Set up main function for peak positions
-  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>();
+  m_positionFunc = std::make_shared<ThermalNeutronDtoTOFFunction>();
   m_positionFunc->initialize();
 
   // 3. Fit
@@ -1034,7 +1034,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
 TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
     map<string, Parameter> parameters, double startchi2, double finalchi2) {
   // 1. Create TableWorkspace
-  auto tablews = boost::make_shared<TableWorkspace>();
+  auto tablews = std::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");
@@ -1098,7 +1098,7 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
   size_t lenx = m_dataWS->x(m_wsIndex).size();
   size_t leny = m_dataWS->y(m_wsIndex).size();
 
-  Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 6, lenx, leny));
 
   outws->getAxis(0)->setUnit("dSpacing");

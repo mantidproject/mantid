@@ -32,7 +32,7 @@ void StripPeaks::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
 
-  auto min = boost::make_shared<BoundedValidator<int>>();
+  auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
   declareProperty("FWHM", 7, min,
@@ -59,7 +59,7 @@ void StripPeaks::init() {
   std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
-      boost::make_shared<StringListValidator>(bkgdtypes),
+      std::make_shared<StringListValidator>(bkgdtypes),
       "Type of Background. Present choices include 'Linear' and 'Quadratic'");
 
   declareProperty("HighBackground", true,
@@ -67,13 +67,13 @@ void StripPeaks::init() {
                   "relatively weak comparing to "
                   "background.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, will remove peaks only in the given spectrum of the "
                   "workspace. Otherwise, all spectra will be searched.");
 
-  auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.);
   declareProperty(
       "MaximumChisq", 100., mustBePositiveDbl,

@@ -228,6 +228,8 @@ public:
   TYPE minValue() const;
   /// Returns the maximum value found in the series
   TYPE maxValue() const;
+  /// Returns the mean value found in the series
+  double mean() const;
 
   /// Returns the number of values at UNIQUE time intervals in the time series
   int size() const override;
@@ -249,7 +251,7 @@ public:
   /// Set a property from a string
   std::string setValueFromJson(const Json::Value &) override;
   /// Set a property from a DataItem
-  std::string setDataItem(const boost::shared_ptr<DataItem>) override;
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override;
 
   /// Deletes the series of values in the property
   void clear() override;

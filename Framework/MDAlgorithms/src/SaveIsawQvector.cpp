@@ -52,7 +52,7 @@ const std::string SaveIsawQvector::category() const {
 /** Initialize the algorithm's properties.
  */
 void SaveIsawQvector::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   //
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units

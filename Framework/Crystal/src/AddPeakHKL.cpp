@@ -46,7 +46,7 @@ void AddPeakHKL::init() {
           "Workspace", "", Direction::InOut),
       "An input workspace.");
   // clang-format off
-    declareProperty(std::make_unique<ArrayProperty<double>>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
+    declareProperty(std::make_unique<ArrayProperty<double>>("HKL", std::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
   // clang-format on
 }
 

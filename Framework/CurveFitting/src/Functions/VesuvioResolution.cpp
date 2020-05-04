@@ -77,7 +77,7 @@ void VesuvioResolution::setUpForFit() {
   // Voigt
 
   using namespace Mantid::API;
-  m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
 }
 
@@ -89,7 +89,7 @@ void VesuvioResolution::setUpForFit() {
  * @param endX Ending x-vaue (unused).
  */
 void VesuvioResolution::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
     double startX, double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);

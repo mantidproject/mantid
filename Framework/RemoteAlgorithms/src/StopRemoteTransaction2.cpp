@@ -24,14 +24,14 @@ using namespace Mantid::Kernel;
 
 void StopRemoteTransaction2::init() {
   auto requireValue =
-      boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>();
+      std::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty(
-      "ComputeResource", "", boost::make_shared<StringListValidator>(computes),
+      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
       "The name of the remote computer where the transaction was created",
       Direction::Input);
 

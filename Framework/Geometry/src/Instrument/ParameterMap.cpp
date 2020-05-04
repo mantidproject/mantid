@@ -183,7 +183,7 @@ const std::string ParameterMap::getDescription(const std::string &compName,
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
     if (compName == it->first->getName()) {
-      boost::shared_ptr<Parameter> param = get(it->first, name);
+      std::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getDescription();
         if (!result.empty())
@@ -207,7 +207,7 @@ ParameterMap::getShortDescription(const std::string &compName,
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
     if (compName == it->first->getName()) {
-      boost::shared_ptr<Parameter> param = get(it->first, name);
+      std::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getShortDescription();
         if (!result.empty())
@@ -371,7 +371,7 @@ void ParameterMap::add(const std::string &type, const IComponent *comp,
  * memory
  */
 void ParameterMap::add(const IComponent *comp,
-                       const boost::shared_ptr<Parameter> &par,
+                       const std::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
   checkIsNotMaskingParameter(par->name());
   // can not add null pointer
@@ -387,7 +387,7 @@ void ParameterMap::add(const IComponent *comp,
   // an
   // add/replace-style function
   if (existing_par != m_map.end()) {
-    boost::atomic_store(&(existing_par->second), par);
+    std::atomic_store(&(existing_par->second), par);
   } else {
 // When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
 // https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
@@ -626,7 +626,7 @@ void ParameterMap::addBool(const IComponent *comp, const std::string &name,
 void ParameterMap::forceUnsafeSetMasked(const IComponent *comp, bool value) {
   const std::string name("masked");
   auto param = create(pBool(), name);
-  auto typedParam = boost::dynamic_pointer_cast<ParameterType<bool>>(param);
+  auto typedParam = std::dynamic_pointer_cast<ParameterType<bool>>(param);
   typedParam->setValue(value);
 
 // When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
@@ -800,9 +800,9 @@ Parameter_sptr ParameterMap::get(const IComponent *comp,
  * @returns The named parameter of the given type if it exists or a NULL shared
  * pointer if not
  */
-boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
-                                               const char *name,
-                                               const char *type) const {
+std::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
+                                             const char *name,
+                                             const char *type) const {
   checkIsNotMaskingParameter(name);
   Parameter_sptr result;
   if (!comp)
@@ -810,7 +810,7 @@ boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
 
   auto itr = positionOf(comp, name, type);
   if (itr != m_map.end())
-    result = boost::atomic_load(&itr->second);
+    result = std::atomic_load(&itr->second);
   return result;
 }
 
@@ -893,7 +893,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
       for (auto itr = itrs.first; itr != itrs.second; ++itr) {
         const auto &param = itr->second;
         if (strcasecmp(param->type().c_str(), type.c_str()) == 0) {
-          result = boost::atomic_load(&param);
+          result = std::atomic_load(&param);
           break;
         }
       } // found->firdst
@@ -910,7 +910,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
  */
 Parameter_sptr ParameterMap::getRecursiveByType(const IComponent *comp,
                                                 const std::string &type) const {
-  boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
+  std::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
   while (compInFocus != nullptr) {
     Parameter_sptr param = getByType(compInFocus.get(), type);
     if (param) {
@@ -1014,7 +1014,7 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
 std::string ParameterMap::asString() const {
   std::stringstream out;
   for (const auto &mappair : m_map) {
-    const boost::shared_ptr<Parameter> &p = mappair.second;
+    const std::shared_ptr<Parameter> &p = mappair.second;
     if (p && mappair.first) {
       const auto *comp = dynamic_cast<const IComponent *>(mappair.first);
       const auto *det = dynamic_cast<const IDetector *>(comp);
@@ -1136,9 +1136,8 @@ void ParameterMap::addParameterFilename(const std::string &filename) {
 }
 
 /// Wrapper for ParameterFactory::create to avoid include in header
-boost::shared_ptr<Parameter>
-ParameterMap::create(const std::string &className,
-                     const std::string &name) const {
+std::shared_ptr<Parameter> ParameterMap::create(const std::string &className,
+                                                const std::string &name) const {
   return ParameterFactory::create(className, name);
 }
 

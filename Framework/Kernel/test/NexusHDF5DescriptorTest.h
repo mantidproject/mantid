@@ -42,6 +42,12 @@ public:
 
     TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.getFilename());
 
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry(
+                         "/entry/instrument/bank39/total_counts", "SDS"),
+                     true);
+
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs"), true);
+
     const std::map<std::string, std::set<std::string>> &allEntries =
         nexusHDF5Descriptor.getAllEntries();
 

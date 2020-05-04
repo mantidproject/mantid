@@ -78,8 +78,8 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   ws->setYUnitLabel(yLabel);
   ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr unit = ws->getAxis(0)->unit();
-  boost::shared_ptr<Units::Label> label =
-      boost::dynamic_pointer_cast<Units::Label>(unit);
+  std::shared_ptr<Units::Label> label =
+      std::dynamic_pointer_cast<Units::Label>(unit);
   label->setLabel("Number of Iterations", "");
 
   const size_t nspec = ws->getNumberHistograms();
@@ -127,7 +127,7 @@ void MaxEnt::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::Input,
-          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+          std::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
@@ -156,7 +156,7 @@ void MaxEnt::init() {
                   "X axis is assumed to be in the first bin. If it is not, "
                   "setting this property will automatically correct for this.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
   declareProperty(std::make_unique<PropertyWithValue<size_t>>(
                       "ResolutionFactor", 1, mustBePositive, Direction::Input),
@@ -164,7 +164,7 @@ void MaxEnt::init() {
                   "of points will be increased in the image and reconstructed "
                   "data");
 
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
@@ -207,7 +207,7 @@ void MaxEnt::init() {
       "the default value of this proporty may need changing or "
       "other changes to this implementation are required.");
 
-  mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
+  mustBePositive = std::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(1);
   declareProperty(std::make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
@@ -220,7 +220,7 @@ void MaxEnt::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
-          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+          std::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "Adjusts the calculated data by multiplying each value by the "
       "corresponding Y value of this workspace. "
       "The data in this workspace is complex in the same manner as complex "
@@ -228,7 +228,7 @@ void MaxEnt::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
-          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+          std::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "Adjusts the calculated data by adding to each value the corresponding Y "
       "value of this workspace. "
       "If DataLinearAdj is also specified, this addition is done after its "
@@ -379,26 +379,25 @@ void MaxEnt::exec() {
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
   if (complexData) {
-    dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    dataSpace = std::make_shared<MaxentSpaceComplex>();
   } else {
-    dataSpace = boost::make_shared<MaxentSpaceReal>();
+    dataSpace = std::make_shared<MaxentSpaceReal>();
   }
   // Is our image space real or complex?
   MaxentSpace_sptr imageSpace;
   if (complexImage) {
-    imageSpace = boost::make_shared<MaxentSpaceComplex>();
+    imageSpace = std::make_shared<MaxentSpaceComplex>();
   } else {
-    imageSpace = boost::make_shared<MaxentSpaceReal>();
+    imageSpace = std::make_shared<MaxentSpaceReal>();
   }
   // The type of transform. Currently a 1D Fourier Transform or Multiple ID
   // Fourier transform
   MaxentTransform_sptr transform;
   if (perSpectrumReconstruction) {
-    transform =
-        boost::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
+    transform = std::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
   } else {
-    auto complexDataSpace = boost::make_shared<MaxentSpaceComplex>();
-    transform = boost::make_shared<MaxentTransformMultiFourier>(
+    auto complexDataSpace = std::make_shared<MaxentSpaceComplex>();
+    transform = std::make_shared<MaxentTransformMultiFourier>(
         complexDataSpace, imageSpace, nHist / 2);
   }
 
@@ -406,9 +405,9 @@ void MaxEnt::exec() {
   // positive only, or positive and/or negative)
   MaxentEntropy_sptr entropy;
   if (positiveImage) {
-    entropy = boost::make_shared<MaxentEntropyPositiveValues>();
+    entropy = std::make_shared<MaxentEntropyPositiveValues>();
   } else {
-    entropy = boost::make_shared<MaxentEntropyNegativeValues>();
+    entropy = std::make_shared<MaxentEntropyNegativeValues>();
   }
 
   // Entropy and transform is all we need to set up a calculator
@@ -914,8 +913,8 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
   // X caption & label
   auto inputUnit = inWS->getAxis(0)->unit();
   if (inputUnit) {
-    boost::shared_ptr<Kernel::Units::Label> lblUnit =
-        boost::dynamic_pointer_cast<Kernel::Units::Label>(
+    std::shared_ptr<Kernel::Units::Label> lblUnit =
+        std::dynamic_pointer_cast<Kernel::Units::Label>(
             UnitFactory::Instance().create("Label"));
     if (lblUnit) {
 

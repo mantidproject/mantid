@@ -69,7 +69,7 @@ public:
   void registerOwningPresenter(UpdateableOnDemand * /*owner*/) override {}
   void zoomToPeak(const int /*peakIndex*/) override {}
   bool isHidden() const override { return true; }
-  void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/)
+  void reInitialize(std::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/)
       override { /*Do nothing*/
   }
   bool contentsDifferent(const PeaksPresenter * /*other*/) const override {

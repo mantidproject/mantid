@@ -73,7 +73,7 @@ LoadVTK(Filename='fly.vtk',SignalArrayName='volume_scalars',AdaptiveBinned=False
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidVatesAPI/vtkStructuredPoints_Silent.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <vtkDataArray.h>
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
@@ -124,7 +124,7 @@ void LoadVTK::init() {
       "Binary legacy VTK uniform structured image file to load.");
 
   auto manditorySignalArrayName =
-      boost::make_shared<MandatoryValidator<std::string>>();
+      std::make_shared<MandatoryValidator<std::string>>();
 
   this->declareProperty("SignalArrayName", "", manditorySignalArrayName,
                         "Point data array name to import as signal/intesity "
@@ -139,7 +139,7 @@ void LoadVTK::init() {
                         "produces an [[MDEventWorkspace]], otherwise an "
                         "[[MDHistoWorkspace]] is made.");
 
-  auto rangeValidator = boost::make_shared<BoundedValidator<double>>(0, 100);
+  auto rangeValidator = std::make_shared<BoundedValidator<double>>(0, 100);
   this->declareProperty("KeepTopPercent", 25.0, rangeValidator,
                         "Only keep the top percentage of SignalArray values in "
                         "the range min to max. Allow sparse regions to be "
@@ -186,7 +186,7 @@ void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals,
 
   prog.report("Converting to MD Histogram Workspace");
   MDHistoWorkspace_sptr outputWS =
-      boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
+      std::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
 
   // cppcheck-suppress unreadVariable
   double *destinationSignals = outputWS->mutableSignalArray();
@@ -251,7 +251,7 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
   this->g_log.debug(ss.str());
 
   prog.report("Converting to MD Event Workspace");
-  auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
+  auto ws = std::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
   auto bc = ws->getBoxController();
   bc->setSplitInto(2);
   bc->setSplitThreshold(10);
@@ -340,13 +340,13 @@ void LoadVTK::exec() {
   readDataset->ComputeBounds();
   readDataset->GetBounds(bounds);
   Mantid::Geometry::UnknownFrame frame("");
-  auto dimX = boost::make_shared<MDHistoDimension>(
+  auto dimX = std::make_shared<MDHistoDimension>(
       "X", "X", frame, static_cast<coord_t>(bounds[0]),
       static_cast<coord_t>(bounds[1]), dimensions[0]);
-  auto dimY = boost::make_shared<MDHistoDimension>(
+  auto dimY = std::make_shared<MDHistoDimension>(
       "Y", "Y", frame, static_cast<coord_t>(bounds[2]),
       static_cast<coord_t>(bounds[3]), dimensions[1]);
-  auto dimZ = boost::make_shared<MDHistoDimension>(
+  auto dimZ = std::make_shared<MDHistoDimension>(
       "Z", "Z", frame, static_cast<coord_t>(bounds[4]),
       static_cast<coord_t>(bounds[5]), dimensions[2]);
 

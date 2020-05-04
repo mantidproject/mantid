@@ -20,8 +20,8 @@
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::API;

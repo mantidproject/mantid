@@ -8,8 +8,8 @@
 
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -35,7 +35,7 @@ public:
 
   void test_mutex() {
     MyTask t;
-    auto mut = boost::make_shared<std::mutex>();
+    auto mut = std::make_shared<std::mutex>();
     t.setMutex(mut);
     TS_ASSERT_EQUALS(mut, t.getMutex());
   }

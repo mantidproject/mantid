@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -38,7 +38,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // test the table workspace
-    wksp = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+    wksp = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(filename));
     TS_ASSERT(wksp);
   }
@@ -411,7 +411,7 @@ public:
 
     // test the table workspace
     ITableWorkspace_sptr wksp;
-    wksp = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+    wksp = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(WKSP_NAME));
     TS_ASSERT(wksp);
 

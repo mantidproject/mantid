@@ -76,7 +76,7 @@ void ProcessBackground::init() {
   std::vector<std::string> options{"SelectBackgroundPoints", "RemovePeaks",
                                    "DeleteRegion", "AddRegion"};
 
-  auto validator = boost::make_shared<Kernel::StringListValidator>(options);
+  auto validator = std::make_shared<Kernel::StringListValidator>(options);
   declareProperty("Options", "RemovePeaks", validator,
                   "Name of the functionality realized by this algorithm.");
 
@@ -97,8 +97,7 @@ void ProcessBackground::init() {
 
   // Optional Function Type
   std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev"};
-  auto bkgdvalidator =
-      boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+  auto bkgdvalidator = std::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty(
       "BackgroundType", "Polynomial", bkgdvalidator,
       "Type of the background. Options include Polynomial and Chebyshev.");
@@ -107,7 +106,7 @@ void ProcessBackground::init() {
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   vector<string> funcoptions{"N/A", "FitGivenDataPoints", "UserFunction"};
-  auto fovalidator = boost::make_shared<StringListValidator>(funcoptions);
+  auto fovalidator = std::make_shared<StringListValidator>(funcoptions);
   declareProperty("SelectionMode", "N/A", fovalidator,
                   "If choise is UserFunction, background will be selected by "
                   "an input background "
@@ -155,8 +154,7 @@ void ProcessBackground::init() {
   // Mode to select background
   vector<string> pointsselectmode{"All Background Points",
                                   "Input Background Points Only"};
-  auto modevalidator =
-      boost::make_shared<StringListValidator>(pointsselectmode);
+  auto modevalidator = std::make_shared<StringListValidator>(pointsselectmode);
   declareProperty("BackgroundPointSelectMode", "All Background Points",
                   modevalidator, "Mode to select background points. ");
   setPropertySettings("BackgroundPointSelectMode",
@@ -201,7 +199,7 @@ void ProcessBackground::init() {
   // Output background type.
   std::vector<std::string> outbkgdtype{"Polynomial", "Chebyshev"};
   auto outbkgdvalidator =
-      boost::make_shared<Kernel::StringListValidator>(outbkgdtype);
+      std::make_shared<Kernel::StringListValidator>(outbkgdtype);
   declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
                   "Type of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundType",
@@ -288,12 +286,12 @@ void ProcessBackground::exec() {
 void ProcessBackground::setupDummyOutputWSes() {
   // Dummy outputs to make it work with python script
   setPropertyValue("UserBackgroundWorkspace", "dummy0");
-  Workspace2D_sptr dummyws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr dummyws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
   setProperty("UserBackgroundWorkspace", dummyws);
 
   setPropertyValue("OutputBackgroundParameterWorkspace", "dummy1");
-  TableWorkspace_sptr dummytbws = boost::make_shared<TableWorkspace>();
+  TableWorkspace_sptr dummytbws = std::make_shared<TableWorkspace>();
   setProperty("OutputBackgroundParameterWorkspace", dummytbws);
 }
 
@@ -333,7 +331,7 @@ void ProcessBackground::deleteRegion() {
   // region
   API::MatrixWorkspace_sptr mws =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
-  m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mws);
+  m_outputWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(mws);
   m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
 
   for (size_t i = 0; i < sizey; i++) {
@@ -430,7 +428,7 @@ void ProcessBackground::addRegion() {
   }
 
   // Construct the new Workspace
-  m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+  m_outputWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, vx.size(),
                                                vy.size()));
   m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
@@ -521,7 +519,7 @@ void ProcessBackground::selectFromGivenXValues() {
 
   size_t wsSize = realIndexes.size();
   DataObjects::Workspace2D_sptr bkgdWS =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", 1, wsSize,
                                                    wsSize));
   for (size_t i = 0; i < wsSize; ++i) {
@@ -613,7 +611,7 @@ ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
   double startx = m_lowerBound;
   double endx = m_upperBound;
   fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
+                   std::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
   fit->setProperty("InputWorkspace", bkgdWS);
   fit->setProperty("WorkspaceIndex", 0);
   fit->setProperty("MaxIterations", 500);
@@ -654,13 +652,13 @@ ProcessBackground::createBackgroundFunction(const string &backgroundtype) {
   Functions::BackgroundFunction_sptr bkgdfunction;
 
   if (backgroundtype == "Polynomial") {
-    bkgdfunction = boost::dynamic_pointer_cast<Functions::BackgroundFunction>(
-        boost::make_shared<Functions::Polynomial>());
+    bkgdfunction = std::dynamic_pointer_cast<Functions::BackgroundFunction>(
+        std::make_shared<Functions::Polynomial>());
     bkgdfunction->initialize();
   } else if (backgroundtype == "Chebyshev") {
-    Chebyshev_sptr cheby = boost::make_shared<Functions::Chebyshev>();
+    Chebyshev_sptr cheby = std::make_shared<Functions::Chebyshev>();
     bkgdfunction =
-        boost::dynamic_pointer_cast<Functions::BackgroundFunction>(cheby);
+        std::dynamic_pointer_cast<Functions::BackgroundFunction>(cheby);
     bkgdfunction->initialize();
 
     g_log.debug() << "[D] Chebyshev is set to range " << m_lowerBound << ", "
@@ -704,7 +702,7 @@ Workspace2D_sptr ProcessBackground::filterForBackground(
 
   size_t sizex = domain.size();
   size_t sizey = values.size();
-  MatrixWorkspace_sptr visualws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr visualws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 4, sizex, sizey));
   for (size_t i = 0; i < sizex; ++i) {
     for (size_t j = 0; j < 4; ++j) {
@@ -734,10 +732,9 @@ Workspace2D_sptr ProcessBackground::filterForBackground(
 
   // Build new workspace for OutputWorkspace
   size_t nspec = 3;
-  Workspace2D_sptr outws =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", nspec, wsSize,
-                                                   wsSize));
+  Workspace2D_sptr outws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      API::WorkspaceFactory::Instance().create("Workspace2D", nspec, wsSize,
+                                               wsSize));
   for (size_t i = 0; i < wsSize; ++i) {
     size_t index = selectedIndexes[i];
     for (size_t j = 0; j < nspec; ++j)
@@ -790,7 +787,7 @@ void ProcessBackground::fitBackgroundFunction(
   double startx = m_lowerBound;
   double endx = m_upperBound;
   fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
+                   std::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
   fit->setProperty("InputWorkspace", m_outputWS);
   fit->setProperty("WorkspaceIndex", 0);
   fit->setProperty("MaxIterations", 500);
@@ -817,7 +814,7 @@ void ProcessBackground::fitBackgroundFunction(
 
   // Get out the parameter names
   API::IFunction_sptr funcout = fit->getProperty("Function");
-  TableWorkspace_sptr outbkgdparws = boost::make_shared<TableWorkspace>();
+  TableWorkspace_sptr outbkgdparws = std::make_shared<TableWorkspace>();
   outbkgdparws->addColumn("str", "Name");
   outbkgdparws->addColumn("double", "Value");
 
@@ -926,7 +923,7 @@ RemovePeaks::removePeaks(const API::MatrixWorkspace_const_sptr &dataws,
     --numbkgdpointsy;
 
   // Construct output workspace
-  Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, numbkgdpoints,
                                           numbkgdpointsy));
   outws->getAxis(0)->setUnit(dataws->getAxis(0)->unit()->unitID());

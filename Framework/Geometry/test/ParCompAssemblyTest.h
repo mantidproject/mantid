@@ -90,7 +90,7 @@ public:
     CompAssembly pbank(&bank, pmap.get()); // parametrized one
 
     TS_ASSERT_EQUALS(pbank.nelements(), 3);
-    boost::shared_ptr<IComponent> det1copy;
+    std::shared_ptr<IComponent> det1copy;
     det1copy = pbank[0];
     TS_ASSERT(det1copy);
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
@@ -99,7 +99,7 @@ public:
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
 
     pmap->addV3D(det2, "pos", V3D(1, 1, 1));
-    boost::shared_ptr<IComponent> det2copy;
+    std::shared_ptr<IComponent> det2copy;
     TS_ASSERT_THROWS_NOTHING(det2copy = pbank[1]);
     TS_ASSERT_DIFFERS(det2->getPos(), det2copy->getPos());
   }
@@ -139,15 +139,15 @@ public:
 
   //  CompAssembly * createTestParAssembly()
   //  {
-  //    boost::shared_ptr<CompAssembly> bank =
-  //    boost::make_shared<CompAssembly>("Bank");
-  //    m_det1 = boost::make_shared<Component>("Det1Name");
-  //    m_det2 = boost::make_shared<Component>("Det2Name");
-  //    m_det3 = boost::make_shared<Component>("Det3Name");
+  //    std::shared_ptr<CompAssembly> bank =
+  //    std::make_shared<CompAssembly>("Bank");
+  //    m_det1 = std::make_shared<Component>("Det1Name");
+  //    m_det2 = std::make_shared<Component>("Det2Name");
+  //    m_det3 = std::make_shared<Component>("Det3Name");
   //    bank->add(det1.get());
   //    bank->add(det2.get());
   //    bank->add(det3.get());
   //  }
   //  // Keep references to detectors alive
-  //  boost::shared_ptr<Component> m_det1, m_det2, m_det3
+  //  std::shared_ptr<Component> m_det1, m_det2, m_det3
 };

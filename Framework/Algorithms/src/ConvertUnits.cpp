@@ -36,7 +36,7 @@ using namespace HistogramData;
 
 /// Initialisation method
 void ConvertUnits::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -48,16 +48,16 @@ void ConvertUnits::init() {
   // Extract the current contents of the UnitFactory to be the allowed values of
   // the Target property
   declareProperty("Target", "",
-                  boost::make_shared<StringListValidator>(
+                  std::make_shared<StringListValidator>(
                       UnitFactory::Instance().getConvertibleUnits()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
@@ -110,7 +110,7 @@ void ConvertUnits::exec() {
                           << "), so just pointing the output workspace "
                              "property to the input workspace.\n";
       setProperty("OutputWorkspace",
-                  boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+                  std::const_pointer_cast<MatrixWorkspace>(inputWS));
       return;
     } else {
       // Clone the workspace.
@@ -120,7 +120,7 @@ void ConvertUnits::exec() {
       duplicate->setProperty("InputWorkspace", inputWS);
       duplicate->execute();
       Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-      auto outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      auto outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
       setProperty("OutputWorkspace", outputWs);
       return;
     }
@@ -140,7 +140,7 @@ void ConvertUnits::exec() {
       convToHist->setProperty("InputWorkspace", inputWS);
       convToHist->execute();
       MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
-      correctWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      correctWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
       if (!correctWS->isHistogramData()) {
         throw std::runtime_error(
@@ -165,7 +165,7 @@ void ConvertUnits::exec() {
     convtoPoints->setProperty("InputWorkspace", outputWS);
     convtoPoints->execute();
     MatrixWorkspace_sptr temp = convtoPoints->getProperty("OutputWorkspace");
-    outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     if (outputWS->isHistogramData()) {
       throw std::runtime_error(
@@ -258,7 +258,7 @@ void ConvertUnits::setupMemberVariables(
   m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
   // Check if its an event workspace
   m_inputEvents =
-      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != nullptr);
+      (std::dynamic_pointer_cast<const EventWorkspace>(inputWS) != nullptr);
 
   m_inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");
@@ -358,7 +358,7 @@ ConvertUnits::convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS,
   }
 
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   // If we get to here then the bins weren't aligned and each spectrum is
@@ -537,7 +537,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   auto &outSpectrumInfo = outputWS->mutableSpectrumInfo();
@@ -651,7 +651,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
  *  @param WS The workspace to operate on
  */
 void ConvertUnits::reverse(const API::MatrixWorkspace_sptr &WS) {
-  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(WS);
   auto isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
   if (WS->isCommonBins() && !isInputEvents) {

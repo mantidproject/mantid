@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DateValidator.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <ctime>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -93,7 +93,7 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
 
 /// create a copy of the the validator
 IValidator_sptr DateValidator::clone() const {
-  return boost::make_shared<DateValidator>(*this);
+  return std::make_shared<DateValidator>(*this);
 }
 
 /** Checks the given value is a valid date

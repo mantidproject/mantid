@@ -37,7 +37,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <Poco/File.h>
 
@@ -71,7 +71,7 @@ EventWorkspace_sptr
 createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   double binDelta = 10.0;
 
-  auto retVal = boost::make_shared<EventWorkspace>();
+  auto retVal = std::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
   // --------- Load the instrument -----------
@@ -145,11 +145,11 @@ makeFakeMDEventWorkspace(const std::string &wsName, long numEvents,
   ws1->setCoordinateSystem(coord);
   ws1->getBoxController()->setSplitThreshold(100);
   API::AnalysisDataService::Instance().addOrReplace(
-      wsName, boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
+      wsName, std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
   FakeMD dataFaker(std::vector<double>(1, static_cast<double>(numEvents)),
                    std::vector<double>(), 0, true);
   dataFaker.fill(ws1);
-  return boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(
+  return std::dynamic_pointer_cast<MDEventWorkspace3Lean>(
       API::AnalysisDataService::Instance().retrieve(wsName));
 }
 
@@ -258,7 +258,7 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
         names[d], names[d], frame, min[d], max[d], numBins[d])));
 
   MDHistoWorkspace_sptr ws_sptr =
-      boost::make_shared<MDHistoWorkspace>(dimensions);
+      std::make_shared<MDHistoWorkspace>(dimensions);
   ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
@@ -292,7 +292,7 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
         names[d], names[d], frame, min[d], max[d], numBins[d])));
 
   MDHistoWorkspace_sptr ws_sptr =
-      boost::make_shared<MDHistoWorkspace>(dimensions);
+      std::make_shared<MDHistoWorkspace>(dimensions);
   ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
@@ -320,33 +320,27 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
   // MDHistoWorkspace *ws = nullptr;
   MDHistoWorkspace_sptr ws_sptr;
   if (numDims == 1) {
-    ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
-                                             numBins));
+    ws_sptr =
+        std::make_shared<MDHistoWorkspace>(std::make_shared<MDHistoDimension>(
+            "x", "x", frame, 0.0f, max, numBins));
   } else if (numDims == 2) {
-    ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
-                                             numBins),
-        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
-                                             numBins));
+    ws_sptr = std::make_shared<MDHistoWorkspace>(
+        std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
+        std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
+                                           numBins));
   } else if (numDims == 3) {
-    ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
-                                             numBins),
-        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
-                                             numBins),
-        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
-                                             numBins));
+    ws_sptr = std::make_shared<MDHistoWorkspace>(
+        std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
+        std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max, numBins),
+        std::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
+                                           numBins));
   } else if (numDims == 4) {
-    ws_sptr = boost::make_shared<MDHistoWorkspace>(
-        boost::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max,
-                                             numBins),
-        boost::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
-                                             numBins),
-        boost::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
-                                             numBins),
-        boost::make_shared<MDHistoDimension>("t", "t", frame, 0.0f, max,
-                                             numBins));
+    ws_sptr = std::make_shared<MDHistoWorkspace>(
+        std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
+        std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max, numBins),
+        std::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max, numBins),
+        std::make_shared<MDHistoDimension>("t", "t", frame, 0.0f, max,
+                                           numBins));
   }
 
   if (!ws_sptr)
@@ -354,7 +348,7 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
         " invalid or unsupported number of dimensions given");
 
   ws_sptr->setTo(signal, errorSquared, numEvents);
-  ws_sptr->addExperimentInfo(boost::make_shared<ExperimentInfo>());
+  ws_sptr->addExperimentInfo(std::make_shared<ExperimentInfo>());
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
   return ws_sptr;

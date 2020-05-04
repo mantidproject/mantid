@@ -10,7 +10,7 @@
 #include <QPoint>
 #include <QRect>
 #include <QTableWidget>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <qwt_plot.h>
 
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
@@ -48,7 +48,7 @@ public:
   ~SpectrumDisplay() override;
 
   virtual bool hasData(const std::string &wsName,
-                       const boost::shared_ptr<Mantid::API::Workspace> ws);
+                       const std::shared_ptr<Mantid::API::Workspace> &ws);
 
   /// Set some properties of the SpectrumPlotItem object
   void setupSpectrumPlotItem();
@@ -103,9 +103,9 @@ public:
 
   QwtPlot *spectrumPlot() const { return m_spectrumPlot; }
 
-  void addOther(const boost::shared_ptr<SpectrumDisplay> &other);
-  void addOthers(const QList<boost::shared_ptr<SpectrumDisplay>> &others);
-  void removeOther(const boost::shared_ptr<SpectrumDisplay> &other);
+  void addOther(const std::shared_ptr<SpectrumDisplay> &other);
+  void addOthers(const QList<std::shared_ptr<SpectrumDisplay>> &others);
+  void removeOther(const std::shared_ptr<SpectrumDisplay> &other);
 
   void setTrackingOn(bool on);
 
@@ -151,7 +151,7 @@ private:
   double m_totalYMin;
   double m_totalYMax;
 
-  QList<boost::weak_ptr<SpectrumDisplay>> m_otherDisplays;
+  QList<std::weak_ptr<SpectrumDisplay>> m_otherDisplays;
   TrackingPicker *m_imagePicker;
 };
 

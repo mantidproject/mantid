@@ -15,7 +15,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
+#include <memory>
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>

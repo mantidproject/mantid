@@ -49,8 +49,8 @@ public:
   setAttribute(const std::string &attName,
                const Mantid::API::IFunction::Attribute &attValue) override;
   void setMatrixWorkspace(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
-      size_t wi, double startX, double endX) override;
+      std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
+      double startX, double endX) override;
 
 private:
   std::vector<double>

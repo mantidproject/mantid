@@ -76,7 +76,7 @@ void CrystalStructure::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) {
 CompositeBraggScatterer_sptr CrystalStructure::getScatterers() const {
   BraggScatterer_sptr clone = m_scatterers->clone();
 
-  return boost::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
+  return std::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
 }
 
 /// Remove all scatterers and set the supplied ones as new scatterers.

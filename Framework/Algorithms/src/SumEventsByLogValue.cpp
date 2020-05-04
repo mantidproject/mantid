@@ -47,12 +47,12 @@ void SumEventsByLogValue::init() {
                   "otherwise.");
 
   declareProperty("LogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the number series log against which the data "
                   "should be summed");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", "", boost::make_shared<RebinParamsValidator>(true)),
+          "OutputBinning", "", std::make_shared<RebinParamsValidator>(true)),
       "Binning parameters for the output workspace (see [[Rebin]] for syntax) "
       "(Optional for logs holding integer values, mandatory otherwise)");
 }

@@ -104,7 +104,7 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData,
 #if GSL_MAJOR_VERSION < 2
   if (!m_bsplineDerivWorkspace) {
     gsl_bspline_deriv_workspace *ws = gsl_bspline_deriv_alloc(k);
-    m_bsplineDerivWorkspace = boost::shared_ptr<gsl_bspline_deriv_workspace>(
+    m_bsplineDerivWorkspace = std::shared_ptr<gsl_bspline_deriv_workspace>(
         ws, ReleaseBSplineDerivativeWorkspace());
   }
 #endif
@@ -184,7 +184,7 @@ void BSpline::resetGSLObjects() {
   gsl_bspline_workspace *ws = gsl_bspline_alloc(static_cast<size_t>(order),
                                                 static_cast<size_t>(nbreak));
   m_bsplineWorkspace =
-      boost::shared_ptr<gsl_bspline_workspace>(ws, ReleaseBSplineWorkspace());
+      std::shared_ptr<gsl_bspline_workspace>(ws, ReleaseBSplineWorkspace());
 #if GSL_MAJOR_VERSION < 2
   m_bsplineDerivWorkspace.reset();
 #endif

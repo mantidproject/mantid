@@ -17,7 +17,7 @@
 #include "MantidKernel/Unit.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 
@@ -34,7 +34,7 @@ public:
     Mantid::API::Workspace_sptr loadedWS =
         loader.getProperty("OutputWorkspace");
     auto inWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedWS);
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedWS);
     WorkspaceHelpers::makeDistribution(inWS);
     return inWS;
   }

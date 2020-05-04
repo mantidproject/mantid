@@ -197,11 +197,11 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
                const size_t wavelengthPoints) {
   // Build a quite standard and somewhat complete instrument.
   auto instrument =
-      boost::make_shared<Geometry::Instrument>("MC_simulation_instrument");
+      std::make_shared<Geometry::Instrument>("MC_simulation_instrument");
   const auto refFrame = modelWS.getInstrument()->getReferenceFrame();
 
   instrument->setReferenceFrame(
-      boost::make_shared<Geometry::ReferenceFrame>(*refFrame));
+      std::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
   constexpr Kernel::V3D samplePos{0.0, 0.0, 0.0};
   auto sample = std::make_unique<Geometry::ObjComponent>("sample", nullptr,

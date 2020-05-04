@@ -58,7 +58,7 @@ const std::string ConvertUnitsUsingDetectorTable::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertUnitsUsingDetectorTable::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<API::WorkspaceUnitValidator>();
   wsValidator->add<API::HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
@@ -68,7 +68,7 @@ void ConvertUnitsUsingDetectorTable::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
   declareProperty("Target", "",
-                  boost::make_shared<StringListValidator>(
+                  std::make_shared<StringListValidator>(
                       UnitFactory::Instance().getConvertibleUnits()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
@@ -177,7 +177,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
   // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   auto &spectrumInfo = outputWS->mutableSpectrumInfo();
