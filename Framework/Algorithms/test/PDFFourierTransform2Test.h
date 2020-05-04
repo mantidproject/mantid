@@ -193,8 +193,7 @@ public:
   }
 
   void test_reverse() {
-    API::Workspace_sptr ws =
-        createWS(20, 0.1, "CheckResult", "AtomicDistance");
+    API::Workspace_sptr ws = createWS(20, 0.1, "CheckResult", "AtomicDistance");
 
     // 1. Run PDFFT
     PDFFourierTransform2 pdfft;

@@ -77,9 +77,10 @@ void PDFFourierTransform2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
                   "Input spectrum density or paired-distribution function");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
-                  "Result paired-distribution function or Input spectrum density");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
+      "Result paired-distribution function or Input spectrum density");
 
   std::vector<std::string> directionOptions;
   directionOptions.emplace_back(FORWARD);
@@ -113,9 +114,9 @@ void PDFFourierTransform2::init() {
       "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
   setPropertySettings("Qmin", std::make_unique<EnabledWhenProperty>(
                                   "Direction", IS_EQUAL_TO, FORWARD));
-  declareProperty(
-      "Qmax", EMPTY_DBL(), mustBePositive,
-      "Maximum Q in S(Q) to calculate in Fourier transform. (optional, defaults to 40 on backward transform.)");
+  declareProperty("Qmax", EMPTY_DBL(), mustBePositive,
+                  "Maximum Q in S(Q) to calculate in Fourier transform. "
+                  "(optional, defaults to 40 on backward transform.)");
   declareProperty("Filter", false,
                   "Set to apply Lorch function filter to the input");
 
@@ -136,9 +137,10 @@ void PDFFourierTransform2::init() {
   declareProperty("Rmin", EMPTY_DBL(), mustBePositive,
                   "Minimum r for G(r) to calculate. (optional)");
   setPropertySettings("Rmin", std::make_unique<EnabledWhenProperty>(
-                                    "Direction", IS_EQUAL_TO, BACKWARD));
+                                  "Direction", IS_EQUAL_TO, BACKWARD));
   declareProperty("Rmax", EMPTY_DBL(), mustBePositive,
-                  "Maximum r for G(r) to calculate. (optional, defaults to 20 on forward transform.)");
+                  "Maximum r for G(r) to calculate. (optional, defaults to 20 "
+                  "on forward transform.)");
   declareProperty(
       "rho0", EMPTY_DBL(), mustBePositive,
       "Average number density used for g(r) and RDF(r) conversions (optional)");
@@ -271,9 +273,10 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
   // convert to Q[S(Q)-1]
   string soqType = getProperty("SofQType");
   if (!isDefault("InputSofQType") && isDefault("SofQType")) {
-	soqType = getProperty("InputSofQType");
-    g_log.warning() << "InputSofQType has been deprecated and replaced by SofQType\n";
-  } 
+    soqType = getProperty("InputSofQType");
+    g_log.warning()
+        << "InputSofQType has been deprecated and replaced by SofQType\n";
+  }
   if (soqType == S_OF_Q) {
     g_log.information() << "Subtracting one from all values\n";
     // there is no error propagation for subtracting one
@@ -340,7 +343,7 @@ void PDFFourierTransform2::convertFromSQMinus1(
     soqType = getProperty("InputSofQType");
     g_log.warning()
         << "InputSofQType has been deprecated and replaced by SofQType\n";
-  } 
+  }
   if (soqType == S_OF_Q) {
     for (size_t i = 0; i < FOfQ.size(); ++i) {
       // transform the data
@@ -456,7 +459,7 @@ void PDFFourierTransform2::exec() {
     if (isEmpty(outMax)) {
       outMax = 20;
     }
-  } else if (direction == BACKWARD) {
+  } else {
     convertToLittleGRPlus1(inputY, inputX, inputDY, inputDX);
     inDelta = getProperty("DeltaR");
     inMin = getProperty("Rmin");
