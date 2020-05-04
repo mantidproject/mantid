@@ -10,8 +10,7 @@ from math import sqrt, ceil, floor
 from distutils.version import LooseVersion
 
 from qtpy import QT_VERSION, QtGui
-
-from Muon.GUI.Common.plotting_widget.external_plotting_model import PlotInformation
+from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import PlotInformation
 from mantid.plots.utility import legend_set_draggable
 
 
