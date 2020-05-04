@@ -347,11 +347,35 @@ def get_detectors_indices(workspace):
     (ie every detector which is not a monitor)
 
     :param workspace: a Workspace2D or an EventWorkspace
+    :return : the detectors' spectrum indices as a range if possible, else as a numpy array
     """
     total_range = workspace.getNumberHistograms()
     spectrum_info = workspace.spectrumInfo()
-    indices = [i for i in range(total_range) if not spectrum_info.isMonitor(i)]
-    return indices
+    monitors_indices = [i for i in range(total_range) if spectrum_info.isMonitor(i)]
+    monitor_count = len(monitors_indices)
+
+    # If possible, ie the detectors' indices are continuous, we return a range.
+    # If not, we return a numpy array
+    range_start = -1
+    range_end = total_range
+    is_range = True
+    for index, i in enumerate(monitors_indices):
+        if index == i:
+            range_start = i
+        else:
+            if monitor_count - index == total_range - i and monitors_indices[-1] == total_range - 1:
+                range_end = i
+            else:
+                is_range = False
+            break
+
+    if is_range:
+        return range(range_start + 1, range_end)
+    else:
+        indices = [i for i in range(total_range)]
+        for monitor in monitors_indices:
+            indices.remove(monitor)
+        return np.array(indices)
 
 
 def get_bins(workspace, wkspIndex, withDy=False):
