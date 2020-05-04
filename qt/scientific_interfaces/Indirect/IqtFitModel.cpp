@@ -151,20 +151,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFitModel::IqtFitModel()
-    : IndirectFittingModel(), m_makeBetaGlobal(false),
-      m_constrainIntensities(false) {}
-
-MultiDomainFunction_sptr IqtFitModel::getMultiDomainFunction() const {
-  if (m_makeBetaGlobal)
-    return createFunctionWithGlobalBeta(getFittingFunction());
-  return IndirectFittingModel::getMultiDomainFunction();
-}
-
-IAlgorithm_sptr IqtFitModel::getFittingAlgorithm() const {
-  if (m_makeBetaGlobal)
-    return createSimultaneousFitWithEqualRange(getMultiDomainFunction());
-  return IndirectFittingModel::getFittingAlgorithm();
-}
+    : IndirectFittingModel(), m_constrainIntensities(false) {}
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
@@ -225,23 +212,6 @@ IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
   parameters["Stretching"] = ParameterValue(1.0);
   parameters["A0"] = ParameterValue(0.0);
   return parameters;
-}
-
-MultiDomainFunction_sptr IqtFitModel::createFunctionWithGlobalBeta(
-    const IFunction_sptr &function) const {
-  std::shared_ptr<MultiDomainFunction> multiDomainFunction(
-      new MultiDomainFunction);
-  const auto functionString = function->asString();
-  for (auto i = TableDatasetIndex{0}; i < numberOfWorkspaces(); ++i) {
-    auto addDomains = [&](WorkspaceIndex /*unused*/) {
-      const auto index = multiDomainFunction->nFunctions();
-      multiDomainFunction->addFunction(createFunction(functionString));
-      multiDomainFunction->setDomainIndex(index, index);
-    };
-    applySpectra(i, addDomains);
-  }
-  addGlobalTie(*multiDomainFunction, "Stretching");
-  return multiDomainFunction;
 }
 
 } // namespace IDA

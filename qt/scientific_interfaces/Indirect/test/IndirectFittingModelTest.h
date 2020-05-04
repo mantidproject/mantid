@@ -345,47 +345,6 @@ public:
   }
 
   void
-  test_that_createDisplayName_returns_valid_string_when_provided_an_in_range_dataIndex() {
-    auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
-
-    std::string const formatString = "%1%_s%2%_Gaussian";
-    std::string const rangeDelimiter = "_to_";
-
-    TS_ASSERT_EQUALS(model->createOutputName(formatString, rangeDelimiter, 0),
-                     "WorkspaceName_s0_Gaussian_Results");
-  }
-
-  void
-  test_that_createDisplayName_returns_string_with_red_removed_from_the_workspace_name() {
-    auto const model = createModelWithSingleWorkspace("Workspace_3456_red", 1);
-
-    std::string const formatString = "%1%_s%2%_Gaussian";
-    std::string const rangeDelimiter = "_to_";
-
-    TS_ASSERT_EQUALS(model->createOutputName(formatString, rangeDelimiter, 0),
-                     "Workspace_3456_s0_Gaussian_Results");
-  }
-
-  void
-  test_that_createDisplayName_returns_correct_name_when_provided_a_valid_rangeDelimiter_and_formatString() {
-    auto const model = createModelWithSingleWorkspace("Workspace_3456_red", 1);
-
-    std::vector<std::string> const formatStrings{
-        "%1%_s%2%_Gaussian", "%1%_f%2%,s%2%_MSD", "%1%_s%2%_TeixeiraWater"};
-    std::string const rangeDelimiter = "_to_";
-
-    TS_ASSERT_EQUALS(
-        model->createOutputName(formatStrings[0], rangeDelimiter, 0),
-        "Workspace_3456_s0_Gaussian_Results");
-    TS_ASSERT_EQUALS(
-        model->createOutputName(formatStrings[1], rangeDelimiter, 0),
-        "Workspace_3456_f0+s0_MSD_Results");
-    TS_ASSERT_EQUALS(
-        model->createOutputName(formatStrings[2], rangeDelimiter, 0),
-        "Workspace_3456_s0_TeixeiraWater_Results");
-  }
-
-  void
   test_that_isMultiFit_returns_true_when_there_are_more_than_one_workspaces_stored_in_the_model() {
     auto const model =
         createModelWithMultipleWorkspaces(3, "Workspace1", "Workspace2");
