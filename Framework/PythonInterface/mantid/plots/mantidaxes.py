@@ -13,6 +13,8 @@ except ImportError:
 import copy
 import numpy as np
 
+from copy import copy
+
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
 from matplotlib.colors import Colormap
@@ -285,6 +287,51 @@ class MantidAxes(Axes):
         return tracked_artists
 
     def remove_workspace_artists(self, workspace):
+        if self.is_waterfall():
+            return self._remove_workspace_artists_waterfall(workspace=workspace)
+        else:
+            return self._remove_workspace_artists(workspace)
+
+    def remove_artists_if(self, unary_predicate):
+        if self.is_waterfall():
+            return self._remove_workspace_artists_waterfall(predicate=unary_predicate)
+        else:
+            return self._remove_artists_if(unary_predicate)
+
+    def _remove_workspace_artists_waterfall(self, workspace=None, predicate=None):
+        """
+        Perform the steps necessary to maintain waterfall plot settings before removing
+        the artists. Output is based on the inner function.
+        If workspace is set, uses _remove_workspace_artists()
+        otherwise if predicate is set, uses _remove_artists_if()
+        otherwise raises a RuntimeError.
+        :param workspace: A Workspace object
+        :param predicate: A unary predicate used to select artists.
+        :return: The output of the inner function.
+        """
+        waterfall_x_offset = copy(self.waterfall_x_offset)
+        waterfall_y_offset = copy(self.waterfall_y_offset)
+        has_fills = self.waterfall_has_fill()
+
+        self.update_waterfall(0, 0)
+
+        if workspace is not None:
+            output = self._remove_workspace_artists(workspace)
+        elif predicate is not None:
+            output = self._remove_artists_if(predicate)
+        else:
+            raise RuntimeError("A workspace or predicate is required.")
+
+        self.update_waterfall(waterfall_x_offset, waterfall_y_offset)
+
+        if len(self.lines) == 1:  # Can't have waterfall plots with only one line.
+            self.set_waterfall(False)
+        elif has_fills:
+            datafunctions.waterfall_update_fill(self)
+
+        return output
+
+    def _remove_workspace_artists(self, workspace):
         """
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
@@ -302,7 +349,7 @@ class MantidAxes(Axes):
 
         return True
 
-    def remove_artists_if(self, unary_predicate):
+    def _remove_artists_if(self, unary_predicate):
         """
         Remove any artists which satisfy the predicate and return True
         if the axes is then empty
