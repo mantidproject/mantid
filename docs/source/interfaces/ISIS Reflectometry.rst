@@ -222,6 +222,7 @@ The **Tools** menu provides access to options and utilities:
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | Slit Calculator  | Tool for calculating approximate slit widths             |
+| Options          | Tool for controlling warnings and rounding precision     |
 +------------------+----------------------------------------------------------+
 
 Runs Tab

@@ -12,6 +12,10 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ############################
 
+New
+---
+The **Options** dialog can now be accessed from the Tools menu, controlling the display of warnings and rounding precision.
+
 Bug fixes
 ---------
 
