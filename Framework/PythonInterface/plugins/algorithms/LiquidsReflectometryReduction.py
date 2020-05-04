@@ -186,6 +186,12 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
             # Sum up the normalization peak
             norm_summed = SumSpectra(InputWorkspace = norm_cropped)
+            norm_summed = RebinToWorkspace(WorkspaceToRebin=norm_summed,
+                                           WorkspaceToMatch=data_cropped,
+                                           OutputWorkspace=str(norm_summed))
+
+            # Sum up the normalization peak
+            norm_summed = SumSpectra(InputWorkspace = norm_cropped)
 
             # Normalize the data
             normalized_data = data_cropped / norm_summed
