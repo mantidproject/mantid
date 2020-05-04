@@ -99,20 +99,18 @@ public:
         createWS(20, 0.1, "CheckResult", "MomentumTransfer");
 
     // 1. Run PDFFT
-    auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "PDFGofR");
+    pdfft.setProperty("InputSofQType", "S(Q)");
+    pdfft.setProperty("Rmax", 20.0);
+    pdfft.setProperty("DeltaR", 0.01);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
 
-    pdfft->initialize();
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("InputSofQType", "S(Q)");
-    pdfft->setProperty("Rmax", 20.0);
-    pdfft->setProperty("DeltaR", 0.01);
-    pdfft->setProperty("Qmin", 0.0);
-    pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)");
-
-    pdfft->execute();
+    pdfft.execute();
 
     DataObjects::Workspace2D_sptr pdfws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -134,20 +132,18 @@ public:
         createWS(20, 0.1, "CheckNan", "MomentumTransfer", true);
 
     // 1. Run PDFFT
-    auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "PDFGofR");
+    pdfft.setProperty("InputSofQType", "S(Q)");
+    pdfft.setProperty("Rmax", 20.0);
+    pdfft.setProperty("DeltaR", 0.01);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
 
-    pdfft->initialize();
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("InputSofQType", "S(Q)");
-    pdfft->setProperty("Rmax", 20.0);
-    pdfft->setProperty("DeltaR", 0.01);
-    pdfft->setProperty("Qmin", 0.0);
-    pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)");
-
-    pdfft->execute();
+    pdfft.execute();
 
     DataObjects::Workspace2D_sptr pdfws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -172,18 +168,16 @@ public:
     }
 
     // 1. Run PDFFT
-    auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "PDFGofR");
+    pdfft.setProperty("InputSofQType", "S(Q)-1");
+    pdfft.setProperty("Qmax", 20.0);
+    pdfft.setProperty("PDFType", "G(r)");
+    pdfft.setProperty("Filter", true);
 
-    pdfft->initialize();
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("InputSofQType", "S(Q)-1");
-    pdfft->setProperty("Qmax", 20.0);
-    pdfft->setProperty("PDFType", "G(r)");
-    pdfft->setProperty("Filter", true);
-
-    pdfft->execute();
+    pdfft.execute();
 
     DataObjects::Workspace2D_sptr pdfws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -214,17 +208,16 @@ public:
 
   void setUp() override {
     ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
-    pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform pdfft;
 
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "outputWS");
-    pdfft->setProperty("InputSofQType", "S(Q)");
-    pdfft->setProperty("Rmax", 20.0);
-    pdfft->setProperty("DeltaR", 0.01);
-    pdfft->setProperty("Qmin", 0.0);
-    pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)");
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "outputWS");
+    pdfft.setProperty("InputSofQType", "S(Q)");
+    pdfft.setProperty("Rmax", 20.0);
+    pdfft.setProperty("DeltaR", 0.01);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
   }
 
   void tearDown() override {

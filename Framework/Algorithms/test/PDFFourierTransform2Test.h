@@ -64,7 +64,7 @@ Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
 }
 } // namespace
 
-class PDFFourierTransformTest : public CxxTest::TestSuite {
+class PDFFourierTransform2Test : public CxxTest::TestSuite {
 public:
   void test_Init() {
     PDFFourierTransform2 alg;
@@ -99,20 +99,18 @@ public:
         createWS(20, 0.1, "CheckResult", "MomentumTransfer");
 
     // 1. Run PDFFT
-    auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "PDFGofR");
+    pdfft.setProperty("SofQType", "S(Q)");
+    pdfft.setProperty("Rmax", 20.0);
+    pdfft.setProperty("DeltaR", 0.01);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
 
-    pdfft->initialize();
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("SofQType", "S(Q)");
-    pdfft->setProperty("Rmax", 20.0);
-    pdfft->setProperty("DeltaR", 0.01);
-    pdfft->setProperty("Qmin", 0.0);
-    pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)");
-
-    pdfft->execute();
+    pdfft.execute();
 
     DataObjects::Workspace2D_sptr pdfws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -123,8 +121,8 @@ public:
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
-    TS_ASSERT_DELTA(GofR[0], 0.0186, 0.0001);
-    TS_ASSERT_DELTA(GofR[249], -0.3867, 0.0001);
+    TS_ASSERT_DELTA(GofR[0], 0.0200, 0.0001);
+    TS_ASSERT_DELTA(GofR[249], -0.4928, 0.0001);
     TS_ASSERT_EQUALS(pdfUnit->caption(), "Atomic Distance");
   }
 
@@ -134,20 +132,18 @@ public:
         createWS(20, 0.1, "CheckNan", "MomentumTransfer", true);
 
     // 1. Run PDFFT
-    auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "PDFGofR");
+    pdfft.setProperty("SofQType", "S(Q)");
+    pdfft.setProperty("Rmax", 20.0);
+    pdfft.setProperty("DeltaR", 0.01);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
 
-    pdfft->initialize();
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("SofQType", "S(Q)");
-    pdfft->setProperty("Rmax", 20.0);
-    pdfft->setProperty("DeltaR", 0.01);
-    pdfft->setProperty("Qmin", 0.0);
-    pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)");
-
-    pdfft->execute();
+    pdfft.execute();
 
     DataObjects::Workspace2D_sptr pdfws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -172,18 +168,16 @@ public:
     }
 
     // 1. Run PDFFT
-    auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "PDFGofR");
+    pdfft.setProperty("SofQType", "S(Q)-1");
+    pdfft.setProperty("Qmax", 20.0);
+    pdfft.setProperty("PDFType", "G(r)");
+    pdfft.setProperty("Filter", true);
 
-    pdfft->initialize();
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "PDFGofR");
-    pdfft->setProperty("SofQType", "S(Q)-1");
-    pdfft->setProperty("Qmax", 20.0);
-    pdfft->setProperty("PDFType", "G(r)");
-    pdfft->setProperty("Filter", true);
-
-    pdfft->execute();
+    pdfft.execute();
 
     DataObjects::Workspace2D_sptr pdfws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -192,39 +186,70 @@ public:
 
     TS_ASSERT(GofR[0] > 40.0);
     for (size_t i = 1; i < GofR.size(); i++) {
-      TS_ASSERT_LESS_THAN(fabs(GofR[i]), 1e-12);
+      TS_ASSERT_LESS_THAN(fabs(GofR[i]), 0.2);
     }
 
     Mantid::API::AnalysisDataService::Instance().clear();
   }
+
+  void test_reverse() {
+    API::Workspace_sptr ws =
+        createWS(20, 0.1, "CheckResult", "AtomicDistance");
+
+    // 1. Run PDFFT
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "SofQ");
+    pdfft.setProperty("SofQType", "S(Q)");
+    pdfft.setProperty("Qmax", 20.0);
+    pdfft.setProperty("DeltaQ", 0.01);
+    pdfft.setProperty("Rmin", 0.0);
+    pdfft.setProperty("Rmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
+
+    pdfft.execute();
+
+    DataObjects::Workspace2D_sptr sofqws =
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+            API::AnalysisDataService::Instance().retrieve("SofQ"));
+    const auto &Q = sofqws->x(0);
+    const auto &SofQ = sofqws->y(0);
+    const auto &SofQUnit = sofqws->getAxis(0)->unit();
+
+    TS_ASSERT_DELTA(Q[0], 0.01, 0.0001);
+    TS_ASSERT_DELTA(Q[249], 2.5, 0.0001);
+    TS_ASSERT_DELTA(SofQ[0], 5.1875, 0.0001);
+    TS_ASSERT_DELTA(SofQ[249], 1.1068, 0.0001);
+    TS_ASSERT_EQUALS(SofQUnit->caption(), "q");
+  }
 };
 
-class PDFFourierTransformTestPerformance : public CxxTest::TestSuite {
+class PDFFourierTransform2TestPerformance : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PDFFourierTransformTestPerformance *createSuite() {
-    return new PDFFourierTransformTestPerformance();
+  static PDFFourierTransform2TestPerformance *createSuite() {
+    return new PDFFourierTransform2TestPerformance();
   }
 
-  static void destroySuite(PDFFourierTransformTestPerformance *suite) {
+  static void destroySuite(PDFFourierTransform2TestPerformance *suite) {
     delete suite;
   }
 
   void setUp() override {
     ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
-    pdfft =
-        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
+    PDFFourierTransform2 pdfft;
 
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "outputWS");
-    pdfft->setProperty("SofQType", "S(Q)");
-    pdfft->setProperty("Rmax", 20.0);
-    pdfft->setProperty("DeltaR", 0.01);
-    pdfft->setProperty("Qmin", 0.0);
-    pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)");
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "outputWS");
+    pdfft.setProperty("SofQType", "S(Q)");
+    pdfft.setProperty("Rmax", 20.0);
+    pdfft.setProperty("DeltaR", 0.01);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
   }
 
   void tearDown() override {
