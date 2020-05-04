@@ -1,7 +1,7 @@
-.. _GettingStartedWithPyCharm:
+.. _PyCharm:
 
-Getting Started with PyCharm
-============================
+PyCharm
+=======
 
 PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
 
@@ -23,7 +23,7 @@ Setting up PyCharm on Windows
 
    .. code-block:: sh
 
-      <Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe
+      <Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/python.exe
 
    This is the interpreter, so select "Ok" and apply the changes. This should bring up a list of all the packages associated to the interpreter. There should be many packages, however you should not see PyQt (but instead QtPy).
 
@@ -103,7 +103,7 @@ This can be done in two ways:
        <Mantid Build Directory>\bin\Debug;
        <Mantid Source Directory>\external\src\ThirdParty\bin;
        <Mantid Source Directory>\external\src\ThirdParty\bin\mingw;
-       <Mantid Source Directory>\external\src\ThirdParty\lib\python2.7;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\python3.8;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\plugins;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\bin;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\bin;
@@ -157,31 +157,40 @@ This **does not** require a PyCharm Professional license for debugging, but requ
 5. You should now be able to click the Run/Debug icons next to each unit test method or class to run/debug them.
 
 
-Remote Debugging of Unit Tests with PyCharm
-###########################################
+Remote Debugging with PyCharm
+#############################
 
-This requires a PyCharm Professional license for the Remote Debugging feature.
+A PyCharm Professional license is required to use the Remote Debugging feature.
 
-This approach can be used to debug unit tests. However, as the required package ``pydevd`` is not shipped with Mantid, we need to manually add it at runtime. This can be done by appending a directory that contains the installed ``pydevd`` package on the ``PYTHONPATH``. The following code does so at runtime::
+This functionality is useful for debugging python code that is spawned in separate threads, such as Python algorithms and system tests.
 
-    PYTHON_ROOT="<Change this to point to a Python installation that has pydevd installed>"
-    # PYTHON_ROOT="c:/users/<username>/apps/miniconda3"
-    import os
-    import sys
-    sys.path.append(os.path.join(PYTHON_ROOT, "lib/site-packages"))
-    import pydevd
-    pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
+The remote debugger needs to be added as a configuration to be used easily:
 
+1. Click the Add Configuration button at the top of the main window or click ``Run->Edit Configurations...``
+2. Click the + button and add "Python Remote Debug" to the list of configurations.
+3. Give it a name, and set the port number to ``44444``.
+4. Leave "Suspend after connect" ticked if you would like any connections to the debugger to act as a breakpoint. It may be useful to untick this if you would like to hit a breakpoint in a loop inside an algorithm that runs many times but does not always hit that breakpoint.
+5. Click OK.
 
-A Remote Debugging configration needs to be setup to use the ``44444`` port (can be changed, but it needs to be reflected in the code), and running before the tests are run!
+To use the remote debugger:
 
-The ``pydevd`` package does not have to be installed on Python 2. As of 12/11/2018 installing ``pydevd`` on a separate installation with Python 3.7, and adding the code above successfully connects.
+1. Select the remote debugger from the drop down list of configurations.
+2. Click the green bug icon to start the debugger.
+3. Copy and paste the two lines shown in the terminal into the code you wish to debug:
 
+    .. code-block:: python
+
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
+
+4. Start Mantid or the test you wish to debug.
+5. If "Suspend after connect" has been ticked the point at which the two lines have been pasted will act as a breakpoint. Otherwise, the code will stop at the next breakpoint *after* the pasted lines.
+6. You can now use the PyCharm debugger as normal.
 
 Setting up PyCharm on Linux
 ###########################
 
-1. Use the native python interpreter (``/usr/bin/python2.7``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe``
+1. Use the native python interpreter (``/usr/bin/python3``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/python.exe``
 2. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for python code.
 
    Within the source directory add the following to your sources:
@@ -222,3 +231,12 @@ The following non-default plugins are things our team has found useful for Manti
 - **CMD Support** - Syntax highlighting for ``.BAT`` ~scripts
 
 Please add to this list if you find a useful plugin of your own
+
+Remote Development
+##################
+
+Note: Requires PyCharm Professional.
+
+PyCharm supports deployment and syncronisation of written code to a remote server via SSH.
+
+Open a local copy of the project and then follow the the guides here for `configuring the remote interpreter <https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html>`_ and `creating a deployment configuration <https://www.jetbrains.com/help/pycharm/creating-a-remote-server-configuration.html>`_. 

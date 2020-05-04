@@ -25,9 +25,9 @@ class SampleLogs(object):
         self.filtered = True
         self.setup_table()
 
-    def clicked(self):
-        """When a log is clicked update stats with selected log and replot the
-        logs. Finally update any other view aspects associated with the selected log.
+    def update(self):
+        """Update stats with selected log and replot the
+        logs.  Finally update any other view aspects associated with the selected log.
         """
         self.log_changed()
         self.update_stats()

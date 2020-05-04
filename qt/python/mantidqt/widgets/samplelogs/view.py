@@ -36,7 +36,6 @@ class SampleLogsView(QSplitter):
         # Create sample log table
         self.table = QTableView()
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table.clicked.connect(self.presenter.clicked)
         self.table.doubleClicked.connect(self.presenter.doubleClicked)
         self.table.contextMenuEvent = self.tableMenu
         self.addWidget(self.table)
@@ -119,6 +118,7 @@ class SampleLogsView(QSplitter):
         self.table.setModel(self.model)
         self.table.resizeColumnsToContents()
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table.selectionModel().selectionChanged.connect(self.presenter.update)
 
     def plot_selected_logs(self, ws, exp, rows):
         """Update the plot with the selected rows"""

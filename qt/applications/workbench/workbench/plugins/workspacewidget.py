@@ -152,7 +152,8 @@ class WorkspaceWidget(PluginWidget):
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                SliceViewer(ws=ws, parent=self)
+                presenter = SliceViewer(ws=ws, parent=self)
+                presenter.view.show()
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'."
                                "".format(ws.name()))

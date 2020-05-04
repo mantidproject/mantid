@@ -25,9 +25,9 @@ Improvements
   You can choose to hide it until the next release.
 - The Sample Logs Dialof now lets you view the complete log data as well as filtered data which only includes values for the current period, running status and with invalid values removed.  Just click the "Filtered Data" checkbox to swap between them.
 - The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
-
+- The plot toolbar now shows the correct buttons for 3D plots.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
-
+- The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 
 Bugfixes
 ########
@@ -38,5 +38,8 @@ Bugfixes
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly
 - Opening figure options on a plot with an empty legend no longer causes an unhandled exception.
+- Fixed being able to zoom in and out of colorbars on colorfill plots.
+- Fixed the default axis scale settings applying to the wrong axis.
+- Performing an overplot by dragging workspaces onto colorfill plots now correctly replaces the workspace.
 
 :ref:`Release 5.1.0 <v5.1.0>`

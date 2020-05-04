@@ -230,6 +230,8 @@ public:
   TYPE minValue() const;
   /// Returns the maximum value found in the series
   TYPE maxValue() const;
+  /// Returns the mean value found in the series
+  double mean() const;
 
   /// Returns the number of values at UNIQUE time intervals in the time series
   int size() const override;
