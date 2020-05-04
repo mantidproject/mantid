@@ -15,6 +15,7 @@ Matplotlib in Mantid
 
 * :ref:`scripting_plots`
 * :ref:`06_formatting_plots`
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
 
 .. contents:: Table of contents
