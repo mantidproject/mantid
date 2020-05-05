@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
@@ -430,6 +431,7 @@ void LoadNexusProcessed::exec() {
 
     if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
       // We have what we need.
+      applyLogFiltering(tempWS);
       setProperty("OutputWorkspace", tempWS);
     } else {
       // We already know that this is a group workspace. Is it a true
@@ -512,9 +514,9 @@ void LoadNexusProcessed::exec() {
                         1. / nWorkspaceEntries_d);
         }
 
+        applyLogFiltering(local_workspace);
         declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
             prop_name + indexStr, wsName, Direction::Output));
-
         wksp_group->addWorkspace(local_workspace);
         setProperty(prop_name + indexStr, local_workspace);
       }
@@ -2245,6 +2247,24 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
     }
   }
   return total_specs;
+}
+
+/**
+ * Applies log filtering to workspaces that require it
+ *
+ * @param local_workspace :: the workspace containing logs to be filtered
+ */
+void LoadNexusProcessed::applyLogFiltering(
+    Mantid::API::Workspace_sptr local_workspace) {
+  auto mWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(local_workspace);
+  if (mWorkspace) {
+    auto run = mWorkspace->run();
+    // check for presence of filterable logs that suggest this is ISIS data
+    if (run.hasProperty(LogParser::statusLogName()) ||
+        run.hasProperty(LogParser::periodsLogName())) {
+      ISISRunLogs::applyLogFiltering(mWorkspace->mutableRun());
+    }
+  }
 }
 
 } // namespace DataHandling
