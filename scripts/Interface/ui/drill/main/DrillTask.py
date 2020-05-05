@@ -9,12 +9,16 @@ from qtpy.QtCore import QObject, QRunnable, Signal
 
 import mantid.simpleapi as sapi
 
+from .DrillAlgorithmObserver import DrillAlgorithmObserver
+
 class DrillTaskSignals(QObject):
     """
     Signals that the DrillTask could send.
     """
-    started = Signal(int)        # the task reference
-    finished = Signal(int, int)  # the task reference and the return code
+    started = Signal(int)         # task reference
+    finished = Signal(int)        # task reference
+    error = Signal(int)           # task reference
+    progress = Signal(int, float) # task reference and progress between 0.0 and 1.0
 
 
 class DrillTask(QRunnable):
@@ -24,9 +28,25 @@ class DrillTask(QRunnable):
     def __init__(self, ref, alg, **kwargs):
         super(DrillTask, self).__init__()
         self.ref = ref
-        self.alg = alg
-        self.kwargs = kwargs
         self.signals = DrillTaskSignals()
+        # setup the algo
+        self.alg = sapi.AlgorithmManager.create(alg)
+        for (k, v) in kwargs.items():
+            self.alg.setProperty(k, v)
+        # setup the observer
+        self.observer = DrillAlgorithmObserver()
+        self.observer.observeFinish(self.alg)
+        self.observer.signals.finished.connect(
+                lambda : self.signals.finished.emit(self.ref)
+                )
+        self.observer.observeError(self.alg)
+        self.observer.signals.error.connect(
+                lambda : self.signals.error.emit(self.ref)
+                )
+        self.observer.observeProgress(self.alg)
+        self.observer.signals.progress.connect(
+                lambda p : self.signals.progress.emit(self.ref, p)
+                )
 
     def run(self):
         """
@@ -35,12 +55,20 @@ class DrillTask(QRunnable):
         """
         self.signals.started.emit(self.ref)
         try:
-            fn = getattr(sapi, self.alg)
-            fn(**self.kwargs)
-            self.signals.finished.emit(self.ref, 0)
+            self.alg.execute()
         except Exception as e:
             print(e)
-            self.signals.finished.emit(self.ref, -1)
+            self.signals.error.emit(self.ref)
         except:
-            pass
+            self.signals.error.emit(self.ref)
+
+    def cancel(self):
+        """
+        Cancel the algorithm. This function first tests if the algorithm is
+        currently running. It avoids emitting error signal for cancelling non
+        running ones.
+        """
+        if self.alg.isRunning():
+            self.alg.cancel()
+            self.signals.error.emit(self.ref)
 

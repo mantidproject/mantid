@@ -16,6 +16,7 @@ class DrillPresenter:
 
         # signals connections
         self.connect_view_signals()
+        self.model.process_started.connect(self.on_process_started)
         self.model.process_done.connect(self.on_process_done)
         self.model.process_error.connect(self.on_process_error)
         self.model.progress_update.connect(self.on_progress)
@@ -56,7 +57,6 @@ class DrillPresenter:
 
     def on_process(self, rows):
         self.model.process(rows)
-        n, nmax = self.model.get_processing_progress()
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
 
@@ -79,6 +79,9 @@ class DrillPresenter:
 
     def on_rundex_saved(self, filename):
         self.model.export_rundex_data(filename)
+
+    def on_process_started(self, row):
+        self.view.set_row_processing(row)
 
     def on_process_done(self, ref):
         self.view.set_row_done(ref)

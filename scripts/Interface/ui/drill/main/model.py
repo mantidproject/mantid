@@ -14,13 +14,14 @@ from mantid.kernel import config, logger
 from mantid.api import AlgorithmObserver
 
 from .specifications import RundexSettings
-from .DrillAlgorithmObserver import DrillAlgorithmObserver
+from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 
 class DrillModel(QObject):
 
     settings = dict()
     algorithm = None
+    process_started = Signal(int)
     process_done = Signal(int)
     process_error = Signal(int)
     processing_done = Signal()
@@ -30,19 +31,21 @@ class DrillModel(QObject):
         super(DrillModel, self).__init__()
         self.set_instrument(config['default.instrument'])
         self.samples = list()
-        self.processes_running = 0
-        self.processes_done = 0
-        self.observer = DrillAlgorithmObserver()
-        self.observer.signals.taskFinished.connect(
-                lambda p : self.process_done.emit(p)
+        self.tasksPool = DrillAlgorithmPool()
+        # setup the thread pool
+        self.tasksPool.signals.taskStarted.connect(
+                lambda row : self.process_started.emit(row)
                 )
-        self.observer.signals.taskError.connect(
-                lambda p : self.process_error.emit(p)
+        self.tasksPool.signals.taskFinished.connect(
+                lambda row : self.process_done.emit(row)
                 )
-        self.observer.signals.progressUpdate.connect(
+        self.tasksPool.signals.taskError.connect(
+                lambda row : self.process_error.emit(row)
+                )
+        self.tasksPool.signals.progressUpdate.connect(
                 lambda p : self.progress_update.emit(p)
                 )
-        self.observer.signals.processingDone.connect(
+        self.tasksPool.signals.processingDone.connect(
                 lambda : self.processing_done.emit()
                 )
 
@@ -55,8 +58,8 @@ class DrillModel(QObject):
         return local_options
 
     def process(self, elements):
-        self.processes_running = 0
-        self.processes_done = 0
+        # to be sure that the pool is cleared
+        self.tasksPool.abortProcessing()
         # TODO: check the elements before algorithm submission
         for e in elements:
             if (e < len(self.samples) and len(self.samples[e]) > 0):
@@ -64,10 +67,10 @@ class DrillModel(QObject):
                 kwargs.update(self.settings)
                 kwargs['OutputWorkspace'] = "sample_" + str(e)
                 task = DrillTask(e, self.algorithm, **kwargs)
-                self.observer.addProcess(task)
+                self.tasksPool.addProcess(task)
 
     def stop_process(self):
-        self.observer.abortProcessing()
+        self.tasksPool.abortProcessing()
 
     def set_instrument(self, instrument):
         self.samples = list()
@@ -164,7 +167,4 @@ class DrillModel(QObject):
 
     def get_supported_techniques(self):
         return [technique for technique in RundexSettings.ALGORITHMS]
-
-    def get_processing_progress(self):
-        return self.processes_done, self.processes_running
 
