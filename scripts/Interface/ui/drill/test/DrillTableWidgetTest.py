@@ -114,6 +114,18 @@ class DrillTableWidgetTest(unittest.TestCase):
                                                          (1, 1),
                                                          (2, 2)])
 
+    def test_getRowsFromSelectedCells(self):
+        self.assertEqual(self.table.getSelectedCells(), [])
+        self.table.setRowCount(5)
+        self.table.setColumnCount(5)
+        self.selectCell(0, 0, Qt.NoModifier)
+        self.selectCell(0, 1, Qt.ControlModifier)
+        self.assertEqual(self.table.getRowsFromSelectedCells(), [0])
+        self.selectCell(0, 0, Qt.NoModifier)
+        self.selectCell(1, 1, Qt.ControlModifier)
+        self.selectCell(2, 2, Qt.ControlModifier)
+        self.assertEqual(self.table.getRowsFromSelectedCells(), [0, 1, 2])
+
     def test_getCellContents(self):
         self.assertEqual(self.table.getCellContents(0, 0), "")
         self.assertEqual(self.table.getCellContents(-1, -1), "")

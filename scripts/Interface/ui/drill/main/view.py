@@ -219,6 +219,8 @@ class DrillView(QMainWindow):
         Ask for the processing of the selected rows.
         """
         rows = self.table.getSelectedRows()
+        if not rows:
+            rows = self.table.getRowsFromSelectedCells()
         if rows:
             self.process.emit(rows)
 

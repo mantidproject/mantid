@@ -137,6 +137,18 @@ class DrillTableWidget(QTableWidget):
         selected_indexes = self.selectionModel().selectedIndexes()
         return [(i.row(), i.column()) for i in selected_indexes]
 
+    def getRowsFromSelectedCells(self):
+        """
+        Get the row indexes of the selected cells.
+
+        Return:
+            list(int): list of unique rows indexes
+        """
+        selectedIndexes = self.selectionModel().selectedIndexes()
+        selectedRows = [i.row() for i in selectedIndexes]
+        allRows = self.getAllRows()
+        return [r for r in allRows if r in selectedRows]
+
     def getCellContents(self, row, column):
         """
         Get the contents of a given cell as a string.
