@@ -545,8 +545,8 @@ void LoadBBY::loadInstrumentParameters(
             else
               logStrings[logTag] = details[2];
             if (!hdfTag.empty())
-              g_log.warning() << "Cannot find hdf parameter "
-                              << hdfTag << ", using default.\n";
+              g_log.warning() << "Cannot find hdf parameter " << hdfTag
+                              << ", using default.\n";
           }
         } catch (std::invalid_argument &) {
           g_log.warning() << "Invalid format for BILBY parameter " << x.first
