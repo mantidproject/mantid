@@ -23,5 +23,12 @@ New Features
 - Addition of an external plotting button to the Muon Analysis 2 GUI.
   This allows the user to create a standalone Workbench (or MantidPlot) plot of the displayed data.
   The user may then perform standard operations on the plot, e.g drag and drop workspaces onto the figure.
+- On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
+
+Improvements
+-------------
+- Improved the plotting code the Muon Analysis interface, with a significant amount of redundant code removed.
+  This code improvement will lead to more maintainable code, which will be more stable and
+  easier to add new functionality in the future.
 
 :ref:`Release 5.1.0 <v5.1.0>`
