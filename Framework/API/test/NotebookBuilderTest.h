@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NOTEBOOKBUILDERTEST_H_
-#define MANTID_NOTEBOOKBUILDERTEST_H_
+#pragma once
 
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
@@ -154,8 +153,8 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
       alg->initialize();
       alg->execute();
 
-      boost::shared_ptr<MatrixWorkspace> output =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output =
+          std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -182,8 +181,8 @@ public:
                          "\"TopLevelAlgorithm(InputWorkspace='test_input_"
                          "workspace', "
                          "OutputWorkspace='test_output_workspace')\",";
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input =
+        std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -221,8 +220,8 @@ public:
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input =
+        std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -264,8 +263,8 @@ public:
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input =
+        std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -317,8 +316,8 @@ public:
                          "\"TopLevelAlgorithm(InputWorkspace=r'test_inp\\\\ut_"
                          "workspace', "
                          "OutputWorkspace='test_output_workspace')\",";
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input =
+        std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace",
                                                  input);
 
@@ -351,5 +350,3 @@ public:
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");
   }
 };
-
-#endif // MANTID_NOTEBOOKBUILDERTEST_H_

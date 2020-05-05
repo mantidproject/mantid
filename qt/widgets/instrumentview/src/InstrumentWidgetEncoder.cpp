@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
 #include "MantidQtWidgets/InstrumentView/ColorBar.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -251,7 +250,7 @@ QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
   QMap<QString, QVariant> map;
 
-  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  auto projection3D = std::dynamic_pointer_cast<Projection3D>(obj);
   if (projection3D) {
     map.insert(QString("projection3DSuccess"), QVariant(true));
     map.insert(QString("projection3D"),

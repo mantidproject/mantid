@@ -100,6 +100,7 @@ set ( MISC_CORE_DIST_DLLS
     hdf5_hl.dll
     hdf5.dll
     jsoncpp.dll
+    lib3mf.dll
     libeay32.dll
     libNeXus-0.dll
     libNeXusCPP-0.dll

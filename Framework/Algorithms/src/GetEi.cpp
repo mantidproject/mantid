@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetEi.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -49,7 +49,7 @@ GetEi::GetEi() : Algorithm(), m_tempWS(), m_fracCompl(0.0) {}
 
 void GetEi::init() {
   // Declare required input parameters for algorithm and do some validation here
-  auto val = boost::make_shared<CompositeValidator>();
+  auto val = std::make_shared<CompositeValidator>();
   val->add<WorkspaceUnitValidator>("TOF");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
@@ -58,7 +58,7 @@ void GetEi::init() {
                                             Direction::Input, val),
       "The X units of this workspace must be time of flight with times in\n"
       "micro-seconds");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "Monitor1Spec", -1, mustBePositive,
@@ -68,7 +68,7 @@ void GetEi::init() {
       "Monitor2Spec", -1, mustBePositive,
       "The spectrum number of the output of the second monitor e.g. MAPS\n"
       "41475, MARI 3, MERLIN 69638");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(
       "EnergyEstimate", -1.0, positiveDouble,
@@ -163,9 +163,9 @@ void GetEi::exec() {
  * passed to this function second
  *  @throw NotFoundError if no detector is found for the detector ID given
  */
-void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
-                        specnum_t mon1Spec, double &monitor0Dist,
-                        double &monitor1Dist) const {
+void GetEi::getGeometry(const API::MatrixWorkspace_const_sptr &WS,
+                        specnum_t mon0Spec, specnum_t mon1Spec,
+                        double &monitor0Dist, double &monitor1Dist) const {
   const IComponent_const_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
@@ -220,7 +220,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
  * in the workspace
  */
 std::vector<size_t> GetEi::getMonitorWsIndexs(
-    API::MatrixWorkspace_const_sptr WS, specnum_t specNum1,
+    const API::MatrixWorkspace_const_sptr &WS, specnum_t specNum1,
     specnum_t specNum2) const { // getting spectra numbers from detector IDs is
                                 // hard because the map works the other way,
   // getting index numbers from spectra numbers has
@@ -285,7 +285,7 @@ double GetEi::timeToFly(double s, double E_KE) const {
  *  @throw out_of_range if the peak runs off the edge of the histogram
  *  @throw runtime_error a Child Algorithm just falls over
  */
-double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
+double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS,
                             const size_t monitIn, const double peakTime) {
   const auto &timesArray = WS->x(monitIn);
   // we search for the peak only inside some window because there are often more

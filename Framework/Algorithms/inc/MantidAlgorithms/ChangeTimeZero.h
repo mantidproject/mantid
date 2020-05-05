@@ -1,23 +1,22 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CHANGETIMEZERO_H_
-#define MANTID_ALGORITHMS_CHANGETIMEZERO_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport ChangeTimeZero : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ChangeTimeZero : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeTimeZero"; };
@@ -40,23 +39,24 @@ private:
   void exec() override;
   /// Create the output workspace
   Mantid::API::MatrixWorkspace_sptr
-  createOutputWS(Mantid::API::MatrixWorkspace_sptr input, double startProgress,
-                 double stopProgress);
+  createOutputWS(const Mantid::API::MatrixWorkspace_sptr &input,
+                 double startProgress, double stopProgress);
   /// Get the time shift
-  double getTimeShift(API::MatrixWorkspace_sptr ws) const;
+  double getTimeShift(const API::MatrixWorkspace_sptr &ws) const;
   /// Shift the time of the logs
-  void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift,
-                       double startProgress, double stopProgress);
+  void shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws,
+                       double timeShift, double startProgress,
+                       double stopProgress);
   /// Get the date and time of the first good frame of a workspace
   Mantid::Types::Core::DateAndTime
-  getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
+  getStartTimeFromWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) const;
   /// Can the string be transformed to double
-  bool checkForDouble(std::string val) const;
+  bool checkForDouble(const std::string &val) const;
   /// Can the string be transformed to a DateTime
   bool checkForDateTime(const std::string &val) const;
 
   /// Time shift the log of a double series property
-  void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
+  void shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws,
                                    Mantid::Kernel::Property *prop,
                                    double timeShift) const;
   /// Time shift the log of a string property
@@ -64,7 +64,7 @@ private:
       Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
       double timeShift) const;
   // Shift the time of the neutrons
-  void shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
+  void shiftTimeOfNeutrons(const Mantid::API::MatrixWorkspace_sptr &ws,
                            double timeShift, double startProgress,
                            double stopProgress);
 
@@ -77,5 +77,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CHANGEPULSETIME_H_ */

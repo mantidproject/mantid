@@ -112,7 +112,7 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
-generate_mantid_export_header(Muon)
+generate_mantid_export_header(Muon FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS

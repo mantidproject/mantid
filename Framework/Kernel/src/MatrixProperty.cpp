@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MatrixProperty.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -22,7 +22,7 @@ namespace Kernel {
  */
 template <typename TYPE>
 MatrixProperty<TYPE>::MatrixProperty(const std::string &propName,
-                                     IValidator_sptr validator,
+                                     const IValidator_sptr &validator,
                                      unsigned int direction)
     : PropertyWithValue<HeldType>(propName, HeldType(), validator, direction) {}
 

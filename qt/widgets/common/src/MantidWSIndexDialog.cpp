@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,6 +20,7 @@
 #include <boost/lexical_cast.hpp>
 #include <cstdlib>
 #include <exception>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -48,7 +49,8 @@ const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
  * @param showTiledOption :: true if tiled plot enabled
  * @param isAdvanced :: true if advanced plotting has been selected
  */
-MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WindowFlags flags,
+MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent,
+                                         const Qt::WindowFlags &flags,
                                          const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showTiledOption,
@@ -211,7 +213,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
       // Convert the spectra choices of the user into workspace indices for us
       // to use.
       Mantid::API::MatrixWorkspace_const_sptr ws =
-          boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
                   wsName.toStdString()));
       if (nullptr == ws)
@@ -701,7 +703,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
 
 Mantid::API::MatrixWorkspace_const_sptr
 MantidWSIndexWidget::getWorkspace(const QString &workspaceName) const {
-  return boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+  return std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(
           workspaceName.toStdString()));
 }
@@ -729,7 +731,7 @@ void MantidWSIndexWidget::checkForSpectraAxes() {
 
   for (; it != m_wsNames.constEnd(); ++it) {
     Mantid::API::MatrixWorkspace_const_sptr ws =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
     if (nullptr == ws)
@@ -757,7 +759,7 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
   // Cycle through the workspaces ...
   for (; it != m_wsNames.constEnd(); ++it) {
     Mantid::API::MatrixWorkspace_const_sptr ws =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
     if (nullptr == ws)
@@ -785,7 +787,7 @@ void MantidWSIndexWidget::generateSpectraNumIntervals() {
   bool firstWs = true;
   foreach (const QString wsName, m_wsNames) {
     Mantid::API::MatrixWorkspace_const_sptr ws =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 wsName.toStdString()));
     if (!ws)
@@ -830,12 +832,10 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param showTiledOption :: If true the "Tiled" option is created
  * @param isAdvanced :: true if adanced plotting dialog is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WindowFlags flags,
-                                         const QList<QString> &wsNames,
-                                         const bool showWaterfallOption,
-                                         const bool showPlotAll,
-                                         const bool showTiledOption,
-                                         const bool isAdvanced)
+MantidWSIndexDialog::MantidWSIndexDialog(
+    QWidget *parent, const Qt::WindowFlags &flags,
+    const QList<QString> &wsNames, const bool showWaterfallOption,
+    const bool showPlotAll, const bool showTiledOption, const bool isAdvanced)
     : QDialog(parent, flags),
       m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption,
                isAdvanced),
@@ -973,7 +973,7 @@ Interval::Interval(int single) { init(single, single); }
 
 Interval::Interval(int start, int end) { init(start, end); }
 
-Interval::Interval(QString intervalString) {
+Interval::Interval(const QString &intervalString) {
   // Check to see if string is of the correct format, and then parse.
   // An interval can either be "n" or "n-m" where n and m are integers
   const QString patternSingle("^\\d+$");     // E.g. "2" or "712"
@@ -1086,9 +1086,13 @@ void Interval::init(int start, int end) {
 //----------------------------------
 IntervalList::IntervalList(void) {}
 
-IntervalList::IntervalList(QString intervals) { addIntervals(intervals); }
+IntervalList::IntervalList(const QString &intervals) {
+  addIntervals(std::move(intervals));
+}
 
-IntervalList::IntervalList(Interval interval) { m_list.append(interval); }
+IntervalList::IntervalList(const Interval &interval) {
+  m_list.append(interval);
+}
 
 IntervalList::IntervalList(const IntervalList &copy) { m_list = copy.m_list; }
 
@@ -1338,7 +1342,7 @@ QValidator::State IntervalListValidator::validate(QString &input,
 MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(
     QWidget *parent)
     : QWidget(parent) {
-  QGridLayout *layout = new QGridLayout();
+  auto *layout = new QGridLayout();
   _lineEdit = new QLineEdit();
   m_validLbl = new QLabel("*"); // make it red
   QPalette pal = m_validLbl->palette();
@@ -1350,7 +1354,8 @@ MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(
   setLayout(layout);
 }
 
-void MantidWSIndexWidget::QLineEditWithErrorMark::setError(QString error) {
+void MantidWSIndexWidget::QLineEditWithErrorMark::setError(
+    const QString &error) {
   if (error.isEmpty()) {
     m_validLbl->setVisible(false);
   } else {

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_ALGORITHMDIALOG_H_
-#define MANTIDQT_API_ALGORITHMDIALOG_H_
+#pragma once
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -142,7 +141,7 @@ protected:
 
   /// Set properties on this algorithm by pulling values from the tied widgets
   bool setPropertyValues(const QStringList &skipList = QStringList());
-  bool setPropertyValue(const QString pName, bool validateOthers);
+  bool setPropertyValue(const QString &pName, bool validateOthers);
 
   void showValidators();
   //@}
@@ -256,7 +255,7 @@ protected:
   /// GenericDialogDemo.cpp
 public:
   /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::IAlgorithm_sptr /*alg*/);
+  void setAlgorithm(const Mantid::API::IAlgorithm_sptr & /*alg*/);
   /// Set a list of suggested values
   void setPresetValues(const QHash<QString, QString> &presetValues);
   /// Set whether this is intended for use from a script or not
@@ -344,4 +343,3 @@ protected:
 };
 } // namespace API
 } // namespace MantidQt
-#endif // MANTIDQT_API_ALGORITHMDIALOG_H_

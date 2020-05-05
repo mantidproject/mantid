@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
-#define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
@@ -16,7 +15,7 @@
 #include <QSettings>
 #include <QString>
 #include <QStringList>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -142,7 +141,7 @@ public:
   /// Inform the widget of a running instance of MonitorLiveData to be used in
   /// stopLiveListener()
   void setLiveAlgorithm(
-      const boost::shared_ptr<Mantid::API::IAlgorithm> &monitorLiveData);
+      const std::shared_ptr<Mantid::API::IAlgorithm> &monitorLiveData);
   /// Gets the instrument currently fixed to
   QString getInstrumentOverride();
   /// Overrides the value of default instrument
@@ -185,7 +184,7 @@ public slots:
   void findFiles();
   /// Find the files within the text edit field and cache their full paths
   void findFiles(bool isModified);
-  boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
+  std::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
 
 public:
   // Method for handling drop events
@@ -256,7 +255,7 @@ private:
   /// If or when live button will be shown
   LiveButtonOpts m_liveButtonState;
   /// Handle on a running instance of MonitorLiveData
-  boost::shared_ptr<Mantid::API::IAlgorithm> m_monitorLiveData;
+  std::shared_ptr<Mantid::API::IAlgorithm> m_monitorLiveData;
   /// Whether validation red star is being shown
   bool m_showValidator;
   /// The Ui form
@@ -281,5 +280,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_

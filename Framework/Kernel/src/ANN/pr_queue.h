@@ -23,8 +23,7 @@
 //		Initial release
 //----------------------------------------------------------------------
 
-#ifndef PR_QUEUE_H
-#define PR_QUEUE_H
+#pragma once
 
 #include "MantidKernel/ANN/ANNperf.h" // performance evaluation
 #include "MantidKernel/ANN/ANNx.h"    // all ANN includes
@@ -139,5 +138,3 @@ public:
     pq[p] = pq[n + 1]; // insert last item in proper place
   }
 };
-
-#endif

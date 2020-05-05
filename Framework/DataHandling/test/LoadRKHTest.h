@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADRKHTEST_H_
-#define LOADRKHTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -78,7 +77,7 @@ public:
     Workspace_sptr rkhspace;
     TS_ASSERT_THROWS_NOTHING(
         rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
+    Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     // The data in the 2D workspace does not match the file data directly
     // because the
@@ -157,7 +156,7 @@ public:
     Workspace_sptr rkhspace;
     TS_ASSERT_THROWS_NOTHING(
         rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
+    Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 2);
 
@@ -224,7 +223,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
+    Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
 
@@ -283,7 +282,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
+    Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
 
@@ -370,5 +369,3 @@ private:
     file.close();
   }
 };
-
-#endif // LOADRKHTEST_H_

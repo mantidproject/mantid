@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFITMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IQTFITMODEL_H_
+#pragma once
 
 #include "IndirectFittingModel.h"
 
@@ -32,8 +31,8 @@ private:
                                   WorkspaceIndex spectrum) const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(TableDatasetIndex index) const override;
-  Mantid::API::MultiDomainFunction_sptr
-  createFunctionWithGlobalBeta(Mantid::API::IFunction_sptr function) const;
+  Mantid::API::MultiDomainFunction_sptr createFunctionWithGlobalBeta(
+      const Mantid::API::IFunction_sptr &function) const;
 
   bool m_makeBetaGlobal;
   bool m_constrainIntensities;
@@ -43,5 +42,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

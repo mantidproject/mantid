@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECTTEST_H_
-#define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECTTEST_H_
+#pragma once
 
 #include "SpecularReflectionAlgorithmTest.h"
 #include <cxxtest/TestSuite.h>
@@ -16,6 +15,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
+#include <utility>
 
 using Mantid::Algorithms::SpecularReflectionPositionCorrect;
 using namespace Mantid::API;
@@ -82,8 +82,7 @@ public:
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_less_than_zero() {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionPositionCorrect>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionPositionCorrect>();
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty(
@@ -97,8 +96,7 @@ public:
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_outside_range() {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionPositionCorrect>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionPositionCorrect>();
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty(
@@ -113,8 +111,7 @@ public:
   }
 
   void test_throws_if_DetectorComponentName_unknown() {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionPositionCorrect>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionPositionCorrect>();
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty(
@@ -182,9 +179,9 @@ public:
                      sampleToDetectorBeamOffset, 1e-6);
   }
 
-  void
-  do_test_correct_point_detector_position(std::string detectorFindProperty = "",
-                                          std::string stringValue = "") {
+  void do_test_correct_point_detector_position(
+      const std::string &detectorFindProperty = "",
+      const std::string &stringValue = "") {
     MatrixWorkspace_sptr toConvert = pointDetectorWS;
 
     const double thetaInDegrees = 10.0; // Desired theta in degrees.
@@ -241,8 +238,8 @@ public:
   }
 
   double do_test_correct_line_detector_position(
-      std::vector<int> specNumbers, double thetaInDegrees,
-      std::string detectorName = "lineardetector",
+      const std::vector<int> &specNumbers, double thetaInDegrees,
+      const std::string &detectorName = "lineardetector",
       bool strictSpectrumCheck = true) {
     auto toConvert = this->linearDetectorWS;
 
@@ -259,7 +256,7 @@ public:
 
     VerticalHorizontalOffsetType offsetTupleCorrected =
         determine_vertical_and_horizontal_offsets(
-            corrected, detectorName); // Positions after correction
+            corrected, std::move(detectorName)); // Positions after correction
     const double sampleToDetectorVerticalOffsetCorrected =
         offsetTupleCorrected.get<0>();
 
@@ -326,5 +323,3 @@ public:
                      std::invalid_argument &);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECTTEST_H_ */

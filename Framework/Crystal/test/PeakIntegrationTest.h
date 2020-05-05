@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PeakIntegrationTEST_H_
-#define MANTID_CRYSTAL_PeakIntegrationTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
@@ -115,7 +114,7 @@ public:
     int numEventsPer = 100;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
     EventWorkspace_sptr in_ws =
-        boost::dynamic_pointer_cast<EventWorkspace>(inputW);
+        std::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("TOF");
     /*if (type == WEIGHTED)
       in_ws *= 2.0;
@@ -141,7 +140,7 @@ public:
 
     inputW->mutableRun().addProperty("run_number", 3007);
 
-    boost::shared_ptr<Mantid::API::Algorithm> algu =
+    std::shared_ptr<Mantid::API::Algorithm> algu =
         Mantid::API::AlgorithmFactory::Instance().create(
             std::string("LoadIsawUB"), 1);
     algu->initialize();
@@ -149,7 +148,7 @@ public:
     algu->setPropertyValue("Filename", "TOPAZ_3007.mat");
     algu->execute();
 
-    boost::shared_ptr<Mantid::API::Algorithm> algb =
+    std::shared_ptr<Mantid::API::Algorithm> algb =
         Mantid::API::AlgorithmFactory::Instance().create(std::string("Rebin"),
                                                          1);
     algb->initialize();
@@ -198,5 +197,3 @@ public:
     // do_test_MINITOPAZ(true);
   }
 };
-
-#endif /* MANTID_CRYSTAL_PeakIntegrationTEST_H_ */

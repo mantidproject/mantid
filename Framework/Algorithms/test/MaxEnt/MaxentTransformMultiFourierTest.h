@@ -1,20 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAXENTTRANSFORMMULTIFOURIERTEST_H_
-#define MANTID_ALGORITHMS_MAXENTTRANSFORMMULTIFOURIERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 
 using Mantid::Algorithms::MaxentSpace_sptr;
 using Mantid::Algorithms::MaxentSpaceComplex;
@@ -37,11 +35,11 @@ public:
   void test_complex_data_to_real_image_against_fourier() {
 
     MaxentSpaceComplex_sptr dataSpaceMF =
-        boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceReal>();
+        std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceMF = std::make_shared<MaxentSpaceReal>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
-    MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpaceF = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceF = std::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
     // Three square waves that add up to a saw tooth wave
@@ -67,11 +65,11 @@ public:
   void test_complex_data_to_complex_image_against_fourier() {
 
     MaxentSpaceComplex_sptr dataSpaceMF =
-        boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+        std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceMF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
-    MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpaceF = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
     std::vector<double> realDataMF = {1, -1, 1,  -1, 1,  -1, 1,  -1,
@@ -95,11 +93,11 @@ public:
 
   void test_image_to_data_repeats_fourier() {
     MaxentSpaceComplex_sptr dataSpaceMF =
-        boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+        std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceMF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
-    MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpaceF = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
     std::vector<double> complexImage = {4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0};
@@ -123,11 +121,11 @@ public:
 
   void test_image_to_data_with_real_adjustments() {
     MaxentSpaceComplex_sptr dataSpaceMF =
-        boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+        std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceMF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
-    MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpaceF = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
     std::vector<double> complexImage = {4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0};
@@ -173,11 +171,11 @@ public:
 
   void test_image_to_data_with_imaginary_adjustments() {
     MaxentSpaceComplex_sptr dataSpaceMF =
-        boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceMF = boost::make_shared<MaxentSpaceComplex>();
+        std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceMF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformMultiFourier transformMF(dataSpaceMF, imageSpaceMF, 3);
-    MaxentSpace_sptr dataSpaceF = boost::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpaceF = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpaceF = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpaceF = std::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transformF(dataSpaceF, imageSpaceF);
 
     std::vector<double> complexImage = {4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0};
@@ -236,5 +234,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_ALGORITHMS_MAXENTTRANSFORMMULTIFOURIERTEST_H_ */

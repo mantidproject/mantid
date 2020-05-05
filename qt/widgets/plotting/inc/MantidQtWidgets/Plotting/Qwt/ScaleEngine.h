@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCALE_ENGINE_H
-#define SCALE_ENGINE_H
+#pragma once
 
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include <float.h>
@@ -46,8 +45,8 @@ public:
       : QwtScaleTransformation(Other), d_engine(engine){};
   double xForm(double x, double /*s1*/, double /*s2*/, double p1,
                double p2) const override;
-  double invXForm(double x, double s1, double s2, double p1,
-                  double p2) const override;
+  double invXForm(double p, double p1, double p2, double s1,
+                  double s2) const override;
   QwtScaleTransformation *copy() const override;
   ~ScaleTransformation() override;
 
@@ -131,5 +130,3 @@ private:
   //! Nth Power for a power scale
   double d_nth_power;
 };
-
-#endif

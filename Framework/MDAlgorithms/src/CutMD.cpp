@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -19,8 +19,8 @@
 #include "MantidKernel/System.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -31,7 +31,7 @@ namespace {
 // Typedef to simplify function signatures
 using MinMax = std::pair<double, double>;
 
-MinMax getDimensionExtents(IMDEventWorkspace_sptr ws, size_t index) {
+MinMax getDimensionExtents(const IMDEventWorkspace_sptr &ws, size_t index) {
   if (!ws)
     throw std::runtime_error(
         "Invalid workspace passed to getDimensionExtents.");
@@ -50,7 +50,7 @@ std::string numToStringWithPrecision(const double num) {
 DblMatrix scaleProjection(const DblMatrix &inMatrix,
                           const std::vector<std::string> &inUnits,
                           std::vector<std::string> &outUnits,
-                          IMDEventWorkspace_sptr inWS) {
+                          const IMDEventWorkspace_sptr &inWS) {
   DblMatrix ret(inMatrix);
   // Check if we actually need to do anything
   if (std::equal(inUnits.begin(), inUnits.end(), outUnits.begin()))
@@ -209,7 +209,7 @@ Determine the original q units. Assumes first 3 dimensions by index are r,l,d
 @param logger : logging object
 @return vector of markers
 */
-std::vector<std::string> findOriginalQUnits(IMDWorkspace_const_sptr inws,
+std::vector<std::string> findOriginalQUnits(const IMDWorkspace_const_sptr &inws,
                                             Mantid::Kernel::Logger &logger) {
   std::vector<std::string> unitMarkers(3);
   for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {
@@ -271,7 +271,7 @@ void CutMD::init() {
                   "MDHistoWorkspace as output. This is DND "
                   "only in Horace terminology.");
 
-  auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositiveInteger = std::make_shared<BoundedValidator<int>>();
   mustBePositiveInteger->setLower(0);
 
   declareProperty("MaxRecursionDepth", 1, mustBePositiveInteger,
@@ -293,7 +293,7 @@ void CutMD::init() {
   std::string help(buffer);
   boost::algorithm::trim(help);
   declareProperty("InterpretQDimensionUnits", AutoMethod,
-                  boost::make_shared<StringListValidator>(propOptions), help);
+                  std::make_shared<StringListValidator>(propOptions), help);
 }
 
 void CutMD::exec() {
@@ -311,7 +311,7 @@ void CutMD::exec() {
   Workspace_sptr sliceWS; // output workspace
 
   // Histogram workspaces can be sliced axis-aligned only.
-  if (auto histInWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
+  if (auto histInWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
 
     g_log.information("Integrating using binning parameters only.");
     auto integrateAlg =
@@ -327,7 +327,7 @@ void CutMD::exec() {
     sliceWS = temp;
   } else { // We are processing an MDEventWorkspace
 
-    auto eventInWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+    auto eventInWS = std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
     const bool noPix = getProperty("NoPix");
 
     // Check Projection format
@@ -474,7 +474,7 @@ void CutMD::exec() {
     sliceWS = cutAlg->getProperty("OutputWorkspace");
 
     MultipleExperimentInfos_sptr sliceInfo =
-        boost::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
+        std::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
 
     if (!sliceInfo)
       throw std::runtime_error(
@@ -488,7 +488,7 @@ void CutMD::exec() {
     }
   }
 
-  auto geometry = boost::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
+  auto geometry = std::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
 
   /* Original workspace and transformation information does not make sense for
    * self-contained Horace-style

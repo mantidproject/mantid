@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingPresenter.h"
 
@@ -158,7 +158,27 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     return;
   }
 
+  if (lastRunPath.toString() == "") {
+    m_view->displayError(
+        "The last run is not a valid run number. \n"
+        "This could be because the file is not in the search path or the "
+        "file does not exist yet. ");
+    m_view->enableAll();
+    m_loadingData = false;
+    return;
+  }
+  if (firstRunPath.toString() == "") {
+    m_view->displayError(
+        "The first run is not a valid run number. \n"
+        "This could be because the file is not in the search path or the "
+        "file does not exist yet. ");
+    m_view->enableAll();
+    m_loadingData = false;
+    return;
+  }
+
   try {
+
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS
@@ -235,6 +255,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     emit dataChanged();
 
+  } catch (const std::invalid_argument &e) {
+    m_view->displayError(e.what());
   } catch (std::exception &e) {
     m_view->displayError(e.what());
   }
@@ -305,11 +327,11 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
   if (m_loadedData)
-    return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
+    return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
   return MatrixWorkspace_sptr();
 }
 
-void ALCDataLoadingPresenter::setData(MatrixWorkspace_sptr data) {
+void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
 
   if (data) {
     // Set the data

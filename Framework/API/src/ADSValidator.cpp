@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TypedValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <sstream>
 
 namespace Mantid {
@@ -22,7 +22,7 @@ ADSValidator::ADSValidator(const bool allowMultiSelection,
 
 /// Clone the validator
 Kernel::IValidator_sptr ADSValidator::clone() const {
-  return boost::make_shared<ADSValidator>(*this);
+  return std::make_shared<ADSValidator>(*this);
 }
 
 bool ADSValidator::isMultipleSelectionAllowed() {

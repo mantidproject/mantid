@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaEventListener.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -118,7 +118,7 @@ void KafkaEventListener::start(Types::Core::DateAndTime startTime) {
 }
 
 /// @copydoc ILiveListener::extractData
-boost::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
+std::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
   assert(m_decoder);
   // The first call to extract is very early in the start live data process
   // and we may not be completely ready yet, wait upto a maximum of 5 seconds

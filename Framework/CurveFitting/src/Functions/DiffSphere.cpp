@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
@@ -71,10 +71,10 @@ void DiffSphere::setAttribute(const std::string &name,
  * @brief Initialize elastic and inelastic parts, aliases, attributes, and ties
  */
 void DiffSphere::init() {
-  m_elastic = boost::dynamic_pointer_cast<ElasticDiffSphere>(
+  m_elastic = std::dynamic_pointer_cast<ElasticDiffSphere>(
       API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
   this->addFunction(m_elastic);
-  m_inelastic = boost::dynamic_pointer_cast<InelasticDiffSphere>(
+  m_inelastic = std::dynamic_pointer_cast<InelasticDiffSphere>(
       API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
   this->addFunction(m_inelastic);
 

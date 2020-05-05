@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/LoadPLN.h"
 #include "MantidAPI/Axis.h"
@@ -475,7 +481,7 @@ void LoadPLN::init() {
                   "The input filename of the stored data");
 
   declareProperty(PathToBinaryStr, "",
-                  boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
+                  std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "Relative or absolute path to the compressed binary\n"
                   "event file linked to the HDF file, eg /storage/data/");
 
@@ -522,7 +528,7 @@ void LoadPLN::init() {
 void LoadPLN::createWorkspace(const std::string &title) {
 
   // Create the workspace
-  m_localWorkspace = boost::make_shared<DataObjects::EventWorkspace>();
+  m_localWorkspace = std::make_shared<DataObjects::EventWorkspace>();
   m_localWorkspace->initialize(HISTOGRAMS, 2, 1);
 
   // set the units

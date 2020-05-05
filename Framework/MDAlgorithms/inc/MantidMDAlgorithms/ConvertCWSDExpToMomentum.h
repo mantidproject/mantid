@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUM_H_
-#define MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -46,7 +45,7 @@ private:
   void addMDEvents(bool usevirtual);
 
   void convertSpiceMatrixToMomentumMDEvents(
-      API::MatrixWorkspace_sptr dataws, bool usevirtual,
+      const API::MatrixWorkspace_sptr &dataws, bool usevirtual,
       const detid_t &startdetid, const int scannumber, const int runnumber,
       double measuretime, int monitor_counts);
 
@@ -67,7 +66,7 @@ private:
   void parseDetectorTable(std::vector<Kernel::V3D> &vec_detpos,
                           std::vector<detid_t> &vec_detid);
 
-  void setupTransferMatrix(API::MatrixWorkspace_sptr dataws,
+  void setupTransferMatrix(const API::MatrixWorkspace_sptr &dataws,
                            Kernel::DblMatrix &rotationMatrix);
 
   void createVirtualInstrument();
@@ -75,7 +74,7 @@ private:
   void updateQRange(const std::vector<Mantid::coord_t> &vec_q);
 
   /// Remove background from
-  void removeBackground(API::MatrixWorkspace_sptr dataws);
+  void removeBackground(const API::MatrixWorkspace_sptr &dataws);
 
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;
@@ -117,5 +116,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUM_H_ */

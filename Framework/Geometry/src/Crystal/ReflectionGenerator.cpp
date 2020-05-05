@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
@@ -43,8 +43,8 @@ const CrystalStructure &ReflectionGenerator::getCrystalStructure() const {
 /// cell.
 HKLFilter_const_sptr ReflectionGenerator::getDRangeFilter(double dMin,
                                                           double dMax) const {
-  return boost::make_shared<const HKLFilterDRange>(m_crystalStructure.cell(),
-                                                   dMin, dMax);
+  return std::make_shared<const HKLFilterDRange>(m_crystalStructure.cell(),
+                                                 dMin, dMax);
 }
 
 /// Returns a reflection condition HKLFilter based on the supplied enum.
@@ -52,15 +52,15 @@ HKLFilter_const_sptr ReflectionGenerator::getReflectionConditionFilter(
     ReflectionConditionFilter filter) {
   switch (filter) {
   case ReflectionConditionFilter::Centering:
-    return boost::make_shared<const HKLFilterCentering>(
+    return std::make_shared<const HKLFilterCentering>(
         m_crystalStructure.centering());
     break;
   case ReflectionConditionFilter::SpaceGroup:
-    return boost::make_shared<const HKLFilterSpaceGroup>(
+    return std::make_shared<const HKLFilterSpaceGroup>(
         m_crystalStructure.spaceGroup());
     break;
   case ReflectionConditionFilter::StructureFactor:
-    return boost::make_shared<const HKLFilterStructureFactor>(m_sfCalculator);
+    return std::make_shared<const HKLFilterStructureFactor>(m_sfCalculator);
   default:
     return HKLFilter_const_sptr();
   }
@@ -76,7 +76,7 @@ std::vector<V3D> ReflectionGenerator::getHKLs(double dMin, double dMax) const {
 /// filter. If the pointer is null, it's ignored.
 std::vector<Kernel::V3D> ReflectionGenerator::getHKLs(
     double dMin, double dMax,
-    HKLFilter_const_sptr reflectionConditionFilter) const {
+    const HKLFilter_const_sptr &reflectionConditionFilter) const {
   HKLGenerator generator(m_crystalStructure.cell(), dMin);
 
   HKLFilter_const_sptr filter = getDRangeFilter(dMin, dMax);
@@ -103,7 +103,7 @@ std::vector<V3D> ReflectionGenerator::getUniqueHKLs(double dMin,
 /// d-limits using the specified reflection condition filter.
 std::vector<V3D> ReflectionGenerator::getUniqueHKLs(
     double dMin, double dMax,
-    HKLFilter_const_sptr reflectionConditionFilter) const {
+    const HKLFilter_const_sptr &reflectionConditionFilter) const {
   HKLGenerator generator(m_crystalStructure.cell(), dMin);
 
   HKLFilter_const_sptr filter = getDRangeFilter(dMin, dMax);

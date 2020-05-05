@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKSPACEVALIDATORSTEST_H_
-#define WORKSPACEVALIDATORSTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -147,7 +146,7 @@ public:
 
   void testWSPropertyandValidator() {
     auto wavUnitValidator =
-        boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+        std::make_shared<WorkspaceUnitValidator>("Wavelength");
     WorkspaceProperty<MatrixWorkspace> wsp1("workspace1", "ws1",
                                             Direction::Input, wavUnitValidator);
     // test property validation
@@ -175,13 +174,13 @@ public:
 
   void testInstrumentValidator() {
     { // default validator
-      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
-      auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+      auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto inst = std::make_shared<Mantid::Geometry::Instrument>();
       auto *sample = new Mantid::Geometry::ObjComponent("Sample");
       inst->add(sample);
       inst->markAsSamplePos(sample);
 
-      auto instVal = boost::make_shared<InstrumentValidator>();
+      auto instVal = std::make_shared<InstrumentValidator>();
       TS_ASSERT_EQUALS(
           instVal->isValid(ws),
           "The instrument is missing the following components: sample holder");
@@ -190,10 +189,10 @@ public:
     }
 
     { // requires just a source
-      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
-      auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+      auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto inst = std::make_shared<Mantid::Geometry::Instrument>();
 
-      auto instVal = boost::make_shared<InstrumentValidator>(
+      auto instVal = std::make_shared<InstrumentValidator>(
           InstrumentValidator::SourcePosition);
       TS_ASSERT_EQUALS(
           instVal->isValid(ws),
@@ -206,10 +205,10 @@ public:
     }
 
     { // requires source & sample position
-      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
-      auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+      auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto inst = std::make_shared<Mantid::Geometry::Instrument>();
 
-      auto instVal = boost::make_shared<InstrumentValidator>(
+      auto instVal = std::make_shared<InstrumentValidator>(
           InstrumentValidator::SourcePosition |
           InstrumentValidator::SamplePosition);
       TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the "
@@ -231,7 +230,7 @@ public:
     using Mantid::DataObjects::Workspace2D;
     using Mantid::Geometry::OrientedLattice;
     OrientedLatticeValidator validator;
-    auto ws = boost::make_shared<Workspace2D>();
+    auto ws = std::make_shared<Workspace2D>();
     TS_ASSERT_EQUALS(
         validator.isValid(ws),
         "Workspace must have a sample with an orientation matrix defined.");
@@ -247,9 +246,9 @@ public:
     using Mantid::PhysicalConstants::NeutronAtom;
     // These should be separate tests when they are refactored out
     { // requires just shape
-      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
       auto sampleVal =
-          boost::make_shared<SampleValidator>(SampleValidator::Shape);
+          std::make_shared<SampleValidator>(SampleValidator::Shape);
 
       TS_ASSERT_EQUALS(sampleVal->isValid(ws),
                        "The sample is missing the following properties: shape");
@@ -259,22 +258,22 @@ public:
     }
 
     { // requires just material
-      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
       auto sampleVal =
-          boost::make_shared<SampleValidator>(SampleValidator::Material);
+          std::make_shared<SampleValidator>(SampleValidator::Material);
 
       TS_ASSERT_EQUALS(
           sampleVal->isValid(ws),
           "The sample is missing the following properties: material");
-      auto noShape = boost::make_shared<CSGObject>();
+      auto noShape = std::make_shared<CSGObject>();
       noShape->setMaterial(Material("V", NeutronAtom(), 0.072));
       ws->mutableSample().setShape(noShape);
       TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
     }
 
     { // requires both
-      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
-      auto sampleVal = boost::make_shared<SampleValidator>(
+      auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto sampleVal = std::make_shared<SampleValidator>(
           SampleValidator::Shape | SampleValidator::Material);
 
       TS_ASSERT_EQUALS(
@@ -287,5 +286,3 @@ public:
     }
   }
 };
-
-#endif /*WORKSPACEVALIDATORSTEST_H_*/

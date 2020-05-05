@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADPDFGETNFILE_H_
-#define MANTID_DATAHANDLING_LOADPDFGETNFILE_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -46,7 +46,7 @@ private:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
   /// Parse PDFgetN data file
-  void parseDataFile(std::string filename);
+  void parseDataFile(const std::string &filename);
 
   /// Check whether a string starts from a specified sub-string
   bool startsWith(const std::string &s, const std::string &header) const;
@@ -70,12 +70,10 @@ private:
   void generateDataWorkspace();
 
   /// Set X and Y axis unit and lebel
-  void setUnit(DataObjects::Workspace2D_sptr ws);
+  void setUnit(const DataObjects::Workspace2D_sptr &ws);
 
   void checkSameSize(const std::vector<size_t> &numptsvec, size_t numsets);
 };
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADPDFGETNFILE_H_ */

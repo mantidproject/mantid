@@ -1,5 +1,4 @@
-#ifndef MANTID_KERNEL_SINGLETON_HOLDER_H
-#define MANTID_KERNEL_SINGLETON_HOLDER_H
+#pragma once
 
 ////////////////////////////////////////////////////////////////////////////////
 // The Loki Library
@@ -36,7 +35,7 @@ using SingletonDeleterFn = std::function<void()>;
 
 /// Register the given deleter function to be called
 /// at exit
-MANTID_KERNEL_DLL void deleteOnExit(SingletonDeleterFn func);
+MANTID_KERNEL_DLL void deleteOnExit(const SingletonDeleterFn &func);
 
 /// Manage the lifetime of a class intended to be a singleton
 template <typename T> class SingletonHolder {
@@ -111,5 +110,3 @@ __declspec(noinline)
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // SINGLETON_HOLDER_H

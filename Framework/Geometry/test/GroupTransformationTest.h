@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_GROUPTRANSFORMATIONTEST_H_
-#define MANTID_GEOMETRY_GROUPTRANSFORMATIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -63,28 +62,28 @@ public:
 
       // Check for identity
       SymmetryElementIdentity_sptr identity =
-          boost::dynamic_pointer_cast<SymmetryElementIdentity>(el);
+          std::dynamic_pointer_cast<SymmetryElementIdentity>(el);
       if (identity) {
         elements.insert(el->hmSymbol());
       }
 
       // Check for inversion
       SymmetryElementInversion_sptr inversion =
-          boost::dynamic_pointer_cast<SymmetryElementInversion>(el);
+          std::dynamic_pointer_cast<SymmetryElementInversion>(el);
       if (inversion) {
         elements.insert(el->hmSymbol());
       }
 
       // Check for 2 || z
       SymmetryElementRotation_sptr rotation =
-          boost::dynamic_pointer_cast<SymmetryElementRotation>(el);
+          std::dynamic_pointer_cast<SymmetryElementRotation>(el);
       if (rotation && rotation->getAxis() == V3R(0, 0, 1)) {
         elements.insert(el->hmSymbol());
       }
 
       // Check for m perpendicular to z
       SymmetryElementMirror_sptr mirror =
-          boost::dynamic_pointer_cast<SymmetryElementMirror>(el);
+          std::dynamic_pointer_cast<SymmetryElementMirror>(el);
       if (mirror && mirror->getAxis() == V3R(0, 0, 1)) {
         elements.insert(el->hmSymbol());
       }
@@ -133,5 +132,3 @@ public:
     TS_ASSERT_EQUALS(r3cRhGen, r3cRh);
   }
 };
-
-#endif /* MANTID_GEOMETRY_GROUPTRANSFORMATIONTEST_H_ */

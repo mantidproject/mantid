@@ -1,13 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ALGORITHMPROPERTYTEST_H_
-#define MANTID_API_ALGORITHMPROPERTYTEST_H_
+#pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
@@ -65,8 +63,7 @@ private:
     const std::string summary() const override { return "Test summary"; }
     void init() override {
       declareProperty(std::make_unique<AlgorithmProperty>(
-          "CalculateStep",
-          boost::make_shared<AlgorithmHasProperty>("Output1")));
+          "CalculateStep", std::make_shared<AlgorithmHasProperty>("Output1")));
     }
     void exec() override {}
   };
@@ -215,5 +212,3 @@ private:
     return algm;
   }
 };
-
-#endif /* MANTID_API_ALGORITHMPROPERTYTEST_H_ */

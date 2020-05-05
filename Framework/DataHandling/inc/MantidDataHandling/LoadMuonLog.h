@@ -1,16 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADMUONLOG_H_
-#define MANTID_DATAHANDLING_LOADMUONLOG_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidNexus/MuonNexusReader.h"
 
 namespace Mantid {
 
@@ -65,7 +66,10 @@ private:
 
   /// Overwrites Algorithm method
   void exec() override;
-
+  /// Adds a log to the workspace
+  void addLogValueFromIndex(MuonNexusReader &nxload, const int &index,
+                            API::MatrixWorkspace_sptr &localWorkspace,
+                            std::set<std::string> &logNames);
   /// The name and path of an input file. This may be the filename of a raw
   /// datafile or the name of a specific log file.
   std::string m_filename;
@@ -80,5 +84,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADMUONLOG_H_*/

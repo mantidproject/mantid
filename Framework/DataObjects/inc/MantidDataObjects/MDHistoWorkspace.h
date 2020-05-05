@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACE_H_
-#define MANTID_DATAOBJECTS_MDHISTOWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -92,7 +91,8 @@ public:
                        const Mantid::Kernel::VMD &end,
                        Mantid::API::MDNormalization normalize) const override;
 
-  void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
+  void checkWorkspaceSize(const MDHistoWorkspace &other,
+                          const std::string &operation);
 
   // --------------------------------------------------------------------------------------------
   MDHistoWorkspace &operator+=(const MDHistoWorkspace &b);
@@ -526,12 +526,10 @@ protected:
 };
 
 /// A shared pointer to a MDHistoWorkspace
-using MDHistoWorkspace_sptr = boost::shared_ptr<MDHistoWorkspace>;
+using MDHistoWorkspace_sptr = std::shared_ptr<MDHistoWorkspace>;
 
 /// A shared pointer to a const MDHistoWorkspace
-using MDHistoWorkspace_const_sptr = boost::shared_ptr<const MDHistoWorkspace>;
+using MDHistoWorkspace_const_sptr = std::shared_ptr<const MDHistoWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACE_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SaveMD.h"
 #include "MantidAPI/CoordTransform.h"
@@ -33,7 +33,7 @@ namespace {
 template <typename MDE, size_t nd>
 void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc,
                    typename MDEventWorkspace<MDE, nd>::sptr ws,
-                   std::string filename) {
+                   const std::string &filename) {
   // remove all boxes from the DiskBuffer. DB will calculate boxes positions
   // on HDD.
   bc->getFileIO()->flushCache();
@@ -165,7 +165,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // the boxes file positions are unknown and we need to calculate it.
     BoxFlatStruct.initFlatStructure(ws, filename);
     // create saver class
-    auto Saver = boost::shared_ptr<API::IBoxControllerIO>(
+    auto Saver = std::shared_ptr<API::IBoxControllerIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     Saver->setDataType(sizeof(coord_t), MDE::getTypeName());
     if (makeFileBackend) {
@@ -236,7 +236,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param ws :: MDHistoWorkspace to save
  */
-void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
+void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   std::string filename = getPropertyValue("Filename");
 
   // Erase the file if it exists
@@ -286,7 +286,7 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   // Write out the affine matrices
   MDBoxFlatTree::saveAffineTransformMatricies(
-      file.get(), boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+      file.get(), std::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!
@@ -324,9 +324,9 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 void SaveMD::exec() {
   IMDWorkspace_sptr ws = getProperty("InputWorkspace");
   IMDEventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(ws);
   MDHistoWorkspace_sptr histoWS =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
 
   if (eventWS) {
     // Wrapper to cast to MDEventWorkspace then call the function

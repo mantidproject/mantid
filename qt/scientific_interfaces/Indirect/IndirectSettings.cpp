@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettings.h"
 #include "IndirectInterface.h"
@@ -54,7 +54,7 @@ void IndirectSettings::otherUserSubWindowCreated(
 }
 
 void IndirectSettings::connectIndirectInterface(
-    QPointer<UserSubWindow> window) {
+    const QPointer<UserSubWindow> &window) {
   if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data()))
     connect(m_presenter.get(), SIGNAL(applySettings()), indirectInterface,
             SLOT(applySettings()));

@@ -823,6 +823,10 @@ target_include_directories(MantidPlot PRIVATE
 target_compile_options( MantidPlot PRIVATE
   $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type> )
 
+set (BOOST_LIBRARIES_MANTIDPLOT ${Boost_LIBRARIES})
+find_package(BoostPython REQUIRED)
+set (BOOST_LIBRARIES_MANTIDPLOT "${BOOST_LIBRARIES_MANTIDPLOT};${Boost_LIBRARIES}")
+
 # Library dependencies
 target_link_libraries(MantidPlot
                       LINK_PRIVATE
@@ -835,7 +839,7 @@ target_link_libraries(MantidPlot
                       MantidQtWidgetsInstrumentViewQt4
                       MantidQtWidgetsSliceViewerQt4
                       MantidQtWidgetsSpectrumViewerQt4
-                      ${Boost_LIBRARIES}
+                      ${BOOST_LIBRARIES_MANTIDPLOT}
                       ${POCO_LIBRARIES}
                       ${GSL_LIBRARIES}
                       ${MUPARSER_LIBRARIES}

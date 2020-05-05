@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 '''
 1. all the functions are defined and built consistently.
@@ -19,7 +19,6 @@ Data types:
 ***
 '''
 # Import all needed libraries
-from __future__ import (absolute_import, division, print_function)
 from matplotlib import pyplot as plt
 import numpy as np
 import itertools as itt
@@ -987,8 +986,7 @@ def FitTrans():
     # rebin transmission data
     lam = 0.0039558 * TOF / (L1 + initL2)
 
-    print(('wavelength limits: ' +
-           str(lam[0]) + ' and ' + str(lam[len(lam) - 1])))
+    print(('wavelength limits: ' + str(lam[0]) + ' and ' + str(lam[len(lam) - 1])))
     minlam = 0.8
     maxlam = 3.5
     imin = np.where(lam >= minlam)[0][0]
@@ -1081,8 +1079,7 @@ def FitTrans():
         parfilename = str(input('Choose file with starting pars: '))
         parfullfilename = parfilename
         x0 = dlmread(parfullfilename)
-        tog = str(input('Got parameters from: \n' +
-                        parfilename + '\nUse these ([y]/n)?'))
+        tog = str(input('Got parameters from: \n' + parfilename + '\nUse these ([y]/n)?'))
         if tog == 'n':
             x0 = np.hstack((setang1, pkmult1, setang2, pkmult2,
                             sf, pkwid, tbgd, pkwid2, relsf, delam, L2))
@@ -1204,11 +1201,9 @@ def FitTrans():
 
     if fixmult == 1:
         lb[3:4 + neqv1 - 1] = x0[3:4 + neqv1 - 1] - 0.01
-        lb[6 + neqv1:7 + neqv1 + neqv2 - 1] = x0[6 +
-                                                 neqv1:7 + neqv1 + neqv2 - 1] - 0.01
+        lb[6 + neqv1:7 + neqv1 + neqv2 - 1] = x0[6 + neqv1:7 + neqv1 + neqv2 - 1] - 0.01
         ub[3:4 + neqv1 - 1] = x0[3:4 + neqv1 - 1] + 0.01
-        ub[6 + neqv1:7 + neqv1 + neqv2 - 1] = x0[6 +
-                                                 neqv1:7 + neqv1 + neqv2 - 1] + 0.01
+        ub[6 + neqv1:7 + neqv1 + neqv2 - 1] = x0[6 + neqv1:7 + neqv1 + neqv2 - 1] + 0.01
 
     prompt = str(input('Enter anything to begin refinement...'))
     print('Refining...\nMight take quite a long time...')

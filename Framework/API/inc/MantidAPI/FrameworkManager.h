@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FRAMEWORKMANAGER_H_
-#define MANTID_API_FRAMEWORKMANAGER_H_
+#pragma once
 
 #include <string>
 
@@ -16,7 +15,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/SingletonHolder.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 
@@ -59,23 +58,10 @@ public:
 
   /// Clear memory associated with the PropertyManagers
   void clearPropertyManagers();
-  /// Creates and instance of an algorithm
-  IAlgorithm *createAlgorithm(const std::string &algName,
-                              const int &version = -1);
-
-  /// Creates an instance of an algorithm and sets the properties provided
-  IAlgorithm *createAlgorithm(const std::string &algName,
-                              const std::string &propertiesArray,
-                              const int &version = -1);
-
-  /// Creates an instance of an algorithm, sets the properties provided & then
-  /// executes it.
-  IAlgorithm *exec(const std::string &algName,
-                   const std::string &propertiesArray, const int &version = -1);
 
   /// Creates an algorithm and runs it, with variadic arguments
-  boost::shared_ptr<IAlgorithm> exec(const std::string &algorithmName,
-                                     int count, ...);
+  std::shared_ptr<IAlgorithm> exec(const std::string &algorithmName, int count,
+                                   ...);
 
   /// Returns a shared pointer to the workspace requested
   Workspace *getWorkspace(const std::string &wsName);
@@ -131,5 +117,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::FrameworkManagerImpl>;
 }
 } // namespace Mantid
-
-#endif /*MANTID_API_FRAMEWORKMANAGER_H_*/

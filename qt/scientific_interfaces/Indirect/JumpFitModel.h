@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
+#pragma once
 
 #include "IndirectFittingModel.h"
 
@@ -53,8 +52,9 @@ public:
                                   WorkspaceIndex spectrum) const override;
 
 private:
-  std::string constructOutputName() const;
-  bool allWorkspacesEqual(Mantid::API::MatrixWorkspace_sptr workspace) const;
+  std::string constructOutputName(const std::string &batchType) const;
+  bool
+  allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   JumpFitParameters &
   addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
                        const std::string &hwhmName);
@@ -70,5 +70,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

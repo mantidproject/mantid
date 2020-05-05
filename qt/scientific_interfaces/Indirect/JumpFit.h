@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
-#define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
+#pragma once
 
 #include "IndirectFitAnalysisTab.h"
 #include "JumpFitModel.h"
 #include "ui_JumpFit.h"
 
+#include "IFQFitObserver.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/TextAxis.h"
 
@@ -42,9 +42,8 @@ private:
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
+  std::string fitTypeString() const;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

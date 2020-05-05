@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CORRECTKIKF_H_
-#define MANTID_ALGORITHMS_CORRECTKIKF_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,7 +44,7 @@ namespace Algorithms {
     @date 10/21/2010
 */
 
-class DLLExport CorrectKiKf : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorrectKiKf : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CorrectKiKf"; }
@@ -75,7 +75,7 @@ private:
    */
   template <class T>
   void correctKiKfEventHelper(std::vector<T> &wevector, double efixed,
-                              const std::string emodeStr);
+                              const std::string &emodeStr);
   void getEfixedFromParameterMap(double &Efi, int64_t i,
                                  const Mantid::API::SpectrumInfo &spectrumInfo,
                                  const Mantid::Geometry::ParameterMap &pmap);
@@ -83,5 +83,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_CORRECTKIKF_H_*/

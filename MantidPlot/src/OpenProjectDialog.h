@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef OPEN_PROJECT_DIALOG_H
-#define OPEN_PROJECT_DIALOG_H
+#pragma once
 
 #include "ExtensibleFileDialog.h"
 
@@ -48,5 +47,3 @@ protected slots:
   //! Update which options are visible and enabled based on the output format.
   void updateAdvancedOptions(const QString &filter);
 };
-
-#endif // ifndef OPEN_PROJECT_DIALOG_H

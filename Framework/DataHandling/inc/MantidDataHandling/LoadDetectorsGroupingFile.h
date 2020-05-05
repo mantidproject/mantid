@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
-#define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -108,7 +107,7 @@ class DLLExport LoadGroupXMLFile {
 public:
   LoadGroupXMLFile();
 
-  void loadXMLFile(std::string xmlfilename);
+  void loadXMLFile(const std::string &xmlfilename);
   void setDefaultStartingGroupID(int startgroupid) {
     m_startGroupID = startgroupid;
   }
@@ -168,7 +167,7 @@ private:
   void parseXML();
   /// Get attribute value from an XML node
   static std::string getAttributeValueByName(Poco::XML::Node *pNode,
-                                             std::string attributename,
+                                             const std::string &attributename,
                                              bool &found);
 };
 
@@ -219,5 +218,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_ */

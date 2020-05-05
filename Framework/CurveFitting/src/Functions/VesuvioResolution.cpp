@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -77,7 +77,7 @@ void VesuvioResolution::setUpForFit() {
   // Voigt
 
   using namespace Mantid::API;
-  m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
 }
 
@@ -89,7 +89,7 @@ void VesuvioResolution::setUpForFit() {
  * @param endX Ending x-vaue (unused).
  */
 void VesuvioResolution::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
     double startX, double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);
@@ -187,8 +187,6 @@ void VesuvioResolution::function1D(double *out, const double *xValues,
   std::copy(outVec.begin(), outVec.end(), out);
 }
 
-/**
- */
 void VesuvioResolution::declareAttributes() {
   declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
 }

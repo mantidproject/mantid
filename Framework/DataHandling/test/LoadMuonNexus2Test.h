@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADMUONNEXUS2TEST_H_
-#define LOADMUONNEXUS2TEST_H_
+#pragma once
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
@@ -34,7 +33,7 @@ using Mantid::Types::Core::DateAndTime;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite {
 public:
-  void check_spectra_and_detectors(MatrixWorkspace_sptr output) {
+  void check_spectra_and_detectors(const MatrixWorkspace_sptr &output) {
 
     //----------------------------------------------------------------------
     // Tests to check that spectra-detector mapping is done correctly
@@ -84,8 +83,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace);
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
@@ -149,8 +147,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace);
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 11);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
@@ -187,8 +184,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace);
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 3);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
@@ -227,8 +223,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace);
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 14);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
@@ -258,7 +253,7 @@ public:
     TS_ASSERT(nxLoad.isExecuted());
 
     Workspace_sptr outWS = nxLoad.getProperty("OutputWorkspace");
-    const auto loadedWS = boost::dynamic_pointer_cast<Workspace2D>(outWS);
+    const auto loadedWS = std::dynamic_pointer_cast<Workspace2D>(outWS);
     TS_ASSERT(loadedWS);
 
     // Check the right spectra have been loaded
@@ -297,8 +292,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace + "_1");
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
@@ -366,8 +360,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace + "_2");
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
@@ -443,8 +436,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace);
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(output2D->blocksize(), 8192);
@@ -491,5 +483,3 @@ public:
 private:
   LoadMuonNexus2 loader;
 };
-
-#endif /*LOADMUONNEXUS2TEST_H_*/

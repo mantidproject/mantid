@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKSPACETEST_H_
-#define WORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ISpectrum.h"
@@ -41,7 +40,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <atomic>
@@ -66,13 +65,12 @@ namespace {
  * @param numSpectra
  * @return
  */
-boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
-                                                              size_t numBins) {
-  boost::shared_ptr<MatrixWorkspace> ws2 =
-      boost::make_shared<WorkspaceTester>();
+std::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
+                                                            size_t numBins) {
+  std::shared_ptr<MatrixWorkspace> ws2 = std::make_shared<WorkspaceTester>();
   ws2->initialize(numSpectra, numBins, numBins);
 
-  auto inst = boost::make_shared<Instrument>("TestInstrument");
+  auto inst = std::make_shared<Instrument>("TestInstrument");
   // We get a 1:1 map by default so the detector ID should match the spectrum
   // number
   for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
@@ -124,7 +122,7 @@ public:
   }
   static void destroySuite(MatrixWorkspaceTest *suite) { delete suite; }
 
-  MatrixWorkspaceTest() : ws(boost::make_shared<WorkspaceTester>()) {
+  MatrixWorkspaceTest() : ws(std::make_shared<WorkspaceTester>()) {
     ws->initialize(1, 1, 1);
   }
 
@@ -387,7 +385,7 @@ public:
   }
 
   void test_toString_Produces_Expected_Contents() {
-    auto testWS = boost::make_shared<WorkspaceTester>();
+    auto testWS = std::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);
     testWS->setTitle("A test run");
     testWS->getAxis(0)->setUnit("TOF");
@@ -417,7 +415,7 @@ public:
   }
 
   void testCloneClearsWorkspaceName() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 1, 1);
     const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
     AnalysisDataService::Instance().add(name, ws);
@@ -527,8 +525,8 @@ public:
   }
 
   void testDetectorMappingCopiedWhenAWorkspaceIsCopied() {
-    boost::shared_ptr<MatrixWorkspace> parent =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<MatrixWorkspace> parent =
+        std::make_shared<WorkspaceTester>();
     parent->initialize(1, 1, 1);
     parent->getSpectrum(0).setSpectrumNo(99);
     parent->getSpectrum(0).setDetectorID(999);
@@ -585,7 +583,7 @@ public:
   void testGetDetector() {
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
-    boost::shared_ptr<MatrixWorkspace> workspace(
+    std::shared_ptr<MatrixWorkspace> workspace(
         makeWorkspaceWithDetectors(3, 1));
 
     // Initially un masked
@@ -618,7 +616,7 @@ public:
   void testWholeSpectraMasking() {
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
-    boost::shared_ptr<MatrixWorkspace> workspace(
+    std::shared_ptr<MatrixWorkspace> workspace(
         makeWorkspaceWithDetectors(3, 1));
 
     // Initially un masked
@@ -870,7 +868,7 @@ public:
     // Create some discontinuities and check that the default value is there
     // Have to create a whole new instrument to keep things consistent, since
     // the detector ID is stored in at least 3 places
-    auto inst = boost::make_shared<Instrument>("TestInstrument");
+    auto inst = std::make_shared<Instrument>("TestInstrument");
     // We get a 1:1 map by default so the detector ID should match the spectrum
     // number
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
@@ -1081,16 +1079,16 @@ public:
   }
 
   void test_monitorWorkspace() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     TSM_ASSERT("There should be no monitor workspace by default",
                !ws->monitorWorkspace())
 
-    auto ws2 = boost::make_shared<WorkspaceTester>();
+    auto ws2 = std::make_shared<WorkspaceTester>();
     ws->setMonitorWorkspace(ws2);
     TSM_ASSERT_EQUALS("Monitor workspace not successfully set",
                       ws->monitorWorkspace(), ws2)
 
-    ws->setMonitorWorkspace(boost::shared_ptr<MatrixWorkspace>());
+    ws->setMonitorWorkspace(std::shared_ptr<MatrixWorkspace>());
     TSM_ASSERT("Monitor workspace not successfully reset",
                !ws->monitorWorkspace())
   }
@@ -1546,7 +1544,7 @@ public:
    */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
+    MatrixWorkspace_sptr wsInput = std::make_shared<WorkspaceTester>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Direction::Input);
 
@@ -1586,7 +1584,7 @@ public:
     Mantid::MantidVec dxSpec0(j, values[0]);
     auto dxSpec1 =
         Kernel::make_cow<Mantid::HistogramData::HistogramDx>(j, values[1]);
-    auto dxSpec2 = boost::make_shared<Mantid::HistogramData::HistogramDx>(
+    auto dxSpec2 = std::make_shared<Mantid::HistogramData::HistogramDx>(
         Mantid::MantidVec(j, values[2]));
 
     // Act
@@ -2020,7 +2018,7 @@ public:
   }
 
   void test_YUnitLabel_Correct_For_Empty_Y_Labels() {
-    auto testWS = boost::make_shared<WorkspaceTester>();
+    auto testWS = std::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);
     testWS->setDistribution(false);
     testWS->getAxis(0)->setUnit("TOF");
@@ -2031,7 +2029,7 @@ public:
   }
 
   void test_YUnitLabel_Correct_For_Empty_X_And_Y_Labels() {
-    auto testWS = boost::make_shared<WorkspaceTester>();
+    auto testWS = std::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);
     testWS->setDistribution(false);
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "");
@@ -2040,11 +2038,37 @@ public:
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "");
   }
 
+  void test_findY() {
+    auto ws = std::make_shared<WorkspaceTester>();
+    ws->initialize(2, 2, 2);
+    ws->mutableY(0) = 1.;
+    ws->mutableY(1) = 2.;
+    auto idx = ws->findY(0., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, -1);
+    TS_ASSERT_EQUALS(idx.second, -1);
+    idx = ws->findY(1., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 0);
+    idx = ws->findY(1., {0, 1});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 1);
+    idx = ws->findY(2., {1, 0});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 0);
+    idx = ws->findY(2., {1, 1});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 1);
+    ws->mutableY(1) = NAN;
+    idx = ws->findY(NAN, {0, 0});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 0);
+  }
+
 private:
-  boost::shared_ptr<WorkspaceTester>
+  std::shared_ptr<WorkspaceTester>
   generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
                                                    const std::string &yLabel) {
-    auto testWS = boost::make_shared<WorkspaceTester>();
+    auto testWS = std::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);
     testWS->setDistribution(distribution);
     testWS->setYUnit("Counts");
@@ -2075,13 +2099,12 @@ private:
     const auto frameThetaSign = thetaSignAxis;
     const auto frameHandedness = Geometry::Right;
     const std::string frameOrigin{"source"};
-    auto refFrame = boost::make_shared<ReferenceFrame>(
+    auto refFrame = std::make_shared<ReferenceFrame>(
         frameUp, frameAlongBeam, frameThetaSign, frameHandedness, frameOrigin);
-    boost::shared_ptr<MatrixWorkspace> ws =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<MatrixWorkspace> ws = std::make_shared<WorkspaceTester>();
     ws->initialize(numDets, numBins, numBins);
     // Create instrument with four detectors to play with.
-    auto instrument = boost::make_shared<Instrument>("TestInstrument");
+    auto instrument = std::make_shared<Instrument>("TestInstrument");
     instrument->setReferenceFrame(refFrame);
     constexpr double twoTheta{4.2 / 180. * M_PI};
     for (size_t i = 0; i < numDets; ++i) {
@@ -2118,7 +2141,7 @@ private:
   Mantid::API::MantidImage_sptr createImage(const size_t width,
                                             const size_t height) {
     auto image =
-        boost::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
+        std::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
     double startingValue = 1.0;
     for (auto &row : *image) {
       std::iota(row.begin(), row.end(), startingValue);
@@ -2173,7 +2196,7 @@ private:
     return ws;
   }
 
-  boost::shared_ptr<MatrixWorkspace> ws;
+  std::shared_ptr<MatrixWorkspace> ws;
 };
 
 class MatrixWorkspaceTestPerformance : public CxxTest::TestSuite {
@@ -2202,13 +2225,13 @@ public:
     Mantid::Kernel::V3D samplePos(0, 0, 1);
     Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
     Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
-    m_paramMap = boost::make_shared<Mantid::Geometry::ParameterMap>();
+    m_paramMap = std::make_shared<Mantid::Geometry::ParameterMap>();
 
     auto baseInstrument = ComponentCreationHelper::sansInstrument(
         sourcePos, samplePos, trolley1Pos, trolley2Pos);
 
     auto sansInstrument =
-        boost::make_shared<Instrument>(baseInstrument, m_paramMap);
+        std::make_shared<Instrument>(baseInstrument, m_paramMap);
 
     // See component creation helper for instrument definition
     m_sansBank = sansInstrument->getComponentByName("Bank1");
@@ -2371,7 +2394,7 @@ public:
 
   void test_hasOrientedLattice() {
     // create a workspace without an oriented lattice (or sample)
-    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
+    std::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
     TSM_ASSERT_EQUALS(
         "A newly created workspace should not have an oriented lattice",
         ws->hasOrientedLattice(), false);
@@ -2390,7 +2413,7 @@ public:
   }
 
   void test_isGroup() {
-    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
+    std::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
     TS_ASSERT_EQUALS(ws->isGroup(), false);
   }
 
@@ -2400,7 +2423,5 @@ private:
   Mantid::Kernel::Quat m_zRotation;
   Mantid::Kernel::V3D m_pos;
   Mantid::Geometry::IComponent_const_sptr m_sansBank;
-  boost::shared_ptr<Mantid::Geometry::ParameterMap> m_paramMap;
+  std::shared_ptr<Mantid::Geometry::ParameterMap> m_paramMap;
 };
-
-#endif /*WORKSPACETEST_H_*/

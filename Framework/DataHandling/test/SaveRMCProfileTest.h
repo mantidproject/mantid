@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVERMCPROFILETEST_H_
-#define MANTID_DATAHANDLING_SAVERMCPROFILETEST_H_
+#pragma once
 
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
@@ -60,7 +59,7 @@ public:
     return n;
   }
 
-  bool loadWorkspace(const std::string &filename, const std::string wsName) {
+  bool loadWorkspace(const std::string &filename, const std::string &wsName) {
     LoadNexusProcessed load;
     load.initialize();
     load.setProperty("Filename", filename);
@@ -136,5 +135,3 @@ public:
     AnalysisDataService::Instance().deepRemoveGroup(groupName);
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVERMCPROFILETEST_H_ */

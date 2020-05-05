@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFITMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_MSDFITMODEL_H_
+#pragma once
 
 #include "IndirectFittingModel.h"
 
@@ -21,13 +20,13 @@ public:
                                   WorkspaceIndex spectrum) const override;
 
   std::vector<std::string> getSpectrumDependentAttributes() const override;
+  void setFitTypeString(const std::string &fitType);
 
 private:
   std::string getResultXAxisUnit() const override;
+  std::string m_fitType;
 };
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

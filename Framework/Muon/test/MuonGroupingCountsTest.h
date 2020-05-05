@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_MUONGROUPINGCOUNTSTEST_H_
-#define MANTID_MUON_MUONGROUPINGCOUNTSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -27,7 +26,7 @@ namespace {
 // algorithm (a MatrixWorkspace).
 class setUpADSWithWorkspace {
 public:
-  setUpADSWithWorkspace(Workspace_sptr ws) {
+  setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
   };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
@@ -39,7 +38,7 @@ public:
 IAlgorithm_sptr
 algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 
-  auto alg = boost::make_shared<MuonGroupingCounts>();
+  auto alg = std::make_shared<MuonGroupingCounts>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
   alg->setProperty("OutputWorkspace", "__notUsed");
@@ -51,7 +50,7 @@ algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 // Set up algorithm without any optional properties
 // i.e. just the input workspace and group name.
 IAlgorithm_sptr
-setUpAlgorithmWithoutOptionalProperties(WorkspaceGroup_sptr ws,
+setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws,
                                         const std::string &name) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -61,7 +60,7 @@ setUpAlgorithmWithoutOptionalProperties(WorkspaceGroup_sptr ws,
 }
 
 // Set up algorithm with GroupName applied
-IAlgorithm_sptr setUpAlgorithmWithGroupName(WorkspaceGroup_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithGroupName(const WorkspaceGroup_sptr &ws,
                                             const std::string &name) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -72,7 +71,7 @@ IAlgorithm_sptr setUpAlgorithmWithGroupName(WorkspaceGroup_sptr ws,
 
 // Set up algorithm with TimeOffset applied
 IAlgorithm_sptr
-setUpAlgorithmWithGroupNameAndDetectors(WorkspaceGroup_sptr ws,
+setUpAlgorithmWithGroupNameAndDetectors(const WorkspaceGroup_sptr &ws,
                                         const std::string &name,
                                         const std::vector<int> &detectors) {
   setUpADSWithWorkspace setup(ws);
@@ -84,9 +83,9 @@ setUpAlgorithmWithGroupNameAndDetectors(WorkspaceGroup_sptr ws,
 }
 
 // Retrieve the output workspace from an executed algorithm
-MatrixWorkspace_sptr getOutputWorkspace(IAlgorithm_sptr alg) {
+MatrixWorkspace_sptr getOutputWorkspace(const IAlgorithm_sptr &alg) {
   Workspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-  auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
   return wsOut;
 }
 
@@ -127,7 +126,7 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonGroupingCounts>();
+    auto alg = std::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
     TS_ASSERT_THROWS_ANYTHING(
@@ -138,7 +137,7 @@ public:
 
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonGroupingCounts>();
+    auto alg = std::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
     TSM_ASSERT_THROWS_NOTHING(
@@ -318,5 +317,3 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
   }
 };
-
-#endif /* MANTID_MUON_MUONGROUPINGCOUNTSTEST_H_ */

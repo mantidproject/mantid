@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.kernel import *
@@ -14,7 +12,6 @@ from testhelpers import run_algorithm
 import numpy as np
 from SANSDarkRunBackgroundCorrection import DarkRunMonitorAndDetectorRemover
 from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
-from six.moves import range
 
 
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
@@ -560,6 +557,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                 ws.setE(element, ws.dataE(element)*0.0 + dataE)
 
         return ws
+
 
 class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
 

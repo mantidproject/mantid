@@ -27,8 +27,7 @@
 //          Added ANN_ prefix to avoid name conflicts.
 //----------------------------------------------------------------------
 
-#ifndef ANNperf_H
-#define ANNperf_H
+#pragma once
 
 //----------------------------------------------------------------------
 //	basic includes
@@ -232,5 +231,3 @@ DLL_API void annResetCounts(); // reset counts for one queries
 DLL_API void annUpdateStats(); // update stats with current counts
 
 DLL_API void annPrintStats(ANNbool validate); // print statistics for a run
-
-#endif

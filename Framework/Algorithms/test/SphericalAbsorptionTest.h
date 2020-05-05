@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPHERICALABSORPTIONTEST_H_
-#define SPHERICALABSORPTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/SphericalAbsorption.h"
@@ -24,31 +24,29 @@ using Mantid::API::MatrixWorkspace_sptr;
 class SphericalAbsorptionTest : public CxxTest::TestSuite {
 public:
   void testName() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_EQUALS(atten->name(), "SphericalAbsorption");
   }
 
   void testVersion() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_EQUALS(atten->version(), 1);
   }
 
   void testInit() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_THROWS_NOTHING(atten->initialize());
     TS_ASSERT(atten->isInitialized());
   }
 
   void testExec() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    // register all the algorithms
+    FrameworkManager::Instance();
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     if (!atten->isInitialized())
       atten->initialize();
 
@@ -77,7 +75,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.9942, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.9674, 0.0001);
@@ -86,5 +84,3 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 };
-
-#endif /*SPHERICALABSORPTIONTEST_H_*/

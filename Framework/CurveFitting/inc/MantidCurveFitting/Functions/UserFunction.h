@@ -1,18 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_USERFUNCTION_H_
-#define MANTID_CURVEFITTING_USERFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include <boost/shared_array.hpp>
+#include "MantidCurveFitting/DllConfig.h"
+#include <memory>
 
 namespace mu {
 class Parser;
@@ -27,8 +27,8 @@ A user defined function.
 @author Roman Tolchenov, Tessella plc
 @date 15/01/2010
 */
-class DLLExport UserFunction : public API::ParamFunction,
-                               public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL UserFunction : public API::ParamFunction,
+                                             public API::IFunction1D {
 public:
   /// Constructor
   UserFunction();
@@ -75,9 +75,9 @@ private:
   /// True indicates that input formula contains 'x' variable
   bool m_x_set;
   /// Temporary data storage used in functionDeriv
-  mutable boost::shared_array<double> m_tmp;
+  mutable std::vector<double> m_tmp;
   /// Temporary data storage used in functionDeriv
-  mutable boost::shared_array<double> m_tmp1;
+  mutable std::vector<double> m_tmp1;
 
   /// mu::Parser callback function for setting variables.
   static double *AddVariable(const char *varName, void *pufun);
@@ -86,5 +86,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_USERFUNCTION_H_*/

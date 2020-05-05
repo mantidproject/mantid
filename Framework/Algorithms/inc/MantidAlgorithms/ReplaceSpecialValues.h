@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REPLACESPECIALVALUES_H_
-#define MANTID_ALGORITHMS_REPLACESPECIALVALUES_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -22,7 +21,7 @@ namespace Algorithms {
  @author Nicholas Draper, Tessella plc
  @date 18/06/2009
  */
-class DLLExport ReplaceSpecialValues : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL ReplaceSpecialValues : public UnaryOperation {
 public:
   /// Default constructor
   ReplaceSpecialValues();
@@ -88,5 +87,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_REPLACESPECIALVALUES_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SEQDOMAIN_H_
-#define MANTID_CURVEFITTING_SEQDOMAIN_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -39,7 +38,7 @@ public:
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
                                   API::FunctionValues_sptr &values) const;
   /// Add new domain creator
-  void addCreator(API::IDomainCreator_sptr creator);
+  void addCreator(const API::IDomainCreator_sptr &creator);
   /// Calculate the value of an additive cost function
   virtual void
   additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction);
@@ -67,10 +66,8 @@ protected:
   /// Currently active values.
   mutable std::vector<API::FunctionValues_sptr> m_values;
   /// Domain creators.
-  std::vector<boost::shared_ptr<API::IDomainCreator>> m_creators;
+  std::vector<std::shared_ptr<API::IDomainCreator>> m_creators;
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_SEQDOMAIN_H_*/

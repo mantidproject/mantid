@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
-#define MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
+#pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -225,7 +224,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        out = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(ws1Name));)
     TS_ASSERT(out);
     if (!out)
@@ -419,8 +418,7 @@ private:
                                          const std::string &inputWorkspace2,
                                          const std::string &outputWorkspace) {
     auto appendSpectra =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "AppendSpectra");
+        Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setRethrows(true));
     TS_ASSERT_THROWS_NOTHING(
         appendSpectra->setProperty("InputWorkspace1", inputWorkspace1));
@@ -433,9 +431,9 @@ private:
   }
   /** Creates a 2D workspace with 5 histograms
    */
-  void createWorkspaceWithAxisAndLabel(const std::string outputName,
+  void createWorkspaceWithAxisAndLabel(const std::string &outputName,
                                        const std::string &axisType,
-                                       const std::string axisValue) {
+                                       const std::string &axisValue) {
     int nspec = 5;
     std::vector<std::string> YVals;
     std::vector<double> dataX;
@@ -450,8 +448,8 @@ private:
       dataY.emplace_back(double(i));
     }
 
-    auto createWS = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "CreateWorkspace");
+    auto createWS =
+        Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("OutputWorkspace", "we"));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("DataX", dataX));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("DataY", dataY));
@@ -465,8 +463,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(createWS->execute());
 
     // we do a rebin so we can have nice bins
-    auto rebin =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Rebin");
+    auto rebin = Mantid::API::AlgorithmManager::Instance().create("Rebin");
     TS_ASSERT_THROWS_NOTHING(rebin->setProperty("InputWorkspace", "we"));
     TS_ASSERT_THROWS_NOTHING(
         rebin->setProperty("Params", std::vector<double>{1}));
@@ -478,5 +475,3 @@ private:
   const std::string ws1Name;
   const std::string ws2Name;
 };
-
-#endif /* MANTID_ALGORITHMS_APPENDSPECTRATEST_H_ */

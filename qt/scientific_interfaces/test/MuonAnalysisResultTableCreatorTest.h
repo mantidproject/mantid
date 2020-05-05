@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
+#pragma once
 
 #include "../Muon/MuonAnalysisResultTableCreator.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -59,7 +58,7 @@ public:
     return MuonAnalysisResultTableCreator::haveSameParameters(tables);
   }
   void removeFixedParameterErrors(
-      const Mantid::API::ITableWorkspace_sptr table) const {
+      const Mantid::API::ITableWorkspace_sptr &table) const {
     MuonAnalysisResultTableCreator::removeFixedParameterErrors(table);
   }
 };
@@ -118,8 +117,8 @@ public:
             getParamTable(m_firstRun));
     ads.add("EMU00020919; Pair; long; Asym; #1_Parameters",
             getParamTable(m_firstRun + 1));
-    ads.add("EMU00020918", boost::make_shared<WorkspaceGroup>());
-    ads.add("EMU00020919", boost::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020918", std::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020919", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("EMU00020918",
                    "EMU00020918; Pair; long; Asym; #1_Workspace");
     ads.addToGroup("EMU00020918",
@@ -154,8 +153,8 @@ public:
             getParamTable(m_firstRun));
     ads.add("EMU00020919; Pair; long; Asym; #1_Parameters",
             getAlternateParamTable());
-    ads.add("EMU00020918", boost::make_shared<WorkspaceGroup>());
-    ads.add("EMU00020919", boost::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020918", std::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020919", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("EMU00020918",
                    "EMU00020918; Pair; long; Asym; #1_Workspace");
     ads.addToGroup("EMU00020918",
@@ -184,7 +183,7 @@ public:
             getParamTable(m_firstRun + 1));
     ads.add("MuonSeqFit_Label_EMU20919_Workspace",
             getWorkspace(m_firstRun + 1));
-    ads.add("MuonSeqFit_Label", boost::make_shared<WorkspaceGroup>());
+    ads.add("MuonSeqFit_Label", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20918_Parameters");
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20918_Workspace");
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20919_Parameters");
@@ -216,7 +215,7 @@ public:
             getParamTable(m_firstRun + 1));
     ads.add("MuonSimulFit_Label_EMU20919_long_Workspace",
             getWorkspace(m_firstRun + 1));
-    ads.add("MuonSimulFit_Label", boost::make_shared<WorkspaceGroup>());
+    ads.add("MuonSimulFit_Label", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("MuonSimulFit_Label",
                    "MuonSimulFit_Label_EMU20918_long_Parameters");
     ads.addToGroup("MuonSimulFit_Label",
@@ -259,7 +258,7 @@ public:
               getParamTable(m_firstRun + 1, true));
       ads.add(prefix + runs[i][1] + "_long_Workspace",
               getWorkspace(m_firstRun + 1));
-      ads.add(prefix, boost::make_shared<WorkspaceGroup>());
+      ads.add(prefix, std::make_shared<WorkspaceGroup>());
       ads.addToGroup(prefix, prefix + runs[i][0] + "_long_Parameters");
       ads.addToGroup(prefix, prefix + runs[i][0] + "_long_Workspace");
       ads.addToGroup(prefix, prefix + runs[i][1] + "_long_Parameters");
@@ -290,7 +289,7 @@ public:
     RAII_ADS ads;
     for (int i = 0; i < labels.size(); ++i) {
       const std::string &prefix = "MuonSimulFit_" + labels[i].toStdString();
-      ads.add(prefix, boost::make_shared<WorkspaceGroup>());
+      ads.add(prefix, std::make_shared<WorkspaceGroup>());
       for (size_t j = 0; j < runs[i].size(); ++j) {
         const int run = m_firstRun + static_cast<int>(j);
         ads.add(prefix + runs[i][j] + "_long_Parameters",
@@ -404,7 +403,7 @@ private:
 
   /// Create parameter table output from a fit
   ITableWorkspace_sptr getParamTable(int runNumber, bool makeGlobals = false) {
-    const double base = static_cast<double>(runNumber - m_firstRun);
+    const auto base = static_cast<double>(runNumber - m_firstRun);
     auto table = WorkspaceFactory::Instance().createTable();
     // Create columns
     table->addColumn("str", "Name");
@@ -468,7 +467,7 @@ private:
   }
 
   /// Expected output table
-  ITableWorkspace_sptr getExpectedOutputSingle(const QStringList workspaces) {
+  ITableWorkspace_sptr getExpectedOutputSingle(const QStringList &workspaces) {
     auto table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "workspace_Name");
     const std::vector<std::string> titles = {
@@ -549,8 +548,8 @@ private:
     return table;
   }
 
-  bool compareTables(const ITableWorkspace_sptr lhs,
-                     const ITableWorkspace_sptr rhs) {
+  bool compareTables(const ITableWorkspace_sptr &lhs,
+                     const ITableWorkspace_sptr &rhs) {
     auto alg = AlgorithmManager::Instance().create("CompareWorkspaces");
     alg->initialize();
     alg->setChild(true);
@@ -576,5 +575,3 @@ private:
   LogValuesMap m_logValues;
   int m_firstStart_sec, m_startDiff_sec, m_firstRun;
 };
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_ */

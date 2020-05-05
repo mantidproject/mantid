@@ -8,7 +8,6 @@ set(MODULE_TEMPLATE src/api.cpp.in)
 set(EXPORT_FILES
     src/Exports/IAlgorithm.cpp
     src/Exports/AlgorithmObserver.cpp
-    src/Exports/AlgorithmProxy.cpp
     src/Exports/AlgorithmHistory.cpp
     src/Exports/CatalogManager.cpp
     src/Exports/CatalogSession.cpp
@@ -133,10 +132,11 @@ target_link_libraries(PythonAPIModule
                               PythonGeometryModule
                               PythonKernelModule
                               API
-                              Types
-                              Kernel
-                              HistogramData
                               Geometry
+                              HistogramData
+                              Indexing
+                              Kernel
+                              Types
                               ${PYTHON_LIBRARIES}
                               ${POCO_LIBRARIES}
                               ${Boost_LIBRARIES})

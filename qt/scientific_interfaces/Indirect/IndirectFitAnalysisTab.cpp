@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTab.h"
 #include "ui_IqtFit.h"
@@ -19,6 +19,7 @@
 #include <QtCore>
 
 #include <algorithm>
+#include <utility>
 
 /// Logger
 Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
@@ -159,7 +160,6 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view, this);
-  m_plotPresenter->disableSpectrumPlotSelection();
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
@@ -264,7 +264,7 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
 size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
     const std::string &functionName) const {
   auto fittingFunction = m_fittingModel->getFittingFunction();
-  if (fittingFunction->nFunctions() > 0)
+  if (fittingFunction && fittingFunction->nFunctions() > 0)
     return getNumberOfSpecificFunctionContained(
         functionName, fittingFunction->getFunction(0).get());
   else
@@ -369,11 +369,11 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
 
   if (error) {
     m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm,
-                                         TableDatasetIndex{0});
+                                         m_currentTableDatasetIndex);
     m_fittingAlgorithm.reset();
   } else
     m_fittingModel->addSingleFitOutput(m_fittingAlgorithm,
-                                       TableDatasetIndex{0});
+                                       m_currentTableDatasetIndex);
 }
 
 /**
@@ -424,10 +424,13 @@ void IndirectFitAnalysisTab::updateParameterValues(
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
   IFunction_sptr fun = m_fittingModel->getFittingFunction();
-  if (fun->getNumberDomains() > 1)
-    m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-  else
-    m_fitPropertyBrowser->updateParameters(*fun);
+  if (fun) {
+    if (fun->getNumberDomains() > 1) {
+      m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+    } else {
+      m_fitPropertyBrowser->updateParameters(*fun);
+    }
+  }
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
@@ -528,6 +531,7 @@ void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
     enableFitButtons(false);
     enableOutputOptions(false);
     m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
+    m_currentTableDatasetIndex = dataIndex;
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
@@ -640,7 +644,7 @@ void IndirectFitAnalysisTab::setEditResultVisible(bool visible) {
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
-    IAlgorithm_sptr fitAlgorithm) const {
+    const IAlgorithm_sptr &fitAlgorithm) const {
   fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
   fitAlgorithm->setProperty("MaxIterations",
                             m_fitPropertyBrowser->maxIterations());
@@ -671,14 +675,14 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
 void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateSingleFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 

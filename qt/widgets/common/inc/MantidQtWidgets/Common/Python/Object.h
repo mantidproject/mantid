@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTWIDGETS_PYTHON_OBJECT_H
-#define MANTIDQTWIDGETS_PYTHON_OBJECT_H
+#pragma once
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -105,5 +104,3 @@ private:
 } // namespace Common
 } // namespace Widgets
 } // namespace MantidQt
-
-#endif // MANTIDQTWIDGETS_PYTHON_OBJECT_H

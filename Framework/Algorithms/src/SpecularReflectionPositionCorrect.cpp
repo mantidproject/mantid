@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
 
@@ -81,10 +81,9 @@ const std::string SpecularReflectionPositionCorrect::category() const {
 /** Initialize the algorithm's properties.
  */
 void SpecularReflectionPositionCorrect::init() {
-  auto thetaValidator = boost::make_shared<CompositeValidator>();
-  thetaValidator->add(boost::make_shared<MandatoryValidator<double>>());
-  thetaValidator->add(
-      boost::make_shared<BoundedValidator<double>>(0, 90, true));
+  auto thetaValidator = std::make_shared<CompositeValidator>();
+  thetaValidator->add(std::make_shared<MandatoryValidator<double>>());
+  thetaValidator->add(std::make_shared<BoundedValidator<double>>(0, 90, true));
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace to correct.");
@@ -113,8 +112,7 @@ void SpecularReflectionPositionCorrect::exec() {
   cloneWS->setProperty("InputWorkspace", inWS);
   cloneWS->execute();
   Workspace_sptr tmp = cloneWS->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr outWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+  MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
   const double twoThetaIn = this->getProperty("TwoThetaIn");
 
@@ -138,13 +136,13 @@ void SpecularReflectionPositionCorrect::exec() {
  * @param detectorPosition: Actual detector or detector group position.
  */
 void SpecularReflectionPositionCorrect::moveDetectors(
-    API::MatrixWorkspace_sptr toCorrect, IComponent_const_sptr detector,
-    IComponent_const_sptr sample, const double &upOffset,
+    const API::MatrixWorkspace_sptr &toCorrect, IComponent_const_sptr detector,
+    const IComponent_const_sptr &sample, const double &upOffset,
     const double &acrossOffset, const V3D &detectorPosition) {
   auto instrument = toCorrect->getInstrument();
   const V3D samplePosition = sample->getPos();
   auto referenceFrame = instrument->getReferenceFrame();
-  if (auto groupDetector = boost::dynamic_pointer_cast<const DetectorGroup>(
+  if (auto groupDetector = std::dynamic_pointer_cast<const DetectorGroup>(
           detector)) // Do we have a group of detectors
   {
     const std::vector<IDetector_const_sptr> detectors =
@@ -203,8 +201,9 @@ void SpecularReflectionPositionCorrect::moveDetectors(
  * @param detector : Pointer to a given detector
  */
 void SpecularReflectionPositionCorrect::correctPosition(
-    API::MatrixWorkspace_sptr toCorrect, const double &twoThetaInDeg,
-    IComponent_const_sptr sample, IComponent_const_sptr detector) {
+    const API::MatrixWorkspace_sptr &toCorrect, const double &twoThetaInDeg,
+    const IComponent_const_sptr &sample,
+    const IComponent_const_sptr &detector) {
 
   auto instrument = toCorrect->getInstrument();
 

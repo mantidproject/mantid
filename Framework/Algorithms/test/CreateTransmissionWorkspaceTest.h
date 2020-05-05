@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * CreateTransmissionWorkspaceTest.h
@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
-#define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -180,5 +179,3 @@ public:
     TS_ASSERT_EQUALS("Wavelength", outWS->getAxis(0)->unit()->unitID());
   }
 };
-
-#endif /* ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_ */

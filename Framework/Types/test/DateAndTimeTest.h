@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * DateAndTimeTest.h
@@ -11,8 +11,7 @@
  *      Author: janik
  */
 
-#ifndef DATEANDTIMETEST_H_
-#define DATEANDTIMETEST_H_
+#pragma once
 
 #include "MantidTypes/Core/DateAndTime.h"
 #include <ctime>
@@ -471,5 +470,3 @@ public:
     }
   }
 };
-
-#endif /* DATEANDTIMETEST_H_ */

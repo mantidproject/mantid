@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADMUONNEXUS1TEST_H_
-#define LOADMUONNEXUS1TEST_H_
+#pragma once
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
@@ -73,8 +72,7 @@ public:
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         outputSpace);
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -178,9 +176,9 @@ public:
           outputSpace);
 
       Workspace2D_sptr output2D =
-          boost::dynamic_pointer_cast<Workspace2D>(output);
+          std::dynamic_pointer_cast<Workspace2D>(output);
       // Workspace2D_sptr output2D2 =
-      // boost::dynamic_pointer_cast<Workspace2D>(output2);
+      // std::dynamic_pointer_cast<Workspace2D>(output2);
       // Should be 32 for file inputFile =
       // "../../../../Test/Nexus/emu00006475.nxs";
       TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -216,9 +214,9 @@ public:
            outputSpace + "_4"));
 
       Workspace2D_sptr output2D =
-          boost::dynamic_pointer_cast<Workspace2D>(output);
+          std::dynamic_pointer_cast<Workspace2D>(output);
       Workspace2D_sptr output2D2 =
-          boost::dynamic_pointer_cast<Workspace2D>(output2);
+          std::dynamic_pointer_cast<Workspace2D>(output2);
       // Should be 32 for file inputFile =
       // "../../../../Test/Nexus/emu00006475.nxs";
       TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -281,9 +279,9 @@ public:
            outputSpace + "_4"));
 
       Workspace2D_sptr output2D =
-          boost::dynamic_pointer_cast<Workspace2D>(output);
+          std::dynamic_pointer_cast<Workspace2D>(output);
       Workspace2D_sptr output2D2 =
-          boost::dynamic_pointer_cast<Workspace2D>(output2);
+          std::dynamic_pointer_cast<Workspace2D>(output2);
       // Should be 32 for file inputFile =
       // "../../../../Test/Nexus/emu00006475.nxs";
       TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -325,8 +323,7 @@ public:
     MatrixWorkspace_sptr output;
     (output =
          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 9);
@@ -369,7 +366,7 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output1 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS1");
-    Workspace2D_sptr out1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
+    Workspace2D_sptr out1 = std::dynamic_pointer_cast<Workspace2D>(output1);
 
     // Execute alg2
     // Load all the spectra
@@ -382,7 +379,7 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output2 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS2");
-    Workspace2D_sptr out2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
+    Workspace2D_sptr out2 = std::dynamic_pointer_cast<Workspace2D>(output2);
 
     // Check common spectra
     // X values should match
@@ -464,7 +461,7 @@ public:
     }
 
     Workspace_sptr outWS = alg.getProperty("OutputWorkspace");
-    const auto loadedWS = boost::dynamic_pointer_cast<Workspace2D>(outWS);
+    const auto loadedWS = std::dynamic_pointer_cast<Workspace2D>(outWS);
     TS_ASSERT(loadedWS);
 
     // Check the right spectra have been loaded
@@ -558,8 +555,8 @@ public:
     if (deadTimesGroup) {
       TS_ASSERT_EQUALS(deadTimesGroup->size(), 2);
 
-      TableWorkspace_sptr table1 = boost::dynamic_pointer_cast<TableWorkspace>(
-          deadTimesGroup->getItem(0));
+      TableWorkspace_sptr table1 =
+          std::dynamic_pointer_cast<TableWorkspace>(deadTimesGroup->getItem(0));
       TS_ASSERT(table1);
 
       if (table1) {
@@ -575,8 +572,8 @@ public:
         TS_ASSERT_DELTA(table1->Double(63, 1), 0.01245339, 0.00000001);
       }
 
-      TableWorkspace_sptr table2 = boost::dynamic_pointer_cast<TableWorkspace>(
-          deadTimesGroup->getItem(1));
+      TableWorkspace_sptr table2 =
+          std::dynamic_pointer_cast<TableWorkspace>(deadTimesGroup->getItem(1));
       TS_ASSERT(table2);
 
       if (table2) {
@@ -685,7 +682,7 @@ public:
     if (detectorGrouping) {
       TS_ASSERT_EQUALS(detectorGrouping->size(), 2);
 
-      TableWorkspace_sptr table1 = boost::dynamic_pointer_cast<TableWorkspace>(
+      TableWorkspace_sptr table1 = std::dynamic_pointer_cast<TableWorkspace>(
           detectorGrouping->getItem(0));
       TS_ASSERT(table1);
 
@@ -707,7 +704,7 @@ public:
         TS_ASSERT_EQUALS(e2[31], 32);
       }
 
-      TableWorkspace_sptr table2 = boost::dynamic_pointer_cast<TableWorkspace>(
+      TableWorkspace_sptr table2 = std::dynamic_pointer_cast<TableWorkspace>(
           detectorGrouping->getItem(1));
       TS_ASSERT(table2);
 
@@ -751,7 +748,7 @@ public:
     }
 
     auto outWs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
     TS_ASSERT(outWs);
 
     if (!outWs)
@@ -786,7 +783,7 @@ public:
     }
 
     auto outWs =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(outWsEntry.retrieve());
+        std::dynamic_pointer_cast<WorkspaceGroup>(outWsEntry.retrieve());
     TS_ASSERT(outWs);
 
     if (!outWs)
@@ -794,8 +791,7 @@ public:
 
     TS_ASSERT_EQUALS(outWs->size(), 2);
 
-    auto outWs1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outWs->getItem(0));
+    auto outWs1 = std::dynamic_pointer_cast<MatrixWorkspace>(outWs->getItem(0));
     TS_ASSERT(outWs1);
 
     if (outWs1) {
@@ -811,8 +807,7 @@ public:
       TS_ASSERT_EQUALS(outWs1->y(1)[1997], 0);
     }
 
-    auto outWs2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outWs->getItem(1));
+    auto outWs2 = std::dynamic_pointer_cast<MatrixWorkspace>(outWs->getItem(1));
     TS_ASSERT(outWs2);
 
     if (outWs2) {
@@ -851,13 +846,13 @@ public:
     if (!outWs)
       return;
 
-    auto gws = boost::dynamic_pointer_cast<WorkspaceGroup>(outWs);
+    auto gws = std::dynamic_pointer_cast<WorkspaceGroup>(outWs);
     TS_ASSERT(gws);
 
     if (!gws)
       return;
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     TS_ASSERT(ws);
     const Run &run = ws->run();
 
@@ -895,7 +890,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouping =
                                  alg.getProperty("DetectorGroupingTable"));
     const auto detectorGrouping =
-        boost::dynamic_pointer_cast<TableWorkspace>(grouping);
+        std::dynamic_pointer_cast<TableWorkspace>(grouping);
 
     if (detectorGrouping) {
       TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
@@ -947,7 +942,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouping =
                                  alg.getProperty("DetectorGroupingTable"));
     const auto detectorGrouping =
-        boost::dynamic_pointer_cast<TableWorkspace>(grouping);
+        std::dynamic_pointer_cast<TableWorkspace>(grouping);
 
     if (detectorGrouping) {
       TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
@@ -993,7 +988,7 @@ public:
     }
     Workspace_sptr outWs = outWsEntry.retrieve();
     TS_ASSERT(outWs);
-    const auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(outWs);
+    const auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(outWs);
     TS_ASSERT(matrixWs);
     if (matrixWs) {
       checkProperty(matrixWs->run(), "goodfrm", 65500);
@@ -1047,5 +1042,3 @@ public:
 private:
   LoadMuonNexus1 loader;
 };
-
-#endif /*LOADMUONNEXUS1TEST_H_*/

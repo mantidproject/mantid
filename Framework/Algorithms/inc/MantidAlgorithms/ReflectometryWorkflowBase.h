@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 #include <boost/optional.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -26,7 +25,8 @@ namespace Algorithms {
  containing common implementation functionality usable
  *  by concrete reflectometry workflow algorithms.
  */
-class DLLExport ReflectometryWorkflowBase : public API::DataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL ReflectometryWorkflowBase
+    : public API::DataProcessorAlgorithm {
 public:
   // Class typedefs
   using MinMax = boost::tuple<double, double>;
@@ -44,9 +44,9 @@ public:
   /// Convert the input workspace to wavelength, splitting according to the
   /// properties provided.
   DetectorMonitorWorkspacePair
-  toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
+  toLam(const Mantid::API::MatrixWorkspace_sptr &toConvert,
         const std::string &processingCommands,
-        const OptionalInteger monitorIndex, const MinMax &wavelengthMinMax,
+        const OptionalInteger &monitorIndex, const MinMax &wavelengthMinMax,
         const OptionalMinMax &backgroundMinMax);
 
   /// Convert the detector spectrum of the input workspace to wavelength
@@ -70,12 +70,11 @@ protected:
   /// Get the min/max property values
   MinMax getMinMax(const std::string &minProperty,
                    const std::string &maxProperty) const;
-  OptionalMinMax getOptionalMinMax(Mantid::API::Algorithm *const alg,
-                                   const std::string &minProperty,
-                                   const std::string &maxProperty,
-                                   Mantid::Geometry::Instrument_const_sptr inst,
-                                   std::string minIdfName,
-                                   std::string maxIdfName) const;
+  OptionalMinMax getOptionalMinMax(
+      Mantid::API::Algorithm *const alg, const std::string &minProperty,
+      const std::string &maxProperty,
+      const Mantid::Geometry::Instrument_const_sptr &inst,
+      const std::string &minIdfName, const std::string &maxIdfName) const;
   /// Get the transmission correction properties
   void getTransmissionRunInfo(
       OptionalMatrixWorkspace_sptr &firstTransmissionRun,
@@ -102,7 +101,7 @@ private:
   /// Convert the monitor parts of the input workspace to wavelength
   API::MatrixWorkspace_sptr
   toLamMonitor(const API::MatrixWorkspace_sptr &toConvert,
-               const OptionalInteger monitorIndex,
+               const OptionalInteger &monitorIndex,
                const OptionalMinMax &backgroundMinMax);
 
   /// Make a unity workspace
@@ -111,5 +110,3 @@ private:
 };
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_ */

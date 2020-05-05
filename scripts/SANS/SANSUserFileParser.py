@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 import re
 
@@ -69,8 +68,8 @@ class BackCommandParser(object):
             self._use_mean = False
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the MEAN/TOF value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
     def _evaluate_uniform(self, argument):
         '''
@@ -84,8 +83,8 @@ class BackCommandParser(object):
             self._use_time = False
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the TIME/UAMP value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
     def _evaluate_run(self, argument):
         '''
@@ -95,8 +94,8 @@ class BackCommandParser(object):
         '''
         if not argument.startswith(self._run_key[0]):
             raise RuntimeError("BackCommandParser: Cannot parse the RUN= value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
         # Remove the Run= part and take the rest as the run parameter. At this point we cannot
         # check if it is a valid run
@@ -117,8 +116,8 @@ class BackCommandParser(object):
             self._mon_number=int(mon_number)
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the MON value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
     def can_attempt_to_parse(self, arguments):
         '''

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ResampleX.h"
 #include "MantidAPI/Axis.h"
@@ -60,7 +60,7 @@ void ResampleX::init() {
       std::make_unique<ArrayProperty<double>>("XMax"),
       "A comma separated list of the XMax for every spectrum. (Optional)");
 
-  auto min = boost::make_shared<BoundedValidator<int>>();
+  auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   declareProperty("NumberBins", 0, min,
                   "Number of bins to split up each spectrum into.");
@@ -117,8 +117,8 @@ map<string, string> ResampleX::validateInputs() {
  *everything
  * went according to plan.
  */
-string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
-                        vector<double> &xmaxs) {
+string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
+                        vector<double> &xmins, vector<double> &xmaxs) {
   const size_t numSpectra = inputWS->getNumberHistograms();
 
   // pad out the ranges by copying the first value to the rest that are needed
@@ -141,7 +141,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   double xmin_wksp = inputWS->getXMin();
   double xmax_wksp = inputWS->getXMax();
   EventWorkspace_const_sptr inputEventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS != nullptr && inputEventWS->getNumberEvents() > 0) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
@@ -337,7 +337,7 @@ void ResampleX::exec() {
 
   // start doing actual work
   EventWorkspace_const_sptr inputEventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS != nullptr) {
     if (m_preserveEvents) {
       if (inPlace) {
@@ -346,8 +346,7 @@ void ResampleX::exec() {
         g_log.debug() << "Rebinning event workspace out of place\n";
         outputWS = inputWS->clone();
       }
-      auto outputEventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      auto outputEventWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
       if (common_limits) {
         // get the delta from the first since they are all the same

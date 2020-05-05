@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_
-#define MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include <QColor>
 #include <QStandardItem>
@@ -47,4 +46,3 @@ Cell extractCellPropertiesFromItem(QStandardItem const &item);
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_

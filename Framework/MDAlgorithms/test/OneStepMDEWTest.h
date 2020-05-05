@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_ONESTEPMDEWTEST_H_
-#define MANTID_MDEVENTS_ONESTEPMDEWTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -36,12 +35,10 @@ public:
 
     IMDEventWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        out = std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("OneStepMDEWTest")););
     TS_ASSERT(out);
     if (!out)
       return;
   }
 };
-
-#endif /* MANTID_MDEVENTS_ONESTEPMDEWTEST_H_ */

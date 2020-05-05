@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_
-#define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchJobRunner.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
@@ -42,7 +41,7 @@ public:
         m_tolerance(0.1), m_experiment(makeEmptyExperiment()),
         m_instrument(makeEmptyInstrument()),
         m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {
-    m_jobAlgorithm = boost::make_shared<MockBatchJobAlgorithm>();
+    m_jobAlgorithm = std::make_shared<MockBatchJobAlgorithm>();
   }
 
 protected:
@@ -52,7 +51,7 @@ protected:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
-  boost::shared_ptr<MockBatchJobAlgorithm> m_jobAlgorithm;
+  std::shared_ptr<MockBatchJobAlgorithm> m_jobAlgorithm;
 
   class BatchJobRunnerFriend : public BatchJobRunner {
     friend class BatchJobRunnerTest;
@@ -114,5 +113,3 @@ protected:
         MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
   }
 };
-
-#endif // MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_

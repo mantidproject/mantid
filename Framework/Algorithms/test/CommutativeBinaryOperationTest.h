@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMMUTATIVEBINARYOPERATIONTEST_H_
-#define COMMUTATIVEBINARYOPERATIONTEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
-#include "MantidKernel/System.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -35,8 +33,8 @@ public:
     return "Commutative binary operation helper.";
   }
 
-  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,
-                                     const MatrixWorkspace_const_sptr ws2) {
+  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr &ws1,
+                                     const MatrixWorkspace_const_sptr &ws2) {
     m_lhs = ws1;
     m_rhs = ws2;
     m_lhsBlocksize = ws1->blocksize();
@@ -155,5 +153,3 @@ public:
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_event2).empty());
   }
 };
-
-#endif /*COMMUTATIVEBINARYOPERATIONTEST_H_*/

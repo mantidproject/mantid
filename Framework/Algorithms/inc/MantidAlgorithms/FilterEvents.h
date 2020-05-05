@@ -1,19 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FILTEREVENTS_H_
-#define MANTID_ALGORITHMS_FILTEREVENTS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
 
@@ -27,7 +26,7 @@ class TimeAtSampleStrategy;
 
   @date 2012-04-04
 */
-class DLLExport FilterEvents : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FilterEvents : public API::Algorithm {
 
   enum TOFCorrectionType {
     NoneCorrect,
@@ -80,7 +79,7 @@ private:
   void processMatrixSplitterWorkspace();
 
   /// create event workspace
-  boost::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
+  std::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
   /// create output workspaces if the splitters are given in SplittersWorkspace
   void createOutputWorkspacesSplitters();
   /// create output workspaces in the case of using TableWorlspace for splitters
@@ -235,5 +234,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_FILTEREVENTS_H_ */

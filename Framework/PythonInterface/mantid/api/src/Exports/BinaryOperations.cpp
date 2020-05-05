@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/BinaryOperations.h"
 
@@ -103,13 +103,13 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
 
   // ----- Determine which version of the algo should be called -----
   MatrixWorkspace_const_sptr lhs_mat =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(lhs);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(lhs);
   MatrixWorkspace_const_sptr rhs_mat =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(rhs);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(rhs);
   WorkspaceGroup_const_sptr lhs_grp =
-      boost::dynamic_pointer_cast<const WorkspaceGroup>(lhs);
+      std::dynamic_pointer_cast<const WorkspaceGroup>(lhs);
   WorkspaceGroup_const_sptr rhs_grp =
-      boost::dynamic_pointer_cast<const WorkspaceGroup>(rhs);
+      std::dynamic_pointer_cast<const WorkspaceGroup>(rhs);
 
   if ((lhs_mat || lhs_grp) && (rhs_mat || rhs_grp))
     // Both sides are matrixworkspace - use the original algos (e..g "Plus.")

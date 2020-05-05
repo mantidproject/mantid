@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeaksIntersection.h"
 #include "MantidAPI/TableRow.h"
@@ -45,7 +45,7 @@ void PeaksIntersection::initBaseProperties() {
 
   declareProperty(
       "CoordinateFrame", "DetectorSpace",
-      boost::make_shared<StringListValidator>(propOptions),
+      std::make_shared<StringListValidator>(propOptions),
       "What coordinate system to use for intersection criteria?\n"
       "  DetectorSpace: Real-space coordinates.\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
@@ -117,7 +117,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   }
 
   Mantid::DataObjects::TableWorkspace_sptr outputWorkspace =
-      boost::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
+      std::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
   outputWorkspace->addColumn("int", "PeakIndex");
   outputWorkspace->addColumn("bool", "Intersecting");
   outputWorkspace->addColumn("double", "Distance");

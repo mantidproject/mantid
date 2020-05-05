@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FABADAMINIMIZER_H_
-#define MANTID_CURVEFITTING_FABADAMINIMIZER_H_
+#pragma once
 
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
@@ -30,7 +29,7 @@ namespace FuncMinimisers {
   Algorithm extended with Gibbs Sampling. Designed to obtain the Bayesian
   posterior PDFs
 */
-class DLLExport FABADAMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL FABADAMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   FABADAMinimizer();
@@ -115,7 +114,7 @@ private:
   /// Pointer to the cost function. Must be the least squares.
   // Intentar encontrar una manera de sacar aqui el numero de parametros  que
   // no sea necesaria la cost function
-  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
+  std::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// Pointer to the Fitting Function (IFunction) inside the cost function.
   API::IFunction_sptr m_fitFunction;
   /// The number of iterations done (restarted at each phase).
@@ -175,5 +174,3 @@ public:
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_FABADAMINIMIZER_H_ */

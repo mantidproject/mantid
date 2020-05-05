@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib import rcParams
 from matplotlib.axes import ErrorbarContainer
@@ -119,6 +117,12 @@ class CurveProperties(dict):
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
         kwargs['visible'] = not self.hide
+
+        # If the long form of the marker name is currently being used, it is changed to the short form which is
+        # understood by matplotlib.
+        if kwargs['marker'] in MARKER_MAP:
+            kwargs['marker'] = MARKER_MAP[kwargs['marker']]
+
         return kwargs
 
     @classmethod

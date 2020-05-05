@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This algorithm flattens a MDHistoWorkspace to a Workspace2D. Mantid has far
@@ -13,8 +13,7 @@
  *
  *
  */
-#ifndef MDHISTOTOWORKSPACE2D_H_
-#define MDHISTOTOWORKSPACE2D_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -52,15 +51,13 @@ private:
 
   size_t m_rank;
   size_t m_currentSpectra;
-  size_t calculateNSpectra(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void recurseData(Mantid::API::IMDHistoWorkspace_sptr inWS,
-                   Mantid::DataObjects::Workspace2D_sptr outWS,
+  size_t calculateNSpectra(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void recurseData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+                   const Mantid::DataObjects::Workspace2D_sptr &outWS,
                    size_t currentDim, Mantid::coord_t *pos);
 
-  void checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS);
+  void checkW2D(const Mantid::DataObjects::Workspace2D_sptr &outWS);
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS,
-                    Mantid::DataObjects::Workspace2D_sptr outWS);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+                    const Mantid::DataObjects::Workspace2D_sptr &outWS);
 };
-
-#endif /*MDHISTOTOWORKSPACE2D_H_*/

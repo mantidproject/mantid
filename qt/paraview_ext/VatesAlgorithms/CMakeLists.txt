@@ -64,8 +64,7 @@ endif()
 # Create test file projects
 include_directories(SYSTEM
                     ${CXXTEST_INCLUDE_DIR}
-                    ${GMOCK_INCLUDE_DIR}
-                    ${GTEST_INCLUDE_DIR})
+)
 
 include_directories(inc
                     ../../../Framework/TestHelpers/inc
@@ -87,8 +86,8 @@ target_link_libraries(VatesAlgorithmsTest
                       VatesAPI
                       VatesAlgorithms
                       ${POCO_LIBRARIES}
-                      ${GMOCK_LIBRARIES}
-                      ${GTEST_LIBRARIES})
+                      gmock
+)
 add_dependencies(AllTests VatesAlgorithmsTest)
 # Add to the 'UnitTests' group in VS
 set_property(TARGET VatesAlgorithmsTest PROPERTY FOLDER "UnitTests")

@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
-#define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
+#pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -42,8 +41,8 @@ private:
 
   Makes the tests much more readable like this.
   */
-  boost::shared_ptr<ConvertToReflectometryQ>
-  make_standard_algorithm(const std::string outputdimensions = "Q (lab frame)",
+  std::shared_ptr<ConvertToReflectometryQ>
+  make_standard_algorithm(const std::string &outputdimensions = "Q (lab frame)",
                           bool outputAsMD = true) {
     MatrixWorkspace_sptr in_ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
@@ -56,9 +55,9 @@ private:
 
     auto newAxis = std::make_unique<NumericAxis>(in_ws->getAxis(1)->length());
 
-    newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
+    newAxis->unit() = std::make_shared<Mantid::Kernel::Units::Degrees>();
     in_ws->replaceAxis(1, std::move(newAxis));
-    auto alg = boost::make_shared<ConvertToReflectometryQ>();
+    auto alg = std::make_shared<ConvertToReflectometryQ>();
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
     TS_ASSERT(alg->isInitialized())
@@ -79,8 +78,6 @@ public:
     return new ConvertToReflectometryQTest();
   }
   static void destroySuite(ConvertToReflectometryQTest *suite) { delete suite; }
-
-  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
   void test_name() {
     ConvertToReflectometryQ alg;
@@ -156,7 +153,7 @@ public:
   void test_execute_qxqz_md() {
     auto alg = make_standard_algorithm();
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -173,7 +170,7 @@ public:
   void test_execute_kikf_md() {
     auto alg = make_standard_algorithm("K (incident, final)");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -188,7 +185,7 @@ public:
   void test_execute_pipf_md() {
     auto alg = make_standard_algorithm("P (lab frame)");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -204,7 +201,7 @@ public:
     const bool outputAsMD = false;
     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -216,7 +213,7 @@ public:
     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
     alg->setProperty("Method", "NormalisedPolygon");
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -228,7 +225,7 @@ public:
     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
     alg->setProperty("Method", "NormalisedPolygon");
     alg->execute();
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -239,7 +236,7 @@ public:
     const bool outputAsMD = false;
     auto alg = make_standard_algorithm("K (incident, final)", outputAsMD);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -249,7 +246,7 @@ public:
     const bool outputAsMD = false;
     auto alg = make_standard_algorithm("P (lab frame)", outputAsMD);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
@@ -305,7 +302,7 @@ private:
 public:
   void setUp() override {
     // Load some data
-    IAlgorithm *loadalg = FrameworkManager::Instance().createAlgorithm("Load");
+    auto loadalg = AlgorithmManager::Instance().create("Load");
     loadalg->setRethrows(true);
     loadalg->initialize();
     loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
@@ -313,8 +310,7 @@ public:
     loadalg->execute();
 
     // Convert units to wavelength
-    IAlgorithm *unitsalg =
-        FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+    auto unitsalg = AlgorithmManager::Instance().create("ConvertUnits");
     unitsalg->initialize();
     unitsalg->setPropertyValue("InputWorkspace", "testws");
     unitsalg->setPropertyValue("OutputWorkspace", "testws");
@@ -322,8 +318,8 @@ public:
     unitsalg->execute();
 
     // Convert the specturm axis ot signed_theta
-    IAlgorithm *specaxisalg =
-        FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
+    auto specaxisalg =
+        AlgorithmManager::Instance().create("ConvertSpectrumAxis");
     specaxisalg->initialize();
     specaxisalg->setPropertyValue("InputWorkspace", "testws");
     specaxisalg->setPropertyValue("OutputWorkspace", "testws");
@@ -373,5 +369,3 @@ public:
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQTEST_H_ */

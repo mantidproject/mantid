@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDITRUNCATEDATATEST_H_
-#define MANTID_SINQ_POLDITRUNCATEDATATEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -47,7 +46,7 @@ public:
   }
 
   void testSetChopper() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
 
     TestablePoldiTruncateData truncate;
 
@@ -99,7 +98,7 @@ public:
   }
 
   void testCalculateBinCount() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
@@ -128,7 +127,7 @@ public:
   }
 
   void testGetMaximumTimeValue() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
@@ -147,7 +146,7 @@ public:
   }
 
   void testGetMinimumExtraTimeValue() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
@@ -172,7 +171,7 @@ public:
   }
 
   void testGetCroppedWorkspace() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(2).WillRepeatedly(Return(1500.0));
 
     MatrixWorkspace_sptr inputWorkspace =
@@ -201,7 +200,7 @@ public:
   }
 
   void testGetExtraCountsWorkspace() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(2).WillRepeatedly(Return(1500.0));
 
     MatrixWorkspace_sptr inputWorkspace =
@@ -319,5 +318,3 @@ private:
     ~TestablePoldiTruncateData() override {}
   };
 };
-
-#endif /* MANTID_SINQ_POLDITRUNCATEDATATEST_H_ */

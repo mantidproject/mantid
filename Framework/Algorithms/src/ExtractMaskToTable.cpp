@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractMaskToTable.h"
 #include "MantidAPI/TableRow.h"
@@ -58,7 +58,7 @@ void ExtractMaskToTable::exec() {
   if (!m_dataWS)
     throw runtime_error("InputWorkspace cannot be cast to a MatrixWorkspace.");
   MaskWorkspace_const_sptr maskws =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+      std::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
 
   bool m_inputIsMask = false;
   if (maskws) {
@@ -78,7 +78,7 @@ void ExtractMaskToTable::exec() {
         "XMin or XMax cannot be empty.  XMin must be less than XMax.");
 
   // Create and set up output workspace
-  auto outws = boost::make_shared<TableWorkspace>();
+  auto outws = std::make_shared<TableWorkspace>();
   outws->addColumn("double", "XMin");
   outws->addColumn("double", "XMax");
   outws->addColumn("str", "DetectorIDsList");
@@ -124,7 +124,7 @@ void ExtractMaskToTable::exec() {
  * @returns :: vector of detector IDs that are masked
  */
 std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
-    DataObjects::TableWorkspace_sptr masktablews) {
+    const DataObjects::TableWorkspace_sptr &masktablews) {
   // Output vector
   std::vector<detid_t> maskeddetectorids;
 
@@ -174,7 +174,7 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
  * @returns :: vector genrated from input string containing the list
  */
 std::vector<detid_t>
-ExtractMaskToTable::parseStringToVector(std::string liststr) {
+ExtractMaskToTable::parseStringToVector(const std::string &liststr) {
   std::vector<detid_t> detidvec;
 
   // Use ArrayProperty to parse the list
@@ -244,7 +244,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
 
   // Go through all spectra to find masked workspace
   MaskWorkspace_const_sptr maskws =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+      std::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
   size_t numhist = maskws->getNumberHistograms();
   for (size_t i = 0; i < numhist; ++i) {
     // Rule out the spectrum without mask
@@ -264,7 +264,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
  * @param targetWS :: table workspace to which the content is copied;
  */
 void ExtractMaskToTable::copyTableWorkspaceContent(
-    TableWorkspace_sptr sourceWS, TableWorkspace_sptr targetWS) {
+    const TableWorkspace_sptr &sourceWS, const TableWorkspace_sptr &targetWS) {
   // Compare the column names.  They must be exactly the same
   vector<string> sourcecolnames = sourceWS->getColumnNames();
   vector<string> targetcolnames = targetWS->getColumnNames();
@@ -310,7 +310,7 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
  * @param xmax :: maximum x
  * @param prevmaskedids :: vector of previous masked detector IDs
  */
-void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
+void ExtractMaskToTable::addToTableWorkspace(const TableWorkspace_sptr &outws,
                                              vector<detid_t> maskeddetids,
                                              double xmin, double xmax,
                                              vector<detid_t> prevmaskedids) {

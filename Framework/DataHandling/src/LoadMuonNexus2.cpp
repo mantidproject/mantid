@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidAPI/Axis.h"
@@ -24,7 +24,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -80,7 +80,7 @@ void LoadMuonNexus2::exec() {
     // version 1 loader
     IAlgorithm_sptr childAlg =
         createChildAlgorithm("LoadMuonNexus", 0, 1, true, 1);
-    auto version1Loader = boost::dynamic_pointer_cast<API::Algorithm>(childAlg);
+    auto version1Loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
     version1Loader->copyPropertiesFrom(*this);
     version1Loader->executeAsChildAlg();
     this->copyPropertiesFrom(*version1Loader);
@@ -127,8 +127,8 @@ void LoadMuonNexus2::doExec() {
   Property *ws = getProperty("OutputWorkspace");
   std::string localWSName = ws->value();
   // If multiperiod, will need to hold the Instrument & Sample for copying
-  boost::shared_ptr<Instrument> instrument;
-  boost::shared_ptr<Sample> sample;
+  std::shared_ptr<Instrument> instrument;
+  std::shared_ptr<Sample> sample;
 
   std::string detectorName;
   // Only the first NXdata found
@@ -177,13 +177,13 @@ void LoadMuonNexus2::doExec() {
 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", total_specs,
                                               nBins + 1, nBins));
   // Set the unit on the workspace to muon time, for now in the form of a Label
   // Unit
-  boost::shared_ptr<Kernel::Units::Label> lblUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> lblUnit =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Units::Symbol::Microsecond);
   localWorkspace->getAxis(0)->unit() = lblUnit;
@@ -202,7 +202,7 @@ void LoadMuonNexus2::doExec() {
 
   if (m_numberOfPeriods > 1) {
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+                std::dynamic_pointer_cast<Workspace>(wsGrpSptr));
   }
 
   // period_index is currently unused
@@ -238,7 +238,7 @@ void LoadMuonNexus2::doExec() {
       loadLogs(localWorkspace, entry, period);
     } else // We are working on a higher period of a multiperiod raw file
     {
-      localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
     }
 
@@ -298,10 +298,10 @@ void LoadMuonNexus2::doExec() {
 
     // Assign the result to the output workspace property
     if (m_numberOfPeriods > 1)
-      setProperty(outws, boost::static_pointer_cast<Workspace>(localWorkspace));
+      setProperty(outws, std::static_pointer_cast<Workspace>(localWorkspace));
     else {
       setProperty("OutputWorkspace",
-                  boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+                  std::dynamic_pointer_cast<Workspace>(localWorkspace));
     }
 
   } // loop over periods
@@ -314,7 +314,7 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
                                    const Mantid::NeXus::NXInt &counts,
                                    int period, int spec) {
   int nBins = 0;
-  int *data = nullptr;
+  const int *data = nullptr;
 
   if (counts.rank() == 3) {
     nBins = counts.dim2();
@@ -335,8 +335,8 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
  *   @param entry :: The Nexus entry
  *   @param period :: The period of this workspace
  */
-void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
-                              int period) {
+void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws,
+                              NXEntry &entry, int period) {
   // Avoid compiler warning
   (void)period;
 
@@ -373,7 +373,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
  * @param localWorkspace :: The workspace details to use
  */
 void LoadMuonNexus2::loadRunDetails(
-    DataObjects::Workspace2D_sptr localWorkspace) {
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);

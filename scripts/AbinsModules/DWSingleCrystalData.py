@@ -1,13 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
-import six
-
 # Abins modules
 import AbinsModules
 
@@ -28,7 +25,7 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
         else:
             raise ValueError("Improper value of temperature.")
 
-        if isinstance(num_atoms, six.integer_types) and num_atoms > 0:
+        if isinstance(num_atoms, int) and num_atoms > 0:
             self._num_atoms = num_atoms
         else:
             raise ValueError("Improper number of atoms.")
@@ -71,7 +68,7 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
         :param data: Debye-Waller factor to check
         :param atom:  number of atom
         """
-        if not isinstance(atom, six.integer_types):
+        if not isinstance(atom, int):
             raise ValueError("Number of atom should be an integer.")
         if atom < 0 or atom > self._num_atoms:  # here we count from zero
             raise ValueError("Invalid number of atom.")

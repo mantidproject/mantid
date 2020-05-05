@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MDNORM_H_
-#define MANTID_MDALGORITHMS_MDNORM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
@@ -35,25 +34,25 @@ private:
   void exec() override;
   void validateBinningForTemporaryDataWorkspace(
       const std::map<std::string, std::string> &,
-      const Mantid::API::IMDHistoWorkspace_sptr);
+      const Mantid::API::IMDHistoWorkspace_sptr &);
   std::map<std::string, std::string> validateInputs() override final;
   std::string QDimensionName(std::vector<double> projection);
   std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   DataObjects::MDHistoWorkspace_sptr
-  binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps);
+  binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization,
                                uint16_t expInfoIndex = 0) const;
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues,
-                              Geometry::SymmetryOperation so,
+                              const Geometry::SymmetryOperation &so,
                               uint16_t expInfoIndex, size_t soIndex);
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
                               const double theta, const double phi,
-                              Kernel::DblMatrix transform, double lowvalue,
-                              double highvalue);
+                              const Kernel::DblMatrix &transform,
+                              double lowvalue, double highvalue);
   void calcIntegralsForIntersections(const std::vector<double> &xValues,
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues);
@@ -100,5 +99,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_MDNORM_H_ */

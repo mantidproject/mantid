@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_
-#define MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_
+#pragma once
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/V3D.h"
@@ -114,7 +113,7 @@ public:
       TS_ASSERT_DELTA(inti, 2 * inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
-      auto ellipsoid_shape = boost::dynamic_pointer_cast<
+      auto ellipsoid_shape = std::dynamic_pointer_cast<
           const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
       TSM_ASSERT("Expect to get back an ellipsoid shape", ellipsoid_shape);
     }
@@ -235,7 +234,7 @@ public:
       TS_ASSERT_DELTA(inti, inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
-      auto ellipsoid_shape = boost::dynamic_pointer_cast<
+      auto ellipsoid_shape = std::dynamic_pointer_cast<
           const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
       TSM_ASSERT("Expect to get back an ellipsoid shape", ellipsoid_shape);
     }
@@ -297,7 +296,7 @@ public:
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti,
                                                  strong_sigi);
     const auto shape =
-        boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
+        std::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
     const auto frac = std::get<0>(result.second);
 
     // Check the fraction of the peak that is contained within a "standard core"
@@ -372,7 +371,7 @@ public:
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti,
                                                  strong_sigi);
     const auto shape =
-        boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
+        std::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
     const auto frac = std::get<0>(result.second);
 
     // Check the fraction of the peak that is contained within a "standard core"
@@ -614,5 +613,3 @@ private:
     } while (n < npts);
   }
 };
-
-#endif /* MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_ */

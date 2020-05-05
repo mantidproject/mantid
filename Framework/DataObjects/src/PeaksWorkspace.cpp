@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -26,12 +26,12 @@
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <fstream>
+#include <memory>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -666,7 +666,7 @@ void PeaksWorkspace::initColumns() {
  **/
 void PeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
-  columns.emplace_back(boost::shared_ptr<DataObjects::PeakColumn>(
+  columns.emplace_back(std::shared_ptr<DataObjects::PeakColumn>(
       new DataObjects::PeakColumn(this->peaks, name)));
   // Cache the names
   columnNames.emplace_back(name);
@@ -684,7 +684,7 @@ size_t PeaksWorkspace::getColumnIndex(const std::string &name) const {
 
 //---------------------------------------------------------------------------------------------
 /// Gets the shared pointer to a column by index.
-boost::shared_ptr<Mantid::API::Column> PeaksWorkspace::getColumn(size_t index) {
+std::shared_ptr<Mantid::API::Column> PeaksWorkspace::getColumn(size_t index) {
   if (index >= columns.size())
     throw std::invalid_argument(
         "PeaksWorkspace::getColumn() called with invalid index.");
@@ -693,7 +693,7 @@ boost::shared_ptr<Mantid::API::Column> PeaksWorkspace::getColumn(size_t index) {
 
 //---------------------------------------------------------------------------------------------
 /// Gets the shared pointer to a column by index.
-boost::shared_ptr<const Mantid::API::Column>
+std::shared_ptr<const Mantid::API::Column>
 PeaksWorkspace::getColumn(size_t index) const {
   if (index >= columns.size())
     throw std::invalid_argument(

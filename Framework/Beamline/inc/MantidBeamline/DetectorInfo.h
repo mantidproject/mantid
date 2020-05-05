@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_BEAMLINE_DETECTORINFO_H_
-#define MANTID_BEAMLINE_DETECTORINFO_H_
+#pragma once
 
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
@@ -222,5 +221,3 @@ inline bool DetectorInfo::hasMaskedDetectors() const {
 
 } // namespace Beamline
 } // namespace Mantid
-
-#endif /* MANTID_BEAMLINE_DETECTORINFO_H_ */

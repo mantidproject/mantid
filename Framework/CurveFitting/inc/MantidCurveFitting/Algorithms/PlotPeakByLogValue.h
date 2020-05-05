@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_
-#define MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -41,7 +40,7 @@ Required Properties:
 @author Roman Tolchenov, Tessella plc
 @date 01/06/2010
 */
-class DLLExport PlotPeakByLogValue : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL PlotPeakByLogValue : public API::Algorithm {
   /** Structure to identify data for fitting
    */
 
@@ -65,15 +64,17 @@ private:
   void exec() override;
 
   /// Set any WorkspaceIndex attributes in the fitting function
-  void setWorkspaceIndexAttribute(API::IFunction_sptr fun, int wsIndex) const;
+  void setWorkspaceIndexAttribute(const API::IFunction_sptr &fun,
+                                  int wsIndex) const;
 
-  boost::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
-                                            bool outputCompositeMembers,
-                                            bool outputConvolvedMembers,
-                                            const API::IFunction_sptr &ifun,
-                                            const InputSpectraToFit &data);
+  std::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
+                                          bool outputCompositeMembers,
+                                          bool outputConvolvedMembers,
+                                          const API::IFunction_sptr &ifun,
+                                          const InputSpectraToFit &data);
 
-  double calculateLogValue(std::string logName, const InputSpectraToFit &data);
+  double calculateLogValue(const std::string &logName,
+                           const InputSpectraToFit &data);
 
   API::ITableWorkspace_sptr
   createResultsTable(const std::string &logName,
@@ -110,5 +111,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_*/

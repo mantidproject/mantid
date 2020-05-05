@@ -1,19 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
-#define SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
 #include "MockObjects.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
@@ -66,7 +65,7 @@ public:
     CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
 
-    auto candidate = boost::make_shared<NiceMock<MockPeaksPresenter>>();
+    auto candidate = std::make_shared<NiceMock<MockPeaksPresenter>>();
     EXPECT_CALL(*candidate, contentsDifferent(_)).WillOnce(Return(true));
 
     presenter.addPeaksPresenter(candidate);
@@ -77,7 +76,7 @@ public:
   void test_keep_presenters_unique() {
     CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
-    auto presenterToAdd = boost::make_shared<NiceMock<MockPeaksPresenter>>();
+    auto presenterToAdd = std::make_shared<NiceMock<MockPeaksPresenter>>();
     EXPECT_CALL(*presenterToAdd, contentsDifferent(_))
         .WillRepeatedly(Return(true));
     presenter.addPeaksPresenter(presenterToAdd);
@@ -95,10 +94,10 @@ public:
     CompositePeaksPresenter composite(&mockZoomableView);
     const size_t testDim = 0;
     const size_t initialSize = composite.size();
-    auto a = boost::make_shared<NiceMock<MockPeaksPresenter>>();
+    auto a = std::make_shared<NiceMock<MockPeaksPresenter>>();
     EXPECT_CALL(*a, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allow us to add the subject
-    auto b = boost::make_shared<NiceMock<MockPeaksPresenter>>();
+    auto b = std::make_shared<NiceMock<MockPeaksPresenter>>();
     EXPECT_CALL(*b, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add the subject
 
@@ -132,7 +131,7 @@ public:
   */
   void test_updateWithSlicePoint_default() {
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, updateWithSlicePoint(_))
         .Times(1); // Expect the method on the default to be called.
@@ -147,7 +146,7 @@ public:
   }
 
   void test_updateWithSlicePoint() {
-    MockPeaksPresenter *mockPresenter = new MockPeaksPresenter;
+    auto *mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
     EXPECT_CALL(*mockPresenter, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
@@ -169,7 +168,7 @@ public:
   }
 
   void test_getTransformName_default() {
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, getTransformName())
         .Times(1)
@@ -181,7 +180,7 @@ public:
   }
 
   void test_getTransformName() {
-    MockPeaksPresenter *mockPresenter = new MockPeaksPresenter;
+    auto *mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
     EXPECT_CALL(*mockPresenter, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
@@ -206,7 +205,7 @@ public:
   */
   void test_update_default() {
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, update())
         .Times(1); // Expect the method on the default to be called.
@@ -220,7 +219,7 @@ public:
   }
 
   void test_update() {
-    MockPeaksPresenter *mockPresenter = new MockPeaksPresenter;
+    auto *mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
     EXPECT_CALL(*mockPresenter, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
@@ -242,7 +241,7 @@ public:
   void test_presentedWorkspaces() {
     // One nested presenter
     SetPeaksWorkspaces setA;
-    MockPeaksPresenter *pA = new MockPeaksPresenter;
+    auto *pA = new MockPeaksPresenter;
     EXPECT_CALL(*pA, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr A(pA);
@@ -251,7 +250,7 @@ public:
 
     // Another nested presenter
     SetPeaksWorkspaces setB;
-    MockPeaksPresenter *pB = new MockPeaksPresenter;
+    auto *pB = new MockPeaksPresenter;
     EXPECT_CALL(*pB, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr B(pB);
@@ -401,7 +400,7 @@ public:
     // Add peaksWS
     const int limit = 10;
     for (int i = 0; i < limit; ++i) {
-      auto subject = boost::make_shared<NiceMock<MockPeaksPresenter>>();
+      auto subject = std::make_shared<NiceMock<MockPeaksPresenter>>();
       EXPECT_CALL(*subject, contentsDifferent(_))
           .WillRepeatedly(Return(true)); // Allows us to add to composite
       TS_ASSERT_THROWS_NOTHING(presenter.addPeaksPresenter(subject));
@@ -410,7 +409,7 @@ public:
     // Add a peaksWS beyond the limit of allowed number of peaksWS.
 
     TS_ASSERT_THROWS(presenter.addPeaksPresenter(
-                         boost::make_shared<NiceMock<MockPeaksPresenter>>()),
+                         std::make_shared<NiceMock<MockPeaksPresenter>>()),
                      std::invalid_argument &);
   }
 
@@ -430,10 +429,10 @@ public:
 
     // Prepare subject objects.
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setBackgroundColor(newColor)).Times(1);
@@ -459,10 +458,10 @@ public:
 
     // Prepare subject objects.
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, setForegroundColor(newColor)).Times(1);
@@ -492,12 +491,12 @@ public:
     {
       // Create some input peaks workspaces.
       IPeaksWorkspace_sptr peaksWS_A =
-          boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+          std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
       SetPeaksWorkspaces setA;
       setA.insert(peaksWS_A);
 
       IPeaksWorkspace_sptr peaksWS_B =
-          boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+          std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
       SetPeaksWorkspaces setB;
       setB.insert(peaksWS_B);
 
@@ -553,7 +552,7 @@ public:
   void test_remove_default() {
     CompositePeaksPresenter composite(&_fakeZoomableView);
     auto peaksWorkspace =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
 
     // Try to remove a peaks workspace & associated presenter that doesn't exist
     // from a default constructed composite.
@@ -563,10 +562,10 @@ public:
   void do_test_setShown(bool expectedToShow) {
     // Prepare subject objects.
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, setShown(expectedToShow)).Times(1);
@@ -597,7 +596,7 @@ public:
     const bool expectedFlag = true;
 
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, setShown(expectedFlag))
         .Times(1); // Expect the method on the default to be called.
@@ -605,9 +604,8 @@ public:
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
     // Call the method on the composite.
-    composite.setShown(
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(),
-        expectedFlag);
+    composite.setShown(std::make_shared<Mantid::DataObjects::PeaksWorkspace>(),
+                       expectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockDefault));
   }
@@ -616,7 +614,7 @@ public:
     const bool expectedFlag = true;
 
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, showBackgroundRadius(expectedFlag))
         .Times(1); // Expect the method on the default to be called.
@@ -625,8 +623,7 @@ public:
     CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
     // Call the method on the composite.
     composite.setBackgroundRadiusShown(
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(),
-        expectedFlag);
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>(), expectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockDefault));
   }
@@ -637,7 +634,7 @@ public:
         "Cannot fetch background colors until nested presenters have been "
         "added.",
         composite.getBackgroundPeakViewColor(
-            boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()),
+            std::make_shared<Mantid::DataObjects::PeaksWorkspace>()),
         std::runtime_error &);
   }
 
@@ -647,7 +644,7 @@ public:
         "Cannot fetch foreground colours until nested presenters have been "
         "added.",
         composite.getForegroundPeakViewColor(
-            boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()),
+            std::make_shared<Mantid::DataObjects::PeaksWorkspace>()),
         std::runtime_error &);
   }
 
@@ -655,10 +652,10 @@ public:
     const int peakIndex = 0;
     // Prepare subject objects.
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getBoundingBox(peakIndex))
@@ -685,7 +682,7 @@ public:
   void test_setPeakSizeOnProjection() {
     const double fraction = 0.5;
 
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setPeakSizeOnProjection(fraction)).Times(1);
@@ -702,7 +699,7 @@ public:
   void test_setPeakSizeIntoProjection() {
     const double fraction = 0.5;
 
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setPeakSizeIntoProjection(fraction)).Times(1);
@@ -717,7 +714,7 @@ public:
   }
 
   void test_getPeakSizeOnProjection_default() {
-    MockPeaksPresenter *pDefault = new MockPeaksPresenter;
+    auto *pDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(pDefault);
     EXPECT_CALL(*pDefault, getPeakSizeOnProjection()).WillOnce(Return(0));
 
@@ -728,7 +725,7 @@ public:
   }
 
   void test_getPeakSizeIntoProjection_default() {
-    MockPeaksPresenter *pDefault = new MockPeaksPresenter;
+    auto *pDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(pDefault);
     EXPECT_CALL(*pDefault, getPeakSizeIntoProjection()).WillOnce(Return(0));
 
@@ -739,7 +736,7 @@ public:
   }
 
   void test_getPeakSizeOnProjection() {
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getPeakSizeOnProjection()).WillOnce(Return(1));
@@ -754,7 +751,7 @@ public:
   }
 
   void test_getPeakSizeIntoProjection() {
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getPeakSizeIntoProjection()).WillOnce(Return(1));
@@ -780,15 +777,15 @@ public:
 
     // One nested presenter. Create setup environment.
     IPeaksWorkspace_sptr peaksWS_1 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     IPeaksWorkspace_sptr peaksWS_2 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     AnalysisDataService::Instance().add("ws1", peaksWS_1);
     AnalysisDataService::Instance().add("ws2", peaksWS_2);
     SetPeaksWorkspaces set;
     set.insert(peaksWS_1);
     set.insert(peaksWS_2);
-    MockPeaksPresenter *pPresenter = new MockPeaksPresenter;
+    auto *pPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(pPresenter);
     EXPECT_CALL(*pPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pPresenter, presentedWorkspaces()).WillRepeatedly(Return(set));
@@ -829,9 +826,9 @@ public:
 
     // One nested presenter. Create setup environment.
     IPeaksWorkspace_sptr peaksWS_1 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     IPeaksWorkspace_sptr peaksWS_2 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     AnalysisDataService::Instance().add("ws1", peaksWS_1);
     AnalysisDataService::Instance().add("ws2", peaksWS_2);
     SetPeaksWorkspaces set1;
@@ -839,10 +836,10 @@ public:
     SetPeaksWorkspaces set2;
     set2.insert(peaksWS_2);
 
-    MockPeaksPresenter *pPresenter1 = new MockPeaksPresenter;
+    auto *pPresenter1 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter1(pPresenter1);
 
-    MockPeaksPresenter *pPresenter2 = new MockPeaksPresenter;
+    auto *pPresenter2 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter2(pPresenter2);
 
     EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
@@ -893,9 +890,9 @@ public:
 
     // One nested presenter. Create setup environment.
     IPeaksWorkspace_sptr peaksWS_1 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     IPeaksWorkspace_sptr peaksWS_2 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     AnalysisDataService::Instance().add("ws1", peaksWS_1);
     AnalysisDataService::Instance().add("ws2", peaksWS_2);
     SetPeaksWorkspaces set1;
@@ -903,10 +900,10 @@ public:
     SetPeaksWorkspaces set2;
     set2.insert(peaksWS_2);
 
-    MockPeaksPresenter *pPresenter1 = new MockPeaksPresenter;
+    auto *pPresenter1 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter1(pPresenter1);
 
-    MockPeaksPresenter *pPresenter2 = new MockPeaksPresenter;
+    auto *pPresenter2 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter2(pPresenter2);
 
     EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
@@ -946,7 +943,7 @@ public:
 
     EXPECT_CALL(*pPresenter2, reInitialize(_)).Times(1);
 
-    peaksWS_2 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+    peaksWS_2 = std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     AnalysisDataService::Instance().addOrReplace(
         "ws2", peaksWS_2); // Same key (name) different object.
     composite.notifyWorkspaceChanged("ws2", peaksWS_2);
@@ -963,9 +960,9 @@ public:
 
     // One nested presenter. Create setup environment.
     IPeaksWorkspace_sptr peaksWS_1 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     IPeaksWorkspace_sptr peaksWS_2 =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     AnalysisDataService::Instance().add("ws1", peaksWS_1);
     AnalysisDataService::Instance().add("ws2", peaksWS_2);
     SetPeaksWorkspaces set1;
@@ -973,10 +970,10 @@ public:
     SetPeaksWorkspaces set2;
     set2.insert(peaksWS_2);
 
-    MockPeaksPresenter *pPresenter1 = new MockPeaksPresenter;
+    auto *pPresenter1 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter1(pPresenter1);
 
-    MockPeaksPresenter *pPresenter2 = new MockPeaksPresenter;
+    auto *pPresenter2 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter2(pPresenter2);
 
     EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
@@ -1033,7 +1030,7 @@ public:
 
     // Prepare subject objects.
     Mantid::API::IPeaksWorkspace_sptr peaksWSA =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces setA;
     setA.insert(peaksWSA);
     auto *pSubjectA = new NiceMock<MockPeaksPresenter>;
@@ -1042,7 +1039,7 @@ public:
     EXPECT_CALL(*pSubjectA, contentsDifferent(_)).WillOnce(Return(true));
 
     Mantid::API::IPeaksWorkspace_sptr peaksWSB =
-        boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+        std::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces setB;
     setA.insert(peaksWSB);
     auto *pSubjectB = new NiceMock<MockPeaksPresenter>;
@@ -1070,5 +1067,3 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pSubjectB));
   }
 };
-
-#endif

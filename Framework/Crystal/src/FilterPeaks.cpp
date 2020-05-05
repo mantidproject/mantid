@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -70,23 +70,23 @@ void FilterPeaks::init() {
                                    "Signal/Noise", "QMod",        "Wavelength",
                                    "DSpacing",     "TOF",         "RunNumber"};
   declareProperty("FilterVariable", "",
-                  boost::make_shared<StringListValidator>(filters),
+                  std::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
 
   declareProperty("FilterValue", EMPTY_DBL(),
-                  boost::make_shared<MandatoryValidator<double>>(),
+                  std::make_shared<MandatoryValidator<double>>(),
                   "The value of the FilterVariable to compare each peak to");
 
   std::vector<std::string> operation{"<", ">", "=", "!=", "<=", ">="};
   declareProperty("Operator", "<",
-                  boost::make_shared<StringListValidator>(operation), "");
+                  std::make_shared<StringListValidator>(operation), "");
 }
 
 /** Execute the algorithm.
  */
 void FilterPeaks::exec() {
   PeaksWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  PeaksWorkspace_sptr filteredWS = boost::dynamic_pointer_cast<PeaksWorkspace>(
+  PeaksWorkspace_sptr filteredWS = std::dynamic_pointer_cast<PeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
 
   // Copy over ExperimentInfo from input workspace

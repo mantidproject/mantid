@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -69,7 +69,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
 
         // Clone the monitor workspace, if there is one
         auto originalMatrix =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(original);
+            std::dynamic_pointer_cast<MatrixWorkspace>(original);
         MatrixWorkspace_sptr monitorWS, newMonitorWS;
         if (originalMatrix &&
             (monitorWS = originalMatrix->monitorWorkspace())) {
@@ -79,7 +79,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
           monitorsCloner->executeAsChildAlg();
           Workspace_sptr outputWS =
               monitorsCloner->getProperty("OutputWorkspace");
-          newMonitorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+          newMonitorWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
         }
 
         Algorithm_sptr cloner =

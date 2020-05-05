@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_COMPAREWORKSPACESTEST_H_
-#define MANTID_ALGORITHMS_COMPAREWORKSPACESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -87,7 +86,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InstrumentWorkspace",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWS1Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
@@ -98,7 +97,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InstrumentWorkspace",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWS2Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
@@ -108,15 +107,15 @@ public:
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr pws1, pws2;
     TS_ASSERT_THROWS_NOTHING(
-        pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve(outWS1Name)));
     TS_ASSERT_THROWS_NOTHING(
-        pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve(outWS2Name)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<Workspace>(pws1)));
+        "Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<Workspace>(pws2)));
+        "Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -136,7 +135,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InstrumentWorkspace",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWS3Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
@@ -147,7 +146,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InstrumentWorkspace",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWS4Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 14));
@@ -157,17 +156,17 @@ public:
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr pws1, pws2;
     TS_ASSERT_THROWS_NOTHING(
-        pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve(outWS3Name)));
     TS_ASSERT_THROWS_NOTHING(
-        pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve(outWS4Name)));
     TS_ASSERT_EQUALS(pws1->getNumberPeaks(), 13);
     TS_ASSERT_EQUALS(pws2->getNumberPeaks(), 14);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<Workspace>(pws1)));
+        "Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<Workspace>(pws2)));
+        "Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -181,9 +180,9 @@ public:
     EventWorkspace_sptr ews2 =
         WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
@@ -199,7 +198,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
@@ -216,9 +215,9 @@ public:
     EventWorkspace_sptr ews2 =
         WorkspaceCreationHelper::createEventWorkspace(15, 20, 30);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the !Mantid::API::equals() function
@@ -233,9 +232,9 @@ public:
     EventWorkspace_sptr ews2 =
         WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 0.0, 1.0, 2);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the !Mantid::API::equals() function
@@ -252,9 +251,9 @@ public:
         WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     ews2 *= 1.2;
     alg.setProperty("Workspace1",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews1));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(ews1));
     alg.setProperty("Workspace2",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews2));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(ews2));
     alg.setProperty("CheckAllData", true);
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
@@ -284,9 +283,9 @@ public:
       ews2->getSpectrum(i).switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
     }
     alg.setProperty("Workspace1",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews1));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(ews1));
     alg.setProperty("Workspace2",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews2));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(ews2));
     alg.setProperty("CheckAllData", true);
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
@@ -310,9 +309,9 @@ public:
     EventWorkspace_sptr ews2 =
         WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 5.0, 10.0);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the !Mantid::API::equals() function
@@ -327,9 +326,9 @@ public:
     MDEventWorkspace3Lean::sptr mdews2 =
         MDEventsTestHelper::makeFakeMDEventWorkspace("mdev2");
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -343,9 +342,9 @@ public:
     MDEventWorkspace3::sptr mdews2 =
         MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -358,9 +357,9 @@ public:
     MDEventWorkspace3Lean::sptr mdews2 =
         MDEventsTestHelper::makeMDEW<3>(5, -10.0, 10.0, 1);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -375,9 +374,9 @@ public:
         MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
                                                            "B", "X%d");
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -392,9 +391,9 @@ public:
         MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 1.0, 10.0, 1000,
                                                            "B");
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -409,9 +408,9 @@ public:
         MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 5000,
                                                            "B");
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -435,9 +434,9 @@ public:
     const float offset = 0.1f;
     events[0].setSignal(events[0].getSignal() + offset);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -461,9 +460,9 @@ public:
     const float offset = 0.1f;
     events[0].setErrorSquared(events[0].getErrorSquared() + offset);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -476,9 +475,9 @@ public:
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -491,9 +490,9 @@ public:
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -512,9 +511,9 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
             3, 5.0, 1.0, numBins, min, max, names);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -527,9 +526,9 @@ public:
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 5);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -543,9 +542,9 @@ public:
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 10, max);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -558,9 +557,9 @@ public:
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(5.1, 4);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
@@ -574,9 +573,9 @@ public:
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4, 10, 10.0, 1.1);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
@@ -1093,7 +1092,7 @@ public:
     Mantid::API::AnalysisDataServiceImpl &dataStore =
         Mantid::API::AnalysisDataService::Instance();
     // Extract the zeroth element of groupTwo and add a spurious log
-    MatrixWorkspace_sptr zero = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr zero = std::dynamic_pointer_cast<MatrixWorkspace>(
         dataStore.retrieve(groupTwo->getNames()[0]));
     TS_ASSERT(zero);
     using Mantid::Kernel::PropertyWithValue;
@@ -1352,7 +1351,7 @@ private:
     }
   }
 
-  void cleanupGroup(const WorkspaceGroup_sptr group) {
+  void cleanupGroup(const WorkspaceGroup_sptr &group) {
     // group->deepRemoveAll();
     const std::string name = group->getName();
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(name);
@@ -1364,5 +1363,3 @@ private:
 
   const std::string PROPERTY_VALUE_TRUE;
 };
-
-#endif /* MANTID_ALGORITHMS_COMPAREWORKSPACESTEST_H_ */

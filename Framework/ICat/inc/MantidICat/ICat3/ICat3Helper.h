@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ICAT_SEARCHHELPER_H_
-#define MANTID_ICAT_SEARCHHELPER_H_
+#pragma once
 
 #include "MantidAPI/CatalogSession.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -31,7 +30,7 @@ public:
 
   /// search method
   int doSearch(ICat3::ICATPortBindingProxy &icat,
-               boost::shared_ptr<ICat3::ns1__searchByAdvanced> &request,
+               std::shared_ptr<ICat3::ns1__searchByAdvanced> &request,
                ICat3::ns1__searchByAdvancedResponse &response);
 
   /// calls getInvestigationIncludes api's
@@ -132,4 +131,3 @@ private:
 };
 } // namespace ICat
 } // namespace Mantid
-#endif

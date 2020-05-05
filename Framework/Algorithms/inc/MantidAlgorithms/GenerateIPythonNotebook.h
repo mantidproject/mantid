@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H
-#define MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,7 +23,7 @@ namespace Algorithms {
   <li>InputWorkspace - the workspace name who's history is to be saved.</li>
   </ul>
 */
-class DLLExport GenerateIPythonNotebook : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GenerateIPythonNotebook : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "GenerateIPythonNotebook"; };
@@ -51,5 +50,3 @@ protected:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif // MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H

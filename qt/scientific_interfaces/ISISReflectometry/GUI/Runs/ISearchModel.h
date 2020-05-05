@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_ISEARCHMODEL_H_
-#define MANTID_ISISREFLECTOMETRY_ISEARCHMODEL_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -27,9 +26,7 @@ public:
 };
 
 /// Typedef for a shared pointer to \c SearchModel
-using ISearchModel_sptr = boost::shared_ptr<ISearchModel>;
+using ISearchModel_sptr = std::shared_ptr<ISearchModel>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_ISISREFLECTOMETRY_ISEARCHMODEL_H_ */

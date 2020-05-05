@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
@@ -195,7 +193,7 @@ class ColorbarWidget(QWidget):
                 try:
                     self.cmin_value = data[~data.mask].min()
                     self.cmax_value = data[~data.mask].max()
-                except AttributeError:
+                except (AttributeError, IndexError):
                     self.cmin_value = np.nanmin(data)
                     self.cmax_value = np.nanmax(data)
             except (ValueError, RuntimeWarning):

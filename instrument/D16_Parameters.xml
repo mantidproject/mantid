@@ -6,6 +6,10 @@
       <parameter name="sample_logs_sum" type="string">
         <value val="time, duration, timer" />
       </parameter>
+      <!-- The width of the detector in pixels -->
+      <parameter name="detector-width" type="number">
+        <value val="320"/>
+      </parameter>
       <!-- The pixel sizes used by SolidAngle -->
       <parameter name="x-pixel-size" type="number">
         <value val="1"/>

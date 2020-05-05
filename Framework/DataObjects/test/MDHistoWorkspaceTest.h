@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
-#define MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDIterator.h"
@@ -38,7 +37,7 @@ class MDHistoWorkspaceTest : public CxxTest::TestSuite {
 private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
-  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
+  size_t getNumberMasked(const Mantid::API::IMDWorkspace_sptr &ws) {
     auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
@@ -94,7 +93,7 @@ public:
   }
 
   /** Check that a workspace has the right signal/error*/
-  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal,
+  void checkWorkspace(const MDHistoWorkspace_sptr &ws, double expectedSignal,
                       double expectedErrorSquared,
                       double expectedNumEvents = 1.0) {
     for (size_t i = 0; i < ws->getNPoints(); i++) {
@@ -1179,11 +1178,11 @@ public:
     Mantid::coord_t min = 0;
     Mantid::coord_t max = 10;
     size_t bins = 2;
-    auto dimension1 = boost::make_shared<MDHistoDimension>(
+    auto dimension1 = std::make_shared<MDHistoDimension>(
         "QSampleX", "QSampleX", frame1, min, max, bins);
-    auto dimension2 = boost::make_shared<MDHistoDimension>(
+    auto dimension2 = std::make_shared<MDHistoDimension>(
         "QSampleY", "QSampleY", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
 
     // Act
@@ -1280,5 +1279,3 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_ */

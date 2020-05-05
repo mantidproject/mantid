@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -157,7 +157,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
       xr[nData - 1] = -xr[0];
 
     IFunction1D_sptr fun =
-        boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
+        std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
     if (!fun) {
       throw std::runtime_error("Convolution can work only with 1D functions");
     }
@@ -197,19 +197,19 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
   }
 
   IFunction1D_sptr resolution =
-      boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
+      std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
 
   // check for delta functions
-  std::vector<boost::shared_ptr<DeltaFunction>> dltFuns;
+  std::vector<std::shared_ptr<DeltaFunction>> dltFuns;
   double dltF = 0;
   bool deltaFunctionsOnly = false;
   bool deltaShifted = false;
   CompositeFunction_sptr cf =
-      boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
+      std::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
     dltFuns.reserve(cf->nFunctions());
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
-      auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
+      auto df = std::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {
         dltFuns.emplace_back(df);
         if (df->getParameter("Centre") != 0.0) {
@@ -223,7 +223,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
       deltaFunctionsOnly = true;
     }
   } else if (auto df =
-                 boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
+                 std::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
     // single delta function - return scaled resolution
     deltaFunctionsOnly = true;
     dltFuns.emplace_back(df);
@@ -342,7 +342,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
   // Lines 341-349 is duplicated in functionFFTmode. To be cleanup
   // in issue 16064
   IFunction1D_sptr resolution =
-      boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
+      std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
   if (!resolution) {
     throw std::runtime_error("Convolution can work only with 1D functions");
   }
@@ -355,16 +355,16 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
   std::reverse(m_resolution.begin(), m_resolution.end());
 
   // check for delta functions
-  std::vector<boost::shared_ptr<DeltaFunction>> dltFuns;
+  std::vector<std::shared_ptr<DeltaFunction>> dltFuns;
   double dltF = 0;
   bool deltaFunctionsOnly = false;
   bool deltaShifted = false;
   CompositeFunction_sptr cf =
-      boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
+      std::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
     dltFuns.reserve(cf->nFunctions());
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
-      auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
+      auto df = std::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {
         dltFuns.emplace_back(df);
         if (df->getParameter("Centre") != 0.0) {
@@ -378,7 +378,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
       deltaFunctionsOnly = true;
     }
   } else if (auto df =
-                 boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
+                 std::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
     // single delta function - return scaled resolution
     deltaFunctionsOnly = true;
     dltFuns.emplace_back(df);
@@ -445,7 +445,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
  * 1 for the model
  */
 size_t Convolution::addFunction(IFunction_sptr f) {
-  if (boost::dynamic_pointer_cast<Convolution>(f)) {
+  if (std::dynamic_pointer_cast<Convolution>(f)) {
     throw std::runtime_error("Nested convolutions are not allowed.");
   }
   if (nFunctions() == 0 && getAttribute("FixResolution").asBool()) {
@@ -463,9 +463,9 @@ size_t Convolution::addFunction(IFunction_sptr f) {
           "IFunction expected but function of another type found");
     }
     CompositeFunction_sptr cf =
-        boost::dynamic_pointer_cast<CompositeFunction>(f1);
+        std::dynamic_pointer_cast<CompositeFunction>(f1);
     if (cf == nullptr) {
-      cf = boost::dynamic_pointer_cast<CompositeFunction>(
+      cf = std::dynamic_pointer_cast<CompositeFunction>(
           API::FunctionFactory::Instance().createFunction("CompositeFunction"));
       removeFunction(1);
       cf->addFunction(f1);

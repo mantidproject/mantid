@@ -28,8 +28,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef TRANSLATE_CURVE_TOOL_H
-#define TRANSLATE_CURVE_TOOL_H
+#pragma once
 
 #include "PlotToolInterface.h"
 #include <QObject>
@@ -84,5 +83,3 @@ private:
   QwtDoublePoint d_curve_point;
   ApplicationWindow *d_app;
 };
-
-#endif // TRANSLATE_CURVE_TOOL_H

@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REBIN_H_
-#define MANTID_ALGORITHMS_REBIN_H_
+#pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -35,7 +35,7 @@ namespace Algorithms {
     @author Dickon Champion, STFC
     @date 25/02/2008
  */
-class DLLExport Rebin : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL Rebin : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Rebin"; }
@@ -76,11 +76,9 @@ protected:
   void init() override;
   void exec() override;
 
-  void propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
-                      API::MatrixWorkspace_sptr outputWS, int hist);
+  void propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS,
+                      const API::MatrixWorkspace_sptr &outputWS, int hist);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_REBIN_H_*/

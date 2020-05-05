@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_STATISTICSOFPEAKSWORKSPACETEST_H_
-#define MANTID_CRYSTAL_STATISTICSOFPEAKSWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
@@ -78,7 +77,7 @@ public:
 
     ITableWorkspace_sptr tableOut;
     TS_ASSERT_THROWS_NOTHING(
-        tableOut = boost::dynamic_pointer_cast<ITableWorkspace>(
+        tableOut = std::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("stat")));
     TS_ASSERT(tableOut);
     if (!tableOut)
@@ -95,7 +94,7 @@ public:
 
     PeaksWorkspace_sptr wsout;
     TS_ASSERT_THROWS_NOTHING(
-        wsout = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        wsout = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("TOPAZ_peaks")));
     TS_ASSERT(wsout);
     if (!wsout)
@@ -116,5 +115,3 @@ public:
   /// Test with a few peaks
   void test_exec() { do_test(2, 4, 4); }
 };
-
-#endif /* MANTID_CRYSTAL_STATISTICSOFPEAKSWORKSPACETEST_H_ */

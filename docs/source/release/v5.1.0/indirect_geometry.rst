@@ -5,8 +5,15 @@ Indirect Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+Improvements
+############
+
+- An issue with IndirectDataReduction causing it to slow down processing when open has been resolved.
+- Scientific constraints have been added to all fitting tabs in IndirectDataAnalysis.
+
+Bug Fixes
+#########
+
+- FQ and Msd tabs now label output workspaces with the fitting function.
 
 :ref:`Release 5.1.0 <v5.1.0>`

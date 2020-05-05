@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FUNCTIONTASK_H_
-#define MANTID_KERNEL_FUNCTIONTASK_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
@@ -14,6 +13,8 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/function.hpp>
+#include <utility>
+
 #endif
 
 namespace Mantid {
@@ -62,7 +63,7 @@ public:
    * @param cost :: computational cost
    */
   FunctionTask(std::function<void()> func, double cost = 1.0)
-      : Task(cost), m_voidFunc(func) {}
+      : Task(cost), m_voidFunc(std::move(func)) {}
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */
@@ -79,5 +80,3 @@ protected:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_FUNCTIONTASK_H_ */

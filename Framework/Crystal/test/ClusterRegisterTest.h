@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CLUSTERREGISTERTEST_H_
-#define MANTID_CRYSTAL_CLUSTERREGISTERTEST_H_
+#pragma once
 
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/ClusterRegister.h"
 #include "MantidCrystal/CompositeCluster.h"
 #include "MockObjects.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Crystal;
 using namespace testing;
@@ -29,8 +28,8 @@ public:
 
   void test_addClusters() {
     ClusterRegister cRegister;
-    cRegister.add(1, boost::make_shared<MockICluster>());
-    cRegister.add(2, boost::make_shared<MockICluster>());
+    cRegister.add(1, std::make_shared<MockICluster>());
+    cRegister.add(2, std::make_shared<MockICluster>());
 
     auto clusters = cRegister.clusters();
     TS_ASSERT_EQUALS(2, clusters.size());
@@ -38,8 +37,8 @@ public:
 
   void test_try_addClusters_with_duplicate_keys() {
     ClusterRegister cRegister;
-    cRegister.add(1, boost::make_shared<MockICluster>());
-    cRegister.add(1, boost::make_shared<MockICluster>());
+    cRegister.add(1, std::make_shared<MockICluster>());
+    cRegister.add(1, std::make_shared<MockICluster>());
 
     auto clusters = cRegister.clusters();
     TS_ASSERT_EQUALS(1, clusters.size());
@@ -47,9 +46,9 @@ public:
 
   void test_simple_merge() {
     ClusterRegister cRegister;
-    auto a = boost::make_shared<Cluster>(1);
-    auto b = boost::make_shared<Cluster>(2);
-    auto c = boost::make_shared<Cluster>(3);
+    auto a = std::make_shared<Cluster>(1);
+    auto b = std::make_shared<Cluster>(2);
+    auto c = std::make_shared<Cluster>(3);
     a->addIndex(0);
     b->addIndex(0);
     c->addIndex(0);
@@ -63,15 +62,15 @@ public:
     TS_ASSERT_EQUALS(2, combined.size());
     TS_ASSERT(combined.find(1) != combined.end());
     TS_ASSERT(combined.find(2) != combined.end());
-    TS_ASSERT(boost::dynamic_pointer_cast<ICluster>(combined[1]));
-    TS_ASSERT(boost::dynamic_pointer_cast<CompositeCluster>(combined[2]));
+    TS_ASSERT(std::dynamic_pointer_cast<ICluster>(combined[1]));
+    TS_ASSERT(std::dynamic_pointer_cast<CompositeCluster>(combined[2]));
   }
 
   void test_simple_merge_repeat() {
     ClusterRegister cRegister;
-    auto a = boost::make_shared<Cluster>(1);
-    auto b = boost::make_shared<Cluster>(2);
-    auto c = boost::make_shared<Cluster>(3);
+    auto a = std::make_shared<Cluster>(1);
+    auto b = std::make_shared<Cluster>(2);
+    auto c = std::make_shared<Cluster>(3);
     a->addIndex(0);
     b->addIndex(0);
     c->addIndex(0);
@@ -88,15 +87,15 @@ public:
     TS_ASSERT_EQUALS(2, combined.size());
     TS_ASSERT(combined.find(1) != combined.end());
     TS_ASSERT(combined.find(2) != combined.end());
-    TS_ASSERT(boost::dynamic_pointer_cast<ICluster>(combined[1]));
-    TS_ASSERT(boost::dynamic_pointer_cast<CompositeCluster>(combined[2]));
+    TS_ASSERT(std::dynamic_pointer_cast<ICluster>(combined[1]));
+    TS_ASSERT(std::dynamic_pointer_cast<CompositeCluster>(combined[2]));
   }
 
   void test_multi_merge() {
     ClusterRegister cRegister;
-    auto a = boost::make_shared<Cluster>(1);
-    auto b = boost::make_shared<Cluster>(2);
-    auto c = boost::make_shared<Cluster>(3);
+    auto a = std::make_shared<Cluster>(1);
+    auto b = std::make_shared<Cluster>(2);
+    auto c = std::make_shared<Cluster>(3);
     a->addIndex(0);
     b->addIndex(0);
     c->addIndex(0);
@@ -112,16 +111,16 @@ public:
     TS_ASSERT_EQUALS(1, combined.size());
     TSM_ASSERT("Combined all clusters, so should have a single Composite "
                "cluster. Composite should be labelled with the lowest label.",
-               boost::dynamic_pointer_cast<CompositeCluster>(combined[1]));
+               std::dynamic_pointer_cast<CompositeCluster>(combined[1]));
   }
 
   void test_complex_merge() {
     // Merge (1,2)  (3,4) then (2, 3), we should get one big cluster at the end.
 
-    auto one = boost::make_shared<Cluster>(1);
-    auto two = boost::make_shared<Cluster>(2);
-    auto three = boost::make_shared<Cluster>(3);
-    auto four = boost::make_shared<Cluster>(4);
+    auto one = std::make_shared<Cluster>(1);
+    auto two = std::make_shared<Cluster>(2);
+    auto three = std::make_shared<Cluster>(3);
+    auto four = std::make_shared<Cluster>(4);
 
     one->addIndex(0);
     two->addIndex(0);
@@ -148,5 +147,3 @@ public:
     TSM_ASSERT_EQUALS("Entire clustere labeled as minimum (1)", label, 1);
   }
 };
-
-#endif /* MANTID_CRYSTAL_CLUSTERREGISTERTEST_H_ */

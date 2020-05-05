@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/LoadFlexiNexus.h"
 #include "MantidAPI/Axis.h"
@@ -71,7 +71,7 @@ void LoadFlexiNexus::exec() {
   readData(&fin);
 }
 
-void LoadFlexiNexus::loadDictionary(std::string dictFile) {
+void LoadFlexiNexus::loadDictionary(const std::string &dictFile) {
   std::ifstream in(dictFile.c_str(), std::ifstream::in);
   std::string line, key, value;
 
@@ -109,7 +109,6 @@ void LoadFlexiNexus::readData(NeXus::File *fin) {
 
   Info inf = fin->getInfo();
   size_t rank = inf.dims.size();
-  boost::shared_array<int> data;
 
   if (rank <= 2) {
     load2DWorkspace(fin);
@@ -166,7 +165,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   }
 
   // fill the data.......
-  ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+  ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", nSpectra, xData.size(),
                                           spectraLength));
 
@@ -204,7 +203,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   addMetaData(fin, ws, (ExperimentInfo_sptr)ws);
 
   // assign the workspace
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(ws));
 }
 
 void LoadFlexiNexus::loadMD(NeXus::File *fin) {
@@ -221,7 +220,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
         makeDimension(fin, k, static_cast<int>(inf.dims[k])));
   }
 
-  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto ws = std::make_shared<MDHistoWorkspace>(dimensions);
 
   auto dd = ws->mutableSignalArray();
   signal_t *ddE = ws->mutableErrorSquaredArray();
@@ -312,8 +311,8 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
   return MDHistoDimension_sptr(
       new MDHistoDimension(name, name, frame, min, max, length));
 }
-void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
-                                 ExperimentInfo_sptr info) {
+void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws,
+                                 const ExperimentInfo_sptr &info) {
   std::map<std::string, std::string>::const_iterator it;
 
   // assign a title
@@ -404,7 +403,7 @@ std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
   return specialMap;
 }
 
-int LoadFlexiNexus::safeOpenpath(NeXus::File *fin, std::string path) {
+int LoadFlexiNexus::safeOpenpath(NeXus::File *fin, const std::string &path) {
   try {
     fin->openPath(path);
   } catch (NeXus::Exception &) {

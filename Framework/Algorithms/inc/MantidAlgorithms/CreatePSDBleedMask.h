@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATEPSDBLEEDMASK_H_
-#define MANTID_ALGORITHMS_CREATEPSDBLEEDMASK_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -31,7 +30,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2011-01-10
 */
-class DLLExport CreatePSDBleedMask : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL CreatePSDBleedMask : public DetectorDiagnostic {
 public:
   /// Default constructor
   CreatePSDBleedMask();
@@ -54,14 +53,12 @@ private:
 
   /// Process a tube
   bool performBleedTest(const std::vector<int> &tubeIndices,
-                        API::MatrixWorkspace_const_sptr inputWS, double maxRate,
-                        int numIgnoredPixels);
+                        const API::MatrixWorkspace_const_sptr &inputWS,
+                        double maxRate, int numIgnoredPixels);
   /// Mask a tube with the given workspace indices
   void maskTube(const std::vector<int> &tubeIndices,
-                API::MatrixWorkspace_sptr workspace);
+                const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif // MANTID_ALGORITHMS_CREATEPSDBLEEDMASK_H_

@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_RINGPROFILE_H_
-#define MANTID_ALGORITHMS_RINGPROFILE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {
@@ -21,7 +20,7 @@ namespace Algorithms {
 
   @author Gesner Passos, ISIS
 */
-class DLLExport RingProfile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RingProfile : public API::Algorithm {
 public:
   RingProfile();
 
@@ -40,7 +39,7 @@ public:
   };
 
 protected:
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
 
 private:
   void init() override;
@@ -48,17 +47,18 @@ private:
   /// get the bin position for the given angle
   int fromAngleToBin(double angle, bool degree = true);
   /// validate the inputs of the algorithm for instrument based workspace
-  void checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr);
+  void checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr &);
   /// validate the inputs of the algorithm for 2d matrix based instrument
-  void checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr);
+  void checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr &);
   /// process ring profile for instrument based workspace
-  void processInstrumentRingProfile(const API::MatrixWorkspace_sptr inputWS,
+  void processInstrumentRingProfile(const API::MatrixWorkspace_sptr &inputWS,
                                     std::vector<double> &output_bins);
   /// process ring profile for image based workspace
-  void processNumericImageRingProfile(const API::MatrixWorkspace_sptr inputWS,
+  void processNumericImageRingProfile(const API::MatrixWorkspace_sptr &inputWS,
                                       std::vector<double> &output_bins);
   /// identify the bin position for the given pixel in the image based workspace
-  void getBinForPixel(const API::MatrixWorkspace_sptr, int, std::vector<int> &);
+  void getBinForPixel(const API::MatrixWorkspace_sptr &, int,
+                      std::vector<int> &);
   //// identify the bin position for the pixel related to the given detector
   int getBinForPixel(const Kernel::V3D &position);
   /// copy of the minRadius input
@@ -83,5 +83,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_RINGPROFILE_H_ */

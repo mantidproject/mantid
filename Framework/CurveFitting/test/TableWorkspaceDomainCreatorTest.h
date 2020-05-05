@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATORTEST_H_
-#define MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATORTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -74,7 +73,7 @@ public:
     TS_ASSERT_EQUALS(fit->getPropertyValue("OutputStatus"), "success");
 
     API::MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             API::AnalysisDataService::Instance().retrieve("Output_Workspace"));
 
     TS_ASSERT(outWS);
@@ -104,7 +103,7 @@ public:
     fit->execute();
 
     API::ITableWorkspace_sptr covar =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+        std::dynamic_pointer_cast<API::ITableWorkspace>(
             API::AnalysisDataService::Instance().retrieve(
                 "Output_NormalisedCovarianceMatrix"));
 
@@ -134,7 +133,7 @@ public:
     auto fit = setupBasicFitPropertiesAlgorithm(fun, ws);
     fit->execute();
     API::ITableWorkspace_sptr params =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+        std::dynamic_pointer_cast<API::ITableWorkspace>(
             API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     double chi2 = fit->getProperty("OutputChi2overDoF");
@@ -181,7 +180,7 @@ public:
   void test_output_no_errors_provided() {
     auto wsWithNoErrors = createTestTableWorkspace(false);
     auto fun = createExpDecayFunction(1.0, 1.0);
-    auto fit = boost::make_shared<Fit>();
+    auto fit = std::make_shared<Fit>();
     fit->initialize();
     fit->setProperty("Function", fun);
     fit->setProperty("InputWorkspace", wsWithNoErrors);
@@ -256,7 +255,7 @@ public:
     table->getColumn("Errors")->setPlotType(5);
 
     auto fun = createExpDecayFunction(1.0, 1.0);
-    auto fit = boost::make_shared<Fit>();
+    auto fit = std::make_shared<Fit>();
     fit->initialize();
     fit->setProperty("Function", fun);
     fit->setProperty("InputWorkspace", table);
@@ -381,7 +380,7 @@ public:
     API::FunctionValues_sptr values;
 
     // Requires a property manager to make a workspce
-    auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(
         std::make_unique<API::WorkspaceProperty<API::Workspace>>(
@@ -770,11 +769,11 @@ private:
     return fun;
   }
 
-  boost::shared_ptr<Fit>
-  setupBasicFitPropertiesAlgorithm(API::IFunction_sptr fun,
-                                   API::Workspace_sptr ws,
+  std::shared_ptr<Fit>
+  setupBasicFitPropertiesAlgorithm(const API::IFunction_sptr &fun,
+                                   const API::Workspace_sptr &ws,
                                    bool createOutput = true) {
-    auto fit = boost::make_shared<Fit>();
+    auto fit = std::make_shared<Fit>();
     fit->initialize();
     fit->setProperty("Function", fun);
     fit->setProperty("InputWorkspace", ws);
@@ -786,5 +785,3 @@ private:
     return fit;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATORTEST_H_ */

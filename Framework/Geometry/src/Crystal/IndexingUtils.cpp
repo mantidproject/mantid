@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
@@ -2854,8 +2854,8 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
                            specified.
  */
 int IndexingUtils::SelectDirection(V3D &best_direction,
-                                   const std::vector<V3D> q_vectors,
-                                   const std::vector<V3D> direction_list,
+                                   const std::vector<V3D> &q_vectors,
+                                   const std::vector<V3D> &direction_list,
                                    double plane_spacing,
                                    double required_tolerance) {
   if (q_vectors.empty()) {

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UPDATEINSTRUMENTTESTFROMFILE_H_
-#define UPDATEINSTRUMENTTESTFROMFILE_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -138,7 +137,6 @@ public:
 
   void
   test_DAT_Extension_Without_Header_Assumes_Detector_Calibration_File_And_Fails_If_Number_Of_Columns_Incorrect() {
-    const std::string colNames = "spectrum,theta,t0,-,R";
     const std::string contents = "plik det  t0 l0 l1\n"
                                  "    3 130.4653  -0.4157  11.0050   0.6708\n"
                                  "    4 131.9319  -0.5338  11.0050   0.6545";
@@ -311,5 +309,3 @@ private:
   std::string wsName;
   std::string xmlFile;
 };
-
-#endif /*UPDATEINSTRUMENTTESTFROMFILE_H_*/

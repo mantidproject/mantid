@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __TRAITSTEST_H
-#define __TRAITSTEST_H
+#pragma once
 
 //
 // This example shows how to use TS_ASSERT_EQUALS for your own classes
@@ -71,5 +70,3 @@ public:
 #endif // _CXXTEST_HAVE_STD
     }
 };
-
-#endif // __TRAITSTEST_H

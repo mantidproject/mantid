@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, division, print_function
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, UnitConversion, Elastic, Property, IntArrayProperty, StringListValidator
 from mantid.simpleapi import (mtd, SetGoniometer, AddSampleLog, MaskBTP, RenameWorkspace, GroupWorkspaces,
                               CreateWorkspace, LoadNexusLogs, LoadInstrument)
-from six.moves import range
 import numpy as np
 import h5py
 
@@ -63,6 +61,7 @@ class LoadWAND(DataProcessorAlgorithm):
             data = np.zeros((512*480*8),dtype=np.int64)
             with h5py.File(run, 'r') as f:
                 monitor_count = f['/entry/monitor1/total_counts'].value[0]
+                duration = f['/entry/duration'].value[0]
                 run_number = f['/entry/run_number'].value[0]
                 for b in range(8):
                     data += np.bincount(f['/entry/bank'+str(b+1)+'_events/event_id'].value,minlength=512*480*8)
@@ -92,6 +91,8 @@ class LoadWAND(DataProcessorAlgorithm):
             AddSampleLog('__tmp_load', LogName="Ei", LogType='Number', NumberType='Double',
                          LogText=str(UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)), EnableLogging=False)
             AddSampleLog('__tmp_load', LogName="run_number", LogText=run_number, EnableLogging=False)
+            AddSampleLog('__tmp_load', LogName="duration", LogType='Number',
+                         LogText=str(duration), NumberType='Double', EnableLogging=False)
 
             if grouping > 1: # Fix detector IDs per spectrum before loading instrument
                 __tmp_load = mtd['__tmp_load']

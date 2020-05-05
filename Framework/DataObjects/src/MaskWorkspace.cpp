@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataObjects/MaskWorkspace.h"
+#include <utility>
+
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
@@ -51,9 +53,10 @@ MaskWorkspace::MaskWorkspace(std::size_t numvectors) {
  * workspace.
  * @return MaskWorkspace
  */
-MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
-                             const bool includeMonitors)
-    : SpecialWorkspace2D(instrument, includeMonitors) {
+MaskWorkspace::MaskWorkspace(
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
+    const bool includeMonitors)
+    : SpecialWorkspace2D(std::move(instrument), includeMonitors) {
   this->clearMask();
 }
 
@@ -63,7 +66,7 @@ MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
  * It must have an instrument.
  * @return MaskWorkspace
  */
-MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr parent)
+MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent)
     : SpecialWorkspace2D(parent) {
   this->clearMask();
 }
@@ -252,7 +255,7 @@ const std::string MaskWorkspace::id() const { return "MaskWorkspace"; }
 /** Copy from
  */
 void MaskWorkspace::copyFrom(
-    boost::shared_ptr<const SpecialWorkspace2D> sourcews) {
+    std::shared_ptr<const SpecialWorkspace2D> sourcews) {
   SpecialWorkspace2D::copyFrom(sourcews);
 }
 

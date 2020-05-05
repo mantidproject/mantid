@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CopyDataRange.h"
 
@@ -11,6 +11,7 @@
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -18,9 +19,9 @@ using namespace Mantid::HistogramData;
 
 namespace {
 
-void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
-                   MatrixWorkspace_sptr destWorkspace, int const &specMin,
-                   int const &specMax, int const &xMinIndex,
+void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace,
+                   const MatrixWorkspace_sptr &destWorkspace,
+                   int const &specMin, int const &specMax, int const &xMinIndex,
                    int const &xMaxIndex, int yInsertionIndex,
                    int const &xInsertionIndex) {
   for (auto specIndex = specMin; specIndex <= specMax; ++specIndex) {
@@ -36,17 +37,18 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
   }
 }
 
-void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
-                   MatrixWorkspace_sptr destWorkspace, int const &specMin,
-                   int const &specMax, double const &xMin, double const &xMax,
-                   int yInsertionIndex, int const &xInsertionIndex) {
+void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace,
+                   const MatrixWorkspace_sptr &destWorkspace,
+                   int const &specMin, int const &specMax, double const &xMin,
+                   double const &xMax, int yInsertionIndex,
+                   int const &xInsertionIndex) {
   auto const xMinIndex =
       static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0, 0.000001));
   auto const xMaxIndex =
       static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0, 0.000001));
 
-  copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex,
-                xMaxIndex, yInsertionIndex, xInsertionIndex);
+  copyDataRange(inputWorkspace, std::move(destWorkspace), specMin, specMax,
+                xMinIndex, xMaxIndex, yInsertionIndex, xInsertionIndex);
 }
 
 } // namespace
@@ -84,9 +86,9 @@ void CopyDataRange::init() {
                       "DestWorkspace", "", Direction::Input),
                   "The workspace to have range of data replaced.");
 
-  auto const positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto const positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(0);
-  auto const anyDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto const anyDouble = std::make_shared<Kernel::BoundedValidator<double>>();
 
   declareProperty("StartWorkspaceIndex", 0, positiveInt,
                   "The index denoting the start of the spectra range.");

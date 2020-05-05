@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
-#define CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -49,13 +48,13 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
@@ -84,15 +83,15 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
     fun->setParameter("h", 3.);
     fun->setParameter("s", 0.1);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     TrustRegionMinimizer s;
@@ -122,7 +121,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.5);
@@ -130,8 +129,8 @@ public:
     fun->setParameter("s", 0.1);
     fun->fix(0);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -162,7 +161,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.5);
@@ -170,8 +169,8 @@ public:
     fun->setParameter("s", 0.1);
     fun->tie("a", "1");
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -200,7 +199,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b");
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
@@ -208,8 +207,8 @@ public:
     fun->addConstraint(
         std::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
@@ -236,7 +235,7 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a^2*x+b");
     fun->setParameter("a", -0.5);
     fun->setParameter("b", 2.2);
@@ -246,8 +245,8 @@ public:
     fun->addConstraint(
         std::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
@@ -261,5 +260,3 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
 };
-
-#endif /*CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_*/

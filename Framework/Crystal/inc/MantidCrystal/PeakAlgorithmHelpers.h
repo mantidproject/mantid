@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKALGORITHMHELPERS_H
-#define MANTID_CRYSTAL_PEAKALGORITHMHELPERS_H
+#pragma once
 #include "MantidAPI/IAlgorithm.h"
 
 namespace Mantid::Kernel {
@@ -56,5 +55,3 @@ generateOffsetVectors(const std::vector<double> &hOffsets,
                       const std::vector<double> &kOffsets,
                       const std::vector<double> &lOffsets);
 } // namespace Mantid::Crystal
-
-#endif // MANTID_CRYSTAL_PEAKALGORITHMHELPERS_H

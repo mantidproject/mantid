@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ErrorReporter.h"
 #include "MantidKernel/ChecksumHelper.h"
@@ -30,27 +30,27 @@ Logger g_log("ErrorReporter");
 // Constructor for ErrorReporter
 /** Constructor
  */
-ErrorReporter::ErrorReporter(const std::string application,
-                             const Types::Core::time_duration upTime,
-                             const std::string exitCode, const bool share)
+ErrorReporter::ErrorReporter(const std::string &application,
+                             const Types::Core::time_duration &upTime,
+                             const std::string &exitCode, const bool share)
     : ErrorReporter(application, upTime, exitCode, share, "", "", "", "") {}
 
 /** Constructor
  */
-ErrorReporter::ErrorReporter(const std::string application,
-                             const Types::Core::time_duration upTime,
-                             const std::string exitCode, const bool share,
-                             const std::string name, const std::string email,
-                             const std::string textBox)
+ErrorReporter::ErrorReporter(const std::string &application,
+                             const Types::Core::time_duration &upTime,
+                             const std::string &exitCode, const bool share,
+                             const std::string &name, const std::string &email,
+                             const std::string &textBox)
     : ErrorReporter(application, upTime, exitCode, share, name, email, textBox,
                     "") {}
 
-ErrorReporter::ErrorReporter(const std::string application,
-                             const Types::Core::time_duration upTime,
-                             const std::string exitCode, const bool share,
-                             const std::string name, const std::string email,
-                             const std::string textBox,
-                             const std::string traceback)
+ErrorReporter::ErrorReporter(const std::string &application,
+                             const Types::Core::time_duration &upTime,
+                             const std::string &exitCode, const bool share,
+                             const std::string &name, const std::string &email,
+                             const std::string &textBox,
+                             const std::string &traceback)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
       m_share(share), m_name(name), m_email(email), m_textbox(textBox),
       m_stacktrace(traceback) {

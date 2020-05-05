@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
-#define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -17,6 +16,8 @@
 #include "../EnggDiffraction/EnggDiffFittingModel.h"
 
 #include <cxxtest/TestSuite.h>
+#include <utility>
+
 #include <vector>
 
 using namespace Mantid;
@@ -29,31 +30,30 @@ namespace {
 class EnggDiffFittingModelAddWSExposed : public EnggDiffFittingModel {
 public:
   void addWorkspace(const RunLabel &runLabel,
-                    Mantid::API::MatrixWorkspace_sptr ws);
+                    const Mantid::API::MatrixWorkspace_sptr &ws);
 
   void addFitParams(const RunLabel &runLabel,
-                    Mantid::API::ITableWorkspace_sptr ws);
+                    const Mantid::API::ITableWorkspace_sptr &ws);
 
-  void mergeTablesExposed(API::ITableWorkspace_sptr tableToCopy,
-                          API::ITableWorkspace_sptr targetTable);
+  void mergeTablesExposed(const API::ITableWorkspace_sptr &tableToCopy,
+                          const API::ITableWorkspace_sptr &targetTable);
 };
 
-inline void
-EnggDiffFittingModelAddWSExposed::addWorkspace(const RunLabel &runLabel,
-                                               API::MatrixWorkspace_sptr ws) {
-  addFocusedWorkspace(runLabel, ws,
+inline void EnggDiffFittingModelAddWSExposed::addWorkspace(
+    const RunLabel &runLabel, const API::MatrixWorkspace_sptr &ws) {
+  addFocusedWorkspace(runLabel, std::move(ws),
                       runLabel.runNumber + "_" + std::to_string(runLabel.bank));
 }
 
 inline void EnggDiffFittingModelAddWSExposed::addFitParams(
-    const RunLabel &runLabel, Mantid::API::ITableWorkspace_sptr ws) {
-  addFitResults(runLabel, ws);
+    const RunLabel &runLabel, const Mantid::API::ITableWorkspace_sptr &ws) {
+  addFitResults(runLabel, std::move(ws));
 }
 
 inline void EnggDiffFittingModelAddWSExposed::mergeTablesExposed(
-    API::ITableWorkspace_sptr tableToCopy,
-    API::ITableWorkspace_sptr targetTable) {
-  mergeTables(tableToCopy, targetTable);
+    const API::ITableWorkspace_sptr &tableToCopy,
+    const API::ITableWorkspace_sptr &targetTable) {
+  mergeTables(std::move(tableToCopy), std::move(targetTable));
 }
 
 void addSampleWorkspaceToModel(const RunLabel &runLabel,
@@ -310,5 +310,3 @@ const std::string EnggDiffFittingModelTest::FOCUSED_WS_FILENAME =
 
 const RunLabel EnggDiffFittingModelTest::FOCUSED_WS_RUN_LABEL =
     RunLabel("277208", 2);
-
-#endif

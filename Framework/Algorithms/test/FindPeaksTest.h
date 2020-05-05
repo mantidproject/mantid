@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FINDPEAKSTEST_H_
-#define FINDPEAKSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -101,9 +100,8 @@ public:
     TS_ASSERT(finder1.isExecuted());
 
     // Get output workspace
-    TableWorkspace_sptr outtablews =
-        boost::dynamic_pointer_cast<TableWorkspace>(
-            AnalysisDataService::Instance().retrieve("FoundedSinglePeakTable"));
+    TableWorkspace_sptr outtablews = std::dynamic_pointer_cast<TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("FoundedSinglePeakTable"));
     TS_ASSERT(outtablews);
 
     // Size of the output workspace
@@ -150,7 +148,7 @@ public:
     TS_ASSERT(finder.isExecuted());
 
     Mantid::API::ITableWorkspace_sptr peaklist =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "FindPeaksTest_foundpeaks"));
 
@@ -191,7 +189,7 @@ public:
   /** Parse a row in output parameter tableworkspace to a string/double
    * parameter name/value map
    */
-  void getParameterMap(TableWorkspace_sptr tablews, size_t rowindex,
+  void getParameterMap(const TableWorkspace_sptr &tablews, size_t rowindex,
                        map<string, double> &parammap) {
     parammap.clear();
 
@@ -233,7 +231,7 @@ public:
 
     const size_t size = 83;
 
-    MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr dataws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
     dataws->setHistogram(
@@ -294,7 +292,7 @@ public:
     loader.setProperty("OutputWorkspace", "FindPeaksTest_peaksWS");
     loader.execute();
 
-    m_dataWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    m_dataWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FindPeaksTest_peaksWS"));
 
     m_syntheticWS = createSyntheticWS();
@@ -382,5 +380,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_dataWS;
   Mantid::API::MatrixWorkspace_sptr m_syntheticWS;
 }; // end of class FindPeaksTestPerformance
-
-#endif /*FINDPEAKSTEST_H_*/

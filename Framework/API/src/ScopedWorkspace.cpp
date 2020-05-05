@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAPI/ScopedWorkspace.h"
+#include <utility>
+
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid {
@@ -22,9 +24,9 @@ ScopedWorkspace::ScopedWorkspace() : m_name(generateUniqueName()) {}
 /**
  * Workspace constructor
  */
-ScopedWorkspace::ScopedWorkspace(Workspace_sptr ws)
+ScopedWorkspace::ScopedWorkspace(const Workspace_sptr &ws)
     : m_name(generateUniqueName()) {
-  set(ws);
+  set(std::move(ws));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -77,7 +79,7 @@ void ScopedWorkspace::remove() {
 /**
  * Make ADS entry to point to the given workspace.
  */
-void ScopedWorkspace::set(Workspace_sptr newWS) {
+void ScopedWorkspace::set(const Workspace_sptr &newWS) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
   if (!newWS->getName().empty() && ads.doesExist(newWS->getName()))

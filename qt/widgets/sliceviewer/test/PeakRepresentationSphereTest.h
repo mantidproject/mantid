@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
-#define SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
+#pragma once
 
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
 #include "MockObjects.h"
@@ -143,7 +142,7 @@ public:
 
   void test_move_position_produces_correct_position() {
     // Arrange
-    MockPeakTransform *pMockTransform = new MockPeakTransform;
+    auto *pMockTransform = new MockPeakTransform;
     EXPECT_CALL(*pMockTransform, transform(_))
         .Times(1)
         .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
@@ -264,10 +263,10 @@ public:
       for (int y = 0; y < sizeInAxis; ++y) {
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
-          m_peaks.emplace_back(boost::make_shared<
-                               PeakRepresentationSphereExposeProtectedWrapper>(
-              peakOrigin, radius, innerBackgroundRadius,
-              outerBackgroundRadius));
+          m_peaks.emplace_back(
+              std::make_shared<PeakRepresentationSphereExposeProtectedWrapper>(
+                  peakOrigin, radius, innerBackgroundRadius,
+                  outerBackgroundRadius));
         }
       }
     }
@@ -323,7 +322,7 @@ public:
 
 private:
   using PeaksRepresentationSphere_sptr =
-      boost::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
+      std::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
   using VecPeaksRepresentationSphere =
       std::vector<PeaksRepresentationSphere_sptr>;
 
@@ -331,5 +330,3 @@ private:
   VecPeaksRepresentationSphere m_peaks;
   PeakRepresentationViewInformation m_viewInformation;
 };
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
-#define MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
+#pragma once
 
 #include "MantidPythonInterface/core/ExtractWorkspace.h"
 #include "MantidPythonInterface/core/IsNone.h" // includes object.hpp
@@ -18,7 +17,7 @@
 #include <boost/python/call_method.hpp>
 #include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/extract.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include <string>
 
@@ -82,16 +81,16 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
 //
 template <typename T>
 struct DLLExport TypedPropertyValueHandler<
-    boost::shared_ptr<T>,
+    std::shared_ptr<T>,
     typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
     : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
-  using HeldType = boost::shared_ptr<T>;
+  using HeldType = std::shared_ptr<T>;
 
   /// Convenience typedef
   using PointeeType = T;
   /// Convenience typedef
-  using PropertyValueType = boost::shared_ptr<T>;
+  using PropertyValueType = std::shared_ptr<T>;
 
   /**
    * Set function to handle Python -> C++ calls and get the correct type
@@ -102,10 +101,10 @@ struct DLLExport TypedPropertyValueHandler<
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::object &value) const override {
     if (value == boost::python::object())
-      alg->setProperty<HeldType>(name, boost::shared_ptr<T>(nullptr));
+      alg->setProperty<HeldType>(name, std::shared_ptr<T>(nullptr));
     else
       alg->setProperty<HeldType>(
-          name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
+          name, std::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
   }
 
   /**
@@ -144,5 +143,3 @@ struct DLLExport TypedPropertyValueHandler<
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_ */

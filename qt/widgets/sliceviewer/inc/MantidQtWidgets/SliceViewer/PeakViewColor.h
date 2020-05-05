@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_VIEW_COLOR_H_
-#define MANTID_SLICEVIEWER_PEAK_VIEW_COLOR_H_
+#pragma once
 
 #include <QColor>
 
@@ -23,8 +22,9 @@
  * New peak types will need to have a color entry registered here.
  */
 struct PeakViewColor {
-  PeakViewColor(QColor colorCross = QColor(), QColor colorSphere = QColor(),
-                QColor colorEllipsoid = QColor())
+  PeakViewColor(const QColor &colorCross = QColor(),
+                const QColor &colorSphere = QColor(),
+                const QColor &colorEllipsoid = QColor())
       : colorCross(colorCross), colorSphere(colorSphere),
         colorEllipsoid(colorEllipsoid) {}
 
@@ -44,5 +44,3 @@ struct PeakViewColor {
   QColor colorSphere;
   QColor colorEllipsoid;
 };
-
-#endif

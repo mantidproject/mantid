@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
         File                 : MatrixModel.h
@@ -16,8 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MATRIXMODEL_H
-#define MATRIXMODEL_H
+#pragma once
 
 #include <QAbstractTableModel>
 #include <QLocale>
@@ -135,5 +134,3 @@ protected:
   gsl_permutation *d_inv_perm;
   QSize d_data_block_size;
 };
-
-#endif

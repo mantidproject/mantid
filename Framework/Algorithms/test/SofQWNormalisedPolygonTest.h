@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
-#define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -147,8 +146,7 @@ public:
     const Counts inY(nbins, 2.0);
     const Histogram inHistogram(inX, inY);
     MatrixWorkspace_sptr input = create<Workspace2D>(nhist, inHistogram);
-    auto instrument =
-        boost::make_shared<Instrument>("cuboidal_detector_machine");
+    auto instrument = std::make_shared<Instrument>("cuboidal_detector_machine");
     addDetector(instrument, V3D(0.1, 0., 3.), 0, "det0");
     input->getSpectrum(0).setDetectorID(0);
     addDetector(instrument, V3D(0.2, 0., 3.), 1, "det1");
@@ -237,6 +235,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
     const double dE{0.3};
+    // cppcheck-suppress unreadVariable
     const std::vector<double> eBinParams{dE};
     std::vector<double> expectedEBinEdges;
     const auto firstEdge = inWS->x(0).front();
@@ -304,8 +303,7 @@ public:
     const Counts inY(nbins, 2.0);
     const Histogram inHistogram(inX, inY);
     MatrixWorkspace_sptr input = create<Workspace2D>(nhist, inHistogram);
-    auto instrument =
-        boost::make_shared<Instrument>("cuboidal_detector_machine");
+    auto instrument = std::make_shared<Instrument>("cuboidal_detector_machine");
     addDetector(instrument, V3D(0.1, 0., 3.), 0, "det0");
     input->getSpectrum(0).setDetectorID(0);
     addDetector(instrument, V3D(0.2, 0., 3.), 1, "det1");
@@ -315,7 +313,7 @@ public:
     input->setInstrument(instrument);
     input->getAxis(0)->setUnit("DeltaE");
     input->mutableRun().addProperty("Ei", 23.);
-    auto twoThetaRanges = boost::make_shared<TableWorkspace>();
+    auto twoThetaRanges = std::make_shared<TableWorkspace>();
     twoThetaRanges->addColumn("int", "Detector ID");
     twoThetaRanges->addColumn("double", "Max two theta");
     twoThetaRanges->addColumn("double", "Min two theta");
@@ -365,9 +363,10 @@ public:
    * @param twoThetaRanges input table workspace
    * @return the algorithm object
    */
-  IAlgorithm_sptr setUpAlg(
-      Mantid::API::MatrixWorkspace_sptr const inputWS,
-      boost::shared_ptr<Mantid::DataObjects::TableWorkspace> twoThetaRanges) {
+  IAlgorithm_sptr
+  setUpAlg(Mantid::API::MatrixWorkspace_sptr const &inputWS,
+           const std::shared_ptr<Mantid::DataObjects::TableWorkspace>
+               &twoThetaRanges) {
     const std::vector<double> qBinParams{0.023};
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("SofQWNormalisedPolygon");
@@ -384,10 +383,10 @@ public:
    * @param rowCount The number of detectors required
    * @return A pointer to the table workspace
    */
-  boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
-  createTableWorkspace(const std::vector<std::string> dataTypes,
+  std::shared_ptr<Mantid::DataObjects::TableWorkspace>
+  createTableWorkspace(const std::vector<std::string> &dataTypes,
                        const int rowCount) {
-    auto twoThetaRanges = boost::make_shared<TableWorkspace>();
+    auto twoThetaRanges = std::make_shared<TableWorkspace>();
     std::vector<std::string> names = {"Detector ID", "Max two theta",
                                       "Min two theta"};
     for (std::vector<std::string>::size_type i = 0; i < dataTypes.size(); i++) {
@@ -492,7 +491,7 @@ public:
     const Counts inY(nbins, 2.0);
     const Histogram inHistogram(inX, inY);
     m_largeWS = create<Workspace2D>(nhist, inHistogram);
-    auto instrument = boost::make_shared<Instrument>("cuboidal_machine");
+    auto instrument = std::make_shared<Instrument>("cuboidal_machine");
     constexpr double l2{4.};
     constexpr double twoThetaZero{M_PI / 20.};
     constexpr size_t rows{100};
@@ -543,5 +542,3 @@ public:
 private:
   MatrixWorkspace_sptr m_largeWS;
 };
-
-#endif /* MANTID_ALGORITHMS_SOFQW2TEST_H_ */

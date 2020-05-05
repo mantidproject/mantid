@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid import mtd
 from mantid.simpleapi import (config, CropWorkspace, DeleteWorkspace, DirectILLApplySelfShielding, DirectILLCollectData,
                               DirectILLDiagnostics, DirectILLIntegrateVanadium, DirectILLReduction, DirectILLSelfShielding,
@@ -210,9 +208,9 @@ class IN6(systemtesting.MantidSystemTest):
 class IN5_Tube_Background(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        Load(Filename='ILL/IN5/Epp.nxs', OutputWorkspace='Epp')
-        Load(Filename='ILL/IN5/Sample.nxs', OutputWorkspace='Sample')
-        Load(Filename='ILL/IN5/Vmask.nxs', OutputWorkspace='Vmask')
+        Load(Filename='ILL/IN5/Epp.nxs', OutputWorkspace='Epp', ConvertToTOF=True)
+        Load(Filename='ILL/IN5/Sample.nxs', OutputWorkspace='Sample', ConvertToTOF=True)
+        Load(Filename='ILL/IN5/Vmask.nxs', OutputWorkspace='Vmask', ConvertToTOF=True)
         args = {'InputWorkspace':'Sample',
                 'DiagnosticsWorkspace':'Vmask',
                 'EPPWorkspace':'Epp',
@@ -249,7 +247,7 @@ class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
             OutputEPPWorkspace='Epp'
         )
 
-        ws = Load(run)
+        ws = Load(run, ConvertToTOF=True)
         self.ecrase(ws)
 
         DirectILLCollectData(

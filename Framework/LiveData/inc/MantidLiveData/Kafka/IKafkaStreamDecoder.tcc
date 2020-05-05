@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -34,7 +40,7 @@ namespace LiveData {
  * @return A new workspace of the appropriate size
  */
 template <typename T>
-boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
+std::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
     const std::string &workspaceClassName, size_t nspectra, const int32_t *spec,
     const int32_t *udet, uint32_t length) {
   // Get spectra to detector mapping
@@ -43,7 +49,7 @@ boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
 
   // Create histo workspace
   auto buffer =
-      boost::static_pointer_cast<T>(API::WorkspaceFactory::Instance().create(
+      std::static_pointer_cast<T>(API::WorkspaceFactory::Instance().create(
           workspaceClassName, nspectra, 2, 1));
 
   // Set the units
@@ -67,10 +73,10 @@ boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
  * @param parent A reference to an existing workspace
  */
 template <typename T>
-boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
-    const std::string &workspaceClassName, const boost::shared_ptr<T> &parent) {
+std::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
+    const std::string &workspaceClassName, const std::shared_ptr<T> &parent) {
   auto buffer =
-      boost::static_pointer_cast<T>(API::WorkspaceFactory::Instance().create(
+      std::static_pointer_cast<T>(API::WorkspaceFactory::Instance().create(
           workspaceClassName, parent->getNumberHistograms(), 2, 1));
   // Copy meta data
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer,
@@ -81,8 +87,7 @@ boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
 }
 
 template <typename T>
-void loadFromAlgorithm(const std::string &name,
-                       boost::shared_ptr<T> workspace) {
+void loadFromAlgorithm(const std::string &name, std::shared_ptr<T> workspace) {
   auto alg =
       API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
   // Do not put the workspace in the ADS
@@ -103,7 +108,7 @@ void loadFromAlgorithm(const std::string &name,
  */
 template <typename T>
 bool IKafkaStreamDecoder::loadInstrument(const std::string &name,
-                                         boost::shared_ptr<T> workspace,
+                                         std::shared_ptr<T> workspace,
                                          const std::string &jsonGeometry) {
   auto instrument = workspace->getInstrument();
   if (instrument->getNumberDetectors() != 0) // instrument already loaded.

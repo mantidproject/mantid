@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUNDTEST_H_
-#define MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUNDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -73,8 +72,8 @@ public:
     // workspace has 20 spectra, value does not matter for function
     std::vector<int> indices(20, 1);
 
-    boost::shared_ptr<IPoldiFunction1D> poldiFunction =
-        boost::dynamic_pointer_cast<IPoldiFunction1D>(function);
+    std::shared_ptr<IPoldiFunction1D> poldiFunction =
+        std::dynamic_pointer_cast<IPoldiFunction1D>(function);
     TS_ASSERT(poldiFunction);
     poldiFunction->poldiFunction1D(indices, domain, values);
 
@@ -83,5 +82,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUNDTEST_H_ */

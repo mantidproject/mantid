@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_BRAGGSCATTERERCOLLECTIONTEST_H_
-#define MANTID_GEOMETRY_BRAGGSCATTERERCOLLECTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -45,12 +44,12 @@ public:
         CompositeBraggScatterer::create(scatterers);
     TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
     TS_ASSERT_EQUALS(
-        boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
             scatterer->getScatterer(0))
             ->getPosition(),
         V3D(0.35, 0, 0));
     TS_ASSERT_EQUALS(
-        boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
             scatterer->getScatterer(1))
             ->getPosition(),
         V3D(0.25, 0.25, 0.25));
@@ -61,17 +60,17 @@ public:
     BraggScatterer_sptr clone = scatterer->clone();
 
     CompositeBraggScatterer_sptr collectionClone =
-        boost::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
+        std::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
 
     TS_ASSERT(collectionClone);
     TS_ASSERT_EQUALS(collectionClone->nScatterers(), 2);
     TS_ASSERT_EQUALS(
-        boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
             collectionClone->getScatterer(0))
             ->getPosition(),
         V3D(0.35, 0, 0));
     TS_ASSERT_EQUALS(
-        boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
             collectionClone->getScatterer(1))
             ->getPosition(),
         V3D(0.25, 0.25, 0.25));
@@ -166,7 +165,7 @@ private:
                           const std::string &position, double U = 0.0,
                           double occ = 1.0) {
     IsotropicAtomBraggScatterer_sptr scatterer =
-        boost::make_shared<IsotropicAtomBraggScatterer>();
+        std::make_shared<IsotropicAtomBraggScatterer>();
     scatterer->initialize();
     scatterer->setProperty("Element", element);
     scatterer->setProperty("Position", position);
@@ -203,5 +202,3 @@ private:
             {{5, 4, 4}, 6.93},   {{5, 5, 4}, 65.05},  {{5, 5, 5}, 88.57}};
   }
 };
-
-#endif /* MANTID_GEOMETRY_BRAGGSCATTERERCOLLECTIONTEST_H_ */

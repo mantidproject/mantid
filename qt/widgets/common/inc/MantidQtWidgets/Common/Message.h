@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MESSAGE_H_
-#define MESSAGE_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -37,15 +36,15 @@ public:
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
   Message(const QString &text, Priority priority = Priority::PRIO_NOTICE,
-          QString scriptPath = "");
+          const QString &scriptPath = "");
   /// Construct a message from a std::string with a given priority
   /// (default=notice)
   Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE,
-          QString scriptPath = "");
+          const QString &scriptPath = "");
   /// Construct a message from a c-style string and a given priority
   /// (default=notice)
   Message(const char *text, Priority priority = Priority::PRIO_NOTICE,
-          QString scriptPath = "");
+          const QString &scriptPath = "");
   /// Copy constructor
   Message(const Message &msg);
   /// Copy assignment
@@ -71,5 +70,3 @@ private:
 
 /// Required to operate in signals/slots
 Q_DECLARE_METATYPE(MantidQt::MantidWidgets::Message)
-
-#endif // MESSAGE_H_

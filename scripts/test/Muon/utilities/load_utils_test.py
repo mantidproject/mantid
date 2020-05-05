@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import Muon.GUI.Common.utilities.load_utils as utils
 import os
@@ -10,7 +10,7 @@ import unittest
 
 from mantid import simpleapi, ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 
 
 def create_simple_workspace(data_x, data_y, run_number=0):

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_
-#define MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/RangeMarker.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
@@ -76,5 +75,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_

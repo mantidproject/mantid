@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
-#define MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_PeriodicTableWidget.h"
@@ -43,7 +42,8 @@ public:
 
   /// @return Comma-separated string of all the element buttons for one group
   /// that are currently checked
-  QString elementsSelectedToString(QVector<QPushButton *> elementsSelected);
+  QString
+  elementsSelectedToString(const QVector<QPushButton *> &elementsSelected);
 
   /// @return Comma-separated string of all element buttons that are checked in
   /// the whole PeriodicTableWidget
@@ -56,12 +56,12 @@ public:
   void disableAllElementButtons();
 
   /// Enables a button for an element by the element name i.e 'Au' for Gold.
-  void enableButtonByName(QString elementStr);
+  void enableButtonByName(const QString &elementStr);
 
   ///@return the result of the comparison between a string and the text of a
   /// button.
   bool compareButtonNameToStr(QPushButton *buttonToCompare,
-                              QString stringToCompare);
+                              const QString &stringToCompare);
 
   /// Displays or hides the Legend for the colour coding of periodic groups
   void showGroupLegend(bool checked);
@@ -87,7 +87,7 @@ private:
   void ColourNobleGases(const QVector<QPushButton *> &nobleGases);
 
   /// Methods to colour single element button by setting styleSheet
-  void ColourButton(QPushButton *elementButton, QString colour);
+  void ColourButton(QPushButton *elementButton, const QString &colour);
 
   /// Method to populate Group Vectors with element QPushButtons
   void populateGroupVectors();
@@ -98,5 +98,3 @@ private:
   /// Colour all of the elements by calls to individual group colouring methods
   void ColourElements();
 };
-
-#endif // !MANTID_MANTIDWIDGETS_PERIODICTABLE_H_

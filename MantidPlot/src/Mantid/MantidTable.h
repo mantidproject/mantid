@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDTABLE_H
-#define MANTIDTABLE_H
+#pragma once
 
 #include "../Table.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -18,7 +17,7 @@
 class MantidTable : public Table, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws,
+  MantidTable(ScriptingEnv *env, const Mantid::API::ITableWorkspace_sptr &ws,
               const QString &label, ApplicationWindow *parent,
               bool transpose = false);
 
@@ -54,10 +53,10 @@ protected slots:
 protected:
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   // Reimplemented methods for custom sorting of TableWorkspaces
   void sortColumn(int col, int order) override;
@@ -75,5 +74,3 @@ private:
   /// Show the table workspace transposed
   bool m_transposed;
 };
-
-#endif /* MANTIDTABLE_H */

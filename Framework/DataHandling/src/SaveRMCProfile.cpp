@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveRMCProfile.h"
 
@@ -96,8 +96,8 @@ void SaveRMCProfile::exec() {
   out.close();
 }
 
-void SaveRMCProfile::writeMetaData(std::ofstream &out,
-                                   API::MatrixWorkspace_const_sptr inputWS) {
+void SaveRMCProfile::writeMetaData(
+    std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
   const auto &y = inputWS->y(0);
   const std::string title = getProperty("Title");
   const std::string inputType = getProperty("InputType");
@@ -107,8 +107,8 @@ void SaveRMCProfile::writeMetaData(std::ofstream &out,
   std::cout << "rmc " << inputType << " #  " << title << std::endl;
 }
 
-void SaveRMCProfile::writeWSData(std::ofstream &out,
-                                 API::MatrixWorkspace_const_sptr inputWS) {
+void SaveRMCProfile::writeWSData(
+    std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
   const auto &x = inputWS->points(0);
   const auto &y = inputWS->y(0);
   for (size_t i = 0; i < x.size(); ++i) {

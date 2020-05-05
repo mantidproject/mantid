@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FLATPLATEABSORPTION_H_
-#define MANTID_ALGORITHMS_FLATPLATEABSORPTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -59,7 +58,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 15/01/2010
 */
-class DLLExport FlatPlateAbsorption : public AbsorptionCorrection {
+class MANTID_ALGORITHMS_DLL FlatPlateAbsorption : public AbsorptionCorrection {
 public:
   /// (Empty) Constructor
   FlatPlateAbsorption();
@@ -98,5 +97,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_FLATPLATEABSORPTION_H_*/

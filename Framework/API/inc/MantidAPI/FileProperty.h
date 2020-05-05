@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FILEPROPERTY_H_
-#define MANTID_API_FILEPROPERTY_H_
+#pragma once
 
 //-----------------------------------------------------------------
 // Includes
@@ -40,7 +39,8 @@ namespace API {
      FileAction type parameter in the constructor.
 
  */
-class DLLExport FileProperty : public Kernel::PropertyWithValue<std::string> {
+class MANTID_API_DLL FileProperty
+    : public Kernel::PropertyWithValue<std::string> {
 public:
   /// An enumeration for load/save types. This is passed on to the FileValidator
   /// as a constructor parameter.
@@ -128,5 +128,3 @@ private:
 #endif
 } // namespace API
 } // namespace Mantid
-
-#endif // MANTID_API_FILEPROPERTY_H_

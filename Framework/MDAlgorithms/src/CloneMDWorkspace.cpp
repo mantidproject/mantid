@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CloneMDWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -97,7 +97,7 @@ void CloneMDWorkspace::doClone(
     // Set the output workspace to this
     IMDWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     this->setProperty("OutputWorkspace",
-                      boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
+                      std::dynamic_pointer_cast<IMDWorkspace>(outWS));
   } else {
     // Perform the clone in memory.
     IMDWorkspace_sptr outWS(ws->clone());
@@ -111,9 +111,9 @@ void CloneMDWorkspace::doClone(
 void CloneMDWorkspace::exec() {
   IMDWorkspace_sptr inBaseWS = getProperty("InputWorkspace");
   IMDEventWorkspace_sptr inWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(inBaseWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(inBaseWS);
   MDHistoWorkspace_sptr inHistoWS =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(inBaseWS);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(inBaseWS);
 
   if (inWS) {
     CALL_MDEVENT_FUNCTION(this->doClone, inWS);

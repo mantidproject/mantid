@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_
-#define MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_
+#pragma once
 
 #include <math.h>
 
@@ -18,6 +17,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
@@ -26,8 +27,8 @@ namespace {
 const int dead1 = 4;
 const int dead2 = 12;
 
-void populatePhaseTableWithDeadDetectors(ITableWorkspace_sptr phaseTable,
-                                         const MatrixWorkspace_sptr ws) {
+void populatePhaseTableWithDeadDetectors(const ITableWorkspace_sptr &phaseTable,
+                                         const MatrixWorkspace_sptr &ws) {
   phaseTable->addColumn("int", "DetectprID");
   phaseTable->addColumn("double", "Asymmetry");
   phaseTable->addColumn("double", "phase");
@@ -43,7 +44,7 @@ void populatePhaseTableWithDeadDetectors(ITableWorkspace_sptr phaseTable,
     }
   }
 }
-void populatePhaseTable(ITableWorkspace_sptr phaseTable,
+void populatePhaseTable(const ITableWorkspace_sptr &phaseTable,
                         std::vector<std::string> names, bool swap = false) {
   phaseTable->addColumn("int", names[0]);
   phaseTable->addColumn("double", names[1]);
@@ -59,12 +60,14 @@ void populatePhaseTable(ITableWorkspace_sptr phaseTable,
     phaseRow2 << i << asym << phase;
   }
 }
-void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
-  populatePhaseTable(phaseTable, {"DetectorID", "Asymmetry", "Phase"});
+void populatePhaseTable(const ITableWorkspace_sptr &phaseTable) {
+  populatePhaseTable(std::move(phaseTable),
+                     {"DetectorID", "Asymmetry", "Phase"});
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
-                         ITableWorkspace_sptr phaseTable) {
+IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
+                         bool isChildAlg,
+                         const ITableWorkspace_sptr &phaseTable) {
   // Set up PhaseQuad
   IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
   phaseQuad->setChild(isChildAlg);
@@ -75,36 +78,38 @@ IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
   return phaseQuad;
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg) {
+IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
+                         bool isChildAlg) {
   // Create and populate a detector table
-  boost::shared_ptr<ITableWorkspace> phaseTable(
+  std::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
   populatePhaseTable(phaseTable);
 
-  return setupAlg(m_loadedData, isChildAlg, phaseTable);
+  return setupAlg(std::move(m_loadedData), isChildAlg, phaseTable);
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
-                         std::vector<std::string> names, bool swap = false) {
+IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
+                         bool isChildAlg, std::vector<std::string> names,
+                         bool swap = false) {
   // Create and populate a detector table
-  boost::shared_ptr<ITableWorkspace> phaseTable(
+  std::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
-  populatePhaseTable(phaseTable, names, swap);
+  populatePhaseTable(phaseTable, std::move(names), swap);
 
-  return setupAlg(m_loadedData, isChildAlg, phaseTable);
+  return setupAlg(std::move(m_loadedData), isChildAlg, phaseTable);
 }
 
-IAlgorithm_sptr setupAlgDead(MatrixWorkspace_sptr m_loadedData) {
+IAlgorithm_sptr setupAlgDead(const MatrixWorkspace_sptr &m_loadedData) {
   // Create and populate a detector table
-  boost::shared_ptr<ITableWorkspace> phaseTable(
+  std::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
   populatePhaseTableWithDeadDetectors(phaseTable, m_loadedData);
 
   return setupAlg(m_loadedData, true, phaseTable);
 }
 
-MatrixWorkspace_sptr setupWS(MatrixWorkspace_sptr m_loadedData) {
-  boost::shared_ptr<ITableWorkspace> phaseTable(
+MatrixWorkspace_sptr setupWS(const MatrixWorkspace_sptr &m_loadedData) {
+  std::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
   MatrixWorkspace_sptr ws = m_loadedData->clone();
   // create toy data set
@@ -135,7 +140,7 @@ MatrixWorkspace_sptr loadMuonDataset() {
   loader->execute();
   Workspace_sptr temp = loader->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr m_loadedData =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      std::dynamic_pointer_cast<MatrixWorkspace>(temp);
   return m_loadedData;
 }
 } // namespace
@@ -347,5 +352,3 @@ private:
   MatrixWorkspace_sptr m_loadedData;
   IAlgorithm_sptr phaseQuad;
 };
-
-#endif /* MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_ */

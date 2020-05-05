@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/IComponent.h"
@@ -12,7 +12,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -36,8 +36,8 @@ Geometry::Instrument_sptr
 createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
                         const Mantid::Kernel::V3D &samplePos,
                         const Mantid::Kernel::V3D &detectorPos) {
-  Instrument_sptr instrument = boost::make_shared<Instrument>();
-  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+  Instrument_sptr instrument = std::make_shared<Instrument>();
+  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
       "0,0,0"));
 
@@ -69,8 +69,8 @@ Geometry::Instrument_sptr
 createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
                         const std::vector<Kernel::V3D> &vecdetpos,
                         const std::vector<detid_t> &vecdetid) {
-  Instrument_sptr instrument = boost::make_shared<Instrument>();
-  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+  Instrument_sptr instrument = std::make_shared<Instrument>();
+  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Right,
       "0,0,0"));
 
@@ -106,8 +106,8 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
 /**
  * Create a sphere object
  */
-boost::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
-                                          const std::string &id) {
+std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
+                                        const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }

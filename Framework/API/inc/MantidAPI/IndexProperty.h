@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_INDEXPROPERTY_H_
-#define MANTID_API_INDEXPROPERTY_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IWorkspaceProperty.h"
@@ -33,7 +32,7 @@ public:
   IndexProperty(const std::string &name,
                 const IWorkspaceProperty &workspaceProp,
                 const IndexTypeProperty &indexTypeProp,
-                Kernel::IValidator_sptr validator =
+                const Kernel::IValidator_sptr &validator =
                     Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   IndexProperty *clone() const override;
@@ -62,5 +61,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_INDEXPROPERTY_H_ */

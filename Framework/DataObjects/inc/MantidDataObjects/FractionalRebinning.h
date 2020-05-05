@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_FRACTIONALREBINNING_
-#define MANTID_DATAOBJECTS_FRACTIONALREBINNING_
+#pragma once
 
 //------------------------------------------------------------------------------
 // Includes
@@ -43,8 +42,8 @@ getIntersectionRegion(const std::vector<double> &xAxis,
 
 /// Compute sqrt of errors and put back in bin width division if necessary
 MANTID_DATAOBJECTS_DLL void
-normaliseOutput(API::MatrixWorkspace_sptr outputWS,
-                API::MatrixWorkspace_const_sptr inputWS,
+normaliseOutput(const API::MatrixWorkspace_sptr &outputWS,
+                const API::MatrixWorkspace_const_sptr &inputWS,
                 API::Progress *progress = nullptr);
 
 /// Rebin the input quadrilateral to to output grid
@@ -70,5 +69,3 @@ finalizeFractionalRebin(DataObjects::RebinnedOutput &outputWS);
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif

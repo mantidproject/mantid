@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 #include <cmath>
@@ -79,8 +79,8 @@ void Poldi2DFunction::poldiFunction1D(const std::vector<int> &indices,
                                       FunctionValues &values) const {
   for (size_t i = 0; i < nFunctions(); ++i) {
     IFunction_sptr currentFunction = getFunction(i);
-    boost::shared_ptr<IPoldiFunction1D> spectrumFunction =
-        boost::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
+    std::shared_ptr<IPoldiFunction1D> spectrumFunction =
+        std::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
 
     if (spectrumFunction) {
       spectrumFunction->poldiFunction1D(indices, domain, values);

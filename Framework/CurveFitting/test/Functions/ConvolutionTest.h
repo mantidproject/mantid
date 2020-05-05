@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVOLUTIONTEST_H_
-#define CONVOLUTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -181,8 +180,7 @@ public:
     linear->setParameter(0, 0.1);
     linear->setParameter(1, 0.2);
 
-    size_t iFun = 10000;
-    iFun = conv.addFunction(linear);
+    size_t iFun = conv.addFunction(linear);
     TS_ASSERT_EQUALS(iFun, 0);
     iFun = conv.addFunction(gauss1);
     TS_ASSERT_EQUALS(iFun, 1);
@@ -260,8 +258,8 @@ public:
 
     double a = 1.3;
     double h = 3.;
-    boost::shared_ptr<ConvolutionTest_Gauss> res =
-        boost::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> res =
+        std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", 0);
     res->setParameter("h", h);
     res->setParameter("s", a);
@@ -310,8 +308,8 @@ public:
     double c1 = 0.;     // center of the gaussian
     double h1 = 3;      // intensity
     double s1 = pi / 2; // standard deviation
-    boost::shared_ptr<ConvolutionTest_Gauss> res =
-        boost::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> res =
+        std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
     res->setParameter("h", h1);
     res->setParameter("s", s1);
@@ -328,8 +326,8 @@ public:
     double c2 = x0 + Dx / 2;
     double h2 = 10.;
     double s2 = pi / 3;
-    boost::shared_ptr<ConvolutionTest_Gauss> fun =
-        boost::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> fun =
+        std::make_shared<ConvolutionTest_Gauss>();
     fun->setParameter("c", c2);
     fun->setParameter("h", h2);
     fun->setParameter("s", s2);
@@ -367,14 +365,14 @@ public:
     double c1 = 0.0; // center of the gaussian
     double h1 = 1.0; // intensity
     double s1 = 1.0; // rate
-    auto res = boost::make_shared<ConvolutionTest_Gauss>();
+    auto res = std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
     res->setParameter("h", h1);
     res->setParameter("s", s1);
     conv.addFunction(res);
     // Add Delta Dirac function
     double h2 = 1.0;
-    auto fun = boost::make_shared<DeltaFunction>();
+    auto fun = std::make_shared<DeltaFunction>();
     fun->setParameter("Height", h2);
     conv.addFunction(fun);
     // Define domains
@@ -409,5 +407,3 @@ public:
     TS_ASSERT(categories[0] == "General");
   }
 };
-
-#endif /*CONVOLUTIONTEST_H_*/

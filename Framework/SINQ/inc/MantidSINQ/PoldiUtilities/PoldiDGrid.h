@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIDGRID_H
-#define MANTID_SINQ_POLDIDGRID_H
+#pragma once
 
 #include "MantidSINQ/DllConfig.h"
 
@@ -29,14 +28,14 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiDGrid {
 public:
   PoldiDGrid(
-      boost::shared_ptr<PoldiAbstractDetector> detector =
-          boost::shared_ptr<PoldiAbstractDetector>(),
-      boost::shared_ptr<PoldiAbstractChopper> chopper =
-          boost::shared_ptr<PoldiAbstractChopper>(),
+      std::shared_ptr<PoldiAbstractDetector> detector =
+          std::shared_ptr<PoldiAbstractDetector>(),
+      std::shared_ptr<PoldiAbstractChopper> chopper =
+          std::shared_ptr<PoldiAbstractChopper>(),
       double deltaT = 0.0,
       std::pair<double, double> wavelengthRange = std::pair<double, double>());
-  void setDetector(boost::shared_ptr<PoldiAbstractDetector> newDetector);
-  void setChopper(boost::shared_ptr<PoldiAbstractChopper> newChopper);
+  void setDetector(std::shared_ptr<PoldiAbstractDetector> newDetector);
+  void setChopper(std::shared_ptr<PoldiAbstractChopper> newChopper);
   void setDeltaT(double newDeltaT);
   void setWavelengthRange(std::pair<double, double> wavelengthRange);
 
@@ -48,8 +47,8 @@ protected:
   double calculateDeltaD();
   void createGrid();
 
-  boost::shared_ptr<PoldiAbstractDetector> m_detector;
-  boost::shared_ptr<PoldiAbstractChopper> m_chopper;
+  std::shared_ptr<PoldiAbstractDetector> m_detector;
+  std::shared_ptr<PoldiAbstractChopper> m_chopper;
   double m_deltaT;
   std::pair<double, double> m_wavelengthRange;
 
@@ -61,5 +60,3 @@ protected:
 };
 } // namespace Poldi
 } // namespace Mantid
-
-#endif // MANTID_SINQ_POLDIDGRID_H

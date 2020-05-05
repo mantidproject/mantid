@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateFlatEventWorkspace.h"
 
@@ -105,7 +105,7 @@ void CreateFlatEventWorkspace::exec() {
   clone->executeAsChildAlg();
   Workspace_sptr tmp = clone->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr tmpChunkWs =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+      std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
   Progress progress(this, 0.0, 1.0, nRegions);
 
@@ -139,7 +139,7 @@ void CreateFlatEventWorkspace::exec() {
   outputWS = finalcrop_alg->getProperty("OutputWorkspace");
 
   EventWorkspace_sptr outputEWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   outputEWS->clearMRU();
 
   // Need to reset the matrixworkspace/histogram representation to be the

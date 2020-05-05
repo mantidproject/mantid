@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/MuonGroupingCounts.h"
 #include "MantidAPI/Algorithm.h"
@@ -25,11 +25,11 @@ using namespace Mantid::HistogramData;
 namespace {
 
 bool checkPeriodInWorkspaceGroup(const int &period,
-                                 WorkspaceGroup_sptr workspace) {
+                                 const WorkspaceGroup_sptr &workspace) {
   return period <= workspace->getNumberOfEntries();
 }
 
-MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
+MatrixWorkspace_sptr groupDetectors(const MatrixWorkspace_sptr &workspace,
                                     const std::vector<int> &detectorIDs) {
 
   auto outputWS = WorkspaceFactory::Instance().create(workspace, 1);
@@ -175,10 +175,10 @@ void MuonGroupingCounts::exec() {
 
   // Group detectors in each period
   std::vector<int> group = getProperty("Grouping");
-  auto groupedPeriods = boost::make_shared<WorkspaceGroup>();
+  auto groupedPeriods = std::make_shared<WorkspaceGroup>();
   for (auto &&workspace : *inputWS) {
     groupedPeriods->addWorkspace(groupDetectors(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), group));
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace), group));
   }
 
   std::vector<int> summedPeriods = getProperty("SummedPeriods");
@@ -199,7 +199,8 @@ void MuonGroupingCounts::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-void MuonGroupingCounts::setGroupingSampleLogs(MatrixWorkspace_sptr workspace) {
+void MuonGroupingCounts::setGroupingSampleLogs(
+    const MatrixWorkspace_sptr &workspace) {
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_group_name",
                                     getPropertyValue("GroupName"));
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_group",

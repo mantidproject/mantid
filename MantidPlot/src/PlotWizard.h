@@ -28,8 +28,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PLOTWIZARD_H
-#define PLOTWIZARD_H
+#pragma once
 
 #include <QDialog>
 class QGroupBox;
@@ -47,7 +46,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: Qt window flags
    */
-  PlotWizard(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  PlotWizard(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 private:
   //! Button "Plot"
@@ -118,5 +117,3 @@ signals:
   //! Emitted when new plots need to be created
   void plot(const QStringList &);
 };
-
-#endif //  PLOTWIZARD_H

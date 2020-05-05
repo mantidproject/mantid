@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module coordinate file access and information extraction from files."""
 
 # pylint: disable=too-few-public-methods, invalid-name
 
-from __future__ import (absolute_import, division, print_function)
 import os
 import h5py as h5
 import re
@@ -18,8 +17,6 @@ from mantid.kernel import (DateAndTime, ConfigService, Logger)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
 from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
-from six import with_metaclass
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
 # ----------------------------------------------------------------------------------------------------------------------
@@ -719,7 +716,7 @@ def get_geometry_information_raw(file_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSFileInformation(with_metaclass(ABCMeta, object)):
+class SANSFileInformation(metaclass=ABCMeta):
     logger = Logger("SANS")
 
     def __init__(self, full_file_name):

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDSTEST_H_
-#define MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -76,7 +75,7 @@ public:
       return;
 
     // Workspace is a group
-    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     TS_ASSERT(group);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
@@ -86,7 +85,7 @@ public:
 
     // Table with peaks that can be attributed to Si
     ITableWorkspace_sptr tableSi =
-        boost::dynamic_pointer_cast<ITableWorkspace>(indexedSi);
+        std::dynamic_pointer_cast<ITableWorkspace>(indexedSi);
     TS_ASSERT(tableSi);
     TS_ASSERT_EQUALS(tableSi->getName(), "measured_SI_indexed_Si");
     TS_ASSERT_EQUALS(tableSi->rowCount(), 4);
@@ -104,7 +103,7 @@ public:
 
     // Table with peaks that can be attributed to Si
     ITableWorkspace_sptr tableUnindexed =
-        boost::dynamic_pointer_cast<ITableWorkspace>(unindexed);
+        std::dynamic_pointer_cast<ITableWorkspace>(unindexed);
     TS_ASSERT(tableUnindexed);
     TS_ASSERT_EQUALS(tableUnindexed->getName(), "measured_SI_unindexed");
     TS_ASSERT_EQUALS(tableUnindexed->rowCount(), 0);
@@ -665,17 +664,17 @@ private:
 
     storeRandomWorkspaces(testWorkspaces);
 
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group1 = std::make_shared<WorkspaceGroup>();
     WorkspaceCreationHelper::storeWS("group1", group1);
     group1->add("test1");
     group1->add("test2");
 
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group2 = std::make_shared<WorkspaceGroup>();
     WorkspaceCreationHelper::storeWS("group2", group2);
     group2->add("test3");
     group2->add("test4");
 
-    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group3 = std::make_shared<WorkspaceGroup>();
     WorkspaceCreationHelper::storeWS("group3", group3);
     group3->add("group1");
     group3->add("group2");
@@ -710,5 +709,3 @@ private:
     return stringVector;
   }
 };
-
-#endif /* MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDSTEST_H_ */

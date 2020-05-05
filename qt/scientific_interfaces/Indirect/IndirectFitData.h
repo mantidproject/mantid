@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATALEGACY_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATALEGACY_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -14,7 +13,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/optional.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include <cctype>
 #include <numeric>
@@ -109,7 +108,7 @@ std::vector<T> vectorFromString(const std::string &listString) {
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitData {
 public:
-  IndirectFitData(Mantid::API::MatrixWorkspace_sptr workspace,
+  IndirectFitData(const Mantid::API::MatrixWorkspace_sptr &workspace,
                   const Spectra &spectra);
 
   std::string displayName(const std::string &formatString,
@@ -164,5 +163,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

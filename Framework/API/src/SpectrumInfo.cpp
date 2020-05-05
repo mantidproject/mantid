@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -15,7 +15,7 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -32,6 +32,10 @@ SpectrumInfo::~SpectrumInfo() = default;
 
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
 size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
+
+size_t SpectrumInfo::detectorCount() const {
+  return m_spectrumInfo.detectorCount();
+}
 
 /// Returns a const reference to the SpectrumDefinition of the spectrum.
 const SpectrumDefinition &
@@ -181,13 +185,13 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
                                            std::to_string(index));
   } else {
     // Else need to construct a DetectorGroup and use that
-    std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
+    std::vector<std::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &index : specDef) {
       const auto detIndex = index.first;
       det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
     m_lastDetector[thread] =
-        boost::make_shared<Geometry::DetectorGroup>(det_ptrs);
+        std::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
   m_lastIndex[thread] = index;
   return *m_lastDetector[thread];

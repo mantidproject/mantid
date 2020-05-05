@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,attribute-defined-outside-init
 """
@@ -10,7 +10,6 @@ The tests here are ports from the original SANS2DReductionGUI.py test suite. Not
 include details about the ReductionSingleton
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.kernel import (config)
 from mantid.api import (FileFinder)

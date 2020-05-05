@@ -36,6 +36,8 @@ else {
 $env:QT_PLUGIN_PATH = Resolve-Path("$scriptRootDirectory/../plugins/qt5")
 # Appends the Mantid install/bin directory to the PATH so that the import can find the QT DLLs
 $env:PATH += ";$scriptRootDirectory"
+# Set Python warnings filter to ignore SyntaxWarnings
+$env:PYTHONWARNINGS = "default::DeprecationWarning:__main__,ignore::DeprecationWarning,ignore::PendingDeprecationWarning,ignore::ImportWarning,ignore::ResourceWarning,ignore::SyntaxWarning"
 
 # The 2>&1 at the end flushes STDERR into STDOUT and removes the new popup Windows that come from PS2EXE
 # Additionally that will correctly capture the output when run with just python.exe (console visible)

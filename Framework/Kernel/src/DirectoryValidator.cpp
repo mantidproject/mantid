@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/IValidator.h"
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -33,7 +33,7 @@ std::vector<std::string> DirectoryValidator::allowedValues() const {
  * @returns A pointer to a new validator with the same properties as this one
  */
 IValidator_sptr DirectoryValidator::clone() const {
-  return boost::make_shared<DirectoryValidator>(*this);
+  return std::make_shared<DirectoryValidator>(*this);
 }
 
 /** If m_fullTest=true if checks that the files exists, otherwise just that path

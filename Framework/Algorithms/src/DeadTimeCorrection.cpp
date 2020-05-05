@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DeadTimeCorrection.h"
 #include "MantidAPI/FileProperty.h"
@@ -59,7 +59,7 @@ void DeadTimeCorrection::init() {
                       "GroupingPattern", "", Direction::Input),
                   "See the GroupingPattern documentation of GroupDetectors.");
 
-  auto positive = boost::make_shared<BoundedValidator<double>>();
+  auto positive = std::make_shared<BoundedValidator<double>>();
   positive->setLower(0.);
   declareProperty("Tau", 0., positive, "The count rate coefficient.");
 

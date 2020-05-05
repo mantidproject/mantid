@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CALCTRANSBEAMSPREADER_H_
-#define MANTID_ALGORITHMS_CALCTRANSBEAMSPREADER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -56,7 +55,8 @@ namespace Algorithms {
     @author Mathieu Doucet, ORNL
     @date 28/07/2010
 */
-class DLLExport CalculateTransmissionBeamSpreader : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateTransmissionBeamSpreader
+    : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override {
@@ -85,12 +85,12 @@ private:
   void exec() override;
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS,
+  API::MatrixWorkspace_sptr extractSpectrum(const API::MatrixWorkspace_sptr &WS,
                                             const size_t index);
   /// Call the Linear fitting algorithm as a child algorithm
-  API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
+  API::MatrixWorkspace_sptr fitToData(const API::MatrixWorkspace_sptr &WS);
   /// Sum the total detector, excluding masked pixels and monitors
-  API::MatrixWorkspace_sptr sumSpectra(API::MatrixWorkspace_sptr WS);
+  API::MatrixWorkspace_sptr sumSpectra(const API::MatrixWorkspace_sptr &WS);
 
   bool logFit =
       false; ///< If true, will take log of transmission curve before fitting
@@ -98,5 +98,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_*/

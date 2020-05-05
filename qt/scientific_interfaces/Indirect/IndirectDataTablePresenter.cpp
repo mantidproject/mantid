@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataTablePresenter.h"
 
@@ -49,7 +49,7 @@ public:
 
   void setModelData(QWidget *editor, QAbstractItemModel *model,
                     const QModelIndex &index) const override {
-    QLineEdit *lineEdit = static_cast<QLineEdit *>(editor);
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
     model->setData(index, lineEdit->text(), Qt::EditRole);
   }
 
@@ -216,11 +216,11 @@ IndirectDataTablePresenter::getSpectra(TableRowIndex start,
   while (start < end) {
     WorkspaceIndex minimum = getWorkspaceIndex(start);
     WorkspaceIndex maximum = minimum;
-    start++;
+    ++start;
     while (start < end &&
            getWorkspaceIndex(start) == maximum + WorkspaceIndex{1}) {
       ++maximum;
-      start++;
+      ++start;
     }
     spectraPairs.emplace_back(minimum, maximum);
   }
@@ -627,9 +627,10 @@ void IndirectDataTablePresenter::updateDataPositionsInCells(
     TableDatasetIndex from, TableDatasetIndex to) {
   for (auto i = from; i < to; ++i) {
     const auto nextPosition = getNextPosition(i);
-    for (auto row = m_dataPositions[i]; row < nextPosition; ++row)
+    for (auto row = m_dataPositions[i]; row < nextPosition; ++row) {
       m_dataTable->item(row.value, 0)
           ->setData(Qt::UserRole, getVariant(i.value));
+    }
   }
 }
 

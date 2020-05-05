@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H
-#define MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H
+#pragma once
 
 #include "MantidNexusGeometry/DllConfig.h"
 
@@ -56,4 +55,3 @@ createFromOFFMesh(const std::vector<uint32_t> &faceIndices,
 } // namespace NexusShapeFactory
 } // namespace NexusGeometry
 } // namespace Mantid
-#endif // MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H

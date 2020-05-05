@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class AxProperties(dict):
@@ -31,16 +31,22 @@ class AxProperties(dict):
         props['ylim'] = ax.get_ylim()
         props['ylabel'] = ax.get_ylabel()
         props['yscale'] = ax.get_yscale().title()
+
+        if isinstance(ax, Axes3D):
+            props['zlim'] = ax.get_zlim()
+            props['zlabel'] = ax.get_zlabel()
+            props['zscale'] = ax.get_zscale().title()
+
         return cls(props)
 
     @classmethod
     def from_view(cls, view):
         props = dict()
         props['title'] = view.get_title()
-        props['xlim'] = (view.get_xlower_limit(), view.get_xupper_limit())
-        props['ylim'] = (view.get_ylower_limit(), view.get_yupper_limit())
-        props['xlabel'] = view.get_xlabel()
-        props['xscale'] = view.get_xscale()
-        props['ylabel'] = view.get_ylabel()
-        props['yscale'] = view.get_yscale()
+
+        ax = view.get_axis()
+        props[f'{ax}lim'] = (view.get_lower_limit(), view.get_upper_limit())
+        props[f'{ax}label'] = view.get_label()
+        props[f'{ax}scale'] = view.get_scale()
+
         return cls(props)

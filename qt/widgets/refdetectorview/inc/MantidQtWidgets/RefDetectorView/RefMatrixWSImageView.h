@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REF_MATRIX_WS_IMAGE_VIEW_H
-#define REF_MATRIX_WS_IMAGE_VIEW_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
@@ -30,10 +29,10 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefMatrixWSImageView {
 
 public:
   /// Construct an image viewer for the specifed MatrixWorkspace
-  RefMatrixWSImageView(Mantid::API::MatrixWorkspace_sptr /*mat_ws*/);
+  RefMatrixWSImageView(const Mantid::API::MatrixWorkspace_sptr & /*mat_ws*/);
 
-  RefMatrixWSImageView(QString wpsName, int peakMin, int peakMax, int backMin,
-                       int backMax, int tofMin, int tofMax);
+  RefMatrixWSImageView(const QString &wpsName, int peakMin, int peakMax,
+                       int backMin, int backMax, int tofMin, int tofMax);
 
   RefIVConnections *getConnections();
 
@@ -45,5 +44,3 @@ private:
 
 } // namespace RefDetectorViewer
 } // namespace MantidQt
-
-#endif // REF_MATRIX_WS_IMAGE_VIEW_H

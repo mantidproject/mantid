@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COMPTONPROFILE_H_
-#define MANTID_CURVEFITTING_COMPTONPROFILE_H_
+#pragma once
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -42,9 +41,8 @@ public:
   /// Ensure the object is ready to be fitted
   void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wsIndex, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wsIndex, double startX, double endX) override;
 
   /// Initiate a Y-space value chache rebuild when workspace of mass are
   /// changed.
@@ -111,7 +109,7 @@ protected:
   mutable Kernel::Logger m_log;
 
   /// Current workspace
-  boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
+  std::shared_ptr<const API::MatrixWorkspace> m_workspace;
   /// Current workspace index, required to access instrument parameters
   size_t m_wsIndex;
 
@@ -119,9 +117,9 @@ protected:
   double m_endX;
 
   /// Voigt function
-  boost::shared_ptr<API::IPeakFunction> m_voigt;
+  std::shared_ptr<API::IPeakFunction> m_voigt;
   /// Vesuvio resolution function
-  boost::shared_ptr<VesuvioResolution> m_resolutionFunction;
+  std::shared_ptr<VesuvioResolution> m_resolutionFunction;
 
   /** @name Caches for commonly used values*/
   ///@{
@@ -139,5 +137,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_COMPTONPROFILE_H_ */

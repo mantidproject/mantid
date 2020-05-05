@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __MDHISTOTOWORKSPACE2DTEST
-#define __MDHISTOTOWORKSPACE2DTEST
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -84,15 +83,15 @@ private:
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("x"), std::string("ID0"), frame,
                              coord_t(-50), coord_t(50), size_t(100)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("y"), std::string("ID1"), frame,
                              coord_t(-60), coord_t(60), size_t(120)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("z"), std::string("ID2"), frame,
                              coord_t(-100), coord_t(100), size_t(200)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
 
     MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
     outWS->setTo(1., 1., .0);
@@ -105,5 +104,3 @@ private:
     return outWS;
   }
 };
-
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/ModifyDetectorDotDatFile.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -57,7 +57,7 @@ void ModifyDetectorDotDatFile::exec() {
   std::string outputFilename = getPropertyValue("OutputFilename");
 
   Workspace_sptr ws1 = getProperty("InputWorkspace");
-  ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+  ExperimentInfo_sptr ws = std::dynamic_pointer_cast<ExperimentInfo>(ws1);
 
   // Check instrument
   Instrument_const_sptr inst = ws->getInstrument();

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
-#define MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -45,7 +44,7 @@ public:
     // create a workspace
     const int numspec = 9;
     const int nummask = 5;
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(
+    Instrument_sptr instr = std::dynamic_pointer_cast<Instrument>(
         ComponentCreationHelper::createTestInstrumentCylindrical(1));
     Detector *d = new Detector("det", 0, nullptr);
     instr->add(d);
@@ -102,5 +101,3 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_ */

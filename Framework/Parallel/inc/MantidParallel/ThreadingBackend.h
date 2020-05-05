@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_THREADINGBACKEND_H_
-#define MANTID_PARALLEL_THREADINGBACKEND_H_
+#pragma once
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
@@ -174,5 +173,3 @@ Request ThreadingBackend::irecv(int dest, int source, int tag, T *data,
 } // namespace detail
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_THREADINGBACKEND_H_ */

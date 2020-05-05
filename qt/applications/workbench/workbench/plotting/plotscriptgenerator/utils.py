@@ -1,19 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 import re
 
 import numpy as np
 from matplotlib.container import ErrorbarContainer
-
-from mantid.py3compat import is_text_string
 
 
 def round_to_sig_figs(number, sig_figs):
@@ -28,7 +24,7 @@ def convert_value_to_arg_string(value):
     which can be passed to a function. It is recursive so works on objects
     such as lists.
     """
-    if is_text_string(value):
+    if isinstance(value, str):
         return "'{}'".format(value)
     if isinstance(value, (list, np.ndarray, tuple)):
         return "[{}]".format(', '.join([convert_value_to_arg_string(v) for v in value]))
@@ -75,7 +71,7 @@ def generate_workspace_retrieval_commands(fig):
 
 def clean_variable_name(name):
     """Converts a string into a valid Python variable name"""
-    return re.sub('\W|^(?=\d)', '_', name)
+    return re.sub(r'\W|^(?=\d)', '_', name)
 
 
 def sorted_lines_in(ax, artists):

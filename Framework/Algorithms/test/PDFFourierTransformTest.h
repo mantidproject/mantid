@@ -1,20 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
-#define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
+#pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cxxtest/TestSuite.h>
@@ -34,12 +32,11 @@ namespace {
  */
 Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
                                            const std::string &name,
-                                           const std::string unitlabel,
+                                           const std::string &unitlabel,
                                            const bool withBadValues = false) {
 
-  Mantid::API::FrameworkManager::Instance();
   Mantid::DataObjects::Workspace2D_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
           Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1, n,
                                                            n));
 
@@ -102,9 +99,8 @@ public:
         createWS(20, 0.1, "CheckResult", "MomentumTransfer");
 
     // 1. Run PDFFT
-    API::IAlgorithm *pdfft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "PDFFourierTransform");
+    auto pdfft =
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
@@ -119,7 +115,7 @@ public:
     pdfft->execute();
 
     DataObjects::Workspace2D_sptr pdfws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
     const auto &R = pdfws->x(0);
     const auto &GofR = pdfws->y(0);
@@ -138,9 +134,8 @@ public:
         createWS(20, 0.1, "CheckNan", "MomentumTransfer", true);
 
     // 1. Run PDFFT
-    API::IAlgorithm *pdfft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "PDFFourierTransform");
+    auto pdfft =
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
@@ -155,7 +150,7 @@ public:
     pdfft->execute();
 
     DataObjects::Workspace2D_sptr pdfws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
     const auto &R = pdfws->x(0);
     const auto &GofR = pdfws->y(0);
@@ -177,9 +172,8 @@ public:
     }
 
     // 1. Run PDFFT
-    API::IAlgorithm *pdfft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "PDFFourierTransform");
+    auto pdfft =
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
@@ -192,7 +186,7 @@ public:
     pdfft->execute();
 
     DataObjects::Workspace2D_sptr pdfws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
     const auto GofR = pdfws->y(0);
 
@@ -220,10 +214,9 @@ public:
 
   void setUp() override {
     ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
-    pdfft = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "PDFFourierTransform");
+    pdfft =
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
-    pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
     pdfft->setProperty("OutputWorkspace", "outputWS");
     pdfft->setProperty("InputSofQType", "S(Q)");
@@ -242,7 +235,5 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_sptr ws;
-  API::IAlgorithm *pdfft;
+  Mantid::API::IAlgorithm_sptr pdfft;
 };
-
-#endif /* MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_ */

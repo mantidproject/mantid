@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_LOGMANAGER_H_
-#define MANTID_API_LOGMANAGER_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -183,6 +182,9 @@ public:
   /// Clear the logs
   void clearLogs();
 
+  bool operator==(const LogManager &other) const;
+  bool operator!=(const LogManager &other) const;
+
 protected:
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file,
@@ -200,9 +202,9 @@ private:
       m_singleValueCache;
 };
 /// shared pointer to the logManager base class
-using LogManager_sptr = boost::shared_ptr<LogManager>;
+using LogManager_sptr = std::shared_ptr<LogManager>;
 /// shared pointer to the logManager base class (const version)
-using LogManager_const_sptr = boost::shared_ptr<const LogManager>;
+using LogManager_const_sptr = std::shared_ptr<const LogManager>;
 
 /**
  * Add a property of a specified type (Simply creates a Kernel::Property of that
@@ -236,5 +238,3 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
 }
 } // namespace API
 } // namespace Mantid
-
-#endif // MANTID_API_LOGMANAGER_H_

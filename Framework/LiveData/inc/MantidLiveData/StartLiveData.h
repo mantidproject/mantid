@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_STARTLIVEDATA_H_
-#define MANTID_LIVEDATA_STARTLIVEDATA_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidLiveData/DllConfig.h"
@@ -44,11 +43,9 @@ private:
   void afterPropertySet(const std::string &) override;
 
   void copyListenerProperties(
-      const boost::shared_ptr<Mantid::API::ILiveListener> &listener);
+      const std::shared_ptr<Mantid::API::ILiveListener> &listener);
   void removeListenerProperties();
 };
 
 } // namespace LiveData
 } // namespace Mantid
-
-#endif /* MANTID_LIVEDATA_STARTLIVEDATA_H_ */

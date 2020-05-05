@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIDETECTORDECORATORTEST_H_
-#define MANTID_SINQ_POLDIDETECTORDECORATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -18,7 +17,7 @@ using ::testing::_;
 using ::testing::Return;
 
 class PoldiDetectorDecoratorTest : public CxxTest::TestSuite {
-  boost::shared_ptr<MockDetector> m_detector;
+  std::shared_ptr<MockDetector> m_detector;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -29,7 +28,7 @@ public:
   static void destroySuite(PoldiDetectorDecoratorTest *suite) { delete suite; }
 
   PoldiDetectorDecoratorTest() {
-    m_detector = boost::make_shared<MockDetector>();
+    m_detector = std::make_shared<MockDetector>();
   }
 
   void testInitialization() {
@@ -37,7 +36,7 @@ public:
 
     TS_ASSERT_EQUALS(decorator.decoratedDetector(), m_detector);
 
-    decorator.setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector>());
+    decorator.setDecoratedDetector(std::shared_ptr<PoldiAbstractDetector>());
 
     TS_ASSERT(!decorator.decoratedDetector());
   }
@@ -79,5 +78,3 @@ public:
     TS_ASSERT_THROWS(decorator.qLimits(1.0, 5.0), const std::runtime_error &);
   }
 };
-
-#endif /* MANTID_SINQ_POLDIDETECTORDECORATORTEST_H_ */

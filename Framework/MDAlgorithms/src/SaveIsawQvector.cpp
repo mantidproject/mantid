@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
 
@@ -52,7 +52,7 @@ const std::string SaveIsawQvector::category() const {
 /** Initialize the algorithm's properties.
  */
 void SaveIsawQvector::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   //
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units
@@ -194,7 +194,7 @@ void SaveIsawQvector::exec() {
  *
  * @param wksp The workspace to get information from.
  */
-void SaveIsawQvector::initTargetWSDescr(EventWorkspace_sptr wksp) {
+void SaveIsawQvector::initTargetWSDescr(const EventWorkspace_sptr &wksp) {
   m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
                           std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);

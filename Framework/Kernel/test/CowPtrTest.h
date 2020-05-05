@@ -1,16 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COW_PTR_TEST_H_
-#define COW_PTR_TEST_H_
+#pragma once
 
 #include "MantidKernel/cow_ptr.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -39,9 +37,8 @@ public:
   }
 
   void testConstructorByPtr() {
-
-    auto *resource = new MyType{2};
-    cow_ptr<MyType> cow{resource};
+    auto resource = std::make_unique<MyType>(2);
+    cow_ptr<MyType> cow{resource.release()};
 
     TSM_ASSERT_EQUALS("COW does not hold the expected value", 2, cow->value);
   }
@@ -49,7 +46,7 @@ public:
   void testConstructorByTemporarySptr() {
 
     int value = 3;
-    auto resource = boost::make_shared<MyType>(value);
+    auto resource = std::make_shared<MyType>(value);
     cow_ptr<MyType> cow{std::move(resource)};
 
     TS_ASSERT_EQUALS(cow->value, value);
@@ -59,7 +56,7 @@ public:
   void testConstructorByNamedSptr() {
 
     int value = 3;
-    auto resource = boost::make_shared<MyType>(value);
+    auto resource = std::make_shared<MyType>(value);
     cow_ptr<MyType> cow{resource};
 
     TS_ASSERT_EQUALS(cow->value, value);
@@ -70,7 +67,7 @@ public:
   }
 
   void test_move_constructor() {
-    auto resource = boost::make_shared<int>(42);
+    auto resource = std::make_shared<int>(42);
     cow_ptr<int> source{resource};
     cow_ptr<int> clone(std::move(source));
     TS_ASSERT(!source);
@@ -78,7 +75,7 @@ public:
   }
 
   void test_move_assignment() {
-    auto resource = boost::make_shared<int>(42);
+    auto resource = std::make_shared<int>(42);
     cow_ptr<int> source{resource};
     cow_ptr<int> clone;
     clone = std::move(source);
@@ -101,7 +98,7 @@ public:
     cow4 = cow1;
     TS_ASSERT(!cow4);
 
-    boost::shared_ptr<MyType> shared;
+    std::shared_ptr<MyType> shared;
     TS_ASSERT(!shared);
     cow4 = shared;
     TS_ASSERT(!cow4);
@@ -112,7 +109,7 @@ public:
   }
 
   void test_get() {
-    auto resource = boost::make_shared<MyType>(42);
+    auto resource = std::make_shared<MyType>(42);
     cow_ptr<MyType> cow(resource);
     TS_ASSERT_DIFFERS(resource.get(), nullptr);
     TS_ASSERT_EQUALS(cow.get(), resource.get());
@@ -121,7 +118,7 @@ public:
   void test_operator_bool() {
     cow_ptr<MyType> cow1{nullptr};
     TS_ASSERT(!cow1);
-    auto resource = boost::make_shared<MyType>(42);
+    auto resource = std::make_shared<MyType>(42);
     cow_ptr<MyType> cow2{resource};
     TS_ASSERT(cow2);
   }
@@ -130,7 +127,7 @@ public:
     cow_ptr<MyType> cow{nullptr};
     TS_ASSERT(!cow.unique());
     TS_ASSERT_EQUALS(cow.use_count(), 0);
-    cow = boost::make_shared<MyType>(42);
+    cow = std::make_shared<MyType>(42);
     TS_ASSERT(cow.unique());
     TS_ASSERT_EQUALS(cow.use_count(), 1);
     auto copy = cow;
@@ -145,7 +142,7 @@ public:
   void test_access() {
 
     int value = 3;
-    cow_ptr<MyType> original{boost::make_shared<MyType>(value)};
+    cow_ptr<MyType> original{std::make_shared<MyType>(value)};
     auto copy = original; // Now internal shared_ptr count should be at 2
 
     MyType &copyResource = copy.access(); // The resource should now be copied.
@@ -162,15 +159,13 @@ public:
   void test_equals_not_equals() {
     cow_ptr<MyType> cow{nullptr};
     TS_ASSERT(cow == cow);
-    const auto cow2 = boost::make_shared<MyType>(42);
+    const auto cow2 = std::make_shared<MyType>(42);
     TS_ASSERT(cow2 == cow2);
     TS_ASSERT(cow != cow2);
-    cow = boost::make_shared<MyType>(42);
+    cow = std::make_shared<MyType>(42);
     TS_ASSERT(cow == cow);
     TS_ASSERT(cow != cow2);
     cow = cow2;
     TS_ASSERT(cow == cow2);
   }
 };
-
-#endif /*COW_PTR_TEST_H_*/

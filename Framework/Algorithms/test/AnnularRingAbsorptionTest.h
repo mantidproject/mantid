@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_
-#define MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -121,7 +120,7 @@ private:
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    auto alg = boost::make_shared<AnnularRingAbsorption>();
+    auto alg = std::make_shared<AnnularRingAbsorption>();
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -139,5 +138,3 @@ private:
     return inputWS;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_ */

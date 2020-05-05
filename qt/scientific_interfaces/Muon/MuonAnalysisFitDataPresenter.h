@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/IMuonFitDataSelector.h"
@@ -135,7 +134,7 @@ private:
   /// Update model and view with names of workspaces to fit
   void updateWorkspaceNames(const std::vector<std::string> &names) const;
   /// Get rebin options for analysis
-  std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
+  std::string getRebinParams(const Mantid::API::Workspace_sptr &ws) const;
   /// Add special logs to fitted workspaces
   void addSpecialLogs(
       const std::string &wsName,
@@ -185,5 +184,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_ */

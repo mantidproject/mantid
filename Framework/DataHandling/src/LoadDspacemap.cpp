@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadDspacemap.h"
 #include "MantidAPI/FileProperty.h"
@@ -44,7 +44,7 @@ void LoadDspacemap::init() {
   std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
                                        "VULCAN-Binary"};
   declareProperty("FileType", "POWGEN",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The type of file being read.");
 
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
@@ -95,8 +95,8 @@ void LoadDspacemap::exec() {
  * @param offsetsWS :: OffsetsWorkspace to be filled.
  */
 void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
-    const std::string DFileName,
-    Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS) {
+    const std::string &DFileName,
+    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
   // Get a pointer to the instrument contained in the workspace
 
   const auto &detectorInfo = offsetsWS->detectorInfo();
@@ -150,7 +150,7 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) /
  */
 void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     std::map<detid_t, double> &vulcan,
-    Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS) {
+    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
   // Get a pointer to the instrument contained in the workspace
   // At this point, instrument VULCAN has been created?
   Instrument_const_sptr instrument = offsetsWS->getInstrument();
@@ -177,7 +177,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   for (it = allDetectors.begin(); it != allDetectors.end(); it++){
     int32_t detid = it->first;
 
-    // def boost::shared_ptr<const Mantid::Geometry::IDetector>
+    // def std::shared_ptr<const Mantid::Geometry::IDetector>
   IDetector_const_sptr;
 
     std::string parentname =

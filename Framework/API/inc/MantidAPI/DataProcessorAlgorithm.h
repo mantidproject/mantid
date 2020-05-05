@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_DATAPROCESSORALGORITHM_H_
-#define MANTID_API_DATAPROCESSORALGORITHM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -28,7 +27,7 @@ namespace API {
    @date 2012-04-04
  */
 template <class Base>
-class DLLExport GenericDataProcessorAlgorithm : public Base {
+class MANTID_API_DLL GenericDataProcessorAlgorithm : public Base {
 public:
   GenericDataProcessorAlgorithm();
   std::string getPropertyValue(const std::string &name) const override;
@@ -36,7 +35,7 @@ public:
   getProperty(const std::string &name) const override;
 
 protected:
-  boost::shared_ptr<Algorithm> createChildAlgorithm(
+  std::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1) override;
@@ -46,14 +45,14 @@ protected:
   void setPropManagerPropName(const std::string &propName);
   void mapPropertyName(const std::string &nameInProp,
                        const std::string &nameInPropManager);
-  void copyProperty(API::Algorithm_sptr alg, const std::string &name);
+  void copyProperty(const API::Algorithm_sptr &alg, const std::string &name);
   virtual ITableWorkspace_sptr determineChunk(const std::string &filename);
   virtual MatrixWorkspace_sptr loadChunk(const size_t rowIndex);
   Workspace_sptr load(const std::string &inputData,
                       const bool loadQuiet = false);
   std::vector<std::string> splitInput(const std::string &input);
   void forwardProperties();
-  boost::shared_ptr<Kernel::PropertyManager> getProcessProperties(
+  std::shared_ptr<Kernel::PropertyManager> getProcessProperties(
       const std::string &propertyManager = std::string()) const;
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
@@ -151,5 +150,3 @@ using DistributedDataProcessorAlgorithm =
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_DATAPROCESSORALGORITHM_H_ */

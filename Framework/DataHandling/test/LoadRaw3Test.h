@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LoadRaw3TEST_H_
-#define LoadRaw3TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -76,8 +75,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2584);
     // Check two X vectors are the same
@@ -102,14 +100,13 @@ public:
     // Tests taken from LoadInstrumentTest to check Child Algorithm is running
     // properly
     //  ----------------------------------------------------------------------
-    boost::shared_ptr<const Instrument> i = output2D->getInstrument();
-    boost::shared_ptr<const Mantid::Geometry::IComponent> source =
-        i->getSource();
+    std::shared_ptr<const Instrument> i = output2D->getInstrument();
+    std::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
 
-    boost::shared_ptr<const Mantid::Geometry::IComponent> samplepos =
+    std::shared_ptr<const Mantid::Geometry::IComponent> samplepos =
         i->getSample();
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
@@ -126,7 +123,7 @@ public:
     // Test code copied from LoadLogTest to check Child Algorithm is running
     // properly
     //----------------------------------------------------------------------
-    // boost::shared_ptr<Sample> sample = output2D->getSample();
+    // std::shared_ptr<Sample> sample = output2D->getSample();
     Property *l_property = output2D->run().getLogData(std::string("TEMP1"));
     TimeSeriesProperty<double> *l_timeSeriesDouble =
         dynamic_cast<TimeSeriesProperty<double> *>(l_property);
@@ -154,7 +151,7 @@ public:
     detectorgroup = output2D->getSpectrum(2083).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
+    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it)
       TS_ASSERT_EQUALS(*it, pixnum++);
 
     AnalysisDataService::Instance().remove(outputSpace);
@@ -177,8 +174,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 9);
@@ -214,8 +210,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWS));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 5);
     AnalysisDataService::Instance().remove(outWS);
@@ -238,8 +233,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWS));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 5);
     AnalysisDataService::Instance().remove(outWS);
@@ -263,8 +257,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWS));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 6);
     TS_ASSERT_EQUALS(output2D->getSpectrum(0).getSpectrumNo(), 5);
@@ -292,8 +285,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWS));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 3);
     AnalysisDataService::Instance().remove(outWS);
@@ -371,12 +363,12 @@ public:
     Workspace_sptr wsSptr =
         AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+        std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
     std::vector<std::string> wsNamevec;
     wsNamevec = sptrWSGrp->getNames();
     int period = 1;
     std::vector<std::string>::const_iterator it = wsNamevec.begin();
-    for (; it != wsNamevec.end(); it++) {
+    for (; it != wsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_" + count.str();
@@ -386,7 +378,7 @@ public:
     std::vector<std::string>::const_iterator itr1 = wsNamevec.begin();
     int periodNumber = 0;
     const int nHistograms = 4;
-    for (; itr1 != wsNamevec.end(); itr1++) {
+    for (; itr1 != wsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -432,8 +424,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("parameterIDF"));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     const auto &detectorInfo = output2D->detectorInfo();
     const auto &detector = detectorInfo.detector(detectorInfo.indexOf(60));
@@ -455,7 +446,7 @@ public:
     TS_ASSERT(loader5.isExecuted())
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT(output = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    TS_ASSERT(output = std::dynamic_pointer_cast<MatrixWorkspace>(
                   AnalysisDataService::Instance().retrieve("twoRegimes")))
     // Shift should be 3300 - check a couple of values
     TS_ASSERT_EQUALS(output->readX(0).front() + 3300, output->readX(1).front())
@@ -490,15 +481,14 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     Workspace_sptr monitoroutput;
     TS_ASSERT_THROWS_NOTHING(monitoroutput =
                                  AnalysisDataService::Instance().retrieve(
                                      outputSpace + "_monitors"));
     Workspace2D_sptr monitoroutput2D =
-        boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
+        std::dynamic_pointer_cast<Workspace2D>(monitoroutput);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2580);
 
@@ -528,20 +518,19 @@ public:
     // Test monitors attached:
     auto monitorsAttached = output2D->monitorWorkspace();
     TS_ASSERT(monitorsAttached);
-    auto realMonWs = boost::dynamic_pointer_cast<Workspace2D>(monitorsAttached);
+    auto realMonWs = std::dynamic_pointer_cast<Workspace2D>(monitorsAttached);
     TS_ASSERT_EQUALS(realMonWs.get(), monitoroutput2D.get())
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check Child Algorithm is running
     // properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<const Instrument> i = output2D->getInstrument();
-    boost::shared_ptr<const Mantid::Geometry::IComponent> source =
-        i->getSource();
+    std::shared_ptr<const Instrument> i = output2D->getInstrument();
+    std::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
 
-    boost::shared_ptr<const Mantid::Geometry::IComponent> samplepos =
+    std::shared_ptr<const Mantid::Geometry::IComponent> samplepos =
         i->getSample();
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
@@ -582,7 +571,7 @@ public:
     detectorgroup = output2D->getSpectrum(2079).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
+    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it)
       TS_ASSERT_EQUALS(*it, pixnum++);
 
     // Test if filename log is found in both monitor and sata workspace
@@ -621,13 +610,13 @@ public:
     Workspace_sptr monitorwsSptr =
         AnalysisDataService::Instance().retrieve("multiperiod_monitors");
     WorkspaceGroup_sptr monitorsptrWSGrp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
+        std::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
 
     const std::vector<std::string> monitorwsNamevec =
         monitorsptrWSGrp->getNames();
     int period = 1;
     std::vector<std::string>::const_iterator it = monitorwsNamevec.begin();
-    for (; it != monitorwsNamevec.end(); it++) {
+    for (; it != monitorwsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_monitors_" + count.str();
@@ -635,7 +624,7 @@ public:
       period++;
     }
     std::vector<std::string>::const_iterator itr1 = monitorwsNamevec.begin();
-    for (; itr1 != monitorwsNamevec.end(); itr1++) {
+    for (; itr1 != monitorwsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -670,12 +659,12 @@ public:
     Workspace_sptr wsSptr =
         AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+        std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
 
     const std::vector<std::string> wsNamevec = sptrWSGrp->getNames();
     period = 1;
     it = wsNamevec.begin();
-    for (; it != wsNamevec.end(); it++) {
+    for (; it != wsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_" + count.str();
@@ -685,7 +674,7 @@ public:
     itr1 = wsNamevec.begin();
     int periodNumber = 0;
     const int nHistograms = 2;
-    for (; itr1 != wsNamevec.end(); itr1++) {
+    for (; itr1 != wsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -800,8 +789,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 9);
@@ -841,8 +829,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT(output2D);
     if (!output2D)
       return;
@@ -880,15 +867,14 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     Workspace_sptr monitoroutput;
     TS_ASSERT_THROWS_NOTHING(
         monitoroutput =
             AnalysisDataService::Instance().retrieve("outWS_monitors"));
     Workspace2D_sptr monitoroutput2D =
-        boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
+        std::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 96);
@@ -925,15 +911,14 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     Workspace_sptr monitoroutput;
     TS_ASSERT_THROWS_NOTHING(
         monitoroutput =
             AnalysisDataService::Instance().retrieve("outWS_monitors"));
     Workspace2D_sptr monitoroutput2D =
-        boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
+        std::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 99);
@@ -965,8 +950,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2580);
     // Check one particular value
@@ -997,8 +981,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 99);
     AnalysisDataService::Instance().remove("outWS");
@@ -1023,8 +1006,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Obtain the expected log files which should be in the same directory as
     // the raw datafile
@@ -1057,8 +1039,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     Property *l_property = output2D->run().getLogData(std::string("ICPevent"));
     TimeSeriesProperty<std::string> *l_timeSeriesString =
@@ -1152,7 +1133,7 @@ public:
 private:
   /// Helper method to run common set of tests on a workspace in a multi-period
   /// group.
-  void doTestMultiPeriodWorkspace(MatrixWorkspace_sptr workspace,
+  void doTestMultiPeriodWorkspace(const MatrixWorkspace_sptr &workspace,
                                   const size_t &nHistograms,
                                   int expected_period) {
     // Check the number of histograms.
@@ -1174,10 +1155,10 @@ private:
   }
 
   /// Check that two matrix workspaces match
-  std::string checkWorkspacesMatch(Workspace_sptr workspace1,
-                                   Workspace_sptr workspace2) {
-    auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace1);
-    auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace2);
+  std::string checkWorkspacesMatch(const Workspace_sptr &workspace1,
+                                   const Workspace_sptr &workspace2) {
+    auto ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(workspace1);
+    auto ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(workspace2);
     if (!ws1 || !ws2) {
       return "At least one of the workspaces is not a MatrixWorkspace.";
     }
@@ -1231,5 +1212,3 @@ public:
     TS_ASSERT(loader.execute());
   }
 };
-
-#endif /*LoadRaw3TEST_H_*/

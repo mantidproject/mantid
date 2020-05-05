@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import datetime
 
 import numpy as np
@@ -16,6 +14,7 @@ from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -87,10 +86,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
                 [artist[0].is_normalized for artist in current_artists])
             normalization = current_normalization
         else:
-            if mantid.kernel.config['graph1d.autodistribution'].lower() == 'on':
-                normalization = True
-            else:
-                normalization, _ = check_resample_to_regular_grid(workspace, **kwargs)
+            normalization = mantid.kernel.config['graph1d.autodistribution'].lower() == 'on'
     return normalization, kwargs
 
 
@@ -608,6 +604,7 @@ def get_sample_log(workspace, **kwargs):
     if not run.hasProperty(LogName):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
+
     try:
         units = tsp.units
     except UnicodeDecodeError as exc:
@@ -617,8 +614,14 @@ def get_sample_log(workspace, **kwargs):
                             mantid.kernel.Int32TimeSeriesProperty,
                             mantid.kernel.Int64TimeSeriesProperty)):
         raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
-    times = tsp.times.astype('datetime64[us]')
-    y = tsp.value
+    Filtered = kwargs.pop('Filtered', True)
+    if not Filtered:
+        #these methods access the unfiltered data
+        times = tsp.times.astype('datetime64[us]')
+        y = tsp.value
+    else:
+        times = tsp.filtered_times.astype('datetime64[us]')
+        y = tsp.filtered_value
     FullTime = kwargs.pop('FullTime', False)
     StartFromLog = kwargs.pop('StartFromLog', False)
     if FullTime:
@@ -952,6 +955,9 @@ def waterfall_fill_is_line_colour(ax):
 
 
 def waterfall_create_fill(ax):
+    if ax.waterfall_has_fill():
+        return
+
     errorbar_cap_lines = remove_and_return_errorbar_cap_lines(ax)
 
     for i, line in enumerate(ax.get_lines()):
@@ -1013,8 +1019,14 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     :param vmin: the minimum value on the colorbar
     :param vmax: the maximum value on the colorbar
     """
-    if vmin == 0 and scale == LogNorm:
-        vmin += 1e-6  # Avoid 0 log scale error
+    if vmin <= 0 and scale == LogNorm:
+        vmin = 0.0001  # Avoid 0 log scale error
+        mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
+
+    if vmax <= 0 and scale == LogNorm:
+        vmax = 1  # Avoid 0 log scale error
+        mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
+
     image.set_norm(scale(vmin=vmin, vmax=vmax))
     if image.colorbar:
         image.colorbar.remove()
@@ -1026,3 +1038,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
                                              "as the range between min value and max value is too large")
         figure.colorbar(image, ticks=locator)
+
+
+def figure_contains_only_3d_plots(fig) -> bool:
+    return all(isinstance(ax, Axes3D) for ax in fig.get_axes())

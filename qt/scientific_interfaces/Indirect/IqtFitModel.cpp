@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFitModel.h"
 
@@ -12,6 +12,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -19,7 +20,7 @@ namespace {
 IFunction_sptr getFirstInCategory(IFunction_sptr function,
                                   const std::string &category);
 
-IFunction_sptr getFirstInCategory(CompositeFunction_sptr composite,
+IFunction_sptr getFirstInCategory(const CompositeFunction_sptr &composite,
                                   const std::string &category) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
     auto function = getFirstInCategory(composite->getFunction(i), category);
@@ -35,13 +36,13 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function,
     return nullptr;
   if (function->category() == category)
     return function;
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     return getFirstInCategory(composite, category);
   return nullptr;
 }
 
-std::vector<std::string> getParameters(IFunction_sptr function,
+std::vector<std::string> getParameters(const IFunction_sptr &function,
                                        const std::string &shortParameterName) {
   std::vector<std::string> parameters;
 
@@ -52,7 +53,7 @@ std::vector<std::string> getParameters(IFunction_sptr function,
   return parameters;
 }
 
-bool constrainIntensities(IFunction_sptr function) {
+bool constrainIntensities(const IFunction_sptr &function) {
   const auto intensityParameters = getParameters(function, "Height");
   const auto backgroundParameters = getParameters(function, "A0");
 
@@ -73,7 +74,7 @@ bool constrainIntensities(IFunction_sptr function) {
   return true;
 }
 
-double computeTauApproximation(MatrixWorkspace_sptr workspace) {
+double computeTauApproximation(const MatrixWorkspace_sptr &workspace) {
   const auto &x = workspace->x(0);
   const auto &y = workspace->y(0);
 
@@ -83,28 +84,28 @@ double computeTauApproximation(MatrixWorkspace_sptr workspace) {
 }
 
 double computeHeightApproximation(IFunction_sptr function) {
-  const auto background = getFirstInCategory(function, "Background");
+  const auto background = getFirstInCategory(std::move(function), "Background");
   const double height = 1.0;
   if (background && background->hasParameter("A0"))
     return height - background->getParameter("A0");
   return height;
 }
 
-std::string getSuffix(MatrixWorkspace_sptr workspace) {
+std::string getSuffix(const MatrixWorkspace_sptr &workspace) {
   const auto position = workspace->getName().rfind("_");
   return workspace->getName().substr(position + 1);
 }
 
-std::string getFitString(MatrixWorkspace_sptr workspace) {
-  auto suffix = getSuffix(workspace);
+std::string getFitString(const MatrixWorkspace_sptr &workspace) {
+  auto suffix = getSuffix(std::move(workspace));
   boost::algorithm::to_lower(suffix);
   if (suffix == "iqt")
     return "Fit";
   return "_IqtFit";
 }
 
-boost::optional<std::string> findFullParameterName(IFunction_sptr function,
-                                                   const std::string &name) {
+boost::optional<std::string>
+findFullParameterName(const IFunction_sptr &function, const std::string &name) {
   for (auto i = 0u; i < function->nParams(); ++i) {
     const auto fullName = function->parameterName(i);
     if (boost::algorithm::ends_with(fullName, name))
@@ -185,7 +186,7 @@ std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_seq" + m_fitType + "_s%2%",
+  return createOutputName("%1%" + fitString + "_seq_" + m_fitType + "_s%2%",
                           "_to_", TableDatasetIndex{0});
 }
 
@@ -193,7 +194,7 @@ std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_sim" + m_fitType + "_s%2%",
+  return createOutputName("%1%" + fitString + "_sim_" + m_fitType + "_s%2%",
                           "_to_", TableDatasetIndex{0});
 }
 
@@ -230,9 +231,9 @@ IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
   return parameters;
 }
 
-MultiDomainFunction_sptr
-IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
-  boost::shared_ptr<MultiDomainFunction> multiDomainFunction(
+MultiDomainFunction_sptr IqtFitModel::createFunctionWithGlobalBeta(
+    const IFunction_sptr &function) const {
+  std::shared_ptr<MultiDomainFunction> multiDomainFunction(
       new MultiDomainFunction);
   const auto functionString = function->asString();
   for (auto i = TableDatasetIndex{0}; i < numberOfWorkspaces(); ++i) {

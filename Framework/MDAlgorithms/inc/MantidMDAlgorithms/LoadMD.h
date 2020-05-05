@@ -1,17 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_LOADMD_H_
-#define MANTID_MDALGORITHMS_LOADMD_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
+
 #include <boost/optional.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -58,11 +59,11 @@ private:
   template <typename MDE, size_t nd>
   void doLoad(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
-  void loadExperimentInfos(
-      boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
+  void
+  loadExperimentInfos(std::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
-  void loadSlab(std::string name, void *data,
-                DataObjects::MDHistoWorkspace_sptr ws,
+  void loadSlab(const std::string &name, void *data,
+                const DataObjects::MDHistoWorkspace_sptr &ws,
                 NeXus::NXnumtype dataType);
   void loadHisto();
 
@@ -79,18 +80,18 @@ private:
       boost::optional<Mantid::API::MDNormalization> &normalization);
 
   /// Load all the affine matricies
-  void loadAffineMatricies(API::IMDWorkspace_sptr ws);
+  void loadAffineMatricies(const API::IMDWorkspace_sptr &ws);
   /// Load a given affine matrix
-  API::CoordTransform *loadAffineMatrix(std::string entry_name);
+  API::CoordTransform *loadAffineMatrix(const std::string &entry_name);
 
   /// Sets MDFrames for workspaces from legacy files
-  void setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws);
+  void setMDFrameOnWorkspaceFromLegacyFile(const API::IMDWorkspace_sptr &ws);
 
   /// Checks if a worspace is a certain type of legacy file
-  void checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws);
+  void checkForRequiredLegacyFixup(const API::IMDWorkspace_sptr &ws);
 
   /// Negative scaling for Q dimensions
-  std::vector<double> qDimensions(API::IMDWorkspace_sptr ws);
+  std::vector<double> qDimensions(const API::IMDWorkspace_sptr &ws);
 
   /// Open file handle
   // clang-format off
@@ -129,5 +130,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_LOADMD_H_ */

@@ -1,23 +1,22 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CALCULATEDIFC_H_
-#define MANTID_ALGORITHMS_CALCULATEDIFC_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** CalculateDIFC : Calculate the DIFC for every pixel
  */
-class DLLExport CalculateDIFC : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateDIFC : public API::Algorithm {
 public:
   /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override;
@@ -39,5 +38,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CALCULATEDIFC_H_ */

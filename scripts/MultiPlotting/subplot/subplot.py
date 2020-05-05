@@ -1,12 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 
 from copy import deepcopy
@@ -253,7 +250,7 @@ class subplot(QtWidgets.QWidget):
         self.signal_rm_subplot.emit(subplot_name)
 
     def _rm_ws_from_plots(self, workspace_name):
-        keys = deepcopy(self._context.subplots.keys())
+        keys = deepcopy(list(self._context.subplots.keys()))
         for subplot in keys:
             labels = self._context.get_lines_from_WS(subplot, workspace_name)
             for label in labels:

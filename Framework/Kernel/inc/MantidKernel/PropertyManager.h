@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PROPERTYMANAGER_H_
-#define MANTID_KERNEL_PROPERTYMANAGER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -109,6 +108,9 @@ public:
   /// Return the property manager serialized as a json object.
   ::Json::Value asJson(bool withDefaultValues = false) const override;
 
+  bool operator==(const PropertyManager &other) const;
+  bool operator!=(const PropertyManager &other) const;
+
 protected:
   friend class PropertyManagerOwner;
 
@@ -133,12 +135,10 @@ private:
 };
 
 /// Typedef for a shared pointer to a PropertyManager
-using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+using PropertyManager_sptr = std::shared_ptr<PropertyManager>;
 
 /// Return the value of the PropertyManager as a Json::Value
 MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const PropertyManager &propMgr);
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_PROPERTYMANAGER_H_*/

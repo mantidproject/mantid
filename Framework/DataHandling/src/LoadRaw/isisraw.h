@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ISISRAW_H
-#define ISISRAW_H
+#pragma once
 
 /**
   @file isisraw.h ISIS VMS raw file definitions
@@ -385,5 +384,3 @@ public:
   int printInfo(std::ostream &os);
   int getTimeChannels(float *rtcb1, int n);
 };
-
-#endif /* ISISRAW_H */

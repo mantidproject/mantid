@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MASKEDPROPERTY_H_
-#define MANTID_KERNEL_MASKEDPROPERTY_H_
+#pragma once
 
 #include "MantidKernel/PropertyWithValue.h"
 #include <string>
@@ -29,9 +28,10 @@ template <typename TYPE = std::string>
 class MaskedProperty : public Kernel::PropertyWithValue<TYPE> {
 public:
   /// Constructor with a validator
-  MaskedProperty(const std::string &name, TYPE defaultvalue,
-                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
-                 const unsigned int direction = Direction::Input);
+  MaskedProperty(
+      const std::string &name, TYPE defaultvalue,
+      const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+      const unsigned int direction = Direction::Input);
   /// Constructor with a validator without validation
   MaskedProperty(const std::string &name, const TYPE &defaultvalue,
                  const unsigned int direction);
@@ -56,4 +56,3 @@ private:
 };
 } // namespace Kernel
 } // namespace Mantid
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*=========================================================================
 
@@ -48,8 +48,7 @@
  * vtkImplicitFunction vtkClipPolyData
  */
 
-#ifndef AlignedCutter_h
-#define AlignedCutter_h
+#pragma once
 
 #include "vtkCutter.h"
 
@@ -77,5 +76,3 @@ private:
   void operator=(const AlignedCutter &) VTK_DELETE_FUNCTION;
 };
 //@}
-
-#endif

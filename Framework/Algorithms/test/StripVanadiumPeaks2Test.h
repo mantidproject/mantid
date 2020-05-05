@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRIPVANADIUMPEAKSTEST_H_
-#define STRIPVANADIUMPEAKSTEST_H_
+#pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/UnitFactory.h"
@@ -42,8 +41,7 @@ public:
     std::string outputWSName("PG3_733_stripped");
 
     // Start by loading our NXS file
-    IAlgorithm *loader =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    auto loader = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
     loader->setPropertyValue("Filename", "PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWSName);
     loader->execute();
@@ -713,5 +711,3 @@ private:
     return std::move(space2D);
   }
 };
-
-#endif /*STRIPVANADIUMPEAKSTEST_H_*/

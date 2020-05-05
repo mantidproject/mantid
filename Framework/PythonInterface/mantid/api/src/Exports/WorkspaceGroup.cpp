@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -47,7 +47,7 @@ std::vector<Workspace_sptr>::iterator group_end(WorkspaceGroup &self) {
 
 /** Constructor function for WorkspaceGroup */
 Workspace_sptr makeWorkspaceGroup() {
-  Workspace_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  Workspace_sptr wsGroup = std::make_shared<WorkspaceGroup>();
   return wsGroup;
 }
 

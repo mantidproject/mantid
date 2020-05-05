@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/RotateSource.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -49,10 +49,9 @@ void RotateSource::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
 
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   DataObjects::PeaksWorkspace_sptr inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_const_sptr inst;

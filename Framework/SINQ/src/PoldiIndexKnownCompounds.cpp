@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
 
@@ -142,7 +142,7 @@ void PoldiIndexKnownCompounds::setExpectedPhaseNames(
 
 /// Creates a new collection that will store peaks that cannot be indexed.
 void PoldiIndexKnownCompounds::initializeUnindexedPeaks() {
-  m_unindexedPeaks = boost::make_shared<PoldiPeakCollection>();
+  m_unindexedPeaks = std::make_shared<PoldiPeakCollection>();
 }
 
 /** Initializes peak collections for storing assigned peaks.
@@ -164,8 +164,7 @@ void PoldiIndexKnownCompounds::initializeIndexedPeaks(
 
   for (const auto &expectedPhase : expectedPhases) {
     PoldiPeakCollection_sptr newCollection =
-        boost::make_shared<PoldiPeakCollection>(
-            m_measuredPeaks->intensityType());
+        std::make_shared<PoldiPeakCollection>(m_measuredPeaks->intensityType());
     newCollection->setPointGroup(expectedPhase->pointGroup());
     newCollection->setProfileFunctionName(
         m_measuredPeaks->getProfileFunctionName());
@@ -205,7 +204,7 @@ std::vector<Workspace_sptr> PoldiIndexKnownCompounds::getWorkspaces(
           AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
 
       WorkspaceGroup_sptr groupTest =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(currentWorkspace);
+          std::dynamic_pointer_cast<WorkspaceGroup>(currentWorkspace);
       if (groupTest) {
         std::vector<Workspace_sptr> workspacesNextLevel =
             getWorkspaces(groupTest->getNames());
@@ -232,7 +231,7 @@ PoldiIndexKnownCompounds::getPeakCollections(
   std::vector<PoldiPeakCollection_sptr> peakCollections;
   for (const auto &workspace : workspaces) {
     TableWorkspace_sptr tableWs =
-        boost::dynamic_pointer_cast<TableWorkspace>(workspace);
+        std::dynamic_pointer_cast<TableWorkspace>(workspace);
 
     if (!tableWs) {
       throw std::invalid_argument(
@@ -240,7 +239,7 @@ PoldiIndexKnownCompounds::getPeakCollections(
     }
 
     peakCollections.emplace_back(
-        boost::make_shared<PoldiPeakCollection>(tableWs));
+        std::make_shared<PoldiPeakCollection>(tableWs));
   }
 
   return peakCollections;
@@ -730,7 +729,7 @@ PoldiIndexKnownCompounds::getIntensitySortedPeakCollection(
             std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
 
   PoldiPeakCollection_sptr sortedPeaks =
-      boost::make_shared<PoldiPeakCollection>(peaks->intensityType());
+      std::make_shared<PoldiPeakCollection>(peaks->intensityType());
   for (auto &peak : peakVector) {
     sortedPeaks->addPeak(peak->clone());
   }
@@ -786,7 +785,7 @@ void PoldiIndexKnownCompounds::exec() {
       getProperty("InputWorkspace");
 
   PoldiPeakCollection_sptr unindexedPeaks =
-      boost::make_shared<PoldiPeakCollection>(peakTableWorkspace);
+      std::make_shared<PoldiPeakCollection>(peakTableWorkspace);
   g_log.information() << "  Number of peaks: " << unindexedPeaks->peakCount()
                       << '\n';
 
@@ -833,7 +832,7 @@ void PoldiIndexKnownCompounds::exec() {
    * the phase they have been attributed to, plus unindexed peaks.
    */
   std::string inputWorkspaceName = getPropertyValue("InputWorkspace");
-  WorkspaceGroup_sptr outputWorkspaces = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr outputWorkspaces = std::make_shared<WorkspaceGroup>();
 
   for (size_t i = 0; i < m_indexedPeaks.size(); ++i) {
     PoldiPeakCollection_sptr intensitySorted =

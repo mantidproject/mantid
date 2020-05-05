@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------
 // Includes
@@ -32,7 +32,7 @@ private:
 public:
   explicit WorkspaceIsNotOfType(const std::string &type)
       : m_type(type), m_isMatrixWorkspace(type == "MatrixWorkspace") {}
-  bool operator()(Mantid::API::Workspace_sptr ws) const {
+  bool operator()(const Mantid::API::Workspace_sptr &ws) const {
     if (m_type.empty())
       return false;
     if (m_isMatrixWorkspace) {
@@ -78,7 +78,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
   m_wsList->addItems(tmp);
   m_wsList->setSelectionMode(QAbstractItemView::MultiSelection);
 
-  QDialogButtonBox *btnBox = new QDialogButtonBox(Qt::Horizontal);
+  auto *btnBox = new QDialogButtonBox(Qt::Horizontal);
 
   if (!customButtonLabel.empty()) {
     m_customButton = new QPushButton(QString::fromStdString(customButtonLabel));
@@ -87,13 +87,13 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
   }
 
   m_okButton = new QPushButton("Select");
-  QPushButton *cancelButton = new QPushButton("Cancel");
+  auto *cancelButton = new QPushButton("Cancel");
   btnBox->addButton(m_okButton, QDialogButtonBox::AcceptRole);
   btnBox->addButton(cancelButton, QDialogButtonBox::RejectRole);
   connect(btnBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(btnBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-  QVBoxLayout *vLayout = new QVBoxLayout();
+  auto *vLayout = new QVBoxLayout();
   vLayout->addWidget(m_wsList);
   vLayout->addWidget(btnBox);
 

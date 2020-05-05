@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 from mantid.plots.datafunctions import update_colorbar_scale
 from mantidqt.utils.qt import block_signals
@@ -24,10 +22,13 @@ class ImagesTabWidgetPresenter:
         else:
             self.view = view
 
+        # This connection is here so that when the view is updated below the min/max spin boxes have the correct range
+        # for the scale.
+        self.view.scale_combo_box.currentTextChanged.connect(self.scale_changed)
+
         self.image_names_dict = dict()
         self.populate_select_image_combo_box_and_update_view()
 
-        # Signals
         self.view.select_image_combo_box.currentIndexChanged.connect(
             self.update_view)
 
@@ -112,3 +113,6 @@ class ImagesTabWidgetPresenter:
                 self.generate_image_name(img), img, self.image_names_dict)
         self.view.populate_select_image_combo_box(
             sorted(self.image_names_dict.keys()))
+
+    def scale_changed(self, scale):
+        self.view.set_min_max_ranges(scale)

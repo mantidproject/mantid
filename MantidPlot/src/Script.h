@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCRIPT_H
-#define SCRIPT_H
+#pragma once
 
 #include <QEvent>
 #include <QFuture>
@@ -192,5 +191,3 @@ private:
 
   ScriptThreadPool *m_thread;
 };
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_HFIRDARKCURRENTSUBTRACTION_H_
-#define MANTID_ALGORITHMS_HFIRDARKCURRENTSUBTRACTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -60,7 +59,7 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  double getCountingTime(API::MatrixWorkspace_sptr inputWS);
+  double getCountingTime(const API::MatrixWorkspace_sptr &inputWS);
 
   static const int DEFAULT_MONITOR_ID = 0;
   static const int DEFAULT_TIMER_ID = 1;
@@ -68,5 +67,3 @@ private:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_HFIRDarkCurrentSubtraction_H_*/

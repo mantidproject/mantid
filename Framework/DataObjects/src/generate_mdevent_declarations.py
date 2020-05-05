@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Simple script that generates references to all
 needed MDEvent<X>/MDLeanEvent<X> instantiations. """
@@ -57,7 +57,7 @@ def build_macro(padding,min_dimension=1, max_dimensions=4,const=""):
 """
 
 
-    macro = """%s%sMDEventWorkspace<%s, %d>::sptr %s = boost::dynamic_pointer_cast<%sMDEventWorkspace<%s, %d> >(workspace); \\
+    macro = """%s%sMDEventWorkspace<%s, %d>::sptr %s = std::dynamic_pointer_cast<%sMDEventWorkspace<%s, %d> >(workspace); \\
 if (%s) funcname<%s, %d>(%s); \\
     """
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEDIFFCAL_H_
-#define MANTID_DATAHANDLING_SAVEDIFFCAL_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -38,8 +37,9 @@ private:
 
   void writeDoubleFieldFromTable(H5::Group &group, const std::string &name);
   void writeIntFieldFromTable(H5::Group &group, const std::string &name);
-  void writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
-                             DataObjects::SpecialWorkspace2D_const_sptr ws);
+  void
+  writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
+                        const DataObjects::SpecialWorkspace2D_const_sptr &ws);
   void generateDetidToIndex();
   bool tableHasColumn(const std::string &ColumnName) const;
 
@@ -50,5 +50,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_SAVEDIFFCAL_H_ */

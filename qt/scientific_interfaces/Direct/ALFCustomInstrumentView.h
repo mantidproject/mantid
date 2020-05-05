@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
@@ -36,7 +35,7 @@ public:
                       &binders) override;
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override;
-  void addSpectrum(std::string wsName);
+  void addSpectrum(const std::string &wsName);
   void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis);
 
 public slots:
@@ -52,5 +51,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALFCustomInstrumentView_H_ */

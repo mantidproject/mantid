@@ -1,19 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTFITDATAPRESENTERTEST_H_
-#define MANTIDQT_INDIRECTFITDATAPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitDataViewLegacy.h"
-#include "IndirectDataTablePresenterLegacy.h"
-#include "IndirectFitDataPresenterLegacy.h"
-#include "IndirectFittingModelLegacy.h"
+#include "IIndirectFitDataView.h"
+#include "IndirectDataTablePresenter.h"
+#include "IndirectFitDataPresenter.h"
+#include "IndirectFittingModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -57,7 +56,7 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIIndirectFitDataView : public IIndirectFitDataViewLegacy {
+class MockIIndirectFitDataView : public IIndirectFitDataView {
 public:
   /// Signals
   void emitSampleLoaded(QString const &name) { emit sampleLoaded(name); }
@@ -82,6 +81,9 @@ public:
   MOCK_METHOD1(setSampleFBSuffices, void(QStringList const &suffices));
   MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
   MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
+  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
+  MOCK_METHOD1(setStartX, void(double startX));
+  MOCK_METHOD1(setEndX, void(double endX));
 
   MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
   MOCK_METHOD1(setSampleWorkspaceSelectorIndex,
@@ -95,23 +97,25 @@ public:
 };
 
 /// Mock object to mock the model
-class MockIndirectFitDataModel : public IndirectFittingModelLegacy {
+class MockIndirectFitDataModel : public IndirectFittingModel {
 public:
-  using IndirectFittingModelLegacy::addWorkspace;
+  using IndirectFittingModel::addWorkspace;
 
   /// Public Methods
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
 
   MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
+  MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
 
   MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
+  MOCK_METHOD2(addWorkspace, void(std::string const &workspaceName,
+                                  std::string const &spectra));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override {
+  std::string singleFitOutputName(TableDatasetIndex index,
+                                  IDA::WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -142,9 +146,9 @@ public:
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
 
-    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenterLegacy>(
+    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
         std::move(m_model.get()), std::move(m_table.get()));
-    m_presenter = std::make_unique<IndirectFitDataPresenterLegacy>(
+    m_presenter = std::make_unique<IndirectFitDataPresenter>(
         std::move(m_model.get()), std::move(m_view.get()),
         std::move(m_dataTablePresenter));
 
@@ -187,7 +191,8 @@ public:
   void
   test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_view_and_model() {
     ON_CALL(*m_view, isMultipleDataTabSelected()).WillByDefault(Return(true));
-    ON_CALL(*m_model, numberOfWorkspaces()).WillByDefault(Return(2));
+    ON_CALL(*m_model, numberOfWorkspaces())
+        .WillByDefault(Return(TableDatasetIndex{2}));
 
     Expectation isMultipleData =
         EXPECT_CALL(*m_view, isMultipleDataTabSelected())
@@ -195,7 +200,7 @@ public:
             .WillOnce(Return(true));
     EXPECT_CALL(*m_model, numberOfWorkspaces()).Times(1).After(isMultipleData);
 
-    m_presenter->updateSpectraInTable(0);
+    m_presenter->updateSpectraInTable(TableDatasetIndex{0});
   }
 
   ///----------------------------------------------------------------------
@@ -249,28 +254,11 @@ public:
   }
 
   void
-  test_that_setStartX_will_alter_the_relevant_startX_column_in_the_data_table() {
-    TableItem const startX(2.3);
-
-    m_presenter->setStartX(startX.asDouble(), 0, 0);
-
-    assertValueIsGlobal(START_X_COLUMN, startX);
-  }
-
-  void
-  test_that_setEndX_will_alter_the_relevant_endX_column_in_the_data_table() {
-    TableItem const endX(5.5);
-
-    m_presenter->setEndX(endX.asDouble(), 0, 0);
-
-    assertValueIsGlobal(END_X_COLUMN, endX);
-  }
-
-  void
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     TableItem const excludeRegion("2-3");
 
-    m_presenter->setExclude(excludeRegion.asString(), 0, 0);
+    m_presenter->setExclude(excludeRegion.asString(), TableDatasetIndex{0},
+                            IDA::WorkspaceIndex{0});
 
     assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }
@@ -304,7 +292,7 @@ private:
 
   void assertValueIsGlobal(int column, TableItem const &value) const {
     for (auto row = 0; row < m_table->rowCount(); ++row)
-      TS_ASSERT_EQUALS(value, getTableItem(row, column));
+      TS_ASSERT_EQUALS(value.asString(), getTableItem(row, column));
   }
 
   std::string getTableItem(int row, int column) const {
@@ -312,13 +300,11 @@ private:
   }
 
   std::unique_ptr<QTableWidget> m_table;
-  std::unique_ptr<IndirectDataTablePresenterLegacy> m_dataTablePresenter;
+  std::unique_ptr<IndirectDataTablePresenter> m_dataTablePresenter;
 
   std::unique_ptr<MockIIndirectFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;
-  std::unique_ptr<IndirectFitDataPresenterLegacy> m_presenter;
+  std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
   SetUpADSWithWorkspace *m_ads;
 };
-
-#endif

@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
+#pragma once
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "../Muon/MuonAnalysisDataLoader.h"
 #include "MantidAPI/Algorithm.h"
@@ -43,9 +44,10 @@ public:
                  const QStringList &instruments,
                  const std::string &deadTimesFile = "")
       : MuonAnalysisDataLoader(deadTimesType, instruments, deadTimesFile){};
-  void setProcessAlgorithmProperties(IAlgorithm_sptr alg,
+  void setProcessAlgorithmProperties(const IAlgorithm_sptr &alg,
                                      const AnalysisOptions &options) const {
-    MuonAnalysisDataLoader::setProcessAlgorithmProperties(alg, options);
+    MuonAnalysisDataLoader::setProcessAlgorithmProperties(std::move(alg),
+                                                          options);
   }
 };
 
@@ -90,12 +92,12 @@ public:
     TS_ASSERT(loadedWS);
     // Test that there are 2 periods
     const auto wsGroup =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
+        std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
     TS_ASSERT(wsGroup);
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
     // Test that there are 6 spectra per period
     for (int i = 0; i < 2; i++) {
-      const auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      const auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           wsGroup->getItem(i));
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 6);
@@ -117,7 +119,7 @@ public:
     TS_ASSERT(loadedWS);
     // Test that there are 2 periods
     const auto wsGroup =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
+        std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
     TS_ASSERT(wsGroup);
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
   }
@@ -149,9 +151,9 @@ public:
     MuonAnalysisDataLoader loader(DeadTimesType::FromFile, {"MUSR"});
     LoadResult result;
     const auto deadTimes = createDeadTimeTable({1, 2, 3}, {0.1, 0.2, 0.3});
-    auto wsGroup = boost::make_shared<WorkspaceGroup>();
+    auto wsGroup = std::make_shared<WorkspaceGroup>();
     wsGroup->addWorkspace(deadTimes);
-    result.loadedDeadTimes = boost::dynamic_pointer_cast<Workspace>(wsGroup);
+    result.loadedDeadTimes = std::dynamic_pointer_cast<Workspace>(wsGroup);
     const auto loadedDeadTimes = loader.getDeadTimesTable(result);
     TS_ASSERT_EQUALS(deadTimes, loadedDeadTimes);
   }
@@ -163,7 +165,7 @@ public:
     save->initialize();
     save->setChild(true);
     save->setProperty("InputWorkspace",
-                      boost::dynamic_pointer_cast<Workspace>(deadTimes));
+                      std::dynamic_pointer_cast<Workspace>(deadTimes));
     Poco::Path tempFile(Poco::Path::temp());
     tempFile.setFileName("tempdeadtimes.nxs");
     save->setPropertyValue("Filename", tempFile.toString());
@@ -193,11 +195,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(corrected =
                                  loader.correctAndGroup(result, grouping));
     auto correctedGroup =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(corrected);
+        std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(corrected);
     TS_ASSERT(correctedGroup);
     TS_ASSERT_EQUALS(correctedGroup->size(), 2);
     for (size_t i = 0; i < correctedGroup->size(); i++) {
-      auto matrixWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      auto matrixWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           correctedGroup->getItem(i));
       TS_ASSERT(matrixWS);
       // Check that each period has number of spectra = number of groups
@@ -268,7 +270,7 @@ public:
         -0.037308, -0.0183329, 0.0250825, -0.0154756, 0.018308,
         0.0116216, -0.019053,  0.0100087, -0.0393029, -0.001696};
     const auto outputWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
     TS_ASSERT(outputWS);
     const auto &data = outputWS->y(0);
     TS_ASSERT_EQUALS(data.size(), 1958);
@@ -292,7 +294,7 @@ private:
   TableWorkspace_sptr createDeadTimeTable(std::vector<int> specToLoad,
                                           std::vector<double> deadTimes) {
     TableWorkspace_sptr deadTimeTable =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
     deadTimeTable->addColumn("int", "spectrum");
@@ -374,4 +376,3 @@ private:
     }
   }
 };
-#endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_ */

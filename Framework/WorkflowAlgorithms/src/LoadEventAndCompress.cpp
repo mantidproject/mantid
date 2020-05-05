@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/LoadEventAndCompress.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -105,7 +105,7 @@ void LoadEventAndCompress::init() {
   setPropertyGroup("FilterMonByTimeStart", grp4);
   setPropertyGroup("FilterMonByTimeStop", grp4);
 
-  auto range = boost::make_shared<BoundedValidator<double>>();
+  auto range = std::make_shared<BoundedValidator<double>>();
   range->setBounds(0., 100.);
   declareProperty("FilterBadPulses", 95., range);
 }
@@ -184,7 +184,7 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
 
   alg->executeAsChildAlg();
   Workspace_sptr wksp = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(wksp);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(wksp);
 }
 
 /**
@@ -192,8 +192,7 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
  */
 API::MatrixWorkspace_sptr
 LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp) {
-  EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(wksp);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(wksp);
 
   if (m_filterBadPulses > 0.) {
     auto filterBadPulsesAlgo = createChildAlgorithm("FilterBadPulses");
@@ -262,7 +261,7 @@ void LoadEventAndCompress::exec() {
 
   // don't assume that any chunk had the correct binning so just reset it here
   EventWorkspace_sptr totalEventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(total);
+      std::dynamic_pointer_cast<EventWorkspace>(total);
   if (totalEventWS->getNEvents())
     totalEventWS->resetAllXToSingleBin();
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_PARAMETERFACTORY_H_
-#define MANTID_GEOMETRY_PARAMETERFACTORY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -41,8 +40,8 @@ class MANTID_GEOMETRY_DLL ParameterFactory {
 public:
   template <class C> static void subscribe(const std::string &className);
 
-  static boost::shared_ptr<Parameter> create(const std::string &className,
-                                             const std::string &name);
+  static std::shared_ptr<Parameter> create(const std::string &className,
+                                           const std::string &name);
 
 private:
   /// Private default constructor
@@ -76,5 +75,3 @@ void ParameterFactory::subscribe(const std::string &className) {
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /*MANTID_GEOMETRY_PARAMETERFACTORY_H_*/

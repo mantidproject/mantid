@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDMATRIX_H
-#define MANTIDMATRIX_H
+#pragma once
 
 #include <map>
 #include <math.h>
@@ -20,7 +19,6 @@
 #include "../MdiSubWindow.h"
 #include "../UserFunction.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
@@ -57,7 +55,7 @@ class ProjectData;
  * @param miny :: Variable to receive the minimum value.
  * @param maxy :: Variable to receive the maximum value.
  */
-void findYRange(Mantid::API::MatrixWorkspace_const_sptr ws, double &miny,
+void findYRange(const Mantid::API::MatrixWorkspace_const_sptr &ws, double &miny,
                 double &maxy);
 
 /** MantidMatrix is the class that represents a Qtiplot window for displaying
@@ -71,9 +69,9 @@ class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
-  MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, QWidget *parent,
-               const QString &label, const QString &name = QString(),
-               int start = -1, int end = -1);
+  MantidMatrix(const Mantid::API::MatrixWorkspace_const_sptr &ws,
+               QWidget *parent, const QString &label,
+               const QString &name = QString(), int start = -1, int end = -1);
 
   void connectTableView(QTableView *, MantidMatrixModel *);
   MantidMatrixModel *model() { return m_modelY; }
@@ -161,10 +159,10 @@ public:
 
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void clearADSHandle() override;
 
 signals:
@@ -174,7 +172,7 @@ signals:
 
 public slots:
 
-  void changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  void changeWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
   void closeMatrix();
 
   //! Return the width of all columns
@@ -246,7 +244,7 @@ public slots:
   void setMatrixProperties();
 
 protected:
-  void setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start = -1,
+  void setup(const Mantid::API::MatrixWorkspace_const_sptr &ws, int start = -1,
              int end = -1);
 
   ApplicationWindow *m_appWindow;
@@ -309,7 +307,7 @@ private:
   /// Hook up a MantidMatrixExtension
   void setupNewExtension(MantidMatrixModel::Type type);
   /// Update the existing extensions
-  void updateExtensions(Mantid::API::MatrixWorkspace_sptr ws);
+  void updateExtensions(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   /// ExtensioRequest handler
   MantidMatrixExtensionRequest m_extensionRequest;
@@ -368,5 +366,3 @@ private:
   bool m_colormapPen;
   ContourLinesEditor *m_ContourLinesEditor;
 };
-
-#endif

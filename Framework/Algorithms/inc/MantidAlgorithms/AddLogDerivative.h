@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_ADDLOGDERIVATIVE_H_
-#define MANTID_ALGORITHMS_ADDLOGDERIVATIVE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
@@ -20,7 +19,7 @@ namespace Algorithms {
   @author Janik Zikovsky
   @date 2011-09-16
 */
-class DLLExport AddLogDerivative : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddLogDerivative : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "AddLogDerivative"; };
@@ -52,5 +51,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_ADDLOGDERIVATIVE_H_ */

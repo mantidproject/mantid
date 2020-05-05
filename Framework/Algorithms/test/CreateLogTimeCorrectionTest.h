@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATELOGTIMECORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_CREATELOGTIMECORRECTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -62,7 +61,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("CorrectionTable"));
     TS_ASSERT(outws);
 
@@ -102,7 +101,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("CorrectionTable"));
     TS_ASSERT(outws);
 
@@ -171,7 +170,7 @@ private:
   /** Generate an empty Vulcan workspace
    */
   API::MatrixWorkspace_sptr createEmptyWorkspace(const string &instrument) {
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
 
     if (!instrument.empty()) {
@@ -188,5 +187,3 @@ private:
 
   MatrixWorkspace_sptr m_inpws;
 };
-
-#endif /* MANTID_ALGORITHMS_CREATELOGTIMECORRECTIONTEST_H_ */

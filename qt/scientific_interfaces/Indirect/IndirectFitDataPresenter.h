@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
+#pragma once
 
 #include "IAddWorkspaceDialog.h"
 #include "IIndirectFitDataView.h"
@@ -59,7 +58,7 @@ public:
   void replaceHandle(const std::string &workspaceName,
                      const Workspace_sptr &workspace) override;
   DataForParameterEstimationCollection
-  getDataForParameterEstimation(EstimationDataSelector selector) const;
+  getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 public slots:
   void updateSpectraInTable(TableDatasetIndex dataIndex);
@@ -69,6 +68,7 @@ protected slots:
   void setModelFromSingleData();
   void setModelFromMultipleData();
   void showAddWorkspaceDialog();
+  virtual void handleSampleLoaded(const QString &);
 
   virtual void closeDialog();
 
@@ -100,7 +100,6 @@ protected:
 
 private slots:
   void addData();
-  void handleSampleLoaded(const QString &);
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
@@ -122,5 +121,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_ */

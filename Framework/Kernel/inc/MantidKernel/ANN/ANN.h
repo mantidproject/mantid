@@ -66,8 +66,7 @@
 //				1994, 573-582.
 //----------------------------------------------------------------------
 
-#ifndef ANN_H
-#define ANN_H
+#pragma once
 
 // M. Gigg: Added the next two pragmas to supress the warnings regarding
 // unused parameters since this is a third party package
@@ -901,5 +900,3 @@ DLL_API void annMaxPtsVisit( // max. pts to visit in search
     int maxPts);             // the limit
 
 DLL_API void annClose(); // called to end use of ANN
-
-#endif

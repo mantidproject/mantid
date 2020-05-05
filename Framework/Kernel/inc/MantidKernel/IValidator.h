@@ -1,30 +1,29 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_IVALIDATOR_H_
-#define MANTID_KERNEL_IVALIDATOR_H_
+#pragma once
 
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/DllConfig.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <stdexcept>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
-// Forward declaration so that the typedef boost::shared_ptr<Validator>
+// Forward declaration so that the typedef std::shared_ptr<Validator>
 // understand it
 class IValidator;
 
 /// A shared_ptr to an IValidator
-using IValidator_sptr = boost::shared_ptr<IValidator>;
+using IValidator_sptr = std::shared_ptr<IValidator>;
 
 namespace {
 /// Helper object to determine if a type is either a pointer/shared_ptr
@@ -33,7 +32,7 @@ template <class T> struct IsPtrType : public std::is_pointer<T> {};
 /// Helper object to determine if a type is either a pointer/shared_ptr
 /// Specialized implementation for shared_ptr
 template <class T>
-struct IsPtrType<boost::shared_ptr<T>> : public std::true_type {};
+struct IsPtrType<std::shared_ptr<T>> : public std::true_type {};
 template <> struct IsPtrType<decltype(nullptr)> : public std::true_type {};
 } // namespace
 
@@ -126,7 +125,7 @@ private:
   }
 
   /** Calls the validator for a type that is either a raw pointer or a
-   * boost::shared pointer
+   * std::shared pointer
    * @returns An error message to display to users or an empty string on no
    * error
    */
@@ -157,11 +156,9 @@ private:
   template <typename T>
   std::string runCheckWithDataItemPtr(const T &value,
                                       const std::true_type &) const {
-    return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
+    return check(boost::any(std::static_pointer_cast<DataItem>(value)));
   }
 };
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_IVALIDATOR_H_*/

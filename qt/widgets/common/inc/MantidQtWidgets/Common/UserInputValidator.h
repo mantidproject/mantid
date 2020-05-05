@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
-#define MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
@@ -81,12 +80,13 @@ public:
   /// Checks the number of histograms in a workspace
   bool checkWorkspaceNumberOfHistograms(QString const &workspaceName,
                                         std::size_t const &validSize);
-  bool checkWorkspaceNumberOfHistograms(Mantid::API::MatrixWorkspace_sptr,
-                                        std::size_t const &validSize);
+  bool
+  checkWorkspaceNumberOfHistograms(const Mantid::API::MatrixWorkspace_sptr &,
+                                   std::size_t const &validSize);
   /// Checks the number of bins in a workspace
   bool checkWorkspaceNumberOfBins(QString const &workspaceName,
                                   std::size_t const &validSize);
-  bool checkWorkspaceNumberOfBins(Mantid::API::MatrixWorkspace_sptr,
+  bool checkWorkspaceNumberOfBins(const Mantid::API::MatrixWorkspace_sptr &,
                                   std::size_t const &validSize);
   /// Checks that a workspace group contains valid matrix workspace's
   bool checkWorkspaceGroupIsValid(QString const &groupName,
@@ -108,7 +108,7 @@ public:
 private:
   /// Gets a workspace from the ADS
   template <typename T = Mantid::API::MatrixWorkspace>
-  boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
+  std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
 
   /// Any raised error messages.
   QStringList m_errorMessages;
@@ -149,7 +149,7 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
  * @return The workspace
  */
 template <typename T>
-boost::shared_ptr<T>
+std::shared_ptr<T>
 UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(
       workspaceName);
@@ -157,5 +157,3 @@ UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_

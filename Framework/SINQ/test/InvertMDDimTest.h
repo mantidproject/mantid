@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __INVERTMDTEST
-#define __INVERTMDTEST
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -59,7 +58,7 @@ public:
     TS_ASSERT_EQUALS(sum, 2400);
 
     // test dimensions
-    boost::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
+    std::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
     TS_ASSERT_EQUALS(dimi->getNBins(), 20);
     TS_ASSERT_DELTA(dimi->getMinimum(), -10., .01);
     TS_ASSERT_DELTA(dimi->getMaximum(), 10., .01);
@@ -122,15 +121,15 @@ private:
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("x"), std::string("ID0"), frame,
                              coord_t(-5), coord_t(5), size_t(10)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("y"), std::string("ID1"), frame,
                              coord_t(-6), coord_t(6), size_t(12)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("z"), std::string("ID2"), frame,
                              coord_t(-10), coord_t(10), size_t(20)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
 
     MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
     outWS->setTo(1., 1., .0);
@@ -138,5 +137,3 @@ private:
     return outWS;
   }
 };
-
-#endif

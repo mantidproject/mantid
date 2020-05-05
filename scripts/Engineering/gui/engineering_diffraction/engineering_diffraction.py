@@ -1,16 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtCore, QtWidgets
 
 from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView
 from .tabs.calibration.presenter import CalibrationPresenter
+from .tabs.common import CalibrationObserver
+from .tabs.common.path_handling import get_run_number_from_path
 from .tabs.focus.model import FocusModel
 from .tabs.focus.view import FocusView
 from .tabs.focus.presenter import FocusPresenter
@@ -43,10 +44,15 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.focus_presenter = None
         self.fitting_presenter = None
         self.settings_presenter = None
+        self.calibration_observer = CalibrationObserver(self)
         self.set_on_help_clicked(self.open_help_window)
 
         self.set_on_settings_clicked(self.open_settings)
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
+
+        # Setup status bar
+        self.status_label = QtWidgets.QLabel()
+        self.setup_statusbar()
 
         # Setup Elements
         self.setup_settings()
@@ -97,6 +103,11 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     def setup_calibration_notifier(self):
         self.calibration_presenter.calibration_notifier.add_subscriber(
             self.focus_presenter.calibration_observer)
+        self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
+
+    def setup_statusbar(self):
+        self.statusbar.addWidget(self.status_label)
+        self.set_statusbar_text("No Calibration Loaded.")
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)
@@ -119,3 +130,12 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()
+
+    def update_calibration(self, calibration):
+        instrument = calibration.get_instrument()
+        van_no = get_run_number_from_path(calibration.get_vanadium(), instrument)
+        sample_no = get_run_number_from_path(calibration.get_sample(), instrument)
+        self.set_statusbar_text(f"V: {van_no}, CeO2: {sample_no}, Instrument: {instrument}")
+
+    def set_statusbar_text(self, text):
+        self.status_label.setText(text)

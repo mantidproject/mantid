@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_AXIS_H_
-#define MANTID_API_AXIS_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace Mantid {
@@ -42,11 +41,11 @@ public:
   const std::string &title() const;
   std::string &title();
 
-  const boost::shared_ptr<Kernel::Unit> &unit() const;
-  boost::shared_ptr<Kernel::Unit> &unit();
+  const std::shared_ptr<Kernel::Unit> &unit() const;
+  std::shared_ptr<Kernel::Unit> &unit();
 
   /// Set the unit on the Axis
-  virtual const boost::shared_ptr<Kernel::Unit> &
+  virtual const std::shared_ptr<Kernel::Unit> &
   setUnit(const std::string &unitName);
 
   /// Returns true is the axis is a Spectra axis
@@ -99,10 +98,8 @@ private:
   /// The user-defined title for this axis
   std::string m_title;
   /// The unit for this axis
-  boost::shared_ptr<Kernel::Unit> m_unit;
+  std::shared_ptr<Kernel::Unit> m_unit;
 };
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_AXIS_H_*/

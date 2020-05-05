@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 
 # 3rdparty imports
@@ -17,6 +15,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm, Normalize
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
@@ -191,6 +190,13 @@ class YAxisEditor(AxisEditor):
         self.create_model()
 
 
+class ZAxisEditor(AxisEditor):
+
+    def __init__(self, canvas, axes):
+        super(ZAxisEditor, self).__init__(canvas, axes, 'z')
+        self.create_model()
+
+
 class ColorbarAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):
@@ -198,16 +204,25 @@ class ColorbarAxisEditor(AxisEditor):
 
         self.images = self.canvas.figure.gca().images
         if len(self.images) == 0:
-            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)]
+            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)
+                           or isinstance(col, Poly3DCollection)]
 
         self.create_model()
 
     def changes_accepted(self):
-        super(ColorbarAxisEditor, self).changes_accepted()
+        self.ui.errors.hide()
+
+        limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
+
         scale = Normalize
         if isinstance(self.images[0].norm, LogNorm):
             scale = LogNorm
-        update_colorbar_scale(self.canvas.figure, self.images[0], scale, self.limit_min, self.limit_max)
+
+        if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
+            raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
+
+        self.lim_setter(limit_min, limit_max)
+        update_colorbar_scale(self.canvas.figure, self.images[0], scale, limit_min, limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()

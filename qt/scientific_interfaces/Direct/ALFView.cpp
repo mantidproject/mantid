@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 #include "ALFCustomInstrumentModel.h"
@@ -24,6 +24,7 @@ Mantid::Kernel::Logger g_log("ALFView");
 ALFView::ALFView(QWidget *parent)
     : UserSubWindow(parent), m_view(nullptr), m_presenter(nullptr),
       m_analysisPane(nullptr) {
+  this->setWindowTitle("ALF View");
   m_model = new ALFCustomInstrumentModel();
   m_view = new ALFCustomInstrumentView(m_model->getInstrument(), this);
   auto analysisView =

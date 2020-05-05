@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTFITPLOTPRESENTERTEST_H_
-#define MANTIDQT_INDIRECTFITPLOTPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitPlotViewLegacy.h"
-#include "IndirectFitPlotPresenterLegacy.h"
-#include "IndirectFittingModelLegacy.h"
+#include "IIndirectFitPlotView.h"
+#include "IndirectFitPlotPresenter.h"
+#include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -28,11 +27,13 @@ using namespace testing;
 
 namespace {
 
-IFunction_sptr getFunction(std::string const &functionString) {
-  return FunctionFactory::Instance().createInitialized(functionString);
+MultiDomainFunction_sptr getFunction(std::string const &functionString) {
+  return FunctionFactory::Instance().createInitializedMultiDomainFunction(
+      functionString, 10);
 }
 
-IFunction_sptr getFunctionWithWorkspaceName(std::string const &workspaceName) {
+MultiDomainFunction_sptr
+getFunctionWithWorkspaceName(std::string const &workspaceName) {
   std::string const functionString =
       "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
       "(composite=Convolution,FixResolution=true,NumDeriv=true;"
@@ -49,16 +50,16 @@ IFunction_sptr getFunctionWithWorkspaceName(std::string const &workspaceName) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectFitPlotView : public IIndirectFitPlotViewLegacy {
+class MockIndirectFitPlotView : public IIndirectFitPlotView {
 public:
   /// Signals
-  void emitSelectedFitDataChanged(std::size_t index) {
+  void emitSelectedFitDataChanged(TableDatasetIndex index) {
     emit selectedFitDataChanged(index);
   }
 
   void emitPlotCurrentPreview() { emit plotCurrentPreview(); }
 
-  void emitPlotSpectrumChanged(std::size_t spectrum) {
+  void emitPlotSpectrumChanged(IDA::WorkspaceIndex spectrum) {
     emit plotSpectrumChanged(spectrum);
   }
 
@@ -82,38 +83,40 @@ public:
 
   /// Public methods
   MOCK_METHOD1(watchADS, void(bool watch));
+  MOCK_METHOD0(disableSpectrumPlotSelection, void());
 
-  MOCK_CONST_METHOD0(getSelectedSpectrum, std::size_t());
-  MOCK_CONST_METHOD0(getSelectedSpectrumIndex, int());
-  MOCK_CONST_METHOD0(getSelectedDataIndex, int());
-  MOCK_CONST_METHOD0(dataSelectionSize, std::size_t());
+  MOCK_CONST_METHOD0(getSelectedSpectrum, IDA::WorkspaceIndex());
+  MOCK_CONST_METHOD0(getSelectedSpectrumIndex, TableRowIndex());
+  MOCK_CONST_METHOD0(getSelectedDataIndex, TableDatasetIndex());
+  MOCK_CONST_METHOD0(dataSelectionSize, TableDatasetIndex());
   MOCK_CONST_METHOD0(isPlotGuessChecked, bool());
 
   MOCK_METHOD0(hideMultipleDataSelection, void());
   MOCK_METHOD0(showMultipleDataSelection, void());
 
   MOCK_METHOD2(setAvailableSpectra,
-               void(std::size_t minimum, std::size_t maximum));
-  MOCK_METHOD2(setAvailableSpectra,
-               void(std::vector<std::size_t>::const_iterator const &from,
-                    std::vector<std::size_t>::const_iterator const &to));
+               void(IDA::WorkspaceIndex minimum, IDA::WorkspaceIndex maximum));
+  MOCK_METHOD2(
+      setAvailableSpectra,
+      void(std::vector<IDA::WorkspaceIndex>::const_iterator const &from,
+           std::vector<IDA::WorkspaceIndex>::const_iterator const &to));
 
   MOCK_METHOD1(setMinimumSpectrum, void(int minimum));
   MOCK_METHOD1(setMaximumSpectrum, void(int maximum));
-  MOCK_METHOD1(setPlotSpectrum, void(int spectrum));
+  MOCK_METHOD1(setPlotSpectrum, void(IDA::WorkspaceIndex spectrum));
   MOCK_METHOD1(appendToDataSelection, void(std::string const &dataName));
   MOCK_METHOD2(setNameInDataSelection,
-               void(std::string const &dataName, std::size_t index));
+               void(std::string const &dataName, TableDatasetIndex index));
   MOCK_METHOD0(clearDataSelection, void());
 
   MOCK_METHOD4(plotInTopPreview,
                void(QString const &name,
                     Mantid::API::MatrixWorkspace_sptr workspace,
-                    std::size_t spectrum, Qt::GlobalColor colour));
+                    IDA::WorkspaceIndex spectrum, Qt::GlobalColor colour));
   MOCK_METHOD4(plotInBottomPreview,
                void(QString const &name,
                     Mantid::API::MatrixWorkspace_sptr workspace,
-                    std::size_t spectrum, Qt::GlobalColor colour));
+                    IDA::WorkspaceIndex spectrum, Qt::GlobalColor colour));
 
   MOCK_METHOD1(removeFromTopPreview, void(QString const &name));
   MOCK_METHOD1(removeFromBottomPreview, void(QString const &name));
@@ -147,35 +150,40 @@ public:
   MOCK_METHOD1(setHWHMMaximum, void(double maximum));
 };
 
-class MockIndirectFittingModel : public IndirectFittingModelLegacy {
+class MockIndirectFittingModel : public IndirectFittingModel {
 public:
   /// Public methods
-  MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(std::size_t index));
+  MOCK_CONST_METHOD1(getWorkspace,
+                     MatrixWorkspace_sptr(TableDatasetIndex index));
   MOCK_CONST_METHOD2(getFittingRange,
-                     std::pair<double, double>(std::size_t dataIndex,
-                                               std::size_t spectrum));
+                     std::pair<double, double>(TableDatasetIndex dataIndex,
+                                               IDA::WorkspaceIndex spectrum));
   MOCK_CONST_METHOD3(createDisplayName,
                      std::string(std::string const &formatString,
                                  std::string const &rangeDelimiter,
-                                 std::size_t dataIndex));
+                                 TableDatasetIndex dataIndex));
   MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
-  MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
+  MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
+  MOCK_CONST_METHOD0(getFittingFunction,
+                     Mantid::API::MultiDomainFunction_sptr());
 
-  MOCK_METHOD3(setStartX, void(double startX, std::size_t dataIndex,
-                               std::size_t spectrum));
-  MOCK_METHOD3(setEndX,
-               void(double endX, std::size_t dataIndex, std::size_t spectrum));
+  MOCK_METHOD3(setStartX, void(double startX, TableDatasetIndex dataIndex,
+                               IDA::WorkspaceIndex spectrum));
+  MOCK_METHOD3(setEndX, void(double endX, TableDatasetIndex dataIndex,
+                             IDA::WorkspaceIndex spectrum));
+
+  MOCK_METHOD2(setEndX, void(double endX, TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setStartX, void(double endX, TableDatasetIndex dataIndex));
 
   MOCK_METHOD3(setDefaultParameterValue,
                void(std::string const &name, double value,
-                    std::size_t dataIndex));
+                    TableDatasetIndex dataIndex));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override {
+  std::string singleFitOutputName(TableDatasetIndex index,
+                                  IDA::WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -202,13 +210,13 @@ public:
   }
 
   void setUp() override {
-    /// Note that the IndirectFitPlotModelLegacy could not be mocked as the
-    /// Presenter takes an IndirectFittingModelLegacy. This means the
-    /// IndirectFittingModelLegacy is mocked instead - which is a good
+    /// Note that the IndirectFitPlotModel could not be mocked as the
+    /// Presenter takes an IndirectFittingModel. This means the
+    /// IndirectFittingModel is mocked instead - which is a good
     /// substitute anyway
     m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_fittingModel = std::make_unique<NiceMock<MockIndirectFittingModel>>();
-    m_presenter = std::make_unique<IndirectFitPlotPresenterLegacy>(
+    m_presenter = std::make_unique<IndirectFitPlotPresenter>(
         std::move(m_fittingModel.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(10));
@@ -231,7 +239,7 @@ public:
   ///----------------------------------------------------------------------
 
   void test_that_the_model_and_view_have_been_instantiated_correctly() {
-    std::size_t const selectedSpectrum(3);
+    IDA::WorkspaceIndex const selectedSpectrum(3);
 
     ON_CALL(*m_view, getSelectedSpectrum())
         .WillByDefault(Return(selectedSpectrum));
@@ -248,7 +256,7 @@ public:
 
   void
   test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
-    std::size_t const selectionSize(2);
+    TableDatasetIndex const selectionSize(2);
 
     ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(selectionSize));
 
@@ -273,18 +281,32 @@ public:
 
   void
   test_that_the_selectedFitDataChanged_signal_will_set_the_available_spectra() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
-    EXPECT_CALL(*m_view, setAvailableSpectra(0, 9)).Times(1);
+    EXPECT_CALL(*m_view, setAvailableSpectra(IDA::WorkspaceIndex(0),
+                                             IDA::WorkspaceIndex(9)))
+        .Times(1);
+
+    m_view->emitSelectedFitDataChanged(index);
+  }
+
+  void
+  test_that_selectedFitDataChanged_signal_will_enable_selectors_when_workspace_presenter() {
+    TableDatasetIndex const index(0);
+    ON_CALL(*m_fittingModel, getWorkspace(index))
+        .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+
+    EXPECT_CALL(*m_view, enableSpectrumSelection(true)).Times(1);
+    EXPECT_CALL(*m_view, enableFitRangeSelection(true)).Times(1);
 
     m_view->emitSelectedFitDataChanged(index);
   }
 
   void
   test_that_the_selectedFitDataChanged_signal_will_disable_selectors_when_there_is_no_workspace() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(nullptr));
 
@@ -296,39 +318,39 @@ public:
 
   void
   test_that_the_selectedFitDataChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
-    EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(3);
+    EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(5);
 
     m_view->emitSelectedFitDataChanged(index);
   }
 
   void
   test_that_the_selectedFitDataChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(nullptr));
 
-    EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(2);
-    EXPECT_CALL(*m_view, clearPreviews()).Times(1);
+    EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(3);
+    EXPECT_CALL(*m_view, clearPreviews()).Times(2);
 
     m_view->emitSelectedFitDataChanged(index);
   }
 
   void
   test_that_the_selectedFitDataChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     auto const range = std::make_pair(1.0, 2.0);
-    ON_CALL(*m_fittingModel, getFittingRange(index, 0))
+    ON_CALL(*m_fittingModel, getFittingRange(index, IDA::WorkspaceIndex(0)))
         .WillByDefault(Return(range));
 
-    EXPECT_CALL(*m_fittingModel, getFittingRange(index, 0))
-        .Times(1)
+    EXPECT_CALL(*m_fittingModel, getFittingRange(index, IDA::WorkspaceIndex(0)))
+        .Times(2)
         .WillRepeatedly(Return(range));
-    EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
-    EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
+    EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(2);
+    EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(2);
 
     m_view->emitSelectedFitDataChanged(index);
   }
@@ -340,47 +362,47 @@ public:
 
   void
   test_that_the_plotSpectrumChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(2);
     EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
-    m_view->emitPlotSpectrumChanged(index);
+    m_view->emitPlotSpectrumChanged(0);
   }
 
   void
   test_that_the_plotSpectrumChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(nullptr));
 
     EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(1);
     EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
-    m_view->emitPlotSpectrumChanged(index);
+    m_view->emitPlotSpectrumChanged(0);
   }
 
   void
   test_that_the_plotSpectrumChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     auto const range = std::make_pair(1.0, 2.0);
-    ON_CALL(*m_fittingModel, getFittingRange(index, 0))
+    ON_CALL(*m_fittingModel, getFittingRange(index, IDA::WorkspaceIndex(0)))
         .WillByDefault(Return(range));
 
-    EXPECT_CALL(*m_fittingModel, getFittingRange(index, 0))
+    EXPECT_CALL(*m_fittingModel, getFittingRange(index, IDA::WorkspaceIndex(0)))
         .Times(1)
         .WillOnce(Return(range));
     EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
     EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
-    m_view->emitPlotSpectrumChanged(index);
+    m_view->emitPlotSpectrumChanged(0);
   }
 
   void
   test_that_the_plotCurrentPreview_signal_will_display_an_error_message_if_there_is_no_input_workspace() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     std::string const message("Workspace not found - data may not be loaded.");
 
     ON_CALL(*m_fittingModel, getWorkspace(index))
@@ -395,12 +417,12 @@ public:
 
   void
   test_that_the_plotGuessChanged_signal_will_not_clear_the_guess_plot_when_passed_true() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     std::string const workspaceName("WorkspaceName");
     auto const range = std::make_pair(1.0, 2.0);
     auto const fitFunction = getFunctionWithWorkspaceName(workspaceName);
 
-    ON_CALL(*m_fittingModel, getFittingRange(index, 0))
+    ON_CALL(*m_fittingModel, getFittingRange(index, IDA::WorkspaceIndex(0)))
         .WillByDefault(Return(range));
     ON_CALL(*m_fittingModel, getFittingFunction())
         .WillByDefault(Return(fitFunction));
@@ -414,7 +436,7 @@ public:
 
   void
   test_that_the_plotGuessChanged_signal_will_clear_the_plot_when_passed_false() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
@@ -425,16 +447,17 @@ public:
 
   void test_that_the_startXChanged_signal_will_set_the_fitting_models_startX() {
     auto const range = std::make_pair(0.0, 2.0);
-    ON_CALL(*m_fittingModel, getFittingRange(0, 0))
+    ON_CALL(*m_fittingModel,
+            getFittingRange(TableDatasetIndex(0), IDA::WorkspaceIndex(0)))
         .WillByDefault(Return(range));
 
-    EXPECT_CALL(*m_fittingModel, setStartX(1.0, 0, 0)).Times(1);
+    EXPECT_CALL(*m_fittingModel, setStartX(1.0, TableDatasetIndex(0))).Times(1);
 
     m_view->emitStartXChanged(1.0);
   }
 
   void test_that_the_endXChanged_signal_will_set_the_fitting_models_endX() {
-    EXPECT_CALL(*m_fittingModel, setEndX(2.0, 0, 0)).Times(1);
+    EXPECT_CALL(*m_fittingModel, setEndX(2.0, TableDatasetIndex(0))).Times(1);
     m_view->emitEndXChanged(2.0);
   }
 
@@ -457,8 +480,9 @@ public:
         .WillByDefault(Return(fitFunction));
 
     Expectation setDefault =
-        EXPECT_CALL(*m_fittingModel,
-                    setDefaultParameterValue("A0", background, 0))
+        EXPECT_CALL(
+            *m_fittingModel,
+            setDefaultParameterValue("A0", background, TableDatasetIndex(0)))
             .Times(1);
     EXPECT_CALL(*m_fittingModel, getFittingFunction())
         .Times(1)
@@ -475,7 +499,7 @@ public:
   test_that_getSelectedSpectrumIndex_will_get_the_selected_spectrum_from_the_view() {
     EXPECT_CALL(*m_view, getSelectedSpectrumIndex())
         .Times(1)
-        .WillOnce(Return(0));
+        .WillOnce(Return(TableRowIndex(0)));
     m_presenter->getSelectedSpectrumIndex();
   }
 
@@ -542,11 +566,14 @@ public:
 
   void
   test_that_appendLastDataToSelection_will_set_the_name_of_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_equal() {
-    std::size_t const index(1);
+    TableDatasetIndex const index(1);
 
-    ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(2));
-    ON_CALL(*m_fittingModel, numberOfWorkspaces()).WillByDefault(Return(2));
-    ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
+    ON_CALL(*m_view, dataSelectionSize())
+        .WillByDefault(Return(TableDatasetIndex(2)));
+    ON_CALL(*m_fittingModel, numberOfWorkspaces())
+        .WillByDefault(Return(TableDatasetIndex(2)));
+    ON_CALL(*m_fittingModel,
+            createDisplayName("%1% (%2%)", "-", TableDatasetIndex(1)))
         .WillByDefault(Return("DisplayName-1"));
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
@@ -563,10 +590,12 @@ public:
 
   void
   test_that_appendLastDataToSelection_will_add_to_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_not_equal() {
-    std::size_t const index(1);
+    TableDatasetIndex const index(1);
 
-    ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(1));
-    ON_CALL(*m_fittingModel, numberOfWorkspaces()).WillByDefault(Return(2));
+    ON_CALL(*m_view, dataSelectionSize())
+        .WillByDefault(Return(TableDatasetIndex(1)));
+    ON_CALL(*m_fittingModel, numberOfWorkspaces())
+        .WillByDefault(Return(TableDatasetIndex(2)));
     ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
         .WillByDefault(Return("DisplayName-1"));
     ON_CALL(*m_fittingModel, getWorkspace(index))
@@ -584,7 +613,7 @@ public:
 
   void
   test_that_updateSelectedDataName_will_update_the_name_in_the_data_selection() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
 
     ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
         .WillByDefault(Return("DisplayName-1"));
@@ -594,7 +623,8 @@ public:
     Expectation createName =
         EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
             .Times(1);
-    EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", 0))
+    EXPECT_CALL(*m_view,
+                setNameInDataSelection("DisplayName-1", TableDatasetIndex(0)))
         .Times(1)
         .After(createName);
 
@@ -604,9 +634,7 @@ public:
 private:
   std::unique_ptr<MockIndirectFitPlotView> m_view;
   std::unique_ptr<MockIndirectFittingModel> m_fittingModel;
-  std::unique_ptr<IndirectFitPlotPresenterLegacy> m_presenter;
+  std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
 
   SetUpADSWithWorkspace *m_ads;
 };
-
-#endif

@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_HKLFILTER_H_
-#define MANTID_GEOMETRY_HKLFILTER_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/shared_ptr.hpp>
 #include <functional>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -74,8 +73,8 @@ public:
 };
 
 using HKLFilter_uptr = std::unique_ptr<HKLFilter>;
-using HKLFilter_const_sptr = boost::shared_ptr<const HKLFilter>;
-using HKLFilter_sptr = boost::shared_ptr<HKLFilter>;
+using HKLFilter_const_sptr = std::shared_ptr<const HKLFilter>;
+using HKLFilter_sptr = std::shared_ptr<HKLFilter>;
 
 /// Base class for unary logic operations for HKLFilter.
 class MANTID_GEOMETRY_DLL HKLFilterUnaryLogicOperation : public HKLFilter {
@@ -156,5 +155,3 @@ operator|(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs);
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_HKLFILTER_H_ */

@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PROPERTY_H_
-#define MANTID_KERNEL_PROPERTY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <set>
@@ -154,7 +153,7 @@ public:
   virtual std::string setValueFromProperty(const Property &right) = 0;
   /// Set the value of the property via a DataItem pointer.  If the value is
   /// unacceptable the value is not changed but a string is returned
-  virtual std::string setDataItem(const boost::shared_ptr<DataItem>) = 0;
+  virtual std::string setDataItem(const std::shared_ptr<DataItem> &) = 0;
   /// Get the default value for the property which is the value the property was
   /// initialised with
   virtual std::string getDefault() const = 0;
@@ -259,5 +258,3 @@ MANTID_KERNEL_DLL std::string getUnmangledTypeName(const std::type_info &type);
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_PROPERTY_H_*/

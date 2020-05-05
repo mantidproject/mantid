@@ -1,15 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 """ CreateSANSWavelengthPixelAdjustment class creates workspaces for pixel adjustment
     and wavelength adjustment.
 """
-
-from __future__ import (absolute_import, division, print_function)
 
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.common.constants import EMPTY_NAME

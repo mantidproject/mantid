@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -125,10 +125,10 @@ void PointByPointVCorrection::exec() {
     //       builds which caused the unit tests
     //       to sometimes fail.  Maybe this is some compiler bug to do with
     //       using bind2nd within the parrallel macros.
-    for (double &rY : resultY) {
-      // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
-      rY *= factor;
-    }
+
+    // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
+    std::transform(resultY.begin(), resultY.end(), resultY.begin(),
+                   [&factor](double rY) { return rY * factor; });
 
     // Finally get the normalized errors
     for (int j = 0; j < size - 1; j++)

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_WRAPPEDFUNCTIONTEST_H_
-#define MANTID_API_WRAPPEDFUNCTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -16,9 +15,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -77,7 +76,7 @@ public:
     // Does nothing, not required for this test.
   }
 
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) override {
+  void setWorkspace(std::shared_ptr<const Workspace> ws) override {
     m_workspace = ws;
   }
 
@@ -320,7 +319,7 @@ public:
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
 
-    CompositeFunction_sptr composite = boost::make_shared<CompositeFunction>();
+    CompositeFunction_sptr composite = std::make_shared<CompositeFunction>();
     composite->addFunction(fn);
 
     TS_ASSERT_THROWS_NOTHING(composite->addTies("f0.Height=2.0*f0.Sigma"));
@@ -332,14 +331,14 @@ public:
 
   void testTiesInWrappedComposite() {
     FunctionParameterDecorator_sptr outer =
-        boost::make_shared<TestableFunctionParameterDecorator>();
+        std::make_shared<TestableFunctionParameterDecorator>();
     outer->setDecoratedFunction("CompositeFunction");
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
 
     CompositeFunction_sptr composite =
-        boost::dynamic_pointer_cast<CompositeFunction>(
+        std::dynamic_pointer_cast<CompositeFunction>(
             outer->getDecoratedFunction());
     composite->addFunction(fn);
 
@@ -414,7 +413,7 @@ public:
     TS_ASSERT(cloned);
 
     FunctionParameterDecorator_sptr castedClone =
-        boost::dynamic_pointer_cast<FunctionParameterDecorator>(cloned);
+        std::dynamic_pointer_cast<FunctionParameterDecorator>(cloned);
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(cloned->name(), fn->name());
 
@@ -425,7 +424,7 @@ public:
 
   void testSetWorkspace() {
     // using WorkspaceGroup because it is in API
-    Workspace_const_sptr ws = boost::make_shared<const WorkspaceGroup>();
+    Workspace_const_sptr ws = std::make_shared<const WorkspaceGroup>();
 
     TestableFunctionParameterDecorator invalidFn;
     TS_ASSERT_THROWS(invalidFn.setWorkspace(ws), const std::runtime_error &);
@@ -435,8 +434,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(fn->setWorkspace(ws));
 
-    boost::shared_ptr<FunctionWithParameters> decorated =
-        boost::dynamic_pointer_cast<FunctionWithParameters>(
+    std::shared_ptr<FunctionWithParameters> decorated =
+        std::dynamic_pointer_cast<FunctionWithParameters>(
             fn->getDecoratedFunction());
 
     TS_ASSERT_EQUALS(decorated->getWorkspace(), ws);
@@ -445,7 +444,7 @@ public:
 private:
   FunctionParameterDecorator_sptr getFunctionParameterDecoratorGaussian() {
     FunctionParameterDecorator_sptr fn =
-        boost::make_shared<TestableFunctionParameterDecorator>();
+        std::make_shared<TestableFunctionParameterDecorator>();
     fn->setDecoratedFunction("FunctionWithParameters");
 
     return fn;
@@ -459,5 +458,3 @@ private:
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
-
-#endif /* MANTID_API_WRAPPEDFUNCTIONTEST_H_ */

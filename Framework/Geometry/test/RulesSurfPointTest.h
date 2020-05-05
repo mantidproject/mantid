@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_RULESSURFPOINTTEST__
-#define MANTID_RULESSURFPOINTTEST__
+#pragma once
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -37,7 +36,7 @@ public:
   void testSetKey() {
     SurfPoint A;
     TS_ASSERT_EQUALS(A.display(), "0");
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
   }
@@ -52,7 +51,7 @@ public:
 
   void testFullCreatedObject() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
@@ -64,7 +63,7 @@ public:
                         // so it should always return 0
     SurfPoint A;
     TS_ASSERT_EQUALS(A.simplify(), 0);
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.simplify(), 0);
@@ -74,7 +73,7 @@ public:
     SurfPoint A;
     TS_ASSERT_EQUALS(A.simplify(), 0);
     TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.simplify(), 0);
@@ -85,14 +84,14 @@ public:
   testSetLeaves() { // This should not enabled as surfpoint cannot have leaves
     // TODO:disable setleaves function
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     SurfPoint B;
-    auto S1 = boost::make_shared<Sphere>();
+    auto S1 = std::make_shared<Sphere>();
     B.setKey(S1);
     B.setKeyN(11);
     TS_ASSERT_EQUALS(B.getKey(), S1.get());
@@ -107,14 +106,14 @@ public:
   void testSetLeaf() { // TODO: disable setleaf function as surfpoint cannot
                        // have leaves
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     SurfPoint B;
-    auto S1 = boost::make_shared<Sphere>();
+    auto S1 = std::make_shared<Sphere>();
     B.setKey(S1);
     B.setKeyN(11);
     TS_ASSERT_EQUALS(B.getKey(), S1.get());
@@ -128,21 +127,21 @@ public:
 
   void testfindLeaf() { // TODO: disable to find leaf as this is final
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     SurfPoint B;
-    auto S1 = boost::make_shared<Sphere>();
+    auto S1 = std::make_shared<Sphere>();
     B.setKey(S1);
     B.setKeyN(11);
     TS_ASSERT_EQUALS(B.getKey(), S1.get());
     TS_ASSERT_EQUALS(B.getKeyN(), 11);
     TS_ASSERT_EQUALS(B.display(), "11");
     TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
-    B.setKey(boost::make_shared<Plane>());
+    B.setKey(std::make_shared<Plane>());
     B.setKeyN(10);
     TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
     TS_ASSERT_EQUALS(A.findLeaf(&A), 0);
@@ -150,7 +149,7 @@ public:
 
   void testFindKey() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
@@ -162,7 +161,7 @@ public:
 
   void testGetSign() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
@@ -176,7 +175,7 @@ public:
 
   void testSelfConstructor() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
@@ -192,7 +191,7 @@ public:
 
   void testClone() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
@@ -208,7 +207,7 @@ public:
 
   void testAssignment() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.getKey(), P1.get());
@@ -225,7 +224,7 @@ public:
 
   void testIsValid() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     P1->setSurface("px 5");
     A.setKey(P1);
     A.setKeyN(10);
@@ -240,7 +239,7 @@ public:
 
   void testIsValidMap() {
     SurfPoint A;
-    auto P1 = boost::make_shared<Plane>();
+    auto P1 = std::make_shared<Plane>();
     P1->setSurface("px 5");
     A.setKey(P1);
     A.setKeyN(10);
@@ -262,5 +261,3 @@ public:
 };
 //---------------------------------End of
 // SurfPoint-------------------------------------
-
-#endif

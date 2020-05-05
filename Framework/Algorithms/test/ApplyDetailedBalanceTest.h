@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
-#define MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -118,7 +116,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        evout = boost::dynamic_pointer_cast<EventWorkspace>(
+        evout = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)));
 
     double temp = 100.;
@@ -189,5 +187,3 @@ private:
     AnalysisDataService::Instance().add(inputWSname, ws2D);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_ */

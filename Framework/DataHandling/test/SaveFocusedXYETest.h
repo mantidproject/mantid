@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVEFOCUSEDXYETEST_H_
-#define SAVEFOCUSEDXYETEST_H_
+#pragma once
 
 #include "MantidDataHandling/SaveFocusedXYE.h"
 
@@ -47,7 +46,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    boost::shared_ptr<Units::Label> label = boost::make_shared<Units::Label>();
+    std::shared_ptr<Units::Label> label = std::make_shared<Units::Label>();
     label->setLabel(std::string("Temperature"));
     workspace->getAxis(1)->unit() = label;
 
@@ -91,7 +90,7 @@ public:
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    TS_ASSERT_DIFFERS(workspace, boost::shared_ptr<Workspace2D>());
+    TS_ASSERT_DIFFERS(workspace, std::shared_ptr<Workspace2D>());
     std::string resultWS("result");
     AnalysisDataService::Instance().add(resultWS, workspace);
 
@@ -164,7 +163,7 @@ public:
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    TS_ASSERT_DIFFERS(workspace, boost::shared_ptr<Workspace2D>());
+    TS_ASSERT_DIFFERS(workspace, std::shared_ptr<Workspace2D>());
     std::string resultWS("result");
     AnalysisDataService::Instance().add(resultWS, workspace);
 
@@ -514,7 +513,7 @@ public:
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    TS_ASSERT_DIFFERS(workspace, boost::shared_ptr<Workspace2D>());
+    TS_ASSERT_DIFFERS(workspace, std::shared_ptr<Workspace2D>());
     std::string resultWS("result");
     AnalysisDataService::Instance().add(resultWS, workspace);
 
@@ -646,5 +645,3 @@ private:
     return saver;
   }
 };
-
-#endif // SAVEFOCUSEDXYETEST_H_

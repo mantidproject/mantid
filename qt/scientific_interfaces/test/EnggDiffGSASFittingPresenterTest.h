@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_
-#define MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_
+#pragma once
 
 #include "../EnggDiffraction/EnggDiffGSASFittingPresenter.h"
 #include "EnggDiffGSASFittingModelMock.h"
@@ -362,12 +361,12 @@ private:
 
     m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
 
-    auto mockMultiRunWidgetPresenter_sptr = boost::make_shared<
+    auto mockMultiRunWidgetPresenter_sptr = std::make_shared<
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetPresenter>>();
     m_mockMultiRunWidgetPtr = mockMultiRunWidgetPresenter_sptr.get();
 
     auto mockParam_sptr =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     m_mockParamPtr = mockParam_sptr.get();
 
     auto pres_uptr = std::make_unique<EnggDiffGSASFittingPresenter>(
@@ -432,5 +431,3 @@ private:
         .WillOnce(Return(params.refineGamma));
   }
 };
-
-#endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_

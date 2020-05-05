@@ -35,6 +35,10 @@ option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
+# Ensure that if we are running any sanitizers the compiler options are
+# known in sub targets
+include(Sanitizers)
+
 # Quick exit if we only want data targets
 if(DATA_TARGETS_ONLY)
   include(SetupDataTargets)
@@ -93,10 +97,12 @@ endif()
 include(CommonSetup)
 
 # Find OpenGL
-find_package(OpenGL REQUIRED)
-# FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
-if(NOT OPENGL_FOUND)
-  message(FATAL_ERROR "OpenGL was not found.")
+if(ENABLE_OPENGL)
+  find_package(OpenGL REQUIRED)
+  # FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
+  if(NOT OPENGL_FOUND)
+    message(FATAL_ERROR "OpenGL was not found.")
+  endif()
 endif()
 
 find_package(TBB REQUIRED)

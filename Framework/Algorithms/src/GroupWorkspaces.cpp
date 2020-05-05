@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAPI/ADSValidator.h"
@@ -26,7 +26,7 @@ void GroupWorkspaces::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces", boost::make_shared<ADSValidator>(true, true)),
+          "InputWorkspaces", std::make_shared<ADSValidator>(true, true)),
       "Names of the Input Workspaces to Group");
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("GlobExpression", ""),
@@ -147,14 +147,14 @@ void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
  * @param workspace A pointer to the workspace to add
  */
 void GroupWorkspaces::addToGroup(const API::Workspace_sptr &workspace) {
-  auto localGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  auto localGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   if (localGroup) {
     addToGroup(localGroup->getNames());
     // Remove the group from the ADS
     AnalysisDataService::Instance().remove(workspace->getName());
   } else {
     if (!m_group)
-      m_group = boost::make_shared<WorkspaceGroup>(workspace->storageMode());
+      m_group = std::make_shared<WorkspaceGroup>(workspace->storageMode());
     else if (communicator().size() != 1 &&
              m_group->storageMode() != workspace->storageMode()) {
       throw std::runtime_error(

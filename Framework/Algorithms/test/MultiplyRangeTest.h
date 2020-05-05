@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIPLYRANGETEST_H_
-#define MULTIPLYRANGETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/MultiplyRange.h"
@@ -51,10 +50,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("tomultiply")));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("multiplied")));
 
     const size_t length = result->blocksize();
@@ -76,5 +75,3 @@ public:
 private:
   Mantid::Algorithms::MultiplyRange mr;
 };
-
-#endif /*MULTIPLYRANGETEST_H_*/

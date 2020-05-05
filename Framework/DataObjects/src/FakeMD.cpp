@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //--------------------------------------------------------------------------------------------------
 // Includes
@@ -49,7 +49,7 @@ FakeMD::FakeMD(const std::vector<double> &uniformParams,
  * @param workspace A pointer to MD event workspace to fill using the object
  * parameters
  */
-void FakeMD::fill(API::IMDEventWorkspace_sptr workspace) {
+void FakeMD::fill(const API::IMDEventWorkspace_sptr &workspace) {
   setupDetectorCache(*workspace);
 
   CALL_MDEVENT_FUNCTION(this->addFakePeak, workspace)

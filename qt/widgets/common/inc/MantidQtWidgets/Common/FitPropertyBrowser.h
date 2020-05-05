@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FITPROPERTYBROWSER_H_
-#define FITPROPERTYBROWSER_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/AlgorithmObserver.h"
@@ -100,7 +99,7 @@ public:
   /// Set new current function
   void setCurrentFunction(PropertyHandler *h) const;
   /// Get the current function
-  boost::shared_ptr<const Mantid::API::IFunction> theFunction() const;
+  std::shared_ptr<const Mantid::API::IFunction> theFunction() const;
   /// Update the function parameters
   void updateParameters();
   /// Update the function attributes
@@ -119,7 +118,7 @@ public:
   virtual void removeFunction(PropertyHandler *handler);
 
   /// Get Composite Function
-  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
+  std::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
     return m_compositeFunction;
   }
 
@@ -143,7 +142,7 @@ public:
   void setDefaultBackgroundType(const std::string &fnType);
 
   /// Get the workspace
-  boost::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
+  std::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
   /// Get the input workspace name
   std::string workspaceName() const;
   /// Set the input workspace name
@@ -227,7 +226,7 @@ public:
   void setTip(const QString &txt);
 
   /// alter text of Plot Guess
-  void setTextPlotGuess(const QString text);
+  void setTextPlotGuess(const QString &text);
 
   /// Creates the "Ties" property value for the Fit algorithm
   QString getTieString() const;
@@ -272,7 +271,7 @@ public:
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void addHandle(const std::string &wsName,
-                 const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                 const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Called when the Fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
@@ -467,7 +466,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
+  void setWorkspace(const std::shared_ptr<Mantid::API::IFunction> &f) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
   /// Adds the workspace index property to the browser.
@@ -487,7 +486,7 @@ protected:
   /// Catches unexpected not found exceptions
   Mantid::API::IFunction_sptr tryCreateFitFunction(const QString &str);
   /// Create CompositeFunction from pointer
-  void createCompositeFunction(const Mantid::API::IFunction_sptr func);
+  void createCompositeFunction(const Mantid::API::IFunction_sptr &func);
 
   /// Property managers:
   QtGroupPropertyManager *m_groupManager;
@@ -528,7 +527,7 @@ protected:
   QList<QtProperty *> m_minimizerProperties;
 
   /// A copy of the edited function
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  std::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
 
   QtTreePropertyBrowser *m_browser;
 
@@ -594,7 +593,7 @@ private:
   /// Return the nearest allowed workspace index.
   int getAllowedIndex(int currentIndex) const;
 
-  void setCurrentFunction(Mantid::API::IFunction_const_sptr f) const;
+  void setCurrentFunction(const Mantid::API::IFunction_const_sptr &f) const;
 
   /// Sets the new workspace to the current one
   virtual void workspaceChange(const QString &wsName);
@@ -708,5 +707,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*FITPROPERTYBROWSER_H_*/

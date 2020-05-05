@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "GUI/RunsTable/IRunsTableView.h"
 #include "ISearchModel.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -101,9 +100,9 @@ public:
   virtual std::string getSearchString() const = 0;
   virtual int getLiveDataUpdateInterval() const = 0;
 
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const = 0;
 
   // Start live data monitoring
@@ -113,4 +112,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef OBJCOMPONENT_ASSEMBLY_
-#define OBJCOMPONENT_ASSEMBLY_
+#pragma once
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -58,7 +57,7 @@ public:
   int addCopy(IComponent *, const std::string &) override;
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
-  boost::shared_ptr<IComponent> getChild(const int i) const override {
+  std::shared_ptr<IComponent> getChild(const int i) const override {
     return (*this)[i];
   }
   //! Get all children
@@ -66,10 +65,10 @@ public:
                    bool recursive) const override;
   //! Returns a pointer to the first component of assembly encountered with the
   // given name
-  boost::shared_ptr<const IComponent>
+  std::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override;
   //! Get a pointer to the ith component in the assembly
-  boost::shared_ptr<IComponent> operator[](int i) const override;
+  std::shared_ptr<IComponent> operator[](int i) const override;
   //! Print information about all children
   void printChildren(std::ostream &) const override;
   void printTree(std::ostream &) const override;
@@ -78,8 +77,8 @@ public:
   Kernel::V3D getPos() const override;
 
   //! Set the outline of the assembly
-  boost::shared_ptr<IObject> createOutline();
-  void setOutline(boost::shared_ptr<const IObject> obj);
+  std::shared_ptr<IObject> createOutline();
+  void setOutline(std::shared_ptr<const IObject> obj);
 
   /** Test the intersection of the ray with the children of the component
    * assembly  */
@@ -99,14 +98,12 @@ private:
 };
 
 /// Shared pointer to ObjCompAssembly
-using ObjCompAssembly_sptr = boost::shared_ptr<ObjCompAssembly>;
+using ObjCompAssembly_sptr = std::shared_ptr<ObjCompAssembly>;
 /// Shared pointer to ObjCompAssembly (const version)
-using ObjCompAssembly_const_sptr = boost::shared_ptr<const ObjCompAssembly>;
+using ObjCompAssembly_const_sptr = std::shared_ptr<const ObjCompAssembly>;
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const ObjCompAssembly &);
 
 } // Namespace Geometry
 } // Namespace Mantid
-
-#endif /*OBJCOMPONENT_ASSEMBLY_*/

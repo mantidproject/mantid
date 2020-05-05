@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FUNCTIONDOMAINGENERAL_H_
-#define MANTID_API_FUNCTIONDOMAINGENERAL_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -26,16 +25,14 @@ public:
   /// Get the number of columns
   size_t columnCount() const;
   /// Add a new column. All columns must have the same size.
-  void addColumn(boost::shared_ptr<Column> column);
+  void addColumn(const std::shared_ptr<Column> &column);
   /// Get i-th column
-  boost::shared_ptr<Column> getColumn(size_t i) const;
+  std::shared_ptr<Column> getColumn(size_t i) const;
 
 private:
   /// Columns containing function arguments
-  std::vector<boost::shared_ptr<Column>> m_columns;
+  std::vector<std::shared_ptr<Column>> m_columns;
 };
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_FUNCTIONDOMAINGENERAL_H_*/

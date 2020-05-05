@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 """
@@ -110,9 +110,10 @@ class FigureErrorsManager(object):
     @classmethod
     def replot_curve(cls, ax, curve, plot_kwargs):
         if isinstance(ax, MantidAxes):
-            axis = ax.creation_args[0].get('axis', None)
-            if axis:
-                plot_kwargs['axis'] = axis
+            if ax.creation_args:
+                axis = ax.creation_args[0].get('axis', None)
+                if axis:
+                    plot_kwargs['axis'] = axis
             try:
                 new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes

@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ITRANSFORMSCALE_H_
-#define MANTID_API_ITRANSFORMSCALE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <string>
@@ -39,7 +38,7 @@ public:
 }; // class ITransformScale
 
 /// typedef for a shared pointer
-using ITransformScale_sptr = boost::shared_ptr<ITransformScale>;
+using ITransformScale_sptr = std::shared_ptr<ITransformScale>;
 
 } // namespace API
 } // namespace Mantid
@@ -51,5 +50,3 @@ using ITransformScale_sptr = boost::shared_ptr<ITransformScale>;
            #classname)),                                                       \
        0));                                                                    \
   }
-
-#endif /*MANTID_API_ITRANSFORMSCALE_H_*/

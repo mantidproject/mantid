@@ -1,16 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_
-#define MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_
+#pragma once
+
+#include <utility>
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -45,7 +47,8 @@ private:
     std::string unit;
 
     ScannedVariables(std::string n, std::string p, std::string u)
-        : axis(0), scanned(0), name(n), property(p), unit(u) {}
+        : axis(0), scanned(0), name(std::move(n)), property(std::move(p)),
+          unit(std::move(u)) {}
 
     void setAxis(int a) { axis = a; }
     void setScanned(int s) { scanned = s; }
@@ -119,5 +122,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_ */

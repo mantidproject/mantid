@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LINEVIEWER_H
-#define LINEVIEWER_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/CoordTransform.h"
@@ -29,11 +28,11 @@ public:
   LineViewer(QWidget *parent = nullptr);
   ~LineViewer() override;
 
-  void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  void setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws);
   void setFreeDimensions(bool all, int dimX, int dimY);
-  void setStart(Mantid::Kernel::VMD start);
-  void setEnd(Mantid::Kernel::VMD end);
-  void setThickness(Mantid::Kernel::VMD width);
+  void setStart(const Mantid::Kernel::VMD &start);
+  void setEnd(const Mantid::Kernel::VMD &end);
+  void setThickness(const Mantid::Kernel::VMD &width);
   void setPlanarWidth(double width);
   void setNumBins(int numBins);
   void setFixedBinWidthMode(bool fixedWidth, double binWidth);
@@ -98,9 +97,9 @@ signals:
 
 private:
   Mantid::API::IAlgorithm_sptr
-  applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws);
   Mantid::API::IAlgorithm_sptr
-  applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
   void setupScaleEngine(MantidQwtWorkspaceData &curveData);
   /// set the slice workspace from the ADS
   void setSliceWorkspace(const std::string &name);
@@ -184,4 +183,3 @@ private:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif // LINEVIEWER_H

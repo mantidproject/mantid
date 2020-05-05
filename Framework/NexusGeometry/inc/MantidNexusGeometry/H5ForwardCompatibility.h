@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDNEXUSGEOMETRY_H5FORWARDCOMPATIBILITY
-#define MANTIDNEXUSGEOMETRY_H5FORWARDCOMPATIBILITY
+#pragma once
 
 #include "MantidNexusGeometry/DllConfig.h"
 #include <H5Cpp.h>
@@ -31,5 +30,3 @@ std::string getObjName(const H5::H5File &obj);
 } // namespace H5ForwardCompatibility
 } // namespace NexusGeometry
 } // namespace Mantid
-
-#endif // MANTIDNEXUSGEOMETRY_H5FORWARDCOMPATIBILITY

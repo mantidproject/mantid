@@ -1,18 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QTSEARCHMODEL_H_
-#define MANTID_ISISREFLECTOMETRY_QTSEARCHMODEL_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "ISearchModel.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "SearchResult.h"
 #include <QAbstractTableModel>
-#include <boost/shared_ptr.hpp>
 #include <map>
 #include <memory>
 #include <vector>
@@ -63,5 +61,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_ISISREFLECTOMETRY_QTSEARCHMODEL_H_ */

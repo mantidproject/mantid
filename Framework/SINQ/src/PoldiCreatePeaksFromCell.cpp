@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiCreatePeaksFromCell.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -165,15 +165,15 @@ void PoldiCreatePeaksFromCell::init() {
   std::vector<std::string> spaceGroups =
       SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols();
   declareProperty("SpaceGroup", spaceGroups.front(),
-                  boost::make_shared<StringListValidator>(spaceGroups),
+                  std::make_shared<StringListValidator>(spaceGroups),
                   "SpaceGroup of the crystal structure.");
 
   declareProperty("Atoms", "",
                   "Atoms in the asymmetric unit. Format: \n"
                   "Element x y z Occupancy U; ... ");
 
-  boost::shared_ptr<BoundedValidator<double>> latticeParameterEdgeValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
+  std::shared_ptr<BoundedValidator<double>> latticeParameterEdgeValidator =
+      std::make_shared<BoundedValidator<double>>(0.0, 0.0);
   latticeParameterEdgeValidator->clearUpper();
   declareProperty("a", 1.0, latticeParameterEdgeValidator,
                   "Lattice parameter a");
@@ -182,8 +182,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("c", 1.0, latticeParameterEdgeValidator->clone(),
                   "Lattice parameter c");
 
-  boost::shared_ptr<BoundedValidator<double>> latticeParameterAngleValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 180.0);
+  std::shared_ptr<BoundedValidator<double>> latticeParameterAngleValidator =
+      std::make_shared<BoundedValidator<double>>(0.0, 180.0);
   declareProperty("alpha", 90.0, latticeParameterAngleValidator,
                   "Lattice parameter alpha");
   declareProperty("beta", 90.0, latticeParameterAngleValidator->clone(),
@@ -191,8 +191,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("gamma", 90.0, latticeParameterAngleValidator->clone(),
                   "Lattice parameter gamma");
 
-  boost::shared_ptr<BoundedValidator<double>> dValidator =
-      boost::make_shared<BoundedValidator<double>>(0.01, 0.0);
+  std::shared_ptr<BoundedValidator<double>> dValidator =
+      std::make_shared<BoundedValidator<double>>(0.01, 0.0);
   dValidator->clearUpper();
 
   declareProperty("LatticeSpacingMin", 0.5, dValidator,
@@ -230,7 +230,7 @@ void PoldiCreatePeaksFromCell::exec() {
 
   // Create PoldiPeakCollection using given parameters, set output workspace
   PoldiPeakCollection_sptr peaks =
-      boost::make_shared<PoldiPeakCollection>(crystalStructure, dMin, dMax);
+      std::make_shared<PoldiPeakCollection>(crystalStructure, dMin, dMax);
 
   setProperty("OutputWorkspace", peaks->asTableWorkspace());
 }

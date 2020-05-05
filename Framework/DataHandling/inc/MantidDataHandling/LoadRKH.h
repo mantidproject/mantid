@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADRKH_H_
-#define MANTID_DATAHANDLING_LOADRKH_H_
+#pragma once
 
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <fstream>
@@ -74,7 +74,7 @@ private:
                              MantidVec &axis0Data);
   const std::string readUnit(const std::string &line);
   void readNumEntrys(const int nEntries, MantidVec &output);
-  void binCenter(const MantidVec oldBoundaries, MantidVec &toCenter) const;
+  void binCenter(const MantidVec &oldBoundaries, MantidVec &toCenter) const;
 
   // Remove lines from an input stream
   void skipLines(std::istream &strm, int nlines);
@@ -91,4 +91,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-#endif /*MANTID_DATAHANDLING_LOADRKH_H_*/

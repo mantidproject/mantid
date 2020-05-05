@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTTEST_H_
-#define INSTRUMENTTEST_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -17,8 +16,8 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -56,7 +55,7 @@ public:
     // instrument.setDefaultViewAxis("X-");
     instrument.getLogfileCache().insert(
         std::make_pair(std::make_pair("apple", det3),
-                       boost::shared_ptr<XMLInstrumentParameter>()));
+                       std::shared_ptr<XMLInstrumentParameter>()));
     instrument.getLogfileUnit()["banana"] = "yellow";
   }
 
@@ -202,14 +201,14 @@ public:
     // CompAssembly tree are inconsistent
     // Unfortunately, the way things were written means that this can happen
     TS_ASSERT_THROWS(i.removeDetector(d), const std::runtime_error &);
-    TS_ASSERT_THROWS(i.getDetector(1).get(), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(i.getDetector(1), const Exception::NotFoundError &);
     // Now make the 2 calls necessary to do it properly
     TS_ASSERT_THROWS_NOTHING(i.add(d));
     TS_ASSERT_THROWS_NOTHING(i.markAsDetector(d));
     TS_ASSERT_EQUALS(i.getDetectorIDs(false).size(), 1);
     TS_ASSERT_EQUALS(i.nelements(), 1);
     TS_ASSERT_THROWS_NOTHING(i.removeDetector(d));
-    TS_ASSERT_THROWS(i.getDetector(1).get(), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(i.getDetector(1), const Exception::NotFoundError &);
     TS_ASSERT_EQUALS(i.nelements(), 0);
 
     // Now check it does the right thing for a monitor as well
@@ -244,8 +243,8 @@ public:
 
     IDetector_const_sptr det;
     TS_ASSERT_THROWS_NOTHING(det = instrument.getDetectorG(detIDs));
-    boost::shared_ptr<const DetectorGroup> detGroup =
-        boost::dynamic_pointer_cast<const DetectorGroup>(det);
+    std::shared_ptr<const DetectorGroup> detGroup =
+        std::dynamic_pointer_cast<const DetectorGroup>(det);
     TS_ASSERT(detGroup);
 
     TS_ASSERT_EQUALS(detGroup->nDets(), ndets);
@@ -375,7 +374,7 @@ public:
     TS_ASSERT_EQUALS(inst->getValidToDate(), validTo);
     // Try the parametrized copy constructor
     ParameterMap_sptr map(new ParameterMap());
-    Instrument inst2(boost::dynamic_pointer_cast<Instrument>(inst), map);
+    Instrument inst2(std::dynamic_pointer_cast<Instrument>(inst), map);
     TS_ASSERT_EQUALS(inst2.getValidFromDate(), validFrom);
     TS_ASSERT_EQUALS(inst2.getValidToDate(), validTo);
   }
@@ -469,7 +468,7 @@ public:
     const V3D bankAxis{0, 0, 1};
     const Quat bankRot(90.0, bankAxis);
     const V3D bankScale{1, 2, 3};
-    auto pmap = boost::make_shared<ParameterMap>();
+    auto pmap = std::make_shared<ParameterMap>();
     pmap->addV3D(bank1->getComponentID(), ParameterMap::pos(), bankOffset);
     pmap->addV3D(bank2->getComponentID(), ParameterMap::pos(), bankEpsilon);
     pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
@@ -477,7 +476,7 @@ public:
 
     // Set instrument in ParameterMap to create DetectorInfo
     pmap->setInstrument(baseInstrument.get());
-    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+    auto instr = std::make_shared<Instrument>(baseInstrument, pmap);
     auto &detInfo = pmap->mutableDetectorInfo();
     auto &compInfo = pmap->mutableComponentInfo();
 
@@ -550,7 +549,7 @@ public:
     const auto &baseInstrument =
         ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     const auto bank1 = baseInstrument->getComponentByName("bank1");
-    auto pmap = boost::make_shared<ParameterMap>();
+    auto pmap = std::make_shared<ParameterMap>();
     double scalex = 1.7;
     double scaley = 1.3;
     pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
@@ -558,7 +557,7 @@ public:
 
     // Set instrument in ParameterMap to create DetectorInfo
     pmap->setInstrument(baseInstrument.get());
-    auto instr = boost::make_shared<Instrument>(baseInstrument, pmap);
+    auto instr = std::make_shared<Instrument>(baseInstrument, pmap);
     auto &detInfo = pmap->mutableDetectorInfo();
 
     // bank 1
@@ -686,9 +685,9 @@ public:
     m_instrumentNotParameterized = ComponentCreationHelper::sansInstrument(
         sourcePos, samplePos, trolley1Pos, trolley2Pos);
 
-    auto map = boost::make_shared<ParameterMap>();
+    auto map = std::make_shared<ParameterMap>();
     m_instrumentParameterized =
-        boost::make_shared<Instrument>(m_instrumentNotParameterized, map);
+        std::make_shared<Instrument>(m_instrumentNotParameterized, map);
   }
 
   void test_access_pos_non_parameterized() {
@@ -731,5 +730,3 @@ private:
   Instrument_sptr m_instrumentParameterized;
   Instrument_sptr m_instrumentNotParameterized;
 };
-
-#endif /*INSTRUMENTTEST_H_*/

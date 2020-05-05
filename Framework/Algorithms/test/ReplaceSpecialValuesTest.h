@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REPLACESPECIALVALUESTEST_H_
-#define REPLACESPECIALVALUESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -248,8 +247,9 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
-  void checkValues(MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr result,
-                   bool naNCheck, bool infCheck) {
+  void checkValues(const MatrixWorkspace_sptr &inputWS,
+                   const MatrixWorkspace_sptr &result, bool naNCheck,
+                   bool infCheck) {
 
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       for (int j = 1; j < 5; ++j) {
@@ -323,7 +323,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        evout = boost::dynamic_pointer_cast<EventWorkspace>(
+        evout = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("test_ev_rep_out")));
 
     TS_ASSERT(evout); // should be an event workspace
@@ -342,5 +342,3 @@ private:
     TS_ASSERT(propToCheck->isDefault());
   }
 };
-
-#endif /*REPLACESPECIALVALUESTEST_H_*/

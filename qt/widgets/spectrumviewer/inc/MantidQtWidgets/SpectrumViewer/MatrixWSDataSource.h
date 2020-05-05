@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MATRIX_WS_DATA_SOURCE_H
-#define MATRIX_WS_DATA_SOURCE_H
+#pragma once
 
 #include <cstddef>
 
@@ -42,12 +41,12 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource
     : public SpectrumDataSource {
 public:
   /// Construct a DataSource object around the specifed MatrixWorkspace
-  MatrixWSDataSource(Mantid::API::MatrixWorkspace_const_sptr matWs);
+  MatrixWSDataSource(const Mantid::API::MatrixWorkspace_const_sptr &matWs);
 
   ~MatrixWSDataSource() override;
 
   bool hasData(const std::string &wsName,
-               const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+               const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Get the smallest 'x' value covered by the data
   double getXMin() override;
@@ -83,17 +82,14 @@ public:
 private:
   Mantid::API::MatrixWorkspace_const_sptr m_matWs;
   EModeHandler *m_emodeHandler;
-  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
-  boost::shared_ptr<const Mantid::Geometry::IComponent> m_source;
-  boost::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
+  std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
+  std::shared_ptr<const Mantid::Geometry::IComponent> m_source;
+  std::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
   const Mantid::API::SpectrumInfo &m_spectrumInfo;
 };
 
-using MatrixWSDataSource_sptr = boost::shared_ptr<MatrixWSDataSource>;
-using MatrixWSDataSource_const_sptr =
-    boost::shared_ptr<const MatrixWSDataSource>;
+using MatrixWSDataSource_sptr = std::shared_ptr<MatrixWSDataSource>;
+using MatrixWSDataSource_const_sptr = std::shared_ptr<const MatrixWSDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // MATRIX_WS_DATA_SOURCE_H

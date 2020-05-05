@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONWIDGET_H_
-#define MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONWIDGET_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
@@ -26,18 +25,18 @@ class MANTIDQT_ISISSANS_DLL SANSBackgroundCorrectionWidget : public QWidget {
 public:
   SANSBackgroundCorrectionWidget(QWidget *parent = nullptr);
 
-  void
-  setDarkRunSettingForTimeDetectors(SANSBackgroundCorrectionSettings setting);
+  void setDarkRunSettingForTimeDetectors(
+      const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForTimeDetectors();
-  void
-  setDarkRunSettingForUampDetectors(SANSBackgroundCorrectionSettings setting);
+  void setDarkRunSettingForUampDetectors(
+      const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForUampDetectors();
 
-  void
-  setDarkRunSettingForTimeMonitors(SANSBackgroundCorrectionSettings setting);
+  void setDarkRunSettingForTimeMonitors(
+      const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForTimeMonitors();
-  void
-  setDarkRunSettingForUampMonitors(SANSBackgroundCorrectionSettings setting);
+  void setDarkRunSettingForUampMonitors(
+      const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForUampMonitors();
 
   void resetEntries();
@@ -58,5 +57,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*  MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONWIDGET_H_ */

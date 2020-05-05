@@ -16,7 +16,7 @@ Fitting Models To Data
 .. role:: green
 .. role:: orange
 
-Fitting is itereatively searching for the parameter values that minimise some cost function to obtain
+Fitting is iteratively searching for the parameter values that minimise some cost function to obtain
 the best fit of the model to the data.
 
 
@@ -48,9 +48,13 @@ Simple fitting
 4. Choose ExpDecay and click OK
 |ChooseExpDecay.png|
 
-5. Notice how the ExpDecay function has appeared in the Functions list on the Fit Property Browser, and there are preset Settings below.
+5. Notice how the ExpDecay function has appeared in the Functions list on the Fit Property Browser, and there are pre-set Settings below.
 For now, just click on the drop-down menu "Fit" and run a normal Fit.
-|RunFitOption.png|
+
+.. figure:: /images/RunFitOption.png
+   :alt: RunFitOption
+   :align: center
+
 6. Examine the results... 
 
 Fit results
@@ -72,7 +76,8 @@ C. **Output workspaces** will be created and available via the main Mantid Works
 .. figure:: /images/FitResults.png
    :alt: FitResults.png
 
-   There are three output workspaces:
+
+**There are three output workspaces**:
 
    1. A TableWorkspace with the name suffixed with "_Parameters". It
    contains the fitting parameters and their corresponding errors.
@@ -101,8 +106,6 @@ C. **Output workspaces** will be created and available via the main Mantid Works
 .. |AddOtherFunctionOption.png| image:: /images/AddOtherFunctionOption.png
    :width: 500px
 .. |ChooseExpDecay.png| image:: /images/ChooseExpDecay.png
-   :width: 150 px
-.. |RunFitOption.png| image:: /images/RunFitOption.png
 .. |MUSRDataSetFittingResults.png| image:: /images/MUSRDataSetFittingResults.png
 
 

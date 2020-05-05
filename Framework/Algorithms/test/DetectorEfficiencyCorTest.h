@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DETECTOREFFICIENCYCORTEST_H_
-#define DETECTOREFFICIENCYCORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -42,7 +41,6 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1);
     dummyWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
-    const std::string inputWS = "testInput";
 
     Mantid::Algorithms::DetectorEfficiencyCor corrector;
     TS_ASSERT_THROWS_NOTHING(corrector.initialize());
@@ -130,7 +128,7 @@ private:
     bool addTypeTag = true;
     auto shape = ShapeFactory().createShape(xmlShape, addTypeTag);
 
-    boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> instrument = std::make_shared<Instrument>();
     const int ndets(2);
     std::vector<Detector *> detectors;
     for (int i = 0; i < ndets; ++i) {
@@ -160,5 +158,3 @@ private:
     return std::move(space2D);
   }
 };
-
-#endif /*DETECTOREFFICIENCYCOR_H_*/

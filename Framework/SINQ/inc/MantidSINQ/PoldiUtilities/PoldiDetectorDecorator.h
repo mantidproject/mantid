@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIDETECTORDECORATOR_H_
-#define MANTID_SINQ_POLDIDETECTORDECORATOR_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
@@ -27,11 +26,11 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiDetectorDecorator : public PoldiAbstractDetector {
 public:
   PoldiDetectorDecorator(
-      boost::shared_ptr<PoldiAbstractDetector> decoratedDetector =
-          boost::shared_ptr<PoldiAbstractDetector>());
+      std::shared_ptr<PoldiAbstractDetector> decoratedDetector =
+          std::shared_ptr<PoldiAbstractDetector>());
 
-  void setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector> detector);
-  boost::shared_ptr<PoldiAbstractDetector> decoratedDetector();
+  void setDecoratedDetector(std::shared_ptr<PoldiAbstractDetector> detector);
+  std::shared_ptr<PoldiAbstractDetector> decoratedDetector();
 
   void
   loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
@@ -52,10 +51,8 @@ public:
 protected:
   virtual void detectorSetHook();
 
-  boost::shared_ptr<PoldiAbstractDetector> m_decoratedDetector;
+  std::shared_ptr<PoldiAbstractDetector> m_decoratedDetector;
 };
 
 } // namespace Poldi
 } // namespace Mantid
-
-#endif /* MANTID_SINQ_POLDIDETECTORDECORATOR_H_ */

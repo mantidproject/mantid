@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -10,8 +10,6 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import argparse
 import atexit
 import importlib
@@ -21,11 +19,12 @@ from functools import partial
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
-from mantid.py3compat import setswitchinterval
+from sys import setswitchinterval
 from mantid.utils import is_required_version
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.plugins.exception_handler import exception_logger
 from workbench.utils.windowfinder import find_window
+from workbench.widgets.about.presenter import AboutPresenter
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 # -----------------------------------------------------------------------------
@@ -353,11 +352,14 @@ class MainWindow(QMainWindow):
             self, "Mantid Homepage", on_triggered=self.open_mantid_homepage)
         action_mantid_forum = create_action(
             self, "Mantid Forum", on_triggered=self.open_mantid_forum)
+        action_about = create_action(
+            self, "About Mantid Workbench", on_triggered=self.open_about)
 
         self.help_menu_actions = [
             action_mantid_help, action_mantid_concepts,
             action_algorithm_descriptions, None,
-            action_mantid_homepage, action_mantid_forum]
+            action_mantid_homepage, action_mantid_forum,
+            None, action_about]
 
     def create_widget_actions(self):
         """
@@ -695,6 +697,10 @@ class MainWindow(QMainWindow):
     def open_mantid_forum(self):
         self.interface_manager.showWebPage('https://forum.mantidproject.org/')
 
+    def open_about(self):
+        about = AboutPresenter(self)
+        about.show()
+
     def readSettings(self, settings):
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
@@ -792,6 +798,11 @@ def start_workbench(app, command_line_options):
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
+
+    # Set the mainwindow as the parent for additional QMainWindow instances
+    from workbench.config import set_additional_windows_parent
+    set_additional_windows_parent(main_window)
+
     # decorates the excepthook callback with the reference to the main window
     # this is used in case the user wants to terminate the workbench from the error window shown
     sys.excepthook = partial(exception_logger, main_window)
@@ -831,12 +842,16 @@ def start_workbench(app, command_line_options):
 
     main_window.show()
     main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
-    # Project Recovey on startup
+    # Project Recovery on startup
     main_window.project_recovery.repair_checkpoints()
     if main_window.project_recovery.check_for_recover_checkpoint():
         main_window.project_recovery.attempt_recovery()
     else:
         main_window.project_recovery.start_recovery_thread()
+
+    if not (command_line_options.execute or command_line_options.quit):
+        if AboutPresenter.should_show_on_startup():
+            AboutPresenter(main_window).show()
 
     # lift-off!
     return app.exec_()

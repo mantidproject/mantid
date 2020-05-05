@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
@@ -10,7 +10,6 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 - Email Pascal Manuel @ ISIS if things break here and let him know how his scripts may need to be modified.
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import os
 from mantid.simpleapi import *
@@ -18,7 +17,7 @@ from mantid.simpleapi import *
 
 class WishMasking(systemtesting.MantidSystemTest):
 
-        # Utility function will return the masking corresponding to a workspace index from a cal file.
+    # Utility function will return the masking corresponding to a workspace index from a cal file.
     def get_masking_for_index(self, cal_file, requested_index):
         while True:
             line = cal_file.readline()
@@ -149,7 +148,6 @@ class WishMasking(systemtesting.MantidSystemTest):
             self.assertEqual(merged_mask_boundary_outside,  update_mask_boundary_outside)
 
         finally:
-                        #clean up no matter what.
             merged_cal_file.close()
             update_cal_file.close()
             os.remove(master_cal_file_path)

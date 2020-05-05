@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -15,7 +15,7 @@ from matplotlib.pyplot import figure
 from numpy import linspace, random
 
 from mantid.plots import MantidAxes  # register mantid projection  # noqa
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
@@ -141,8 +141,29 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         presenter.apply_properties()
         self.assertEqual("New Label", img.get_label())
         self.assertEqual('jet', img.cmap.name)
-        self.assertEqual(1e-6, img.norm.vmin)
+        self.assertEqual(0.0001, img.norm.vmin)
         self.assertEqual(4, img.norm.vmax)
+        self.assertTrue(isinstance(img.norm, LogNorm))
+
+    def test_apply_properties_log_scale_with_negative_vmin_and_vmax(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        props = {'title': '(0, 0) - img label',
+                 'label': 'New Label',
+                 'colormap': 'jet',
+                 'vmin': -10,
+                 'vmax': -5,
+                 'scale': 'Logarithmic',
+                 'interpolation': 'Hanning'}
+        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - img label',
+                         get_properties=lambda: ImageProperties(props))
+        presenter = self._generate_presenter(fig=fig, view=mock_view)
+        presenter.apply_properties()
+        self.assertEqual("New Label", img.get_label())
+        self.assertEqual('jet', img.cmap.name)
+        self.assertEqual(0.0001, img.norm.vmin)
+        self.assertEqual(1, img.norm.vmax)
         self.assertTrue(isinstance(img.norm, LogNorm))
 
     def test_interpolation_disabled_for_pcolormesh_image(self):

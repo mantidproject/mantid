@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FLOATINGPOINTCOMPARISON_H_
-#define MANTID_KERNEL_FLOATINGPOINTCOMPARISON_H_
+#pragma once
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -22,5 +21,3 @@ template <typename T> MANTID_KERNEL_DLL bool ltEquals(const T x, const T y);
 template <typename T> MANTID_KERNEL_DLL bool gtEquals(const T x, const T y);
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // MANTID_KERNEL_FLOATINGPOINTCOMPARISON_H_

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadOff.h"
 #include "MantidGeometry/Instrument.h"
@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-LoadOff::LoadOff(std::string filename, ScaleUnits scaleType)
+LoadOff::LoadOff(const std::string &filename, ScaleUnits scaleType)
     : MeshFileIO(scaleType) {
   m_file = std::ifstream(filename.c_str());
   if (!m_file) {

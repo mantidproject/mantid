@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
-#define MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
+#pragma once
 
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -36,7 +36,8 @@ class CostFuncFitting;
     - exec()
     - initConcrete() to declare more properties
 */
-class DLLExport IFittingAlgorithm : public API::ParallelAlgorithm {
+class MANTID_CURVEFITTING_DLL IFittingAlgorithm
+    : public API::ParallelAlgorithm {
 public:
   const std::string category() const override;
 
@@ -59,15 +60,15 @@ protected:
   void addWorkspaces();
   std::vector<std::string> getCostFunctionNames() const;
   void declareCostFunctionProperty();
-  boost::shared_ptr<CostFunctions::CostFuncFitting>
+  std::shared_ptr<CostFunctions::CostFuncFitting>
   getCostFunctionInitialized() const;
 
   /// Keep the domain type
   API::IDomainCreator::DomainType m_domainType{API::IDomainCreator::Simple};
   /// Pointer to the fitting function
-  boost::shared_ptr<API::IFunction> m_function;
+  std::shared_ptr<API::IFunction> m_function;
   /// Pointer to a domain creator
-  boost::shared_ptr<API::IDomainCreator> m_domainCreator;
+  std::shared_ptr<API::IDomainCreator> m_domainCreator;
   std::vector<std::string> m_workspacePropertyNames;
   std::vector<std::string> m_workspaceIndexPropertyNames;
 
@@ -76,5 +77,3 @@ protected:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_IFITTINGALGORITHM_H_ */

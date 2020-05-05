@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
@@ -154,7 +154,7 @@ QString UserSubWindow::openFileDialog(const bool save,
  *  @param parent :: a pointer to an object that will look after it deleting it
  */
 QLabel *UserSubWindow::newValidator(QWidget *parent) {
-  QLabel *validLbl = new QLabel("*", parent);
+  auto *validLbl = new QLabel("*", parent);
   QPalette pal = validLbl->palette();
   pal.setColor(QPalette::WindowText, Qt::darkRed);
   validLbl->setPalette(pal);

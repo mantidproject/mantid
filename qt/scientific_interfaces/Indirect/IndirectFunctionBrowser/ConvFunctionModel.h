@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
-#define MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
+#pragma once
 
 #include "ConvTypes.h"
 #include "DllConfig.h"
@@ -116,7 +115,8 @@ private:
   boost::optional<QString> getParameterDescription(ParamID name) const;
   boost::optional<QString> getPrefix(ParamID name) const;
   void setCurrentValues(const QMap<ParamID, double> &);
-  void applyParameterFunction(std::function<void(ParamID)> paramFun) const;
+  void
+  applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
@@ -131,8 +131,8 @@ private:
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
-  void checkConvolution(IFunction_sptr fun);
-  void checkSingleFunction(IFunction_sptr fun, bool &isFitTypeSet);
+  void checkConvolution(const IFunction_sptr &fun);
+  void checkSingleFunction(const IFunction_sptr &fun, bool &isFitTypeSet);
 
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
@@ -154,5 +154,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_ */

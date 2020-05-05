@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_
-#define MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -324,7 +323,7 @@ public:
   }
 
 private:
-  static void addSampleLogs(MatrixWorkspace_sptr ws, const double TOF) {
+  static void addSampleLogs(const MatrixWorkspace_sptr &ws, const double TOF) {
     const double length = flightLengthIN4(ws);
     const double Ei = incidentEnergy(TOF, length);
     ws->mutableRun().addProperty("EI", Ei);
@@ -332,8 +331,8 @@ private:
     ws->mutableRun().addProperty("wavelength", lambda);
   }
 
-  static void assertTOFShift(MatrixWorkspace_sptr shiftedWs,
-                             MatrixWorkspace_sptr ws, const double ei,
+  static void assertTOFShift(const MatrixWorkspace_sptr &shiftedWs,
+                             const MatrixWorkspace_sptr &ws, const double ei,
                              const double wavelength, const double shift) {
     TS_ASSERT(shiftedWs);
     TS_ASSERT_EQUALS(shiftedWs->run().getPropertyAsSingleValue("EI"), ei);
@@ -413,7 +412,7 @@ private:
     }
   }
 
-  static double flightLengthIN4(MatrixWorkspace_const_sptr ws) {
+  static double flightLengthIN4(const MatrixWorkspace_const_sptr &ws) {
     const double l1 = ws->spectrumInfo().l1();
     const double l2 = ws->spectrumInfo().l2(1);
     return l1 + l2;
@@ -438,5 +437,3 @@ private:
            Mantid::PhysicalConstants::NeutronMass * 1e4;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_ */

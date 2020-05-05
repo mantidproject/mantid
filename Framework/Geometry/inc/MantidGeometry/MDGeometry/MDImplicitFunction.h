@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_
-#define MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -279,9 +278,7 @@ protected:
   size_t m_numPlanes;
 };
 
-using MDImplicitFunction_sptr = boost::shared_ptr<MDImplicitFunction>;
+using MDImplicitFunction_sptr = std::shared_ptr<MDImplicitFunction>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_ */

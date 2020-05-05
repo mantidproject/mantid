@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidAPI/FileProperty.h"
@@ -180,11 +180,11 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
 
   ExperimentInfo_sptr ws;
   MultipleExperimentInfos_sptr MDWS =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
+      std::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
   if (MDWS != nullptr) {
     ws = MDWS->getExperimentInfo(0);
   } else {
-    ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+    ws = std::dynamic_pointer_cast<ExperimentInfo>(ws1);
   }
   if (!ws)
     throw std::invalid_argument("Must specify either a MatrixWorkspace or a "

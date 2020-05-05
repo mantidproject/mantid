@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORYTEST_H_
-#define MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORYTEST_H_
+#pragma once
 
 #include "MantidDataHandling/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/Container.h"
@@ -14,7 +13,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::DataHandling::SampleEnvironmentFactory;
 using Mantid::DataHandling::SampleEnvironmentSpecFileFinder;
@@ -98,10 +97,10 @@ private:
       using namespace Mantid::Kernel;
 
       ShapeFactory factory;
-      auto small = boost::make_shared<Container>(factory.createShape(
+      auto small = std::make_shared<Container>(factory.createShape(
           ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1")));
       small->setID("8mm");
-      auto large = boost::make_shared<Container>(factory.createShape(
+      auto large = std::make_shared<Container>(factory.createShape(
           ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2")));
       large->setID("10mm");
 
@@ -114,5 +113,3 @@ private:
     }
   };
 };
-
-#endif /* MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORYTEST_H_ */

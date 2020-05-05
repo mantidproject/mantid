@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef DATASETDIALOG_H
-#define DATASETDIALOG_H
+#pragma once
 
 #include "ApplicationWindow.h"
 #include <QDialog>
@@ -46,7 +45,7 @@ class DataSetDialog : public QDialog {
 
 public:
   DataSetDialog(const QString &text, ApplicationWindow *app, Graph *g = nullptr,
-                Qt::WFlags fl = nullptr);
+                const Qt::WFlags &fl = nullptr);
 
 public slots:
   void accept() override;
@@ -72,5 +71,3 @@ private:
   QGroupBox *groupBox1;
   QComboBox *boxName;
 };
-
-#endif

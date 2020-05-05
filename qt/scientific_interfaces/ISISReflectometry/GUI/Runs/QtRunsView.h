@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
-#define MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "GUI/RunsTable/QtRunsTableView.h"
@@ -34,7 +33,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView
       public IRunsView {
   Q_OBJECT
 public:
-  QtRunsView(QWidget *parent, RunsTableViewFactory makeView);
+  QtRunsView(QWidget *parent, const RunsTableViewFactory &makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
@@ -76,9 +75,9 @@ public:
   std::string getSearchString() const override;
   int getLiveDataUpdateInterval() const override;
 
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const override;
 
   // Live data monitor
@@ -91,8 +90,8 @@ private:
   /// Implement our own timer event to trigger autoreduction
   void timerEvent(QTimerEvent *event) override;
 
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   void setSelected(QComboBox &box, std::string const &str);
 
@@ -130,5 +129,3 @@ private slots:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_ */

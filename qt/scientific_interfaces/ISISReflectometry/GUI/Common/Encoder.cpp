@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "Encoder.h"
 #include "../../Reduction/Group.h"
 #include "../../Reduction/ReductionJobs.h"
@@ -308,6 +307,14 @@ QMap<QString, QVariant> Encoder::encodeExperiment(const QtExperimentView *gui) {
              QVariant(gui->m_ui.transStitchParamsEdit->text()));
   map.insert(QString("transScaleRHSCheckBox"),
              QVariant(gui->m_ui.transScaleRHSCheckBox->isChecked()));
+  map.insert(QString("subtractBackgroundCheckBox"),
+             QVariant(gui->m_ui.subtractBackgroundCheckBox->isChecked()));
+  map.insert(QString("backgroundMethodComboBox"),
+             QVariant(gui->m_ui.backgroundMethodComboBox->currentIndex()));
+  map.insert(QString("polynomialDegreeSpinBox"),
+             QVariant(gui->m_ui.polynomialDegreeSpinBox->value()));
+  map.insert(QString("costFunctionComboBox"),
+             QVariant(gui->m_ui.costFunctionComboBox->currentIndex()));
   map.insert(QString("polCorrCheckBox"),
              QVariant(gui->m_ui.polCorrCheckBox->isChecked()));
   map.insert(QString("floodCorComboBox"),

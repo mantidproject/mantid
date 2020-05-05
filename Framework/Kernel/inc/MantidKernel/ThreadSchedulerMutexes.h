@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_THREADSCHEDULERMUTEXES_H_
-#define MANTID_KERNEL_THREADSCHEDULERMUTEXES_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
 
+#include <algorithm>
 #include <memory>
 #include <mutex>
 #include <numeric>
@@ -46,7 +46,7 @@ public:
     std::lock_guard<std::mutex> lock(m_queueLock);
     m_cost += newTask->cost();
 
-    boost::shared_ptr<std::mutex> mut = newTask->getMutex();
+    std::shared_ptr<std::mutex> mut = newTask->getMutex();
     m_supermap[mut].emplace(newTask->cost(), newTask);
   }
 
@@ -64,7 +64,7 @@ public:
       // is busy
       for (auto &mutexedMap : m_supermap) {
         // The key is the mutex associated with the inner map
-        boost::shared_ptr<std::mutex> mapMutex = mutexedMap.first;
+        std::shared_ptr<std::mutex> mapMutex = mutexedMap.first;
         if ((!mapMutex) || (m_mutexes.empty()) ||
             (m_mutexes.find(mapMutex) == m_mutexes.end())) {
           // The mutex of this map is free!
@@ -101,7 +101,7 @@ public:
 
     // --- Add the mutex (if any) to the list of "busy" ones ---
     if (temp) {
-      boost::shared_ptr<std::mutex> mut = temp->getMutex();
+      std::shared_ptr<std::mutex> mut = temp->getMutex();
       if (mut)
         m_mutexes.insert(mut);
     }
@@ -117,7 +117,7 @@ public:
    */
   void finished(Task *task, size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    boost::shared_ptr<std::mutex> mut = task->getMutex();
+    std::shared_ptr<std::mutex> mut = task->getMutex();
     if (mut) {
       std::lock_guard<std::mutex> lock(m_queueLock);
       // We take this mutex off the list of used ones.
@@ -131,7 +131,7 @@ public:
     // Add up the sizes of all contained maps.
     return std::accumulate(
         m_supermap.cbegin(), m_supermap.cend(), size_t{0},
-        [](size_t total, const std::pair<const boost::shared_ptr<std::mutex> &,
+        [](size_t total, const std::pair<const std::shared_ptr<std::mutex> &,
                                          const InnerMap &> &mutexedMap) {
           return total + mutexedMap.second.size();
         });
@@ -141,12 +141,10 @@ public:
   /// @return true if the queue is empty
   bool empty() override {
     std::lock_guard<std::mutex> lock(m_queueLock);
-    auto mapWithTasks =
-        std::find_if_not(m_supermap.cbegin(), m_supermap.cend(),
-                         [](const std::pair<const boost::shared_ptr<std::mutex>,
-                                            const InnerMap &> &mutexedMap) {
-                           return mutexedMap.second.empty();
-                         });
+    auto mapWithTasks = std::find_if_not(
+        m_supermap.cbegin(), m_supermap.cend(),
+        [](const std::pair<const std::shared_ptr<std::mutex>, const InnerMap &>
+               &mutexedMap) { return mutexedMap.second.empty(); });
     return mapWithTasks == m_supermap.cend();
   }
 
@@ -168,17 +166,15 @@ protected:
   /// Map to tasks, sorted by cost
   using InnerMap = std::multimap<double, std::shared_ptr<Task>>;
   /// Map to maps, sorted by Mutex*
-  using SuperMap = std::map<boost::shared_ptr<std::mutex>, InnerMap>;
+  using SuperMap = std::map<std::shared_ptr<std::mutex>, InnerMap>;
 
   /** A super map; first key = a Mutex *
    * Inside it: second key = the cost. */
   SuperMap m_supermap;
 
   /// Vector of currently used mutexes.
-  std::set<boost::shared_ptr<std::mutex>> m_mutexes;
+  std::set<std::shared_ptr<std::mutex>> m_mutexes;
 };
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_THREADSCHEDULERMUTEXES_H_ */

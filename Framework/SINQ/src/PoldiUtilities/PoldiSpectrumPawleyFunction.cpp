@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -20,8 +20,8 @@ PoldiSpectrumPawleyFunction::PoldiSpectrumPawleyFunction()
 /// This function does nothing to prevent setting the workspace on the wrapped
 /// function (unit conversion will not work and is not needed).
 void PoldiSpectrumPawleyFunction::setMatrixWorkspace(
-    boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+    std::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX,
+    double endX) {
   UNUSED_ARG(workspace);
   UNUSED_ARG(wi);
   UNUSED_ARG(startX);
@@ -93,7 +93,7 @@ IPawleyFunction_sptr PoldiSpectrumPawleyFunction::getPawleyFunction() const {
 void PoldiSpectrumPawleyFunction::beforeDecoratedFunctionSet(
     const IFunction_sptr &fn) {
   IPawleyFunction_sptr pawleyFunction =
-      boost::dynamic_pointer_cast<IPawleyFunction>(fn);
+      std::dynamic_pointer_cast<IPawleyFunction>(fn);
 
   if (!pawleyFunction) {
     throw std::invalid_argument("Function is not a pawley function.");

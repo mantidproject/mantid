@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REMOVEPROMPTPULSE_H_
-#define MANTID_ALGORITHMS_REMOVEPROMPTPULSE_H_
+#pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +18,8 @@ namespace Algorithms {
   @author
   @date 2011-07-18
 */
-class DLLExport RemovePromptPulse : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemovePromptPulse
+    : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;
@@ -50,5 +50,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_REMOVEPROMPTPULSE_H_ */

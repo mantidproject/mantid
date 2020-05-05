@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFFunctionPlotData.h"
 #include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
@@ -17,6 +17,8 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,8 +38,8 @@ auto FUNCTION_CURVE_COLOR = Qt::magenta;
 /// @param endX :: An upper bound of the evaluation interval.
 /// @param nX :: A number of values to evaluate.
 MDFFunctionPlotData::MDFFunctionPlotData(
-    boost::shared_ptr<Mantid::API::IFunction> fun, double startX, double endX,
-    size_t nX)
+    const std::shared_ptr<Mantid::API::IFunction> &fun, double startX,
+    double endX, size_t nX)
     : m_function(fun), m_functionCurve(new QwtPlotCurve()) {
   setDomain(startX, endX, nX);
   auto pen = m_functionCurve->pen();

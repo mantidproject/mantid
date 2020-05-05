@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_TRACK_H_
-#define MANTID_GEOMETRY_TRACK_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -15,6 +14,9 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/Tolerance.h"
+
+#include <boost/container/small_vector.hpp>
+
 #include <iosfwd>
 #include <list>
 
@@ -142,8 +144,8 @@ struct IntersectionPoint {
  */
 class MANTID_GEOMETRY_DLL Track {
 public:
-  using LType = std::vector<Link>;
-  using PType = std::vector<IntersectionPoint>;
+  using LType = boost::container::small_vector<Link, 5>;
+  using PType = boost::container::small_vector<IntersectionPoint, 5>;
 
 public:
   /// Default constructor
@@ -161,7 +163,6 @@ public:
   void removeCojoins();
   /// Construct links between added points
   void buildLink();
-
   /// Set a starting point and direction
   void reset(const Kernel::V3D &startPoint, const Kernel::V3D &direction);
   /// Clear the current set of intersection results
@@ -205,5 +206,3 @@ private:
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
-
-#endif /*MANTID_GEOMETRY_TRACK_H_*/

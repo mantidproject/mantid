@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMD_H_
-#define MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -46,7 +45,7 @@ private:
 
   template <class T, class MDE, size_t nd>
   void convertEventList(
-      boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
+      std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
       size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
       uint16_t runIndex, int32_t detectorID);
 
@@ -65,5 +64,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMD_H_ */

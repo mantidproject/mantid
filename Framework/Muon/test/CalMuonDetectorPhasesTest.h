@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALMUONDETECTORPHASESTEST_H_
-#define CALMUONDETECTORPHASESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -100,13 +99,13 @@ public:
    * We have to use the ADS to test WorkspaceGroups
    */
   void testValidateInputsWithWSGroup() {
-    auto ws1 = boost::static_pointer_cast<Workspace>(
+    auto ws1 = std::static_pointer_cast<Workspace>(
         createWorkspace(2, 4, "Microseconds"));
-    auto ws2 = boost::static_pointer_cast<Workspace>(
+    auto ws2 = std::static_pointer_cast<Workspace>(
         createWorkspace(2, 4, "Microseconds"));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().add("group", group);
     group->add("workspace1");
     group->add("workspace2");
@@ -181,14 +180,14 @@ private:
                                        const std::string &mainFieldDirection) {
     auto ws = createWorkspace(nspec, maxt, units);
     auto instrument =
-        boost::make_shared<Mantid::Geometry::Instrument>(instrumentName);
+        std::make_shared<Mantid::Geometry::Instrument>(instrumentName);
     ws->setInstrument(instrument);
     ws->mutableRun().addProperty("main_field_direction", mainFieldDirection);
     return ws;
   }
 
   /// Runs test of execution on the given workspace
-  void runExecutionTest(const MatrixWorkspace_sptr workspace) {
+  void runExecutionTest(const MatrixWorkspace_sptr &workspace) {
     auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
     calc->initialize();
     calc->setChild(true);
@@ -223,5 +222,3 @@ private:
     TS_ASSERT_DELTA(tab->Double(3, 2), 5.504, 0.001);
   }
 };
-
-#endif /*CALMUONDETECTORPHASESTEST_H_*/

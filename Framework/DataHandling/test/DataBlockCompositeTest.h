@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_DATABLOCKCOMPOSITETEST_H_
-#define MANTID_DATAHANDLING_DATABLOCKCOMPOSITETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
-#include <boost/shared_array.hpp>
+#include <memory>
 
 using Mantid::DataHandling::DataBlock;
 using Mantid::DataHandling::DataBlockComposite;
@@ -217,8 +216,7 @@ public:
     // Arrange
     constexpr int64_t size = 11;
     // Has intervals [1,1], [3,5], [8,11], [16, 16], [21,22]
-    boost::shared_array<int> indexArray(
-        new int[size]{1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
+    std::vector<int> indexArray({1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
@@ -274,8 +272,7 @@ public:
     // Arrange
     constexpr int64_t size = 11;
     // Has intervals [1,1], [3,5], [8,11], [16, 16], [21,22]
-    boost::shared_array<int> indexArray(
-        new int[size]{1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
+    std::vector<int> indexArray({1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
@@ -346,8 +343,7 @@ public:
     // Arrange
     constexpr int64_t size = 12;
     // Has intervals [1,5], [8,11], [16, 16], [21,22]
-    boost::shared_array<int> indexArray(
-        new int[size]{1, 2, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
+    std::vector<int> indexArray({1, 2, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
@@ -404,8 +400,7 @@ public:
     // Arrange
     constexpr int64_t size = 11;
     // Has intervals [1,1], [3,5], [8,11], [16, 16], [21,22]
-    boost::shared_array<int> indexArray(
-        new int[size]{1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
+    std::vector<int> indexArray({1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
@@ -1005,5 +1000,3 @@ private:
     return composite;
   }
 };
-
-#endif /* MANTID_DATAHANDLING_DATABLOCKCOMPOSITETEST_H_ */

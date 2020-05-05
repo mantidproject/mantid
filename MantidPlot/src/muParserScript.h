@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MUPARSER_SCRIPT_H
-#define MUPARSER_SCRIPT_H
+#pragma once
 
 #include "Script.h"
 
@@ -100,5 +99,3 @@ private:
 public:
   static muParserScript *current;
 };
-
-#endif

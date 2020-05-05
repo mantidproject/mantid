@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMPTONPROFILETESTHELPERS_H_
-#define COMPTONPROFILETESTHELPERS_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -151,7 +150,7 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   using namespace Mantid::Geometry;
 
   // Requires an instrument.
-  auto inst = boost::make_shared<Instrument>();
+  auto inst = std::make_shared<Instrument>();
 
   // Source/sample
   auto *source = new ObjComponent("source");
@@ -207,5 +206,3 @@ static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
   pmap.addDouble(compID, "sigma_gauss", 20);
 }
 } // namespace ComptonProfileTestHelpers
-
-#endif /* COMPTONPROFILETESTHELPERS_H_ */

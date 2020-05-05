@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SMOOTHDIALOG_H
-#define SMOOTHDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -44,7 +43,7 @@ class SmoothCurveDialog : public QDialog {
 
 public:
   SmoothCurveDialog(int method, QWidget *parent = nullptr,
-                    Qt::WFlags fl = nullptr);
+                    const Qt::WFlags &fl = nullptr);
 
 public slots:
   void setGraph(Graph *g);
@@ -60,5 +59,3 @@ private:
   QSpinBox *boxPointsLeft, *boxPointsRight, *boxOrder;
   ColorBox *boxColor;
 };
-
-#endif

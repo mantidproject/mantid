@@ -28,8 +28,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef DATA_PICKER_TOOL_H
-#define DATA_PICKER_TOOL_H
+#pragma once
 
 #include "PlotToolInterface.h"
 #include <qwt_plot_marker.h>
@@ -79,5 +78,3 @@ private:
   MoveMode d_move_mode;
   QPoint d_restricted_move_pos;
 };
-
-#endif // ifndef DATA_PICKER_TOOL_H

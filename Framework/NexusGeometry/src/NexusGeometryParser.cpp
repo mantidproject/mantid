@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidGeometry/Instrument.h"
@@ -555,7 +555,7 @@ private:
     }
   }
 
-  boost::shared_ptr<const Geometry::IObject>
+  std::shared_ptr<const Geometry::IObject>
   parseNexusCylinder(const Group &shapeGroup) {
     H5std_string pointsToVertices = "cylinders";
     auto cPoints = readNXInts(shapeGroup, pointsToVertices);
@@ -573,7 +573,7 @@ private:
   }
 
   // Parse OFF (mesh) nexus geometry
-  boost::shared_ptr<const Geometry::IObject>
+  std::shared_ptr<const Geometry::IObject>
   parseNexusMesh(const Group &shapeGroup) {
     const auto faceIndices = readNXUInts32(shapeGroup, "faces");
     const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
@@ -718,7 +718,7 @@ private:
    * @param searchTubes : out parameter, true if tubes can be searched
    * @return shared pointer holding IObject subtype or null shared pointer
    */
-  boost::shared_ptr<const Geometry::IObject>
+  std::shared_ptr<const Geometry::IObject>
   parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
     // Note in the following we are NOT looking for named groups, only groups
     // that have NX_class attributes of either NX_CYLINDER or NX_OFF. That way
@@ -737,7 +737,7 @@ private:
     } else if (off)
       return parseNexusMesh(*off);
     else {
-      return boost::shared_ptr<const Geometry::IObject>(nullptr);
+      return std::shared_ptr<const Geometry::IObject>(nullptr);
     }
   }
 

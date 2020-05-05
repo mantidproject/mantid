@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #if GCC_VERSION >= 40800 // 4.8.0
 GNU_DIAG_OFF("literal-suffix")
@@ -29,7 +29,7 @@ DECLARE_ALGORITHM(CatalogSearch)
 
 /// Initialisation method.
 void CatalogSearch::init() {
-  auto isDate = boost::make_shared<Kernel::DateValidator>();
+  auto isDate = std::make_shared<Kernel::DateValidator>();
 
   // Properties related to the search fields the user will fill in to improve
   // search.

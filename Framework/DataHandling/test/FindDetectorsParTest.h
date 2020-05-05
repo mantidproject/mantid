@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FIND_DETECTORSPAR_H_
-#define FIND_DETECTORSPAR_H_
+#pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
@@ -409,7 +409,7 @@ public:
                            // algorithm in this way ensures that function is
                            // executed
 
-    findPar = FrameworkManager::Instance().createAlgorithm("FindDetectorsPar");
+    findPar = AlgorithmManager::Instance().create("FindDetectorsPar");
   }
   ~FindDetectorsParTest() override {
     FrameworkManager::Instance().clearAlgorithms();
@@ -417,7 +417,7 @@ public:
   }
 
 private:
-  IAlgorithm *findPar;
+  IAlgorithm_sptr findPar;
   MatrixWorkspace_sptr inputWS;
   std::vector<Geometry::IDetector_const_sptr> partDetectors;
 
@@ -460,7 +460,7 @@ private:
 
     inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
 
-    boost::shared_ptr<Geometry::Instrument> spInst(
+    std::shared_ptr<Geometry::Instrument> spInst(
         new Geometry::Instrument("basic_ring"));
     Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
     source->setPos(0.0, 0.0, -10.0);
@@ -560,4 +560,3 @@ private:
     TSM_ASSERT_EQUALS("azimuthal width wrong ", azw_pattern, bufs[4].str());
   }
 };
-#endif

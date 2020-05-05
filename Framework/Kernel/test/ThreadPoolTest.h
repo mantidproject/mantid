@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef THREADPOOLTEST_H_
-#define THREADPOOLTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -18,8 +17,8 @@
 
 #include <Poco/Thread.h>
 
-#include <boost/make_shared.hpp>
 #include <cstdlib>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -338,7 +337,7 @@ public:
     TimeWaster mywaster;
     size_t num = 30000;
     mywaster.total = 0;
-    boost::shared_ptr<std::mutex> lastMutex;
+    std::shared_ptr<std::mutex> lastMutex;
     for (size_t i = 0; i <= num; i++) {
       auto task = std::make_shared<FunctionTask>(
           std::bind(&TimeWaster::add_to_number, &mywaster, i),
@@ -346,7 +345,7 @@ public:
       // Create a new mutex every 1000 tasks. This is more relevant to the
       // ThreadSchedulerMutexes; others ignore it.
       if (i % 1000 == 0)
-        lastMutex = boost::make_shared<std::mutex>();
+        lastMutex = std::make_shared<std::mutex>();
       task->setMutex(lastMutex);
       p.schedule(task);
     }
@@ -437,5 +436,3 @@ public:
     TS_ASSERT_EQUALS(ThreadPoolTest_TaskThatThrows_counter, 1);
   }
 };
-
-#endif

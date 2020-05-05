@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DIFFROTDISCRETECIRCLETEST_H_
-#define DIFFROTDISCRETECIRCLETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -42,7 +41,7 @@ public:
     const double w0 = random_value(-1.0, 1.0);
     const double h = random_value(1.0, 1000.0);
     const double fwhm = random_value(1.0, 100.0);
-    boost::shared_ptr<Gaussian> resolution = boost::make_shared<Gaussian>();
+    std::shared_ptr<Gaussian> resolution = std::make_shared<Gaussian>();
     resolution->initialize(); // declare parameters
     resolution->setCentre(w0);
     resolution->setHeight(h);
@@ -54,7 +53,7 @@ public:
     const double r = random_value(0.3, 9.8);
     const double Q = 0.9;
     const int N = 6;
-    boost::shared_ptr<ElasticDiffRotDiscreteCircle> structure_factor(
+    std::shared_ptr<ElasticDiffRotDiscreteCircle> structure_factor(
         new ElasticDiffRotDiscreteCircle());
     structure_factor->setParameter("Height", I);
     structure_factor->setParameter("Radius", r);
@@ -187,7 +186,7 @@ public:
     func.setAttributeValue("N", N);
 
     // check values where correctly initialized
-    auto ids = boost::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
+    auto ids = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
         func.getFunction(1));
     TS_ASSERT_EQUALS(ids->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ids->getParameter("Radius"), R);
@@ -197,7 +196,7 @@ public:
 
     // check the ties were applied correctly
     func.applyTies(); // elastic parameters are tied to inelastic parameters
-    auto eds = boost::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
+    auto eds = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
         func.getFunction(0));
     TS_ASSERT_EQUALS(eds->getParameter("Height"), I);
     TS_ASSERT_EQUALS(eds->getParameter("Radius"), R);
@@ -218,7 +217,7 @@ public:
     func.setParameter("Decay", tao);
 
     // check the parameter of the inelastic part
-    auto ifunc = boost::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
+    auto ifunc = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
         func.getFunction(1));
     TS_ASSERT_EQUALS(ifunc->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ifunc->getParameter("Radius"), R);
@@ -226,7 +225,7 @@ public:
 
     // check the parameters of the elastic part
     func.applyTies(); // elastic parameters are tied to inelastic parameters
-    auto efunc = boost::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
+    auto efunc = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
         func.getFunction(0));
     TS_ASSERT_EQUALS(efunc->getParameter("Height"), I);
     TS_ASSERT_EQUALS(efunc->getParameter("Radius"), R);
@@ -280,8 +279,7 @@ public:
     // check the parameters of the resolution did not change
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
-    auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
+    auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
                     0.00001); // allow for a small percent variation
@@ -386,8 +384,7 @@ private:
     // check the parameters of the resolution did not change
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
-    auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
+    auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
                     0.00001); // allow for a small percent variation
@@ -549,9 +546,8 @@ private:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
 
     // Create the instrument
-    boost::shared_ptr<Instrument> inst =
-        boost::make_shared<Instrument>("BASIS");
-    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+    std::shared_ptr<Instrument> inst = std::make_shared<Instrument>("BASIS");
+    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position
     ObjComponent *source = new ObjComponent(
@@ -610,5 +606,3 @@ private:
     return ws;
   }
 };
-
-#endif /* DIFFROTDISCRETECIRCLETEST_H_ */

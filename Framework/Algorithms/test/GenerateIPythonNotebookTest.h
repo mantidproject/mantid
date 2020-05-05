@@ -1,13 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOKTEST_H_
-#define MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOKTEST_H_
+#pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -160,11 +158,9 @@ public:
     API::WorkspaceHistory &history = ws->history();
     auto pAlg = std::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
-    history.addHistory(boost::make_shared<AlgorithmHistory>(
-        API::AlgorithmHistory(pAlg.get())));
+    history.addHistory(
+        std::make_shared<AlgorithmHistory>(API::AlgorithmHistory(pAlg.get())));
 
     pAlg.reset(nullptr);
   }
 };
-
-#endif // MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOKTEST_H_

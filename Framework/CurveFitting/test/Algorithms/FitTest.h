@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CURVEFITTING_FITTEST_H_
-#define CURVEFITTING_FITTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
@@ -95,13 +94,13 @@ public:
   }
 
   void test_empty_function() {
-    boost::shared_ptr<Mantid::API::MultiDomainFunction> multi;
+    std::shared_ptr<Mantid::API::MultiDomainFunction> multi;
 
     auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     TS_ASSERT_THROWS(
         alg->setProperty("Function",
-                         boost::dynamic_pointer_cast<IFunction>(multi)),
+                         std::dynamic_pointer_cast<IFunction>(multi)),
         const std::invalid_argument &);
   }
 
@@ -727,7 +726,7 @@ public:
     const int nX = 100;
     const int nY = nX - 1;
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, nX, nY));
 
     const double dx = 10 / 99;
@@ -807,7 +806,7 @@ public:
     int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     // in this case, x-values are just the running index
     auto &x = ws2D->dataX(0);
     for (int i = 0; i < timechannels; i++)
@@ -858,8 +857,7 @@ public:
 
   void test_function_convolution_fit_resolution() {
 
-    boost::shared_ptr<WorkspaceTester> data =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> data = std::make_shared<WorkspaceTester>();
     data->initialize(1, 100, 100);
 
     auto &x = data->dataX(0);
@@ -1030,12 +1028,11 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     // create mock data to test against
-    const std::string wsName = "ExpDecayMockData";
     const int histogramNumber = 1;
     const int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     Mantid::MantidVec &x = ws2D->dataX(0); // x-values
     for (int i = 0; i < timechannels; i++)
       x[i] = i;
@@ -1125,7 +1122,7 @@ public:
 
     auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
-    alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(multi));
+    alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(multi));
     auto ws1 = Mantid::TestHelpers::makeMultiDomainWorkspace1();
     alg->setProperty("InputWorkspace", ws1);
     alg->setProperty("WorkspaceIndex", 0);
@@ -1150,7 +1147,7 @@ public:
 
     Algorithms::Fit fit;
     fit.initialize();
-    fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(multi));
+    fit.setProperty("Function", std::dynamic_pointer_cast<IFunction>(multi));
 
     auto ws1 = Mantid::TestHelpers::makeMultiDomainWorkspace1();
     fit.setProperty("InputWorkspace", ws1);
@@ -1185,7 +1182,7 @@ public:
     // middle part has
     // constant value A1
 
-    MatrixWorkspace_sptr ws = boost::make_shared<WorkspaceTester>();
+    MatrixWorkspace_sptr ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 30, 30);
     {
       const double dx = 1.0;
@@ -1209,9 +1206,9 @@ public:
     // to two
     // parts of the workspace
 
-    boost::shared_ptr<MultiDomainFunction> mf =
-        boost::make_shared<MultiDomainFunction>();
-    mf->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
+    std::shared_ptr<MultiDomainFunction> mf =
+        std::make_shared<MultiDomainFunction>();
+    mf->addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
     mf->setParameter(0, 0.0);
     mf->setParameter(1, 0.0);
     std::vector<size_t> ind(2);
@@ -1224,7 +1221,7 @@ public:
         Mantid::API::AlgorithmManager::Instance().create("Fit");
     Mantid::API::IAlgorithm &fit = *alg;
     fit.initialize();
-    fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mf));
+    fit.setProperty("Function", std::dynamic_pointer_cast<IFunction>(mf));
     // at this point Fit knows the number of domains and creates additional
     // properties InputWorkspace_#
     TS_ASSERT(fit.existsProperty("InputWorkspace_1"));
@@ -1268,7 +1265,7 @@ public:
 
     // needs to be a PawleyFunction_sptr to have getPawleyParameterFunction()
     Mantid::CurveFitting::Functions::PawleyFunction_sptr pawleyFn =
-        boost::make_shared<Mantid::CurveFitting::Functions::PawleyFunction>();
+        std::make_shared<Mantid::CurveFitting::Functions::PawleyFunction>();
     pawleyFn->initialize();
     pawleyFn->setLatticeSystem("Cubic");
     pawleyFn->addPeak(V3D(1, 1, 1), 0.0065, 35.0);
@@ -1280,7 +1277,7 @@ public:
 
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
     fit->setProperty("Function",
-                     boost::dynamic_pointer_cast<IFunction>(pawleyFn));
+                     std::dynamic_pointer_cast<IFunction>(pawleyFn));
     fit->setProperty("InputWorkspace", ws);
     fit->execute();
 
@@ -1304,7 +1301,7 @@ public:
         1.6, 3.2, 800);
 
     Mantid::CurveFitting::Functions::PawleyFunction_sptr pawleyFn =
-        boost::make_shared<Mantid::CurveFitting::Functions::PawleyFunction>();
+        std::make_shared<Mantid::CurveFitting::Functions::PawleyFunction>();
     pawleyFn->initialize();
     pawleyFn->setLatticeSystem("Cubic");
     pawleyFn->addPeak(V3D(1, 1, 1), 0.0065, 35.0);
@@ -1315,7 +1312,7 @@ public:
 
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
     fit->setProperty("Function",
-                     boost::dynamic_pointer_cast<IFunction>(pawleyFn));
+                     std::dynamic_pointer_cast<IFunction>(pawleyFn));
     fit->setProperty("InputWorkspace", ws);
     fit->execute();
 
@@ -2101,7 +2098,7 @@ public:
         1, 0, 1, 0.1);
     {
       API::IFunction_sptr fun =
-          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+          std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2119,7 +2116,7 @@ public:
     }
     {
       API::IFunction_sptr fun =
-          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+          std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2147,7 +2144,7 @@ public:
         [](double x, int) { return 2 + x - 0.1 * x * x; }, 1, 0, 1, 0.1);
     {
       API::IFunction_sptr fun =
-          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+          std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2167,7 +2164,7 @@ public:
     }
     {
       API::IFunction_sptr fun =
-          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+          std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2354,5 +2351,3 @@ private:
   API::MatrixWorkspace_sptr m_smoothWS;
   API::MatrixWorkspace_sptr m_onePeakWS;
 };
-
-#endif /*CURVEFITTING_FITMWTEST_H_*/

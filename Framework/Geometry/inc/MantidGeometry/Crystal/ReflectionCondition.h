@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_REFLECTIONCONDITION_H_
-#define MANTID_GEOMETRY_REFLECTIONCONDITION_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <string>
@@ -174,7 +173,7 @@ public:
 };
 
 /// Shared pointer to a ReflectionCondition
-using ReflectionCondition_sptr = boost::shared_ptr<ReflectionCondition>;
+using ReflectionCondition_sptr = std::shared_ptr<ReflectionCondition>;
 /// A collection of reflections
 using ReflectionConditions = std::vector<ReflectionCondition_sptr>;
 
@@ -188,5 +187,3 @@ getReflectionConditionBySymbol(const std::string &symbol);
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_REFLECTIONCONDITION_H_ */

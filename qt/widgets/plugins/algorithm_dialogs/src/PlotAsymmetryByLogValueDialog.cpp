@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/PlotAsymmetryByLogValueDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
@@ -168,13 +168,13 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString & /*unused*/) {
         return;
       }
       Mantid::API::MatrixWorkspace_sptr mws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
       Mantid::API::WorkspaceGroup_sptr gws =
-          boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+          std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
       if (gws) {
         if (gws->getNumberOfEntries() < 2)
           return;
-        mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 gws->getNames()[1]));
       }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 
@@ -21,9 +21,9 @@ namespace WorkflowAlgorithms {
  * @param groupIndex :: [input] Workspace index of the group to analyse
  */
 MuonGroupCountsCalculator::MuonGroupCountsCalculator(
-    const Mantid::API::WorkspaceGroup_sptr inputWS,
-    const std::vector<int> summedPeriods,
-    const std::vector<int> subtractedPeriods, const int groupIndex)
+    const Mantid::API::WorkspaceGroup_sptr &inputWS,
+    const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods, const int groupIndex)
     : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
                           groupIndex) {}
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADRAWBIN0_H
-#define MANTID_DATAHANDLING_LOADRAWBIN0_H
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -82,7 +81,7 @@ private:
 
   /// ISISRAW class instance which does raw file reading. Shared pointer to
   /// prevent memory leak when an exception is thrown.
-  boost::shared_ptr<ISISRAW2> isisRaw;
+  std::shared_ptr<ISISRAW2> isisRaw;
   /// The name and path of the input file
   std::string m_filename;
 
@@ -101,13 +100,12 @@ private:
   /// Read in the time bin boundaries
   int64_t m_lengthIn;
   /// TimeSeriesProperty<int> containing data periods.
-  boost::shared_ptr<Kernel::Property> m_perioids;
+  std::shared_ptr<Kernel::Property> m_perioids;
 
   /// total number of specs
   specnum_t m_total_specs;
   /// time channel vector
-  std::vector<boost::shared_ptr<HistogramData::HistogramX>> m_timeChannelsVec;
+  std::vector<std::shared_ptr<HistogramData::HistogramX>> m_timeChannelsVec;
 };
 } // namespace DataHandling
 } // namespace Mantid
-#endif

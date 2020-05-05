@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
-#define MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
 #include "ParseReflectometryStrings.h"
@@ -44,6 +42,9 @@ private:
   parseOptions(PerThetaDefaults::ValueArray const &cellText);
   boost::optional<boost::optional<std::string>>
   parseProcessingInstructions(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<boost::optional<std::string>>
+  parseBackgroundProcessingInstructions(
+      PerThetaDefaults::ValueArray const &cellText);
 
   std::vector<int> m_invalidColumns;
 };
@@ -54,4 +55,3 @@ validatePerThetaDefaults(PerThetaDefaults::ValueArray const &cellText);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_

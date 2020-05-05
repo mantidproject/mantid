@@ -1,20 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_GENERATEPEAKS_H_
-#define MANTID_ALGORITHMS_GENERATEPEAKS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,7 +23,7 @@ namespace Algorithms {
 
   @date 2012-04-10
 */
-class DLLExport GeneratePeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GeneratePeaks : public API::Algorithm {
 public:
   GeneratePeaks();
 
@@ -70,10 +69,11 @@ private:
       const std::map<specnum_t,
                      std::vector<std::pair<double, API::IFunction_sptr>>>
           &functionmap,
-      API::MatrixWorkspace_sptr dataWS);
+      const API::MatrixWorkspace_sptr &dataWS);
 
   /// Check whether function has a certain parameter
-  bool hasParameter(API::IFunction_sptr function, std::string paramname);
+  bool hasParameter(const API::IFunction_sptr &function,
+                    const std::string &paramname);
 
   /// Create output workspace
   API::MatrixWorkspace_sptr createOutputWorkspace();
@@ -83,14 +83,15 @@ private:
 
   void createFunction(std::string &peaktype, std::string &bkgdtype);
 
-  void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS);
+  void getSpectraSet(const DataObjects::TableWorkspace_const_sptr &peakParmsWS);
 
   /// Get the IPeakFunction part in the input function
-  API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
+  API::IPeakFunction_sptr
+  getPeakFunction(const API::IFunction_sptr &infunction);
 
   /// Add function parameter names to
   std::vector<std::string>
-  addFunctionParameterNames(std::vector<std::string> funcnames);
+  addFunctionParameterNames(const std::vector<std::string> &funcnames);
 
   /// Peak function
   API::IPeakFunction_sptr m_peakFunction;
@@ -152,5 +153,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_GENERATEPEAKS_H_ */

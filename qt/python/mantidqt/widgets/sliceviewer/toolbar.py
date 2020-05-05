@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
 #
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 from mantidqt.MPLwidgets import NavigationToolbar2QT
 from mantidqt.icons import get_icon
 from qtpy.QtCore import Signal, Qt, QSize
@@ -20,6 +18,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
     gridClicked = Signal()
     linePlotsClicked = Signal(bool)
+    peaksOverlayClicked = Signal(bool)
     plotOptionsChanged = Signal()
 
     toolitems = (
@@ -29,6 +28,8 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
         ('LinePlots', 'Toggle lineplots on/off', 'mdi.chart-bell-curve', 'linePlotsClicked', False),
+        ('OverlayPeaks', 'Add peaks overlays on/off', 'mdi.chart-bubble', 'peaksOverlayClicked',
+         None),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
         (None, None, None, None, None),
         ('Customize', 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
@@ -40,8 +41,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                 self.addSeparator()
             else:
                 if fa_icon:
-                    a = self.addAction(get_icon(fa_icon),
-                                       text, getattr(self, callback))
+                    a = self.addAction(get_icon(fa_icon), text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
                 self._actions[callback] = a
@@ -57,9 +57,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         if self.coordinates:
             self.locLabel = QLabel("", self)
             self.locLabel.setAlignment(Qt.AlignRight | Qt.AlignTop)
-            self.locLabel.setSizePolicy(
-                QSizePolicy(QSizePolicy.Expanding,
-                            QSizePolicy.Ignored))
+            self.locLabel.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
 

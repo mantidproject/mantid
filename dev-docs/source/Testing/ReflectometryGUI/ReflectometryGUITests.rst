@@ -39,7 +39,7 @@ Loading batch files
 - Browse to the file that you want to load (e.g. ``INTER_NR_test.json``).
 - The interface should now have all of the information for the runs and settings from the batch file populated in the display.
 - Compare against a version of the batch file opened in your favourite text editor.
-- Try to re-open the batch file again. You should be asked if you want to discard the changes.
+- Try to re-open the batch file again. You should not be asked if you want to discard the changes (unless you changed anything).
 
 Changing the Default instrument
 -------------------------------

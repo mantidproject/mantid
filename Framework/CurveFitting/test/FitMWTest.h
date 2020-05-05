@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CURVEFITTING_FITMWTEST_H_
-#define CURVEFITTING_FITMWTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -64,7 +63,7 @@ API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram,
   return ws2;
 }
 
-void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
+void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
                          bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);
@@ -90,7 +89,7 @@ void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
     // TS_ASSERT_DIFFERS(chi2, 0.0);
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve("Output_Workspace"));
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 3);
@@ -109,7 +108,7 @@ void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
       TS_ASSERT_EQUALS(Data[i] - Calc[i], Diff[i]);
     }
 
-    ITableWorkspace_sptr covar = boost::dynamic_pointer_cast<ITableWorkspace>(
+    ITableWorkspace_sptr covar = std::dynamic_pointer_cast<ITableWorkspace>(
         API::AnalysisDataService::Instance().retrieve(
             "Output_NormalisedCovarianceMatrix"));
 
@@ -133,7 +132,7 @@ void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
     TS_ASSERT_DIFFERS(fun->getError(0), 0.0);
     TS_ASSERT_DIFFERS(fun->getError(1), 0.0);
 
-    ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(
+    ITableWorkspace_sptr params = std::dynamic_pointer_cast<ITableWorkspace>(
         API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     TS_ASSERT(params);
@@ -170,7 +169,7 @@ void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
   }
 }
-void doTestExecHistogramData(API::MatrixWorkspace_sptr ws2,
+void doTestExecHistogramData(const API::MatrixWorkspace_sptr &ws2,
                              bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);
@@ -498,10 +497,8 @@ public:
   test_Composite_Function_With_SeparateMembers_Option_On_FitMW_Outputs_Composite_Values_Plus_Each_Member() {
     const bool histogram = true;
     auto ws2 = createTestWorkspace(histogram);
-    const std::string inputWSName = "FitMWTest_CompositeTest";
-    // AnalysisDataService::Instance().add(inputWSName, ws2);
 
-    auto composite = boost::make_shared<API::CompositeFunction>();
+    auto composite = std::make_shared<API::CompositeFunction>();
     API::IFunction_sptr expDecay(new ExpDecay);
     expDecay->setParameter("Height", 1.5);
     expDecay->setError(0, 0.01);
@@ -519,7 +516,7 @@ public:
     FunctionValues_sptr values;
 
     // Requires a property manager to make a workspce
-    auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         wsPropName, "", Mantid::Kernel::Direction::Input));
@@ -583,7 +580,7 @@ public:
     FunctionValues_sptr values;
 
     // Requires a property manager to make a workspce
-    auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         wsPropName, "", Mantid::Kernel::Direction::Input));
@@ -643,7 +640,7 @@ public:
   }
 
   void test_setting_instrument_fitting_parameters() {
-    boost::shared_ptr<Mantid::Geometry::Instrument> instrument;
+    std::shared_ptr<Mantid::Geometry::Instrument> instrument;
     instrument.reset(new Mantid::Geometry::Instrument);
     Mantid::Geometry::ObjComponent *source =
         new Mantid::Geometry::ObjComponent("source", instrument.get());
@@ -679,7 +676,7 @@ public:
     FunctionValues_sptr values;
 
     // Requires a property manager to make a workspce
-    auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         wsPropName, "", Mantid::Kernel::Direction::Input));
@@ -696,7 +693,7 @@ public:
   }
 
   void do_test_convolve_members_option(bool withBackground) {
-    auto conv = boost::make_shared<Convolution>();
+    auto conv = std::make_shared<Convolution>();
     auto resolution = IFunction_sptr(new Gaussian);
     resolution->initialize();
     resolution->setParameter("Height", 1.0);
@@ -718,8 +715,7 @@ public:
     conv->addFunction(gaussian2);
 
     // workspace with 100 points on interval -10 <= x <= 10
-    boost::shared_ptr<WorkspaceTester> data =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> data = std::make_shared<WorkspaceTester>();
     data->initialize(1, 100, 100);
 
     auto &xData = data->mutableX(0);
@@ -731,7 +727,7 @@ public:
     FunctionValues_sptr values;
 
     // Requires a property manager to make a workspce
-    auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         wsPropName, "", Mantid::Kernel::Direction::Input));
@@ -742,7 +738,7 @@ public:
       API::IFunction_sptr bckgd(new ExpDecay);
       bckgd->setParameter("Height", 1.);
       bckgd->setParameter("Lifetime", 1.);
-      auto composite = boost::make_shared<API::CompositeFunction>();
+      auto composite = std::make_shared<API::CompositeFunction>();
       composite->addFunction(bckgd);
       composite->addFunction(conv);
       fitfun = composite;
@@ -1353,4 +1349,3 @@ private:
   const size_t NVectors = 2000;
   const size_t YLength = 10000;
 };
-#endif /*CURVEFITTING_FITMWTEST_H_*/

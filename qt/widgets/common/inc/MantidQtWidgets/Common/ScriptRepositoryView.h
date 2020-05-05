@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SCRIPTREPOSITORYVIEW_H_
-#define MANTID_API_SCRIPTREPOSITORYVIEW_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
@@ -38,7 +37,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public MantidDialog {
                      const QModelIndex &index) override;
     QSize sizeHint(const QStyleOptionViewItem &option,
                    const QModelIndex &index) const override;
-    QIcon getIcon(QString state) const;
+    QIcon getIcon(const QString &state) const;
   };
   /// Delegate to show the checkbox for configuring the auto update
   class CheckBoxDelegate : public QStyledItemDelegate {
@@ -79,7 +78,7 @@ protected slots:
   void updateModel();
   void currentChanged(const QModelIndex &current);
   void helpClicked();
-  void openFolderLink(QString /*link*/);
+  void openFolderLink(const QString & /*link*/);
 
 private:
   Ui::ScriptRepositoryView *ui;
@@ -88,5 +87,3 @@ private:
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTID_API_SCRIPTREPOSITORYVIEW_H_ */

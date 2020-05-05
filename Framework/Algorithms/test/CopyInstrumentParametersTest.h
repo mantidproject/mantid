@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COPYINSTRUMENTPARAMETERSTEST_H_
-#define COPYINSTRUMENTPARAMETERSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -301,5 +300,3 @@ private:
   CopyInstrumentParameters copyInstParam;
   const std::string m_SourceWSName, m_TargetWSName;
 };
-
-#endif /*COPYINSTRUMENTPARAMETERSTEST_H_*/

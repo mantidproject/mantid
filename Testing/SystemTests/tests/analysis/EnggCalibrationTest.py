@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import *
-from six import PY2
 
 
 def rel_err_less_delta(val, ref, epsilon):
@@ -126,8 +125,8 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         self.assertEqual(integ_tbl.rowCount(), precalc_integ_tbl.rowCount())
         self.assertEqual(integ_tbl.columnCount(), precalc_integ_tbl.columnCount())
         for i in range(integ_tbl.rowCount()):
-            self.assertTrue((0 == integ_tbl.cell(i, 0) and 0 == precalc_integ_tbl.cell(i, 0)) or
-                            rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
+            self.assertTrue((0 == integ_tbl.cell(i, 0) and 0 == precalc_integ_tbl.cell(i, 0))
+                            or rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
                             "Relative difference bigger than gaccepted error (%f) when comparing the "
                             "integration of a spectrum (%f) against the integration previously calculated and "
                             "saved (%f)." % (delta, integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0)))
@@ -239,8 +238,6 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
         for idx in [0, 12, 516, 789, 891, 1112]:
             cell_val = self.peaks_info.cell(idx, 1)
             self.assertTrue(isinstance(cell_val, str))
-            if PY2:  # This test depends on consistent ordering of a dict which is not guaranteed for python 3
-                self.assertEqual(cell_val[0:11], '{"1": {"A":')
             self.assertEqual(cell_val[-2:], '}}')
 
         # this will be used as a comparison delta in relative terms (percentage)

@@ -1,17 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name, no-init
-from __future__ import (absolute_import, division, print_function)
 import os
 import re
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
-from six import iteritems
 
 
 class LRScalingFactors(PythonAlgorithm):
@@ -402,7 +400,7 @@ class LRScalingFactors(PythonAlgorithm):
         fd.write("# y=a+bx\n#\n")
         fd.write("# LambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n#\n")
 
-        for k, v in iteritems(scaling_file_meta):
+        for k, v in scaling_file_meta.items():
             fd.write("%s\n" % v)
         for item in scaling_file_content:
             fd.write("IncidentMedium=%s " % item["IncidentMedium"])

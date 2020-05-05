@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_JUMPFITMODELTEST_H_
-#define MANTIDQT_JUMPFITMODELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -81,7 +80,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "Name_HWHM_FofQFit_ChudleyElliots");
+                     "Name_HWHM_FofQFit_Seq_ChudleyElliots");
   }
 
   void
@@ -92,7 +91,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "Name_HWHM_FofQFit_ChudleyElliots");
+                     "Name_HWHM_FofQFit_Sim_ChudleyElliots");
   }
 
   void test_that_zeroWidths_returns_false_if_the_workspace_contains_widths() {
@@ -271,7 +270,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "MultiFofQFit_ChudleyElliot_Results");
+                     "MultiFofQFit_seqChudleyElliot_Results");
   }
 
   void
@@ -284,7 +283,7 @@ public:
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "MultiFofQFit_ChudleyElliot_Results");
+                     "MultiFofQFit_simChudleyElliot_Results");
   }
 
   void
@@ -317,5 +316,3 @@ private:
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<JumpFitModel> m_model;
 };
-
-#endif /* MANTIDQT_JUMPFITMODELTEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
@@ -77,6 +76,7 @@ private:
   IBatchPresenter *m_mainPresenter;
 
   ExperimentValidationResult validateExperimentFromView();
+  BackgroundSubtraction backgroundSubtractionFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();
   boost::optional<RangeInLambda> transmissionRunRangeFromView();
@@ -94,6 +94,7 @@ private:
 
   void updateWidgetEnabledState();
   void updateSummationTypeEnabledState();
+  void updateBackgroundSubtractionEnabledState();
   void updatePolarizationCorrectionEnabledState();
   void updateFloodCorrectionEnabledState();
 
@@ -107,4 +108,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H

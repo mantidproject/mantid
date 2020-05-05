@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SAMPLELOGSBEHAVIOURTEST_H_
-#define MANTID_ALGORITHMS_SAMPLELOGSBEHAVIOURTEST_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
@@ -222,7 +221,7 @@ public:
     return ws;
   }
 
-  void testLogUnits(MatrixWorkspace_sptr ws) {
+  void testLogUnits(const MatrixWorkspace_sptr &ws) {
     // All units must not have changed:
     TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
     TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")
@@ -255,5 +254,3 @@ private:
       "  </component-link>"
       "</parameter-file>";
 };
-
-#endif /* MANTID_ALGORITHMS_SAMPLELOGSBEHAVIOURTEST_H_ */

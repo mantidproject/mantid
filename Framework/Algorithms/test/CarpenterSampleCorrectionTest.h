@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIPLE_SCATTERING_ABSORPTION_TEST_H_
-#define MULTIPLE_SCATTERING_ABSORPTION_TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CarpenterSampleCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -79,8 +78,7 @@ public:
 
     // convert to wavelength
     auto convertUnitsAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "ConvertUnits");
+        Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
     convertUnitsAlg->setProperty("Target", "Wavelength");
@@ -165,7 +163,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outName));
-    wksp = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+    wksp = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
     TS_ASSERT(wksp);
     TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);
 
@@ -183,5 +181,3 @@ public:
 private:
   Mantid::Algorithms::CarpenterSampleCorrection algorithm;
 };
-
-#endif /*MULTIPLE_SCATTERING_ABSORPTION_TEST_H_*/

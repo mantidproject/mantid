@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LISTINSTRUMENTS_H_
-#define LISTINSTRUMENTS_H_
+#pragma once
 
 #include "ICatTestHelper.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
@@ -50,5 +49,3 @@ public:
 private:
   CatalogListInstruments instrList;
 };
-
-#endif

@@ -22,12 +22,19 @@ if [ "$(git config user.email)" == "" ]; then
   git config user.email "mantid-buildserver@mantidproject.org"
 fi
 
-# sources to format
-sources=`find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' -o -name '*.tcc' \)`
 sha=`git rev-parse --short HEAD`
 
+if [ -x "$(command -v parallel)" ]; then
+  echo "Using GNU parallel"
+  runner="parallel ${CLANG_FORMAT} -i {}"
+else
+  echo "Using xargs"
+  runner="xargs ${CLANG_FORMAT} -i"
+fi
+
 # format
-${CLANG_FORMAT} -i $sources
+find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' -o -name '*.tcc' \) | ${runner}
+
 git add -A
 echo
 if git diff --cached --quiet

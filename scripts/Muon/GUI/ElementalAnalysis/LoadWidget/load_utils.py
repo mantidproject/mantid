@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
+from collections import OrderedDict
 
 import glob
 import os
 import numpy as np
-from six import iteritems
 from mantid import config
 import mantid.simpleapi as mantid
 
@@ -21,13 +20,13 @@ num_files_per_detector = 3
 class LModel(object):
     def __init__(self):
         self.run = 0
-        self.num_loaded_detectors ={}
-        self.loaded_runs = {}
+        self.num_loaded_detectors =OrderedDict()
+        self.loaded_runs = OrderedDict()
         self.last_loaded_runs = []
 
     def _load(self, inputs):
         """ inputs is a dict mapping filepaths to output names """
-        for path, output in iteritems(inputs):
+        for path, output in inputs.items():
             workspace = mantid.LoadAscii(path, OutputWorkspace=output)
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
@@ -40,7 +39,7 @@ class LModel(object):
             for filename in to_load if get_filename(filename, self.run) is not None
         }
         unique_workspaces = {}
-        for path, workspace in iteritems(workspaces):
+        for path, workspace in workspaces.items():
             if workspace not in unique_workspaces.values():
                 unique_workspaces[path] = workspace
         workspaces = unique_workspaces
@@ -50,7 +49,7 @@ class LModel(object):
             loaded_detectors[ws_name[0]] = 1
         num_loaded_detectors = len(loaded_detectors)
         self._load(workspaces)
-        self.loaded_runs[self.run] = merge_workspaces(self.run, workspaces.values())
+        self.loaded_runs.update({self.run: merge_workspaces(self.run, workspaces.values())})
         self.num_loaded_detectors[self.run] = num_loaded_detectors
         self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
@@ -98,7 +97,7 @@ def merge_workspaces(run, workspaces):
     tmp = mantid.CreateSampleWorkspace()
     overall_ws = mantid.GroupWorkspaces(tmp, OutputWorkspace=str(run))
     # merge each workspace list in detectors into a single workspace
-    for detector, workspace_list in iteritems(detectors):
+    for detector, workspace_list in detectors.items():
         if workspace_list:
             # sort workspace list according to type_index
             sorted_workspace_list = [None] * num_files_per_detector
@@ -214,9 +213,8 @@ def replace_workspace_name_suffix(name, suffix):
 
 def flatten_run_data(*workspaces):
     out = []
-    for workspace in workspaces:
-        detectors = [mantid.mtd[detector] for detector in workspace]
-        out.append(sorted([_workspace.getName() for detector in detectors for _workspace in detector]))
+    for workspace_list in workspaces:
+        out.append(sorted([ws_name for ws_name in workspace_list]))
     return out
 
 

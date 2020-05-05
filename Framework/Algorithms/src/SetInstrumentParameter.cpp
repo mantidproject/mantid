@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -48,7 +48,7 @@ const std::string SetInstrumentParameter::category() const {
 void SetInstrumentParameter::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "", Direction::InOut,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "Workspace to add the log entry to");
   declareProperty("ComponentName", "",
                   "The name of the component to attach "
@@ -58,12 +58,12 @@ void SetInstrumentParameter::init() {
                   "The detector ID list to attach the parameter to. If set "
                   "this will override any ComponentName");
   declareProperty("ParameterName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the parameter");
 
   std::vector<std::string> propOptions{"String", "Number", "Bool"};
   declareProperty("ParameterType", "String",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The type that the parameter value will be.");
 
   declareProperty("Value", "", "The content of the Parameter");
@@ -98,19 +98,18 @@ std::map<std::string, std::string> SetInstrumentParameter::validateInputs() {
 void SetInstrumentParameter::exec() {
   // A pointer to the workspace to add a log to
   Workspace_sptr ws = getProperty("Workspace");
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   DataObjects::PeaksWorkspace_sptr inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputW->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "MatrixWorkspace provided as input");
   } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputP->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
