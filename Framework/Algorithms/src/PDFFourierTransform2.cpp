@@ -368,7 +368,7 @@ void PDFFourierTransform2::convertFromLittleGRPlus1(
   if (outputType == LITTLE_G_OF_R) {
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // transform the data
-      FOfR[i] = FOfR[i] - 1;
+      FOfR[i] = FOfR[i] + 1;
     }
   } else if (outputType == BIG_G_OF_R) {
     const double factor = 4. * M_PI * rho0;
@@ -514,14 +514,12 @@ void PDFFourierTransform2::exec() {
   // do the math
 
   double rho0 = determineRho0();
-  double corr;
+  double corr = 0.5 / M_PI / M_PI / rho0;
+  if (direction == BACKWARD) {
+    corr = 4.0 * M_PI * rho0;
+  }
   for (size_t r_index = 0; r_index < sizer; r_index++) {
     const double r = outputX[r_index];
-    if (direction == FORWARD) {
-      corr = 0.5 / M_PI / M_PI / rho0;
-    } else if (direction == BACKWARD) {
-      corr = 4.0 * M_PI * rho0;
-    }
     const double rfac = corr / (r * r * r);
 
     double fs = 0;

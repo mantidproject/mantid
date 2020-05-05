@@ -144,7 +144,7 @@ Usage
 
 **Example - PDF transformation examples:**
 
-.. testcode:: ExPDFFouurierTransform
+.. testcode:: ExPDFFourierTransform
 
     # Simulates Load of a workspace with all necessary parameters
     import numpy as np;
@@ -159,26 +159,26 @@ Usage
        print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
 
-.. testcleanup:: ExPDFFouurierTransform
+.. testcleanup:: ExPDFFourierTransform
 
    DeleteWorkspace(ws)
    DeleteWorkspace(Rt)   
 
 **Output:**
 
-.. testoutput:: ExPDFFouurierTransform
+.. testoutput:: ExPDFFourierTransform
 
    part of S(Q) and its correlation function
-   ! 0.00 ! 1.000000 ! 0.317333 ! -3.977330 !
-   ! 0.10 ! 0.960789 ! 0.634665 ! 2.247452 !
-   ! 0.20 ! 0.852144 ! 0.951998 ! 0.449677 !
-   ! 0.30 ! 0.697676 ! 1.269330 ! 1.313403 !
-   ! 0.40 ! 0.527292 ! 1.586663 ! 0.803594 !
-   ! 0.50 ! 0.367879 ! 1.903996 ! 1.140167 !
-   ! 0.60 ! 0.236928 ! 2.221328 ! 0.900836 !
-   ! 0.70 ! 0.140858 ! 2.538661 ! 1.079278 !
-   ! 0.80 ! 0.077305 ! 2.855993 ! 0.940616 !
-   ! 0.90 ! 0.039164 ! 3.173326 ! 1.050882 !
+   ! 0.00 ! 1.000000 ! 0.317333 ! -3.977042 !
+   ! 0.10 ! 0.960789 ! 0.634665 ! 2.248558 !
+   ! 0.20 ! 0.852144 ! 0.951998 ! 0.449916 !
+   ! 0.30 ! 0.697676 ! 1.269330 ! 1.314437 !
+   ! 0.40 ! 0.527292 ! 1.586663 ! 0.803744 !
+   ! 0.50 ! 0.367879 ! 1.903996 ! 1.141098 !
+   ! 0.60 ! 0.236928 ! 2.221328 ! 0.900872 !
+   ! 0.70 ! 0.140858 ! 2.538661 ! 1.080090 !
+   ! 0.80 ! 0.077305 ! 2.855993 ! 0.940530 !
+   ! 0.90 ! 0.039164 ! 3.173326 ! 1.051576 !
 
    
 
