@@ -109,7 +109,7 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_unit = "MomentumTransfer"
         self._expected_hist = 17
         self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_elastic_ws)
+        self._run_correction_and_test(shape, self._indirect_elastic_ws, 'Label')
 
     def _run_indirect_fws_test_red(self, shape):
         self._expected_unit = "Wavelength"
