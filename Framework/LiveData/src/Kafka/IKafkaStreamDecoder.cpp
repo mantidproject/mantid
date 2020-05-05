@@ -16,7 +16,8 @@
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
-#include "private/Schema/y2gw_run_info_generated.h"
+#include "private/Schema/6s4t_run_stop_generated.h"
+#include "private/Schema/pl72_run_start_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
@@ -30,7 +31,8 @@ namespace {
 Mantid::Kernel::Logger g_log("IKafkaStreamDecoder");
 
 // File identifiers from flatbuffers schema
-const std::string RUN_MESSAGE_ID = "y2gw";
+const std::string RUN_START_MESSAGE_ID = "pl72";
+const std::string RUN_STOP_MESSAGE_ID = "6s4t";
 
 const std::chrono::seconds MAX_LATENCY(1);
 } // namespace
@@ -410,7 +412,6 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     RunStartStruct &runStartStructOutput) {
   while (!m_interrupt) {
     std::string runMsgBuffer;
-
     int64_t offset;
     int32_t partition;
     std::string topicName;
@@ -418,14 +419,11 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     if (runMsgBuffer.empty()) {
       continue; // no message available, try again
     } else {
-      auto runMsg =
-          GetRunInfo(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
-      if (runMsg->info_type_type() == InfoTypes::RunStart) {
-        // We got a run start message, deserialise it
-        auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
+      auto runStartData =
+          GetRunStart(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
         IKafkaStreamDecoder::RunStartStruct runStartStruct = {
             runStartData->instrument_name()->str(),
-            runStartData->run_id()->str(),
+            runStartData->run_name()->str(),
             runStartData->start_time(),
             static_cast<size_t>(runStartData->n_periods()),
             runStartData->nexus_structure()->str(),
@@ -435,34 +433,19 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
           m_runId = runStartStruct.runId;
           return false; // not interrupted
         }
-      } else {
-        continue; // received message wasn't a RunStart message, try again
       }
     }
-  }
   return true; // interrupted
 }
 
 IKafkaStreamDecoder::RunStartStruct
 IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
-  auto runMsg =
-      GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  if (runMsg->info_type_type() != InfoTypes::RunStart) {
-    // We want a runStart message, try the next one
-    offset = getRunInfoMessage(rawMsgBuffer);
-    runMsg =
-        GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    if (runMsg->info_type_type() != InfoTypes::RunStart) {
-      throw std::runtime_error("IKafkaStreamDecoder::initLocalCaches() - "
-                               "Could not find a run start message "
-                               "in the run info topic. Unable to continue");
-    }
-  }
-  auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
+  auto runStartData
+      = GetRunStart(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
   IKafkaStreamDecoder::RunStartStruct runStart = {
       runStartData->instrument_name()->str(),
-      runStartData->run_id()->str(),
+      runStartData->run_name()->str(),
       runStartData->start_time(),
       static_cast<size_t>(runStartData->n_periods()),
       runStartData->nexus_structure()->str(),
@@ -486,7 +469,7 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
   }
   if (!flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-          RUN_MESSAGE_ID.c_str())) {
+          RUN_START_MESSAGE_ID.c_str())) {
     throw std::runtime_error("IKafkaStreamDecoder::getRunInfoMessage() - "
                              "Received unexpected message type from run info "
                              "topic. Unable to continue");
@@ -520,10 +503,9 @@ void IKafkaStreamDecoder::checkRunMessage(
     std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
   if (flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(buffer.c_str()),
-          RUN_MESSAGE_ID.c_str())) {
-    auto runMsg = GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-    if (!checkOffsets && runMsg->info_type_type() == InfoTypes::RunStop) {
-      auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
+          RUN_START_MESSAGE_ID.c_str())) {
+    auto runStopMsg = GetRunStop(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+    if (!checkOffsets){
       auto stopTime = runStopMsg->stop_time();
       g_log.debug() << "Received an end-of-run message with stop time = "
                     << stopTime << std::endl;
