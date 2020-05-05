@@ -15,7 +15,7 @@ from copy import copy
 from matplotlib.container import ErrorbarContainer
 
 from unittest.mock import Mock, patch
-from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import CreateWorkspace, AddTimeSeriesLog
 from workbench.plotting.plotscriptgenerator.lines import (_get_plot_command_kwargs_from_line2d,
                                                           _get_errorbar_specific_plot_kwargs,
                                                           generate_plot_command,
@@ -83,6 +83,19 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
     def test_generate_plot_command_returns_correct_string_for_line2d(self):
         kwargs = copy(LINE2D_KWARGS)
         kwargs.update(MANTID_ONLY_KWARGS)
+        line = self.ax.plot(self.test_ws, **kwargs)[0]
+        output = generate_plot_command(line)
+        expected_command = ("plot({}, {})".format(self.test_ws.name(),
+                                                  convert_args_to_string(None, kwargs)))
+        self.assertEqual(expected_command, output)
+
+    def test_generate_plot_command_returns_correct_string_for_sample_log(self):
+        kwargs = copy(LINE2D_KWARGS)
+        kwargs.update({"LogName":"my_log","ExperimentInfo":0})
+        # add a log
+        AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
+        AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
+        AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
         line = self.ax.plot(self.test_ws, **kwargs)[0]
         output = generate_plot_command(line)
         expected_command = ("plot({}, {})".format(self.test_ws.name(),

@@ -26,7 +26,8 @@ Improvements
 - The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
 - The plot toolbar now shows the correct buttons for 3D plots.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
-
+- Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbnehc plots.
+- The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 
 Bugfixes
 ########
@@ -39,6 +40,7 @@ Bugfixes
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly
 - Opening figure options on a plot with an empty legend no longer causes an unhandled exception.
 - Fixed being able to zoom in and out of colorbars on colorfill plots.
+- Fixed the default axis scale settings applying to the wrong axis.
 - Performing an overplot by dragging workspaces onto colorfill plots now correctly replaces the workspace.
 
 :ref:`Release 5.1.0 <v5.1.0>`
