@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CentroidPeaksMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -40,7 +40,7 @@ void CentroidPeaksMD::init() {
   std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
                                        "HKL"};
   declareProperty("CoordinatesToUse", "HKL",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
   declareProperty(

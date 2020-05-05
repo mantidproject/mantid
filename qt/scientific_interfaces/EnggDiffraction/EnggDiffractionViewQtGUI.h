@@ -247,7 +247,7 @@ private:
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
-  std::vector<std::string> qListToVector(QStringList list,
+  std::vector<std::string> qListToVector(const QStringList &list,
                                          bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
@@ -257,7 +257,7 @@ private:
   void userSelectInstrument(const QString &prefix);
 
   /// setting the instrument prefix ahead of the run number
-  void setPrefix(std::string prefix);
+  void setPrefix(const std::string &prefix);
 
   // TODO: The values of these three next static members (bank name,
   // type, run mode) can be obtained from widgets when requested/required.  They
@@ -294,7 +294,7 @@ private:
   static const std::string g_DetGrpExtStr;
 
   /// presenter as in the model-view-presenter
-  boost::shared_ptr<IEnggDiffractionPresenter> m_presenter;
+  std::shared_ptr<IEnggDiffractionPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces

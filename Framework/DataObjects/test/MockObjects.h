@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -21,9 +21,8 @@ class MockPeakShapeFactory : public PeakShapeFactory {
 public:
   MOCK_CONST_METHOD1(create,
                      Mantid::Geometry::PeakShape *(const std::string &source));
-  MOCK_METHOD1(
-      setSuccessor,
-      void(boost::shared_ptr<const PeakShapeFactory> successorFactory));
+  MOCK_METHOD1(setSuccessor,
+               void(std::shared_ptr<const PeakShapeFactory> successorFactory));
   ~MockPeakShapeFactory() override {}
 };
 

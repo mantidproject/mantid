@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -76,16 +76,16 @@ private:
   void setFittedFunction(Mantid::API::IFunction_const_sptr function);
 
   // Set errors in the ws after the fit
-  void setErrorsAfterFit(Mantid::API::MatrixWorkspace_sptr data);
+  void setErrorsAfterFit(const Mantid::API::MatrixWorkspace_sptr &data);
 
   /// Disables points which shouldn't be used for fitting
-  static void disableUnwantedPoints(Mantid::API::MatrixWorkspace_sptr ws,
+  static void disableUnwantedPoints(const Mantid::API::MatrixWorkspace_sptr &ws,
                                     const std::vector<Section> &sections);
 
   /// Enable previously disabled points
   static void
-  enableDisabledPoints(Mantid::API::MatrixWorkspace_sptr destWs,
-                       Mantid::API::MatrixWorkspace_const_sptr sourceWs);
+  enableDisabledPoints(const Mantid::API::MatrixWorkspace_sptr &destWs,
+                       const Mantid::API::MatrixWorkspace_const_sptr &sourceWs);
 };
 
 } // namespace CustomInterfaces

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -102,7 +102,7 @@ public:
         ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws2raw(new SpecialWorkspace2D(inst2));
     SpecialWorkspace2D_const_sptr ws2 =
-        boost::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2raw);
+        std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2raw);
 
     // 1. AND operation
     ws1->setValue(2, 1);
@@ -183,7 +183,7 @@ public:
     ws2->setValue(2, 1);
 
     SpecialWorkspace2D_const_sptr cws2 =
-        boost::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
+        std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
     TS_ASSERT_THROWS_ANYTHING(ws1->binaryOperation(cws2, BinaryOperator::AND));
   }
 
@@ -202,7 +202,7 @@ public:
 
     ws2->binaryOperation(BinaryOperator::NOT);
     SpecialWorkspace2D_const_sptr cws2 =
-        boost::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
+        std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
 
     ws1->binaryOperation(cws2, BinaryOperator::AND);
     ws3->binaryOperation(cws2, BinaryOperator::OR);

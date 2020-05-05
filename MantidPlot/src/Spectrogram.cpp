@@ -49,6 +49,7 @@
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <numeric>
+#include <utility>
 
 Spectrogram::Spectrogram()
     : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false),
@@ -175,9 +176,9 @@ void Spectrogram::clearADSHandle() {
  */
 void Spectrogram::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (wsName == d_wsName) {
-    updateData(boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws));
+    updateData(std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws));
   }
 }
 
@@ -694,7 +695,7 @@ void Spectrogram::loadSettings() {
  * This method saves the selectcolrmap file name to membervaraible
  */
 void Spectrogram::setColorMapFileName(QString colormapName) {
-  mCurrentColorMap = colormapName;
+  mCurrentColorMap = std::move(colormapName);
 }
 QwtDoubleRect Spectrogram::boundingRect() const {
   return d_matrix ? d_matrix->boundingRect() : data().boundingRect();
@@ -707,7 +708,7 @@ double Spectrogram::getMinPositiveValue() const {
 }
 
 void Spectrogram::setContourPenList(QList<QPen> lst) {
-  d_pen_list = lst;
+  d_pen_list = std::move(lst);
   setDefaultContourPen(Qt::NoPen);
   d_color_map_pen = false;
 }

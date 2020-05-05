@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 
@@ -23,7 +23,7 @@ class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyDirect
     : public TimeAtSampleStrategy {
 public:
   TimeAtSampleStrategyDirect(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, double ei);
+      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws, double ei);
   Correction calculate(const size_t &workspace_index) const override;
 
 private:

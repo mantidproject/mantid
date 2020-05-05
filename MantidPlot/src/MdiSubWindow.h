@@ -49,7 +49,7 @@ class Folder;
 class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
 public:
-  MdiSubWindowParent_t(QWidget *parent, Qt::WFlags f = nullptr)
+  MdiSubWindowParent_t(QWidget *parent, const Qt::WFlags &f = nullptr)
       : QFrame(parent, f), m_widget(nullptr) {}
   void setWidget(QWidget *w) {
     if (w == nullptr) { // removing widget
@@ -124,13 +124,13 @@ public:
    * \sa setCaptionPolicy(), captionPolicy()
    */
   MdiSubWindow(QWidget *parent, const QString &label = QString(),
-               const QString &name = QString(), Qt::WFlags f = nullptr);
+               const QString &name = QString(), const Qt::WFlags &f = nullptr);
 
   MdiSubWindow();
 
   /// Setup the window without constructor
   void init(QWidget *parent, const QString &label, const QString &name,
-            Qt::WFlags flags);
+            const Qt::WFlags &flags);
 
   //! Possible window captions.
   enum CaptionPolicy {

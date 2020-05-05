@@ -1,18 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """State describing the conversion to momentum transfer"""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSFacility)
@@ -25,7 +22,7 @@ from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_an
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateConvertToQ(with_metaclass(JsonSerializable)):
+class StateConvertToQ(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateConvertToQ, self).__init__()

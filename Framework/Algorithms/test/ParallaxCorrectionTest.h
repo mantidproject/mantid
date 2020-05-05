@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,7 +27,7 @@ using Mantid::Geometry::DetectorInfo;
 using Mantid::Kernel::V3D;
 
 namespace {
-bool compare(MatrixWorkspace_sptr w1, MatrixWorkspace_sptr w2) {
+bool compare(const MatrixWorkspace_sptr &w1, const MatrixWorkspace_sptr &w2) {
   CompareWorkspaces comparator;
   comparator.initialize();
   comparator.setChild(true);

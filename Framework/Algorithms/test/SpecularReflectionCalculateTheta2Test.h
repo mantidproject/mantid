@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -24,8 +24,7 @@ class SpecularReflectionCalculateTheta2Test: public CxxTest::TestSuite,
 
 private:
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionCalculateTheta2>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionCalculateTheta2>();
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();

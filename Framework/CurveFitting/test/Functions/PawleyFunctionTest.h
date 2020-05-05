@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -320,7 +320,7 @@ public:
     PawleyFunction fn;
     fn.initialize();
 
-    TS_ASSERT(boost::dynamic_pointer_cast<CompositeFunction>(
+    TS_ASSERT(std::dynamic_pointer_cast<CompositeFunction>(
         fn.getDecoratedFunction()));
 
     // The base parameters of PawleyParameterFunction

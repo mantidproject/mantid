@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------
 // Includes
@@ -316,7 +316,8 @@ void IndirectDataReduction::loadInstrumentDetails() {
  * @return Value as QString
  */
 QString IndirectDataReduction::getInstrumentParameterFrom(
-    Mantid::Geometry::IComponent_const_sptr comp, std::string param) {
+    const Mantid::Geometry::IComponent_const_sptr &comp,
+    const std::string &param) {
   QString value;
 
   if (!comp->hasParameter(param)) {
@@ -445,7 +446,7 @@ void IndirectDataReduction::saveSettings() {
  *
  * @param facility Name of facility
  */
-void IndirectDataReduction::filterUiForFacility(QString facility) {
+void IndirectDataReduction::filterUiForFacility(const QString &facility) {
   g_log.information() << "Facility selected: " << facility.toStdString()
                       << '\n';
   QStringList enabledTabs;

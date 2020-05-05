@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFunctionModel.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -69,7 +69,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
   m_model.setFunction(fun);
 }
 
-void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
+void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
   bool isFitTypeSet = false;
   bool isResolutionSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
@@ -87,7 +87,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_hasTempCorrection = true;
-      if (boost::dynamic_pointer_cast<CompositeFunction>(
+      if (std::dynamic_pointer_cast<CompositeFunction>(
               innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else
@@ -102,7 +102,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
   }
 }
 
-void ConvFunctionModel::checkSingleFunction(IFunction_sptr fun,
+void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
                                             bool &isFitTypeSet) {
   assert(fun->nFunctions() == 0);
   auto const name = fun->name();
@@ -609,7 +609,7 @@ void ConvFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 }
 
 void ConvFunctionModel::applyParameterFunction(
-    std::function<void(ParamID)> paramFun) const {
+    const std::function<void(ParamID)> &paramFun) const {
   applyToFitType(m_fitType, paramFun);
   applyToBackground(m_backgroundType, paramFun);
   applyToDelta(m_hasDeltaFunction, paramFun);
@@ -635,29 +635,35 @@ std::string ConvFunctionModel::buildLorentzianFunctionString() const {
 }
 
 std::string ConvFunctionModel::buildTeixeiraFunctionString() const {
-  return "name=TeixeiraWaterSQE";
+  return "name=TeixeiraWaterSQE, Height=1, DiffCoeff=2.3, Tau=1.25, Centre=0, "
+         "constraints=(Height>0, DiffCoeff>0, Tau>0)";
 }
 
 std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
-  return "name=StretchedExpFT";
+  return "name=StretchedExpFT, Height=0.1, Tau=100, Beta=1, Centre=0, "
+         "constraints=(Height>0, Tau>0)";
 }
 
 std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
-  return "name=ElasticDiffSphere";
+  return "name=ElasticDiffSphere, Height=1, Centre=0, Radius=2, "
+         "constraints=(Height>0, Radius>0)";
 }
 
 std::string ConvFunctionModel::buildInelasticDiffSphereFunctionString() const {
-  return "name=InelasticDiffSphere";
+  return "name=InelasticDiffSphere, Intensity=1, Radius=2, Diffusion=0.05, "
+         "Shift=0, constraints=(Intensity>0, Radius>0, Diffusion>0)";
 }
 
 std::string
 ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
-  return "name=InelasticDiffRotDiscreteCircle";
+  return "name=InelasticDiffRotDiscreteCircle, Intensity=1, Radius=1, Decay=1, "
+         "Shift=0, constraints=(Intensity>0, Radius>0)";
 }
 
 std::string
 ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
-  return "name=ElasticDiffRotDiscreteCircle";
+  return "name=ElasticDiffRotDiscreteCircle, Height=1, Centre=0, Radius=1, "
+         "constraints=(Height>0, Radius>0)";
 }
 
 std::string ConvFunctionModel::buildPeaksFunctionString() const {

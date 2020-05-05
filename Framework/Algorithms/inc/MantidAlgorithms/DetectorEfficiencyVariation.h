@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -72,8 +72,8 @@ protected:
                           API::MatrixWorkspace_sptr &whiteBeam2,
                           double &variation, int &minSpec, int &maxSpec);
   /// Apply the detector test criterion
-  int doDetectorTests(API::MatrixWorkspace_const_sptr counts1,
-                      API::MatrixWorkspace_const_sptr counts2,
+  int doDetectorTests(const API::MatrixWorkspace_const_sptr &counts1,
+                      const API::MatrixWorkspace_const_sptr &counts2,
                       const double average, double variation);
 
 private:

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,7 +12,7 @@
 
 #include "MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::CurveFitting::CostFunctions::CostFuncUnweightedLeastSquares;
 using namespace Mantid::API;
@@ -33,7 +33,7 @@ public:
      * except when the original weight was 0.
      */
     FunctionDomain1DVector d1d(std::vector<double>(20, 1.0));
-    FunctionValues_sptr values = boost::make_shared<FunctionValues>(d1d);
+    FunctionValues_sptr values = std::make_shared<FunctionValues>(d1d);
 
     for (size_t i = 0; i < values->size(); ++i) {
       values->setFitWeight(i, static_cast<double>(i));
@@ -55,7 +55,7 @@ public:
      * test uses dummy values for which the sum of residuals is known.
      */
     FunctionDomain1DVector d1d(std::vector<double>(10, 1.0));
-    FunctionValues_sptr values = boost::make_shared<FunctionValues>(d1d);
+    FunctionValues_sptr values = std::make_shared<FunctionValues>(d1d);
 
     // Data generated with numpy.random.normal(loc=2.0, scale=0.25, size=10)
     double obsValues[10] = {1.9651563160778176, 1.9618188576389295,
@@ -72,8 +72,7 @@ public:
     // Function has 1 parameter, so degrees of freedom = 9
     IFunction_sptr fn =
         FunctionFactory::Instance().createFunction("FlatBackground");
-    FunctionDomain_sptr domain =
-        boost::make_shared<FunctionDomain1DVector>(d1d);
+    FunctionDomain_sptr domain = std::make_shared<FunctionDomain1DVector>(d1d);
 
     TestableCostFuncUnweightedLeastSquares uwls;
     uwls.setFittingFunction(fn, domain, values);

@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/Exception.h"
@@ -29,7 +30,7 @@ namespace API {
  * @author Janik Zikovsky
  * @date Feb 21, 2011
  */
-class DLLExport BoxController {
+class MANTID_API_DLL BoxController {
 public:
   //-----------------------------------------------------------------------------------
   /** Constructor
@@ -40,7 +41,7 @@ public:
   BoxController(size_t nd)
       : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none),
         m_numSplit(1), m_numTopSplit(1),
-        m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {
+        m_fileIO(std::shared_ptr<API::IBoxControllerIO>()) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
     m_numEventsAtMax = 0;
@@ -398,7 +399,7 @@ public:
   IBoxControllerIO *getFileIO() { return m_fileIO.get(); }
   /// makes box controller file based by providing class, responsible for
   /// fileIO.
-  void setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
+  void setFileBacked(const std::shared_ptr<IBoxControllerIO> &newFileIO,
                      const std::string &fileName = "");
   void clearFileBacked();
   //-----------------------------------------------------------------------------------
@@ -529,7 +530,7 @@ private:
   std::mutex m_idMutex;
 
   // the class which does actual IO operations, including MRU support list
-  boost::shared_ptr<IBoxControllerIO> m_fileIO;
+  std::shared_ptr<IBoxControllerIO> m_fileIO;
 
   /// Number of bytes in a single MDLeanEvent<> of the workspace.
   // size_t m_bytesPerEvent;
@@ -537,10 +538,10 @@ public:
 };
 
 /// Shared ptr to BoxController
-using BoxController_sptr = boost::shared_ptr<BoxController>;
+using BoxController_sptr = std::shared_ptr<BoxController>;
 
 /// Shared ptr to a const BoxController
-using BoxController_const_sptr = boost::shared_ptr<const BoxController>;
+using BoxController_const_sptr = std::shared_ptr<const BoxController>;
 
 } // namespace API
 

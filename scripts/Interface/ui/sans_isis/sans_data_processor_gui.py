@@ -1,24 +1,20 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """ Main view for the ISIS SANS reduction interface.
 """
-
-from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
-from six import with_metaclass
-
 from mantid.kernel import (Logger, UsageService, FeatureType)
-from mantid.py3compat import Enum
+from enum import Enum
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
@@ -57,7 +53,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     MULTI_PERIOD_COLUMNS = ["SSP", "STP", "SDP", "CSP", "CTP", "CDP"]
 
-    class RunTabListener(with_metaclass(ABCMeta, object)):
+    class RunTabListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to in this View
         """
@@ -754,7 +750,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.q_1d_max_line_edit.setEnabled(not is_variable)
         self.q_1d_step_line_edit.setEnabled(not is_variable)
         if is_variable:
-            comma_separated_floats_regex_string = "^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
+            comma_separated_floats_regex_string = r"^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
             reg_ex = QRegExp(comma_separated_floats_regex_string)
             validator = QRegExpValidator(reg_ex)
             self.q_1d_min_line_edit.setValidator(validator)

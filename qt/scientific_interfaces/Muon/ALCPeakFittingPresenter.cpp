@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCPeakFittingPresenter.h"
 
@@ -55,7 +55,7 @@ void ALCPeakFittingPresenter::onCurrentFunctionChanged() {
     IFunction_const_sptr currentFunc = m_view->function(*index);
 
     if (auto peakFunc =
-            boost::dynamic_pointer_cast<const IPeakFunction>(currentFunc)) {
+            std::dynamic_pointer_cast<const IPeakFunction>(currentFunc)) {
       // If peak function selected - update and enable
       m_view->setPeakPicker(peakFunc);
       m_view->setPeakPickerEnabled(true);
@@ -93,7 +93,7 @@ void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
   // only - that's what
   // PeakPicker is showing
   if (currentIndex && *currentIndex == funcIndex) {
-    if (auto peak = boost::dynamic_pointer_cast<const IPeakFunction>(
+    if (auto peak = std::dynamic_pointer_cast<const IPeakFunction>(
             m_view->function(funcIndex))) {
       m_view->setPeakPicker(peak);
     }

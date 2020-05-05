@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusMonitors2.h"
 
@@ -47,7 +47,7 @@ DECLARE_ALGORITHM(LoadNexusMonitors2)
 
 namespace {
 void loadSampleDataISIScompatibilityInfo(
-    ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr const WS) {
+    ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -142,7 +142,7 @@ void LoadNexusMonitors2::init() {
 
   std::vector<std::string> options{"", LOAD_EVENTS, LOAD_HISTO};
   declareProperty("LoadOnly", "",
-                  boost::make_shared<Kernel::StringListValidator>(options),
+                  std::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
                   "Default is to load the one that is present, and Histogram "
                   "if both are present.");
@@ -165,6 +165,9 @@ void LoadNexusMonitors2::exec() {
   }
 
   m_top_entry_name = this->getPropertyValue("NXentryName");
+  // must be done here before the NeXus::File, HDF5 files can't have 2
+  // simultaneous handlers
+  Kernel::NexusHDF5Descriptor descriptor(m_filename);
 
   // top level file information
   ::NeXus::File file(m_filename);
@@ -258,7 +261,7 @@ void LoadNexusMonitors2::exec() {
   if (useEventMon) // set the x-range to be the range for min/max events
   {
     EventWorkspace_sptr eventWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+        std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
@@ -329,7 +332,7 @@ void LoadNexusMonitors2::exec() {
   g_log.debug() << "Loading metadata\n";
   try {
     LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(
-        m_filename, m_workspace, m_top_entry_name);
+        m_filename, m_workspace, m_top_entry_name, descriptor);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
@@ -403,8 +406,9 @@ void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
   }
 }
 
-void LoadNexusMonitors2::runLoadLogs(const std::string filename,
-                                     API::MatrixWorkspace_sptr localWorkspace) {
+void LoadNexusMonitors2::runLoadLogs(
+    const std::string &filename,
+    const API::MatrixWorkspace_sptr &localWorkspace) {
   // do the actual work
   API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
 
@@ -683,7 +687,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
                                                size_t ws_index) {
   // setup local variables
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
   std::string tof_units, event_time_zero_units;
 
   // read in the data

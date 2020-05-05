@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -13,7 +13,7 @@ matplotlib.use('Qt5Agg')  # noqa  # we need Qt for events to work
 import matplotlib.pyplot as plt
 
 from mantid import plots  # noqa  # register mantid projection
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figurewindow import FigureWindow

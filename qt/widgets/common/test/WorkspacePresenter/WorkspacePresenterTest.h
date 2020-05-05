@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -18,8 +18,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using namespace testing;
 using namespace Mantid::API;
@@ -36,7 +35,7 @@ public:
 
   void setUp() override {
     mockView.reset();
-    mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
+    mockView = std::make_shared<NiceMock<MockWorkspaceDockView>>();
     presenter = mockView->getPresenterSharedPtr();
   }
 
@@ -209,7 +208,7 @@ public:
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("NewGroup"));
 
     TS_ASSERT(group != nullptr);
@@ -253,7 +252,7 @@ public:
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("NewGroup"));
     auto names = AnalysisDataService::Instance().getObjectNames();
 
@@ -654,10 +653,10 @@ public:
   }
 
 private:
-  boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
+  std::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   WorkspacePresenterVN_sptr presenter;
 
-  void createGroup(std::string groupName) {
+  void createGroup(const std::string &groupName) {
     auto group =
         WorkspaceCreationHelper::createWorkspaceGroup(0, 10, 10, groupName);
     auto wksp1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
@@ -669,7 +668,7 @@ private:
     AnalysisDataService::Instance().addToGroup(groupName, "wksp2");
   }
 
-  void removeGroup(std::string groupName) {
+  void removeGroup(const std::string &groupName) {
     AnalysisDataService::Instance().deepRemoveGroup(groupName);
   }
 };

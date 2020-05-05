@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -61,14 +61,14 @@ private:
   /// Add all the supplied groups to the ADS, inside wsGrouped, by
   /// executing the ApplyMuonDetectorGrouping algorithm
   void addGroupingToADS(const Mantid::Muon::AnalysisOptions &options,
-                        Mantid::API::Workspace_sptr ws,
-                        Mantid::API::WorkspaceGroup_sptr wsGrouped);
+                        const Mantid::API::Workspace_sptr &ws,
+                        const Mantid::API::WorkspaceGroup_sptr &wsGrouped);
 
   /// Add all the supplied pairs to the ADS, inside wsGrouped, by
   /// executing the ApplyMuonDetectorGroupPairing algorithm
   void addPairingToADS(const Mantid::Muon::AnalysisOptions &options,
-                       Mantid::API::Workspace_sptr ws,
-                       Mantid::API::WorkspaceGroup_sptr wsGrouped);
+                       const Mantid::API::Workspace_sptr &ws,
+                       const Mantid::API::WorkspaceGroup_sptr &wsGrouped);
 
   void addGroupingInformationToADS(const Mantid::API::Grouping &grouping);
 
@@ -87,8 +87,9 @@ private:
   /// are paired are also included as groups.
   void CheckValidGroupsAndPairs(const Mantid::API::Grouping &grouping);
 
-  void getTimeLimitsFromInputWorkspace(Mantid::API::Workspace_sptr inputWS,
-                                       Mantid::Muon::AnalysisOptions &options);
+  void
+  getTimeLimitsFromInputWorkspace(const Mantid::API::Workspace_sptr &inputWS,
+                                  Mantid::Muon::AnalysisOptions &options);
 
   void getTimeLimitsFromInputs(AnalysisOptions &options);
 };

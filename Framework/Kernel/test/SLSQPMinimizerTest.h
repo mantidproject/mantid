@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,7 +11,7 @@
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class SLSQPMinimizerTest : public CxxTest::TestSuite {
 public:
@@ -133,7 +133,7 @@ private:
     using Mantid::Kernel::DblMatrix;
     using Mantid::Kernel::Math::SLSQPMinimizer;
 
-    auto lsqmin = boost::shared_ptr<SLSQPMinimizer>();
+    auto lsqmin = std::shared_ptr<SLSQPMinimizer>();
     const size_t nparams = m_nparams;
     ObjFunction userFunc;
     std::vector<double> start(nparams, -1);
@@ -153,23 +153,23 @@ private:
 
     switch (type) {
     case NOCONSTRAINTS:
-      lsqmin = boost::shared_ptr<SLSQPMinimizer>(
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(
           new SLSQPMinimizer(nparams, userFunc));
       break;
     case EMPTYCONSTRAINTS:
-      lsqmin = boost::shared_ptr<SLSQPMinimizer>(
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(
           new SLSQPMinimizer(nparams, userFunc, DblMatrix(), DblMatrix()));
       break;
     case EQUALITYCONSTRAINT:
-      lsqmin = boost::shared_ptr<SLSQPMinimizer>(
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(
           new SLSQPMinimizer(nparams, userFunc, equality, DblMatrix()));
       break;
     case INEQUALITYCONSTRAINT:
-      lsqmin = boost::shared_ptr<SLSQPMinimizer>(
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(
           new SLSQPMinimizer(nparams, userFunc, DblMatrix(), inequality));
       break;
     case BOTHCONSTRAINTS:
-      lsqmin = boost::shared_ptr<SLSQPMinimizer>(
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(
           new SLSQPMinimizer(nparams, userFunc, equality, inequality));
       break;
     };

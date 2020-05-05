@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.geometry import *
-from six import iteritems
 
 
 class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
@@ -40,7 +38,7 @@ class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
                 self._check_spacegroup(sg, monoclinic_c_cells, monoclinic_c_compatiblity[lattice_system])
 
     def _check_spacegroup(self, sg, cells, compatible_metrics):
-        for system, cell in iteritems(cells):
+        for system, cell in cells.items():
             is_allowed = sg.isAllowedUnitCell(cell)
             should_be_allowed = system in compatible_metrics
 

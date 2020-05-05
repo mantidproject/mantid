@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/Axis.h"
@@ -29,8 +29,9 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <H5Cpp.h>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
+#include <regex>
 
 using Mantid::Types::Core::DateAndTime;
 using std::map;
@@ -41,7 +42,7 @@ using namespace ::NeXus;
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
 using namespace DateAndTimeHelpers;
@@ -87,14 +88,18 @@ LoadEventNexus::LoadEventNexus()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
-  int confidence(0);
-  if (descriptor.classTypeExists("NXevent_data")) {
-    if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
-        descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+int LoadEventNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+
+  int confidence = 0;
+  const std::map<std::string, std::set<std::string>> &allEntries =
+      descriptor.getAllEntries();
+  if (allEntries.count("NXevent_data") == 1) {
+    if (descriptor.isEntry("/entry", "NXentry") ||
+        descriptor.isEntry("/raw_data_1", "NXentry")) {
       confidence = 80;
     }
   }
+
   return confidence;
 }
 
@@ -186,7 +191,7 @@ void LoadEventNexus::init() {
                   "This specified the tolerance to use (in microseconds) when "
                   "compressing.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
                   "If loading the file by sections ('chunks'), this is the "
@@ -212,7 +217,7 @@ void LoadEventNexus::init() {
 
   std::vector<std::string> options{"", "Events", "Histogram"};
   declareProperty("MonitorsLoadOnly", "",
-                  boost::make_shared<Kernel::StringListValidator>(options),
+                  std::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
                   "Default is to load the one that is present.");
 
@@ -286,7 +291,7 @@ void LoadEventNexus::init() {
   loadType.emplace_back("MPI");
 #endif // MPI_EXPERIMENTAL
 
-  auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
+  auto loadTypeValidator = std::make_shared<StringListValidator>(loadType);
   declareProperty("LoadType", "Default", loadTypeValidator,
                   "Set type of loader. 2 options {Default, Multiproceess},"
                   "'Multiprocess' should work faster for big files and it is "
@@ -374,7 +379,7 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
  */
-void LoadEventNexus::exec() {
+void LoadEventNexus::execLoader() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
@@ -398,8 +403,8 @@ void LoadEventNexus::exec() {
   Progress prog(this, 0.0, 0.3, reports);
 
   // Load the detector events
-  m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm currently
-                                                         // relies on an
+  m_ws = std::make_shared<EventWorkspaceCollection>(); // Algorithm currently
+                                                       // relies on an
   // object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
 
@@ -495,15 +500,17 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
  * This variable will be changed if the field is not there.
  * @param oldNeXusFileNames Whether to try using old names. This variable will
  * be changed if it is determined that old names are being used.
- *
+ * @param prefix current entry name prefix (e.g. /entry)
+ * @param descriptor input containing metadata information
  * @return The number of events.
  */
 std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
-                      bool &oldNeXusFileNames) {
+                      bool &oldNeXusFileNames, const std::string &prefix,
+                      const NexusHDF5Descriptor &descriptor) {
   // try getting the value of total_counts
   if (hasTotalCounts) {
     hasTotalCounts = false;
-    if (exists(file, "total_counts")) {
+    if (descriptor.isEntry(prefix + "/total_counts")) {
       try {
         file.openData("total_counts");
         auto info = file.getInfo();
@@ -555,14 +562,14 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
  * @return Pulse times given in the DAS logs
  */
 template <typename T>
-boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
+std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
     bool returnpulsetimes, int &nPeriods,
     std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
-  boost::shared_ptr<BankPulseTimes> out;
+  std::shared_ptr<BankPulseTimes> out;
   API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -604,7 +611,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
         temp = log->timesAsVector();
     }
     if (returnpulsetimes)
-      out = boost::make_shared<BankPulseTimes>(temp);
+      out = std::make_shared<BankPulseTimes>(temp);
 
     // Use the first pulse as the run_start time.
     if (!temp.empty()) {
@@ -707,7 +714,7 @@ void LoadEventNexus::checkForCorruptedPeriods(
  * @return Pulse times given in the DAS logs
  */
 template <>
-boost::shared_ptr<BankPulseTimes>
+std::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
     EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
@@ -779,11 +786,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                    true);
   }
   // set more properties on the workspace
+  const std::shared_ptr<NexusHDF5Descriptor> descriptor = getFileInfo();
+
   try {
     // this is a static method that is why it is passing the
     // file object and the file path
-    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws,
-                                                     m_top_entry_name);
+
+    loadEntryMetadata<EventWorkspaceCollection_sptr>(
+        m_filename, m_ws, m_top_entry_name, *descriptor);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << '\n';
@@ -796,7 +806,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == nullptr) {
     std::vector<DateAndTime> temp;
-    m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
+    m_allBanksPulseTimes = std::make_shared<BankPulseTimes>(temp);
   }
 
   if (!m_ws->getInstrument() || !m_instrument_loaded_correctly) {
@@ -807,8 +817,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // This may not be needed in the future if both LoadEventNexus and
     // LoadInstrument are made to use the same Nexus/HDF5 library
     m_file->close();
-    m_instrument_loaded_correctly =
-        loadInstrument(m_filename, m_ws, m_top_entry_name, this);
+    m_instrument_loaded_correctly = loadInstrument(
+        m_filename, m_ws, m_top_entry_name, this, descriptor.get());
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! "
@@ -828,39 +838,50 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
-  bool hasTotalCounts(true);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
-  while (true) { // should be broken when entry name is set
-    const auto entry = m_file->getNextEntry();
-    const std::string entry_name(entry.first);
-    const std::string entry_class(entry.second);
-    if (entry_name == NULL_STR && entry_class == NULL_STR)
-      break;
 
-    if (entry_class == classType) {
-      // open the group
-      m_file->openGroup(entry_name, classType);
+  const std::map<std::string, std::set<std::string>> &allEntries =
+      descriptor->getAllEntries();
 
-      if (takeTimesFromEvents) {
-        /* If we are here, we are loading logs, but have failed to establish
-         * the run_start from the proton_charge log. We are going to get this
-         * from our event_time_zero instead
-         */
-        auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
-        firstPulseT = std::min(firstPulseT, localFirstLast.first);
+  auto itClassEntries = allEntries.find(classType);
+
+  if (itClassEntries != allEntries.end()) {
+
+    const std::set<std::string> &classEntries = itClassEntries->second;
+    const std::regex classRegex("(/" + m_top_entry_name + "/)([^/]*)");
+    std::smatch groups;
+
+    for (const std::string &classEntry : classEntries) {
+
+      if (std::regex_match(classEntry, groups, classRegex)) {
+        const std::string entry_name(groups[2].str());
+        m_file->openGroup(entry_name, classType);
+
+        if (takeTimesFromEvents) {
+          /* If we are here, we are loading logs, but have failed to establish
+           * the run_start from the proton_charge log. We are going to get this
+           * from our event_time_zero instead
+           */
+          auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
+          firstPulseT = std::min(firstPulseT, localFirstLast.first);
+        }
+        // get the number of events
+        const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
+        bool hasTotalCounts = true;
+        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames,
+                                    prefix, *descriptor);
+        bankNames.emplace_back(entry_name);
+        bankNumEvents.emplace_back(num);
+
+        // Look for weights in simulated file
+        const std::string absoluteEventWeightName = prefix + "/event_weight";
+        haveWeights = descriptor->isEntry(absoluteEventWeightName);
+        m_file->closeGroup();
       }
-      // get the number of events
-      std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
-      bankNames.emplace_back(entry_name);
-      bankNumEvents.emplace_back(num);
-
-      // Look for weights in simulated file
-      haveWeights = exists(*m_file, "event_weight");
-
-      m_file->closeGroup();
     }
   }
+
   if (takeTimesFromEvents)
     run_start = firstPulseT;
 
@@ -1095,7 +1116,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
-  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType);
+  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType,
+                               descriptor.get());
 }
 
 //-----------------------------------------------------------------------------
@@ -1157,16 +1179,18 @@ LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
  *geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
  *  @param alg :: Handle of the algorithm
+ *  @param descriptor :: input containing metadata information
  *  @return true if successful
  */
 template <>
 bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
     EventWorkspaceCollection_sptr localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg) {
+    const std::string &top_entry_name, Algorithm *alg,
+    const Kernel::NexusHDF5Descriptor *descriptor) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
-  auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(nexusfilename, ws,
-                                                           top_entry_name, alg);
+  auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(
+      nexusfilename, ws, top_entry_name, alg, descriptor);
   localWorkspace->setInstrument(ws->getInstrument());
   return hasLoaded;
 }
@@ -1177,28 +1201,28 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
  * @param workspace :: The workspace to contain the spectra mapping
  * @param bankNames :: Bank names that are in Nexus file
  */
-void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
-                                 std::vector<std::string> bankNames) {
-  Instrument_sptr inst = boost::const_pointer_cast<Instrument>(
+void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
+                                 const std::vector<std::string> &bankNames) {
+  Instrument_sptr inst = std::const_pointer_cast<Instrument>(
       workspace->getInstrument()->baseInstrument());
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector>> detList;
+  std::vector<std::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
+    std::shared_ptr<RectangularDetector> det;
+    std::shared_ptr<ICompAssembly> assem;
+    std::shared_ptr<ICompAssembly> assem2;
 
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
       detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g.
       // PG3). We are not doing a full recursive search since that will be
       // very long for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
+      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
-          det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
+          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             detList.emplace_back(det);
 
@@ -1206,10 +1230,10 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
             // Also, look in the second sub-level for RectangularDetectors
             // (e.g. PG3). We are not doing a full recursive search since that
             // will be very long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
+            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = boost::dynamic_pointer_cast<RectangularDetector>(
+                det = std::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
@@ -1234,15 +1258,15 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
         break;
     }
     if (!keep) {
-      boost::shared_ptr<const IComponent> parent =
+      std::shared_ptr<const IComponent> parent =
           inst->getComponentByName(det_name);
       std::vector<Geometry::IComponent_const_sptr> children;
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
       for (auto &col : children) {
-        boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
+        std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+            std::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
         std::vector<Geometry::IComponent_const_sptr> grandchildren;
         asmb2->getChildren(grandchildren, false);
 
@@ -1298,38 +1322,6 @@ void LoadEventNexus::createSpectraMapping(
 
 //-----------------------------------------------------------------------------
 /**
- * Returns whether the file contains monitors with events in them
- * @returns True if the file contains monitors with event data, false
- * otherwise
- */
-bool LoadEventNexus::hasEventMonitors() {
-  bool result(false);
-  // Determine whether to load histograms or events
-  try {
-    m_file->openPath("/" + m_top_entry_name);
-    // Start with the base entry
-    using string_map_t = std::map<std::string, std::string>;
-    // Now we want to go through and find the monitors
-    string_map_t entries = m_file->getEntries();
-    for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
-         ++it) {
-      if (it->second == "NXmonitor") {
-        m_file->openGroup(it->first, it->second);
-        break;
-      }
-    }
-    bool hasTotalCounts = false;
-    bool oldNeXusFileNames = false;
-    result = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames) > 0;
-    m_file->closeGroup();
-  } catch (::NeXus::Exception &) {
-    result = false;
-  }
-  return result;
-}
-
-//-----------------------------------------------------------------------------
-/**
  * Load the Monitors from the NeXus file into a workspace. The original
  * workspace name is used and appended with _monitors.
  *
@@ -1359,7 +1351,7 @@ void LoadEventNexus::runLoadMonitors() {
 
   // The output will either be a group workspace or a matrix workspace
   MatrixWorkspace_sptr mons =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
+      std::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
   if (mons) {
     // Set the internal monitor workspace pointer as well
     m_ws->setMonitorWorkspace(mons);
@@ -1367,7 +1359,7 @@ void LoadEventNexus::runLoadMonitors() {
     filterDuringPause(mons);
   } else {
     WorkspaceGroup_sptr monsGrp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
+        std::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
     if (monsGrp) {
       // declare a property for each member of the group
       for (int i = 0; i < monsGrp->getNumberOfEntries(); i++) {
@@ -1537,7 +1529,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
  *
  * @param fname name of the nexus file to open
  */
-void LoadEventNexus::safeOpenFile(const std::string fname) {
+void LoadEventNexus::safeOpenFile(const std::string &fname) {
   try {
     m_file = std::make_unique<::NeXus::File>(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {

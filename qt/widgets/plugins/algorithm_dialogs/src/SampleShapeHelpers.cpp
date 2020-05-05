@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------
 // Includes
@@ -150,7 +150,7 @@ QString PointGroupBox::write3DElement(const QString &elem_name) const {
  * @param right Right-hand side of binary operation
  * @returns A string representing the result of the operation on the arguments
  */
-QString Operation::toString(QString left, QString right) const {
+QString Operation::toString(const QString &left, const QString &right) const {
   QString result;
   switch (binaryop) {
   // union

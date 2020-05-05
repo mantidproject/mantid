@@ -1,16 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox, QSpinBox
 from qtpy.QtCore import Qt, Signal
-from mantid.py3compat.enum import Enum
+from enum import Enum
 
 
 class State(Enum):
@@ -37,11 +36,11 @@ class DimensionWidget(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dims_info, parent=None):
-        super(DimensionWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self.layout = QVBoxLayout(self)
-
         self.dims = []
         for n, dim in enumerate(dims_info):
             if dim['type'] == 'MDE':
@@ -95,7 +94,7 @@ class DimensionWidget(QWidget):
 
     def set_initial_states(self):
         # set first 2 State.NONE dimensions as x and y
-        none_state_dims = [d for d in self.dims if d.state==State.NONE]
+        none_state_dims = [d for d in self.dims if d.state == State.NONE]
         none_state_dims[0].set_state(State.X)
         none_state_dims[1].set_state(State.Y)
 
@@ -106,11 +105,47 @@ class DimensionWidget(QWidget):
             d.name.setMinimumWidth(max_name_width)
             d.units.setMinimumWidth(max_unit_width)
 
+    def get_indices(self):
+        """
+        :return: a list of 3 elements, [X, Y, Z], where X,Y,Z give the index that is set as that dimension.
+        """
+        xdim, ydim, zdim = None, None, None
+        for index, dimension in enumerate(self.dims):
+            state = dimension.get_state()
+            if state == State.X:
+                xdim = index
+            elif state == State.Y:
+                ydim = index
+            elif state == State.NONE:
+                zdim = index
+
+        return [xdim, ydim, zdim]
+
     def get_slicepoint(self):
+        """:return: a list of 3 elements where None indicates a non-slice dimension and a
+          float indicates the current slice point in that dimension.
+        """
         return [None if d.get_state() in (State.X, State.Y) else d.get_value() for d in self.dims]
 
+    def get_slicerange(self):
+        for d in self.dims:
+            if d.get_state() == State.NONE:
+                spinbox = d.spinbox
+                return (spinbox.minimum(), spinbox.maximum())
+
     def get_bin_params(self):
-        return [d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness() for d in self.dims]
+        return [
+            d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness()
+            for d in self.dims
+        ]
+
+    def set_slicevalue(self, value):
+        """
+        Set the value of the slice point in the slice dimension
+        """
+        for d in self.dims:
+            if d.get_state() == State.NONE:
+                d.set_value(value)
 
 
 class Dimension(QWidget):
@@ -119,7 +154,7 @@ class Dimension(QWidget):
     """
     pass in dimension
 
-    state: one of (State.X, State.Y, State.NONE, State.DISBALE)
+    state: one of (State.X, State.Y, State.NONE, State.DISABLE)
 
     Can be run independently by:
 
@@ -130,8 +165,9 @@ class Dimension(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
-        super(Dimension, self).__init__(parent)
+        super().__init__(parent)
 
         self.minimum = dim_info['minimum']
         self.nbins = dim_info['number_of_bins']
@@ -144,24 +180,24 @@ class Dimension(QWidget):
         self.units = QLabel(dim_info['units'])
 
         self.x = QPushButton('X')
-        self.x.setFixedSize(32,32)
+        self.x.setFixedSize(32, 32)
         self.x.setCheckable(True)
         self.x.clicked.connect(self.x_clicked)
 
         self.y = QPushButton('Y')
-        self.y.setFixedSize(32,32)
+        self.y.setFixedSize(32, 32)
         self.y.setCheckable(True)
         self.y.clicked.connect(self.y_clicked)
 
         self.slider = QSlider(Qt.Horizontal)
-        self.slider.setRange(0, self.nbins-1)
+        self.slider.setRange(0, self.nbins - 1)
         self.slider.valueChanged.connect(self.slider_changed)
 
         self.spinbox = QDoubleSpinBox()
         self.spinbox.setDecimals(3)
-        self.spinbox.setRange(self.get_bin_center(0), self.get_bin_center(self.nbins-1))
+        self.spinbox.setRange(self.get_bin_center(0), self.get_bin_center(self.nbins - 1))
         self.spinbox.setSingleStep(self.width)
-        self.spinbox.valueChanged.connect(self.spinbox_changed)
+        self.spinbox.editingFinished.connect(self.spinbox_changed)
 
         self.layout.addWidget(self.name)
         self.layout.addWidget(self.x)
@@ -226,7 +262,6 @@ class Dimension(QWidget):
     def spinbox_changed(self):
         self.value = self.spinbox.value()
         self.update_slider()
-        self.valueChanged.emit()
 
     def slider_changed(self):
         self.value = self.get_bin_center(self.slider.value())
@@ -234,11 +269,11 @@ class Dimension(QWidget):
         self.valueChanged.emit()
 
     def get_bin_center(self, n):
-        return (n+0.5)*self.width+self.minimum
+        return (n + 0.5) * self.width + self.minimum
 
     def update_slider(self):
-        i = (self.value-self.minimum)/self.width
-        self.slider.setValue(int(min(max(i, 0), self.nbins-1)))
+        i = (self.value - self.minimum) / self.width
+        self.slider.setValue(int(min(max(i, 0), self.nbins - 1)))
 
     def update_spinbox(self):
         self.spinbox.setValue(self.value)
@@ -264,19 +299,20 @@ class DimensionMDE(Dimension):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
 
         # hack in a number_of_bins for MDEventWorkspace
         dim_info['number_of_bins'] = 1000
-        dim_info['width'] = (dim_info['maximum']-dim_info['minimum'])/1000
+        dim_info['width'] = (dim_info['maximum'] - dim_info['minimum']) / 1000
 
         self.spinBins = QSpinBox()
-        self.spinBins.setRange(2,9999)
+        self.spinBins.setRange(2, 9999)
         self.spinBins.setValue(100)
         self.spinBins.hide()
         self.spinBins.setMinimumWidth(110)
         self.spinThick = QDoubleSpinBox()
-        self.spinThick.setRange(0.001,999)
+        self.spinThick.setRange(0.001, 999)
         self.spinThick.setValue(0.1)
         self.spinThick.setSingleStep(0.1)
         self.spinThick.setDecimals(3)
@@ -284,7 +320,7 @@ class DimensionMDE(Dimension):
         self.rebinLabel = QLabel("thick")
         self.rebinLabel.setMinimumWidth(44)
 
-        super(DimensionMDE, self).__init__(dim_info, number, state, parent)
+        super().__init__(dim_info, number, state, parent)
 
         self.spinBins.valueChanged.connect(self.binningChanged)
         self.spinThick.valueChanged.connect(self.valueChanged)
@@ -300,7 +336,7 @@ class DimensionMDE(Dimension):
         return float(self.spinThick.value())
 
     def set_state(self, state):
-        super(DimensionMDE, self).set_state(state)
+        super().set_state(state)
         if self.state == State.X:
             self.spinBins.show()
             self.spinThick.hide()

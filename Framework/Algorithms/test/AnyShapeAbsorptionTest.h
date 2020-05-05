@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
@@ -17,8 +17,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
-using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace_sptr;
 
 class AnyShapeAbsorptionTest : public CxxTest::TestSuite {
@@ -79,11 +79,11 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr flatws;
     TS_ASSERT_THROWS_NOTHING(
-        flatws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        flatws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(flatWS)));
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWS)));
     // These should be extremely close to one another (a fraction of a %)
     TS_ASSERT_DELTA(result->readY(0).front(), flatws->readY(0).front(),
@@ -146,11 +146,11 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr cylws;
     TS_ASSERT_THROWS_NOTHING(
-        cylws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        cylws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(cylWS)));
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWS)));
     // These should be somewhat close to one another (within a couple of %)
     Mantid::MantidVec y0 = result->readY(0);
@@ -189,7 +189,7 @@ public:
     TS_ASSERT(atten3.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("gauge")));
     TS_ASSERT_LESS_THAN(result->readY(0).front(), y0.front());
     TS_ASSERT_LESS_THAN(result->readY(0).back(), y0.back());
@@ -257,7 +257,6 @@ public:
     constexpr double WL_DELTA = (2.9 - WL_MIN) / static_cast<double>(NUM_VALS);
 
     // create the input workspace
-    const std::string IN_WS{"AbsorptionCorrection_Input"};
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
         1, NUM_VALS, WL_MIN, WL_DELTA);
     auto testInst =
@@ -273,7 +272,7 @@ public:
 
     // set the sample/can geometry
     auto setSampleAlg =
-        FrameworkManager::Instance().createAlgorithm("SetSample");
+        AlgorithmManager::Instance().createUnmanaged("SetSample");
     setSampleAlg->setRethrows(true);
     setSampleAlg->initialize();
     setSampleAlg->setPropertyValue("InputWorkspace", "bobby");
@@ -322,12 +321,12 @@ public:
     // material contains Li7
     Mantid::API::MatrixWorkspace_sptr samWS;
     TS_ASSERT_THROWS_NOTHING(
-        samWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        samWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(SAM_WS)));
     const auto &samValues = samWS->readY(0);
     Mantid::API::MatrixWorkspace_sptr canWS;
     TS_ASSERT_THROWS_NOTHING(
-        canWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        canWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(CAN_WS)));
     const auto &canValues = canWS->readY(0);
     TS_ASSERT_EQUALS(samValues.size(), canValues.size());

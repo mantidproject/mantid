@@ -146,7 +146,7 @@ public:
 
   // virtual void setDataVector
   MOCK_METHOD4(setDataVector,
-               void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
+               void(std::vector<std::shared_ptr<QwtData>> &data, bool focused,
                     bool plotSinglePeaks, const std::string &xAxisLabel));
 
   // virtual void resetCanvas

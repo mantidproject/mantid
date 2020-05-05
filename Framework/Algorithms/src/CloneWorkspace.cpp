@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -41,11 +41,11 @@ void CloneWorkspace::exec() {
   }
 
   MatrixWorkspace_const_sptr inputMatrix =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
   IMDWorkspace_sptr inputMD =
-      boost::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace);
   ITableWorkspace_const_sptr iTableWS =
-      boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
 
   if (inputMatrix || iTableWS) {
     // Workspace::clone() is polymorphic, we can use the same for all types
@@ -61,7 +61,7 @@ void CloneWorkspace::exec() {
     alg->executeAsChildAlg();
     IMDWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(outputWS));
+                std::dynamic_pointer_cast<Workspace>(outputWS));
   } else
     throw std::runtime_error("Expected a MatrixWorkspace, PeaksWorkspace, "
                              "MDEventWorkspace, or a MDHistoWorkspace. Cannot "

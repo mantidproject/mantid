@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -121,11 +121,11 @@ protected:
   /// Handle workspace preDeletion tasks.
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   /// Handle workspace replacement tasks.
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   /// Detects if something is dragged onto the VSI
   void dragEnterEvent(QDragEnterEvent *e) override;
   /// Reacts to something being dropped onto the VSI

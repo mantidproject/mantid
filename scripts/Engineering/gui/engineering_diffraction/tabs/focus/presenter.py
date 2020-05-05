@@ -1,18 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
-
-from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, \
+    CalibrationObserver
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import Observer
 
 from qtpy.QtWidgets import QMessageBox
 
@@ -22,7 +20,7 @@ class FocusPresenter(object):
         self.model = model
         self.view = view
         self.worker = None
-        self.calibration_observer = self.CalibrationObserver(self)
+        self.calibration_observer = CalibrationObserver(self)
 
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
@@ -89,8 +87,7 @@ class FocusPresenter(object):
             create_error_message(
                 self.view,
                 "Please make sure the selected instrument matches instrument for the current calibration.\n"
-                "The instrument for the current calibration is: " +
-                self.current_calibration.get_instrument())
+                "The instrument for the current calibration is: " + self.current_calibration.get_instrument())
             return False
         if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
             create_error_message(self.view, "Check cropping values are valid.")
@@ -135,14 +132,3 @@ class FocusPresenter(object):
 
     def show_cropping(self, visible):
         self.view.set_cropping_widget_visibility(visible)
-
-    # -----------------------
-    # Observers / Observables
-    # -----------------------
-    class CalibrationObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, calibration):
-            self.outer.update_calibration(calibration)

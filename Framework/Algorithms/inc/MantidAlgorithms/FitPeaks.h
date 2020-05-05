@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -43,7 +43,7 @@ public:
   double getParameterValue(size_t ipeak, size_t iparam) const;
   double getParameterError(size_t ipeak, size_t iparam) const;
   void setRecord(size_t ipeak, const double cost, const double peak_position,
-                 const FitFunction fit_functions);
+                 const FitFunction &fit_functions);
   void setBadRecord(size_t ipeak, const double peak_position);
   void setFunctionParameters(size_t ipeak, std::vector<double> &param_values);
 
@@ -117,51 +117,50 @@ private:
   enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
   /// suites of method to fit peaks
-  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
+  std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
 
   /// fit peaks in a same spectrum
   void fitSpectrumPeaks(
       size_t wi, const std::vector<double> &expected_peak_centers,
-      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// fit background
   bool fitBackground(const size_t &ws_index,
                      const std::pair<double, double> &fit_window,
                      const double &expected_peak_pos,
-                     API::IBackgroundFunction_sptr bkgd_func);
+                     const API::IBackgroundFunction_sptr &bkgd_func);
 
   // Peak fitting suite
-  double fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
+  double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
                            const double expected_peak_center,
                            const std::pair<double, double> &fitwindow,
                            const bool observe_peak_params,
-                           API::IPeakFunction_sptr peakfunction,
-                           API::IBackgroundFunction_sptr bkgdfunc);
+                           const API::IPeakFunction_sptr &peakfunction,
+                           const API::IBackgroundFunction_sptr &bkgdfunc);
 
   /// Methods to fit functions (general)
-  double fitFunctionSD(API::IAlgorithm_sptr fit,
-                       API::IPeakFunction_sptr peak_function,
-                       API::IBackgroundFunction_sptr bkgd_function,
-                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
+  double fitFunctionSD(const API::IAlgorithm_sptr &fit,
+                       const API::IPeakFunction_sptr &peak_function,
+                       const API::IBackgroundFunction_sptr &bkgd_function,
+                       const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
                        double xmin, double xmax,
                        const double &expected_peak_center,
                        bool observe_peak_shape, bool estimate_background);
 
   double fitFunctionMD(API::IFunction_sptr fit_function,
-                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
                        std::vector<double> &vec_xmin,
                        std::vector<double> &vec_xmax);
 
   /// fit a single peak with high background
-  double fitFunctionHighBackground(API::IAlgorithm_sptr fit,
-                                   const std::pair<double, double> &fit_window,
-                                   const size_t &ws_index,
-                                   const double &expected_peak_center,
-                                   bool observe_peak_shape,
-                                   API::IPeakFunction_sptr peakfunction,
-                                   API::IBackgroundFunction_sptr bkgdfunc);
+  double fitFunctionHighBackground(
+      const API::IAlgorithm_sptr &fit,
+      const std::pair<double, double> &fit_window, const size_t &ws_index,
+      const double &expected_peak_center, bool observe_peak_shape,
+      const API::IPeakFunction_sptr &peakfunction,
+      const API::IBackgroundFunction_sptr &bkgdfunc);
 
-  void setupParameterTableWorkspace(API::ITableWorkspace_sptr table_ws,
+  void setupParameterTableWorkspace(const API::ITableWorkspace_sptr &table_ws,
                                     const std::vector<std::string> &param_names,
                                     bool with_chi2);
 
@@ -171,7 +170,7 @@ private:
                     std::vector<double> &vec_e);
 
   /// Reduce background
-  void reduceByBackground(API::IBackgroundFunction_sptr bkgd_func,
+  void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func,
                           const std::vector<double> &vec_x,
                           std::vector<double> &vec_y);
 
@@ -183,7 +182,7 @@ private:
   /// Esitmate background by 'observation'
   void estimateBackground(const HistogramData::Histogram &histogram,
                           const std::pair<double, double> &peak_window,
-                          API::IBackgroundFunction_sptr bkgd_function);
+                          const API::IBackgroundFunction_sptr &bkgd_function);
   /// estimate linear background
   void estimateLinearBackground(const HistogramData::Histogram &histogram,
                                 double left_window_boundary,
@@ -193,12 +192,12 @@ private:
   /// Estimate peak parameters by 'observation'
   int estimatePeakParameters(const HistogramData::Histogram &histogram,
                              const std::pair<double, double> &peak_window,
-                             API::IPeakFunction_sptr peakfunction,
-                             API::IBackgroundFunction_sptr bkgdfunction,
+                             const API::IPeakFunction_sptr &peakfunction,
+                             const API::IBackgroundFunction_sptr &bkgdfunction,
                              bool observe_peak_width);
 
   bool decideToEstimatePeakParams(const bool firstPeakInSpectrum,
-                                  API::IPeakFunction_sptr peak_function);
+                                  const API::IPeakFunction_sptr &peak_function);
 
   /// observe peak center
   int observePeakCenter(const HistogramData::Histogram &histogram,
@@ -215,27 +214,27 @@ private:
   void processSinglePeakFitResult(
       size_t wsindex, size_t peakindex, const double cost,
       const std::vector<double> &expected_peak_positions,
-      FitPeaksAlgorithm::FitFunction fitfunction,
-      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
+      const FitPeaksAlgorithm::FitFunction &fitfunction,
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// calculate peak+background for fitted
   void calculateFittedPeaks(
-      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+      std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
           fit_results);
 
   /// Get the parameter name for peak height (I or height or etc)
-  std::string
-  getPeakHeightParameterName(API::IPeakFunction_const_sptr peak_function);
+  std::string getPeakHeightParameterName(
+      const API::IPeakFunction_const_sptr &peak_function);
 
   /// Set the workspaces and etc to output properties
-  void processOutputs(
-      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
-          fit_result_vec);
+  void
+  processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+                     fit_result_vec);
 
   /// Write result of peak fit per spectrum to output analysis workspaces
   void writeFitResult(
       size_t wi, const std::vector<double> &expected_positions,
-      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// check whether FitPeaks supports observation on a certain peak profile's
   /// parameters (width!)

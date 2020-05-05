@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -74,7 +74,7 @@ void SlicingAlgorithmDialog::initLayout() {
   auto names = AnalysisDataService::Instance().getObjectNames();
   auto it = names.begin();
   while (it != names.end()) {
-    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(*it));
     if (ws) {
       ui.workspace_selector->addItem((*it).c_str());
@@ -102,8 +102,8 @@ SlicingAlgorithmDialog::~SlicingAlgorithmDialog() { saveSettings(); }
  dimension.
  @param dim : dimension to format to string.
 */
-QString
-formattedAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr dim) {
+QString formattedAlignedDimensionInput(
+    const Mantid::Geometry::IMDDimension_const_sptr &dim) {
   QString min, max, nbins, result;
   QString name(dim->getName().c_str());
   min.setNum(dim->getMinimum());
@@ -133,7 +133,7 @@ formattedAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr dim) {
  @return : empty string.
 */
 QString formatNonAlignedDimensionInput(
-    Mantid::Geometry::IMDDimension_const_sptr /*unused*/) {
+    const Mantid::Geometry::IMDDimension_const_sptr & /*unused*/) {
   // Deliberately return an empty string here, because it's not obvious how the
   // basis vectors could be automatically formed.
   return QString("");
@@ -288,7 +288,7 @@ generated.
 */
 void SlicingAlgorithmDialog::makeDimensionInputs(
     const QString &propertyPrefix, QLayout *owningLayout,
-    QString (*format)(IMDDimension_const_sptr), History history) {
+    QString (*format)(const IMDDimension_const_sptr &), History history) {
   // Remove excess dimensions from the tied properties and the stored property
   // values
   size_t indexRemoved = 0;
@@ -309,7 +309,7 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
 
   const QString &txt = getCurrentInputWorkspaceName();
   if (!txt.isEmpty()) {
-    IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+    IMDWorkspace_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve(txt.toStdString()));
 
     size_t nDimensions = ws->getNumDims();
@@ -441,7 +441,7 @@ bool SlicingAlgorithmDialog::doAutoFillDimensions() const {
  *Customise the layout for usage in the Vsi
  */
 void SlicingAlgorithmDialog::customiseLayoutForVsi(
-    std::string initialWorkspace) {
+    const std::string &initialWorkspace) {
   // File back-end
   ui.file_backend_layout->setVisible(false);
 
@@ -466,8 +466,8 @@ void SlicingAlgorithmDialog::customiseLayoutForVsi(
  * @param index The property index.
  * @param propertyValue The new value of the axis dimension.
  */
-void SlicingAlgorithmDialog::resestAlignedDimProperty(size_t index,
-                                                      QString propertyValue) {
+void SlicingAlgorithmDialog::resestAlignedDimProperty(
+    size_t index, const QString &propertyValue) {
   QString alignedDim = "AlignedDim";
 
   const QString propertyName = alignedDim.append(QString().number(index));

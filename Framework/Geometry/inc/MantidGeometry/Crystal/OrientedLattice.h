@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -66,6 +66,9 @@ public:
   /// Get the real space edge vectors a, b, c corresponding to the UB matrix
   static bool GetABC(const Kernel::DblMatrix &UB, Kernel::V3D &a_dir,
                      Kernel::V3D &b_dir, Kernel::V3D &c_dir);
+
+  bool operator==(const OrientedLattice &other) const;
+  bool operator!=(const OrientedLattice &other) const;
 
 private:
   Kernel::DblMatrix U;

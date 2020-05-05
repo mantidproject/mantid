@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import collections
 import matplotlib
 import matplotlib.collections as mcoll
@@ -108,7 +106,7 @@ def _plot_impl(axes, workspace, args, kwargs):
             axes.xaxis_date()
             axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
             axes.set_xlabel('Time')
-        kwargs['linestyle'] = 'steps-post'
+        kwargs['drawstyle'] = 'steps-post'
     else:
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
             workspace, axes, **kwargs)

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -17,8 +17,9 @@
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
+#include <memory>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -81,8 +82,7 @@ std::string CompositeFunction::writeToString(
   const auto localAttr = this->getLocalAttributeNames();
   for (size_t i = 0; i < nFunctions(); i++) {
     IFunction_sptr fun = getFunction(i);
-    bool isComp =
-        boost::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
+    bool isComp = std::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
     if (isComp)
       ostr << '(';
     std::ostringstream localAttributesStr;
@@ -123,7 +123,7 @@ std::string CompositeFunction::writeToString(
 /**
  * @param ws A pointer to the workspace being fitted
  */
-void CompositeFunction::setWorkspace(boost::shared_ptr<const Workspace> ws) {
+void CompositeFunction::setWorkspace(std::shared_ptr<const Workspace> ws) {
   // Pass it on to each member
   auto iend = m_functions.end();
   for (auto it = m_functions.begin(); it != iend; ++it) {
@@ -138,8 +138,8 @@ void CompositeFunction::setWorkspace(boost::shared_ptr<const Workspace> ws) {
  * @param endX :: An end of the fitting region.
  */
 void CompositeFunction::setMatrixWorkspace(
-    boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+    std::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX,
+    double endX) {
   for (size_t iFun = 0; iFun < nFunctions(); ++iFun) {
     m_functions[iFun]->setMatrixWorkspace(workspace, wi, startX, endX);
   }
@@ -379,8 +379,7 @@ void CompositeFunction::checkFunction() {
   m_functions.clear();
 
   for (auto &f : functions) {
-    CompositeFunction_sptr cf =
-        boost::dynamic_pointer_cast<CompositeFunction>(f);
+    CompositeFunction_sptr cf = std::dynamic_pointer_cast<CompositeFunction>(f);
     if (cf)
       cf->checkFunction();
     addFunction(f);
@@ -468,21 +467,21 @@ void CompositeFunction::removeFunction(size_t i) {
  *  a member of this composite function nothing happens
  * @param f_new :: A pointer to the new function
  */
-void CompositeFunction::replaceFunctionPtr(const IFunction_sptr f_old,
-                                           IFunction_sptr f_new) {
+void CompositeFunction::replaceFunctionPtr(const IFunction_sptr &f_old,
+                                           const IFunction_sptr &f_new) {
   std::vector<IFunction_sptr>::const_iterator it =
       std::find(m_functions.begin(), m_functions.end(), f_old);
   if (it == m_functions.end())
     return;
   std::vector<IFunction_sptr>::difference_type iFun = it - m_functions.begin();
-  replaceFunction(iFun, f_new);
+  replaceFunction(iFun, std::move(f_new));
 }
 
 /** Replace a function with a new one. The old function is deleted.
  * @param i :: The index of the function to replace
  * @param f :: A pointer to the new function
  */
-void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
+void CompositeFunction::replaceFunction(size_t i, const IFunction_sptr &f) {
   if (i >= nFunctions()) {
     throw std::out_of_range("Function index (" + std::to_string(i) +
                             ") out of range (" + std::to_string(nFunctions()) +

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,13 +31,13 @@ public:
   void test_initialized_object_has_expected_attributes() {
     auto profile = createFunction();
     static const size_t nattrs(3);
-    const char *expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass",
-                                         "VoigtEnergyCutOff"};
 
     TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
 
     // Test names as they are used in scripts
     if (profile->nAttributes() > 0) {
+      const char *expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass",
+                                           "VoigtEnergyCutOff"};
       std::unordered_set<std::string> expectedAttrSet(expectedAttrs,
                                                       expectedAttrs + nattrs);
       std::vector<std::string> actualNames = profile->getAttributeNames();
@@ -57,7 +57,7 @@ public:
 
     auto peakProfile = createFunction();
 
-    auto domain = boost::shared_ptr<FunctionDomain1DVector>(
+    auto domain = std::shared_ptr<FunctionDomain1DVector>(
         new FunctionDomain1DVector(-1, 1, 3));
     Mantid::API::FunctionValues outputs(*domain);
     peakProfile->setParameter(0, 0.93);
@@ -74,7 +74,7 @@ public:
 private:
   Mantid::API::IFunction_sptr createFunction() {
     Mantid::API::IFunction_sptr profile =
-        boost::make_shared<ComptonPeakProfile>();
+        std::make_shared<ComptonPeakProfile>();
     profile->initialize();
     auto paramWS = ComptonProfileTestHelpers::createTestWorkspace(
         1, 300, 351, 0.5, ComptonProfileTestHelpers::NoiseType::None, true,

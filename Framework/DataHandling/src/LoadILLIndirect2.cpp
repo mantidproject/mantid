@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLIndirect2.h"
 #include "MantidAPI/Axis.h"
@@ -278,7 +278,8 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
  * @param nexusfilename
  */
 void LoadILLIndirect2::loadNexusEntriesIntoProperties(
-    std::string nexusfilename) {
+    const std::string &nexusfilename) {
+
   API::Run &runDetails = m_localWorkspace->mutableRun();
   NXhandle nxfileID;
   NXstatus stat = NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);

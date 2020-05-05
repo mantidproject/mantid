@@ -1,21 +1,18 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
 #
 #  This file is part of the mantidqt package
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 import sys
 import traceback
 import unittest
 
 # third-party imports
-import six
 
 # local imports
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
@@ -62,32 +59,14 @@ foo()
         # approximate correct
         expected_lines = [
             "NameError:.*'_local'.*",
-            '  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
+            r'  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
             '    exec(.*)',
-            '  File "<string>", line \d+, in <module>',
-            '  File "<string>", line \d+, in foo',
-            '  File "<string>", line \d+, in bar',
+            r'  File "<string>", line \d+, in <module>',
+            r'  File "<string>", line \d+, in foo',
+            r'  File "<string>", line \d+, in bar',
         ]
         for produced, expected in zip(error_lines, expected_lines):
             self.assertRegexpMatches(produced, expected)
-
-    def test_errors_containing_unicode_produce_expected_value_in_python2(self):
-        if not six.PY2:
-            # everything is already unicode in python > 2
-            return
-        try:
-            exec("é =")
-        except SyntaxError:
-            exc_type, exc_value = sys.exc_info()[:2]
-            formatter = ErrorFormatter()
-            error = formatter.format(exc_type, exc_value, None)
-
-        expected = """  File "<string>", line 1
-    é =
-    ^
-SyntaxError: invalid syntax
-"""
-        self.assertEqual(expected, error)
 
 
 if __name__ == "__main__":

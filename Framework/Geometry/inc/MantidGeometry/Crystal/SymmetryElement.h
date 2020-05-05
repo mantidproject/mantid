@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,8 +11,8 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/shared_ptr.hpp>
 #include <gsl/gsl_matrix.h>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -39,7 +39,7 @@ class MANTID_GEOMETRY_DLL SymmetryElement {
 public:
   virtual ~SymmetryElement() = default;
 
-  virtual boost::shared_ptr<SymmetryElement> clone() const = 0;
+  virtual std::shared_ptr<SymmetryElement> clone() const = 0;
 
   /// Returns the internally stored Hermann-Mauguin symbol.
   std::string hmSymbol() const { return m_hmSymbol; }
@@ -50,7 +50,7 @@ protected:
   std::string m_hmSymbol;
 };
 
-using SymmetryElement_sptr = boost::shared_ptr<SymmetryElement>;
+using SymmetryElement_sptr = std::shared_ptr<SymmetryElement>;
 
 /** @class SymmetryElementIdentity
 
@@ -64,7 +64,7 @@ public:
   SymmetryElement_sptr clone() const override;
 };
 
-using SymmetryElementIdentity_sptr = boost::shared_ptr<SymmetryElementIdentity>;
+using SymmetryElementIdentity_sptr = std::shared_ptr<SymmetryElementIdentity>;
 
 /** @class SymmetryElementInversion
 
@@ -85,8 +85,7 @@ protected:
   V3R m_inversionPoint;
 };
 
-using SymmetryElementInversion_sptr =
-    boost::shared_ptr<SymmetryElementInversion>;
+using SymmetryElementInversion_sptr = std::shared_ptr<SymmetryElementInversion>;
 
 /** @class SymmetryElementTranslation
 
@@ -108,7 +107,7 @@ protected:
 };
 
 using SymmetryElementTranslation_sptr =
-    boost::shared_ptr<SymmetryElementTranslation>;
+    std::shared_ptr<SymmetryElementTranslation>;
 
 /** @class SymmetryElementWithAxis
 
@@ -135,7 +134,7 @@ protected:
   V3R m_translation;
 };
 
-using SymmetryElementWithAxis_sptr = boost::shared_ptr<SymmetryElementWithAxis>;
+using SymmetryElementWithAxis_sptr = std::shared_ptr<SymmetryElementWithAxis>;
 
 /** @class SymmetryElementRotation
 
@@ -168,7 +167,7 @@ protected:
   RotationSense m_rotationSense;
 };
 
-using SymmetryElementRotation_sptr = boost::shared_ptr<SymmetryElementRotation>;
+using SymmetryElementRotation_sptr = std::shared_ptr<SymmetryElementRotation>;
 
 /** @class SymmetryElementMirror
 
@@ -188,7 +187,7 @@ public:
   SymmetryElement_sptr clone() const override;
 };
 
-using SymmetryElementMirror_sptr = boost::shared_ptr<SymmetryElementMirror>;
+using SymmetryElementMirror_sptr = std::shared_ptr<SymmetryElementMirror>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -42,7 +42,7 @@ vtkPeakMarkerFactory::vtkPeakMarkerFactory(const std::string &scalarName,
       m_peakRadius(-1) {}
 
 void vtkPeakMarkerFactory::initialize(Mantid::API::Workspace_sptr workspace) {
-  m_workspace = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
+  m_workspace = std::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
   validateWsNotNull();
 
   try {

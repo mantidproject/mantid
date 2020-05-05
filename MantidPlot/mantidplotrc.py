@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #-------------------------------------------------------------------------------
 # mantidplotrc.py
@@ -22,8 +22,6 @@ if __name__ == '__main__':
         del _mpl
     except ImportError:
         pass
-
-    from six import iteritems as _iteritems
 
     # Import MantidPlot python commands
     import mantidplot
@@ -70,7 +68,7 @@ if __name__ == '__main__':
             return []
         from mantid.simpleapi import _get_function_spec
         keywords = []
-        for name,obj in _iteritems(definitions):
+        for name,obj in definitions.items():
             if name.startswith('_') : continue
             if _inspect.isclass(obj) or _inspect.ismodule(obj):
                 continue

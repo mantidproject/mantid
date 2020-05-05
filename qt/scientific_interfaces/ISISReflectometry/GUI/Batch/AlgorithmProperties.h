@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,7 @@ void update(std::string const &property, boost::optional<double> const &value,
 void updateFromMap(AlgorithmRuntimeProps &properties,
                    std::map<std::string, std::string> const &parameterMap);
 
-std::string getOutputWorkspace(Mantid::API::IAlgorithm_sptr algorithm,
+std::string getOutputWorkspace(const Mantid::API::IAlgorithm_sptr &algorithm,
                                std::string const &property);
 
 template <typename VALUE_TYPE>

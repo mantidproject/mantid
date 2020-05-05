@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,11 +51,11 @@ private:
   /// Override exec
   void exec() override;
 
-  std::size_t getNewYSize(const API::MatrixWorkspace_sptr inputWS);
+  std::size_t getNewYSize(const API::MatrixWorkspace_sptr &inputWS);
 
   /// Set the X data on given spectra
-  void setXData(API::MatrixWorkspace_sptr outputWS,
-                const API::MatrixWorkspace_sptr inputWS, const int index);
+  void setXData(const API::MatrixWorkspace_sptr &outputWS,
+                const API::MatrixWorkspace_sptr &inputWS, const int index);
 
   /// Flag if the X data is shared
   bool m_sharedX;

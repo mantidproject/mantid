@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -17,8 +18,8 @@ namespace Functions {
 /** ProductQuadraticExp : Function that evauates the product of an exponential
   and quadratic function.
 */
-class DLLExport ProductQuadraticExp : public API::ParamFunction,
-                                      public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ProductQuadraticExp : public API::ParamFunction,
+                                                    public API::IFunction1D {
 public:
   ProductQuadraticExp();
 

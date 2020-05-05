@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -136,8 +136,8 @@ protected:
 
 private:
   Mantid::Geometry::MDFrame_uptr
-  createMDFrameForNonAxisAligned(std::string units,
-                                 Mantid::Kernel::VMD basisVector) const;
+  createMDFrameForNonAxisAligned(const std::string &units,
+                                 const Mantid::Kernel::VMD &basisVector) const;
   std::vector<Mantid::Kernel::VMD> getOldBasis(size_t dimension) const;
   bool isProjectingOnFrame(const Mantid::Kernel::VMD &oldVector,
                            const Mantid::Kernel::VMD &basisVector) const;
@@ -146,7 +146,7 @@ private:
       const std::vector<Mantid::Kernel::VMD> &oldBasis) const;
   Mantid::Geometry::MDFrame_uptr
   extractMDFrameForNonAxisAligned(std::vector<size_t> indicesWithProjection,
-                                  std::string units) const;
+                                  const std::string &units) const;
   void setTargetUnits(Mantid::Geometry::MDFrame_uptr &frame,
                       const std::string &units) const;
 };

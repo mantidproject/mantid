@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -166,7 +166,7 @@ private:
   mutable bool is_enabled;
   // auxiliary function to obtain list of monitor's ID-s (allowed_values) from a
   // workspace;
-  bool monitorIdReader(API::MatrixWorkspace_const_sptr inputWS) const;
+  bool monitorIdReader(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };
 
 } // namespace Algorithms

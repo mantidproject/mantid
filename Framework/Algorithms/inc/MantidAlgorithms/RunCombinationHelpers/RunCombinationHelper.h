@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,9 +30,9 @@ static const std::string FAIL_BEHAVIOUR = "Fail";
 
 class MANTID_ALGORITHMS_DLL RunCombinationHelper {
 public:
-  std::string checkCompatibility(API::MatrixWorkspace_sptr,
+  std::string checkCompatibility(const API::MatrixWorkspace_sptr &,
                                  bool checkNumberHistograms = false);
-  void setReferenceProperties(API::MatrixWorkspace_sptr);
+  void setReferenceProperties(const API::MatrixWorkspace_sptr &);
   static std::vector<std::string>
   unWrapGroups(const std::vector<std::string> &);
   std::list<API::MatrixWorkspace_sptr>

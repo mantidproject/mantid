@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -104,7 +104,7 @@ public:
   /// Serialize as set of comma separated values
   std::string toExtentsString() const;
   /// Transform the box.
-  void transformBox(Mantid::Geometry::PeakTransform_sptr transform);
+  void transformBox(const Mantid::Geometry::PeakTransform_sptr &transform);
   /// Make a new box based on the slice
   PeakBoundingBox makeSliceBox(const double &sliceDelta) const;
 };

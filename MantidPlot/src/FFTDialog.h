@@ -47,7 +47,8 @@ class FFTDialog : public QDialog {
 public:
   enum DataType { onGraph = 0, onTable = 1, onMatrix = 2 };
 
-  FFTDialog(int type, QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  FFTDialog(int type, QWidget *parent = nullptr,
+            const Qt::WFlags &fl = nullptr);
 
 public slots:
   void setGraph(Graph *g);

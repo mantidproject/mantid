@@ -42,7 +42,8 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent, Qt::WFlags fl)
+SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent,
+                                     const Qt::WFlags &fl)
     : QDialog(parent, fl), graph(nullptr), boxPointsLeft(nullptr),
       boxPointsRight(nullptr), boxOrder(nullptr) {
   smooth_method = method;

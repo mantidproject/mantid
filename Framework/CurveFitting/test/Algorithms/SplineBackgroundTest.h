@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -41,8 +41,8 @@ public:
     const std::string wsName = "SplineBackground_points";
     WorkspaceCreationHelper::storeWS(wsName, ws);
 
-    IAlgorithm *alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "SplineBackground");
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setPropertyValue("OutputWorkspace", "SplineBackground_out");
@@ -87,8 +87,7 @@ public:
     WorkspaceCreationHelper::storeWS(inputWsName, ws);
 
     SplineBackgroundAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SplineBackground");
+        Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
     SplineBackgroundAlg->initialize();
     SplineBackgroundAlg->setPropertyValue("InputWorkspace", inputWsName);
     SplineBackgroundAlg->setPropertyValue("OutputWorkspace", outputWsName);
@@ -107,7 +106,7 @@ public:
   }
 
 private:
-  IAlgorithm *SplineBackgroundAlg;
+  IAlgorithm_sptr SplineBackgroundAlg;
 
   Mantid::DataObjects::Workspace2D_sptr ws;
   const std::string inputWsName = "SplineBackground_points";

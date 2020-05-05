@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsView.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -27,7 +27,8 @@ using namespace MantidQt::Icons;
  * @param parent :: The parent of this view
  * @param makeRunsTableView :: The factory for the RunsTableView.
  */
-QtRunsView::QtRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
+QtRunsView::QtRunsView(QWidget *parent,
+                       const RunsTableViewFactory &makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
       m_searchNotifyee(nullptr), m_searchModel(),
       m_tableView(makeRunsTableView()), m_timer() {
@@ -72,9 +73,8 @@ void QtRunsView::initLayout() {
   m_ui.actionSearch->setIcon(getIcon("mdi.folder", "black", 1.3));
   m_ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
 
-  m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
-  m_monitorAlgoRunner =
-      boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+  m_algoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
+  m_monitorAlgoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
   connect(m_ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)),
@@ -346,12 +346,12 @@ std::set<int> QtRunsView::getAllSearchRows() const {
   return rows;
 }
 
-boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+std::shared_ptr<MantidQt::API::AlgorithmRunner>
 QtRunsView::getAlgorithmRunner() const {
   return m_algoRunner;
 }
 
-boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+std::shared_ptr<MantidQt::API::AlgorithmRunner>
 QtRunsView::getMonitorAlgorithmRunner() const {
   return m_monitorAlgoRunner;
 }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,8 +16,8 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
+#include <memory>
 #include <string>
 
 #include <Poco/Environment.h>
@@ -329,21 +329,20 @@ public:
 
   void TestCustomProperty() {
     std::string countString =
-        ConfigService::Instance().getString("algorithms.retained");
-    TS_ASSERT_EQUALS(countString, "50");
+        ConfigService::Instance().getString("projectRecovery.secondsBetween");
+    TS_ASSERT_EQUALS(countString, "60");
   }
 
   void TestCustomPropertyAsValue() {
-    // Mantid.legs is defined in the properties script as 6
     int value = ConfigService::Instance()
-                    .getValue<int>("algorithms.retained")
+                    .getValue<int>("projectRecovery.secondsBetween")
                     .get_value_or(0);
     double dblValue = ConfigService::Instance()
-                          .getValue<double>("algorithms.retained")
+                          .getValue<double>("projectRecovery.secondsBetween")
                           .get_value_or(0);
 
-    TS_ASSERT_EQUALS(value, 50);
-    TS_ASSERT_EQUALS(dblValue, 50.0);
+    TS_ASSERT_EQUALS(value, 60);
+    TS_ASSERT_EQUALS(dblValue, 60.0);
   }
 
   void TestMissingProperty() {

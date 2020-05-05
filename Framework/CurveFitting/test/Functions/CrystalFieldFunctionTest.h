@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -479,8 +479,8 @@ public:
 
   void test_fit_sm() {
     auto ws = makeDataSM();
-    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
-    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+    auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
 
     std::string fun =
         "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
@@ -557,8 +557,8 @@ public:
         "ties=(sp0.IntensityScaling=1, sp1.IntensityScaling=1)";
 
     auto ws = makeDataMM();
-    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
-    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+    auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
 
     Algorithms::Fit fit;
     fit.initialize();
@@ -597,8 +597,8 @@ public:
         "ties=(sp1.bg.A1 = -sp0.bg.A1)";
 
     auto ws = makeDataMMwithBackground();
-    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
-    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+    auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
 
     Algorithms::Fit fit;
     fit.initialize();
@@ -629,8 +629,8 @@ public:
 
   void test_phys_props_s() {
     auto ws = makeDataSP();
-    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
-    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+    auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
 
     std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
                       "PhysicalProperties=\"cv, chi\","
@@ -662,8 +662,8 @@ public:
 
   void test_phys_props_m() {
     auto ws = makeDataMP();
-    auto sp0 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
-    auto sp1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
+    auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
+    auto sp1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
 
     std::string fun =
         "name=CrystalFieldFunction,Ions=\"Ce, Pr\",Symmetries=\"C2v, "

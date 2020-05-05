@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/OrientedLatticeValidator.h"
@@ -32,7 +32,7 @@ public:
   }
 
   void test_isValid_is_valid_when_latticeDefined() {
-    auto info = boost::make_shared<ExperimentInfo>();
+    auto info = std::make_shared<ExperimentInfo>();
     info->mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>());
 
@@ -41,7 +41,7 @@ public:
   };
 
   void test_isValid_is_invalid_when_latticeUndefined() {
-    auto info = boost::make_shared<ExperimentInfo>();
+    auto info = std::make_shared<ExperimentInfo>();
     OrientedLatticeValidator validator;
     TS_ASSERT_EQUALS(
         validator.isValid(info),

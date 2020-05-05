@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -55,6 +55,8 @@ public:
     double attenuationXSection = EMPTY_DBL();
     /// The total scattering cross section to set, defaults to EMPTY_DBL()
     double scatteringXSection = EMPTY_DBL();
+    /// The name or path of a file containing an attenuation profile
+    std::string attenuationProfileFileName = "";
     /// A flag indicating the unit of sampleNumberDensity
     Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
         Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
@@ -88,7 +90,7 @@ private:
    */
   Kernel::MaterialBuilder builder;
 
-  void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
+  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber,
                    const int massNumber);
 
   void
@@ -96,7 +98,8 @@ private:
                    const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
                    const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
-                         double attenuationXSection, double scatteringXSection);
+                         double attenuationXSection, double scatteringXSection,
+                         std::string attenuationProfileFileName);
 
   static bool isEmpty(const double toCheck);
 };

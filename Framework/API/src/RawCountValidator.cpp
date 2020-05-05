@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -20,7 +20,7 @@ RawCountValidator::RawCountValidator(const bool &mustNotBeDistribution)
 
 /// Clone the current state
 Kernel::IValidator_sptr RawCountValidator::clone() const {
-  return boost::make_shared<RawCountValidator>(*this);
+  return std::make_shared<RawCountValidator>(*this);
 }
 
 /** Checks if the workspace must be a distribution but isn't and vice-versa

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include <algorithm>
@@ -76,7 +76,7 @@ void CrystalStructure::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) {
 CompositeBraggScatterer_sptr CrystalStructure::getScatterers() const {
   BraggScatterer_sptr clone = m_scatterers->clone();
 
-  return boost::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
+  return std::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
 }
 
 /// Remove all scatterers and set the supplied ones as new scatterers.

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ public:
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, API::Progress *prog,
-                       boost::shared_ptr<std::mutex> ioMutex,
+                       std::shared_ptr<std::mutex> ioMutex,
                        Kernel::ThreadScheduler &scheduler,
                        const std::vector<int> &framePeriodNumbers);
 
@@ -42,9 +42,9 @@ private:
   void prepareEventId(::NeXus::File &file, int64_t &start_event,
                       int64_t &stop_event,
                       const std::vector<uint64_t> &event_index);
-  std::unique_ptr<uint32_t[]> loadEventId(::NeXus::File &file);
-  std::unique_ptr<float[]> loadTof(::NeXus::File &file);
-  std::unique_ptr<float[]> loadEventWeights(::NeXus::File &file);
+  std::unique_ptr<std::vector<uint32_t>> loadEventId(::NeXus::File &file);
+  std::unique_ptr<std::vector<float>> loadTof(::NeXus::File &file);
+  std::unique_ptr<std::vector<float>> loadEventWeights(::NeXus::File &file);
   int64_t recalculateDataSize(const int64_t &size);
 
   /// Algorithm being run
@@ -58,7 +58,7 @@ private:
   /// ThreadScheduler running this task
   Kernel::ThreadScheduler &scheduler;
   /// Object with the pulse times for this bank
-  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
+  std::shared_ptr<BankPulseTimes> thisBankPulseTimes;
   /// Did we get an error in loading
   bool m_loadError;
   /// Old names in the file?

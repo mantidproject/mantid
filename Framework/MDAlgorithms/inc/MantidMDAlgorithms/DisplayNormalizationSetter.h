@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/IMDWorkspace.h"
@@ -19,7 +19,7 @@ energy-transfer-mode
 */
 class DLLExport DisplayNormalizationSetter {
 public:
-  void operator()(Mantid::API::IMDWorkspace_sptr mdWorkspace,
+  void operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
                   const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
                   bool isQ = false,
                   const Mantid::Kernel::DeltaEMode::Type &mode =
@@ -27,14 +27,14 @@ public:
 
 private:
   void setNormalizationMDEvent(
-      Mantid::API::IMDWorkspace_sptr mdWorkspace,
+      const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
       const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
       bool isQ = false,
       const Mantid::Kernel::DeltaEMode::Type &mode =
           Mantid::Kernel::DeltaEMode::Elastic);
 
   void applyNormalizationMDEvent(
-      Mantid::API::IMDWorkspace_sptr mdWorkspace,
+      const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
       Mantid::API::MDNormalization displayNormalization,
       Mantid::API::MDNormalization displayNormalizationHisto);
 };

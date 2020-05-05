@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -39,7 +39,7 @@ private:
   ChargeAndTime runSliceEvent(const QString &code2run);
   void checkPythonOutput(const QString &result);
   ChargeAndTime values2ChargeAndTime(const QString &input);
-  void raiseWarning(QString title, QString message);
+  void raiseWarning(const QString &title, const QString &message);
 
 protected:
   void showEvent(QShowEvent * /*unused*/) override;

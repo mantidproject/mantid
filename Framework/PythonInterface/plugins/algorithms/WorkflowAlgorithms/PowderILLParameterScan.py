@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, \
     FloatArrayOrderedPairsValidator, VisibleWhenProperty, PropertyCriterion, FloatBoundedValidator
@@ -257,12 +255,12 @@ class PowderILLParameterScan(PythonAlgorithm):
                 next_cell+=1
 
             if prev_cell == -1:
-                self.log().notice('Unable to interpolate for cell #'+str(cell)+
-                                  ': no non-zero neighbour cell was found on the left side. Bin will be cropped.')
+                self.log().notice('Unable to interpolate for cell #'+str(cell)
+                                  + ': no non-zero neighbour cell was found on the left side. Bin will be cropped.')
                 unable_to_interpolate.append(cell)
             if next_cell == mtd[ws].getNumberHistograms():
-                self.log().notice('Unable to interpolate for cell #'+str(cell)+
-                                  ': no non-zero neighbour cell was found on the right side. Bin will be cropped.')
+                self.log().notice('Unable to interpolate for cell #'+str(cell)
+                                  + ': no non-zero neighbour cell was found on the right side. Bin will be cropped.')
                 unable_to_interpolate.append(cell)
 
             if prev_cell >= 0 and next_cell < mtd[ws].getNumberHistograms():
@@ -344,6 +342,7 @@ class PowderILLParameterScan(PythonAlgorithm):
             spectrum_axis.setValue(i, new_axis[i])
         mtd[grouped].replaceAxis(1, spectrum_axis)
         RenameWorkspace(InputWorkspace=grouped, OutputWorkspace=ws)
+
 
 # Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderILLParameterScan)

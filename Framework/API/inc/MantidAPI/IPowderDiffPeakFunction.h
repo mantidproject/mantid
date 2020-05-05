@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -143,7 +143,7 @@ protected:
   size_t HEIGHTINDEX;
 };
 
-using IPowderDiffPeakFunction_sptr = boost::shared_ptr<IPowderDiffPeakFunction>;
+using IPowderDiffPeakFunction_sptr = std::shared_ptr<IPowderDiffPeakFunction>;
 
 /// Integral for Gamma
 std::complex<double> MANTID_API_DLL E1(std::complex<double> z);

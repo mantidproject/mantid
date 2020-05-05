@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -142,7 +142,7 @@ public slots:
   void setDatasetNames(const QStringList &names) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
-  void removeDatasets(QList<int> indices);
+  void removeDatasets(const QList<int> &indices);
   void addDatasets(const QStringList &names);
 
 protected:

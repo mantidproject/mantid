@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -63,7 +63,7 @@ public:
 
     MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
 
@@ -139,16 +139,16 @@ public:
     TS_ASSERT(radial_average.isExecuted())
 
     // Get wedge 0 of the result with offset 0.
-    auto result1 = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto result1 = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS1));
     auto wedge1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
 
     // Get wedge 1 of the result with offset 90.
-    auto result2 = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto result2 = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS2));
     auto wedge2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
 
     double tolerance = 1e-12;
 
@@ -177,7 +177,7 @@ public:
 
     MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("__iqmasked")))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
     TS_ASSERT_DELTA(result->y(0)[6], 247.106, 0.001);
@@ -243,29 +243,29 @@ public:
     TS_ASSERT(radial_average.isExecuted())
 
     // Get the results of symmetric wedges.
-    auto result1 = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto result1 = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS1));
     TS_ASSERT(result1)
     auto wedge1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
     auto wedge2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(1));
 
     TS_ASSERT(wedge1)
     TS_ASSERT(wedge2)
 
     // Get the results of asymmetric wedges.
-    auto result2 = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    auto result2 = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS2));
     TS_ASSERT(result2)
     auto wedgeA1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(0));
     auto wedgeA2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
     auto wedgeA3 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(2));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(2));
     auto wedgeA4 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(3));
+        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(3));
 
     TS_ASSERT(wedgeA1)
     TS_ASSERT(wedgeA2)
@@ -294,7 +294,7 @@ public:
     TS_ASSERT(radial_average.isExecuted())
     MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("__iqg")))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
     TS_ASSERT_DELTA(result->y(0)[6], 251.052, 0.001);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -79,7 +79,7 @@ private:
   loadInstrument(const std::string &instrumentName,
                  const std::string &reflection = "");
 
-  void runGenericReduction(QString instName, QString mode);
+  void runGenericReduction(const QString &instName, const QString &mode);
   void connectRunButtonValidation(const MantidQt::API::MWRunFiles *file_field);
   void runOSIRISdiffonlyReduction();
   void createGroupingWorkspace(const std::string &outputWsName);

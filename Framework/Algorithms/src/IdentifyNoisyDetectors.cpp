@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -24,7 +24,7 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(IdentifyNoisyDetectors)
 
 void IdentifyNoisyDetectors::init() {
-  auto wsVal = boost::make_shared<CompositeValidator>();
+  auto wsVal = std::make_shared<CompositeValidator>();
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
@@ -149,8 +149,8 @@ void IdentifyNoisyDetectors::exec() {
  * @param values :: stddeviations of each spectra (I think)
  */
 void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
-                                       MatrixWorkspace_sptr valid,
-                                       MatrixWorkspace_sptr values) {
+                                       const MatrixWorkspace_sptr &valid,
+                                       const MatrixWorkspace_sptr &values) {
   const auto nhist = static_cast<int>(valid->getNumberHistograms());
   int count = 0;
   double mean = 0.0;

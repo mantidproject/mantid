@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -820,7 +820,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
   }
   // Else need to construct a DetectorGroup and return that
   auto dets_ptr = localInstrument->getDetectors(dets);
-  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr);
+  return std::make_shared<Geometry::DetectorGroup>(dets_ptr);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector
@@ -1237,9 +1237,10 @@ MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto maskedBins = it->second;
   std::vector<size_t> maskedIds;
   maskedIds.reserve(maskedBins.size());
-  for (const auto &mb : maskedBins) {
-    maskedIds.emplace_back(mb.first);
-  }
+
+  std::transform(maskedBins.begin(), maskedBins.end(),
+                 std::back_inserter(maskedIds),
+                 [](const auto &mb) { return mb.first; });
   return maskedIds;
 }
 
@@ -1263,7 +1264,7 @@ void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex,
  *  @param monitorWS The workspace containing the monitor data.
  */
 void MatrixWorkspace::setMonitorWorkspace(
-    const boost::shared_ptr<MatrixWorkspace> &monitorWS) {
+    const std::shared_ptr<MatrixWorkspace> &monitorWS) {
   if (monitorWS.get() == this) {
     throw std::runtime_error(
         "To avoid memory leak, monitor workspace"
@@ -1274,7 +1275,7 @@ void MatrixWorkspace::setMonitorWorkspace(
 
 /** Returns a pointer to the internal monitor workspace.
  */
-boost::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const {
+std::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const {
   return m_monitorWorkspace;
 }
 
@@ -1623,25 +1624,25 @@ private:
   const Geometry::MDFrame_const_uptr m_frame;
 };
 
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    return boost::make_shared<MWXDimension>(this, xDimensionId);
+    return std::make_shared<MWXDimension>(this, xDimensionId);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    return boost::make_shared<MWDimension>(yAxis, yDimensionId);
+    return std::make_shared<MWDimension>(yAxis, yDimensionId);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
 }
 
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  boost::shared_ptr<IMDDimension> dim;
+  std::shared_ptr<IMDDimension> dim;
   for (int i = 0; i < nAxes; i++) {
     const std::string knownId = getDimensionIdFromAxis(i);
     if (knownId == id) {
-      dim = boost::make_shared<MWDimension>(this->getAxis(i), id);
+      dim = std::make_shared<MWDimension>(this->getAxis(i), id);
       break;
     }
   }
@@ -1898,7 +1899,7 @@ MantidImage_sptr MatrixWorkspace::getImage(
   }
 
   // initialize the image
-  auto image = boost::make_shared<MantidImage>(height);
+  auto image = std::make_shared<MantidImage>(height);
   if (!isHisto)
     ++indexEnd;
 
@@ -1939,7 +1940,6 @@ MatrixWorkspace::findY(double value,
   if (std::isnan(value)) {
     for (int64_t i = idx.first; i < numHists; ++i) {
       const auto &Y = this->y(i);
-      // cppcheck-suppress syntaxError
       if (auto it = std::find_if(std::next(Y.begin(), idx.second), Y.end(),
                                  [](double v) { return std::isnan(v); });
           it != Y.end()) {

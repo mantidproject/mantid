@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,7 +42,7 @@ namespace DataObjects {
 TMDE_CLASS
 class DLLExport MDGridBox : public MDBoxBase<MDE, nd> {
 public:
-  MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth,
+  MDGridBox(std::shared_ptr<API::BoxController> &bc, const uint32_t depth,
             const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
                 &extentsVector);
   MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
@@ -77,12 +77,12 @@ public:
   }
   /**Save the box at specific disk position using the class, respoinsible for
    * the file IO. */
-  void saveAt(API::IBoxControllerIO *const /* */,
+  void saveAt(API::IBoxControllerIO *const,
               uint64_t /*position*/) const override { /*Not saveable */
   }
   /**Load the box data of specified size from the disk location provided using
    * the class, respoinsible for the file IO. */
-  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
+  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/,
                       size_t /* Size */) override { /*Not directly loadable */
   }
   void reserveMemoryForLoad(
@@ -216,7 +216,7 @@ public:
 
 public:
   /// Typedef for a shared pointer to a MDGridBox
-  using sptr = boost::shared_ptr<MDGridBox<MDE, nd>>;
+  using sptr = std::shared_ptr<MDGridBox<MDE, nd>>;
 
   /// Typedef for a vector of MDBoxBase pointers
   using boxVector_t = std::vector<MDBoxBase<MDE, nd> *>;

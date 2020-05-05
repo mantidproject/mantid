@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -43,7 +43,7 @@ const std::string DetectorEfficiencyCorUser::category() const {
 /** Initialize the algorithm's properties.
  */
 void DetectorEfficiencyCorUser::init() {
-  auto val = boost::make_shared<CompositeValidator>();
+  auto val = std::make_shared<CompositeValidator>();
   // val->add<WorkspaceUnitValidator>("Energy");
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
@@ -54,7 +54,7 @@ void DetectorEfficiencyCorUser::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name of the workspace in which to store the result.");
-  auto checkEi = boost::make_shared<BoundedValidator<double>>();
+  auto checkEi = std::make_shared<BoundedValidator<double>>();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
                   "The energy of neutrons leaving the source.");

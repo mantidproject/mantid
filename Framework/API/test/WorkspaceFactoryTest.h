@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -77,7 +77,7 @@ public:
     ws_child->mutableRun().addProperty("Ei", 12.0);
     ws_child->mutableSample().setName("MySample");
 
-    ws_child->setMonitorWorkspace(boost::make_shared<Workspace1DTest>());
+    ws_child->setMonitorWorkspace(std::make_shared<Workspace1DTest>());
 
     MatrixWorkspace_sptr child;
     TS_ASSERT_THROWS_NOTHING(child =

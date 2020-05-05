@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ public:
     Mantid::DataObjects::EventWorkspace_sptr ews =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10);
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ews);
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(ews);
 
     ResizeRectangularDetector alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -49,8 +49,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     Instrument_const_sptr inst = ws->getInstrument();
-    boost::shared_ptr<const RectangularDetector> det =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
+    std::shared_ptr<const RectangularDetector> det =
+        std::dynamic_pointer_cast<const RectangularDetector>(
             inst->getComponentByName("bank1"));
 
     // Bank 1 got scaled
@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 
     // Bank 2 did not get scaled
-    det = boost::dynamic_pointer_cast<const RectangularDetector>(
+    det = std::dynamic_pointer_cast<const RectangularDetector>(
         inst->getComponentByName("bank2"));
     pos = det->getAtXY(1, 1)->getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 1.0, 0.008 * 1.0, 10.0));

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindReflectometryLines2.h"
 
@@ -61,8 +61,8 @@ double median(const Mantid::API::MatrixWorkspace &ws) {
  *  @return a single value workspace
  */
 Mantid::API::MatrixWorkspace_sptr makeOutput(double const x) {
-  auto ws = boost::make_shared<Mantid::DataObjects::WorkspaceSingleValue>(x);
-  return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  auto ws = std::make_shared<Mantid::DataObjects::WorkspaceSingleValue>(x);
+  return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 }
 } // namespace
 
@@ -110,7 +110,7 @@ void FindReflectometryLines2::init() {
                   "The lower peak search limit (an X value).");
   declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(),
                   "The upper peak search limit (an X value).");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       Prop::START_INDEX, 0, mustBePositive,
@@ -194,9 +194,9 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
                 << '\n';
   auto func =
       API::FunctionFactory::Instance().createFunction("CompositeFunction");
-  auto sum = boost::dynamic_pointer_cast<API::CompositeFunction>(func);
+  auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussian = boost::dynamic_pointer_cast<API::IPeakFunction>(func);
+  auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
   gaussian->setHeight(height);
   gaussian->setCentre(centreIndex);
   gaussian->setFwhm(fwhm);
@@ -208,8 +208,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   // call Fit child algorithm
   API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   fit->initialize();
-  fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<API::IFunction>(sum));
+  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
   fit->setProperty("InputWorkspace", transposedWS);
   fit->setProperty("StartX", centreIndex - 3 * fwhm);
   fit->setProperty("EndX", centreIndex + 3 * fwhm);

@@ -1,19 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 import traceback
 
 # third-party imports
-import six
 
 
 class ErrorFormatter(object):
@@ -34,9 +31,4 @@ class ErrorFormatter(object):
         if stack is not None:
             lines.extend(traceback.format_list(stack))
 
-        if six.PY2:
-            # traceback always returns a list of ascii string objects
-            # encoded as utf-8 we want unicode to be consistent
-            # with using unicode_literals across the codebase
-            lines = map(lambda x: x.decode('utf-8') , lines)
         return ''.join(lines)

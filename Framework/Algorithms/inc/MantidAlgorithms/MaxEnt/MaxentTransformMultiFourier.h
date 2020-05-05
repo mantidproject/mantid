@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,8 +13,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using MaxentSpace_sptr = boost::shared_ptr<MaxentSpace>;
-using MaxentSpaceComplex_sptr = boost::shared_ptr<MaxentSpaceComplex>;
+using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
+using MaxentSpaceComplex_sptr = std::shared_ptr<MaxentSpaceComplex>;
 
 /** MaxentTransformMultiFourier : Defines a transformation from
   data space to image space (and vice-versa)
@@ -36,7 +36,7 @@ public:
   // Deleted default constructor
   MaxentTransformMultiFourier() = delete;
   // Constructor
-  MaxentTransformMultiFourier(MaxentSpaceComplex_sptr dataSpace,
+  MaxentTransformMultiFourier(const MaxentSpaceComplex_sptr &dataSpace,
                               MaxentSpace_sptr imageSpace, size_t numSpec);
   // Transfoms form image space to data space
   std::vector<double> imageToData(const std::vector<double> &image) override;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,7 +20,7 @@ algorithm rather than from Algorithm directly. This algorithm processes
 workspaces in each group input in a pair-wise fashion to give a group workspace
 output.
   */
-class DLLExport MultiPeriodGroupAlgorithm : public Algorithm {
+class MANTID_API_DLL MultiPeriodGroupAlgorithm : public Algorithm {
 public:
   MultiPeriodGroupAlgorithm();
 

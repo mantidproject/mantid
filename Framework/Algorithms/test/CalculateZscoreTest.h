@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -52,7 +52,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outWS = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("Zscores"));
 
     auto &Zscore = outWS->y(0);
@@ -73,7 +73,7 @@ public:
     vector<double> data{12, 13, 9,  18, 7,  9,  14, 16, 10, 12,
                         7,  13, 14, 19, 10, 16, 12, 16, 19, 11};
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, data.size(),
                                             data.size()));
 

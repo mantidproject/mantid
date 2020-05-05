@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -28,6 +28,8 @@ GNU_DIAG_OFF("conversion")
 GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
+
+#include <utility>
 
 namespace {
 const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
@@ -59,8 +61,8 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic)
-    : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic, ""),
+    : IKafkaStreamDecoder(std::move(broker), histoTopic, runInfoTopic,
+                          spDetTopic, sampleEnvTopic, chopperTopic, ""),
       m_workspace() {}
 
 /**
@@ -68,6 +70,15 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
  * Stops capturing from the stream
  */
 KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() = default;
+
+KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
+    KafkaHistoStreamDecoder &&rval) noexcept
+    : IKafkaStreamDecoder(std::move(rval)) {
+  {
+    std::lock_guard lck(m_mutex);
+    m_buffer = std::move(rval.m_buffer);
+  }
+}
 
 /**
  * Check if there is data available to extract
@@ -219,7 +230,7 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     const auto nspec = ws->getInstrument()->getNumberDetectors();
 
     // Create buffer
-    histoBuffer = boost::static_pointer_cast<DataObjects::Workspace2D>(
+    histoBuffer = std::static_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", nspec, 2, 1));
     histoBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");

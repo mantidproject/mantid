@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -101,7 +101,6 @@ public:
     const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const CountVariances counts(std::move(frequencies), edges);
-    TS_ASSERT(!frequencies);
     TS_ASSERT_EQUALS(&counts[0], old_ptr);
   }
 
@@ -111,8 +110,6 @@ public:
     const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const CountVariances counts(std::move(frequencies), edges);
-    // Moved from frequencies...
-    TS_ASSERT(!frequencies);
     // ... but made a copy of data, since "copy" also held a reference.
     TS_ASSERT_DIFFERS(&counts[0], old_ptr);
   }
@@ -134,7 +131,6 @@ public:
     // This implicitly constructs FrequencyVariances first, so there is a
     // two-step move going on!
     const CountVariances counts(std::move(frequencies), edges);
-    TS_ASSERT(!frequencies);
     TS_ASSERT_EQUALS(&counts[0], old_ptr);
   }
 };

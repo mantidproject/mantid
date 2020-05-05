@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -13,7 +13,8 @@
 #include "MantidKernel/System.h"
 
 #include <Poco/NObserver.h>
-#include <boost/make_shared.hpp>
+#include <memory>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -84,8 +85,7 @@ MDGeometry::MDGeometry(const MDGeometry &other)
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
   for (size_t d = 0; d < other.getNumDims(); d++) {
     // Copy the dimension
-    auto dim =
-        boost::make_shared<MDHistoDimension>(other.getDimension(d).get());
+    auto dim = std::make_shared<MDHistoDimension>(other.getDimension(d).get());
     dimensions.emplace_back(dim);
   }
   this->initGeometry(dimensions);
@@ -158,7 +158,7 @@ size_t MDGeometry::getNumDims() const { return m_dimensions.size(); }
  * @param index :: which dimension
  * @return the dimension at that index
  */
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getDimension(size_t index) const {
   if (index >= m_dimensions.size())
     throw std::runtime_error(
@@ -171,12 +171,11 @@ MDGeometry::getDimension(size_t index) const {
  * @param id :: string ID of the dimension
  * @return the dimension with the specified id string.
  */
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getDimensionWithId(std::string id) const {
   auto dimension = std::find_if(
       m_dimensions.begin(), m_dimensions.end(),
-      [&id](
-          const boost::shared_ptr<const Mantid::Geometry::IMDDimension> &dim) {
+      [&id](const std::shared_ptr<const Mantid::Geometry::IMDDimension> &dim) {
         return dim->getDimensionId() == id;
       });
   if (dimension != m_dimensions.end())
@@ -244,7 +243,7 @@ size_t MDGeometry::getDimensionIndexById(const std::string &id) const {
 /** Add a dimension
  * @param dim :: shared pointer to the dimension object   */
 void MDGeometry::addDimension(
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) {
+    const std::shared_ptr<Mantid::Geometry::IMDDimension> &dim) {
   m_dimensions.emplace_back(dim);
 }
 
@@ -253,12 +252,12 @@ void MDGeometry::addDimension(
  * @param dim :: bare pointer to the dimension object   */
 void MDGeometry::addDimension(Mantid::Geometry::IMDDimension *dim) {
   m_dimensions.emplace_back(
-      boost::shared_ptr<Mantid::Geometry::IMDDimension>(dim));
+      std::shared_ptr<Mantid::Geometry::IMDDimension>(dim));
 }
 
 // --------------------------------------------------------------------------------------------
 /// Get the x-dimension mapping.
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getXDimension() const {
   if (this->getNumDims() < 1)
     throw std::runtime_error("Workspace does not have any dimensions!");
@@ -266,7 +265,7 @@ MDGeometry::getXDimension() const {
 }
 
 /// Get the y-dimension mapping.
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getYDimension() const {
   if (this->getNumDims() < 2)
     throw std::runtime_error("Workspace does not have a Y dimension.");
@@ -274,7 +273,7 @@ MDGeometry::getYDimension() const {
 }
 
 /// Get the z-dimension mapping.
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getZDimension() const {
   if (this->getNumDims() < 3)
     throw std::runtime_error("Workspace does not have a Z dimension.");
@@ -282,7 +281,7 @@ MDGeometry::getZDimension() const {
 }
 
 /// Get the t-dimension mapping.
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getTDimension() const {
   if (this->getNumDims() < 4)
     throw std::runtime_error("Workspace does not have a T dimension.");
@@ -359,7 +358,7 @@ size_t MDGeometry::numOriginalWorkspaces() const {
  * @return the original workspace to which the basis vectors relate
  * @param index :: index into the vector of original workspaces.
  */
-boost::shared_ptr<Workspace>
+std::shared_ptr<Workspace>
 MDGeometry::getOriginalWorkspace(size_t index) const {
   if (index >= m_originalWorkspaces.size())
     throw std::runtime_error(
@@ -378,11 +377,11 @@ MDGeometry::getOriginalWorkspace(size_t index) const {
  * @param ws :: original workspace shared pointer
  * @param index :: index into the vector of original workspaces.
  */
-void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws,
+void MDGeometry::setOriginalWorkspace(std::shared_ptr<Workspace> ws,
                                       size_t index) {
   if (index >= m_originalWorkspaces.size())
     m_originalWorkspaces.resize(index + 1);
-  m_originalWorkspaces[index] = ws;
+  m_originalWorkspaces[index] = std::move(ws);
   m_notificationHelper->watchForWorkspaceDeletions();
 }
 
@@ -421,7 +420,7 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
       dim->setRange(dim->getNBins(), max, min);
   }
   // Clear the original workspace
-  setOriginalWorkspace(boost::shared_ptr<Workspace>());
+  setOriginalWorkspace(std::shared_ptr<Workspace>());
   setTransformFromOriginal(nullptr);
   setTransformToOriginal(nullptr);
 }
@@ -436,7 +435,7 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  * @param deleted :: The deleted workspace
  */
 void MDGeometry::deleteNotificationReceived(
-    const boost::shared_ptr<const Workspace> &deleted) {
+    const std::shared_ptr<const Workspace> &deleted) {
   for (auto &original : m_originalWorkspaces) {
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.

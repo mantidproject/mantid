@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -272,7 +272,6 @@ public:
 
   void test_last_time_series_log_entry_equals_end_time() {
     LoadNexusLogs ld;
-    std::string outws_name = "REF_L_instrument";
     ld.initialize();
     ld.setPropertyValue("Filename", "REF_L_32035.nxs");
     MatrixWorkspace_sptr ws = createTestWorkspace();

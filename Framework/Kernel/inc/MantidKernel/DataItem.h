@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,7 +11,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <string>
 
@@ -76,9 +76,9 @@ private:
 };
 
 /// Shared pointer to a DataItem
-using DataItem_sptr = boost::shared_ptr<DataItem>;
+using DataItem_sptr = std::shared_ptr<DataItem>;
 /// Shared pointer to a const DataItem
-using DataItem_const_sptr = boost::shared_ptr<const DataItem>;
+using DataItem_const_sptr = std::shared_ptr<const DataItem>;
 
 } // namespace Kernel
 } // namespace Mantid

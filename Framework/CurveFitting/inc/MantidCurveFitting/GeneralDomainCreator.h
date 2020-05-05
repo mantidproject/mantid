@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -44,21 +45,22 @@ namespace CurveFitting {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport GeneralDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL GeneralDomainCreator
+    : public API::IDomainCreator {
 public:
   GeneralDomainCreator(const API::IFunctionGeneral &fun,
                        Kernel::IPropertyManager &manager,
                        const std::string &workspacePropertyName);
 
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
 
   API::Workspace_sptr
   createOutputWorkspace(const std::string &baseName,
                         API::IFunction_sptr function,
-                        boost::shared_ptr<API::FunctionDomain> domain,
-                        boost::shared_ptr<API::FunctionValues> values,
+                        std::shared_ptr<API::FunctionDomain> domain,
+                        std::shared_ptr<API::FunctionValues> values,
                         const std::string &outputWorkspacePropertyName =
                             "OutputWorkspace") override;
 
@@ -69,7 +71,7 @@ public:
 
 private:
   /// Retrive the input workspace from the property manager.
-  boost::shared_ptr<API::ITableWorkspace> getInputWorkspace() const;
+  std::shared_ptr<API::ITableWorkspace> getInputWorkspace() const;
   // Names of additional properties
   /// Property names for columns in a TableWorkspace to be passed to
   /// the domain.

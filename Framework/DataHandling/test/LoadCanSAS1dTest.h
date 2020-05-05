@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -55,7 +55,7 @@ public:
         ws =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
     Mantid::DataObjects::Workspace2D_sptr ws2d =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     // Check if filename is saved
     TS_ASSERT_EQUALS(cansas1d.getPropertyValue("Filename"),
                      ws2d->run().getProperty("Filename")->value());
@@ -113,7 +113,7 @@ public:
     // Now need to test the resultant workspace, first retrieve it
     Workspace_sptr ws =
         Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace);
-    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     TS_ASSERT(group)
     vector<string> wNames = group->getNames();
 
@@ -123,7 +123,7 @@ public:
 
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[0]);
     Mantid::DataObjects::Workspace2D_sptr ws2d =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     TS_ASSERT(ws2d)
 
     Run run = ws2d->run();
@@ -147,7 +147,7 @@ public:
     }
 
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
-    ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    ws2d = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     TS_ASSERT(ws2d)
 
     run = ws2d->run();
@@ -187,7 +187,7 @@ public:
         ws =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
     Mantid::DataObjects::Workspace2D_sptr ws2d =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
 

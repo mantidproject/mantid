@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../../../ISISReflectometry/Reduction/ValidatePerThetaDefaults.h"
@@ -129,6 +129,25 @@ public:
     PerThetaDefaultsValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "bad"});
     std::vector<int> errorCells = {8};
+    TS_ASSERT(result.isError());
+    TS_ASSERT_EQUALS(result.assertError(), errorCells);
+  }
+
+  void testParseBackgroundProcessingInstructions() {
+    PerThetaDefaultsValidator validator;
+    auto result = validator({"", "", "", "", "", "", "", "", "", "4-7"});
+    TS_ASSERT(result.isValid());
+    TS_ASSERT(result.assertValid()
+                  .backgroundProcessingInstructions()
+                  .is_initialized());
+    TS_ASSERT_EQUALS(
+        result.assertValid().backgroundProcessingInstructions().get(), "4-7");
+  }
+
+  void testParseBackgroundProcessingInstructionsError() {
+    PerThetaDefaultsValidator validator;
+    auto result = validator({"", "", "", "", "", "", "", "", "", "bad"});
+    std::vector<int> errorCells = {9};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }

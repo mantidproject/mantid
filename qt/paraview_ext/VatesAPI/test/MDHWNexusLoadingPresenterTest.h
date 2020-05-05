@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -161,7 +161,7 @@ public:
     auto normalizationOption = Mantid::VATES::VisualNormalization::AutoSelect;
     MDHWNexusLoadingPresenter presenter(std::move(view), filename);
     const double time = 0.0;
-    auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+    auto factory = std::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
         normalizationOption, time);
 
     factory

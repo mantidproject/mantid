@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryMomentumTransfer.h"
 
@@ -110,24 +110,21 @@ const std::string ReflectometryMomentumTransfer::summary() const {
  */
 void ReflectometryMomentumTransfer::init() {
   auto inWavelength =
-      boost::make_shared<API::WorkspaceUnitValidator>("Wavelength");
-  auto twoElementArray =
-      boost::make_shared<Kernel::ArrayLengthValidator<int>>(2);
-  auto mandatoryDouble =
-      boost::make_shared<Kernel::MandatoryValidator<double>>();
-  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+      std::make_shared<API::WorkspaceUnitValidator>("Wavelength");
+  auto twoElementArray = std::make_shared<Kernel::ArrayLengthValidator<int>>(2);
+  auto mandatoryDouble = std::make_shared<Kernel::MandatoryValidator<double>>();
+  auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLowerExclusive(0.);
-  auto mandatoryPositiveDouble =
-      boost::make_shared<Kernel::CompositeValidator>();
+  auto mandatoryPositiveDouble = std::make_shared<Kernel::CompositeValidator>();
   mandatoryPositiveDouble->add(mandatoryDouble);
   mandatoryPositiveDouble->add(positiveDouble);
   auto mandatoryString =
-      boost::make_shared<Kernel::MandatoryValidator<std::string>>();
+      std::make_shared<Kernel::MandatoryValidator<std::string>>();
   std::vector<std::string> sumTypes(2);
   sumTypes.front() = SumTypeChoice::LAMBDA;
   sumTypes.back() = SumTypeChoice::Q;
   auto acceptableSumTypes =
-      boost::make_shared<Kernel::ListValidator<std::string>>(sumTypes);
+      std::make_shared<Kernel::ListValidator<std::string>>(sumTypes);
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, inWavelength),

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,8 +41,8 @@ public:
     if (!atten.isInitialized())
       atten.initialize();
 
-    boost::shared_ptr<Instrument> testInst =
-        boost::make_shared<Instrument>("testInst");
+    std::shared_ptr<Instrument> testInst =
+        std::make_shared<Instrument>("testInst");
 
     // Define a source and sample position
     // Define a source component
@@ -100,7 +100,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->y(0).front(), 0.7423, 0.0001);
     TS_ASSERT_DELTA(result->y(0)[1], 0.7244, 0.0001);

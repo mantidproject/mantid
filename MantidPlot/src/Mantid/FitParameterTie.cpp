@@ -1,17 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitParameterTie.h"
 #include "MantidAPI/CompositeFunction.h"
 #include <QRegExp>
 #include <stdexcept>
+#include <utility>
 
 /// Constructor
 FitParameterTie::FitParameterTie(
-    boost::shared_ptr<Mantid::API::CompositeFunction> cf)
+    const std::shared_ptr<Mantid::API::CompositeFunction> &cf)
     : m_compositeFunction(cf), m_prop(nullptr) {}
 
 /// Destructor

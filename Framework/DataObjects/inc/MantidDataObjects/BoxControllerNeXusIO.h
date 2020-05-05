@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -129,7 +129,7 @@ private:
   // get the event type from event name
   static EventType
   TypeFromString(const std::vector<std::string> &typesSupported,
-                 const std::string typeName);
+                 const std::string &typeName);
   /// the enum, which suggests the way (currently)two possible data types are
   /// converted to each other
   enum CoordConversion {

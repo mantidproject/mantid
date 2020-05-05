@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,8 +15,22 @@
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <memory>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
 
 namespace Mantid {
 
@@ -321,7 +335,7 @@ private:
     }
   }
 
-  void addColumn(boost::shared_ptr<API::Column> column);
+  void addColumn(const std::shared_ptr<API::Column> &column);
 
   /** This method finds the row and column index of an integer cell value in a
    * table workspace
@@ -339,7 +353,9 @@ private:
    * @param  col  column number of the value searched
    */
   virtual void find(std::string value, size_t &row, size_t &col) {
-    findValue(value, row, col);
+    findValue(std::move(std::move(std::move(std::move(
+                  std::move(std::move(std::move(std::move(value)))))))),
+              row, col);
   }
   /** This method finds the row and column index of an float value in a table
    * workspace
@@ -386,24 +402,24 @@ private:
     /// Constructor
     FindName(const std::string &name) : m_name(name) {}
     /// Comparison operator
-    bool operator()(boost::shared_ptr<API::Column> &cp) const {
+    bool operator()(std::shared_ptr<API::Column> &cp) const {
       return cp->name() == m_name;
     }
-    bool operator()(const boost::shared_ptr<const API::Column> &cp) const {
+    bool operator()(const std::shared_ptr<const API::Column> &cp) const {
       return cp->name() == m_name;
     }
   };
 
   using column_it =
-      std::vector<boost::shared_ptr<API::Column>>::iterator; ///< Column
-                                                             ///< iterator
+      std::vector<std::shared_ptr<API::Column>>::iterator; ///< Column
+                                                           ///< iterator
 
   ///< Column const iterator
   using column_const_it =
-      std::vector<boost::shared_ptr<API::Column>>::const_iterator;
+      std::vector<std::shared_ptr<API::Column>>::const_iterator;
 
   /// Shared pointers to the columns.
-  std::vector<boost::shared_ptr<API::Column>> m_columns;
+  std::vector<std::shared_ptr<API::Column>> m_columns;
   /// row count
   size_t m_rowCount;
 
@@ -413,9 +429,9 @@ private:
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace
-using TableWorkspace_sptr = boost::shared_ptr<TableWorkspace>;
+using TableWorkspace_sptr = std::shared_ptr<TableWorkspace>;
 /// Typedef for a shared pointer to \c const \c TableWorkspace
-using TableWorkspace_const_sptr = boost::shared_ptr<const TableWorkspace>;
+using TableWorkspace_const_sptr = std::shared_ptr<const TableWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

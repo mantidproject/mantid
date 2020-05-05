@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
@@ -23,8 +24,9 @@ namespace Functions {
 
 /** ThermalNeutronDtoTOFFunction : TODO: DESCRIPTION
  */
-class DLLExport ThermalNeutronDtoTOFFunction : virtual public API::IFunction1D,
-                                               public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronDtoTOFFunction
+    : virtual public API::IFunction1D,
+      public API::ParamFunction {
 public:
   /// Override
   void function1D(double *out, const double *xValues,
@@ -38,7 +40,7 @@ public:
 
   /// Calculate function values
   void function1D(std::vector<double> &out,
-                  const std::vector<double> xValues) const;
+                  const std::vector<double> &xValues) const;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
@@ -66,7 +68,7 @@ private:
 };
 
 using ThermalNeutronDtoTOFFunction_sptr =
-    boost::shared_ptr<ThermalNeutronDtoTOFFunction>;
+    std::shared_ptr<ThermalNeutronDtoTOFFunction>;
 
 /// Calcualte TOF from d-spacing value for thermal neutron
 inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t,

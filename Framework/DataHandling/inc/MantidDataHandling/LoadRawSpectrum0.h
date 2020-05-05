@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -70,7 +70,7 @@ private:
 
   /// ISISRAW class instance which does raw file reading. Shared pointer to
   /// prevent memory leak when an exception is thrown.
-  boost::shared_ptr<ISISRAW2> isisRaw;
+  std::shared_ptr<ISISRAW2> isisRaw;
   /// The name and path of the input file
   std::string m_filename;
 

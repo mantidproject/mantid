@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -76,7 +76,7 @@ private:
 
   void processInputTime();
   void setFilterByTimeOnly();
-  void setFilterByLogValue(std::string logname);
+  void setFilterByLogValue(const std::string &logname);
 
   void processSingleValueFilter(double minvalue, double maxvalue,
                                 bool filterincrease, bool filterdecrease);
@@ -93,7 +93,7 @@ private:
 
   /// Make multiple-log-value filters in serial
   void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap,
-                                   std::vector<double> logvalueranges,
+                                   const std::vector<double> &logvalueranges,
                                    bool centre, bool filterIncrease,
                                    bool filterDecrease,
                                    Types::Core::DateAndTime startTime,
@@ -101,17 +101,19 @@ private:
 
   /// Make multiple-log-value filters in serial in parallel
   void makeMultipleFiltersByValuesParallel(
-      std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
-      bool centre, bool filterIncrease, bool filterDecrease,
+      const std::map<size_t, int> &indexwsindexmap,
+      const std::vector<double> &logvalueranges, bool centre,
+      bool filterIncrease, bool filterDecrease,
       Types::Core::DateAndTime startTime, Types::Core::DateAndTime stopTime);
 
   /// Generate event splitters for partial sample log (serial)
   void makeMultipleFiltersByValuesPartialLog(
       int istart, int iend, std::vector<Types::Core::DateAndTime> &vecSplitTime,
       std::vector<int> &vecSplitGroup, std::map<size_t, int> indexwsindexmap,
-      const std::vector<double> &logvalueranges, Types::Core::time_duration tol,
-      bool filterIncrease, bool filterDecrease,
-      Types::Core::DateAndTime startTime, Types::Core::DateAndTime stopTime);
+      const std::vector<double> &logvalueranges,
+      const Types::Core::time_duration &tol, bool filterIncrease,
+      bool filterDecrease, Types::Core::DateAndTime startTime,
+      Types::Core::DateAndTime stopTime);
 
   /// Generate event filters for integer sample log
   void processIntegerValueFilter(int minvalue, int maxvalue,
@@ -124,7 +126,7 @@ private:
   /// Add a splitter
   void addNewTimeFilterSplitter(Types::Core::DateAndTime starttime,
                                 Types::Core::DateAndTime stoptime, int wsindex,
-                                std::string info);
+                                const std::string &info);
 
   /// Create a splitter and add to the vector of time splitters
   Types::Core::DateAndTime

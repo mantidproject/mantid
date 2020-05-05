@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   include_directories(../../TestHelpers/inc ../../Nexus/inc
                       ${HDF5_INCLUDE_DIRS})
@@ -32,8 +31,8 @@ if(CXXTEST_FOUND)
                         ${JSONCPP_LIBRARIES}
                         ${NEXUS_LIBRARIES}
                         ${MUPARSER_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
 
   add_dependencies(FrameworkTests APITest)
   # Test data

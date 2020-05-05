@@ -1,17 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFit.h"
-#include "IndirectFunctionBrowser/FQTemplateBrowser.h"
+#include "FQFitConstants.h"
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "JumpFitDataPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -34,7 +36,7 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  auto templateBrowser = new FQTemplateBrowser;
+  auto templateBrowser = new SingleFunctionTemplateBrowser(widthFits);
   setPlotView(m_uiForm->pvFitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
@@ -58,10 +60,26 @@ void JumpFit::setupFitTab() {
   m_uiForm->cbParameter->setEnabled(false);
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  connect(this, SIGNAL(functionChanged()), this,
+          SLOT(updateModelFitTypeString()));
 }
 
 void JumpFit::updateModelFitTypeString() {
-  m_jumpFittingModel->setFitType(selectedFitType().toStdString());
+  m_jumpFittingModel->setFitType(fitTypeString());
+}
+
+std::string JumpFit::fitTypeString() const {
+  if (!m_jumpFittingModel->getFittingFunction() ||
+      m_jumpFittingModel->getFittingFunction()->nFunctions() == 0) {
+    return "NoCurrentFunction";
+  }
+
+  auto fun = m_jumpFittingModel->getFittingFunction()->getFunction(0);
+  if (fun->nFunctions() == 0) {
+    return fun->name();
+  } else {
+    return "UserDefinedCompositeFunction";
+  }
 }
 
 void JumpFit::runClicked() { runTab(); }

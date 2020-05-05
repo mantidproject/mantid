@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,10 +51,10 @@ private:
 
   bool doValidation(bool silent = false);
 
-  void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,
-                                     QString shape);
-  void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
-                                  QString shape);
+  void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg,
+                                     const QString &shape);
+  void addShapeSpecificCanOptions(const Mantid::API::IAlgorithm_sptr &alg,
+                                  const QString &shape);
 
   void setComboBoxOptions(QComboBox *combobox,
                           std::vector<std::string> const &options);
@@ -71,9 +71,9 @@ private:
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
 
-  boost::optional<double>
-  getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
-                         const std::string &parameterName);
+  boost::optional<double> getInstrumentParameter(
+      const Mantid::Geometry::Instrument_const_sptr &instrument,
+      const std::string &parameterName);
 
   Ui::CalculatePaalmanPings m_uiForm;
 

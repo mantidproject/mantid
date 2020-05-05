@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -73,9 +73,9 @@ private:
   void align(const ConversionFactors &converter, API::Progress &progress,
              DataObjects::EventWorkspace &outputWS);
 
-  void loadCalFile(API::MatrixWorkspace_sptr inputWS,
+  void loadCalFile(const API::MatrixWorkspace_sptr &inputWS,
                    const std::string &filename);
-  void getCalibrationWS(API::MatrixWorkspace_sptr inputWS);
+  void getCalibrationWS(const API::MatrixWorkspace_sptr &inputWS);
 
   Mantid::API::ITableWorkspace_sptr m_calibrationWS;
 

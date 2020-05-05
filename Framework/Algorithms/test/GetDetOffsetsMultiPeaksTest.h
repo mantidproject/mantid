@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -174,7 +174,7 @@ public:
     E.assign(E.size(), 0.001);
 
     // Create table workspace
-    TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr fitWindowWS = std::make_shared<TableWorkspace>();
     fitWindowWS->addColumn("int", "spectrum");
     fitWindowWS->addColumn("double", "peak0_left");
     fitWindowWS->addColumn("double", "peak0_right");
@@ -245,7 +245,7 @@ public:
     E.assign(E.size(), 0.001);
 
     // Create table workspace
-    TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr fitWindowWS = std::make_shared<TableWorkspace>();
     fitWindowWS->addColumn("int", "spectrum");
     fitWindowWS->addColumn("double", "peak0_left");
     fitWindowWS->addColumn("double", "peak0_right");
@@ -430,7 +430,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate noisy data in a workspace
    */
-  void generateNoisyData(MatrixWorkspace_sptr WS) {
+  void generateNoisyData(const MatrixWorkspace_sptr &WS) {
 
     auto &Y = WS->mutableY(0);
     Y.assign(Y.size(), static_cast<double>(rand() % 5));

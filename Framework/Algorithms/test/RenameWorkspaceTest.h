@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -147,7 +147,7 @@ public:
     Workspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(result = ads.retrieve("newName"))
     WorkspaceGroup_sptr resultGroup;
-    TS_ASSERT(resultGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(result))
+    TS_ASSERT(resultGroup = std::dynamic_pointer_cast<WorkspaceGroup>(result))
     // It should actually be the same workspace as the input
     TS_ASSERT(resultGroup == group)
     // The output group should have the same workspaces in, with new names of

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -50,7 +50,7 @@ const string RemoveLowResTOF::category() const {
 }
 
 void RemoveLowResTOF::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
@@ -70,7 +70,7 @@ void RemoveLowResTOF::init() {
       "TOF which are removed "
       "from input workspace.");
 
-  auto validator = boost::make_shared<BoundedValidator<double>>();
+  auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.01);
   declareProperty("ReferenceDIFC", Mantid::EMPTY_DBL(), validator,
                   "The DIFC value for the reference");
@@ -121,7 +121,7 @@ void RemoveLowResTOF::exec() {
   }
 
   // go off and do the event version if appropriate
-  m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
+  m_inputEvWS = std::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   if (m_inputEvWS != nullptr) {
     this->execEvent(spectrumInfo);
     return;
@@ -155,14 +155,14 @@ void RemoveLowResTOF::exec() {
 void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   // set up the output workspace
   MatrixWorkspace_sptr matrixOutW = getProperty("OutputWorkspace");
-  auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
+  auto outW = std::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   MatrixWorkspace_sptr matrixLowResW = getProperty("LowResTOFWorkspace");
   if (m_outputLowResTOF) {
     matrixLowResW = m_inputWS->clone();
     setProperty("LowResTOFWorkspace", matrixLowResW);
   }
-  auto lowW = boost::dynamic_pointer_cast<EventWorkspace>(matrixLowResW);
+  auto lowW = std::dynamic_pointer_cast<EventWorkspace>(matrixLowResW);
 
   g_log.debug() << "TOF range was " << m_inputEvWS->getTofMin() << " to "
                 << m_inputEvWS->getTofMax() << " microseconds\n";

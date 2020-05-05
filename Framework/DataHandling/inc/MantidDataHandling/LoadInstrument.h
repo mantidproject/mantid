@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -81,13 +81,13 @@ private:
   void exec() override;
 
   /// Run the Child Algorithm LoadParameters
-  void runLoadParameterFile(const boost::shared_ptr<API::MatrixWorkspace> &ws,
-                            std::string filename);
+  void runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws,
+                            const std::string &filename);
 
   /// Search directory for Parameter file, return full path name if found, else
   /// "".
-  std::string getFullPathParamIDF(std::string directoryName,
-                                  std::string filename);
+  std::string getFullPathParamIDF(const std::string &directoryName,
+                                  const std::string &filename);
 
   /// Mutex to avoid simultaneous access
   static std::recursive_mutex m_mutex;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -21,7 +21,7 @@ namespace CostFunctions {
     @author Anders Markvardsen, ISIS, RAL
     @date 11/05/2010
 */
-class DLLExport CostFuncLeastSquares : public CostFuncFitting {
+class MANTID_CURVEFITTING_DLL CostFuncLeastSquares : public CostFuncFitting {
 public:
   /// Constructor
   CostFuncLeastSquares();

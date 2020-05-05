@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -40,7 +40,7 @@ class WorkspaceGroup;
 
     Modified to inherit from DataService
 */
-class DLLExport AnalysisDataServiceImpl final
+class MANTID_API_DLL AnalysisDataServiceImpl final
     : public Kernel::DataService<API::Workspace> {
 public:
   /** @name Extra notifications only applicable to the ADS */
@@ -50,7 +50,7 @@ public:
   public:
     /// Constructor
     GroupWorkspacesNotification(const std::vector<std::string> &wsnames)
-        : DataServiceNotification("", boost::shared_ptr<API::Workspace>()),
+        : DataServiceNotification("", std::shared_ptr<API::Workspace>()),
           m_wsnames(wsnames) {}
     /// returns the workspace names
     const std::vector<std::string> &inputworkspacenames() const {
@@ -67,7 +67,7 @@ public:
   public:
     /// Constructor
     UnGroupingWorkspaceNotification(const std::string &name,
-                                    const boost::shared_ptr<Workspace> &obj)
+                                    const std::shared_ptr<Workspace> &obj)
         : DataServiceNotification(name, obj) {}
   };
 
@@ -81,7 +81,7 @@ public:
     /// Constructor
     GroupUpdatedNotification(const std::string &name);
     /// Returns the workspace pointer cast to WorkspaceGroup
-    boost::shared_ptr<const WorkspaceGroup> getWorkspaceGroup() const;
+    std::shared_ptr<const WorkspaceGroup> getWorkspaceGroup() const;
   };
 
   //@}
@@ -96,12 +96,11 @@ public:
   /// Overridden add member to attach the name to the workspace when a
   /// workspace object is added to the service
   void add(const std::string &name,
-           const boost::shared_ptr<API::Workspace> &workspace) override;
+           const std::shared_ptr<API::Workspace> &workspace) override;
   /// Overridden addOrReplace member to attach the name to the workspace when
   /// a workspace object is added to the service
-  void
-  addOrReplace(const std::string &name,
-               const boost::shared_ptr<API::Workspace> &workspace) override;
+  void addOrReplace(const std::string &name,
+                    const std::shared_ptr<API::Workspace> &workspace) override;
   /// Overridden rename member to attach the new name to the workspace when a
   /// workspace object is renamed
   virtual void rename(const std::string &oldName, const std::string &newName);
@@ -116,11 +115,11 @@ public:
    * @return a shared pointer of WSTYPE
    */
   template <typename WSTYPE>
-  boost::shared_ptr<WSTYPE> retrieveWS(const std::string &name) const {
+  std::shared_ptr<WSTYPE> retrieveWS(const std::string &name) const {
     // Get as a bare workspace
     try {
       // Cast to the desired type and return that.
-      return boost::dynamic_pointer_cast<WSTYPE>(
+      return std::dynamic_pointer_cast<WSTYPE>(
           Kernel::DataService<API::Workspace>::retrieve(name));
 
     } catch (Kernel::Exception::NotFoundError &) {
@@ -147,7 +146,7 @@ public:
 private:
   /// Checks the name is valid, throwing if not
   void verifyName(const std::string &name,
-                  const boost::shared_ptr<API::WorkspaceGroup> &workspace);
+                  const std::shared_ptr<API::WorkspaceGroup> &workspace);
 
   friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
   /// Constructor

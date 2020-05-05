@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
@@ -226,9 +226,9 @@ void UnwrappedSurface::setColor(size_t index, bool picking) const {
   }
 }
 
-bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
+bool hasParent(const std::shared_ptr<const Mantid::Geometry::IComponent> &comp,
                Mantid::Geometry::ComponentID id) {
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
+  std::shared_ptr<const Mantid::Geometry::IComponent> parent =
       comp->getParent();
   if (!parent)
     return false;
@@ -362,7 +362,7 @@ RectF UnwrappedSurface::getSurfaceBounds() const { return m_viewRect; }
  * @param pws :: A shared pointer to the workspace.
  */
 void UnwrappedSurface::setPeaksWorkspace(
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws) {
+    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
   if (!pws) {
     return;
   }
@@ -705,7 +705,7 @@ UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
     return nullptr;
   }
 
-  return boost::dynamic_pointer_cast<IPeaksWorkspace>(ws);
+  return std::dynamic_pointer_cast<IPeaksWorkspace>(ws);
 }
 
 /** Save the state of the unwrapped surface to a Mantid project file

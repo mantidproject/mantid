@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from itertools import product
 import unittest
 
@@ -14,6 +13,7 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal
 from mantid.simpleapi import logger
 from AbinsModules import FrequencyPowderGenerator, AbinsParameters, AbinsConstants
 from AbinsModules.AbinsConstants import INT_TYPE, FLOAT_TYPE
+
 
 class AbinsFrequencyPowderGeneratorTest(unittest.TestCase):
 

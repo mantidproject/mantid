@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,7 +11,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "ui_SplatterPlotView.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QList>
 #include <QPointer>
@@ -155,7 +155,7 @@ private:
   QPointer<pqPipelineSource> m_peaksFilter;  ///< The peaks filter
   Ui::SplatterPlotView m_ui;     ///< The splatter plot view'a UI form
   QPointer<pqRenderView> m_view; ///< The main view area
-  boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
+  std::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
   PeaksTableControllerVsi
       *m_peaksTableController; ///< The peaks table controller
   QAction *m_allPeaksAction; ///< The action for showing all peaks in the table.

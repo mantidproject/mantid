@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -57,12 +57,12 @@ public:
   void setAxisRange(QPair<double, double> range,
                     AxisID axisID = AxisID::XBottom);
   curveTypes
-  getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace);
+  getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
   QPair<double, double> getCurveRange(const curveType &atype);
   QPair<double, double>
-  getCurveRange(const Mantid::API::MatrixWorkspace_sptr workspace);
+  getCurveRange(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void addSpectrum(const curveType &aType,
-                   const Mantid::API::MatrixWorkspace_sptr workspace,
+                   const Mantid::API::MatrixWorkspace_sptr &workspace,
                    const size_t specIndex = 0);
   void removeSpectrum(const curveType &aType);
   bool hasCurve(const curveType &aType);

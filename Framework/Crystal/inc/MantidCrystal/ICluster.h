@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -21,17 +22,17 @@ namespace Crystal {
 /** ICluster : Abstract cluster. Identifies neighbour elements in an image that
  are connected.
  */
-class DLLExport ICluster {
+class MANTID_CRYSTAL_DLL ICluster {
 public:
   using ClusterIntegratedValues = boost::tuple<double, double>;
 
   /// integrate the cluster
-  virtual ClusterIntegratedValues integrate(
-      boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const = 0;
+  virtual ClusterIntegratedValues
+  integrate(std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const = 0;
 
   /// Apply labels to the workspace
   virtual void
-  writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const = 0;
+  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const = 0;
 
   /// Get the originally set label
   virtual size_t getOriginalLabel() const = 0;

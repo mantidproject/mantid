@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,8 +10,8 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -34,8 +34,8 @@ public:
   }
 
   void test_That_Constructor_Does_Not_Throw_On_Giving_A_Valid_Instrument() {
-    boost::shared_ptr<Instrument> testInst =
-        boost::make_shared<Instrument>("empty");
+    std::shared_ptr<Instrument> testInst =
+        std::make_shared<Instrument>("empty");
     ObjComponent *source = new ObjComponent("moderator", nullptr);
     testInst->add(source);
     testInst->markAsSource(source);
@@ -46,7 +46,7 @@ public:
 
   void
   test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument() {
-    TS_ASSERT_THROWS(new InstrumentRayTracer(boost::shared_ptr<Instrument>()),
+    TS_ASSERT_THROWS(new InstrumentRayTracer(std::shared_ptr<Instrument>()),
                      const std::invalid_argument &);
   }
 
@@ -163,8 +163,9 @@ public:
    * @param expectX :: expected x index, -1 if off
    * @param expectY :: expected y index, -1 if off
    */
-  void doTestRectangularDetector(std::string message, Instrument_sptr inst,
-                                 V3D testDir, int expectX, int expectY) {
+  void doTestRectangularDetector(const std::string &message,
+                                 const Instrument_sptr &inst, V3D testDir,
+                                 int expectX, int expectY) {
     InstrumentRayTracer tracker(inst);
     testDir.normalize();
     tracker.traceFromSample(testDir);
@@ -181,11 +182,11 @@ public:
 
     // Get the first result
     Link res = *results.begin();
-    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(
+    IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(
         inst->getComponentByID(res.componentID));
     // Parent bank
     RectangularDetector_const_sptr rect =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
+        std::dynamic_pointer_cast<const RectangularDetector>(
             det->getParent()->getParent());
     // Find the xy index from the detector ID
     std::pair<int, int> xy = rect->getXYForDetectorID(det->getID());

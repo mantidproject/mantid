@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
-from __future__ import absolute_import, division, print_function
 
 import numpy
 import os
@@ -744,9 +742,9 @@ class _CalibrationParameterHelper(object):
 
     @staticmethod
     def validate_known_positions(known_positions):
-        if not (isinstance(known_positions, list) or
-                isinstance(known_positions, tuple) or
-                isinstance(known_positions, numpy.ndarray)):
+        if not (isinstance(known_positions, list)
+                or isinstance(known_positions, tuple)
+                or isinstance(known_positions, numpy.ndarray)):
             raise RuntimeError(
                 "Wrong argument knownPositions. It expects a list of values for the positions expected for the peaks in"
                 "relation to the center of the tube")

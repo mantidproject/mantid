@@ -1,12 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-from six import iteritems
 from isis_powder.routines import yaml_parser
 import warnings
 
@@ -139,8 +136,8 @@ class InstrumentSettings(object):
             if previous_value is not None and previous_value != param_val:
 
                 # Print warning of what we value we are replacing for which parameter
-                warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '" +
-                              str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")
+                warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '"
+                              + str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")
 
         # Finally set the new attribute value
         setattr(self, attribute_name, param_val)
@@ -190,7 +187,7 @@ def _get_enum_values(enum_cls):
     """
     enum_known_vals = []
 
-    for k, enum_val in iteritems(enum_cls.__dict__):
+    for k, enum_val in enum_cls.__dict__.items():
         # Get all class attribute and value pairs except enum_friendly_name
         if k.startswith("__") or k.lower() == "enum_friendly_name":
             continue

@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, invalid-name, no-self-use, attribute-defined-outside-init
 """
     Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
 """
-from __future__ import (absolute_import, division, print_function)
 import sys
 import math
 import re
@@ -21,7 +20,6 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
-from six import string_types
 
 
 class LRAutoReduction(PythonAlgorithm):
@@ -444,7 +442,7 @@ class LRAutoReduction(PythonAlgorithm):
         direct_beam_runs_str = self._read_property(meta_data_run, "direct_beam_runs",
                                                    _direct_beam_runs, is_string=True)
         # The direct runs in the DAS logs are stored as a string
-        if isinstance(direct_beam_runs_str, string_types):
+        if isinstance(direct_beam_runs_str, str):
             try:
                 direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
             except ValueError:

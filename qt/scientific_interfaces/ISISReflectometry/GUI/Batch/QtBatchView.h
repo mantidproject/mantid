@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,7 @@ private slots:
   void onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
   void onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
   void onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                        std::string errorMessage);
+                        const std::string &errorMessage);
 
 private:
   void initLayout();

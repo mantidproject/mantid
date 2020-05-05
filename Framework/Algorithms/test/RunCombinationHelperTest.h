@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -187,7 +187,7 @@ public:
   }
 
 private:
-  void setUnits(MatrixWorkspace_sptr ws) {
+  void setUnits(const MatrixWorkspace_sptr &ws) {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     ws->getAxis(1)->unit() = UnitFactory::Instance().create("Momentum");
     ws->setYUnit("Counts");

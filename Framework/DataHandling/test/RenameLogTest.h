@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -124,8 +124,8 @@ private:
     return testWS;
   }
 
-  void verifyLog(API::MatrixWorkspace_sptr resultWS,
-                 const std::string logName) {
+  void verifyLog(const API::MatrixWorkspace_sptr &resultWS,
+                 const std::string &logName) {
     Kernel::TimeSeriesProperty<double> *rp;
     TS_ASSERT_THROWS_NOTHING(
         rp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(

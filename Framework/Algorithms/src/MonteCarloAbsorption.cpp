@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -90,7 +90,7 @@ DECLARE_ALGORITHM(MonteCarloAbsorption)
  */
 void MonteCarloAbsorption::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -102,7 +102,7 @@ void MonteCarloAbsorption::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
 
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
@@ -120,7 +120,7 @@ void MonteCarloAbsorption::init() {
                   "instrument with a sparse grid of "
                   "detectors interpolating the "
                   "results to the real instrument.");
-  auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto threeOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   threeOrMore->setLower(3);
   declareProperty(
       "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
@@ -129,7 +129,7 @@ void MonteCarloAbsorption::init() {
       "NumberOfDetectorRows",
       std::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
-  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto twoOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   twoOrMore->setLower(2);
   declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
                   twoOrMore,

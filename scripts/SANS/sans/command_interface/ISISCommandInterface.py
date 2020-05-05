@@ -1,17 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import inspect
 import os
 import re
 
-import six
-from six import types
+import types
 
 from SANSadd2 import add_runs
 from mantid.api import (AnalysisDataService, WorkspaceGroup)
@@ -30,10 +27,6 @@ from sans.common.general_functions import (convert_bank_name_to_detector_type_is
                                            is_part_of_reduced_output_workspace_group)
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
-
-if six.PY2:
-    # This can be swapped with in box FileNotFoundError
-    FileNotFoundError = IOError
 
 
 # Disable plotting if running outside Mantidplot

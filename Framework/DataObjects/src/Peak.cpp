@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/NoShape.h"
@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -36,7 +37,7 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
-      m_intMNP(V3D(0, 0, 0)), m_peakShape(boost::make_shared<NoShape>()) {
+      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -57,10 +58,10 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
-  this->setQLabFrame(QLabFrame, detectorDistance);
+  this->setQLabFrame(QLabFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -84,13 +85,13 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
   this->setInstrument(m_inst);
-  this->setQSampleFrame(QSampleFrame, detectorDistance);
+  this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -107,7 +108,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
@@ -129,7 +130,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
@@ -153,7 +154,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -176,7 +177,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
@@ -226,7 +227,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_peakNumber(ipeak.getPeakNumber()),
       m_intHKL(ipeak.getIntHKL()), m_intMNP(ipeak.getIntMNP()),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -304,7 +305,7 @@ void Peak::setDetectorID(int id) {
 
   // Use the parent if the grandparent is the instrument
   Instrument_const_sptr instrument =
-      boost::dynamic_pointer_cast<const Instrument>(parent);
+      std::dynamic_pointer_cast<const Instrument>(parent);
   if (instrument)
     return;
   // Use the grand-parent whenever possible
@@ -317,7 +318,7 @@ void Peak::setDetectorID(int id) {
 
   // Special for rectangular detectors: find the row and column.
   RectangularDetector_const_sptr retDet =
-      boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+      std::dynamic_pointer_cast<const RectangularDetector>(parent);
   if (!retDet)
     return;
   std::pair<int, int> xy = retDet->getXYForDetectorID(m_detectorID);
@@ -567,7 +568,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
 
-  boost::shared_ptr<const ReferenceFrame> refFrame =
+  std::shared_ptr<const ReferenceFrame> refFrame =
       this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
@@ -620,8 +621,7 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
   if (!component) {
     return detectorDir; // the best idea we have is just the direction
   }
-  const auto object =
-      boost::dynamic_pointer_cast<const ObjComponent>(component);
+  const auto object = std::dynamic_pointer_cast<const ObjComponent>(component);
   const auto distance =
       object->shape()->distance(Geometry::Track(samplePos, detectorDir));
   return detectorDir * distance;
@@ -779,7 +779,7 @@ void Peak::setL(double m_L) { this->m_L = m_L; }
 /** Set the BankName of this peak
  * @param m_bankName :: index to set   */
 void Peak::setBankName(std::string m_bankName) {
-  this->m_bankName = m_bankName;
+  this->m_bankName = std::move(m_bankName);
 }
 
 /** Set all three H,K,L indices of the peak */

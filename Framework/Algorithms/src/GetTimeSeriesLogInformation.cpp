@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidAPI/Run.h"
@@ -61,7 +61,7 @@ void GetTimeSeriesLogInformation::init() {
                                        "Relative Time (second)"};
   declareProperty(
       "TimeRangeOption", "Relative Time (second)",
-      boost::make_shared<StringListValidator>(timeoptions),
+      std::make_shared<StringListValidator>(timeoptions),
       "User defined time range (T0, Tf) is of absolute time (second). ");
 
   declareProperty(
@@ -146,7 +146,7 @@ void GetTimeSeriesLogInformation::exec() {
   setProperty("InformationWorkspace", infows);
 
   this->setProperty("OutputWorkspace",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
 
   // 4. Do more staticts (examine)
   // std::string outputdir = this->getProperty("OutputDirectory");
@@ -263,7 +263,7 @@ GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
 /** Generate statistic information table workspace
  */
 TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
-  auto tablews = boost::make_shared<TableWorkspace>();
+  auto tablews = std::make_shared<TableWorkspace>();
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");
@@ -299,7 +299,7 @@ TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
  *
  *  This algorithm should be reconsidered how to work with it.
  */
-void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
+void GetTimeSeriesLogInformation::exportErrorLog(const MatrixWorkspace_sptr &ws,
                                                  vector<DateAndTime> abstimevec,
                                                  double dts) {
   std::string outputdir = getProperty("OutputDirectory");

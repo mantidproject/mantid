@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import os
 import sys
-from six import iteritems
 
 
 def simple_algorithm(algorithm_str, parameters):
@@ -24,7 +22,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         alg = Algorithm.fromString(algorithm_str)
     alg.initialize()
     alg.setChild(True)
-    for key, value in iteritems(parameters):
+    for key, value in parameters.items():
         if value is None:
             Logger("TransmissionUtils").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):

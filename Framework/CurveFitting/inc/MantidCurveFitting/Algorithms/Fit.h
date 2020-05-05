@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -75,7 +75,7 @@ to create a workspace
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
 */
-class DLLExport Fit : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL Fit : public IFittingAlgorithm {
 public:
   /// Default constructor
   Fit();
@@ -102,9 +102,9 @@ private:
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
   void createOutput();
   /// The cost function
-  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
+  std::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
   /// The minimizer
-  boost::shared_ptr<API::IFuncMinimizer> m_minimizer;
+  std::shared_ptr<API::IFuncMinimizer> m_minimizer;
   /// Max number of iterations
   size_t m_maxIterations;
 };

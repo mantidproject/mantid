@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidGeometry/DllConfig.h"
@@ -64,15 +64,15 @@ public:
   int remove(IComponent *);
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
-  boost::shared_ptr<IComponent> getChild(const int i) const override;
+  std::shared_ptr<IComponent> getChild(const int i) const override;
   //! Returns a vector of all children contained.
   void getChildren(std::vector<IComponent_const_sptr> &outVector,
                    bool recursive) const override;
   //! Get a pointer to the ith component in the assembly
-  boost::shared_ptr<IComponent> operator[](int i) const override;
+  std::shared_ptr<IComponent> operator[](int i) const override;
   /// Returns a pointer to the first component of assembly encountered with the
   /// given name
-  boost::shared_ptr<const IComponent>
+  std::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   Kernel::V3D getPos() const override;

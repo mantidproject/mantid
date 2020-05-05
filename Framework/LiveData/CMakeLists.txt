@@ -87,7 +87,8 @@ if(LIBRDKAFKA_FOUND)
       ${TEST_FILES}
       KafkaEventStreamDecoderTest.h
       KafkaHistoStreamDecoderTest.h
-      KafkaTopicSubscriberTest.h)
+      KafkaTopicSubscriberTest.h
+      )
 endif()
 
 if(COVERALLS)
@@ -143,7 +144,7 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
-generate_mantid_export_header(LiveData)
+generate_mantid_export_header(LiveData FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS

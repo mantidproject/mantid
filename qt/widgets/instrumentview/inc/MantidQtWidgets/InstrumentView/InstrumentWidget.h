@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,7 +20,7 @@
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -105,7 +105,7 @@ public:
   SurfaceType getSurfaceType() const { return m_surfaceType; }
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
   /// Get pointer to the projection surface
-  boost::shared_ptr<ProjectionSurface> getSurface() const;
+  std::shared_ptr<ProjectionSurface> getSurface() const;
   /// True if the workspace is being replaced
   bool isWsBeingReplaced() const;
   /// True if the GL instrument display is currently on
@@ -117,7 +117,7 @@ public:
   /// Recalculate the detector data and redraw the instrument view
   void updateInstrumentDetectors();
   /// Delete the peaks workspace.
-  void deletePeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr pws);
+  void deletePeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -148,7 +148,7 @@ public:
   bool hasWorkspace(const std::string &wsName) const;
   void handleWorkspaceReplacement(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace);
+      const std::shared_ptr<Mantid::API::Workspace> &workspace);
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
@@ -193,7 +193,7 @@ public slots:
   void tabChanged(int /*unused*/);
   void componentSelected(size_t componentIndex);
   void executeAlgorithm(const QString & /*unused*/, const QString & /*unused*/);
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*alg*/);
+  void executeAlgorithm(const Mantid::API::IAlgorithm_sptr & /*alg*/);
 
   void setupColorMap();
 
@@ -317,23 +317,23 @@ private:
   /// ADS notification handlers
   void preDeleteHandle(
       const std::string &ws_name,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void clearADSHandle() override;
   /// overlay a peaks workspace on the projection surface
-  void overlayPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr ws);
+  void overlayPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ws);
   /// overlay a masked workspace on the projection surface
-  void overlayMaskedWorkspace(Mantid::API::IMaskWorkspace_sptr ws);
+  void overlayMaskedWorkspace(const Mantid::API::IMaskWorkspace_sptr &ws);
   /// overlay a table workspace with shape parameters on the projection surface
-  void overlayShapesWorkspace(Mantid::API::ITableWorkspace_sptr /*ws*/);
+  void overlayShapesWorkspace(const Mantid::API::ITableWorkspace_sptr & /*ws*/);
   /// get a workspace from the ADS
   Mantid::API::Workspace_sptr getWorkspaceFromADS(const std::string &name);
   /// get a handle to the unwrapped surface
-  boost::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
+  std::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
   /// Load tabs on the widget form a project file
   void loadTabs(const std::string &lines) const;
   /// Save tabs on the widget to a string

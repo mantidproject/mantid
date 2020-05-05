@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/QueryAllRemoteJobs.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -30,14 +30,14 @@ using namespace Mantid::API;
 void QueryAllRemoteJobs::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto nullValidator = boost::make_shared<NullValidator>();
+  auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // Mantid can't store arbitrary structs in its properties, so we're going to
@@ -76,12 +76,12 @@ void QueryAllRemoteJobs::init() {
 }
 
 void QueryAllRemoteJobs::exec() {
-  boost::shared_ptr<RemoteJobManager> jobManager =
+  std::shared_ptr<RemoteJobManager> jobManager =
       Mantid::Kernel::ConfigService::Instance()
           .getFacility()
           .getRemoteJobManager(getPropertyValue("ComputeResource"));
 
-  // jobManager is a boost::shared_ptr...
+  // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??

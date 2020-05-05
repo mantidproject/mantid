@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -51,7 +51,7 @@ BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
  *  a tie or a constraint.
  */
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
-                                       const std::string paramName,
+                                       const std::string &paramName,
                                        const double lowerBound,
                                        const double upperBound, bool isDefault)
     : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
@@ -61,7 +61,7 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
 }
 
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
-                                       const std::string paramName,
+                                       const std::string &paramName,
                                        const double lowerBound, bool isDefault)
     : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
       m_hasUpperBound(false), m_lowerBound(lowerBound), m_upperBound(-DBL_MAX) {

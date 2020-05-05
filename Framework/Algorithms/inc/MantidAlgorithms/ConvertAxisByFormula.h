@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -59,7 +59,7 @@ private:
     double value;
     bool isGeometric;
   };
-  using Variable_ptr = boost::shared_ptr<Variable>;
+  using Variable_ptr = std::shared_ptr<Variable>;
 
   void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
   void calculateValues(mu::Parser &p, std::vector<double> &vec,

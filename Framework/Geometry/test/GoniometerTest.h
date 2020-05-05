@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -254,5 +254,25 @@ public:
     TS_ASSERT_EQUALS(G2.getNumberAxes(), 3);
     // Rotation matrices should be the same after loading
     TS_ASSERT_EQUALS(G2.getR(), G.getR());
+  }
+
+  void test_equals_when_identical() {
+    Mantid::Kernel::DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    Goniometer a(rotation_x);
+    Goniometer b(rotation_x);
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equals_when_not_identical() {
+    Mantid::Kernel::DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    Mantid::Kernel::DblMatrix rotation_y{
+        {0, 0, 1, 0, 1, 0, -1, 0, 0}}; // 90 degrees around y axis
+    Goniometer a(rotation_x);
+    Goniometer b(rotation_y);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
   }
 };

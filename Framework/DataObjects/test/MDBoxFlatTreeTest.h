@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,8 +11,8 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <Poco/File.h>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using Mantid::DataObjects::MDBoxFlatTree;
 
@@ -63,7 +63,7 @@ public:
         BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDLeanEvent"));
 
     size_t nDim = size_t(BoxStoredTree.getNDims());
-    auto new_bc = boost::make_shared<Mantid::API::BoxController>(nDim);
+    auto new_bc = std::make_shared<Mantid::API::BoxController>(nDim);
     new_bc->fromXMLString(BoxStoredTree.getBCXMLdescr());
 
     TSM_ASSERT(

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -32,7 +32,7 @@ class PeakClusterProjectionTest : public CxxTest::TestSuite {
 
 private:
   // Helper function to create a peaks workspace.
-  IPeaksWorkspace_sptr create_peaks_WS(Instrument_sptr inst) const {
+  IPeaksWorkspace_sptr create_peaks_WS(const Instrument_sptr &inst) const {
     PeaksWorkspace *pPeaksWS = new PeaksWorkspace();
     pPeaksWS->setCoordinateSystem(Mantid::Kernel::HKL);
     IPeaksWorkspace_sptr peakWS(pPeaksWS);

@@ -8,7 +8,6 @@ set(SRC_FILES
     src/AlgorithmManager.cpp
     src/AlgorithmObserver.cpp
     src/AlgorithmProperty.cpp
-    src/AlgorithmProxy.cpp
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
@@ -106,6 +105,7 @@ set(SRC_FILES
     src/MultiPeriodGroupWorker.cpp
     src/MultipleExperimentInfos.cpp
     src/MultipleFileProperty.cpp
+    src/NexusFileLoader.cpp
     src/NotebookBuilder.cpp
     src/NotebookWriter.cpp
     src/NullCoordTransform.cpp
@@ -172,7 +172,6 @@ set(INC_FILES
     inc/MantidAPI/AlgorithmManager.h
     inc/MantidAPI/AlgorithmObserver.h
     inc/MantidAPI/AlgorithmProperty.h
-    inc/MantidAPI/AlgorithmProxy.h
     inc/MantidAPI/AnalysisDataService.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
@@ -199,7 +198,6 @@ set(INC_FILES
     inc/MantidAPI/DeprecatedAlgorithm.h
     inc/MantidAPI/DetectorSearcher.h
     inc/MantidAPI/DistributedAlgorithm.h
-    inc/MantidAPI/DllConfig.h
     inc/MantidAPI/DomainCreatorFactory.h
     inc/MantidAPI/EnabledWhenWorkspaceIsType.h
     inc/MantidAPI/EqualBinSizesValidator.h
@@ -306,6 +304,7 @@ set(INC_FILES
     inc/MantidAPI/MultiPeriodGroupWorker.h
     inc/MantidAPI/MultipleExperimentInfos.h
     inc/MantidAPI/MultipleFileProperty.h
+    inc/MantidAPI/NexusFileLoader.h
     inc/MantidAPI/NotebookBuilder.h
     inc/MantidAPI/NotebookWriter.h
     inc/MantidAPI/NullCoordTransform.h
@@ -380,7 +379,6 @@ set(TEST_FILES
     AlgorithmMPITest.h
     AlgorithmManagerTest.h
     AlgorithmPropertyTest.h
-    AlgorithmProxyTest.h
     AlgorithmTest.h
     AnalysisDataServiceTest.h
     AnalysisDataServiceObserverTest.h
@@ -542,6 +540,10 @@ target_link_libraries(API
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(API PUBLIC ${CMAKE_BINARY_DIR}/Framework/API)
+generate_mantid_export_header(API TRUE)
 
 # Installation settings
 

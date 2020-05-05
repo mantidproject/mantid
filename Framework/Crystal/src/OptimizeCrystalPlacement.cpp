@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  *
@@ -335,7 +335,7 @@ void OptimizeCrystalPlacement::exec() {
 
   //--------------------- set up Fit algorithm call-----------------
 
-  boost::shared_ptr<Algorithm> fit_alg =
+  std::shared_ptr<Algorithm> fit_alg =
       createChildAlgorithm("Fit", .1, .93, true);
 
   fit_alg->setProperty("Function", FuncArg);

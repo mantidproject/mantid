@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -52,12 +52,14 @@ public:
    * @return the created processed WS
    */
   template <typename TYPE>
-  boost::shared_ptr<TYPE>
-  doExec(std::string AccumulationMethod, std::string ProcessingAlgorithm = "",
-         std::string ProcessingProperties = "",
-         std::string PostProcessingAlgorithm = "",
-         std::string PostProcessingProperties = "", bool PreserveEvents = true,
-         ILiveListener_sptr listener = ILiveListener_sptr(),
+  std::shared_ptr<TYPE>
+  doExec(const std::string &AccumulationMethod,
+         const std::string &ProcessingAlgorithm = "",
+         const std::string &ProcessingProperties = "",
+         const std::string &PostProcessingAlgorithm = "",
+         const std::string &PostProcessingProperties = "",
+         bool PreserveEvents = true,
+         const ILiveListener_sptr &listener = ILiveListener_sptr(),
          bool makeThrow = false) {
     FacilityHelper::ScopedFacilities loadTESTFacility(
         "unit_testing/UnitTestFacilities.xml", "TEST");
@@ -92,7 +94,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    boost::shared_ptr<TYPE> ws;
+    std::shared_ptr<TYPE> ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake"));
     TS_ASSERT(ws);

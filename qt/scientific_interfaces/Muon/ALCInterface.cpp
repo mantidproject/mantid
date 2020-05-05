@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCInterface.h"
 
@@ -211,7 +211,7 @@ void ALCInterface::exportResults() {
 
     // Add output group to the ADS
     AnalysisDataService::Instance().addOrReplace(
-        groupName, boost::make_shared<WorkspaceGroup>());
+        groupName, std::make_shared<WorkspaceGroup>());
 
     for (auto &result : results) {
       if (result.second) {

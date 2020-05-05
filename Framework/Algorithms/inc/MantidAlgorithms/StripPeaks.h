@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -62,9 +62,10 @@ private:
   /// Execution code
   void exec() override;
 
-  API::ITableWorkspace_sptr findPeaks(API::MatrixWorkspace_sptr WS);
-  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input,
-                                        API::ITableWorkspace_sptr peakslist);
+  API::ITableWorkspace_sptr findPeaks(const API::MatrixWorkspace_sptr &WS);
+  API::MatrixWorkspace_sptr
+  removePeaks(const API::MatrixWorkspace_const_sptr &input,
+              const API::ITableWorkspace_sptr &peakslist);
   double m_maxChiSq{0.0};
 };
 

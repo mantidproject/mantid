@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RingProfile.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -53,12 +53,12 @@ void RingProfile::init() {
                   "An output workspace.");
 
   auto twoOrThree =
-      boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
+      std::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "Centre", std::move(myInput), std::move(twoOrThree)),
                   "Coordinate of the centre of the ring");
-  auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto nonNegative = std::make_shared<Kernel::BoundedValidator<double>>();
   nonNegative->setLower(0);
 
   declareProperty<double>("MinRadius", 0, nonNegative->clone(),
@@ -67,11 +67,11 @@ void RingProfile::init() {
                       "MaxRadius", std::numeric_limits<double>::max(),
                       std::move(nonNegative)),
                   "Radius of the outer ring(m)");
-  auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto nonNegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
   declareProperty<int>("NumBins", 100, std::move(nonNegativeInt),
                        "Number of slice bins for the output");
-  auto degreesLimits = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto degreesLimits = std::make_shared<Kernel::BoundedValidator<double>>();
   degreesLimits->setLower(-360);
   degreesLimits->setUpper(360);
   declareProperty<double>("StartAngle", 0, degreesLimits,
@@ -81,7 +81,7 @@ void RingProfile::init() {
   op[0] = "ClockWise";
   op[1] = "Anti-ClockWise";
   declareProperty("Sense", "Anti-ClockWise",
-                  boost::make_shared<Kernel::StringListValidator>(op),
+                  std::make_shared<Kernel::StringListValidator>(op),
                   "The direction of the integration around the ring");
 }
 
@@ -113,7 +113,7 @@ void RingProfile::exec() {
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // the RingProfile does not support eventworkspace
-  auto checkEvent = boost::dynamic_pointer_cast<API::IEventWorkspace>(inputWS);
+  auto checkEvent = std::dynamic_pointer_cast<API::IEventWorkspace>(inputWS);
   if (checkEvent) {
     throw std::invalid_argument(
         "RingProfile is not defined for EventWorkspaces.");
@@ -140,7 +140,7 @@ void RingProfile::exec() {
     checkInputsForNumericWorkspace(inputWS);
   }
 
-  m_progress = boost::shared_ptr<API::Progress>(
+  m_progress = std::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, inputWS->getNumberHistograms() + 1));
 
   // prepare the vector to hold the output
@@ -184,7 +184,7 @@ void RingProfile::exec() {
 
   // the horizontal axis is configured as degrees and copy the values of X
   auto horizontal = std::make_unique<API::NumericAxis>(refX.size());
-  horizontal->unit() = boost::make_shared<Kernel::Units::Phi>();
+  horizontal->unit() = std::make_shared<Kernel::Units::Phi>();
   horizontal->title() = "Ring Angle";
   for (size_t j = 0; j < refX.size(); j++)
     horizontal->setValue(j, refX[j]);
@@ -215,7 +215,7 @@ void RingProfile::exec() {
  * @param inputWS: the input workspace
  */
 void RingProfile::checkInputsForSpectraWorkspace(
-    const API::MatrixWorkspace_sptr inputWS) {
+    const API::MatrixWorkspace_sptr &inputWS) {
   try {
     // finding the limits of the instrument
     const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -325,7 +325,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
  * @param inputWS: pointer to the input workspace
  */
 void RingProfile::checkInputsForNumericWorkspace(
-    const API::MatrixWorkspace_sptr inputWS) {
+    const API::MatrixWorkspace_sptr &inputWS) {
   g_log.notice() << "CheckingInputs For Numeric Workspace\n";
 
   // The Axis0 is defined by the values of readX inside the spectra of the
@@ -396,7 +396,8 @@ void RingProfile::checkInputsForNumericWorkspace(
  *integration values
  */
 void RingProfile::processInstrumentRingProfile(
-    const API::MatrixWorkspace_sptr inputWS, std::vector<double> &output_bins) {
+    const API::MatrixWorkspace_sptr &inputWS,
+    std::vector<double> &output_bins) {
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int i = 0; i < static_cast<int>(inputWS->getNumberHistograms()); i++) {
@@ -485,7 +486,8 @@ int RingProfile::getBinForPixel(const Kernel::V3D &position) {
  *integration values
  */
 void RingProfile::processNumericImageRingProfile(
-    const API::MatrixWorkspace_sptr inputWS, std::vector<double> &output_bins) {
+    const API::MatrixWorkspace_sptr &inputWS,
+    std::vector<double> &output_bins) {
   // allocate the bin positions vector
   std::vector<int> bin_n(inputWS->dataY(0).size(), -1);
 
@@ -538,7 +540,7 @@ void RingProfile::processNumericImageRingProfile(
  * @param bins_pos: bin positions (for each column inside the spectrum, the
  *correspondent bin_pos)
  */
-void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
+void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr &ws,
                                  int spectrum_index,
                                  std::vector<int> &bins_pos) {
 

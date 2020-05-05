@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ public:
       const ImplicitFunctionParameterParserFactoryImpl &) = delete;
   ImplicitFunctionParameterParserFactoryImpl &
   operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
-  boost::shared_ptr<ImplicitFunctionParameterParser>
+  std::shared_ptr<ImplicitFunctionParameterParser>
   create(const std::string &xmlString) const override;
   ImplicitFunctionParameterParser *createImplicitFunctionParameterParserFromXML(
       Poco::XML::Element *parametersElement) const;

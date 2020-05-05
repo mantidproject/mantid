@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidworkbench package
 
-import six
 
 from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 from workbench.projectrecovery.projectrecoverysaver import ALGS_TO_IGNORE, ALG_PROPERTIES_TO_IGNORE
@@ -36,7 +35,7 @@ def get_workspace_history_list(workspace):
 def convert_list_to_string(to_convert, add_new_line=True, fix_comments=False):
     string = ""
     for line in to_convert:
-        if isinstance(line, six.string_types):
+        if isinstance(line, str):
             string += line
         elif fix_comments and isinstance(line, tuple):
             string += line[0]

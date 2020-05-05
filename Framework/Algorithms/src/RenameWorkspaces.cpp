@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -30,7 +30,7 @@ void RenameWorkspaces::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Names of the Input Workspaces");
   // WorkspaceNames - List of new names
   declareProperty(std::make_unique<ArrayProperty<std::string>>(

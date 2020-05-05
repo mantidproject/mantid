@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -53,7 +53,7 @@ protected:
   static Mantid::Kernel::Logger &g_Log;
 
   /// pointer to the class, which does the particular conversion
-  boost::shared_ptr<MDAlgorithms::ConvToMDBase> m_Convertor;
+  std::shared_ptr<MDAlgorithms::ConvToMDBase> m_Convertor;
 
   /// Template to check if a variable equal to NaN
   template <class T> inline bool isNaN(T val) {

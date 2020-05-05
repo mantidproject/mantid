@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -19,13 +19,13 @@ namespace Registry {
  * Encapsulates the registration required for an interface type T
  * that sits on top of a Kernel::DataItem object. The constructor
  * does 3 things:
- *    - Calls register_ptr_to_python<boost::shared_ptr<T>>
- *    - Calls register_ptr_to_python<boost::weak_ptr<T>>
- *    - Registers a new PropertyValueHandler for a boost::shared_ptr<T>
+ *    - Calls register_ptr_to_python<std::shared_ptr<T>>
+ *    - Calls register_ptr_to_python<std::weak_ptr<T>>
+ *    - Registers a new PropertyValueHandler for a std::shared_ptr<T>
  */
 template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
-  using IType_sptr = boost::shared_ptr<IType>;
-  using IType_wptr = boost::weak_ptr<IType>;
+  using IType_sptr = std::shared_ptr<IType>;
+  using IType_wptr = std::weak_ptr<IType>;
   /// Constructor
   RegisterWorkspacePtrToPython() {
     using namespace boost::python;

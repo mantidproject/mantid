@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -32,7 +33,7 @@ namespace Functions {
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 03/03/2015
 */
-class DLLExport PseudoVoigt : public API::IPeakFunction {
+class MANTID_CURVEFITTING_DLL PseudoVoigt : public API::IPeakFunction {
 public:
   double centre() const override { return getParameter("PeakCentre"); }
   double intensity() const override { return getParameter("Intensity"); }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -26,7 +26,7 @@ public:
   void setUp() override {
     mockPresenter.reset();
     mockPresenter =
-        boost::make_shared<NiceMock<MockWorkspaceProviderNotifiable>>();
+        std::make_shared<NiceMock<MockWorkspaceProviderNotifiable>>();
     adapter.registerPresenter(mockPresenter);
     AnalysisDataService::Instance().clear();
   }
@@ -131,6 +131,6 @@ public:
   }
 
 private:
-  boost::shared_ptr<NiceMock<MockWorkspaceProviderNotifiable>> mockPresenter;
+  std::shared_ptr<NiceMock<MockWorkspaceProviderNotifiable>> mockPresenter;
   ADSAdapter adapter;
 };

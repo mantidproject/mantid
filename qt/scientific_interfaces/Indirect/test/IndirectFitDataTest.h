@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFitDataLegacy.h"
+#include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
@@ -18,16 +18,19 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace MantidQt::CustomInterfaces;
 
 namespace {
 
-std::unique_ptr<IndirectFitDataLegacy>
+std::unique_ptr<IndirectFitData>
 getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
-  SpectraLegacy const spec =
-      std::make_pair(0u, workspace->getNumberHistograms() - 1);
-  IndirectFitDataLegacy data(workspace, spec);
-  return std::make_unique<IndirectFitDataLegacy>(data);
+  Spectra const spec =
+      Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
+              MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
+                  static_cast<int>(workspace->getNumberHistograms() - 1)});
+  IndirectFitData data(workspace, spec);
+  return std::make_unique<IndirectFitData>(data);
 }
 
 } // namespace
@@ -44,11 +47,13 @@ public:
 
   void test_data_is_instantiated() {
     auto const workspace = createWorkspace(1);
-    SpectraLegacy const spec =
-        std::make_pair(0u, workspace->getNumberHistograms() - 1);
+    Spectra const spec =
+        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
+                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
+                    static_cast<int>(workspace->getNumberHistograms() - 1)});
 
     workspace->setTitle("Test Title");
-    IndirectFitDataLegacy const data(workspace, spec);
+    IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.workspace(), workspace);
     TS_ASSERT_EQUALS(data.workspace()->getTitle(), "Test Title");
@@ -56,11 +61,13 @@ public:
   }
 
   void test_that_DiscontinuousSpectra_is_set_up_correctly() {
-    DiscontinuousSpectra<std::size_t> const spectra =
-        DiscontinuousSpectra<std::size_t>("0-5,8,10");
+    Spectra const spectra = Spectra("0-5,8,10");
 
     std::string const spectraString = "0-5,8,10";
-    std::vector<std::size_t> const spectraVec{0, 1, 2, 3, 4, 5, 8, 10};
+    std::vector<IDA::WorkspaceIndex> const spectraVec{
+        IDA::WorkspaceIndex(0), IDA::WorkspaceIndex(1), IDA::WorkspaceIndex(2),
+        IDA::WorkspaceIndex(3), IDA::WorkspaceIndex(4), IDA::WorkspaceIndex(5),
+        IDA::WorkspaceIndex(8), IDA::WorkspaceIndex(10)};
 
     TS_ASSERT_EQUALS(spectra.getString(), spectraString);
     for (auto it = spectra.begin(); it < spectra.end(); ++it)
@@ -72,11 +79,10 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "8,0-7,6,10";
-    SpectraLegacy const spectra = DiscontinuousSpectra<std::size_t>("0-8,10");
+    Spectra const spectra = Spectra("0-8,10");
     data->setSpectra(inputString);
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), data->spectra(), spectra));
+    TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
   void
@@ -84,11 +90,10 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "1,2,4-3,10";
-    SpectraLegacy const spectra = DiscontinuousSpectra<std::size_t>("1-4,10");
+    Spectra const spectra = Spectra("1-4,10");
     data->setSpectra(inputString);
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), data->spectra(), spectra));
+    TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
   void
@@ -96,11 +101,10 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "  8,10,  7";
-    SpectraLegacy const spectra = DiscontinuousSpectra<std::size_t>("7-8,10");
+    Spectra const spectra = Spectra("7-8,10");
     data->setSpectra(inputString);
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), data->spectra(), spectra));
+    TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
   void test_data_is_stored_in_the_ADS() {
@@ -119,7 +123,7 @@ public:
     std::vector<std::string> const formatStrings{
         "%1%_s%2%_Result", "%1%_f%2%,s%2%_Parameter", "%1%_s%2%_Parameter"};
     std::string const rangeDelimiter = "_to_";
-    std::size_t const spectrum = 1;
+    IDA::WorkspaceIndex const spectrum = IDA::WorkspaceIndex{1};
 
     TS_ASSERT_EQUALS(data->displayName(formatStrings[0], rangeDelimiter),
                      "_s0_Result");
@@ -143,23 +147,24 @@ public:
   void
   test_that_the_number_of_spectra_returned_matches_the_instantiated_value() {
     auto const data = getIndirectFitData(10);
-    TS_ASSERT_EQUALS(data->numberOfSpectra(), 10);
+    TS_ASSERT_EQUALS(data->numberOfSpectra(), TableRowIndex{10});
   }
 
   void test_that_getSpectrum_returns_the_expected_spectrum_numbers() {
     auto const data = getIndirectFitData(4);
 
-    for (auto i = 0u; i < data->numberOfSpectra(); ++i) {
-      std::size_t const spectrumNum = data->getSpectrum(i);
-      TS_ASSERT_EQUALS(spectrumNum, i);
+    for (auto i = TableRowIndex{0}; i < data->numberOfSpectra(); ++i) {
+      MantidQt::CustomInterfaces::IDA::WorkspaceIndex const spectrumNum =
+          data->getSpectrum(i);
+      TS_ASSERT_EQUALS(spectrumNum.value, i.value);
     }
   }
 
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
-    auto workspace = boost::make_shared<Workspace2D>();
-    SpectraLegacy const spec = std::make_pair(0u, 0u);
-    IndirectFitDataLegacy const data(workspace, spec);
+    auto workspace = std::make_shared<Workspace2D>();
+    Spectra const spec = Spectra("");
+    IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
   }
@@ -167,8 +172,8 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_spectra() {
     auto const workspace = createWorkspace(1);
-    DiscontinuousSpectra<std::size_t> const spec("");
-    IndirectFitDataLegacy const data(workspace, spec);
+    Spectra const spec("");
+    IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
   }
@@ -184,68 +189,104 @@ public:
   void
   test_that_correct_excludeRegion_is_returned_when_regions_are_in_correct_order() {
     /// When each pair of numbers in the string are in order, then the whole
-    /// string is in the correct order(unordered: 10,11 9,7 ordered:10,11,7,9)
+    /// string is in the correct order(unordered: 10,11 9,7
+    /// ordered:10,11,7,9)
     auto data = getIndirectFitData(4);
 
-    data->setExcludeRegionString("1,8", 0);
-    data->setExcludeRegionString("2,5", 1);
-    data->setExcludeRegionString("1,2,5,6,3,4", 2);
+    data->setExcludeRegionString(
+        "1,8", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0});
+    data->setExcludeRegionString(
+        "2,5", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1});
+    data->setExcludeRegionString(
+        "1,2,5,6,3,4", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2});
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "1.000,8.000");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.000,5.000");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(2),
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
+                     "1.000,8.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1}),
+                     "2.000,5.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2}),
                      "1.000,2.000,5.000,6.000,3.000,4.000");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(3), "");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{3}),
+                     "");
   }
 
   void
   test_that_correct_excludeRegionVector_is_returned_when_regions_are_in_correct_order() {
     /// When each pair of numbers in the string are in order, then the whole
-    /// string is in the correct order(unordered: 10,11 9,7 ordered:10,11,7,9)
+    /// string is in the correct order(unordered: 10,11 9,7
+    /// ordered:10,11,7,9)
     auto data = getIndirectFitData(4);
 
-    data->setExcludeRegionString("1,8", 0);
-    data->setExcludeRegionString("2,5", 1);
+    data->setExcludeRegionString(
+        "1,8", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0});
+    data->setExcludeRegionString(
+        "2,5", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1});
     std::vector<double> const regionVector1{1.0, 8.0};
     std::vector<double> const regionVector2{2.0, 5.0};
 
-    TS_ASSERT_EQUALS(data->excludeRegionsVector(0), regionVector1);
-    TS_ASSERT_EQUALS(data->excludeRegionsVector(1), regionVector2);
-    TS_ASSERT_EQUALS(data->excludeRegionsVector(3).empty(), true);
+    TS_ASSERT_EQUALS(data->excludeRegionsVector(IDA::WorkspaceIndex{0}),
+                     regionVector1);
+    TS_ASSERT_EQUALS(data->excludeRegionsVector(IDA::WorkspaceIndex{1}),
+                     regionVector2);
+    TS_ASSERT_EQUALS(data->excludeRegionsVector(IDA::WorkspaceIndex{3}).empty(),
+                     true);
   }
 
   void test_that_excludeRegion_pairs_are_stored_in_an_order_of_low_to_high() {
     /// Example: unordered: 10,11 9,7     ordered: 10,11,7,9
     auto data = getIndirectFitData(3);
 
-    data->setExcludeRegionString("6,2", 0);
-    data->setExcludeRegionString("6,2,1,2,3,4,7,6", 1);
-    data->setExcludeRegionString("1,2,2,3,20,18,21,22,7,8", 2);
+    data->setExcludeRegionString(
+        "6,2", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0});
+    data->setExcludeRegionString(
+        "6,2,1,2,3,4,7,6", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1});
+    data->setExcludeRegionString(
+        "1,2,2,3,20,18,21,22,7,8",
+        MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2});
 
     std::vector<double> const regionVector{2.0, 6.0};
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.000,6.000");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1),
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
+                     "2.000,6.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1}),
                      "2.000,6.000,1.000,2.000,3.000,4.000,6.000,7.000");
     TS_ASSERT_EQUALS(
-        data->getExcludeRegion(2),
+        data->getExcludeRegion(
+            MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2}),
         "1.000,2.000,2.000,3.000,18.000,20.000,21.000,22.000,7.000,8.000");
-    TS_ASSERT_EQUALS(data->excludeRegionsVector(0), regionVector);
+    TS_ASSERT_EQUALS(data->excludeRegionsVector(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
+                     regionVector);
   }
 
   void
   test_that_excludeRegion_is_stored_without_spaces_when_there_are_many_spaces_in_input_string() {
     auto data = getIndirectFitData(3);
 
-    data->setExcludeRegionString("  6,     2", 0);
-    data->setExcludeRegionString("6,  2,1  ,2,  3,4  ,7,6", 1);
-    data->setExcludeRegionString("1,2 ,2,3,  20,  18,21,22,7, 8   ", 2);
+    data->setExcludeRegionString(
+        "  6,     2", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0});
+    data->setExcludeRegionString(
+        "6,  2,1  ,2,  3,4  ,7,6",
+        MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1});
+    data->setExcludeRegionString(
+        "1,2 ,2,3,  20,  18,21,22,7, 8   ",
+        MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2});
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.000,6.000");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1),
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
+                     "2.000,6.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1}),
                      "2.000,6.000,1.000,2.000,3.000,4.000,6.000,7.000");
     TS_ASSERT_EQUALS(
-        data->getExcludeRegion(2),
+        data->getExcludeRegion(
+            MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2}),
         "1.000,2.000,2.000,3.000,18.000,20.000,21.000,22.000,7.000,8.000");
   }
 
@@ -253,21 +294,30 @@ public:
   test_that_setExcludeRegion_rounds_the_numbers_in_the_input_string_to_the_appropriate_decimal_place() {
     auto data = getIndirectFitData(2);
 
-    data->setExcludeRegionString("6.29445,2.93343", 0);
-    data->setExcludeRegionString("2.6,2.3,1.9999,3.0125", 1);
+    data->setExcludeRegionString(
+        "6.29445,2.93343", MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0});
+    data->setExcludeRegionString(
+        "2.6,2.3,1.9999,3.0125",
+        MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1});
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.933,6.294");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.300,2.600,2.000,3.013");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
+                     "2.933,6.294");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1}),
+                     "2.300,2.600,2.000,3.013");
   }
 
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
     auto data = getIndirectFitData(10);
 
-    std::vector<SpectraLegacy> const spectraPairs{
-        std::make_pair(0u, 11u), std::make_pair(0u, 1000000000000000000u),
-        std::make_pair(10u, 10u)};
-    std::vector<std::string> const spectraStrings{
-        "10", "100000000000000000000000000000", "1,5,10", "1,2,3,4,5,6,22"};
+    std::vector<Spectra> const spectraPairs{
+        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
+                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{11}),
+        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10},
+                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10})};
+    std::vector<std::string> const spectraStrings{"10", "1,5,10",
+                                                  "1,2,3,4,5,6,22"};
 
     for (auto i = 0u; i < spectraPairs.size(); ++i)
       TS_ASSERT_THROWS(data->setSpectra(spectraPairs[i]),
@@ -280,8 +330,10 @@ public:
   void test_no_throw_when_setSpectra_is_provided_a_valid_spectra() {
     auto data = getIndirectFitData(10);
 
-    std::vector<SpectraLegacy> const spectraPairs{
-        std::make_pair(0u, 9u), std::make_pair(4u, 4u), std::make_pair(7u, 4u)};
+    std::vector<Spectra> const spectraPairs{
+        Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9}),
+        Spectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{4}),
+        Spectra(IDA::WorkspaceIndex{7}, IDA::WorkspaceIndex{4})};
     std::vector<std::string> const spectraStrings{"0", "9", "0,9,6,4,5",
                                                   "1,2,3,4,5,6"};
 
@@ -295,42 +347,44 @@ public:
   test_no_throw_when_setStartX_is_provided_a_valid_xValue_and_spectrum_number() {
     auto data = getIndirectFitData(10);
 
-    TS_ASSERT_THROWS_NOTHING(data->setStartX(0.0, 0));
-    TS_ASSERT_THROWS_NOTHING(data->setStartX(-5.0, 0));
-    TS_ASSERT_THROWS_NOTHING(data->setStartX(5000000, 10));
+    TS_ASSERT_THROWS_NOTHING(data->setStartX(0.0, IDA::WorkspaceIndex{0}));
+    TS_ASSERT_THROWS_NOTHING(data->setStartX(-5.0, IDA::WorkspaceIndex{0}));
+    TS_ASSERT_THROWS_NOTHING(data->setStartX(5000000, IDA::WorkspaceIndex{10}));
   }
 
   void test_the_provided_startX_is_stored_in_range_after_using_setStartX() {
     auto data = getIndirectFitData(3);
 
-    data->setStartX(-5.0, 0);
-    data->setStartX(6.53, 1);
-    data->setStartX(100000000000000.0, 2);
+    data->setStartX(-5.0, IDA::WorkspaceIndex{0});
+    data->setStartX(6.53, IDA::WorkspaceIndex{1});
+    data->setStartX(100000000000000.0, IDA::WorkspaceIndex{2});
 
-    TS_ASSERT_EQUALS(data->getRange(0).first, -5.0);
-    TS_ASSERT_EQUALS(data->getRange(1).first, 6.53);
-    TS_ASSERT_EQUALS(data->getRange(2).first, 100000000000000.0);
+    TS_ASSERT_EQUALS(data->getRange(IDA::WorkspaceIndex{0}).first, -5.0);
+    TS_ASSERT_EQUALS(data->getRange(IDA::WorkspaceIndex{1}).first, 6.53);
+    TS_ASSERT_EQUALS(data->getRange(IDA::WorkspaceIndex{2}).first,
+                     100000000000000.0);
   }
 
   void
   test_no_throw_when_setEndX_is_provided_a_valid_xValue_and_spectrum_number() {
     auto data = getIndirectFitData(10);
 
-    TS_ASSERT_THROWS_NOTHING(data->setStartX(0.0, 0));
-    TS_ASSERT_THROWS_NOTHING(data->setStartX(-5.0, 0));
-    TS_ASSERT_THROWS_NOTHING(data->setStartX(5000000, 10));
+    TS_ASSERT_THROWS_NOTHING(data->setStartX(0.0, IDA::WorkspaceIndex{0}));
+    TS_ASSERT_THROWS_NOTHING(data->setStartX(-5.0, IDA::WorkspaceIndex{0}));
+    TS_ASSERT_THROWS_NOTHING(data->setStartX(5000000, IDA::WorkspaceIndex{10}));
   }
 
   void test_the_provided_endX_is_stored_in_range_after_using_setEndX() {
     auto data = getIndirectFitData(3);
 
-    data->setEndX(-5.0, 0);
-    data->setEndX(6.53, 1);
-    data->setEndX(100000000000000.0, 2);
+    data->setEndX(-5.0, IDA::WorkspaceIndex{0});
+    data->setEndX(6.53, IDA::WorkspaceIndex{1});
+    data->setEndX(100000000000000.0, IDA::WorkspaceIndex{2});
 
-    TS_ASSERT_EQUALS(data->getRange(0).second, -5.0);
-    TS_ASSERT_EQUALS(data->getRange(1).second, 6.53);
-    TS_ASSERT_EQUALS(data->getRange(2).second, 100000000000000.0);
+    TS_ASSERT_EQUALS(data->getRange(IDA::WorkspaceIndex{0}).second, -5.0);
+    TS_ASSERT_EQUALS(data->getRange(IDA::WorkspaceIndex{1}).second, 6.53);
+    TS_ASSERT_EQUALS(data->getRange(IDA::WorkspaceIndex{2}).second,
+                     100000000000000.0);
   }
 
   void
@@ -338,12 +392,12 @@ public:
     auto data1 = getIndirectFitData(2);
     auto data2 = getIndirectFitData(2);
 
-    data1->setStartX(6.53, 0);
-    data2->setStartX(5.0, 1);
+    data1->setStartX(6.53, IDA::WorkspaceIndex{0});
+    data2->setStartX(5.0, IDA::WorkspaceIndex{1});
     auto const combinedData = data2->combine(*data1);
 
-    TS_ASSERT_EQUALS(combinedData.getRange(0).first, 6.53);
-    TS_ASSERT_EQUALS(combinedData.getRange(1).first, 5.0);
+    TS_ASSERT_EQUALS(combinedData.getRange(IDA::WorkspaceIndex{0}).first, 6.53);
+    TS_ASSERT_EQUALS(combinedData.getRange(IDA::WorkspaceIndex{1}).first, 5.0);
   }
 
   void
@@ -351,12 +405,13 @@ public:
     auto data1 = getIndirectFitData(2);
     auto data2 = getIndirectFitData(2);
 
-    data1->setEndX(2.34, 0);
-    data2->setEndX(5.9, 1);
+    data1->setEndX(2.34, IDA::WorkspaceIndex{0});
+    data2->setEndX(5.9, IDA::WorkspaceIndex{1});
     auto const combinedData = data2->combine(*data1);
 
-    TS_ASSERT_EQUALS(combinedData.getRange(0).second, 2.34);
-    TS_ASSERT_EQUALS(combinedData.getRange(1).second, 5.9);
+    TS_ASSERT_EQUALS(combinedData.getRange(IDA::WorkspaceIndex{0}).second,
+                     2.34);
+    TS_ASSERT_EQUALS(combinedData.getRange(IDA::WorkspaceIndex{1}).second, 5.9);
   }
 
   void
@@ -364,13 +419,14 @@ public:
     auto data1 = getIndirectFitData(2);
     auto data2 = getIndirectFitData(2);
 
-    data1->setExcludeRegionString("1,2,6,5", 0);
-    data1->setExcludeRegionString("6,2", 1);
+    data1->setExcludeRegionString("1,2,6,5", IDA::WorkspaceIndex{0});
+    data1->setExcludeRegionString("6,2", IDA::WorkspaceIndex{1});
     auto const combinedData = data2->combine(*data1);
 
-    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(0),
-                     "1.000,2.000,5.000,6.000");
-    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(1), "2.000,6.000");
+    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(IDA::WorkspaceIndex{0}),
+                     std::string("1.000,2.000,5.000,6.000"));
+    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(IDA::WorkspaceIndex{1}),
+                     std::string("2.000,6.000"));
   }
 
   void
@@ -378,13 +434,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(std::make_pair(0u, 4u));
-    data2->setSpectra(std::make_pair(5u, 9u));
+    data1->setSpectra(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{4}));
+    data2->setSpectra(Spectra(IDA::WorkspaceIndex{5}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    SpectraLegacy const spec(std::make_pair(0u, 9u));
+    Spectra const spec(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9}));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -392,13 +447,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(std::make_pair(0u, 4u));
-    data2->setSpectra(std::make_pair(8u, 9u));
+    data1->setSpectra(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{4}));
+    data2->setSpectra(Spectra(IDA::WorkspaceIndex{8}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    SpectraLegacy const spec(DiscontinuousSpectra<std::size_t>("0-4,8-9"));
+    Spectra const spec(Spectra("0-4,8-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -406,13 +460,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(std::make_pair(0u, 8u));
-    data2->setSpectra(std::make_pair(4u, 9u));
+    data1->setSpectra(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{8}));
+    data2->setSpectra(Spectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    SpectraLegacy const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -420,13 +473,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
-    data2->setSpectra(DiscontinuousSpectra<std::size_t>("5-9"));
+    data1->setSpectra(Spectra("0-4"));
+    data2->setSpectra(Spectra("5-9"));
     auto const combinedData = data2->combine(*data1);
-    SpectraLegacy const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -434,13 +486,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
-    data2->setSpectra(DiscontinuousSpectra<std::size_t>("2-9"));
+    data1->setSpectra(Spectra("0-7"));
+    data2->setSpectra(Spectra("2-9"));
     auto const combinedData = data2->combine(*data1);
-    SpectraLegacy const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -448,13 +499,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
-    data2->setSpectra(std::make_pair(5u, 9u));
+    data1->setSpectra(Spectra("0-4"));
+    data2->setSpectra(Spectra(IDA::WorkspaceIndex{5}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    SpectraLegacy const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -462,12 +512,11 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
-    data2->setSpectra(std::make_pair(4u, 9u));
+    data1->setSpectra(Spectra("0-7"));
+    data2->setSpectra(Spectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    SpectraLegacy const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 };

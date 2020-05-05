@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -63,7 +63,7 @@ public:
   void addActions(std::vector<std::unique_ptr<Command>> commands) override;
 
   // Connect the model
-  void showTable(boost::shared_ptr<AbstractTreeModel> model) override;
+  void showTable(std::shared_ptr<AbstractTreeModel> model) override;
 
   // Dialog/Prompt methods
   QString requestNotebookPath() override;
@@ -163,7 +163,7 @@ private:
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  boost::shared_ptr<AbstractTreeModel> m_model;
+  std::shared_ptr<AbstractTreeModel> m_model;
   // Command adapters
   std::vector<std::unique_ptr<QtCommandAdapter>> m_commands;
   // the interface (uses actions owned by m_commands)

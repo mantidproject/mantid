@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ public:
 
   void testProperties() {
     IsotropicAtomBraggScatterer_sptr scatterer =
-        boost::make_shared<IsotropicAtomBraggScatterer>();
+        std::make_shared<IsotropicAtomBraggScatterer>();
 
     TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
 
@@ -101,8 +101,7 @@ public:
 
     BraggScatterer_sptr baseclone = scatterer->clone();
     BraggScattererInCrystalStructure_sptr clone =
-        boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            baseclone);
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(baseclone);
 
     TS_ASSERT(clone);
 
@@ -110,7 +109,7 @@ public:
     TS_ASSERT_EQUALS(clone->getCell().getG(), scatterer->getCell().getG());
 
     IsotropicAtomBraggScatterer_sptr scattererClone =
-        boost::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(clone);
+        std::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(clone);
     TS_ASSERT(scattererClone);
 
     TS_ASSERT_EQUALS(scattererClone->getU(), scatterer->getU());
@@ -222,7 +221,7 @@ public:
 private:
   IsotropicAtomBraggScatterer_sptr getInitializedScatterer() {
     IsotropicAtomBraggScatterer_sptr scatterer =
-        boost::make_shared<IsotropicAtomBraggScatterer>();
+        std::make_shared<IsotropicAtomBraggScatterer>();
     scatterer->initialize();
 
     return scatterer;

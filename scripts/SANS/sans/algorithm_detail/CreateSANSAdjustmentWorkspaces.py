@@ -1,15 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 """ CreateSANSAdjustmentWorkspaces algorithm creates workspaces for pixel adjustment,
     wavelength adjustment and pixel-and-wavelength adjustment workspaces.
 """
-
-from __future__ import (absolute_import, division, print_function)
 
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment

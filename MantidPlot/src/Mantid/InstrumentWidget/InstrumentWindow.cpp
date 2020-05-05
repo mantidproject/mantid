@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentWindow.h"
 #include "ApplicationWindow.h"
@@ -64,7 +64,7 @@ MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
 
   const auto name = tsv.asQString(1);
   const auto workspace = app->mantidUI->getWorkspace(name);
-  const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+  const auto ws = std::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
 
   if (!ws)
     return nullptr;

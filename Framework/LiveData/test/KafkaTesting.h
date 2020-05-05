@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -220,7 +220,7 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
 void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
                                  const std::string &startTime,
                                  const std::string &instName, int32_t nPeriods,
-                                 std::string nexusStructure = "") {
+                                 const std::string &nexusStructure = "") {
   // Convert date to time_t
   auto mantidTime = Mantid::Types::Core::DateAndTime(startTime);
   auto startTimestamp =

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 from mantid.simpleapi import CreateWorkspace
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.muon_group import MuonGroup
@@ -19,23 +17,25 @@ def create_workspace_wrapper_stub_object(name):
 
 
 def create_group_populated_by_two_workspace():
-        group = MuonGroup(group_name="group1")
-        counts_workspace_22222 = CreateWorkspace([0], [0])
-        asymmetry_workspace_22222 = CreateWorkspace([0], [0])
-        asymmetry_workspace_unnorm_22222 = CreateWorkspace([0], [0])
+    group = MuonGroup(group_name="group1")
+    counts_workspace_22222 = CreateWorkspace([0], [0])
+    asymmetry_workspace_22222 = CreateWorkspace([0], [0])
+    asymmetry_workspace_unnorm_22222 = CreateWorkspace([0], [0])
 
-        group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222, asymmetry_workspace_unnorm_22222,
-                                False)
-        group.show_raw([22222], 'counts_name_22222', 'asymmetry_name_22222', 'asymmetry_name_22222_unnorm')
-        counts_workspace_33333 = CreateWorkspace([0], [0])
-        asymmetry_workspace_33333 = CreateWorkspace([0], [0])
-        asymmetry_workspace_unnorm_33333 = CreateWorkspace([0], [0])
+    group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222,
+                            asymmetry_workspace_unnorm_22222,
+                            False)
+    group.show_raw([22222], 'counts_name_22222', 'asymmetry_name_22222', 'asymmetry_name_22222_unnorm')
+    counts_workspace_33333 = CreateWorkspace([0], [0])
+    asymmetry_workspace_33333 = CreateWorkspace([0], [0])
+    asymmetry_workspace_unnorm_33333 = CreateWorkspace([0], [0])
 
-        group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, asymmetry_workspace_unnorm_33333,
-                                False)
-        group.show_raw([33333], 'counts_name_33333', 'asymmetry_name_33333', 'asymmetry_name_33333_unnorm')
+    group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333,
+                            asymmetry_workspace_unnorm_33333,
+                            False)
+    group.show_raw([33333], 'counts_name_33333', 'asymmetry_name_33333', 'asymmetry_name_33333_unnorm')
 
-        return group
+    return group
 
 
 def create_group_populated_by_two_rebinned_workspaces():
@@ -44,14 +44,16 @@ def create_group_populated_by_two_rebinned_workspaces():
     asymmetry_workspace_22222 = CreateWorkspace([0], [0])
     asymmetry_workspace_unnorm_22222 = CreateWorkspace([0], [0])
 
-    group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222, asymmetry_workspace_unnorm_22222,
+    group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222,
+                            asymmetry_workspace_unnorm_22222,
                             True)
     group.show_rebin([22222], 'counts_name_22222_rebin', 'asymmetry_name_22222_rebin', 'asymmetry_name_22222_unnorm')
     counts_workspace_33333 = CreateWorkspace([0], [0])
     asymmetry_workspace_33333 = CreateWorkspace([0], [0])
     asymmetry_workspace_unnorm_33333 = CreateWorkspace([0], [0])
 
-    group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, asymmetry_workspace_unnorm_33333,
+    group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333,
+                            asymmetry_workspace_unnorm_33333,
                             True)
     group.show_rebin([33333], 'counts_name_33333_rebin', 'asymmetry_name_33333_rebin', 'asymmetry_name_33333_unnorm')
 
@@ -70,7 +72,8 @@ def create_group_populated_by_two_binned_and_two_unbinned_workspaces():
     asymmetry_workspace_33333 = CreateWorkspace([0], [0])
     asymmetry_workspace_unnorm_33333 = CreateWorkspace([0], [0])
 
-    group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, asymmetry_workspace_unnorm_33333,
+    group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333,
+                            asymmetry_workspace_unnorm_33333,
                             False)
     group.show_raw([33333], 'counts_name_33333', 'asymmetry_name_33333', 'asymmetry_name_33333_unnorm')
 
@@ -78,14 +81,16 @@ def create_group_populated_by_two_binned_and_two_unbinned_workspaces():
     asymmetry_workspace_22222 = CreateWorkspace([0], [0])
     asymmetry_workspace_unnorm_22222 = CreateWorkspace([0], [0])
 
-    group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222, asymmetry_workspace_unnorm_22222,
+    group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222,
+                            asymmetry_workspace_unnorm_22222,
                             True)
     group.show_rebin([22222], 'counts_name_22222_rebin', 'asymmetry_name_22222_rebin', 'asymmetry_name_22222_unnorm')
     counts_workspace_33333 = CreateWorkspace([0], [0])
     asymmetry_workspace_33333 = CreateWorkspace([0], [0])
     asymmetry_workspace_unnorm_33333 = CreateWorkspace([0], [0])
 
-    group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, asymmetry_workspace_unnorm_33333,
+    group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333,
+                            asymmetry_workspace_unnorm_33333,
                             True)
     group.show_rebin([33333], 'counts_name_33333_rebin', 'asymmetry_name_33333_rebin', 'asymmetry_name_22222_unnorm')
 

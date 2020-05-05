@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -94,8 +94,8 @@ public slots:
   void clear();
   void resizeX();
   void resetView();
-  void setCanvasColour(QColor colour);
-  void setLinesWithErrors(QStringList labels);
+  void setCanvasColour(const QColor &colour);
+  void setLinesWithErrors(const QStringList &labels);
   void showLegend(bool visible);
   void replot();
 
@@ -136,7 +136,7 @@ private:
   void switchPlotTool(QAction *selected);
   void setXScaleType(QAction *selected);
   void setYScaleType(QAction *selected);
-  void setScaleType(AxisID id, QString actionName);
+  void setScaleType(AxisID id, const QString &actionName);
   void toggleLegend(const bool checked);
 
   boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);

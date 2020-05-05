@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Test suite for the PyChop package
 """
@@ -34,10 +34,11 @@ class PyChop2Tests(unittest.TestCase):
         self.assertGreater(flux[2], flux[1])
         # Note that MAPS has been upgraded so now should have higher flux than MARI.
         self.assertGreater(flux[0], flux[1])
-        # Checks that the resolution should be best for MARI, MAPS, and MERLIN in that order
-        # actually MAPS and MARI resolutions are very close
-        self.assertLess(res[1][0], res[0][0])
-        self.assertLess(res[0][0], res[2][0])
+        # Checks that the resolution should be best for MAPS, MARI, and MERLIN in that order
+        # actually MAPS and MARI resolutions are very close (previous error in MAPS distances
+        # meant that MARI was calculated to have a better resolution, but it *should* be MAPS)
+        self.assertLess(res[0][0], res[1][0])
+        self.assertLess(res[1][0], res[2][0])
         # Now tests the standalone function
         for inc, instname in enumerate(instnames):
             rr, ff = PyChop2.calculate(instname, 's', 200, 18, 0)

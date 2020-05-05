@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtInstrumentView.h"
 #include "MantidKernel/UsageService.h"
@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <boost/algorithm/string/join.hpp>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,7 +37,7 @@ QtInstrumentView::QtInstrumentView(
     Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
     : QWidget(parent) {
   initLayout();
-  registerSettingsWidgets(algorithmForTooltips);
+  registerSettingsWidgets(std::move(algorithmForTooltips));
 }
 
 void QtInstrumentView::subscribe(InstrumentViewSubscriber *notifyee) {
@@ -132,12 +133,12 @@ void QtInstrumentView::disableDetectorCorrectionType() {
 }
 
 void QtInstrumentView::registerSettingsWidgets(
-    Mantid::API::IAlgorithm_sptr alg) {
-  registerInstrumentSettingsWidgets(alg);
+    const Mantid::API::IAlgorithm_sptr &alg) {
+  registerInstrumentSettingsWidgets(std::move(alg));
 }
 
 void QtInstrumentView::registerInstrumentSettingsWidgets(
-    Mantid::API::IAlgorithm_sptr alg) {
+    const Mantid::API::IAlgorithm_sptr &alg) {
   registerSettingWidget(*m_ui.intMonCheckBox, "NormalizeByIntegratedMonitors",
                         alg);
   registerSettingWidget(*m_ui.monIntMinEdit, "MonitorIntegrationWavelengthMin",
@@ -184,16 +185,16 @@ void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
 }
 
 template <typename Widget>
-void QtInstrumentView::registerSettingWidget(Widget &widget,
-                                             std::string const &propertyName,
-                                             Mantid::API::IAlgorithm_sptr alg) {
+void QtInstrumentView::registerSettingWidget(
+    Widget &widget, std::string const &propertyName,
+    const Mantid::API::IAlgorithm_sptr &alg) {
   connectSettingsChange(widget);
   setToolTipAsPropertyDocumentation(widget, propertyName, alg);
 }
 
 void QtInstrumentView::setToolTipAsPropertyDocumentation(
     QWidget &widget, std::string const &propertyName,
-    Mantid::API::IAlgorithm_sptr alg) {
+    const Mantid::API::IAlgorithm_sptr &alg) {
   widget.setToolTip(QString::fromStdString(
       alg->getPointerToProperty(propertyName)->documentation()));
 }

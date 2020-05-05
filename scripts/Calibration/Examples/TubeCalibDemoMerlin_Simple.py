@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 #
@@ -17,8 +17,6 @@
 # which takes a string consisting of the run number of a calibration run number as argument.
 # The workspace with calibrated instrument is saved to a Nexus file
 #
-
-from __future__ import absolute_import, division, print_function
 
 import tube
 from tube_calib_fit_params import TubeCalibFitParams

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -21,12 +21,16 @@ template <class T> class ActiveResult;
 namespace Mantid {
 namespace API {
 
-/** As we have multiple interfaces to the same logical algorithm (Algorithm &
- * AlgorithmProxy)
+/** As we have multiple interfaces to the same logical algorithm
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */
 using AlgorithmID = void *;
+
+/// The current state of the algorithm object
+enum class ExecutionState { Uninitialized, Initialized, Running, Finished };
+/// The validity of the results of the algorithm object
+enum class ResultState { NotFinished, Failed, Success };
 
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
@@ -109,9 +113,15 @@ public:
   /// Execute as a Child Algorithm, with try/catch
   virtual void executeAsChildAlg() = 0;
 
+  /// Gets the current execution state
+  virtual ExecutionState executionState() const = 0;
+
+  /// Gets the currnet result State
+  virtual ResultState resultState() const = 0;
+
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
-  /// Check whether the algorithm has already been executed
+  /// Check whether the algorithm has been executed sucessfully
   virtual bool isExecuted() const = 0;
 
   /// Raises the cancel flag. interuption_point() method if called inside exec()
@@ -121,6 +131,9 @@ public:
 
   /// True if the algorithm is running.
   virtual bool isRunning() const = 0;
+
+  /// True if the algorithm is ready for garbage collection.
+  virtual bool isReadyForGarbageCollection() const = 0;
 
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;

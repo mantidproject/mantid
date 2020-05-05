@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
@@ -85,7 +85,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
 
   m_logger.information() << "  Setting result...\n";
   DataObjects::Workspace2D_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, dValues.size(),
                                               dValues.size()));
 

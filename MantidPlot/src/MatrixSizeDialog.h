@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : MatrixSizeDialog.h
@@ -36,7 +36,7 @@ public:
    * @param fl :: window flags
    */
   MatrixSizeDialog(Matrix *m, QWidget *parent = nullptr,
-                   Qt::WFlags fl = nullptr);
+                   const Qt::WFlags &fl = nullptr);
 
 private slots:
   //! Accept changes and quit

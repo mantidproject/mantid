@@ -1,8 +1,9 @@
 
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//     NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPSIMuonBin.h"
 #include "MantidAPI/Algorithm.h"
@@ -24,9 +25,9 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <map>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -219,7 +220,7 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
   if (getPropertyValue("DeadTimeTable").empty())
     return;
   Mantid::DataObjects::TableWorkspace_sptr deadTimeTable =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
           Mantid::API::WorkspaceFactory::Instance().createTable(
               "TableWorkspace"));
   assert(deadTimeTable);
@@ -233,8 +234,8 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
   setProperty("DeadTimeTable", deadTimeTable);
 }
 
-std::string LoadPSIMuonBin::getFormattedDateTime(std::string date,
-                                                 std::string time) {
+std::string LoadPSIMuonBin::getFormattedDateTime(const std::string &date,
+                                                 const std::string &time) {
   std::string year;
   if (date.size() == 11) {
     year = date.substr(7, 4);
@@ -497,8 +498,8 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
 
   // Set axis variables
   outputWorkspace->setYUnit("Counts");
-  boost::shared_ptr<Kernel::Units::Label> lblUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> lblUnit =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
   outputWorkspace->getAxis(0)->unit() = lblUnit;

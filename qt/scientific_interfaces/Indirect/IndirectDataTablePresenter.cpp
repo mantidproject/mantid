@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataTablePresenter.h"
 
@@ -216,11 +216,11 @@ IndirectDataTablePresenter::getSpectra(TableRowIndex start,
   while (start < end) {
     WorkspaceIndex minimum = getWorkspaceIndex(start);
     WorkspaceIndex maximum = minimum;
-    start++;
+    ++start;
     while (start < end &&
            getWorkspaceIndex(start) == maximum + WorkspaceIndex{1}) {
       ++maximum;
-      start++;
+      ++start;
     }
     spectraPairs.emplace_back(minimum, maximum);
   }

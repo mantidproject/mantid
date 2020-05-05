@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
@@ -378,11 +378,11 @@ void BinMD::exec() {
   prog = std::make_unique<Progress>(this, 0.0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
-  boost::shared_ptr<IMDHistoWorkspace> tmp =
+  std::shared_ptr<IMDHistoWorkspace> tmp =
       this->getProperty("TemporaryDataWorkspace");
-  outWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  outWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   if (!outWS) {
-    outWS = boost::make_shared<MDHistoWorkspace>(m_binDimensions);
+    outWS = std::make_shared<MDHistoWorkspace>(m_binDimensions);
   } else {
     m_accumulate = true;
   }
@@ -428,7 +428,7 @@ void BinMD::exec() {
 
   // Copy the coordinate system & experiment infos to the output
   IMDEventWorkspace_sptr inEWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
   if (inEWS) {
     outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
     try {
@@ -446,7 +446,7 @@ void BinMD::exec() {
 
   outWS->updateSum();
   // Save the output
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(outWS));
 }
 
 } // namespace MDAlgorithms

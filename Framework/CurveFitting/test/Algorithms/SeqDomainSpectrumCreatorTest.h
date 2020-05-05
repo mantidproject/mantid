@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -73,8 +73,8 @@ public:
 
     creator.createDomain(domain, values);
 
-    boost::shared_ptr<SeqDomain> seqDomain =
-        boost::dynamic_pointer_cast<SeqDomain>(domain);
+    std::shared_ptr<SeqDomain> seqDomain =
+        std::dynamic_pointer_cast<SeqDomain>(domain);
 
     TS_ASSERT(seqDomain);
     TS_ASSERT_EQUALS(seqDomain->getNDomains(), 4);
@@ -113,8 +113,8 @@ public:
 
     creator.createDomain(domain, values);
 
-    boost::shared_ptr<SeqDomain> seqDomain =
-        boost::dynamic_pointer_cast<SeqDomain>(domain);
+    std::shared_ptr<SeqDomain> seqDomain =
+        std::dynamic_pointer_cast<SeqDomain>(domain);
 
     for (size_t i = 0; i < seqDomain->getNDomains(); ++i) {
       FunctionDomain_sptr localDomain;
@@ -122,8 +122,8 @@ public:
 
       seqDomain->getDomainAndValues(i, localDomain, localValues);
 
-      boost::shared_ptr<FunctionDomain1DSpectrum> localSpectrumDomain =
-          boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
+      std::shared_ptr<FunctionDomain1DSpectrum> localSpectrumDomain =
+          std::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
       TS_ASSERT(localSpectrumDomain);
 
       TS_ASSERT_EQUALS(localSpectrumDomain->getWorkspaceIndex(), i);
@@ -145,8 +145,8 @@ public:
 
     creator.createDomain(domain, values);
 
-    boost::shared_ptr<SeqDomain> seqDomain =
-        boost::dynamic_pointer_cast<SeqDomain>(domain);
+    std::shared_ptr<SeqDomain> seqDomain =
+        std::dynamic_pointer_cast<SeqDomain>(domain);
 
     // One less than the created workspace
     TS_ASSERT_EQUALS(seqDomain->getNDomains(), 3);
@@ -156,8 +156,8 @@ public:
 
       seqDomain->getDomainAndValues(i, localDomain, localValues);
 
-      boost::shared_ptr<FunctionDomain1DSpectrum> localSpectrumDomain =
-          boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
+      std::shared_ptr<FunctionDomain1DSpectrum> localSpectrumDomain =
+          std::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
       TS_ASSERT(localSpectrumDomain);
 
       TS_ASSERT_EQUALS(localSpectrumDomain->size(), 12);
@@ -192,7 +192,7 @@ public:
         creator.createOutputWorkspace("", testFunction, domain, values);
 
     MatrixWorkspace_sptr outputWsMatrix =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
     TS_ASSERT(outputWsMatrix);
 
     TS_ASSERT_EQUALS(outputWsMatrix->getNumberHistograms(),
@@ -236,7 +236,7 @@ public:
         creator.createOutputWorkspace("", testFunction, domain, values);
 
     MatrixWorkspace_sptr outputWsMatrix =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
     TS_ASSERT(outputWsMatrix);
 
     // Still has to be the same number of histograms.
@@ -283,7 +283,7 @@ public:
         creator.createOutputWorkspace("", testFunction, domain, values);
 
     MatrixWorkspace_sptr outputWsMatrix =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
     TS_ASSERT(outputWsMatrix);
     TSM_ASSERT("Output should be a distribution",
                outputWsMatrix->isDistribution());

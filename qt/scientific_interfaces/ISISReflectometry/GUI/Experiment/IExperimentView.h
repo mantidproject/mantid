@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -74,6 +74,20 @@ public:
   virtual void showStitchParametersValid() = 0;
   virtual void showStitchParametersInvalid() = 0;
 
+  virtual bool getSubtractBackground() const = 0;
+  virtual void setSubtractBackground(bool enable) = 0;
+  virtual std::string getBackgroundSubtractionMethod() const = 0;
+  virtual void setBackgroundSubtractionMethod(std::string const &method) = 0;
+  virtual void enableBackgroundSubtractionMethod() = 0;
+  virtual void disableBackgroundSubtractionMethod() = 0;
+  virtual int getPolynomialDegree() const = 0;
+  virtual void setPolynomialDegree(int polynomialDegree) = 0;
+  virtual void enablePolynomialDegree() = 0;
+  virtual void disablePolynomialDegree() = 0;
+  virtual std::string getCostFunction() const = 0;
+  virtual void setCostFunction(std::string const &costFunction) = 0;
+  virtual void enableCostFunction() = 0;
+  virtual void disableCostFunction() = 0;
   virtual void enablePolarizationCorrections() = 0;
   virtual void disablePolarizationCorrections() = 0;
   virtual void enableFloodCorrectionInputs() = 0;

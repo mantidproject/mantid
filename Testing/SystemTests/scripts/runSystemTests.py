@@ -1,20 +1,16 @@
 #!/usr/bin/env python
-
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import argparse
 import os
 import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
 
-from six import itervalues
 try:
     # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
     # Remove this when everything is switched to qtpy
@@ -327,7 +323,7 @@ def main():
     if options.dry_run:
         print()
         print("Tests that would be executed:")
-        for suites in itervalues(test_list):
+        for suites in test_list.values():
             for suite in suites:
                 print('  ' + suite.name)
     elif not options.clean:

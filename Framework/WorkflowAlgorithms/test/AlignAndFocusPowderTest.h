@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -692,7 +692,8 @@ public:
   }
 
   /* Utility functions */
-  void loadDiffCal(std::string calfilename, bool group, bool cal, bool mask) {
+  void loadDiffCal(const std::string &calfilename, bool group, bool cal,
+                   bool mask) {
     LoadDiffCal loadDiffAlg;
     loadDiffAlg.initialize();
     loadDiffAlg.setPropertyValue("Filename", calfilename);
@@ -704,7 +705,7 @@ public:
     loadDiffAlg.execute();
   }
 
-  void groupAllBanks(std::string m_inputWS) {
+  void groupAllBanks(const std::string &m_inputWS) {
     CreateGroupingWorkspace groupAlg;
     groupAlg.initialize();
     groupAlg.setPropertyValue("InputWorkspace", m_inputWS);
@@ -713,7 +714,7 @@ public:
     groupAlg.execute();
   }
 
-  void rebin(std::string params, bool preserveEvents = true) {
+  void rebin(const std::string &params, bool preserveEvents = true) {
     Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", m_inputWS);
@@ -734,8 +735,9 @@ public:
     resamplexAlg.execute();
   }
 
-  std::string createArgForNumberHistograms(double val, MatrixWorkspace_sptr ws,
-                                           std::string delimiter = ",") {
+  std::string createArgForNumberHistograms(double val,
+                                           const MatrixWorkspace_sptr &ws,
+                                           const std::string &delimiter = ",") {
     std::vector<std::string> vec;
     for (size_t i = 0; i < ws->getNumberHistograms(); i++)
       vec.emplace_back(boost::lexical_cast<std::string>(val));

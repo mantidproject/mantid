@@ -1,17 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
 from mantid import config
 import os
-from six.moves import filterfalse
+from itertools import filterfalse
 
 
 class Intervals(object):
@@ -139,8 +138,7 @@ class FileBackedWsIterator(object):
         # any are missing.
         missing_files = list(filterfalse(os.path.exists, filenames))
         if len(missing_files) > 0:
-            raise ValueError("One or more files are missing: " +
-                             str(missing_files))
+            raise ValueError("One or more files are missing: " + str(missing_files))
 
         self._filenames = filenames
         self._loaded_ws = None

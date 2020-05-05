@@ -17,6 +17,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 using namespace Mantid;
 using namespace MantidQt::CustomInterfaces;
 
@@ -54,7 +56,7 @@ public:
   void addGammaValue(const RunLabel &runLabel, const double gamma);
 
   void addLatticeParamTable(const RunLabel &runLabel,
-                            API::ITableWorkspace_sptr table);
+                            const API::ITableWorkspace_sptr &table);
 
   void addRwpValue(const RunLabel &runLabel, const double rwp);
 
@@ -71,8 +73,8 @@ TestEnggDiffGSASFittingModel::addGammaValue(const RunLabel &runLabel,
 }
 
 inline void TestEnggDiffGSASFittingModel::addLatticeParamTable(
-    const RunLabel &runLabel, API::ITableWorkspace_sptr table) {
-  addLatticeParams(runLabel, table);
+    const RunLabel &runLabel, const API::ITableWorkspace_sptr &table) {
+  addLatticeParams(runLabel, std::move(table));
 }
 
 inline void TestEnggDiffGSASFittingModel::addRwpValue(const RunLabel &runLabel,

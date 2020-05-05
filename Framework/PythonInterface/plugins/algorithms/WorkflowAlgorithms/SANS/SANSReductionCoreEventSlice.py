@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
 """ SANSReductionCoreEventSlice algorithm runs the sequence of reduction steps which are necessary to reduce a data set,
 for which data must be event sliced. These steps are: slicing, adjustment, convert to q."""
-
-from __future__ import (absolute_import, division, print_function)
 
 from SANSReductionCoreBase import SANSReductionCoreBase
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,7 +23,7 @@ public:
   static void destroySuite(NumericAxisValidatorTest *suite) { delete suite; }
 
   void test_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
     auto newAxis = std::make_unique<NumericAxis>(2);
     ws->replaceAxis(1, std::move(newAxis));
@@ -32,7 +32,7 @@ public:
   }
 
   void test_fail() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
     NumericAxisValidator validator;
     TS_ASSERT_EQUALS(
@@ -41,7 +41,7 @@ public:
   }
 
   void test_axesless_workspace() {
-    auto ws = boost::make_shared<AxeslessWorkspaceTester>();
+    auto ws = std::make_shared<AxeslessWorkspaceTester>();
     ws->initialize(2, 11, 10);
     NumericAxisValidator validator;
     std::string s;

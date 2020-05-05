@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -53,7 +53,7 @@ private:
   /// the separator
   const char m_sep;
   // populates the map and vector containing grouping information
-  void findGroups(API::ITableWorkspace_sptr ws);
+  void findGroups(const API::ITableWorkspace_sptr &ws);
   /// Map the separator options to their string equivalents
   std::map<int, std::vector<size_t>> m_stichgroups;
   std::vector<size_t> m_nogroup;

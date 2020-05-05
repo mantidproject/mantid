@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ProjectSaveModel.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -24,7 +24,7 @@ using namespace MantidQt::MantidWidgets;
  * @param activePythonInterfaces The list of active Python interfaces
  */
 ProjectSaveModel::ProjectSaveModel(
-    std::vector<IProjectSerialisable *> windows,
+    const std::vector<IProjectSerialisable *> &windows,
     std::vector<std::string> activePythonInterfaces)
     : m_activePythonInterfaces(std::move(activePythonInterfaces)) {
   auto workspaces = getWorkspaces();
@@ -182,7 +182,7 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
     auto info = makeWorkspaceInfoObject(ws);
 
     if (ws->id() == "WorkspaceGroup") {
-      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
       for (int i = 0; i < group->getNumberOfEntries(); ++i) {
         auto subInfo = makeWorkspaceInfoObject(group->getItem(i));
         info.subWorkspaces.emplace_back(subInfo);
@@ -204,8 +204,8 @@ std::vector<Workspace_sptr> ProjectSaveModel::getWorkspaces() const {
   return ads.getObjects();
 }
 
-WorkspaceInfo
-ProjectSaveModel::makeWorkspaceInfoObject(Workspace_const_sptr ws) const {
+WorkspaceInfo ProjectSaveModel::makeWorkspaceInfoObject(
+    const Workspace_const_sptr &ws) const {
   WorkspaceIcons icons;
   WorkspaceInfo info;
   info.name = ws->getName();

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -165,7 +165,7 @@ public:
     const bool add_Efixed = true;
     const bool add_t0_formula = true;
     MatrixWorkspace_sptr mtestWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(testWS);
+        std::dynamic_pointer_cast<MatrixWorkspace>(testWS);
     AddToIndirectInstrument(mtestWS, add_t0_formula, add_Efixed);
     ModeratorTzero alg;
     alg.initialize();
@@ -195,7 +195,7 @@ public:
     EventWorkspace_sptr testWS = CreateEventWorkspace();
     AnalysisDataService::Instance().add("testWS", testWS);
     MatrixWorkspace_sptr mtestWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(testWS);
+        std::dynamic_pointer_cast<MatrixWorkspace>(testWS);
     testWS->instrumentParameters().addString(
         testWS->getInstrument()->getComponentID(), "t0_formula",
         "101.9*incidentEnergy^(-0.41)*exp(-incidentEnergy/282.0)");
@@ -227,7 +227,7 @@ public:
     EventWorkspace_sptr testWS = CreateEventWorkspace();
     AnalysisDataService::Instance().add("testWS", testWS);
     MatrixWorkspace_sptr mtestWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(testWS);
+        std::dynamic_pointer_cast<MatrixWorkspace>(testWS);
     testWS->instrumentParameters().addString(
         testWS->getInstrument()->getComponentID(), "t0_formula",
         "101.9*incidentEnergy^(-0.41)*exp(-incidentEnergy/282.0)");
@@ -341,7 +341,7 @@ public:
     outputEvent->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputEvent);
+    test = std::dynamic_pointer_cast<MatrixWorkspace>(inputEvent);
     AnalysisDataService::Instance().add("input", input);
     AnalysisDataService::Instance().add("output", output);
     AnalysisDataService::Instance().add("inputEvent", inputEvent);

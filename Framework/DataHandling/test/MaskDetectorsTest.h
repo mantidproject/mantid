@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -60,7 +60,7 @@ public:
     int num_banks = numspec / 9;
     if (num_banks < 1)
       num_banks = 1;
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(
+    Instrument_sptr instr = std::dynamic_pointer_cast<Instrument>(
         ComponentCreationHelper::createTestInstrumentCylindrical(num_banks));
 
     // 2. Workspace
@@ -70,7 +70,7 @@ public:
       space =
           WorkspaceFactory::Instance().create("EventWorkspace", numspec, 6, 5);
       EventWorkspace_sptr spaceEvent =
-          boost::dynamic_pointer_cast<EventWorkspace>(space);
+          std::dynamic_pointer_cast<EventWorkspace>(space);
       space->setInstrument(instr);
 
       MantidVecPtr vec;
@@ -105,7 +105,7 @@ public:
         specspace->mutableY(i)[0] = 0.0;
         specspace->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
       }
-      space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
+      space = std::dynamic_pointer_cast<MatrixWorkspace>(specspace);
       // Does not have connection between instrument and spectra though has to
       // have instrument
       space->setInstrument(instr);
@@ -649,9 +649,9 @@ public:
 
   void test_MaskWithWorkspaceWithDetectorIDs() {
     auto &ads = AnalysisDataService::Instance();
-    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(90);
 
+    const std::string inputWSName("inputWS");
     setUpWS(false, inputWSName, false, numInputSpec);
 
     auto inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
@@ -717,7 +717,7 @@ public:
 
   void test_MaskWithWorkspaceWithDetectorIDsAndWsIndexRange() {
     auto &ads = AnalysisDataService::Instance();
-    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const std::string inputWSName("inputWS");
     const int numInputSpec(90);
 
     setUpWS(false, inputWSName, false, numInputSpec);

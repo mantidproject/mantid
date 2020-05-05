@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -30,7 +30,7 @@ namespace API {
 using namespace Geometry;
 
 /// Virtual copy constructor
-boost::shared_ptr<IFunction> IFunctionMD::clone() const {
+std::shared_ptr<IFunction> IFunctionMD::clone() const {
   auto fun = IFunction::clone();
   return fun;
 }
@@ -38,10 +38,10 @@ boost::shared_ptr<IFunction> IFunctionMD::clone() const {
 /** Set the workspace
  * @param ws :: A shared pointer to a workspace.
  */
-void IFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws) {
+void IFunctionMD::setWorkspace(std::shared_ptr<const Workspace> ws) {
   try {
     IMDWorkspace_const_sptr workspace =
-        boost::dynamic_pointer_cast<const IMDWorkspace>(ws);
+        std::dynamic_pointer_cast<const IMDWorkspace>(ws);
     if (!workspace) {
       throw std::invalid_argument(
           "Workspace has a wrong type (not a IMDWorkspace)");
@@ -57,7 +57,7 @@ void IFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws) {
     std::map<std::string, size_t>::const_iterator end =
         m_dimensionIndexMap.end();
     for (; it != end; ++it) {
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim =
+      std::shared_ptr<const Mantid::Geometry::IMDDimension> dim =
           workspace->getDimensionWithId(it->first);
       if (!dim) {
         throw std::invalid_argument("Dimension " + it->first +

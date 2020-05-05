@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -83,16 +83,17 @@ public:
     auto expected =
         PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
                          RangeInQ(boost::none, boost::none, boost::none),
-                         boost::none, boost::none);
+                         boost::none, boost::none, boost::none);
     TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
     TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
   }
 
   void testValidPerThetaOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Experiment");
-    auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                     boost::none, RangeInQ(0.01, 0.03, 0.2),
-                                     0.7, std::string("390-415"));
+    auto expected =
+        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
+                         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
+                         std::string("370-389,416-430"));
     TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
     TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
   }
@@ -117,6 +118,31 @@ public:
 
   void testInvalidTransmissionRunRangeFromParamsFile() {
     getDefaultsFromParamsFileThrows("TransmissionRunRange_Invalid");
+  }
+
+  void testDefaultSubtractionOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractBackground(),
+                     false);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractionType(),
+                     BackgroundSubtractionType::PerDetectorAverage);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().degreeOfPolynomial(), 0);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().costFunction(),
+                     CostFunctionType::LeastSquares);
+  }
+
+  void testValidSubtractionOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractBackground(), true);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractionType(),
+                     BackgroundSubtractionType::Polynomial);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().degreeOfPolynomial(), 2);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().costFunction(),
+                     CostFunctionType::UnweightedLeastSquares);
+  }
+
+  void testInvalidSubtractionOptionsFromParamsFile() {
+    getDefaultsFromParamsFileThrows("Subtraction_Invalid");
   }
 
   void testDefaultCorrectionOptions() {

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : SurfaceDialog.h
@@ -32,7 +32,7 @@ class SurfaceDialog : public QDialog {
   Q_OBJECT
 
 public:
-  SurfaceDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  SurfaceDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 public slots:
   void accept() override;

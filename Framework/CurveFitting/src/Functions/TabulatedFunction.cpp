@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -18,6 +18,7 @@
 #include <cmath>
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -296,7 +297,7 @@ void TabulatedFunction::load(const std::string &fname) {
 
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr resData =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
   loadWorkspace(resData);
 }
 
@@ -314,8 +315,8 @@ void TabulatedFunction::loadWorkspace(const std::string &wsName) const {
  * @param ws :: The workspace to load from
  */
 void TabulatedFunction::loadWorkspace(
-    boost::shared_ptr<API::MatrixWorkspace> ws) const {
-  m_workspace = ws;
+    std::shared_ptr<API::MatrixWorkspace> ws) const {
+  m_workspace = std::move(ws);
   m_setupFinished = false;
 }
 

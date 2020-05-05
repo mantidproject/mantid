@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,8 +31,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<Logout2> a;
-    TS_ASSERT(a = boost::make_shared<Logout2>());
+    std::shared_ptr<Logout2> a;
+    TS_ASSERT(a = std::make_shared<Logout2>());
     // can cast to inherited interfaces and base classes
 
     TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::Logout2 *>(a.get()));

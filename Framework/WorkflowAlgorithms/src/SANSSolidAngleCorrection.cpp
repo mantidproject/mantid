@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -50,7 +50,7 @@ static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
 
 //----------------------------------------------------------------------------------------------
 void SANSSolidAngleCorrection::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -73,12 +73,12 @@ void SANSSolidAngleCorrection::init() {
 void SANSSolidAngleCorrection::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    reductionManager = boost::make_shared<PropertyManager>();
+    reductionManager = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         reductionManager);
   }
@@ -93,7 +93,7 @@ void SANSSolidAngleCorrection::exec() {
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   DataObjects::EventWorkspace_const_sptr inputEventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS)
     return execEvent();
 
@@ -175,7 +175,7 @@ void SANSSolidAngleCorrection::execEvent() {
     outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
-  auto outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+  auto outputEventWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
   const auto numberOfSpectra =
       static_cast<int>(outputEventWS->getNumberHistograms());

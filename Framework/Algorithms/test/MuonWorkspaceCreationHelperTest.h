@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -174,7 +174,7 @@ public:
 
     auto wsGroup = createMultiPeriodWorkspaceGroup(5, 2, 10, "muonGroup");
 
-    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("MuonDataPeriod_1"));
     const std::set<detid_t> detids0 = ws1->getSpectrum(0).getDetectorIDs();
     const std::set<detid_t> detids1 = ws1->getSpectrum(1).getDetectorIDs();
@@ -192,7 +192,7 @@ public:
 
     auto wsGroup = createMultiPeriodWorkspaceGroup(5, 2, 10, "muonGroup");
 
-    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("MuonDataPeriod_1"));
 
     Mantid::MantidVec vecX1 = ws1->getSpectrum(0).readX();
@@ -209,7 +209,7 @@ public:
     TS_ASSERT_DELTA(vecY2.at(0), 11, 0.1);
     TS_ASSERT_DELTA(vecY2.at(9), 20, 0.1);
 
-    MatrixWorkspace_sptr ws5 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws5 = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("MuonDataPeriod_5"));
 
     Mantid::MantidVec vecY3 = ws5->getSpectrum(0).readY();
@@ -274,10 +274,10 @@ public:
     TS_ASSERT(ads.doesExist("MuonDataPeriod_2"));
     TS_ASSERT(ads.doesExist("MuonDataPeriod_3"));
 
-    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(
-        ads.retrieve("MuonAnalysis"));
+    WorkspaceGroup_sptr group =
+        std::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve("MuonAnalysis"));
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 3);
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         group->getItem("MuonDataPeriod_1"));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
 
@@ -290,9 +290,9 @@ public:
     auto wsGroup =
         createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
 
-    MatrixWorkspace_sptr wsFirst = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr wsFirst = std::dynamic_pointer_cast<MatrixWorkspace>(
         ads.retrieve("MuonDataPeriod_1"));
-    MatrixWorkspace_sptr wsLast = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr wsLast = std::dynamic_pointer_cast<MatrixWorkspace>(
         ads.retrieve("MuonDataPeriod_3"));
 
     TS_ASSERT(wsFirst->getSpectrum(0).hasDetectorID(1));

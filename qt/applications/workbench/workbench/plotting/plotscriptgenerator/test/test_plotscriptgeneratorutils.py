@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -12,7 +12,7 @@ from ast import parse
 from collections import OrderedDict
 from numpy import array
 
-from mantid.py3compat.mock import patch, Mock
+from unittest.mock import patch, Mock
 from workbench.plotting.plotscriptgenerator.utils import (convert_args_to_string,
                                                           get_plotted_workspaces_names,
                                                           clean_variable_name,

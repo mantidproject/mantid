@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : FitDialog.h
@@ -44,9 +44,10 @@ class FitDialog : public QDialog {
   Q_OBJECT
 
 public:
-  FitDialog(Graph *g, QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  FitDialog(Graph *g, QWidget *parent = nullptr,
+            const Qt::WFlags &fl = nullptr);
 
-  void setSrcTables(QList<MdiSubWindow *> tables);
+  void setSrcTables(const QList<MdiSubWindow *> &tables);
 
 protected:
   void closeEvent(QCloseEvent *e) override;

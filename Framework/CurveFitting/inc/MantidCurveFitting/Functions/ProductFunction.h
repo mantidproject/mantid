@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,8 +10,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
-#include <boost/shared_array.hpp>
+#include "MantidCurveFitting/DllConfig.h"
 #include <cmath>
+#include <memory>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -23,7 +24,7 @@ more other fit functions.
 @author Anders Markvardsen, ISIS, RAL
 @date 4/4/2011
 */
-class DLLExport ProductFunction : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL ProductFunction : public API::CompositeFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "ProductFunction"; }

@@ -224,7 +224,7 @@ private:
 
 //-----------------------------------------------------------------------------
 pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
-                           Qt::WindowFlags parentFlags)
+                           const Qt::WindowFlags& parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
   Q_ASSERT(engine != nullptr);
   // Take ownership of the engine
