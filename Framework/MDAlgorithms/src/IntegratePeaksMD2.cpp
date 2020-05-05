@@ -307,9 +307,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
-  std::cout << std::endl; // DEBUG
   for (int i = 0; i < nPeaks; ++i) {
-    std::cout << "PEAK\t" << i << std::endl; // DEBUG
     if (this->getCancel())
       break; // User cancellation
     progress.report();
@@ -325,11 +323,6 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       pos = p.getQSampleFrame();
     else if (CoordinatesToUse == Mantid::Kernel::HKL) //"HKL"
       pos = p.getHKL();
-
-    // DEBUG
-    V3D Qhat = pos / pos.norm();
-    std::cout << "Qhat\t" << Qhat[0] << ' ' << Qhat[1] << ' ' << Qhat[2]
-              << std::endl; // DEBUG
 
     // Do not integrate if sphere is off edge of detector
 
@@ -427,12 +420,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             ws, getRadiusSq, pos,
             static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisBool,
             bgDensity, eigenvects, eigenvals);
-        // DEBUG
-        for (size_t ivect = 0; ivect < eigenvects.size(); ivect++) {
-          std::cout << eigenvects[ivect][0] << ' ' << eigenvects[ivect][1]
-                    << ' ' << eigenvects[ivect][2] << '\t' << eigenvals[ivect]
-                    << std::endl;
-        }
+
         // transform ellispoid onto sphere of radius = R
         getRadiusSq =
             CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */

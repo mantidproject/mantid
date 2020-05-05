@@ -162,6 +162,30 @@ public:
   }
 
   //-------------------------------------------------------------------------------
+  /** Add a fake uniform  background*/
+  static void addUniform(size_t num,
+                         std::vector<std::pair<double, double>> range) {
+    // each element of range is a pair min max
+
+    std::ostringstream mess;
+    mess << num;
+    // add in eigenvects
+    for (int d = 0; d < range.size(); d++) {
+      mess << ", " << range[d].first << ", " << range[d].second;
+    }
+
+    FakeMDEventData algF;
+    TS_ASSERT_THROWS_NOTHING(algF.initialize())
+    TS_ASSERT(algF.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("UniformParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.execute());
+    TS_ASSERT(algF.isExecuted());
+  }
+
+  //-------------------------------------------------------------------------------
   /** Full test using faked-out peak data */
   void test_exec() {
     // --- Fake workspace with 3 peaks ------
@@ -407,20 +431,25 @@ public:
   }
 
   //-------------------------------------------------------------------------------
+  //// Tests of ellipsoidal integration
+
   void test_exec_EllipsoidNoBackground_SingleCount() {
-    EllipsoidNoBackground(-1.0, false);
+    EllipsoidTestHelper(-1.0, false, false);
   }
   void test_exec_EllipsoidNoBackground_SingleCount_FixQAxis() {
-    EllipsoidNoBackground(-1.0, true);
+    EllipsoidTestHelper(-1.0, true, false);
   }
-   void test_exec_EllipsoidNoBackground_NonSingleCount() {
-    EllipsoidNoBackground(1.0, false);
+  void test_exec_EllipsoidNoBackground_NonSingleCount() {
+    EllipsoidTestHelper(1.0, false, false);
   }
-   void test_exec_EllipsoidNoBackground_NonSingleCount_FixQAxis() {
-    EllipsoidNoBackground(1.0, true);
+  void test_exec_EllipsoidNoBackground_NonSingleCount_FixQAxis() {
+    EllipsoidTestHelper(1.0, true, false);
+  }
+  void test_exec_EllipsoidWithBackground_SingleCount() {
+    EllipsoidTestHelper(-1.0, false, true);
   }
 
-  void EllipsoidNoBackground(double doCounts, bool fixQAxis) {
+  void EllipsoidTestHelper(double doCounts, bool fixQAxis, bool doBkgrd) {
     // doCounts < 0 -> all events have a count of 1
     // doCounts > 0 -> counts follow multivariate normal dist
 
@@ -438,8 +467,26 @@ public:
     eigenvals.push_back(0.03);
     eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
     eigenvals.push_back(0.02);
-    int numEvents = 5000;
+    size_t numEvents = 10000;
     addEllipsoid(numEvents, Q[0], Q[1], Q[2], eigenvects, eigenvals, doCounts);
+
+    // radius for integration (4 stdevs of principal axis)
+    auto peakRadius = 4 * sqrt(eigenvals[0]);
+    double bgInnerRadius = 0.0;
+    double bgOuterRadius = 0.0;
+
+    // background w
+    if (doBkgrd == true) {
+      // add random uniform
+      bgInnerRadius = peakRadius;
+      bgOuterRadius =
+          peakRadius * pow(2.0, 1.0 / 3.0); // twice vol of peak sphere
+      std::vector<std::pair<double, double>> range;
+      for (int d = 0; d < eigenvals.size(); d++) {
+        range.push_back(std::pair(Q[d] - bgOuterRadius, Q[d] + bgOuterRadius));
+      }
+      addUniform(static_cast<size_t>(2 * numEvents), range);
+    }
 
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst =
@@ -450,18 +497,13 @@ public:
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
                                                  peakWS);
 
-    // radius for integration (4 stdevs of principal axis)
-    auto peakRadius = 4 * sqrt(eigenvals[0]);
-
     // Integrate and copy to a new peaks workspace
-    doRun(peakRadius, 0.0, /* outer backgroudn radius*/
-          "IntegratePeaksMD2Test_peaks_out",
-          0.0,          /* inner backgroudn radius (ignored)*/
-          false,        /* edge correction */
-          false,        /* cylinder*/
-          "NoFit", 0.0, /* adaptive*/
-          true,         /* ellipsoid integration*/
-          fixQAxis);    /* fix Q axis of ellipsoid*/
+    doRun(peakRadius, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out",
+          bgInnerRadius, false, /* edge correction */
+          false,                /* cylinder*/
+          "NoFit", 0.0,         /* adaptive*/
+          true,                 /* ellipsoid integration*/
+          fixQAxis);            /* fix Q axis of ellipsoid*/
 
     // Old workspace is unchanged
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
@@ -473,8 +515,16 @@ public:
 
     // test integrated counts
     if (doCounts < 0) {
-      TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                      static_cast<double>(numEvents), ceil(0.002 * numEvents));
+      if (doBkgrd == true) {
+        // use slightly more lenient tolerance
+        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
+                        static_cast<double>(numEvents),
+                        ceil(0.005 * numEvents));
+      } else {
+        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
+                        static_cast<double>(numEvents),
+                        ceil(0.002 * numEvents));
+      }
     } else {
       // sum = 0.2175*Npts (for 3D from simulation regardless of covar etc.)
       TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
@@ -482,7 +532,7 @@ public:
                       static_cast<double>(numEvents) * 0.0015);
     }
 
-    // inspect the integrtated peak
+    // retrieve the peak
     IPeak &iPeak = newPW->getPeak(0);
     Peak *const peak = dynamic_cast<Peak *>(&iPeak);
     TS_ASSERT(peak);
@@ -510,19 +560,23 @@ public:
       auto rad = peakRadius * sqrt(eigenvals[ivect] / eigenvals[0]);
       double angle = axes[isort[ivect]].angle(V3D(
           eigenvects[ivect][0], eigenvects[ivect][1], eigenvects[ivect][2]));
-      std::cout << "DEBUG angle\t" << angle * 180.0 / M_PI << std::endl;
       if (angle > M_PI / 2) {
         // axis is flipped
         angle = M_PI - angle;
       }
-      if (fixQAxis > 0 & ivect == 0) {
+      if (ivect == 0 & fixQAxis == true) {
         // first axis should be parallel to Q
         TS_ASSERT_EQUALS(isort[ivect], 0)
         TS_ASSERT_DELTA(radii[isort[ivect]], rad, 1E-10);
         TS_ASSERT_DELTA(angle, 0, 1E-10);
       } else {
         // compare eigenvalue (radii propto sqrt eigenval)
-        TS_ASSERT_DELTA(radii[isort[ivect]], rad, 0.05 * rad);
+        if (doBkgrd == true) {
+          // use much more lenient tolerance
+          TS_ASSERT_DELTA(radii[isort[ivect]], rad, 0.15 * rad);
+        } else {
+          TS_ASSERT_DELTA(radii[isort[ivect]], rad, 0.05 * rad);
+        }
         TS_ASSERT_DELTA(angle, 0, M_PI * (5.0 / 180.0));
       }
     }

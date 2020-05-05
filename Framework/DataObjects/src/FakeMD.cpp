@@ -239,7 +239,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       auto tmp = invCov * pos;
       double mdsq = 0.0;
       for (int n = 0; n < nd; n++) {
-        mdsq += pos[n]*tmp[n];
+        mdsq += pos[n] * tmp[n];
       }
       // for a multivariate normal dist m-dist is distribute
       // as chi-squared pdf with nd degrees of freedom
@@ -251,9 +251,6 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     for (int n = 0; n < nd; n++) {
       eventCenter[n] = static_cast<coord_t>(pos[n] + center[n]);
     }
-    //// DEBUG
-    // std::cout << eventCenter[0] << "\t\t" << eventCenter[1] << "\t\t"
-    //          << eventCenter[2] << std::endl;
 
     // add event (need to convert pos to coord_t)
     eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
