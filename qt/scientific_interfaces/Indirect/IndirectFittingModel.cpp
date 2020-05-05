@@ -703,16 +703,13 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFit(
 }
 
 std::string
-IndirectFittingModel::createSingleFitOutputName(const std::string &formatString,
-                                                TableDatasetIndex index,
-                                                WorkspaceIndex spectrum) const {
-  // if (m_fittingData.size() > index)
-  //   return m_fittingData[index]->displayName(formatString, spectrum);
-  // else
-  //   throw std::runtime_error("Cannot create a display name for a workspace:
-  //   "
-  //                            "the workspace index provided is too large.");
-  return "SingleFitOutputName";
+IndirectFittingModel::singleFitOutputName(TableDatasetIndex index,
+                                          WorkspaceIndex spectrum) const {
+  std::string inputWorkspace =
+      isMultiFit() ? "Multi" : m_fitDataModel->getWorkspaceNames()[index.value];
+  std::string spectra = std::to_string(spectrum.value);
+  return inputWorkspace + "_" + m_fitType + "_" + m_fitString + "_" + spectra +
+         "_Results";
 }
 
 std::string IndirectFittingModel::getOutputBasename() const {

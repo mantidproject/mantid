@@ -234,19 +234,6 @@ public:
                      3);
   }
 
-  void
-  test_that_singleFitOutputName_returns_the_correct_name_for_a_single_data_set_fit() {
-    Spectra const spectra = Spectra("0-1");
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->singleFitOutputName(
-                         TableDatasetIndex{0},
-                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
-                     "Name_HWHM_FofQFit_ChudleyElliot_s0_Results");
-  }
-
 private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,

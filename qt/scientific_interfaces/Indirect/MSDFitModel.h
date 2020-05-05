@@ -15,8 +15,6 @@ namespace IDA {
 class DLLExport MSDFitModel : public IndirectFittingModel {
 public:
   MSDFitModel();
-  std::string singleFitOutputName(TableDatasetIndex index,
-                                  WorkspaceIndex spectrum) const override;
 
 private:
   std::string getResultXAxisUnit() const override;

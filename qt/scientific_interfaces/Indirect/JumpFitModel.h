@@ -44,11 +44,7 @@ public:
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex);
   void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex);
 
-  std::string singleFitOutputName(TableDatasetIndex index,
-                                  WorkspaceIndex spectrum) const override;
-
 private:
-  std::string constructOutputName(const std::string &batchType) const;
   bool
   allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   JumpFitParameters &

@@ -14,13 +14,6 @@ namespace IDA {
 
 MSDFitModel::MSDFitModel() { m_fitType = MSDFIT_STRING; }
 
-std::string MSDFitModel::singleFitOutputName(TableDatasetIndex index,
-                                             WorkspaceIndex spectrum) const {
-  return createSingleFitOutputName(
-      "%1%_MSDFit_" + fitModeToName[getFittingMode()] + "_s%2%_Results", index,
-      spectrum);
-}
-
 std::string MSDFitModel::getResultXAxisUnit() const { return "Temperature"; }
 
 } // namespace IDA

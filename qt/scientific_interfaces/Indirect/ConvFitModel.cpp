@@ -333,13 +333,6 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-std::string ConvFitModel::singleFitOutputName(TableDatasetIndex index,
-                                              WorkspaceIndex spectrum) const {
-  return createSingleFitOutputName("%1%_conv_" + m_fitString +
-                                       m_backgroundString + "_s%2%_Results",
-                                   index, spectrum);
-}
-
 Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
   return IndirectFittingModel::getFittingFunction();
 }

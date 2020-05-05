@@ -143,9 +143,6 @@ protected:
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const;
-  std::string createSingleFitOutputName(const std::string &formatString,
-                                        TableDatasetIndex index,
-                                        WorkspaceIndex spectrum) const;
   void removeFittingData(TableDatasetIndex index);
   std::string m_fitType = "FitType";
   std::string m_fitString = "FitString";
@@ -165,7 +162,7 @@ private:
   virtual std::string sequentialFitOutputName() const;
   virtual std::string simultaneousFitOutputName() const;
   virtual std::string singleFitOutputName(TableDatasetIndex index,
-                                          WorkspaceIndex spectrum) const = 0;
+                                          WorkspaceIndex spectrum) const;
   virtual std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(TableDatasetIndex index) const;
 

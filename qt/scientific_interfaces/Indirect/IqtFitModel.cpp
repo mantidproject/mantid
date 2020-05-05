@@ -167,13 +167,6 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
   return algorithm;
 }
 
-std::string IqtFitModel::singleFitOutputName(TableDatasetIndex index,
-                                             WorkspaceIndex spectrum) const {
-  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createSingleFitOutputName(
-      "%1%" + fitString + "_" + m_fitString + "_s%2%_Results", index, spectrum);
-}
-
 void IqtFitModel::setFitFunction(
     Mantid::API::MultiDomainFunction_sptr function) {
   IndirectFittingModel::setFitFunction(function);

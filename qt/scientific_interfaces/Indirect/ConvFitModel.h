@@ -45,8 +45,6 @@ public:
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
-  std::string singleFitOutputName(TableDatasetIndex index,
-                                  WorkspaceIndex spectrum) const override;
   Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(TableDatasetIndex index) const override;
