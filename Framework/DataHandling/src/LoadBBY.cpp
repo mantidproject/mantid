@@ -216,8 +216,9 @@ void LoadBBY::exec() {
   // create instrument
   InstrumentInfo instrumentInfo;
   std::map<std::string, double> logParams;
+  std::map<std::string, std::string> logStrings;
   std::map<std::string, std::string> allParams;
-  createInstrument(tarFile, instrumentInfo, logParams, allParams);
+  createInstrument(tarFile, instrumentInfo, logParams, logStrings, allParams);
 
   // set the units
   if (instrumentInfo.is_tof)
@@ -374,16 +375,19 @@ void LoadBBY::exec() {
 
   std::string time_str = start_time.toISO8601String();
 
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_name",
-                                   instrumentInfo.sample_name);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_description",
-                                   instrumentInfo.sample_description);
+  logManager.addProperty("sample_name", instrumentInfo.sample_name);
+  logManager.addProperty("sample_description",
+                         instrumentInfo.sample_description);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "wavelength",
                                    instrumentInfo.wavelength);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "master1_chopper_id",
                                    instrumentInfo.master1_chopper_id);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "master2_chopper_id",
                                    instrumentInfo.master2_chopper_id);
+
+  for (auto &x : logStrings) {
+    logManager.addProperty(x.first, x.second);
+  }
   for (auto &x : logParams) {
     AddSinglePointTimeSeriesProperty(logManager, time_str, x.first, x.second);
   }
@@ -453,6 +457,7 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 // loading instrument parameters
 void LoadBBY::loadInstrumentParameters(
     NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
+    std::map<std::string, std::string> &logStrings,
     std::map<std::string, std::string> &allParams) {
   using namespace Poco::XML;
   std::string idfDirectory =
@@ -489,6 +494,18 @@ void LoadBBY::loadInstrumentParameters(
       pNode = it.nextNode();
     }
 
+    auto isNumeric = [](const std::string &tag) {
+      try {
+        auto stag = boost::algorithm::trim_copy(tag);
+        size_t sz = 0;
+        auto value = std::stod(stag, &sz);
+        return sz > 0 && stag.size() == sz;
+      } catch (const std::invalid_argument &) {
+        return false;
+      }
+    };
+
+    std::string tmpString;
     float tmpFloat = 0.0f;
     for (auto &x : allParams) {
       if (x.first.find("log_") == 0) {
@@ -498,21 +515,40 @@ void LoadBBY::loadInstrumentParameters(
         // comma separated details
         std::vector<std::string> details;
         boost::split(details, line, boost::is_any_of(","));
+        if (details.size() < 3) {
+          g_log.warning() << "Invalid format for BILBY parameter " << x.first
+                          << std::endl;
+          continue;
+        }
         auto hdfTag = boost::algorithm::trim_copy(details[0]);
         try {
           // extract the parameter and add it to the parameter dictionary
-          if (!hdfTag.empty() && loadNXDataSet(entry, hdfTag, tmpFloat)) {
-            auto factor = std::stod(details[1]);
-            logParams[logTag] = factor * tmpFloat;
-          } else if (details.size() > 2) {
-            logParams[logTag] = std::stod(details[2]);
+          // check the default for value numeric and string
+          auto updateOk = false;
+          if (!hdfTag.empty()) {
+            if (isNumeric(details[2])) {
+              if (loadNXDataSet(entry, hdfTag, tmpFloat)) {
+                auto factor = std::stod(details[1]);
+                logParams[logTag] = factor * tmpFloat;
+                updateOk = true;
+              }
+            } else {
+              if (loadNXString(entry, hdfTag, tmpString)) {
+                logStrings[logTag] = tmpString;
+                updateOk = true;
+              }
+            }
+          }
+          if (!updateOk) {
+            if (isNumeric(details[2]))
+              logParams[logTag] = std::stod(details[2]);
+            else
+              logStrings[logTag] = details[2];
             if (!hdfTag.empty())
               g_log.warning() << "Cannot find hdf parameter "
-
                               << hdfTag << ", using default.\n";
           }
-
-        } catch (const std::invalid_argument &) {
+        } catch (std::invalid_argument &) {
           g_log.warning() << "Invalid format for BILBY parameter " << x.first
                           << std::endl;
         }
@@ -529,6 +565,7 @@ void LoadBBY::loadInstrumentParameters(
 void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
                                InstrumentInfo &instrumentInfo,
                                std::map<std::string, double> &logParams,
+                               std::map<std::string, std::string> &logStrings,
                                std::map<std::string, std::string> &allParams) {
 
   const double toMeters = 1.0 / 1000;
@@ -607,7 +644,7 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
         instrumentInfo.phase_slave = tmp_float < 999.0 ? tmp_float : 0.0;
 
-      loadInstrumentParameters(entry, logParams, allParams);
+      loadInstrumentParameters(entry, logParams, logStrings, allParams);
 
       // Ltof_det_value is not present for monochromatic data so check
       // and replace with default
