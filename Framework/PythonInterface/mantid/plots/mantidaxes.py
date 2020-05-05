@@ -1137,29 +1137,31 @@ class MantidAxes3D(Axes3D):
     def set_xlim3d(self, *args):
         min, max = super().set_xlim3d(*args)
 
-        if hasattr(self, 'original_data'):
-            x = self.original_data[0].copy()
-            x[np.less(x, min, where=~np.isnan(x))] = np.nan
-            x[np.greater(x, max, where=~np.isnan(x))] = np.nan
-            self.collections[0]._vec[0] = x
+        self._set_overflowing_data_to_nan(min, max, 0)
 
     def set_ylim3d(self, *args):
         min, max = super().set_ylim3d(*args)
 
-        if hasattr(self, 'original_data'):
-            y = self.original_data[1].copy()
-            y[np.less(y, min, where=~np.isnan(y))] = np.nan
-            y[np.greater(y, max, where=~np.isnan(y))] = np.nan
-            self.collections[0]._vec[1] = y
+        self._set_overflowing_data_to_nan(min, max, 1)
 
     def set_zlim3d(self, *args):
         min, max = super().set_zlim3d(*args)
 
+        self._set_overflowing_data_to_nan(min, max, 2)
+
+    def _set_overflowing_data_to_nan(self, min, max, axis_index):
+        """
+        Sets any data for the given axis that is less than min or greater than max to nan so only the parts of the plot
+        that are within the axes are visible.
+        :param min: the lower axis limit.
+        :param max: the upper axis limit.
+        :param axis_index: the index of the axis being edited, 0 for x, 1 for y, 2 for z.
+        """
         if hasattr(self, 'original_data'):
-            z = self.original_data[2].copy()
-            z[np.less(z, min, where=~np.isnan(z))] = np.nan
-            z[np.greater(z, max, where=~np.isnan(z))] = np.nan
-            self.collections[0]._vec[2] = z
+            axis_data = self.original_data[axis_index].copy()
+            axis_data[np.less(axis_data, min, where=~np.isnan(axis_data))] = np.nan
+            axis_data[np.greater(axis_data, max, where=~np.isnan(axis_data))] = np.nan
+            self.collections[0]._vec[axis_index] = axis_data
 
     def plot(self, *args, **kwargs):
         """
