@@ -288,8 +288,7 @@ class MantidAxes(Axes):
         if artist.axes.creation_args[0].get('axis', None) == MantidAxType.BIN:
             if any([workspace.readE(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
                 return True
-        else:
-            if spec_num is not None:
+        elif spec_num is not None:
                 workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
                 if any(workspace.readE(workspace_index) != 0):
                     return True
@@ -393,17 +392,35 @@ class MantidAxes(Axes):
         """
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
-        self.remove_artists_if(lambda art: art == artist)
-        if kwargs.get('axis', None) == MantidAxType.BIN:
-            workspace_index = spec_num
-        else:
-            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-        self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
 
-        if errorbars:
-            new_artist = self.errorbar(workspace, wkspIndex=workspace_index, **kwargs)
+        #check if it is a sample log plot
+        sample_log_plot_details = None
+        if spec_num is None:
+            sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
+            kwargs['LogName'] = sample_log_plot_details[0]
+            if sample_log_plot_details[1] is not None:
+                kwargs['Filtered'] = sample_log_plot_details[1]
+            if sample_log_plot_details[2] is not None:
+                kwargs['ExperimentInfo'] = sample_log_plot_details[2]
+            #error bars never make sense for sample log plots
+            errorbars=False
+            #neither does distribution
+            if 'distribution' in kwargs.keys():
+                del kwargs['distribution']
         else:
-            new_artist = self.plot(workspace, wkspIndex=workspace_index, **kwargs)
+            if kwargs.get('axis', None) == MantidAxType.BIN:
+                workspace_index = spec_num
+            else:
+                workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+
+            self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
+            kwargs['wkspIndex'] = workspace_index
+
+        self.remove_artists_if(lambda art: art == artist)
+        if errorbars:
+            new_artist = self.errorbar(workspace, **kwargs)
+        else:
+            new_artist = self.plot(workspace, **kwargs)
         return new_artist
 
     def relim(self, visible_only=True):
