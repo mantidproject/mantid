@@ -45,7 +45,7 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  if (inputWS->YUnit().compare("Counts") != 0) {
+  if (inputWS->YUnit() != "Counts") {
     errors["InputWorkspace"] = "Input Workspace should be a counts workspace.";
   }
   return errors;
