@@ -12,6 +12,7 @@ from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import MUON_ANALYSIS_G
 
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
+
 class WorkspacePlotInformation(NamedTuple):
     workspace_name: str
     index: int
