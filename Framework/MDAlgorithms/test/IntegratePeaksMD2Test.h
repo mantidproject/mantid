@@ -413,12 +413,12 @@ public:
   void test_exec_EllipsoidNoBackground_SingleCount_FixQAxis() {
     EllipsoidNoBackground(-1.0, true);
   }
-  //void test_exec_EllipsoidNoBackground_NonSingleCount() {
-  //  EllipsoidNoBackground(1.0, false);
-  //}
-  //void test_exec_EllipsoidNoBackground_NonSingleCount_FixQAxis() {
-  //  EllipsoidNoBackground(1.0, true);
-  //}
+   void test_exec_EllipsoidNoBackground_NonSingleCount() {
+    EllipsoidNoBackground(1.0, false);
+  }
+   void test_exec_EllipsoidNoBackground_NonSingleCount_FixQAxis() {
+    EllipsoidNoBackground(1.0, true);
+  }
 
   void EllipsoidNoBackground(double doCounts, bool fixQAxis) {
     // doCounts < 0 -> all events have a count of 1
@@ -461,7 +461,7 @@ public:
           false,        /* cylinder*/
           "NoFit", 0.0, /* adaptive*/
           true,         /* ellipsoid integration*/
-          fixQAxis);        /* fix Q axis of ellipsoid*/
+          fixQAxis);    /* fix Q axis of ellipsoid*/
 
     // Old workspace is unchanged
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
@@ -471,8 +471,16 @@ public:
             "IntegratePeaksMD2Test_peaks_out"));
     TS_ASSERT(newPW);
 
-    TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                    static_cast<double>(numEvents), ceil(0.002 * numEvents));
+    // test integrated counts
+    if (doCounts < 0) {
+      TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
+                      static_cast<double>(numEvents), ceil(0.002 * numEvents));
+    } else {
+      // sum = 0.2175*Npts (for 3D from simulation regardless of covar etc.)
+      TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
+                      static_cast<double>(numEvents) * 0.2175,
+                      static_cast<double>(numEvents) * 0.0015);
+    }
 
     // inspect the integrtated peak
     IPeak &iPeak = newPW->getPeak(0);
@@ -509,7 +517,7 @@ public:
       }
       if (fixQAxis > 0 & ivect == 0) {
         // first axis should be parallel to Q
-        TS_ASSERT_EQUALS(isort[ivect],0)
+        TS_ASSERT_EQUALS(isort[ivect], 0)
         TS_ASSERT_DELTA(radii[isort[ivect]], rad, 1E-10);
         TS_ASSERT_DELTA(angle, 0, 1E-10);
       } else {

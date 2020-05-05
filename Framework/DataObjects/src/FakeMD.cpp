@@ -182,7 +182,8 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   auto numEvents = size_t(m_ellipsoidParams[0]);
   coord_t center[nd];
   Kernel::Matrix<double> Evec(nd, nd); // hold eigenvectors
-  Kernel::Matrix<double> std(nd, nd); // hold sqrt(eigenvals) standard devs on diag
+  Kernel::Matrix<double> std(nd,
+                             nd); // hold sqrt(eigenvals) standard devs on diag
   for (size_t n = 0; n < nd; n++) {
     center[n] = m_ellipsoidParams[n + 1];
     // get row/col index for eigenvector matrix
@@ -202,8 +203,9 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Kernel::Matrix<double> invCov(nd, nd);
   if (doCounts > 0) {
     auto var = std * std;
-    auto cov = Evec * var * Evec.Invert();
-    invCov = cov.Invert();
+    invCov = Evec * var * Evec.Invert(); // covar mat
+    // invert in place
+    auto det = invCov.Invert();
   }
   // get chi-squared boost function
   boost::math::chi_squared chisq(nd);
@@ -233,14 +235,15 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // calculate Mahalanobis distance
       // https://en.wikipedia.org/wiki/Mahalanobis_distance
 
-      // need to left multiply a matrix with pos so convert to col matrix
-      Kernel::Matrix<double> posMat(nd, 1);
-      posMat.setColumn(0, pos);
-
-      auto md = (posMat * invCov) * pos;
+      // md = sqrt(pos.T * invCov * pos)
+      auto tmp = invCov * pos;
+      double mdsq = 0.0;
+      for (int n = 0; n < nd; n++) {
+        mdsq += pos[n]*tmp[n];
+      }
       // for a multivariate normal dist m-dist is distribute
       // as chi-squared pdf with nd degrees of freedom
-      signal = boost::math::pdf(chisq, md[0]);
+      signal = boost::math::pdf(chisq, sqrt(mdsq));
       errorSquared = signal;
     }
     // convert pos to coord_t and offset  by center
@@ -249,7 +252,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       eventCenter[n] = static_cast<coord_t>(pos[n] + center[n]);
     }
     //// DEBUG
-    //std::cout << eventCenter[0] << "\t\t" << eventCenter[1] << "\t\t"
+    // std::cout << eventCenter[0] << "\t\t" << eventCenter[1] << "\t\t"
     //          << eventCenter[2] << std::endl;
 
     // add event (need to convert pos to coord_t)
