@@ -91,7 +91,8 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
 
     def test_generate_plot_command_returns_correct_string_for_sample_log(self):
         kwargs = copy(LINE2D_KWARGS)
-        kwargs.update({"LogName":"my_log","ExperimentInfo":0})
+        kwargs["drawstyle"] = 'steps-post'
+        kwargs.update({"LogName":"my_log","ExperimentInfo":0,"Filtered":True})
         # add a log
         AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
         AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
