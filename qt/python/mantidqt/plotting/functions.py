@@ -15,7 +15,6 @@ our custom window.
 import numpy as np
 
 # 3rd party imports
-import matplotlib.pyplot as plt
 try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
@@ -261,6 +260,8 @@ def _validate_pcolormesh_inputs(workspaces):
 
 @manage_workspace_names
 def plot_surface(workspaces):
+    # Imported here to prevent pyplot being imported before matplotlib.use() is called when Workbench is opened.
+    import matplotlib.pyplot as plt
     for ws in workspaces:
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
         surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
@@ -271,6 +272,7 @@ def plot_surface(workspaces):
 
 @manage_workspace_names
 def plot_wireframe(workspaces):
+    import matplotlib.pyplot as plt
     for ws in workspaces:
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
         ax.plot_wireframe(ws)
