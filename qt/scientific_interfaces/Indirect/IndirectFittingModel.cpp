@@ -677,15 +677,12 @@ IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("LogName", getResultLogName());
 
-  auto const firstWsIndex =
-      WorkspaceIndex{0}; // m_fitDataModel->getSpectrum(FitDomainIndex{0});
-  const auto range =
-      m_fitDataModel->getFittingRange(TableDatasetIndex{0}, firstWsIndex);
+  const auto range = m_fitDataModel->getFittingRange(FitDomainIndex{0});
   fitAlgorithm->setProperty("StartX", range.first);
   fitAlgorithm->setProperty("EndX", range.second);
 
-  auto excludeRegion = m_fitDataModel->getExcludeRegionVector(
-      TableDatasetIndex{0}, firstWsIndex);
+  auto excludeRegion =
+      m_fitDataModel->getExcludeRegionVector(FitDomainIndex{0});
   if (!excludeRegion.empty()) {
     fitAlgorithm->setProperty("Exclude", excludeRegion);
   }
