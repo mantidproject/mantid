@@ -100,6 +100,7 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         output = generate_plot_command(line)
         expected_command = ("plot({}, {})".format(self.test_ws.name(),
                                                   convert_args_to_string(None, kwargs)))
+        self.maxDiff = None
         self.assertEqual(expected_command, output)
 
     def test_get_errorbar_specific_plot_kwargs_returns_dict_with_correct_properties(self):
