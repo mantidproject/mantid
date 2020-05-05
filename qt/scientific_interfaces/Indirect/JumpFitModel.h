@@ -44,8 +44,6 @@ public:
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex);
   void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex);
 
-  std::string sequentialFitOutputName() const override;
-  std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(TableDatasetIndex index,
                                   WorkspaceIndex spectrum) const override;
 
@@ -60,8 +58,6 @@ private:
   findJumpFitParameters(TableDatasetIndex dataIndex) const;
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
-
-  std::string m_fitType;
   std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;
 };
 

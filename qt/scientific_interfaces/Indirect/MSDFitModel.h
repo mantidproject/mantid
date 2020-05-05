@@ -14,16 +14,12 @@ namespace IDA {
 
 class DLLExport MSDFitModel : public IndirectFittingModel {
 public:
-  std::string sequentialFitOutputName() const override;
-  std::string simultaneousFitOutputName() const override;
+  MSDFitModel();
   std::string singleFitOutputName(TableDatasetIndex index,
                                   WorkspaceIndex spectrum) const override;
 
-  void setFitTypeString(const std::string &fitType);
-
 private:
   std::string getResultXAxisUnit() const override;
-  std::string m_fitType;
 };
 
 } // namespace IDA

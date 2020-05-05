@@ -16,12 +16,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-
-std::string getFitDataName(std::string baseWorkspaceName,
-                           Spectra workspaceIndexes) {
-  return baseWorkspaceName + workspaceIndexes.getString();
-}
-
+static const std::string SIM_STRING = "sim";
+static const std::string SEQ_STRING = "seq";
+static const std::string IQTFIT_STRING = "IQt";
+static const std::string CONVFIT_STRING = "Conv";
+static const std::string MSDFIT_STRING = "Msd";
+static const std::string FQFIT_STRING = "FQ";
+static const std::string MULTI_STRING = "Multi";
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -7,7 +7,6 @@
 #include "IndirectFittingModel.h"
 #include "IndirectFitDataModel.h"
 #include "IndirectFitOutputModel.h"
-#include "IndirectWorkspaceNames.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -29,6 +28,11 @@ using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
+
+std::string getFitDataName(std::string baseWorkspaceName,
+                           Spectra workspaceIndexes) {
+  return baseWorkspaceName + workspaceIndexes.getString();
+}
 
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
@@ -333,11 +337,27 @@ IndirectFittingModel::createDisplayName(TableDatasetIndex dataIndex) const {
                              "the workspace index provided is too large.");
 }
 
-std::string
-IndirectFittingModel::createOutputName(const std::string &formatString,
-                                       const std::string &rangeDelimiter,
-                                       TableDatasetIndex dataIndex) const {
-  return createDisplayName(dataIndex) + "_Results";
+void IndirectFittingModel::setFitTypeString(const std::string &fitType) {
+  m_fitString = fitType;
+}
+
+std::string IndirectFittingModel::createOutputName(std::string fitMode) const {
+  std::string inputWorkspace =
+      isMultiFit() ? "Multi" : m_fitDataModel->getWorkspaceNames()[0];
+  std::string spectra =
+      isMultiFit()
+          ? ""
+          : m_fitDataModel->getSpectra(TableDatasetIndex{0}).getString();
+  return inputWorkspace + "_" + m_fitType + "_" + fitMode + "_" + m_fitString +
+         "_" + spectra + "_Results";
+}
+
+std::string IndirectFittingModel::sequentialFitOutputName() const {
+  return createOutputName(SEQ_STRING);
+}
+
+std::string IndirectFittingModel::simultaneousFitOutputName() const {
+  return createOutputName(SIM_STRING);
 }
 
 bool IndirectFittingModel::isMultiFit() const {
@@ -390,7 +410,8 @@ IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
 }
 
-// void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {
+// void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData)
+// {
 //   m_fittingData = std::move(fittingData.m_data);
 // }
 

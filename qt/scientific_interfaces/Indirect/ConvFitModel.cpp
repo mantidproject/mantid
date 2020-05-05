@@ -318,7 +318,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-ConvFitModel::ConvFitModel() {}
+ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
 
 ConvFitModel::~ConvFitModel() {
   for (const auto &resolution : m_extendedResolution)
@@ -333,25 +333,9 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-std::string ConvFitModel::sequentialFitOutputName() const {
-  if (isMultiFit())
-    return "MultiConvFit_seq_" + m_fitType + m_backgroundString + "_Results";
-  return createOutputName("%1%_conv_seq_" + m_fitType + m_backgroundString +
-                              "_s%2%",
-                          "_to_", TableDatasetIndex{0});
-}
-
-std::string ConvFitModel::simultaneousFitOutputName() const {
-  if (isMultiFit())
-    return "MultiConvFit_sim_" + m_fitType + m_backgroundString + "_Results";
-  return createOutputName("%1%_conv_sim_" + m_fitType + m_backgroundString +
-                              "_s%2%",
-                          "_to_", TableDatasetIndex{0});
-}
-
 std::string ConvFitModel::singleFitOutputName(TableDatasetIndex index,
                                               WorkspaceIndex spectrum) const {
-  return createSingleFitOutputName("%1%_conv_" + m_fitType +
+  return createSingleFitOutputName("%1%_conv_" + m_fitString +
                                        m_backgroundString + "_s%2%_Results",
                                    index, spectrum);
 }
@@ -412,10 +396,6 @@ void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
 void ConvFitModel::setResolution(const std::string &name,
                                  TableDatasetIndex index) {
   m_fitDataModel->setResolution(name, index);
-}
-
-void ConvFitModel::setFitTypeString(const std::string &fitType) {
-  m_fitType = fitType;
 }
 
 std::unordered_map<std::string, ParameterValue>

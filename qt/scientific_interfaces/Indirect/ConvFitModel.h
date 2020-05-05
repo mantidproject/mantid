@@ -36,7 +36,6 @@ public:
   void setTemperature(const boost::optional<double> &temperature);
   void removeWorkspace(TableDatasetIndex index) override;
   void setResolution(const std::string &name, TableDatasetIndex index);
-  void setFitTypeString(const std::string &fitType);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
@@ -46,8 +45,6 @@ public:
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
-  std::string sequentialFitOutputName() const override;
-  std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(TableDatasetIndex index,
                                   WorkspaceIndex spectrum) const override;
   Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const override;
@@ -66,7 +63,6 @@ private:
   boost::optional<double> m_temperature;
   boost::optional<std::size_t> m_backgroundIndex;
   std::string m_backgroundString;
-  std::string m_fitType;
 };
 
 } // namespace IDA

@@ -11,6 +11,7 @@
 #include "IIndirectFitResult.h"
 #include "IndexTypes.h"
 #include "IndirectFitData.h"
+#include "IndirectWorkspaceNames.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
@@ -111,8 +112,7 @@ public:
   void setFittingMode(FittingMode mode);
   FittingMode getFittingMode() const;
 
-  // To remove if possible
-
+  void setFitTypeString(const std::string &fitType);
   boost::optional<ResultLocationNew>
   getResultLocation(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
@@ -134,9 +134,7 @@ public:
   std::unique_ptr<IIndirectFitData> m_fitDataModel;
 
 protected:
-  std::string createOutputName(const std::string &formatString,
-                               const std::string &rangeDelimiter,
-                               TableDatasetIndex dataIndex) const;
+  std::string createOutputName(std::string fitMode) const;
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
@@ -149,6 +147,8 @@ protected:
                                         TableDatasetIndex index,
                                         WorkspaceIndex spectrum) const;
   void removeFittingData(TableDatasetIndex index);
+  std::string m_fitType = "FitType";
+  std::string m_fitString = "FitString";
 
 private:
   std::vector<std::string> getWorkspaceNames() const;
@@ -162,8 +162,8 @@ private:
                       const std::string &input) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
-  virtual std::string sequentialFitOutputName() const = 0;
-  virtual std::string simultaneousFitOutputName() const = 0;
+  virtual std::string sequentialFitOutputName() const;
+  virtual std::string simultaneousFitOutputName() const;
   virtual std::string singleFitOutputName(TableDatasetIndex index,
                                           WorkspaceIndex spectrum) const = 0;
   virtual std::unordered_map<std::string, ParameterValue>

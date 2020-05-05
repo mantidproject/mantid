@@ -151,7 +151,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFitModel::IqtFitModel()
-    : IndirectFittingModel(), m_constrainIntensities(false) {}
+    : IndirectFittingModel(), m_constrainIntensities(false) {
+  m_fitType = IQTFIT_STRING;
+}
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
@@ -165,31 +167,11 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
   return algorithm;
 }
 
-std::string IqtFitModel::sequentialFitOutputName() const {
-  if (isMultiFit())
-    return "MultiIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_seq_" + m_fitType + "_s%2%",
-                          "_to_", TableDatasetIndex{0});
-}
-
-std::string IqtFitModel::simultaneousFitOutputName() const {
-  if (isMultiFit())
-    return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_sim_" + m_fitType + "_s%2%",
-                          "_to_", TableDatasetIndex{0});
-}
-
 std::string IqtFitModel::singleFitOutputName(TableDatasetIndex index,
                                              WorkspaceIndex spectrum) const {
   auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
   return createSingleFitOutputName(
-      "%1%" + fitString + "_" + m_fitType + "_s%2%_Results", index, spectrum);
-}
-
-void IqtFitModel::setFitTypeString(const std::string &fitType) {
-  m_fitType = fitType;
+      "%1%" + fitString + "_" + m_fitString + "_s%2%_Results", index, spectrum);
 }
 
 void IqtFitModel::setFitFunction(

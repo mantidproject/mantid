@@ -15,21 +15,17 @@ namespace IDA {
 class DLLExport IqtFitModel : public IndirectFittingModel {
 public:
   IqtFitModel();
-  void setFitTypeString(const std::string &fitType);
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
 
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
-  std::string sequentialFitOutputName() const override;
-  std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(TableDatasetIndex index,
                                   WorkspaceIndex spectrum) const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(TableDatasetIndex index) const override;
 
   bool m_constrainIntensities;
-  std::string m_fitType;
 };
 
 } // namespace IDA

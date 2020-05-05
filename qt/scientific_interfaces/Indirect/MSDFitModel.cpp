@@ -12,17 +12,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-std::string MSDFitModel::sequentialFitOutputName() const {
-  if (isMultiFit())
-    return "MultiMSDFit_" + fitModeToName[getFittingMode()] + "_Results";
-  return createOutputName("%1%_MSDFit_" + fitModeToName[getFittingMode()] +
-                              "_" + m_fitType + "_s%2%",
-                          "_to_", TableDatasetIndex{0});
-}
-
-std::string MSDFitModel::simultaneousFitOutputName() const {
-  return sequentialFitOutputName();
-}
+MSDFitModel::MSDFitModel() { m_fitType = MSDFIT_STRING; }
 
 std::string MSDFitModel::singleFitOutputName(TableDatasetIndex index,
                                              WorkspaceIndex spectrum) const {
@@ -32,10 +22,6 @@ std::string MSDFitModel::singleFitOutputName(TableDatasetIndex index,
 }
 
 std::string MSDFitModel::getResultXAxisUnit() const { return "Temperature"; }
-
-void MSDFitModel::setFitTypeString(const std::string &fitType) {
-  m_fitType = fitType;
-}
 
 } // namespace IDA
 } // namespace CustomInterfaces

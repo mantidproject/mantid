@@ -72,28 +72,6 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{0});
   }
 
-  void
-  test_that_setFitType_will_change_the_fit_type_in_the_sequentialFitOutputName() {
-    Spectra const spectra = Spectra("0-1");
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "Name_HWHM_FofQFit_Seq_ChudleyElliots");
-  }
-
-  void
-  test_that_setFitType_will_change_the_fit_type_in_the_simultaneousFitOutputName() {
-    Spectra const spectra = Spectra("0-1");
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "Name_HWHM_FofQFit_Sim_ChudleyElliots");
-  }
-
   void test_that_zeroWidths_returns_false_if_the_workspace_contains_widths() {
     Spectra const spectra = Spectra("0-1");
 
@@ -254,32 +232,6 @@ public:
                      0);
     TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, TableDatasetIndex{0}).get(),
                      3);
-  }
-
-  void
-  test_that_sequentialFitOutputName_returns_the_correct_name_for_a_multi_fit() {
-    Spectra const spectra = Spectra("0-1");
-    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
-    m_ads->addOrReplace("Name2", workspace2);
-
-    addWorkspacesToModel(spectra, m_workspace, workspace2);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "MultiFofQFit_seqChudleyElliot_Results");
-  }
-
-  void
-  test_that_simultaneousFitOutputName_returns_the_correct_name_for_a_multi_fit() {
-    Spectra const spectra = Spectra("0-1");
-    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
-    m_ads->addOrReplace("Name2", workspace2);
-
-    addWorkspacesToModel(spectra, m_workspace, workspace2);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "MultiFofQFit_simChudleyElliot_Results");
   }
 
   void
