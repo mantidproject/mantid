@@ -24,7 +24,6 @@ GNU_DIAG_OFF("conversion")
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
-#include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <chrono>
@@ -53,7 +52,6 @@ const std::string RUN_NUMBER_PROPERTY = "run_number";
 const std::string RUN_START_PROPERTY = "run_start";
 
 // File identifiers from flatbuffers schema
-const std::string RUN_MESSAGE_ID = "y2gw";
 const std::string EVENT_MESSAGE_ID = "ev42";
 const std::string SAMPLE_MESSAGE_ID = "f142";
 
