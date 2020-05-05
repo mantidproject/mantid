@@ -10,7 +10,7 @@
 import datetime
 
 import numpy as np
-from matplotlib.collections import PolyCollection
+from matplotlib.collections import PolyCollection, QuadMesh
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
@@ -1043,4 +1043,8 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
 
 
 def figure_contains_only_3d_plots(fig) -> bool:
-    return all(isinstance(ax, Axes3D) for ax in fig.get_axes())
+    for ax in fig.get_axes():
+        # any Axes that is not an Axes3D must be a colorbar (containing a QuadMesh)
+        if not isinstance(ax, Axes3D) and not any(isinstance(col, QuadMesh) for col in ax.collections):
+            return False
+    return True
