@@ -271,20 +271,6 @@ std::unordered_map<FittingMode, std::string> fitModeToName =
     std::unordered_map<FittingMode, std::string>(
         {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
-PrivateFittingData::PrivateFittingData() : m_data() {}
-
-PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)
-    : m_data(std::move(privateData.m_data)) {}
-
-PrivateFittingData::PrivateFittingData(IndirectFitDataCollectionType &&data)
-    : m_data(std::move(data)) {}
-
-PrivateFittingData &
-PrivateFittingData::operator=(PrivateFittingData &&fittingData) {
-  m_data = std::move(fittingData.m_data);
-  return *this;
-}
-
 IndirectFittingModel::IndirectFittingModel()
     : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {
   m_fitDataModel = std::make_unique<IndirectFitDataModel>();
@@ -410,11 +396,6 @@ IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
 }
 
-// void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData)
-// {
-//   m_fittingData = std::move(fittingData.m_data);
-// }
-
 void IndirectFittingModel::setSpectra(const std::string &spectra,
                                       TableDatasetIndex dataIndex) {
   setSpectra(Spectra(spectra), dataIndex);
@@ -484,6 +465,16 @@ void IndirectFittingModel::removeFittingData(TableDatasetIndex index) {
 void IndirectFittingModel::clearWorkspaces() {
   m_fitOutput->clear();
   m_fitDataModel->clear();
+}
+
+void IndirectFittingModel::switchToSingleInputMode() {
+  m_fitOutput->clear();
+  m_fitDataModel->switchToSingleInputMode();
+}
+
+void IndirectFittingModel::switchToMultipleInputMode() {
+  m_fitOutput->clear();
+  m_fitDataModel->switchToMultipleInputMode();
 }
 
 void IndirectFittingModel::clear(){};

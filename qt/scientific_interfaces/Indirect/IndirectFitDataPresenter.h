@@ -112,8 +112,6 @@ private:
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;
-  PrivateFittingData m_singleData;
-  PrivateFittingData m_multipleData;
   IIndirectFitDataView *m_view;
   std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
 };

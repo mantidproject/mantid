@@ -109,6 +109,8 @@ public:
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   // Generic
+  void IndirectFittingModel::switchToSingleInputMode();
+  void IndirectFittingModel::switchToMultipleInputMode();
   void setFittingMode(FittingMode mode);
   FittingMode getFittingMode() const;
 

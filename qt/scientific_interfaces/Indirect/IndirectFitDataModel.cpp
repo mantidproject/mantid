@@ -34,7 +34,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitDataModel::IndirectFitDataModel() : m_fittingData() {}
+IndirectFitDataModel::IndirectFitDataModel() {
+  m_fittingDataSingle = std::make_unique<std::vector<IndirectFitData>>();
+  m_resolutionsSingle = std::make_unique<
+      std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>();
+  m_fittingDataMultiple = std::make_unique<std::vector<IndirectFitData>>();
+  m_resolutionsMultiple = std::make_unique<
+      std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>();
+
+  m_fittingData = m_fittingDataSingle.get();
+  m_resolutions = m_resolutionsSingle.get();
+}
 
 bool IndirectFitDataModel::hasWorkspace(
     std::string const &workspaceName) const {
@@ -46,19 +56,19 @@ bool IndirectFitDataModel::hasWorkspace(
 
 Mantid::API::MatrixWorkspace_sptr
 IndirectFitDataModel::getWorkspace(TableDatasetIndex index) const {
-  if (index < m_fittingData.size())
-    return m_fittingData[index.value].workspace();
+  if (index < m_fittingData->size())
+    return m_fittingData->at(index.value).workspace();
   return nullptr;
 }
 
 Spectra IndirectFitDataModel::getSpectra(TableDatasetIndex index) const {
-  if (index < m_fittingData.size())
-    return m_fittingData[index.value].spectra();
+  if (index < m_fittingData->size())
+    return m_fittingData->at(index.value).spectra();
   return Spectra("");
 }
 
 TableDatasetIndex IndirectFitDataModel::numberOfWorkspaces() const {
-  return TableDatasetIndex{static_cast<int>(m_fittingData.size())};
+  return TableDatasetIndex{static_cast<int>(m_fittingData->size())};
 }
 
 bool IndirectFitDataModel::isMultiFit() const {
@@ -66,8 +76,8 @@ bool IndirectFitDataModel::isMultiFit() const {
 }
 
 int IndirectFitDataModel::getNumberOfSpectra(TableDatasetIndex index) const {
-  if (index < m_fittingData.size())
-    return m_fittingData[index.value].numberOfSpectra().value;
+  if (index < m_fittingData->size())
+    return m_fittingData->at(index.value).numberOfSpectra().value;
   else
     throw std::runtime_error(
         "Cannot find the number of spectra for a workspace: the workspace "
@@ -77,7 +87,7 @@ int IndirectFitDataModel::getNumberOfSpectra(TableDatasetIndex index) const {
 
 int IndirectFitDataModel::getNumberOfDomains() const {
   int sum{0};
-  for (auto fittingData : m_fittingData) {
+  for (auto fittingData : *m_fittingData) {
     sum += fittingData.numberOfSpectra().value;
   }
   return sum;
@@ -85,7 +95,7 @@ int IndirectFitDataModel::getNumberOfDomains() const {
 
 std::vector<double> IndirectFitDataModel::getQValuesForData() const {
   std::vector<double> qValues{1};
-  for (auto &fitData : m_fittingData) {
+  for (auto &fitData : *m_fittingData) {
     auto indexQValues = fitData.getQValues();
     qValues.insert(std::end(qValues), std::begin(indexQValues),
                    std::end(indexQValues));
@@ -96,15 +106,15 @@ std::vector<double> IndirectFitDataModel::getQValuesForData() const {
 std::vector<std::pair<std::string, int>>
 IndirectFitDataModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, int>> resolutionVector;
-  for (auto index = 0; index < m_resolutions.size(); ++index) {
+  for (auto index = 0; index < m_resolutions->size(); ++index) {
 
     auto spectra = getSpectra(TableDatasetIndex{index});
     auto singleSpectraResolution =
-        m_resolutions[index].lock()->getNumberHistograms() == 1;
+        m_resolutions->at(index).lock()->getNumberHistograms() == 1;
     for (auto &spectraIndex : spectra) {
       auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
       resolutionVector.emplace_back(std::make_pair(
-          m_resolutions[index].lock()->getName(), resolutionIndex));
+          m_resolutions->at(index).lock()->getName(), resolutionIndex));
     }
   }
   return resolutionVector;
@@ -115,10 +125,10 @@ void IndirectFitDataModel::setResolution(const std::string &name,
   if (!name.empty() && doesExistInADS(name)) {
     auto resolution = Mantid::API::AnalysisDataService::Instance()
                           .retrieveWS<Mantid::API::MatrixWorkspace>(name);
-    if (m_resolutions.size() > index.value) {
-      m_resolutions[index.value] = resolution;
-    } else if (m_resolutions.size() == index.value) {
-      m_resolutions.emplace_back(resolution);
+    if (m_resolutions->size() > index.value) {
+      m_resolutions->at(index.value) = resolution;
+    } else if (m_resolutions->size() == index.value) {
+      m_resolutions->emplace_back(resolution);
     } else {
       throw std::out_of_range("Provided resolution index '" +
                               std::to_string(index.value) +
@@ -136,22 +146,22 @@ void IndirectFitDataModel::setSpectra(const std::string &spectra,
 
 void IndirectFitDataModel::setSpectra(Spectra &&spectra,
                                       TableDatasetIndex dataIndex) {
-  if (m_fittingData.empty())
+  if (m_fittingData->empty())
     return;
-  m_fittingData[dataIndex.value].setSpectra(std::forward<Spectra>(spectra));
+  m_fittingData->at(dataIndex.value).setSpectra(std::forward<Spectra>(spectra));
 }
 
 void IndirectFitDataModel::setSpectra(const Spectra &spectra,
                                       TableDatasetIndex dataIndex) {
-  if (m_fittingData.empty())
+  if (m_fittingData->empty())
     return;
-  m_fittingData[dataIndex.value].setSpectra(spectra);
+  m_fittingData->at(dataIndex.value).setSpectra(spectra);
 }
 
 std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
   std::vector<std::string> names;
-  names.reserve(m_fittingData.size());
-  for (auto fittingData : m_fittingData)
+  names.reserve(m_fittingData->size());
+  for (auto fittingData : *m_fittingData)
     names.emplace_back(fittingData.workspace()->getName());
   return names;
 }
@@ -190,9 +200,9 @@ void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
 
 void IndirectFitDataModel::addWorkspace(
     Mantid::API ::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
-  if (!m_fittingData.empty() &&
-      equivalentWorkspaces(workspace, m_fittingData.back().workspace()))
-    m_fittingData.back().combine(IndirectFitData(workspace, spectra));
+  if (!m_fittingData->empty() &&
+      equivalentWorkspaces(workspace, m_fittingData->back().workspace()))
+    m_fittingData->back().combine(IndirectFitData(workspace, spectra));
   else
     addNewWorkspace(workspace, spectra);
 }
@@ -201,7 +211,7 @@ FitDomainIndex
 IndirectFitDataModel::getDomainIndex(TableDatasetIndex dataIndex,
                                      WorkspaceIndex spectrum) const {
   FitDomainIndex index{0};
-  for (int iws = 0; iws < m_fittingData.size(); ++iws) {
+  for (int iws = 0; iws < m_fittingData->size(); ++iws) {
     if (iws < dataIndex.value) {
       index += getNumberOfSpectra(iws);
     } else {
@@ -218,14 +228,14 @@ IndirectFitDataModel::getDomainIndex(TableDatasetIndex dataIndex,
   return index;
 }
 
-void IndirectFitDataModel::clear() { m_fittingData.clear(); }
+void IndirectFitDataModel::clear() { m_fittingData->clear(); }
 
 std::pair<double, double>
 IndirectFitDataModel::getFittingRange(TableDatasetIndex dataIndex,
                                       WorkspaceIndex spectrum) const {
-  if (dataIndex.value < m_fittingData.size() &&
-      !m_fittingData[dataIndex.value].zeroSpectra()) {
-    return m_fittingData[dataIndex.value].getRange(spectrum);
+  if (dataIndex.value < m_fittingData->size() &&
+      !m_fittingData->at(dataIndex.value).zeroSpectra()) {
+    return m_fittingData->at(dataIndex.value).getRange(spectrum);
   }
   return std::make_pair(0., 0.);
 }
@@ -233,69 +243,79 @@ IndirectFitDataModel::getFittingRange(TableDatasetIndex dataIndex,
 std::string
 IndirectFitDataModel::getExcludeRegion(TableDatasetIndex dataIndex,
                                        WorkspaceIndex spectrum) const {
-  if (dataIndex.value < m_fittingData.size() &&
-      !m_fittingData[dataIndex.value].zeroSpectra()) {
-    return m_fittingData[dataIndex.value].getExcludeRegion(spectrum);
+  if (dataIndex.value < m_fittingData->size() &&
+      !m_fittingData->at(dataIndex.value).zeroSpectra()) {
+    return m_fittingData->at(dataIndex.value).getExcludeRegion(spectrum);
   }
   return "";
 }
 
 void IndirectFitDataModel::setStartX(double startX, TableDatasetIndex dataIndex,
                                      WorkspaceIndex spectrum) {
-  if (m_fittingData.empty())
+  if (m_fittingData->empty())
     return;
-  m_fittingData[dataIndex.value].setStartX(startX, spectrum);
+  m_fittingData->at(dataIndex.value).setStartX(startX, spectrum);
 }
 
 void IndirectFitDataModel::setStartX(double startX,
                                      TableDatasetIndex dataIndex) {
-  if (m_fittingData.empty())
+  if (m_fittingData->empty())
     return;
-  m_fittingData[dataIndex.value].setStartX(startX);
+  m_fittingData->at(dataIndex.value).setStartX(startX);
 }
 
 void IndirectFitDataModel::setEndX(double endX, TableDatasetIndex dataIndex,
                                    WorkspaceIndex spectrum) {
-  if (m_fittingData.empty())
+  if (m_fittingData->empty())
     return;
-  m_fittingData[dataIndex.value].setEndX(endX, spectrum);
+  m_fittingData->at(dataIndex.value).setEndX(endX, spectrum);
 }
 
 void IndirectFitDataModel::setEndX(double endX, TableDatasetIndex dataIndex) {
-  if (m_fittingData.empty())
+  if (m_fittingData->empty())
     return;
-  m_fittingData[dataIndex.value].setEndX(endX);
+  m_fittingData->at(dataIndex.value).setEndX(endX);
 }
 
 void IndirectFitDataModel::setExcludeRegion(const std::string &exclude,
                                             TableDatasetIndex dataIndex,
                                             WorkspaceIndex spectrum) {
-  if (m_fittingData.empty())
+  if (m_fittingData->empty())
     return;
-  m_fittingData[dataIndex.value].setExcludeRegionString(exclude, spectrum);
+  m_fittingData->at(dataIndex.value).setExcludeRegionString(exclude, spectrum);
 }
 
 void IndirectFitDataModel::addNewWorkspace(
     const Mantid::API::MatrixWorkspace_sptr &workspace,
     const Spectra &spectra) {
-  m_fittingData.emplace_back(IndirectFitData(std::move(workspace), spectra));
+  m_fittingData->emplace_back(IndirectFitData(std::move(workspace), spectra));
 }
 
 void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {
-  m_fittingData.erase(m_fittingData.begin() + index.value);
+  m_fittingData->erase(m_fittingData->begin() + index.value);
 }
 
 void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
   auto subIndices = getSubIndices(fitDomainIndex);
-  m_fittingData.at(subIndices.first.value)
+  m_fittingData->at(subIndices.first.value)
       .getMutableSpectra()
       .erase(subIndices.second);
 }
 
+void IndirectFitDataModel::switchToSingleInputMode() {
+  m_fittingData = m_fittingDataSingle.get();
+  m_resolutions = m_resolutionsSingle.get();
+};
+
+void IndirectFitDataModel::switchToMultipleInputMode() {
+  m_fittingData = m_fittingDataMultiple.get();
+  m_resolutions = m_resolutionsMultiple.get();
+};
+
 std::vector<double>
 IndirectFitDataModel::getExcludeRegionVector(TableDatasetIndex dataIndex,
                                              WorkspaceIndex index) const {
-  auto fitData = m_fittingData[dataIndex.value];
+  auto fitData = m_fittingData->at(dataIndex.value);
   return fitData.excludeRegionsVector(index);
 }
 
@@ -330,14 +350,15 @@ std::string IndirectFitDataModel::getExcludeRegion(FitDomainIndex index) const {
 std::pair<TableDatasetIndex, WorkspaceIndex>
 IndirectFitDataModel::getSubIndices(FitDomainIndex index) const {
   int sum{0};
-  for (int datasetIndex = 0; datasetIndex < m_fittingData.size();
+  for (int datasetIndex = 0; datasetIndex < m_fittingData->size();
        datasetIndex++) {
     for (int workspaceIndex = 0;
-         workspaceIndex < m_fittingData[datasetIndex].spectra().size().value;
+         workspaceIndex <
+         m_fittingData->at(datasetIndex).spectra().size().value;
          workspaceIndex++) {
       if (sum == index.value) {
         WorkspaceIndex spectraIndex =
-            m_fittingData[datasetIndex]
+            m_fittingData->at(datasetIndex)
                 .spectra()[FitDomainIndex{workspaceIndex}];
         return std::make_pair(TableDatasetIndex{datasetIndex}, spectraIndex);
       }

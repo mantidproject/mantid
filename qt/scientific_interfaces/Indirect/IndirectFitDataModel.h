@@ -84,6 +84,9 @@ public:
   std::pair<TableDatasetIndex, WorkspaceIndex>
       getSubIndices(FitDomainIndex) const override;
 
+  void switchToSingleInputMode() override;
+  void switchToMultipleInputMode() override;
+
 protected:
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
@@ -93,8 +96,16 @@ private:
       const Mantid::API::MatrixWorkspace_sptr &workspace,
       const Spectra &spectra);
 
-  std::vector<IndirectFitData> m_fittingData;
-  std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>> m_resolutions;
+  std::vector<IndirectFitData> *m_fittingData;
+  std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>> *m_resolutions;
+
+  std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataSingle;
+  std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>
+      m_resolutionsSingle;
+
+  std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataMultiple;
+  std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>
+      m_resolutionsMultiple;
 };
 
 } // namespace IDA

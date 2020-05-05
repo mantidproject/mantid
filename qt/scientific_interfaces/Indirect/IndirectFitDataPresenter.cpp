@@ -156,16 +156,12 @@ void IndirectFitDataPresenter::setExclude(const std::string &exclude,
 }
 
 void IndirectFitDataPresenter::setModelFromSingleData() {
-  // m_multipleData =
-  m_model->clearWorkspaces();
-  // m_model->setFittingData(std::move(m_singleData));
+  m_model->switchToSingleInputMode();
   emit dataChanged();
 }
 
 void IndirectFitDataPresenter::setModelFromMultipleData() {
-  // m_singleData =
-  m_model->clearWorkspaces();
-  // m_model->setFittingData(std::move(m_multipleData));
+  m_model->switchToMultipleInputMode();
   emit dataChanged();
 }
 

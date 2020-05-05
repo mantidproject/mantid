@@ -20,19 +20,6 @@ namespace IDA {
 using IndirectFitDataCollectionType =
     IndexCollectionType<TableDatasetIndex, std::unique_ptr<IndirectFitData>>;
 
-struct PrivateFittingData {
-  friend class IndirectFittingModel;
-
-public:
-  PrivateFittingData();
-  PrivateFittingData &operator=(PrivateFittingData &&fittingData);
-
-private:
-  PrivateFittingData(PrivateFittingData &&privateData);
-  PrivateFittingData(IndirectFitDataCollectionType &&data);
-  IndirectFitDataCollectionType m_data;
-};
-
 /*
     IIndirectFitData - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
@@ -99,6 +86,9 @@ public:
 
   virtual std::pair<TableDatasetIndex, WorkspaceIndex>
       getSubIndices(FitDomainIndex) const = 0;
+
+  virtual void switchToSingleInputMode() = 0;
+  virtual void switchToMultipleInputMode() = 0;
 };
 
 } // namespace IDA
