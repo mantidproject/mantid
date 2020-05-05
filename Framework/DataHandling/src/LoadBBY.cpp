@@ -498,7 +498,7 @@ void LoadBBY::loadInstrumentParameters(
       try {
         auto stag = boost::algorithm::trim_copy(tag);
         size_t sz = 0;
-        auto value = std::stod(stag, &sz);
+        std::stod(stag, &sz);
         return sz > 0 && stag.size() == sz;
       } catch (const std::invalid_argument &) {
         return false;
