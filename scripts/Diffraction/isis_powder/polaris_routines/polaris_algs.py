@@ -9,7 +9,6 @@ import math
 
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
-from mantid.kernel import logger
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict

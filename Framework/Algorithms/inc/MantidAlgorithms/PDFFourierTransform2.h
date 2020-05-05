@@ -49,14 +49,12 @@ private:
   void convertToLittleGRPlus1(std::vector<double> &FOfR, std::vector<double> &R,
                               std::vector<double> &DFOfR,
                               std::vector<double> &DR);
-  API::MatrixWorkspace_sptr PDFFourierTransform2::createOutputWorkspace();
-  void
-  PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ,
-                                            HistogramData::HistogramX &Q,
-                                            HistogramData::HistogramE &DFOfQ);
-  void PDFFourierTransform2::convertFromLittleGRPlus1(
-      HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
-      HistogramData::HistogramE &DFOfR);
+  void convertFromSQMinus1(HistogramData::HistogramY &FOfQ,
+                           HistogramData::HistogramX &Q,
+                           HistogramData::HistogramE &DFOfQ);
+  void convertFromLittleGRPlus1(HistogramData::HistogramY &FOfR,
+                                HistogramData::HistogramX &R,
+                                HistogramData::HistogramE &DFOfR);
 };
 
 } // namespace Algorithms

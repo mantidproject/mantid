@@ -57,7 +57,6 @@ const string FORWARD("Forward");
 
 const string BACKWARD("Backward");
 
-constexpr double TWO_OVER_PI(2. / M_PI);
 } // namespace
 
 const std::string PDFFourierTransform2::name() const {
@@ -96,7 +95,7 @@ void PDFFourierTransform2::init() {
   soqTypes.emplace_back(Q_S_OF_Q_MINUS_ONE);
   declareProperty("InputSofQType", S_OF_Q,
                   std::make_shared<StringListValidator>(soqTypes),
-                  "To identify spectral density function");
+                  "To identify spectral density function (depricated)");
   setPropertySettings("InputSofQType", std::make_unique<InvisibleProperty>());
   declareProperty("SofQType", S_OF_Q,
                   std::make_shared<StringListValidator>(soqTypes),
@@ -272,8 +271,9 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
                                              std::vector<double> &DQ) {
   // convert to Q[S(Q)-1]
   string soqType = getProperty("SofQType");
+  string inputSOQType = getProperty("InputSofQType");
   if (!isDefault("InputSofQType") && isDefault("SofQType")) {
-    soqType = getProperty("InputSofQType");
+    soqType = inputSOQType;
     g_log.warning()
         << "InputSofQType has been deprecated and replaced by SofQType\n";
   }
@@ -339,8 +339,9 @@ void PDFFourierTransform2::convertFromSQMinus1(
     HistogramData::HistogramE &DFOfQ) {
   // convert to S(Q)-1string
   string soqType = getProperty("SofQType");
+  string inputSOQType = getProperty("InputSofQType");
   if (!isDefault("InputSofQType") && isDefault("SofQType")) {
-    soqType = getProperty("InputSofQType");
+    soqType = inputSOQType;
     g_log.warning()
         << "InputSofQType has been deprecated and replaced by SofQType\n";
   }
@@ -444,31 +445,24 @@ void PDFFourierTransform2::exec() {
   }
 
   // convert to S(Q)-1 or g(R)+1
-  double inDelta, inMin, inMax, outDelta, outMin, outMax;
   if (direction == FORWARD) {
     convertToSQMinus1(inputY, inputX, inputDY, inputDX);
-    inDelta = getProperty("DeltaQ");
-    inMin = getProperty("Qmin");
-    inMax = getProperty("Qmax");
-    outDelta = getProperty("DeltaR");
-    outMin = getProperty("Rmin");
-    if (isEmpty(outMin)) {
-      outMin = 0;
-    }
-    outMax = getProperty("Rmax");
-    if (isEmpty(outMax)) {
-      outMax = 20;
-    }
-  } else {
+  } else if (direction == BACKWARD) {
     convertToLittleGRPlus1(inputY, inputX, inputDY, inputDX);
-    inDelta = getProperty("DeltaR");
+  }
+
+  double inMin, inMax, outDelta, outMax;
+  inMin = getProperty("Qmin");
+  inMax = getProperty("Qmax");
+  outDelta = getProperty("DeltaR");
+  outMax = getProperty("Rmax");
+  if (isEmpty(outMax)) {
+    outMax = 20;
+  }
+  if (direction == BACKWARD) {
     inMin = getProperty("Rmin");
     inMax = getProperty("Rmax");
     outDelta = getProperty("DeltaQ");
-    outMin = getProperty("Qmin");
-    if (isEmpty(outMin)) {
-      outMin = 0;
-    }
     outMax = getProperty("Qmax");
     if (isEmpty(outMax)) {
       outMax = 40;
@@ -507,7 +501,7 @@ void PDFFourierTransform2::exec() {
     outputWS->mutableRun().addProperty("Rmax", inputX[Xmax_index], "Angstroms",
                                        true);
   }
-  outputWS->setDistribution(TRUE);
+  outputWS->setDistribution(true);
   BinEdges edges(sizer + 1, LinearGenerator(outDelta, outDelta));
   outputWS->setBinEdges(0, edges);
   auto &outputX = outputWS->mutableX(0);
