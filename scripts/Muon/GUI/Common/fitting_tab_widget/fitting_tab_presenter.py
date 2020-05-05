@@ -58,7 +58,7 @@ class FittingTabPresenter(object):
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.update_view_from_model)
 
-        self.update_model_from_view()
+        self.initialise_model_options()
 
     @property
     def selected_data(self):
@@ -81,7 +81,6 @@ class FittingTabPresenter(object):
         return self._end_x
 
     # Respond to changes on view
-
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
             self.context.data_context.current_runs,
@@ -130,6 +129,8 @@ class FittingTabPresenter(object):
         else:
             self.selected_data = self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(
                 self.selected_data)
+        self.update_model_from_view(fit_to_raw=self.view.fit_to_raw)
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_type_changed(self):
         self.view.undo_fit_button.setEnabled(False)
@@ -147,10 +148,11 @@ class FittingTabPresenter(object):
             self._update_stored_fit_functions()
             self.view.disable_simul_fit_options()
 
-        self.update_model_from_view()
+        self.update_model_from_view(fit_function=self._fit_function[0], fit_type=self._get_fit_type(),
+                                    fit_by=self.view.simultaneous_fit_by)
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
-        # Send the workpsaces to be plotted
+        # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
         self.handle_plot_guess_changed()
 
@@ -203,13 +205,19 @@ class FittingTabPresenter(object):
         value = self.view.start_time
         index = self.view.get_index_for_start_end_times()
         self.update_start_x(index, value)
-        self.update_model_from_view()
+        self.update_model_from_view(startX=value)
 
     def handle_end_x_updated(self):
         value = self.view.end_time
         index = self.view.get_index_for_start_end_times()
         self.update_end_x(index, value)
-        self.update_model_from_view()
+        self.update_model_from_view(endX=value)
+
+    def handle_minimiser_changed(self):
+        self.update_model_from_view(minimiser=self.view.minimizer)
+
+    def handle_evaluation_type_changed(self):
+        self.update_model_from_view(evaluation_type=self.view.evaluation_type)
 
     def handle_fit_name_changed_by_user(self):
         self.automatically_update_fit_name = False
@@ -240,7 +248,8 @@ class FittingTabPresenter(object):
             self.view.function_name = self.model.get_function_name(name)
             self.model.function_name = self.view.function_name
 
-        self.update_model_from_view()
+        self.update_model_from_view(fit_function=self._fit_function[0],
+                                    global_parameters=self.view.get_global_parameters())
 
         self.fit_function_changed_notifier.notify_subscribers()
 
@@ -305,7 +314,7 @@ class FittingTabPresenter(object):
 
         self.update_fit_status_information_in_view()
         self.handle_display_workspace_changed()
-        self.update_model_from_view()
+        self.update_model_from_view(fit_function=self._fit_function[0], tf_asymmetry_mode=self.view.tf_asymmetry_mode)
         self.fit_function_changed_notifier.notify_subscribers()
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
@@ -341,11 +350,10 @@ class FittingTabPresenter(object):
 
     def handle_fit_by_changed(self):
         self.manual_selection_made = False  # reset manual selection flag
-        if self.view.is_simul_fit():
-            self.update_selected_workspace_list_for_fit()
-            self.view.simul_fit_by_specifier.setEnabled(True)
-            self.view.select_workspaces_to_fit_button.setEnabled(False)
-        self.update_model_from_view()
+        self.update_selected_workspace_list_for_fit()
+        self.view.simul_fit_by_specifier.setEnabled(True)
+        self.view.select_workspaces_to_fit_button.setEnabled(False)
+        self.update_model_from_view(fit_function=self._fit_function[0], fit_by=self.view.simultaneous_fit_by)
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
         # Send the workspaces to be plotted
@@ -394,6 +402,7 @@ class FittingTabPresenter(object):
 
         self.reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
+        self.update_model_from_view(fit_function=self._fit_function[0])
         self.update_fit_status_information_in_view()
 
     def clear_fit_information(self):
@@ -411,8 +420,6 @@ class FittingTabPresenter(object):
             self.update_fit_specifier_list()
         else:
             self.selected_data = self.get_workspace_selected_list()
-
-        self.update_model_from_view()
 
     def get_workspace_selected_list(self):
         if self.context._frequency_context is not None:
@@ -529,17 +536,17 @@ class FittingTabPresenter(object):
         else:
             self.selected_data = []
 
-    def update_model_from_view(self):
-        self.model.update_model_fit_options(self._get_fit_type(),
-                                            self.view.simultaneous_fit_by,
-                                            self._fit_function[0],
-                                            self.start_x[0],
-                                            self.end_x[0],
-                                            self.view.minimizer,
-                                            self.view.evaluation_type,
-                                            self.view.fit_to_raw,
-                                            self.view.get_global_parameters(),
-                                            self.view.tf_asymmetry_mode)
+    def update_model_from_view(self, **kwargs):
+        self.model.update_model_fit_options(**kwargs)
+
+    def initialise_model_options(self):
+        fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0],
+                           "minimiser": self.view.minimizer, "evaluation_type": self.view.evaluation_type,
+                           "fit_to_raw": self.view.fit_to_raw, "fit_type": self._get_fit_type(),
+                           "fit_by": self.view.simultaneous_fit_by,
+                           "global_parameters": self.view.get_global_parameters(),
+                           "tf_asymmetry_mode": self.view.tf_asymmetry_mode}
+        self.model.update_model_fit_options(**fitting_options)
 
     def _get_fit_type(self):
         if self.view.is_simul_fit():

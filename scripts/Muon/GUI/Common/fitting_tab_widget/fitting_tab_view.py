@@ -153,8 +153,11 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def set_slot_for_simul_fit_specifier_changed(self, slot):
         self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
-    def set_slot_for_fit_options_changed(self, slot):
-        self.fit_options_table.cellChanged.connect(slot)
+    def set_slot_for_minimiser_changed(self, slot):
+        self.minimizer_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_evaluation_type_changed(self, slot):
+        self.evaluation_combo.currentIndexChanged.connect(slot)
 
     @property
     def display_workspace(self):

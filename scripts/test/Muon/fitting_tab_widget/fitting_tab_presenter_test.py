@@ -115,52 +115,19 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.function_browser.getDatasetNames(), ['Input Workspace Name'])
 
-    # def test_fit_clicked_with_simultaneous_selected_and_no_globals(self):
-    #     self.presenter.model.get_function_name.return_value = 'GausOsc'
-    #     self.presenter.get_workspace_selected_list = mock.MagicMock(
-    #         return_value=['Input Workspace Name_1', 'Input Workspace Name 2'])
-    #     self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-    #     self.view.simul_fit_checkbox.setChecked(True)
-    #     self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
-    #                                                              'Fit Succeeded', 0.5)
-    #
-    #     self.view.fit_button.clicked.emit(True)
-    #     wait_for_thread(self.presenter.calculation_thread)
-    #
-    #     simultaneous_call_args = self.presenter.model.do_simultaneous_fit.call_args
-    #     call_args_dict = simultaneous_call_args[0][0]
-    #
-    #     self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
-    #     self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
-    #     self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
-    #     self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
-    #
-    #     call_args_globals = simultaneous_call_args[0][1]
-    #     self.assertEqual(call_args_globals, [])
+    def test_fit_clicked_passes_in_correct_arguments_to_model(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
+        self.presenter.get_fit_input_workspaces = mock.MagicMock(
+            return_value=['Input Workspace Name_1', 'Input Workspace Name 2'])
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.evaluate_single_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                                 'Fit Succeeded', 0.5)
 
-    # def test_fit_clicked_with_simultaneous_selected_with_global_parameters(self):
-    #     self.presenter.model.get_function_name.return_value = 'GausOsc'
-    #     self.presenter.get_workspace_selected_list = mock.MagicMock(
-    #         return_value=['Input Workspace Name_1', 'Input Workspace Name 2'])
-    #     self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-    #     self.view.simul_fit_checkbox.setChecked(True)
-    #     self.view.function_browser.setGlobalParameters(['A'])
-    #     self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
-    #                                                              'Fit Suceeded', 0.5)
-    #
-    #     self.view.fit_button.clicked.emit(True)
-    #     wait_for_thread(self.presenter.calculation_thread)
-    #
-    #     simultaneous_call_args = self.presenter.model.do_simultaneous_fit.call_args
-    #
-    #     call_args_dict = simultaneous_call_args[0][0]
-    #     self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
-    #     self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
-    #     self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
-    #     self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
-    #
-    #     call_args_globals = simultaneous_call_args[0][1]
-    #     self.assertEqual(call_args_globals, ['A'])
+        self.view.fit_button.clicked.emit(True)
+        wait_for_thread(self.presenter.calculation_thread)
+
+        fit_call_args = self.presenter.model.evaluate_single_fit.call_args
+        self.assertEqual(fit_call_args[0][0], ['Input Workspace Name_1', 'Input Workspace Name 2'])
 
     def test_fit_function_updates_correctly_and_resets_gui_state_if_new_data_is_selected_and_single_fit(self):
         self.presenter._fit_status = ['success']
@@ -295,7 +262,6 @@ class FittingTabPresenterTest(unittest.TestCase):
                                         'MUSR22725; Group; fwd; Asymmetry']
         self.view.is_simul_fit = mock.MagicMock(return_value=True)
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        multi_domain_function = create_multi_domain_function([fit_function] * 3)
         self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.parameter_display_combo.setCurrentIndex(1)
         self.view.function_browser.setParameter('A', 3)
@@ -665,6 +631,54 @@ class FittingTabPresenterTest(unittest.TestCase):
         wait_for_thread(self.presenter.calculation_thread)
 
         self.assertEqual(self.presenter.handle_finished.call_count, 1)
+
+    def test_fit_function_structure_changed_updates_model(self):
+        self.view.function_browser.blockSignals(True)
+        fit_function_string = 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'
+        self.view.function_browser.setFunction(fit_function_string)
+        self.view.function_browser.setGlobalParameters(['A'])
+        self.view.function_browser.blockSignals(False)
+
+        self.view.function_browser.functionStructureChanged.emit()
+
+        self.presenter.model.update_model_fit_options.assert_called_once_with(fit_function=mock.ANY,
+                                                                              global_parameters=['A'])
+        fit_function_arg = self.presenter.model.update_model_fit_options.call_args[1]["fit_function"]
+        self.assertEqual(str(fit_function_arg), fit_function_string)
+
+    def test_start_x_changed_updates_model(self):
+        self.view.start_time = 1
+
+        self.view.time_start.editingFinished.emit()
+
+        self.presenter.model.update_model_fit_options.assert_called_once_with(startX=1)
+
+    def test_end_x_changed_updates_model(self):
+        self.view.end_time = 10
+
+        self.view.time_end.editingFinished.emit()
+
+        self.presenter.model.update_model_fit_options.assert_called_once_with(endX=10)
+
+    def test_evaluation_type_changed_updates_model(self):
+        self.view.evaluation_combo.addItems(["CentrePoint", "Histogram"])
+
+        self.view.evaluation_combo.setCurrentIndex(1)
+
+        self.presenter.model.update_model_fit_options.assert_called_once_with(evaluation_type="Histogram")
+
+    def test_minimiser_changed_updates_model(self):
+        self.view.minimizer_combo.addItems(["Simplex", "BFGS"])
+
+        self.view.minimizer_combo.setCurrentIndex(1)
+
+        self.presenter.model.update_model_fit_options.assert_called_once_with(minimiser="BFGS")
+
+    def test_use_raw_changed_updates_model(self):
+        self.context.gui_context["RebinType"] = 'Fixed'
+        self.view.fit_to_raw_data_checkbox.setChecked(False)
+
+        self.presenter.model.update_model_fit_options.assert_called_once_with(fit_to_raw=True)
 
 
 if __name__ == '__main__':

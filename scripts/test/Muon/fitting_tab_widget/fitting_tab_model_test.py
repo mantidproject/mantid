@@ -35,10 +35,8 @@ class FittingTabModelTest(unittest.TestCase):
     def setUp(self):
         self.model = FittingTabModel(setup_context())
         self.model.context.ads_observer.unsubscribe()
-        self.model.startX = START_X
-        self.model.endX = END_X
-        self.model.evaluation_type = EVALUATION_TYPE
-        self.model.minimiser = MINIMISER
+        self.model.fitting_options = {"startX": START_X, "endX": END_X, "evaluation_type": EVALUATION_TYPE,
+                                      "minimiser": MINIMISER, "fit_type": "Single", "tf_asymmetry_mode": False}
 
     def setup_fit_workspace_map(self, workspace_list, fit_functions):
         self.model.ws_fit_function_map = {}
@@ -192,8 +190,8 @@ class FittingTabModelTest(unittest.TestCase):
             self.model.change_plot_guess(True, workspace_names=['ws'], index=0)
             mock_evaluate.assert_called_with(InputWorkspace='ws',
                                              Function='func',
-                                             StartX=self.model.startX,
-                                             EndX=self.model.endX,
+                                             StartX=START_X,
+                                             EndX=END_X,
                                              OutputWorkspace='__unknown_interface_fitting_guess')
 
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.mantid')
@@ -205,8 +203,8 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.change_plot_guess(True, workspace_names=['ws'], index=0)
         mock_evaluate.assert_called_with(InputWorkspace='ws',
                                          Function='func',
-                                         StartX=self.model.startX,
-                                         EndX=self.model.endX,
+                                         StartX=START_X,
+                                         EndX=END_X,
                                          OutputWorkspace='__unknown_interface_fitting_guess')
         mock_mantid.logger.error.assert_called_with('Could not evaluate the function.')
         self.assertEqual(0, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
@@ -220,15 +218,14 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.change_plot_guess(True, workspace_names=['ws'], index=0)
         mock_evaluate.assert_called_with(InputWorkspace='ws',
                                          Function='func',
-                                         StartX=self.model.startX,
-                                         EndX=self.model.endX,
+                                         StartX=START_X,
+                                         EndX=END_X,
                                          OutputWorkspace='__unknown_interface_fitting_guess')
         self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
         self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True,
                                                                                         '__unknown_interface_fitting_guess')
 
     def test_evaluate_single_fit_calls_correctly_for_single_fit(self):
-        self.model.fit_type = "Single"
         workspace = ["MUSR:62260;bwd"]
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_single_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
@@ -240,9 +237,9 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.do_single_fit.assert_called_once_with(parameter_dict)
 
     def test_evaluate_single_fit_calls_correct_function_for_simultaneous_fit(self):
-        self.model.fit_type = "Simultaneous"
+        self.model.fitting_options["fit_type"] = "Simultaneous"
+        self.model.fitting_options["global_parameters"] = ['A0']
         workspace = ["MUSR:62260;bwd"]
-        self.model.global_parameters = ['A0']
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_simultaneous_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         parameter_dict = {'Test': 0}
@@ -253,8 +250,8 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.do_simultaneous_fit.assert_called_once_with(parameter_dict, ['A0'])
 
     def test_evaluate_single_fit_calls_correctly_for_single_tf_fit(self):
-        self.model.fit_type = "Single"
         self.model.tf_asymmetry_mode = True
+        self.model.fitting_options["tf_asymmetry_mode"] = True
         workspace = ["MUSR:62260;bwd"]
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_single_tf_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
@@ -266,10 +263,10 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.do_single_tf_fit.assert_called_once_with(parameter_dict)
 
     def test_evaluate_single_fit_calls_correct_function_for_simultaneous_tf_fit(self):
-        self.model.fit_type = "Simultaneous"
-        self.model.tf_asymmetry_mode = True
+        self.model.fitting_options["fit_type"] = "Simultaneous"
+        self.model.fitting_options["global_parameters"] = ['A0']
+        self.model.fitting_options["tf_asymmetry_mode"] = True
         workspace = ["MUSR:62260;bwd"]
-        self.model.global_parameters = ['A0']
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_simultaneous_tf_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         parameter_dict = {'Test': 0}
