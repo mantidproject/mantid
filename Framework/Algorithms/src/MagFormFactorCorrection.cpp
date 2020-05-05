@@ -39,8 +39,7 @@ void MagFormFactorCorrection::init() {
                                                         Direction::Output),
                   "Output workspace name.");
   std::vector<std::string> keys = getMagneticIonList();
-  declareProperty("IonName", "Cu2",
-                  boost::make_shared<StringListValidator>(keys),
+  declareProperty("IonName", "Cu2", std::make_shared<StringListValidator>(keys),
                   "The name of the ion: an element symbol with a number "
                   "indicating the valence, e.g. Fe2 for Fe2+ / Fe(II)");
   declareProperty(std::make_unique<WorkspaceProperty<>>("FormFactorWorkspace",
@@ -96,9 +95,11 @@ void MagFormFactorCorrection::exec() {
   // Gets the vector of form factor values
   std::vector<double> FF;
   FF.reserve(Qvals.size());
-  for (double Qval : Qvals) {
-    FF.emplace_back(ion.analyticalFormFactor(Qval * Qval));
-  }
+
+  std::transform(
+      Qvals.begin(), Qvals.end(), std::back_inserter(FF),
+      [&ion](double qval) { return ion.analyticalFormFactor(qval * qval); });
+
   if (!ffwsStr.empty()) {
     HistogramBuilder builder;
     builder.setX(Qvals.size());

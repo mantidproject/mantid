@@ -7,8 +7,6 @@
 """
     Defines a set of aliases to make accessing certain objects easier
 """
-from __future__ import absolute_import
-
 from mantid.api import (AlgorithmFactoryImpl, AlgorithmManagerImpl, AnalysisDataServiceImpl, CatalogManagerImpl,
                         FileFinderImpl, FileLoaderRegistryImpl, FrameworkManagerImpl, FunctionFactoryImpl,
                         WorkspaceFactoryImpl)

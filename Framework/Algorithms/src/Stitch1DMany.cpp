@@ -14,7 +14,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -27,7 +27,7 @@ DECLARE_ALGORITHM(Stitch1DMany)
 void Stitch1DMany::init() {
 
   declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "InputWorkspaces", boost::make_shared<ADSValidator>()),
+                      "InputWorkspaces", std::make_shared<ADSValidator>()),
                   "List or group of MatrixWorkspaces");
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
@@ -35,7 +35,7 @@ void Stitch1DMany::init() {
                   "Stitched workspace.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Params", boost::make_shared<RebinParamsValidator>(true),
+                      "Params", std::make_shared<RebinParamsValidator>(true),
                       Direction::Input),
                   "Rebinning Parameters, see Rebin algorithm for format.");
 
@@ -73,7 +73,7 @@ void Stitch1DMany::init() {
       "The actual used values for the scaling factors at each stitch step.");
 
   auto scaleFactorFromPeriodValidator =
-      boost::make_shared<BoundedValidator<int>>();
+      std::make_shared<BoundedValidator<int>>();
   scaleFactorFromPeriodValidator->setLower(1);
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "ScaleFactorFromPeriod", 1,
@@ -116,8 +116,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
             AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(ws);
         if (groupWS) {
           for (size_t i = 0; i < groupWS->size(); i++) {
-            auto inputMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(
-                groupWS->getItem(i));
+            auto inputMatrix =
+                std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(i));
             if (inputMatrix) {
               column.emplace_back(inputMatrix);
             } else
@@ -269,8 +269,10 @@ void Stitch1DMany::exec() {
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
         std::vector<MatrixWorkspace_sptr> inMatrix;
         inMatrix.reserve(m_inputWSMatrix.size());
-        for (const auto &ws : m_inputWSMatrix)
-          inMatrix.emplace_back(ws[i]);
+
+        std::transform(m_inputWSMatrix.begin(), m_inputWSMatrix.end(),
+                       std::back_inserter(inMatrix),
+                       [i](const auto &ws) { return ws[i]; });
 
         outName = groupName;
         Workspace_sptr outStitchedWS;

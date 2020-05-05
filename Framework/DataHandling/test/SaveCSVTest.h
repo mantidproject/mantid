@@ -45,7 +45,7 @@ public:
     Workspace_sptr localWorkspace =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     Workspace2D_sptr localWorkspace2D_onePixel =
-        boost::dynamic_pointer_cast<Workspace2D>(localWorkspace);
+        std::dynamic_pointer_cast<Workspace2D>(localWorkspace);
 
     double d = 0.0;
     for (int i = 0; i < 10; ++i, d += 0.1) {
@@ -169,7 +169,8 @@ private:
     Poco::File(fileName).remove();
   }
 
-  void evaluateFileWithDX(std::string fileName, const size_t nSpec) const {
+  void evaluateFileWithDX(const std::string &fileName,
+                          const size_t nSpec) const {
     std::ifstream stream(fileName.c_str());
     std::istringstream dataStream;
     std::string line;

@@ -36,7 +36,6 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 #Make the reduction module available
-from __future__ import (absolute_import, division, print_function)
 from ISISCommandInterface import *
 import SANSUtility as su
 from mantid.simpleapi import *

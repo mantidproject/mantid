@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ This module contains bundle definitions for passing reduction settings between functions."""
-from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 
 # The ReductionSettingBundle contains the information and data for starting a SANSReductionCore reduction.

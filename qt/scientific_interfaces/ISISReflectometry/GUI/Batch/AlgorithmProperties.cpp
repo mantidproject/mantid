@@ -65,7 +65,7 @@ void updateFromMap(AlgorithmRuntimeProps &properties,
     update(kvp.first, kvp.second, properties);
   }
 }
-std::string getOutputWorkspace(IAlgorithm_sptr algorithm,
+std::string getOutputWorkspace(const IAlgorithm_sptr &algorithm,
                                std::string const &property) {
   auto const workspaceName = algorithm->getPropertyValue(property);
   return workspaceName;

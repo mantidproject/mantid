@@ -159,7 +159,7 @@ public:
   }
 
 private:
-  void validateFullResolutionWorkspace(MatrixWorkspace_sptr ws) {
+  void validateFullResolutionWorkspace(const MatrixWorkspace_sptr &ws) {
     NumericAxis *xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
     TS_ASSERT(xAxis);
     if (xAxis) {
@@ -177,7 +177,7 @@ private:
     }
   }
 
-  void validateFullDistributionWorkspace(MatrixWorkspace_sptr ws,
+  void validateFullDistributionWorkspace(const MatrixWorkspace_sptr &ws,
                                          const std::string &label) {
     NumericAxis *xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
     TS_ASSERT(xAxis);

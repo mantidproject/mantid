@@ -240,7 +240,7 @@ public:
   }
 
 private:
-  void ABCtestWorkspace(std::string inputWSname, bool mask) {
+  void ABCtestWorkspace(const std::string &inputWSname, bool mask) {
     int nSpectra(12);
     Workspace2D_sptr ws2D =
         WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(

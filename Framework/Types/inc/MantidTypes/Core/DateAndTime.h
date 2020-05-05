@@ -45,9 +45,9 @@ public:
   DateAndTime(const int32_t seconds, const int32_t nanoseconds);
   DateAndTime(const int64_t seconds, const int64_t nanoseconds);
   DateAndTime(const std::string &ISO8601_string);
-  DateAndTime(const boost::posix_time::ptime _ptime);
+  DateAndTime(const boost::posix_time::ptime &_ptime);
 
-  void set_from_ptime(boost::posix_time::ptime _ptime);
+  void set_from_ptime(const boost::posix_time::ptime &_ptime);
   boost::posix_time::ptime to_ptime() const;
 
   void set_from_time_t(std::time_t _timet);
@@ -59,7 +59,7 @@ public:
   void setFromISO8601(const std::string &str);
   std::string toSimpleString() const;
   std::string
-  toFormattedString(const std::string format = "%Y-%b-%d %H:%M:%S") const;
+  toFormattedString(const std::string &format = "%Y-%b-%d %H:%M:%S") const;
   std::string toISO8601String() const;
 
   /// Stream output operator
@@ -112,7 +112,7 @@ public:
   static DateAndTime getCurrentTime();
   static DateAndTime maximum();
   static DateAndTime minimum();
-  static double secondsFromDuration(time_duration duration);
+  static double secondsFromDuration(const time_duration &duration);
   static time_duration durationFromSeconds(double duration);
   static int64_t nanosecondsFromDuration(const time_duration &td);
   static int64_t nanosecondsFromSeconds(double sec);
@@ -179,8 +179,8 @@ inline DateAndTime DateAndTime::operator+(const double sec) const {
  */
 inline int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
   const double nano = sec * 1e9;
-  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
-  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
+  constexpr auto minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr auto maximum = static_cast<double>(MAX_NANOSECONDS);
   // Use these limits to avoid integer overflows
   if (nano > maximum)
     return MAX_NANOSECONDS;

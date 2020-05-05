@@ -8,7 +8,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {

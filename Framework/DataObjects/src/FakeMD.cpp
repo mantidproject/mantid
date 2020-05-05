@@ -54,7 +54,7 @@ FakeMD::FakeMD(const std::vector<double> &uniformParams,
  * @param workspace A pointer to MD event workspace to fill using the object
  * parameters
  */
-void FakeMD::fill(API::IMDEventWorkspace_sptr workspace) {
+void FakeMD::fill(const API::IMDEventWorkspace_sptr &workspace) {
   setupDetectorCache(*workspace);
 
   CALL_MDEVENT_FUNCTION(this->addFakePeak, workspace)

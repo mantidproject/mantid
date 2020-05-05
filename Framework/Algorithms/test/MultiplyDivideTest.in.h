@@ -9,6 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <stdexcept>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Divide.h"
@@ -240,11 +241,11 @@ public:
       work_out1 = work_in1*work_in2;
       work_out2 = work_in1*value;
       work_out3 = value*work_in2;
-      checkData(work_in2, boost::make_shared<WorkspaceSingleValue>(value), work_out3);
+      checkData(work_in2, std::make_shared<WorkspaceSingleValue>(value), work_out3);
     }
 
     checkData(work_in1, work_in2, work_out1);
-    checkData(work_in1, boost::make_shared<WorkspaceSingleValue>(value), work_out2);
+    checkData(work_in1, std::make_shared<WorkspaceSingleValue>(value), work_out2);
   }
 
   void test_2D_2DbyOperatorOverload_inPlace()
@@ -602,6 +603,10 @@ public:
     mess << "; RHS: grouping=" << rhs_grouping << ", 2D=" << rhs2D;
     message = mess.str();
 
+    if (lhs_grouping == 0 || rhs_grouping == 0){
+      throw std::runtime_error("Attempted div by zero in test");
+    }
+
     int numpix = 12;
     std::vector< std::vector<int> > lhs(numpix/lhs_grouping), rhs(numpix/rhs_grouping);
     for (int i=0; i<numpix; i++)
@@ -688,7 +693,7 @@ public:
   std::string describe_workspace(const MatrixWorkspace_sptr ws)
   {
     std::ostringstream mess;
-    EventWorkspace_const_sptr ews = boost::dynamic_pointer_cast<const EventWorkspace>(ws);
+    EventWorkspace_const_sptr ews = std::dynamic_pointer_cast<const EventWorkspace>(ws);
     if (ews)
       mess << "Event";
     else
@@ -765,12 +770,12 @@ public:
       //Check that the output is an event workspace?
       if (outputIsEvent)
       {
-        TSM_ASSERT( message, boost::dynamic_pointer_cast<EventWorkspace>(work_out1) );
+        TSM_ASSERT( message, std::dynamic_pointer_cast<EventWorkspace>(work_out1) );
       }
       else
       {
         // Check that it is NOT event
-        TSM_ASSERT( message, !(boost::dynamic_pointer_cast<EventWorkspace>(work_out1)) );
+        TSM_ASSERT( message, !(std::dynamic_pointer_cast<EventWorkspace>(work_out1)) );
       }
 
       if (algorithmWillCommute)

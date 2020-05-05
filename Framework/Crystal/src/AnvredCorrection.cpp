@@ -80,7 +80,7 @@ AnvredCorrection::AnvredCorrection()
 void AnvredCorrection::init() {
 
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<InstrumentValidator>();
+  auto wsValidator = std::make_shared<InstrumentValidator>();
 
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -90,7 +90,7 @@ void AnvredCorrection::init() {
                                                         Direction::Output),
                   "Output workspace name");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("LinearScatteringCoef", EMPTY_DBL(), mustBePositive,
                   "Linear scattering coefficient in 1/cm if not set with "
@@ -145,7 +145,7 @@ void AnvredCorrection::exec() {
 
   BuildLamdaWeights();
 
-  eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
+  eventW = std::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
     eventW->sortAll(TOF_SORT, nullptr);
   if ((getProperty("PreserveEvents")) && (eventW != nullptr) &&
@@ -359,7 +359,7 @@ void AnvredCorrection::retrieveBaseProperties() {
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
-    auto shape = boost::shared_ptr<IObject>(
+    auto shape = std::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInAnvredCorrection", neutron, 1.0)));
     m_inputWS->mutableSample().setShape(shape);
@@ -522,16 +522,16 @@ void AnvredCorrection::BuildLamdaWeights() {
 }
 
 void AnvredCorrection::scale_init(const IDetector &det,
-                                  Instrument_const_sptr inst, double &L2,
+                                  const Instrument_const_sptr &inst, double &L2,
                                   double &depth, double &pathlength,
                                   std::string &bankName) {
   bankName = det.getParent()->getParent()->getName();
   // Distance to center of detector
-  boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
+  std::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
   {
     std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
         inst->getComponentByName(bankName));
     asmb->getChildren(children, false);
     det0 = children[0];
@@ -542,7 +542,8 @@ void AnvredCorrection::scale_init(const IDetector &det,
 }
 
 void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
-                                  double &depth, Instrument_const_sptr inst,
+                                  double &depth,
+                                  const Instrument_const_sptr &inst,
                                   double &pathlength, double &value) {
   // correct for the slant path throught the scintillator glass
   double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass

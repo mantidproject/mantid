@@ -57,20 +57,20 @@ public:
 
   //----------------------------------------------------------------------------
   template <class WSTYPE>
-  boost::shared_ptr<WSTYPE> doTest(EventType type,
-                                   const std::string &BankNumbers) {
+  std::shared_ptr<WSTYPE> doTest(EventType type,
+                                 const std::string &BankNumbers) {
     EventWorkspace_sptr in_ws = makeTestWS(type);
     ConvertToDetectorFaceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
     alg.setPropertyValue("BankNumbers", BankNumbers);
     alg.setPropertyValue("OutputWorkspace", "output_md");
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted())
 
-    boost::shared_ptr<WSTYPE> ws;
+    std::shared_ptr<WSTYPE> ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<WSTYPE>("output_md"));
     TS_ASSERT(ws);
@@ -111,7 +111,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
     alg.setPropertyValue("BankNumbers", BankNumbers);
     alg.setPropertyValue("OutputWorkspace", "output_md");
     TS_ASSERT_THROWS_NOTHING(alg.execute();)

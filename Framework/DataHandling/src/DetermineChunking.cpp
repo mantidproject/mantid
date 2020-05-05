@@ -91,7 +91,7 @@ void DetermineChunking::init() {
       "typically of the form INST_####_event.nxs (N.B. case sensitive if "
       "running on Linux).");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("MaxChunkSize", EMPTY_DBL(), mustBePositive,
                   "Get chunking strategy for chunks with this number of "
@@ -292,7 +292,7 @@ void DetermineChunking::exec() {
 }
 
 /// set the name of the top level NXentry m_top_entry_name
-std::string DetermineChunking::setTopEntryName(std::string filename) {
+std::string DetermineChunking::setTopEntryName(const std::string &filename) {
   std::string top_entry_name;
   using string_map_t = std::map<std::string, std::string>;
   try {

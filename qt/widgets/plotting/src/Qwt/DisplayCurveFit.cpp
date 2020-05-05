@@ -76,7 +76,7 @@ void DisplayCurveFit::setAxisRange(QPair<double, double> range, AxisID axisID) {
  * @return a std::vector containing the curve types
  */
 DisplayCurveFit::curveTypes DisplayCurveFit::getCurvesForWorkspace(
-    const Mantid::API::MatrixWorkspace_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
   QStringList curveNames = m_uiForm.fitPlot->getCurvesForWorkspace(workspace);
   curveNames =
       curveNames + m_uiForm.residualsPlot->getCurvesForWorkspace(workspace);
@@ -103,7 +103,7 @@ QPair<double, double> DisplayCurveFit::getCurveRange(const curveType &atype) {
  * workspace
  */
 QPair<double, double> DisplayCurveFit::getCurveRange(
-    const Mantid::API::MatrixWorkspace_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
   curveTypes typesFound = this->getCurvesForWorkspace(workspace);
   if (typesFound.size() == 0) {
     throw std::runtime_error("No fitting curves associated to workspace" +
@@ -119,7 +119,7 @@ QPair<double, double> DisplayCurveFit::getCurveRange(
  * @param specIndex Spectrum index of workspace argument.
  */
 void DisplayCurveFit::addSpectrum(
-    const curveType &aType, const Mantid::API::MatrixWorkspace_sptr workspace,
+    const curveType &aType, const Mantid::API::MatrixWorkspace_sptr &workspace,
     const size_t specIndex) {
   const QString &curveName{m_curveTypeToQString.at(aType)};
   const QColor curveColor(m_curveTypeToColor.at(aType));

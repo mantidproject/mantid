@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import traceback
 
-import six
 from qtpy.QtCore import Slot, QThreadPool, Signal, QObject
-from six import itervalues
 
 from mantid.kernel import Logger
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states
@@ -73,10 +71,10 @@ class BatchProcessRunner(QObject):
             assert len(states) + len(errors) == 1, \
                 "Expected 1 error to return got {0}".format(len(states) + len(errors))
 
-            for error in itervalues(errors):
+            for error in errors.values():
                 self.row_failed_signal.emit(index, error)
 
-            for state in itervalues(states):
+            for state in states.values():
                 try:
                     out_scale_factors, out_shift_factors = \
                         self.batch_processor([state], use_optimizations, output_mode, plot_results, output_graph, save_can)
@@ -100,10 +98,10 @@ class BatchProcessRunner(QObject):
                 self._handle_err(index, e)
                 continue
 
-            for error in itervalues(errors):
+            for error in errors.values():
                 self.row_failed_signal.emit(index, error)
 
-            for state in itervalues(states):
+            for state in states.values():
                 try:
                     load_workspaces_from_states(state)
                     self.row_processed_signal.emit(index, [], [])
@@ -113,7 +111,6 @@ class BatchProcessRunner(QObject):
 
     def _handle_err(self, index, e):
         # We manually have to extract out the traceback, since going to a str for Qt signals will strip this
-        if six.PY3:
-            self._logger.error(''.join(traceback.format_tb(e.__traceback__)))
+        self._logger.error(''.join(traceback.format_tb(e.__traceback__)))
         self._logger.error(str(e))
         self.row_failed_signal.emit(index, str(e))

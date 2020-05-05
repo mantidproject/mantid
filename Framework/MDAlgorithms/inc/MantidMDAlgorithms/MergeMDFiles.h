@@ -54,7 +54,7 @@ private:
 
   void loadBoxData();
 
-  void doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
+  void doExecByCloning(const Mantid::API::IMDEventWorkspace_sptr &ws,
                        const std::string &outputFile);
 
   void finalizeOutput(const std::string &outputFile);

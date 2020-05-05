@@ -15,8 +15,8 @@
 #include "MantidAPI/ParamFunction.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -100,9 +100,9 @@ public:
   static void destroySuite(MultiDomainFunctionTest *suite) { delete suite; }
 
   MultiDomainFunctionTest() {
-    multi.addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
-    multi.addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
-    multi.addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
+    multi.addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
+    multi.addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
+    multi.addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
 
     multi.getFunction(0)->setParameter("A", 0);
     multi.getFunction(0)->setParameter("B", 1);
@@ -113,9 +113,9 @@ public:
     multi.getFunction(2)->setParameter("A", 2);
     multi.getFunction(2)->setParameter("B", 3);
 
-    domain.addDomain(boost::make_shared<FunctionDomain1DVector>(0, 1, 9));
-    domain.addDomain(boost::make_shared<FunctionDomain1DVector>(1, 2, 10));
-    domain.addDomain(boost::make_shared<FunctionDomain1DVector>(2, 3, 11));
+    domain.addDomain(std::make_shared<FunctionDomain1DVector>(0, 1, 9));
+    domain.addDomain(std::make_shared<FunctionDomain1DVector>(1, 2, 10));
+    domain.addDomain(std::make_shared<FunctionDomain1DVector>(2, 3, 11));
   }
 
   void test_calc_domain0_only() {
@@ -324,7 +324,6 @@ public:
   void test_attribute_domain_range() {
     multi.clearDomainIndices();
     multi.setLocalAttributeValue(0, "domains", "0-2");
-    return;
     multi.setLocalAttributeValue(1, "domains", "i");
     multi.setLocalAttributeValue(2, "domains", "i");
 
@@ -336,7 +335,7 @@ public:
     const FunctionDomain1D &d0 =
         static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     for (size_t i = 0; i < 9; ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
+      TS_ASSERT_DELTA(values.getCalculated(i), A + B * d0[i], 1e-6);
     }
 
     A = multi.getFunction(0)->getParameter("A") +
@@ -346,7 +345,7 @@ public:
     const FunctionDomain1D &d1 =
         static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 9; i < 19; ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i - 9]);
+      TS_ASSERT_DELTA(values.getCalculated(i), A + B * d1[i - 9], 1e-6);
     }
 
     A = multi.getFunction(0)->getParameter("A") +
@@ -356,7 +355,7 @@ public:
     const FunctionDomain1D &d2 =
         static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 19; i < 30; ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i - 19]);
+      TS_ASSERT_DELTA(values.getCalculated(i), A + B * d2[i - 19], 1e-6);
     }
   }
 
@@ -366,7 +365,7 @@ public:
         "name=MultiDomainFunctionTest_Function,A=0,B=1,$domains=i;"
         "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=(0,1);"
         "name=MultiDomainFunctionTest_Function,A=2,B=3,$domains=(0,2)";
-    auto mfun = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto mfun = std::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createInitialized(ini));
 
     FunctionValues values(domain);
@@ -464,7 +463,7 @@ public:
         "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=i;"
         "name=MultiDomainFunctionTest_Function,A=3,B=4,$domains=i;ties=(f1.A="
         "f0.B)";
-    auto mfun = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto mfun = std::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createInitialized(ini));
 
     auto eqFuns = mfun->createEquivalentFunctions();

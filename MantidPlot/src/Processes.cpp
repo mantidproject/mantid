@@ -24,7 +24,7 @@
 
 namespace {
 
-bool isOtherInstance(int64_t otherPID, QString otherExeName) {
+bool isOtherInstance(int64_t otherPID, const QString &otherExeName) {
   static const int64_t ourPID(QCoreApplication::applicationPid());
   if (otherPID == ourPID)
     return false;

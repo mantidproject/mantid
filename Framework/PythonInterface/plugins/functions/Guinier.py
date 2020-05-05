@@ -9,7 +9,6 @@
 @author Mathieu Doucet, ORNL
 @date Oct 10, 2014
 '''
-from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory

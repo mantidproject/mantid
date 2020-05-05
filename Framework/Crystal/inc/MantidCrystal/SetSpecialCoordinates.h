@@ -48,13 +48,13 @@ private:
   static const std::string QSampleOption();
   static const std::string HKLOption();
   bool writeCoordinatesToMDEventWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToMDHistoWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToPeaksWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
 };
 

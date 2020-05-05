@@ -34,7 +34,7 @@ void SplineBackground::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "The index of the spectrum for fitting.");
@@ -247,7 +247,7 @@ void SplineBackground::freeBSplinePointers() {
  * @return:: A shared pointer to the output workspace
  */
 MatrixWorkspace_sptr
-SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr ws,
+SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr &ws,
                                    const size_t spec) {
   const auto &xInputVals = ws->x(spec);
   const auto &yInputVals = ws->y(spec);

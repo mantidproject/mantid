@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidKernel/NullValidator.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <string>
 
 using namespace Mantid::Kernel;
@@ -18,10 +18,10 @@ public:
   void testConstructor() { TS_ASSERT_THROWS_NOTHING(NullValidator()); }
 
   void testClone() {
-    IValidator_sptr v = boost::make_shared<NullValidator>();
+    IValidator_sptr v = std::make_shared<NullValidator>();
     IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS(v, vv)
-    TS_ASSERT(boost::dynamic_pointer_cast<NullValidator>(vv))
+    TS_ASSERT(std::dynamic_pointer_cast<NullValidator>(vv))
   }
 
   void testNullValidatorWithInts() {

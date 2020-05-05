@@ -11,7 +11,7 @@
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QString>
 

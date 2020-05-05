@@ -47,12 +47,12 @@ void SumEventsByLogValue::init() {
                   "otherwise.");
 
   declareProperty("LogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the number series log against which the data "
                   "should be summed");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", "", boost::make_shared<RebinParamsValidator>(true)),
+          "OutputBinning", "", std::make_shared<RebinParamsValidator>(true)),
       "Binning parameters for the output workspace (see [[Rebin]] for syntax) "
       "(Optional for logs holding integer values, mandatory otherwise)");
 }
@@ -302,9 +302,9 @@ void SumEventsByLogValue::filterEventList(
  *  @param minVal          The minimum value of the log
  *  @param maxVal          The maximum value of the log
  */
-void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
-                                           const TimeSeriesProperty<int> *log,
-                                           const int minVal, const int maxVal) {
+void SumEventsByLogValue::addMonitorCounts(
+    const ITableWorkspace_sptr &outputWorkspace,
+    const TimeSeriesProperty<int> *log, const int minVal, const int maxVal) {
   DataObjects::EventWorkspace_const_sptr monitorWorkspace =
       getProperty("MonitorWorkspace");
   // If no monitor workspace was given, there's nothing to do

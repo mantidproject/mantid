@@ -69,10 +69,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     const auto &ti_data5 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data5.tm_hour, 12);
@@ -119,10 +119,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     const auto &ti_data5 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data5.tm_hour, 12);
@@ -156,10 +156,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     const auto &ti_data5 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data5.tm_hour, 12);
@@ -216,9 +216,9 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
     // time 4
     TS_ASSERT_EQUALS(v->second, "   line 4");
     const auto &ti_data4 = v->first.to_tm();
@@ -381,10 +381,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     // TS_ASSERT(!isNaN(v->second));
     // last time

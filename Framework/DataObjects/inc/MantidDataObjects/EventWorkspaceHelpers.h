@@ -20,7 +20,7 @@ namespace DataObjects {
 struct DLLExport EventWorkspaceHelpers {
   /// Converts an EventWorkspace to an equivalent Workspace2D.
   static API::MatrixWorkspace_sptr
-  convertEventTo2D(API::MatrixWorkspace_sptr inputMatrixW);
+  convertEventTo2D(const API::MatrixWorkspace_sptr &inputMatrixW);
 };
 
 } // namespace DataObjects

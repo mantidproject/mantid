@@ -17,10 +17,10 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <limits>
 #include <map>
+#include <memory>
 #include <numeric>
 #include <sstream>
 #include <stack>
@@ -175,7 +175,7 @@ const std::string SmoothMD::summary() const {
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                     const WidthVector &widthVector,
                     OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
@@ -278,7 +278,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                          const WidthVector &widthVector,
                          OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
@@ -392,12 +392,12 @@ void SmoothMD::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace to smooth.");
 
-  auto widthVectorValidator = boost::make_shared<CompositeValidator>();
+  auto widthVectorValidator = std::make_shared<CompositeValidator>();
   auto boundedValidator =
-      boost::make_shared<ArrayBoundedValidator<double>>(1, 1000);
+      std::make_shared<ArrayBoundedValidator<double>>(1, 1000);
   widthVectorValidator->add(boundedValidator);
   widthVectorValidator->add(
-      boost::make_shared<MandatoryValidator<WidthVector>>());
+      std::make_shared<MandatoryValidator<WidthVector>>());
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
@@ -414,7 +414,7 @@ void SmoothMD::init() {
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>(
           "Function", first,
-          boost::make_shared<ListValidator<std::string>>(allFunctionTypes),
+          std::make_shared<ListValidator<std::string>>(allFunctionTypes),
           Direction::Input),
       docBuffer.str());
 
@@ -426,12 +426,11 @@ void SmoothMD::init() {
   for (auto const &unitOption : unitOptions) {
     docUnits << unitOption << ", ";
   }
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(
-          "Units", "pixels",
-          boost::make_shared<ListValidator<std::string>>(unitOptions),
-          Direction::Input),
-      docUnits.str());
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "Units", "pixels",
+                      std::make_shared<ListValidator<std::string>>(unitOptions),
+                      Direction::Input),
+                  docUnits.str());
 
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputNormalizationWorkspace", "", Direction::Input,

@@ -56,7 +56,8 @@ private slots:
   void calMinChanged(double /*val*/);
   void calMaxChanged(double /*val*/);
   void calUpdateRS(QtProperty * /*prop*/, double /*val*/);
-  void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
+  void
+  calSetDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws);
   void resCheck(bool state); ///< handles checking/unchecking of "Create RES
   /// File" checkbox
   void setDefaultInstDetails();
@@ -73,8 +74,8 @@ private slots:
   void setSaveEnabled(bool enabled);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
-                       QString const message = "Run",
-                       QString const tooltip = "");
+                       QString const &message = "Run",
+                       QString const &tooltip = "");
 
 private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);

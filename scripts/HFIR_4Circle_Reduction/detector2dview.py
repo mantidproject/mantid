@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
-from __future__ import (absolute_import, division, print_function)
 from HFIR_4Circle_Reduction import mpl2dgraphicsview
 import numpy as np
 import os

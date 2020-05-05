@@ -10,7 +10,6 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 - Email Pascal Manuel @ ISIS if things break here and let him know how his scripts may need to be modified.
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import os
 from mantid.simpleapi import *

@@ -41,7 +41,7 @@ namespace FileDialogHandler {
 */
 QString getSaveFileName(QWidget *parent,
                         const Mantid::Kernel::Property *baseProp,
-                        QFileDialog::Options options) {
+                        const QFileDialog::Options &options) {
   // set up filters and dialog title
   const auto filter = getFilter(baseProp);
   const auto caption = getCaption("Save file", baseProp);

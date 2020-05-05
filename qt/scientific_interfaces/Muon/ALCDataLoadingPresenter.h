@@ -35,7 +35,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
 
   /// Sets some data
-  void setData(Mantid::API::MatrixWorkspace_sptr data);
+  void setData(const Mantid::API::MatrixWorkspace_sptr &data);
 
   // Returns a boolean stating whether data is currently being loading
   bool isLoading() const;

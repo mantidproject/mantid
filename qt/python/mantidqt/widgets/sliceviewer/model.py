@@ -6,12 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#
-from __future__ import (absolute_import, division, print_function)
+from enum import Enum
+
 from mantid.plots.datafunctions import get_indices
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.simpleapi import BinMD
-from mantid.py3compat.enum import Enum
 import numpy as np
 
 
@@ -23,11 +22,12 @@ class WS_TYPE(Enum):
 
 class SliceViewerModel(object):
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
+
     def __init__(self, ws):
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
-            if ws.getDimension(0).getNBins() < 2: # Check number of x bins
+            if ws.getDimension(0).getNBins() < 2:  # Check number of x bins
                 raise ValueError("workspace must contain at least 2 bin")
         elif isinstance(ws, MultipleExperimentInfos):
             if ws.isMDHistoWorkspace():
@@ -51,21 +51,26 @@ class SliceViewerModel(object):
     def _get_ws(self):
         return self._ws
 
+    def get_frame(self):
+        """Return the coordinate system of the workspace"""
+        return self._ws.getSpecialCoordinateSystem()
+
     def get_ws_MDE(self, slicepoint, bin_params):
         params = {}
         for n in range(self._get_ws().getNumDims()):
             if slicepoint[n] is None:
-                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(self._get_ws().getDimension(n).name,
-                                                                        self._get_ws().getDimension(n).getMinimum(),
-                                                                        self._get_ws().getDimension(n).getMaximum(),
-                                                                        bin_params[n])
+                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(
+                    self._get_ws().getDimension(n).name,
+                    self._get_ws().getDimension(n).getMinimum(),
+                    self._get_ws().getDimension(n).getMaximum(), bin_params[n])
             else:
-                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(self._get_ws().getDimension(n).name,
-                                                                        slicepoint[n]-bin_params[n]/2,
-                                                                        slicepoint[n]+bin_params[n]/2,
-                                                                        1)
-        return BinMD(InputWorkspace=self._get_ws(),
-                     OutputWorkspace=self._get_ws().name()+'_rebinned', **params)
+                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(
+                    self._get_ws().getDimension(n).name, slicepoint[n] - bin_params[n] / 2,
+                    slicepoint[n] + bin_params[n] / 2, 1)
+        return BinMD(
+            InputWorkspace=self._get_ws(),
+            OutputWorkspace=self._get_ws().name() + '_rebinned',
+            **params)
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
@@ -76,22 +81,26 @@ class SliceViewerModel(object):
 
     def get_data_MDE(self, slicepoint, bin_params, transpose=False):
         if transpose:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze()).T
+            return np.ma.masked_invalid(
+                self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze()).T
         else:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze())
+            return np.ma.masked_invalid(
+                self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze())
 
     def get_dim_info(self, n):
         """
         returns dict of (minimum, maximun, number_of_bins, width, name, units) for dimension n
         """
         dim = self._get_ws().getDimension(n)
-        return {'minimum': dim.getMinimum(),
-                'maximum': dim.getMaximum(),
-                'number_of_bins': dim.getNBins(),
-                'width': dim.getBinWidth(),
-                'name': dim.name,
-                'units': dim.getUnits(),
-                'type': self.get_ws_type().name}
+        return {
+            'minimum': dim.getMinimum(),
+            'maximum': dim.getMaximum(),
+            'number_of_bins': dim.getNBins(),
+            'width': dim.getBinWidth(),
+            'name': dim.name,
+            'units': dim.getUnits(),
+            'type': self.get_ws_type().name
+        }
 
     def get_dimensions_info(self):
         """

@@ -5,13 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
 from mantid import config
 import os
-from six.moves import filterfalse
+from itertools import filterfalse
 
 
 class Intervals(object):

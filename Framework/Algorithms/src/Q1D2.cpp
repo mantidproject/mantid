@@ -4,7 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/Q1D2.h"
+#include <utility>
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -14,6 +15,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidAlgorithms/Q1D2.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -44,7 +46,7 @@ using namespace DataObjects;
 Q1D2::Q1D2() : API::Algorithm(), m_dataWS(), m_doSolidAngle(false) {}
 
 void Q1D2::init() {
-  auto dataVal = boost::make_shared<CompositeValidator>();
+  auto dataVal = std::make_shared<CompositeValidator>();
   dataVal->add<WorkspaceUnitValidator>("Wavelength");
   dataVal->add<HistogramValidator>();
   dataVal->add<InstrumentValidator>();
@@ -58,7 +60,7 @@ void Q1D2::init() {
       "Name of the workspace that will contain the result of the calculation");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
+          "OutputBinning", std::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
@@ -68,7 +70,7 @@ void Q1D2::init() {
                       "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "Scaling to apply to each spectrum. Must have\n"
                   "the same number of spectra as the DetBankWorkspace");
-  auto wavVal = boost::make_shared<CompositeValidator>();
+  auto wavVal = std::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -87,7 +89,7 @@ void Q1D2::init() {
   declareProperty("SolidAngleWeighting", true,
                   "If true, pixels will be weighted by their solid angle.",
                   Direction::Input);
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty(
@@ -409,12 +411,13 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
  */
 void Q1D2::calculateNormalization(
     const size_t wavStart, const size_t wsIndex,
-    API::MatrixWorkspace_const_sptr pixelAdj,
-    API::MatrixWorkspace_const_sptr wavePixelAdj, double const *const binNorms,
-    double const *const binNormEs, HistogramData::HistogramY::iterator norm,
+    const API::MatrixWorkspace_const_sptr &pixelAdj,
+    const API::MatrixWorkspace_const_sptr &wavePixelAdj,
+    double const *const binNorms, double const *const binNormEs,
+    HistogramData::HistogramY::iterator norm,
     HistogramData::HistogramY::iterator normETo2) const {
   double detectorAdj, detAdjErr;
-  pixelWeight(pixelAdj, wsIndex, detectorAdj, detAdjErr);
+  pixelWeight(std::move(pixelAdj), wsIndex, detectorAdj, detAdjErr);
   // use that the normalization array ends at the start of the error array
   for (auto n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
@@ -444,7 +447,7 @@ void Q1D2::calculateNormalization(
  *  @param[out] error the error on the weight, only non-zero if pixelAdj
  *  @throw LogicError if the solid angle is tiny or negative
  */
-void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
+void Q1D2::pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj,
                        const size_t wsIndex, double &weight,
                        double &error) const {
   const auto &detectorInfo = m_dataWS->detectorInfo();

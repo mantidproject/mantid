@@ -50,7 +50,7 @@ void Integration::init() {
   declareProperty("RangeUpper", EMPTY_DBL(),
                   "The upper integration limit (an X value).");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "Index of the first spectrum to integrate.");
@@ -137,7 +137,7 @@ void Integration::exec() {
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_sptr eventInputWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(localworkspace);
+      std::dynamic_pointer_cast<EventWorkspace>(localworkspace);
 
   if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
@@ -164,9 +164,9 @@ void Integration::exec() {
   MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(
       *localworkspace, maxWsIndex - minWsIndex + 1, BinEdges(2));
   auto rebinned_input =
-      boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+      std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
   auto rebinned_output =
-      boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+      std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   bool is_distrib = outputWorkspace->isDistribution();
   Progress progress(this, progressStart, 1.0, maxWsIndex - minWsIndex + 1);
@@ -349,9 +349,9 @@ void Integration::exec() {
 /**
  * Uses rebin to reduce event workspaces to a single bin histogram
  */
-API::MatrixWorkspace_sptr
-Integration::rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
-                                       double minRange, double maxRange) {
+API::MatrixWorkspace_sptr Integration::rangeFilterEventWorkspace(
+    const API::MatrixWorkspace_sptr &workspace, double minRange,
+    double maxRange) {
   bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
   auto childAlg = createChildAlgorithm("Rebin", 0, 0.5, childLog);
   childAlg->setProperty("InputWorkspace", workspace);
@@ -386,7 +386,7 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
     alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
     // Now if the workspace is "finalized" need to undo this before integrating
-    boost::dynamic_pointer_cast<RebinnedOutput>(temp)->unfinalize();
+    std::dynamic_pointer_cast<RebinnedOutput>(temp)->unfinalize();
   }
 
   // To integrate point data it will be converted to histograms

@@ -26,9 +26,10 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(std::string InputWorkspace, std::string MaskWorkspace,
-               std::string ValueWorkspace, std::string Value,
-               std::string OutputWorkspace, double expectedSignal,
+  void do_test(const std::string &InputWorkspace,
+               const std::string &MaskWorkspace,
+               const std::string &ValueWorkspace, const std::string &Value,
+               const std::string &OutputWorkspace, double expectedSignal,
                double expectedError, bool succeeds = true) {
     MDHistoWorkspace_sptr histo_A =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);

@@ -10,7 +10,7 @@ import unittest
 from assert_called import assert_called
 from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.models import SumRunsModel
 from sans.gui_logic.models.SumRunsModel import SumRunsModel
@@ -178,6 +178,7 @@ def create_mocked_runs(start, len):
     for x, mock_instance in enumerate(run_selection):
         mock_instance.display_name.return_value = start + x
     return run_selection
+
 
 class BaseFileNameTest(AddRunsPagePresenterTestCase):
     def setUp(self):

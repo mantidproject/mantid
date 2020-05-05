@@ -36,7 +36,7 @@ DECLARE_ALGORITHM(CorelliCrossCorrelate)
 /** Initialize the algorithm's properties.
  */
 void CorelliCrossCorrelate::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<InstrumentValidator>();
 
@@ -48,7 +48,7 @@ void CorelliCrossCorrelate::init() {
                   "An output workspace.");
 
   declareProperty("TimingOffset", EMPTY_INT(),
-                  boost::make_shared<MandatoryValidator<int>>(),
+                  std::make_shared<MandatoryValidator<int>>(),
                   "Correlation chopper TDC timing offset in nanoseconds.");
 }
 
@@ -157,8 +157,9 @@ void CorelliCrossCorrelate::exec() {
 
   int offset_int = getProperty("TimingOffset");
   const auto offset = static_cast<int64_t>(offset_int);
-  for (auto &timing : tdc)
-    timing += offset;
+
+  std::transform(tdc.begin(), tdc.end(), tdc.begin(),
+                 [offset](auto timing) { return timing + offset; });
 
   // Determine period from chopper frequency.
   auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(

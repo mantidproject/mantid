@@ -325,7 +325,7 @@ QString TSVSerialiser::asQString(const size_t i) const {
 void TSVSerialiser::storeDouble(const double val) { m_output << "\t" << val; }
 
 void TSVSerialiser::storeInt(const int val) { m_output << "\t" << val; }
-void TSVSerialiser::storeString(const std::string val) {
+void TSVSerialiser::storeString(const std::string &val) {
   m_output << "\t" << val;
 }
 

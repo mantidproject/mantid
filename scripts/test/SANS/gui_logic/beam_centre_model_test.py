@@ -4,11 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import FindDirectionEnum, SANSInstrument, DetectorType
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 

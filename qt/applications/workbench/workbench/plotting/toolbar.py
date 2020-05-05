@@ -8,8 +8,6 @@
 #
 #
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
@@ -19,7 +17,7 @@ from mantidqt.icons import get_icon
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     sig_home_clicked = QtCore.Signal()
-    sig_grid_toggle_triggered = QtCore.Signal()
+    sig_grid_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
@@ -32,25 +30,25 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_waterfall_conversion = QtCore.Signal(bool)
 
     toolitems = (
-        ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
+        ('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
         ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
         ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
         (None, None, None, None, None),
-        ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+        ('Pan', 'Pan: L-click \nStretch: R-click', 'mdi.arrow-all', 'pan', False),
+        ('Zoom', 'Zoom \n In: L-click+drag \n Out: R-click+drag', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
-        ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
-        ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
-        ('Print', 'Print the figure', 'mdi.printer', 'print_figure', None),
+        ('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
+        ('Save', 'Save image file', 'mdi.content-save', 'save_figure', None),
+        ('Print', 'Print image', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
+        ('Customize', 'Options menu', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),
-        ('Create Script', 'Generate a script that will recreate the current figure',
+        ('Create Script', 'Generate script to recreate the current figure',
          'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
-        ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
+        ('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
         (None, None, None, None, None),
-        ('Offset', 'Change the curve offset percentage', 'mdi.arrow-expand-horizontal',
+        ('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
          'waterfall_offset_amount', None),
         ('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
         ('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None)
@@ -104,7 +102,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.sig_plot_options_triggered.emit()
 
     def toggle_grid(self):
-        self.sig_grid_toggle_triggered.emit()
+        enable = self._actions['toggle_grid'].isChecked()
+        self.sig_grid_toggle_triggered.emit(enable)
 
     def toggle_fit(self):
         fit_action = self._actions['toggle_fit']
@@ -146,14 +145,16 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             toolbar_action.setEnabled(on)
             toolbar_action.setVisible(on)
 
+        # show/hide separator
+        fit_action = self._actions['toggle_fit']
+        self.toggle_separator_visibility(fit_action, on)
+
     def set_generate_plot_script_enabled(self, enabled):
         action = self._actions['generate_plot_script']
         action.setEnabled(enabled)
         action.setVisible(enabled)
         # Show/hide the separator between this button and the "Fit" button
-        for i, toolbar_action in enumerate(self.actions()):
-            if toolbar_action == action:
-                self.actions()[i+1].setVisible(enabled)
+        self.toggle_separator_visibility(action, enabled)
 
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
@@ -163,6 +164,24 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     def waterfall_fill_area(self):
         self.sig_waterfall_fill_area_triggered.emit()
+
+    def adjust_for_3d_plots(self):
+        self._actions['toggle_grid'].setChecked(True)
+
+        for action in ['back', 'forward', 'pan', 'zoom']:
+            toolbar_action = self._actions[action]
+            toolbar_action.setEnabled(False)
+            toolbar_action.setVisible(False)
+
+        action = self._actions['forward']
+        self.toggle_separator_visibility(action, False)
+
+    def toggle_separator_visibility(self, action, enabled):
+        # shows/hides the separator positioned immediately after the action
+        for i, toolbar_action in enumerate(self.actions()):
+            if toolbar_action == action:
+                self.actions()[i+1].setVisible(enabled)
+                break
 
 
 class ToolbarStateManager(object):

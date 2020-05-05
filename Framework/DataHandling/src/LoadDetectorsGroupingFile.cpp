@@ -236,8 +236,8 @@ void LoadDetectorsGroupingFile::setByComponents() {
           m_instrument->getComponentByName(name);
 
       // b) component -> component assembly --> children (more than detectors)
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
       std::vector<Geometry::IComponent_const_sptr> children;
       asmb->getChildren(children, true);
 
@@ -248,7 +248,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       for (const auto &child : children) {
         // c) convert component to detector
         Geometry::IDetector_const_sptr det =
-            boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
+            std::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
         if (det) {
           // Component is DETECTOR:
@@ -409,7 +409,7 @@ LoadGroupXMLFile::LoadGroupXMLFile()
       m_pDoc(), m_groupComponentsMap(), m_groupDetectorsMap(),
       m_groupSpectraMap(), m_startGroupID(1), m_groupNamesMap() {}
 
-void LoadGroupXMLFile::loadXMLFile(std::string xmlfilename) {
+void LoadGroupXMLFile::loadXMLFile(const std::string &xmlfilename) {
 
   this->initializeXMLParser(xmlfilename);
   this->parseXML();
@@ -604,9 +604,8 @@ void LoadGroupXMLFile::parseXML() {
 /*
  * Get attribute's value by name from a Node
  */
-std::string LoadGroupXMLFile::getAttributeValueByName(Poco::XML::Node *pNode,
-                                                      std::string attributename,
-                                                      bool &found) {
+std::string LoadGroupXMLFile::getAttributeValueByName(
+    Poco::XML::Node *pNode, const std::string &attributename, bool &found) {
   // 1. Init
   Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
   found = false;

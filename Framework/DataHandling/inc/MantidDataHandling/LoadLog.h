@@ -114,7 +114,7 @@ private:
 
   /// Create timeseries property from .log file and adds that to sample object
   void loadThreeColumnLogFile(std::ifstream &logFileStream,
-                              std::string logFileName, API::Run &run);
+                              const std::string &logFileName, API::Run &run);
 
   /// Loads two column log file data into local workspace
   void loadTwoColumnLogFile(std::ifstream &logFileStream,
@@ -125,7 +125,7 @@ private:
                          const std::string &logFileName);
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
-  boost::shared_ptr<Kernel::Property> m_periods;
+  std::shared_ptr<Kernel::Property> m_periods;
 };
 
 } // namespace DataHandling

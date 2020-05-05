@@ -60,7 +60,7 @@ public:
     TS_ASSERT_EQUALS(sum, 300000);
 
     // test dimensions
-    boost::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
+    std::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
     TS_ASSERT_EQUALS(dimi->getNBins(), 50);
     TS_ASSERT_DELTA(dimi->getMinimum(), 0, .1);
     TS_ASSERT_DELTA(dimi->getMaximum(), 50., .1);
@@ -100,15 +100,15 @@ private:
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("x"), std::string("ID0"), frame,
                              coord_t(-50), coord_t(50), size_t(100)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("y"), std::string("ID1"), frame,
                              coord_t(-60), coord_t(60), size_t(120)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
         new MDHistoDimension(std::string("z"), std::string("ID2"), frame,
                              coord_t(-100), coord_t(100), size_t(200)));
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dim));
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
 
     MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
     outWS->setTo(1., 1., .0);

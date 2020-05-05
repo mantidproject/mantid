@@ -10,8 +10,6 @@ The GuiStateDirector gets the information from the table and state model and gen
 the main part of the work to an StateDirectorISIS object.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 
 from sans.common.file_information import SANSFileInformationBlank

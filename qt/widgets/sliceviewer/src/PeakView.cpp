@@ -8,6 +8,8 @@
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 
 #include <QPainter>
+#include <utility>
+
 #include <qwt_double_interval.h>
 #include <qwt_plot.h>
 #include <qwt_scale_div.h>
@@ -24,7 +26,8 @@ PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
     : PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent),
       m_peaks(vecPeakRepresentation), m_cachedOccupancyIntoView(0.015),
       m_cachedOccupancyInView(0.015), m_showBackground(false),
-      m_foregroundColor(foregroundColor), m_backgroundColor(backgroundColor),
+      m_foregroundColor(std::move(foregroundColor)),
+      m_backgroundColor(std::move(backgroundColor)),
       m_largestEffectiveRadius(largestEffectiveRadius) {}
 
 PeakView::~PeakView() {}

@@ -137,7 +137,7 @@ public:
   }
 
   void test_UnitX_Throws_When_Invalid() {
-    auto alg = boost::make_shared<CreateSimulationWorkspace>();
+    auto alg = std::make_shared<CreateSimulationWorkspace>();
     alg->initialize();
 
     TS_ASSERT_THROWS(alg->setPropertyValue("UnitX", "NOT_A_UNIT"),
@@ -178,7 +178,7 @@ private:
         .retrieveWS<MatrixWorkspace>(m_wsName);
   }
 
-  void doBinCheck(Mantid::API::MatrixWorkspace_sptr outputWS,
+  void doBinCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                   const size_t expectedSize) {
     TS_ASSERT_EQUALS(outputWS->readX(0).size(), expectedSize);
     // Check bins are correct
@@ -189,7 +189,7 @@ private:
     }
   }
 
-  void doInstrumentCheck(Mantid::API::MatrixWorkspace_sptr outputWS,
+  void doInstrumentCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                          const std::string &name, const size_t ndets) {
     Mantid::Geometry::Instrument_const_sptr instr = outputWS->getInstrument();
 
@@ -199,7 +199,7 @@ private:
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &wsName = "") {
-    auto alg = boost::make_shared<CreateSimulationWorkspace>();
+    auto alg = std::make_shared<CreateSimulationWorkspace>();
     alg->setRethrows(true);
     alg->initialize();
     if (!wsName.empty())
@@ -208,7 +208,7 @@ private:
   }
 
   void compareSimulationWorkspaceIDFWithFileIDF(
-      Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
+      const Mantid::API::MatrixWorkspace_sptr &simulationWorkspace,
       const std::string &filename, const std::string &algorithmName) {
     std::string outputWSName = "outWSIDFCompareNexus";
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -220,8 +220,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    auto matWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
+    auto matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
     auto idfForOriginal = matWS->getInstrument()->getFilename();
     auto idfForSimulationWS =
         simulationWorkspace->getInstrument()->getFilename();
@@ -235,10 +234,6 @@ private:
 class CreateSimulationWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-
-    // Starting bin, bin width, last bin
-    const std::string binParams("-30,3,279");
-
     alg.initialize();
 
     alg.setPropertyValue("Instrument", "HET");

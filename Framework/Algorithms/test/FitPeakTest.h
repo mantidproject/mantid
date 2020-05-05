@@ -208,7 +208,7 @@ public:
 
     const size_t NVectors = 1;
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, size,
                                             size));
 
@@ -358,11 +358,9 @@ public:
   /** Generate a workspace contains PG3_4866 5-th peak
    */
   MatrixWorkspace_sptr gen_PG3DiamondData() {
-    vector<double> vecx, vecy, vece;
-
     size_t NVectors = 1;
     size_t size = 53;
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, size,
                                             size));
 

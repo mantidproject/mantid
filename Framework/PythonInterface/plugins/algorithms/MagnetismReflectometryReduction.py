@@ -8,7 +8,6 @@
 """
     Magnetism reflectometry reduction
 """
-from __future__ import (absolute_import, division, print_function)
 import sys
 import math
 import numpy as np

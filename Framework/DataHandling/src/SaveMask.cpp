@@ -19,8 +19,8 @@
 #include <Poco/XML/XMLWriter.h>
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
+#include <memory>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -50,7 +50,7 @@ void SaveMask::exec() {
   API::MatrixWorkspace_sptr userInputWS = this->getProperty("InputWorkspace");
 
   DataObjects::SpecialWorkspace2D_sptr inpWS =
-      boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(userInputWS);
+      std::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(userInputWS);
   if (!inpWS) {
     // extract the masking and use that
     Algorithm_sptr emAlg =
@@ -60,7 +60,7 @@ void SaveMask::exec() {
     emAlg->setLogging(this->isLogging());
     emAlg->execute();
     API::MatrixWorkspace_sptr ws = emAlg->getProperty("OutputWorkspace");
-    inpWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(ws);
+    inpWS = std::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(ws);
     if (!inpWS) {
       throw std::runtime_error(
           "Unable to extract masking data using ExtractMask");

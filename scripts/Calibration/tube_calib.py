@@ -16,8 +16,6 @@ Users should not need to directly call any other function other than :func:`getC
 """
 ## Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
 
-from __future__ import absolute_import, division, print_function
-
 import numpy
 from mantid.simpleapi import *
 from mantid.kernel import *

@@ -16,7 +16,7 @@
 #include "MantidKernel//EigenConversionHelpers.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

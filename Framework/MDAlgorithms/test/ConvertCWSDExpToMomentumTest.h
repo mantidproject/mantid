@@ -33,7 +33,7 @@ std::vector<double> m_pixelDimension;
 void generateTestInputs() {
   // Create data table
   DataObjects::TableWorkspace_sptr datatable =
-      boost::make_shared<DataObjects::TableWorkspace>();
+      std::make_shared<DataObjects::TableWorkspace>();
   datatable->addColumn("int", "Scan No");
   datatable->addColumn("int", "Pt. No");
   datatable->addColumn("str", "File Name");
@@ -43,12 +43,12 @@ void generateTestInputs() {
   TableRow row0 = datatable->appendRow();
   row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256 << 1000
        << 1.1;
-  m_dataTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(datatable);
+  m_dataTableWS = std::dynamic_pointer_cast<ITableWorkspace>(datatable);
   TS_ASSERT(m_dataTableWS);
 
   // Create detector table
   DataObjects::TableWorkspace_sptr dettable =
-      boost::make_shared<DataObjects::TableWorkspace>();
+      std::make_shared<DataObjects::TableWorkspace>();
   dettable->addColumn("int", "DetID");
   dettable->addColumn("double", "X");
   dettable->addColumn("double", "Y");
@@ -63,7 +63,7 @@ void generateTestInputs() {
     detrow << detid << x << y << z << detid;
   }
 
-  m_detectorTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(dettable);
+  m_detectorTableWS = std::dynamic_pointer_cast<ITableWorkspace>(dettable);
   TS_ASSERT(m_detectorTableWS);
 
   AnalysisDataService::Instance().addOrReplace("DataFileTable", m_dataTableWS);
@@ -119,7 +119,7 @@ public:
     TS_ASSERT(testalg.isExecuted());
 
     API::IMDEventWorkspace_sptr outws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 
@@ -158,7 +158,7 @@ public:
     TS_ASSERT(testalg.isExecuted());
 
     API::IMDEventWorkspace_sptr outws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 

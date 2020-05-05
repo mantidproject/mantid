@@ -461,7 +461,7 @@ void QtKeySequenceEdit::setKeySequence(const QKeySequence &sequence) {
 
 QKeySequence QtKeySequenceEdit::keySequence() const { return m_keySequence; }
 
-int QtKeySequenceEdit::translateModifiers(Qt::KeyboardModifiers state,
+int QtKeySequenceEdit::translateModifiers(const Qt::KeyboardModifiers &state,
                                           const QString &text) const {
   int result = 0;
   if ((state & Qt::ShiftModifier) &&

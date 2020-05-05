@@ -48,7 +48,7 @@ void SortXAxis::init() {
 
   auto orderingValues = std::vector<std::string>({"Ascending", "Descending"});
   auto orderingValidator =
-      boost::make_shared<StringListValidator>(orderingValues);
+      std::make_shared<StringListValidator>(orderingValues);
   declareProperty("Ordering", orderingValues[0], orderingValidator,
                   "Ascending or descending sorting", Direction::Input);
 }
@@ -118,7 +118,7 @@ void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
 }
 
 void SortXAxis::sortIndicesByX(
-    std::vector<std::size_t> &workspaceIndicies, std::string order,
+    std::vector<std::size_t> &workspaceIndicies, const std::string &order,
     const Mantid::API::MatrixWorkspace &inputWorkspace, unsigned int specNum) {
   if (order == "Ascending") {
     sortByXValue(workspaceIndicies, inputWorkspace, specNum,

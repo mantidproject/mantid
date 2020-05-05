@@ -27,13 +27,13 @@ public:
 
 private:
   void
-  calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS,
+  calculateAverageSpectrumBackground(const API::MatrixWorkspace_sptr &inputWS,
                                      const std::vector<specnum_t> &spectraList);
   void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
                                      const std::vector<double> &spectrumRanges);
   std::vector<double>
   findSpectrumRanges(const std::vector<specnum_t> &spectraList);
-  void calculatePixelBackground(API::MatrixWorkspace_sptr inputWS,
+  void calculatePixelBackground(const API::MatrixWorkspace_sptr &inputWS,
                                 const std::vector<double> &indexRanges);
 
   /** Overridden Algorithm methods **/

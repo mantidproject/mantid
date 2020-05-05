@@ -24,7 +24,7 @@ uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader,
 }
 } // namespace
 
-bool LoadBinaryStl::isBinarySTL(std::string filename) {
+bool LoadBinaryStl::isBinarySTL(const std::string &filename) {
   Poco::File stlFile = Poco::File(filename);
   if (!stlFile.exists()) {
     // if the file cannot be read then it is not a valid binary Stl File

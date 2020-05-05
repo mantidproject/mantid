@@ -7,8 +7,6 @@
 """ Module containing functions for test
 performance analysis, plotting, and saving
 to other formats (CSV, PDF) """
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
 import testresult
 import os
 import sys
@@ -24,6 +22,8 @@ import random
 DATE_STR_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
 #============================================================================================
+
+
 def get_orderby_clause(last_num):
     """Returns a order by clause that limits to the last # revisions """
     if last_num > 0:
@@ -98,6 +98,8 @@ def get_unique_fields(results, field):
     return list(out)
 
 #============================================================================================
+
+
 def get_results_matching(results, field, value):
     """Given a list of TestResult,
     return a list of TestResult's where 'field' matches 'value'."""
@@ -275,6 +277,8 @@ default_html_header = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transition
 default_html_footer =  """</body></html>"""
 
 #============================================================================================
+
+
 def make_css_file(path):
     """ Make a save the report.css file to be used by all html """
     default_css = """
@@ -310,6 +314,8 @@ font-weight: bold;
     f.close()
 
 #============================================================================================
+
+
 def make_environment_html(res):
     """Return a HTML string with details of test environment, taken from the
     'res' TestResult object"""
@@ -322,6 +328,8 @@ def make_environment_html(res):
     return html
 
 #============================================================================================
+
+
 def make_detailed_html_file(basedir, name, fig1, fig2, fig3, fig4, last_num):
     """ Create a detailed HTML report for the named test """
     html = default_html_header

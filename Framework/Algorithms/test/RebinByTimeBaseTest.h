@@ -23,8 +23,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
+#include <memory>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
@@ -262,7 +262,7 @@ public:
    */
   void test_input_workspace2D_throws() {
     using Mantid::DataObjects::Workspace2D;
-    Workspace_sptr workspace2D = boost::make_shared<Workspace2D>();
+    Workspace_sptr workspace2D = std::make_shared<Workspace2D>();
 
     AlgorithmType alg;
     alg.initialize();

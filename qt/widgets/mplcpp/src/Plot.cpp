@@ -5,12 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Plot.h"
+
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
+#include "MantidQtWidgets/MplCpp/Plot.h"
+#include <utility>
 
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
@@ -102,9 +105,10 @@ Python::Object plot(const Python::Object &args,
                     boost::optional<QHash<QString, QVariant>> axProperties,
                     boost::optional<std::string> windowTitle, bool errors,
                     bool overplot, bool tiled) {
-  const auto kwargs =
-      constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs, axProperties,
-                      windowTitle, errors, overplot, tiled);
+  const auto kwargs = constructKwargs(
+      std::move(spectrumNums), std::move(wkspIndices), std::move(fig),
+      std::move(plotKwargs), std::move(axProperties), std::move(windowTitle),
+      errors, overplot, tiled);
   try {
     return functionsModule().attr("plot")(*args, **kwargs);
   } catch (Python::ErrorAlreadySet &) {

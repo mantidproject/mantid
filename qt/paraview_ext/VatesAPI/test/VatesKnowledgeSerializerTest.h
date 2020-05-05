@@ -14,10 +14,10 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MockObjects.h"
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 using namespace Mantid::VATES;
 
@@ -72,7 +72,7 @@ public:
     Mantid::Geometry::MDImplicitFunction_sptr impFunction(
         new MockImplicitFunction);
     MockIMDWorkspace *pWorkspace = new MockIMDWorkspace;
-    boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
+    std::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
     VatesKnowledgeSerializer generator;
     generator.setImplicitFunction(impFunction);
     generator.setWorkspace(*workspace);

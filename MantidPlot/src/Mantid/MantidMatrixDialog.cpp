@@ -15,7 +15,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-MantidMatrixDialog::MantidMatrixDialog(QWidget *parent, Qt::WFlags fl)
+MantidMatrixDialog::MantidMatrixDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), d_matrix(nullptr) {
   setWindowTitle(tr("MantidPlot - Matrix Properties"));
 

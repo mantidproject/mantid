@@ -72,7 +72,7 @@ public:
     loader.execute();
     TS_ASSERT(loader.isExecuted());
 
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("EmptyWS"));
     TS_ASSERT(outws);
 
@@ -116,12 +116,12 @@ public:
 
     // Retrieve the workspaces as the inputs of ConvertSpiceDataToRealSpace
     ITableWorkspace_sptr datatablews =
-        boost::dynamic_pointer_cast<ITableWorkspace>(
+        std::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
     MatrixWorkspace_sptr parentlogws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
@@ -139,9 +139,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get IMDEventWorkspace
-    IMDEventWorkspace_sptr mdws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("HB2A_MD"));
+    IMDEventWorkspace_sptr mdws = std::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve("HB2A_MD"));
     TS_ASSERT(mdws);
 
     // Check the IMDEvent workspace generated
@@ -242,7 +241,7 @@ public:
     }
 
     // Examine Monitor MDWorkspace
-    IMDWorkspace_const_sptr monmdws = boost::dynamic_pointer_cast<IMDWorkspace>(
+    IMDWorkspace_const_sptr monmdws = std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve("MonitorMDW"));
 
     // Check the IMDEvent workspace generated
@@ -295,17 +294,17 @@ public:
 
     // Retrieve the workspaces as the inputs of ConvertSpiceDataToRealSpace
     ITableWorkspace_sptr datatablews =
-        boost::dynamic_pointer_cast<ITableWorkspace>(
+        std::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
     MatrixWorkspace_sptr parentlogws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
     // Create a table workspace
-    TableWorkspace_sptr deteffws = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr deteffws = std::make_shared<TableWorkspace>();
     deteffws->addColumn("int", "DetectorID");
     deteffws->addColumn("double", "Efficiency");
     for (int i = 1; i <= 44; ++i) {
@@ -329,9 +328,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get IMDEventWorkspace
-    IMDEventWorkspace_sptr mdws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("HB2A_MD"));
+    IMDEventWorkspace_sptr mdws = std::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve("HB2A_MD"));
     TS_ASSERT(mdws);
 
     // Check the IMDEvent workspace generated
@@ -426,7 +424,7 @@ public:
     TS_ASSERT_EQUALS(time1.toFormattedString(), "2012-Aug-13 11:58:03");
 
     // Examine Monitor MDWorkspace
-    IMDWorkspace_const_sptr monmdws = boost::dynamic_pointer_cast<IMDWorkspace>(
+    IMDWorkspace_const_sptr monmdws = std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve("MonitorMDW"));
 
     // Check the IMDEvent workspace generated
@@ -468,12 +466,12 @@ public:
     spcloader.setProperty("IgnoreUnlistedLogs", false);
     spcloader.execute();
 
-    datatablews = boost::dynamic_pointer_cast<ITableWorkspace>(
+    datatablews = std::dynamic_pointer_cast<ITableWorkspace>(
         AnalysisDataService::Instance().retrieve("DataTable"));
-    parentlogws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    parentlogws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("LogParentWS"));
 
-    deteffws = boost::make_shared<TableWorkspace>();
+    deteffws = std::make_shared<TableWorkspace>();
     deteffws->addColumn("int", "DetectorID");
     deteffws->addColumn("double", "Efficiency");
     for (int i = 1; i <= 44; ++i) {

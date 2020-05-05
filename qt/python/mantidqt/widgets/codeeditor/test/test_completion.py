@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, unicode_literals)
-
 import re
 import unittest
 
@@ -14,7 +12,7 @@ import matplotlib.pyplot as plt  # noqa
 import numpy as np  # noqa
 
 from mantid.simpleapi import Rebin  # noqa  # needed so sys.modules can pick up Rebin
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantidqt.widgets.codeeditor.completion import (CodeCompleter, generate_call_tips, get_function_spec,
                                                     get_builtin_argspec, get_module_import_alias)
 from testhelpers import assertRaisesNothing

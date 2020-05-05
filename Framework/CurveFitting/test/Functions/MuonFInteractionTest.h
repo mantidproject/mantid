@@ -65,7 +65,7 @@ public:
     int timechannels = 21;
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     for (int i = 0; i < 21; i++)
       ws2D->dataX(0)[i] = i;
     Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)

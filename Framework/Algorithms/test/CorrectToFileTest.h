@@ -142,7 +142,7 @@ public:
     AnalysisDataService::Instance().remove(data->getName());
   }
 
-  MatrixWorkspace_sptr executeAlgorithm(MatrixWorkspace_sptr testInput,
+  MatrixWorkspace_sptr executeAlgorithm(const MatrixWorkspace_sptr &testInput,
                                         const std::string &unit,
                                         const std::string &operation,
                                         bool newWksp = true) {
@@ -188,7 +188,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         wkspOut = AnalysisDataService::Instance().retrieve(outputSpace));
     MatrixWorkspace_sptr data =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(wkspOut);
+        std::dynamic_pointer_cast<MatrixWorkspace>(wkspOut);
 
     // cleanup the input workspace
     AnalysisDataService::Instance().remove(testInput->getName());

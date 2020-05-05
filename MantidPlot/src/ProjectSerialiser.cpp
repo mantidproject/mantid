@@ -220,7 +220,7 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
  * 		folder. (Default True)
  * @return True is loading was successful, otherwise false
  */
-bool ProjectSerialiser::load(std::string filepath, const int fileVersion,
+bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
                              const bool isTopLevel) {
   // We have to accept std::string to maintain Python compatibility
   auto qfilePath = QString::fromStdString(filepath);
@@ -650,7 +650,7 @@ QString ProjectSerialiser::saveWorkspaces() {
 
     auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
         wsName.toStdString());
-    auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
 
     // We don't split up multiperiod workspaces for performance reasons.
     // There's significant optimisations we can perform on load if they're a

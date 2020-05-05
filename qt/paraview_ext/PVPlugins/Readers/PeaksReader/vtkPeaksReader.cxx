@@ -145,7 +145,7 @@ int vtkPeaksReader::RequestInformation(
     alg->removeObserver(observer);
 
     Workspace_sptr result=AnalysisDataService::Instance().retrieve("LoadedPeaksWS");
-    m_PeakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
+    m_PeakWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
     m_wsTypeName = m_PeakWS->id();
     m_isSetup = true;
   }

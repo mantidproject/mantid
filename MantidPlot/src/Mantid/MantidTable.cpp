@@ -34,7 +34,7 @@ using namespace MantidQt::API;
  * @return the MantidTable created
  */
 MantidTable::MantidTable(ScriptingEnv *env,
-                         Mantid::API::ITableWorkspace_sptr ws,
+                         const Mantid::API::ITableWorkspace_sptr &ws,
                          const QString &label, ApplicationWindow *parent,
                          bool transpose)
     : Table(env,
@@ -264,7 +264,7 @@ void MantidTable::closeTable() {
 //------------------------------------------------------------------------------------------------
 void MantidTable::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   Mantid::API::ITableWorkspace *ws_ptr =
       dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get());
   if (!ws_ptr)
@@ -277,9 +277,9 @@ void MantidTable::preDeleteHandle(
 //------------------------------------------------------------------------------------------------
 void MantidTable::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   Mantid::API::ITableWorkspace_sptr new_ws =
-      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
   if (!new_ws)
     return;
   if (new_ws.get() == m_ws.get() || wsName == m_wsName) {

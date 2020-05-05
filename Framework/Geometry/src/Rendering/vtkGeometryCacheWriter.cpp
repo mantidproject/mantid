@@ -22,6 +22,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 using Poco::XML::AutoPtr;
 using Poco::XML::Document;
@@ -41,7 +42,7 @@ Kernel::Logger g_log("vtkGeometryCacheWriter");
  * Constructor
  */
 vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename) {
-  mFileName = filename;
+  mFileName = std::move(filename);
 
   mDoc = new Document();
   Init();
@@ -84,7 +85,7 @@ void vtkGeometryCacheWriter::createVTKFileHeader() {
  */
 void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   // First check whether Object can be written to the file
-  boost::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
+  std::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
   if (!(handle->canTriangulate()))
     return; // Cannot add the object to the file
   std::stringstream buf;

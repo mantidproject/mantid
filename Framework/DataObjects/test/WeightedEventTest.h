@@ -62,6 +62,7 @@ public:
     // Copy constructor
     we = WeightedEvent();
     we2 = WeightedEvent(456, 789, 2.5, 1.5 * 1.5);
+    // cppcheck-suppress redundantAssignment
     we = we2;
     TS_ASSERT_EQUALS(we.tof(), 456);
     TS_ASSERT_EQUALS(we.pulseTime(), 789);

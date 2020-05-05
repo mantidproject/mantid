@@ -119,7 +119,7 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
  */
 double
 LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
-                                  std::string s) {
+                                  const std::string &s) {
   std::vector<std::string> prop =
       workspace->getInstrument()->getStringParameter(s);
   if (prop.empty()) {
@@ -450,8 +450,7 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
   int rank;
   int dims[4];
 #endif
-  int nbuff = 127;
-  boost::shared_array<char> buff(new char[nbuff + 1]);
+  std::vector<char> buff(128);
 
 #ifdef NEXUS43
   while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
@@ -470,13 +469,12 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
 
     switch (iType) {
     case NX_CHAR: {
-      if (iLength > nbuff + 1) {
-        nbuff = iLength;
-        buff.reset(new char[nbuff + 1]);
+      if (iLength > static_cast<int>(buff.size())) {
+        buff.resize(iLength);
       }
       int nz = iLength + 1;
-      NXgetattr(nxfileID, pName, buff.get(), &nz, &iType);
-      g_log.debug() << indentStr << buff.get() << '\n';
+      NXgetattr(nxfileID, pName, buff.data(), &nz, &iType);
+      g_log.debug() << indentStr << buff.data() << '\n';
       break;
     }
     case NX_INT16: {
@@ -509,7 +507,7 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
  *  @param dateToParse :: date as string
  *  @return date as required in Mantid
  */
-std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
+std::string LoadHelper::dateTimeInIsoFormat(const std::string &dateToParse) {
   namespace bt = boost::posix_time;
   // parsing format
   const std::locale format = std::locale(
@@ -535,7 +533,7 @@ std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
  * @param componentName The name of the component of the instrument
  * @param newPos New position of the component
  */
-void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
+void LoadHelper::moveComponent(const API::MatrixWorkspace_sptr &ws,
                                const std::string &componentName,
                                const V3D &newPos) {
   Geometry::IComponent_const_sptr component =
@@ -557,7 +555,7 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
  * @param rot Rotations defined by setting a quaternion from an angle in degrees
  * and an axis
  */
-void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
+void LoadHelper::rotateComponent(const API::MatrixWorkspace_sptr &ws,
                                  const std::string &componentName,
                                  const Kernel::Quat &rot) {
   Geometry::IComponent_const_sptr component =
@@ -578,7 +576,7 @@ void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
  * @param componentName The Name of the component of the instrument
  * @return The position of the component
  */
-V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws,
+V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws,
                                      const std::string &componentName) {
   Geometry::IComponent_const_sptr component =
       ws->getInstrument()->getComponentByName(componentName);

@@ -323,7 +323,7 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
     const std::vector<std::string> &titles) {
   // Create a table workspace with columns defined
   DataObjects::TableWorkspace_sptr outws =
-      boost::make_shared<DataObjects::TableWorkspace>();
+      std::make_shared<DataObjects::TableWorkspace>();
   size_t ipt = -1;
   for (size_t i = 0; i < titles.size(); ++i) {
     if (titles[i] == "Pt.") {
@@ -349,7 +349,7 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
   }
 
   ITableWorkspace_sptr tablews =
-      boost::dynamic_pointer_cast<ITableWorkspace>(outws);
+      std::dynamic_pointer_cast<ITableWorkspace>(outws);
   return tablews;
 }
 
@@ -436,7 +436,7 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
  * @param datetimeprop
  */
 void LoadSpiceAscii::setupRunStartTime(
-    API::MatrixWorkspace_sptr runinfows,
+    const API::MatrixWorkspace_sptr &runinfows,
     const std::vector<std::string> &datetimeprop) {
   // Check if no need to process run start time
   if (datetimeprop.empty()) {
@@ -596,7 +596,7 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
  * @param pvalue
  */
 template <typename T>
-void LoadSpiceAscii::addProperty(API::MatrixWorkspace_sptr ws,
+void LoadSpiceAscii::addProperty(const API::MatrixWorkspace_sptr &ws,
                                  const std::string &pname, T pvalue) {
   ws->mutableRun().addLogData(new PropertyWithValue<T>(pname, pvalue));
 }

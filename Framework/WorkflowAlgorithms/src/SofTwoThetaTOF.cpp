@@ -112,10 +112,10 @@ const std::string SofTwoThetaTOF::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SofTwoThetaTOF::init() {
-  auto histogrammedTOF = boost::make_shared<Kernel::CompositeValidator>();
-  histogrammedTOF->add(boost::make_shared<API::WorkspaceUnitValidator>("TOF"));
-  histogrammedTOF->add(boost::make_shared<API::HistogramValidator>());
-  histogrammedTOF->add(boost::make_shared<API::InstrumentValidator>());
+  auto histogrammedTOF = std::make_shared<Kernel::CompositeValidator>();
+  histogrammedTOF->add(std::make_shared<API::WorkspaceUnitValidator>("TOF"));
+  histogrammedTOF->add(std::make_shared<API::HistogramValidator>());
+  histogrammedTOF->add(std::make_shared<API::InstrumentValidator>());
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, histogrammedTOF),
@@ -123,7 +123,7 @@ void SofTwoThetaTOF::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "A workspace with (2theta, TOF) units.");
-  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLowerExclusive(0.);
   declareProperty(Prop::ANGLE_STEP, EMPTY_DBL(), positiveDouble,
                   "The angle step for detector grouping, in degrees.");

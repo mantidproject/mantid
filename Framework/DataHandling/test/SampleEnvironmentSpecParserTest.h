@@ -307,6 +307,27 @@ public:
     TS_ASSERT_EQUALS(1, spec->ncomponents());
   }
 
+  void test_3MF() {
+#ifdef ENABLE_LIB3MF
+    using Mantid::Geometry::Container_const_sptr;
+
+    const std::string name = "CRYO001";
+    auto spec = parseSpec(name, R"(<environmentspec>
+                           <fullspecification filename="box_withMaterial.3mf"/>
+                          </environmentspec>)");
+
+    TS_ASSERT_EQUALS(name, spec->name());
+    TS_ASSERT_EQUALS(1, spec->ncans());
+    Container_const_sptr canDefault;
+    TS_ASSERT_THROWS_NOTHING(canDefault = spec->findContainer("default"));
+    TS_ASSERT(canDefault);
+    TS_ASSERT_EQUALS("default", canDefault->id());
+    TS_ASSERT(canDefault->hasValidShape());
+    TS_ASSERT_EQUALS("B4-C", canDefault->material().name());
+    TS_ASSERT_EQUALS(canDefault->hasCustomizableSampleShape(), false);
+#endif
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------

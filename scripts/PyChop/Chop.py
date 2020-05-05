@@ -23,7 +23,6 @@ technical reports:
     http://www.neutronresearch.com/parch/1993/01/199301013280.pdf
 """
 
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import collections
 import warnings

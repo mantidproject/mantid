@@ -28,7 +28,7 @@ namespace {
 // Does the actual calculation of the magnetisation
 void calculate(double *out, const double *xValues, const size_t nData,
                const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector Hmag, const double T,
+               const DoubleFortranVector &Hmag, const double T,
                const double convfact, const bool iscgs) {
   const double beta = 1 / (PhysicalConstants::BoltzmannConstant * T);
   // x-data is the applied field magnitude. We need to recalculate

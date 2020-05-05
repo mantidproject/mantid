@@ -4,27 +4,29 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
+#include <utility>
+
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 
 namespace Mantid {
 namespace Poldi {
 
-PoldiDGrid::PoldiDGrid(boost::shared_ptr<PoldiAbstractDetector> detector,
-                       boost::shared_ptr<PoldiAbstractChopper> chopper,
+PoldiDGrid::PoldiDGrid(std::shared_ptr<PoldiAbstractDetector> detector,
+                       std::shared_ptr<PoldiAbstractChopper> chopper,
                        double deltaT, std::pair<double, double> wavelengthRange)
-    : m_detector(detector), m_chopper(chopper), m_deltaT(deltaT),
-      m_wavelengthRange(wavelengthRange), m_dRangeAsMultiples(), m_deltaD(0.0),
-      m_dgrid(), m_hasCachedCalculation(false) {}
+    : m_detector(std::move(detector)), m_chopper(std::move(chopper)),
+      m_deltaT(deltaT), m_wavelengthRange(wavelengthRange),
+      m_dRangeAsMultiples(), m_deltaD(0.0), m_dgrid(),
+      m_hasCachedCalculation(false) {}
 
 void PoldiDGrid::setDetector(
-    boost::shared_ptr<PoldiAbstractDetector> newDetector) {
-  m_detector = newDetector;
+    std::shared_ptr<PoldiAbstractDetector> newDetector) {
+  m_detector = std::move(newDetector);
 }
 
-void PoldiDGrid::setChopper(
-    boost::shared_ptr<PoldiAbstractChopper> newChopper) {
-  m_chopper = newChopper;
+void PoldiDGrid::setChopper(std::shared_ptr<PoldiAbstractChopper> newChopper) {
+  m_chopper = std::move(newChopper);
 }
 
 void PoldiDGrid::setDeltaT(double newDeltaT) { m_deltaT = newDeltaT; }

@@ -76,7 +76,7 @@ using namespace Mantid;
 using namespace MantidQt::API;
 
 Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
-               const QString &name, Qt::WFlags f)
+               const QString &name, const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f), Scripted(env),
       d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
       d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
@@ -91,7 +91,7 @@ Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
 }
 
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label,
-               QWidget *parent, const QString &name, Qt::WFlags f)
+               QWidget *parent, const QString &name, const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f), Scripted(env),
       d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
       d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
@@ -107,7 +107,7 @@ Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label,
 }
 
 Matrix::Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-               QWidget *parent, const QString &name, Qt::WFlags f)
+               QWidget *parent, const QString &name, const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f), Scripted(env),
       d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
       d_table_view(nullptr), imageLabel(nullptr), formula_str(),

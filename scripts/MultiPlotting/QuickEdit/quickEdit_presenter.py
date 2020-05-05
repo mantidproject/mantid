@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
 
 
 class QuickEditPresenter(object):
@@ -66,6 +65,12 @@ class QuickEditPresenter(object):
 
     def get_errors(self):
         return self._view.get_errors()
+
+    def get_selection(self):
+        name = self.widget.current_selection()
+        if name == "All":
+            return self.all()
+        return [name]
 
     def rm_subplot(self, name):
         current = self._view.current_selection()

@@ -7,13 +7,11 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import matplotlib
 matplotlib.use('Agg') # noqa: E402
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.widgets.samplelogs.model import SampleLogsModel
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.samplelogs.view import SampleLogsView
@@ -74,9 +72,8 @@ class SampleLogsTest(unittest.TestCase):
         self.model.reset_mock()
         self.view.reset_mock()
 
-        presenter.clicked()
-        self.assertEqual(self.view.get_selected_row_indexes.call_count, 2)
-
+        presenter.update()
+        self.assertEqual(self.view.get_selected_row_indexes.call_count, 3)
         # plot clicked
         self.model.reset_mock()
         self.view.reset_mock()

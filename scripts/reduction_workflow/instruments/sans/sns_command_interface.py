@@ -9,7 +9,6 @@
     Command set for EQSANS reduction
 """
 # Import the specific commands that we need - some of these are used in systemtests
-from __future__ import (absolute_import, division, print_function)
 from reduction_workflow.command_interface import *
 
 # The following imports allow users to import this file and have all functionality automatically imported

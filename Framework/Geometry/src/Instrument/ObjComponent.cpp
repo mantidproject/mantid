@@ -15,6 +15,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include <cfloat>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -42,9 +43,9 @@ ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
  *  @param parent :: The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string &name,
-                           boost::shared_ptr<const IObject> shape,
+                           std::shared_ptr<const IObject> shape,
                            IComponent *parent)
-    : IObjComponent(), Component(name, parent), m_shape(shape) {}
+    : IObjComponent(), Component(name, parent), m_shape(std::move(shape)) {}
 
 /** Return the shape of the component
  */
@@ -60,12 +61,12 @@ const IObject_const_sptr ObjComponent::shape() const {
 }
 
 /// Set a new shape on the component
-void ObjComponent::setShape(boost::shared_ptr<const IObject> newShape) {
+void ObjComponent::setShape(std::shared_ptr<const IObject> newShape) {
   if (m_map)
     throw std::runtime_error("ObjComponent::setShape - Cannot change the shape "
                              "of a parameterized object");
   else
-    m_shape = newShape;
+    m_shape = std::move(newShape);
 }
 
 /**

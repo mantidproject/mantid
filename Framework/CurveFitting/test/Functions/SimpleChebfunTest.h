@@ -221,8 +221,8 @@ public:
 
 private:
   void do_test_values(const SimpleChebfun &cheb,
-                      std::function<double(double)> fun, double accur1 = 1e-14,
-                      double accur2 = 1e-14) {
+                      const std::function<double(double)> &fun,
+                      double accur1 = 1e-14, double accur2 = 1e-14) {
     TS_ASSERT(cheb.size() > 0);
     TS_ASSERT(cheb.width() > 0.0);
     if (cheb.isGood()) {

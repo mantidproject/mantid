@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 import unittest
 
-from mantid.py3compat.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
 
@@ -22,6 +22,14 @@ class FigureManagerWorkbenchTest(unittest.TestCase):
         canvas = FigureCanvasQTAgg(fig)
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertNotEqual(fig_mgr, None)
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_window_title(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        fig = MagicMock()
+        canvas = FigureCanvasQTAgg(fig)
+        fig_mgr = FigureManagerWorkbench(canvas, 1)
+        self.assertEqual(fig_mgr.get_window_title(), "Figure 1")
 
 
 if __name__ == "__main__":

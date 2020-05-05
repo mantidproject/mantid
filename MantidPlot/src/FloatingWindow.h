@@ -19,7 +19,8 @@ class QSize;
 class FloatingWindow : public QMainWindow {
   Q_OBJECT
 public:
-  FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f = nullptr);
+  FloatingWindow(ApplicationWindow *appWindow,
+                 const Qt::WindowFlags &f = nullptr);
   ~FloatingWindow() override;
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();

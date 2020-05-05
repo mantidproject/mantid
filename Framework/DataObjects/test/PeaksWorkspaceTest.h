@@ -140,9 +140,6 @@ public:
   }
 
   void test_Save_Unmodified_PeaksWorkspace_Nexus() {
-
-    const std::string filename =
-        "test_Save_Unmodified_PeaksWorkspace_Nexus.nxs";
     auto testPWS = createSaveTestPeaksWorkspace();
     NexusTestHelper nexusHelper(true);
     nexusHelper.createFile("testSavePeaksWorkspace.nxs");
@@ -608,7 +605,7 @@ private:
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
-    auto ws = boost::make_shared<PeaksWorkspace>();
+    auto ws = std::make_shared<PeaksWorkspace>();
     ws->setInstrument(params.instrument);
     ws->mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(params.lattice));

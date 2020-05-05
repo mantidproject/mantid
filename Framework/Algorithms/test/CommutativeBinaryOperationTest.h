@@ -33,8 +33,8 @@ public:
     return "Commutative binary operation helper.";
   }
 
-  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,
-                                     const MatrixWorkspace_const_sptr ws2) {
+  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr &ws1,
+                                     const MatrixWorkspace_const_sptr &ws2) {
     m_lhs = ws1;
     m_rhs = ws2;
     m_lhsBlocksize = ws1->blocksize();

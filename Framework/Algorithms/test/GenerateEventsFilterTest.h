@@ -134,10 +134,10 @@ public:
 
     // 4. Check output
     DataObjects::SplittersWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters01"));
     DataObjects::TableWorkspace_sptr splittersinfo =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("SplittersInformation"));
 
     TS_ASSERT(splittersws);
@@ -194,7 +194,7 @@ public:
 
     // 4. Check output
     DataObjects::SplittersWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters01"));
 
     TS_ASSERT(splittersws);
@@ -272,12 +272,12 @@ public:
 
     // 4. Check output
     DataObjects::SplittersWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters03"));
     TS_ASSERT(splittersws);
 
     DataObjects::TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("Information"));
     TS_ASSERT(infows);
 
@@ -339,12 +339,12 @@ public:
 
     // Check output
     DataObjects::SplittersWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters04"));
     TS_ASSERT(splittersws);
 
     DataObjects::TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("Information"));
     TS_ASSERT(infows);
 
@@ -401,12 +401,12 @@ public:
 
     // 4. Retrieve output workspaces
     SplittersWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<SplittersWorkspace>(
+        std::dynamic_pointer_cast<SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("IntLogSplitter"));
     TS_ASSERT(splittersws);
 
     TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             AnalysisDataService::Instance().retrieve("IntLogInformation"));
     TS_ASSERT(infows);
 
@@ -470,12 +470,12 @@ public:
 
     // Retrieve output workspaces
     SplittersWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<SplittersWorkspace>(
+        std::dynamic_pointer_cast<SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("IntLogSplitter"));
     TS_ASSERT(splittersws);
 
     TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             AnalysisDataService::Instance().retrieve("IntLogInformation"));
     TS_ASSERT(infows);
 
@@ -594,10 +594,10 @@ public:
 
     // Check output
     API::MatrixWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters05"));
     DataObjects::TableWorkspace_sptr splittersinfo =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("SplittersInformation"));
 
     TS_ASSERT(splittersws);
@@ -652,7 +652,7 @@ public:
 
     // Check output workspace
     API::MatrixWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters08"));
 
     TS_ASSERT(splittersws);
@@ -744,12 +744,12 @@ public:
 
     // Check output workspace
     MatrixWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters04B"));
     TS_ASSERT(splittersws);
 
     DataObjects::TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("InfoWS04B"));
     TS_ASSERT(infows);
 
@@ -778,7 +778,7 @@ public:
     TS_ASSERT(alg2.isExecuted());
 
     SplittersWorkspace_sptr splittersws2 =
-        boost::dynamic_pointer_cast<SplittersWorkspace>(
+        std::dynamic_pointer_cast<SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters04C"));
     TS_ASSERT(splittersws2);
 
@@ -846,12 +846,12 @@ public:
 
     // Check output workspace
     MatrixWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters04B"));
     TS_ASSERT(splittersws);
 
     DataObjects::TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("InfoWS04B"));
     TS_ASSERT(infows);
 
@@ -880,7 +880,7 @@ public:
     TS_ASSERT(alg2.isExecuted());
 
     SplittersWorkspace_sptr splittersws2 =
-        boost::dynamic_pointer_cast<SplittersWorkspace>(
+        std::dynamic_pointer_cast<SplittersWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters04C"));
     TS_ASSERT(splittersws2);
 
@@ -944,14 +944,14 @@ public:
 
     // Check output workspace
     MatrixWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters09"));
     TS_ASSERT(splittersws);
     if (splittersws)
       TS_ASSERT(splittersws->x(0).size() >= 2);
 
     DataObjects::TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("InfoWS09"));
     TS_ASSERT(infows);
 
@@ -1000,12 +1000,12 @@ public:
 
     // Check output workspace
     MatrixWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters09"));
     TS_ASSERT(splittersws);
 
     DataObjects::TableWorkspace_const_sptr infows =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("InfoWS09"));
     TS_ASSERT(infows);
 
@@ -1059,7 +1059,7 @@ public:
 
     // Check output workspace
     API::MatrixWorkspace_sptr splittersws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("Splitters08v"));
 
     TS_ASSERT(splittersws);
@@ -1145,7 +1145,7 @@ public:
    * SplittingInterval objects
    */
   size_t convertMatrixSplitterToSplitters(
-      API::MatrixWorkspace_const_sptr matrixws,
+      const API::MatrixWorkspace_const_sptr &matrixws,
       std::vector<Kernel::SplittingInterval> &splitters) {
     splitters.clear();
     size_t numsplitters = 0;

@@ -87,7 +87,8 @@ private:
                               const double *ysmooth) const;
 
   /// Use an existing fit function to tidy smoothing
-  void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
+  void performAdditionalFitting(const API::MatrixWorkspace_sptr &ws,
+                                const int row);
 
   /// Converts histogram data to point data later processing
   /// convert a binned workspace to point data. Uses mean of the bins as point
@@ -95,7 +96,7 @@ private:
   convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
   /// CubicSpline member used to perform smoothing
-  boost::shared_ptr<Functions::BSpline> m_cspline;
+  std::shared_ptr<Functions::BSpline> m_cspline;
   /// pointer to the input workspace
   API::MatrixWorkspace_sptr m_inputWorkspace;
   /// pointer to the input workspace converted to point data

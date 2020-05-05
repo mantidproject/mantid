@@ -128,8 +128,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     //
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
@@ -182,8 +181,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
 
@@ -228,7 +226,7 @@ public:
    * @return
    */
   static EventWorkspace_sptr
-  do_testExec_EventWorkspaces(std::string filename_root, EventType type,
+  do_testExec_EventWorkspaces(const std::string &filename_root, EventType type,
                               std::string &outputFile, bool makeDifferentTypes,
                               bool clearfiles, bool PreserveEvents = true,
                               bool CompressNexus = false) {
@@ -261,8 +259,7 @@ public:
     alg.initialize();
 
     // Now set it...
-    alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<Workspace>(WS));
+    alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(WS));
 
     // specify name of file to save workspace to
     std::ostringstream mess;
@@ -334,14 +331,13 @@ public:
       alg.initialize();
 
     // create dummy 2D-workspace
-    Workspace2D_sptr localWorkspace2D =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr localWorkspace2D = std::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
 
     // set units to be a label
     localWorkspace2D->getAxis(0)->unit() =
         UnitFactory::Instance().create("Label");
-    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+    auto label = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         localWorkspace2D->getAxis(0)->unit());
     label->setLabel("Temperature", "K");
 
@@ -542,9 +538,8 @@ public:
     std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
 
     // Create a table which we will save
-    auto table =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
-            WorkspaceFactory::Instance().createTable());
+    auto table = std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+        WorkspaceFactory::Instance().createTable());
     table->setRowCount(3);
     table->addColumn("int", "IntColumn");
     {
@@ -731,9 +726,8 @@ public:
     std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
 
     // Create a table which we will save
-    auto table =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
-            WorkspaceFactory::Instance().createTable());
+    auto table = std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+        WorkspaceFactory::Instance().createTable());
     table->setRowCount(3);
     table->addColumn("int", "IntColumn");
     {
@@ -813,7 +807,7 @@ public:
                                      "unit_testing/IDF_for_UNIT_TESTING.xml");
     createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
     createWorkspace.execute();
-    auto ws = boost::dynamic_pointer_cast<Workspace2D>(
+    auto ws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("testSpace"));
     ws->mutableDetectorInfo().setMasked(1, true);
     TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(0), false);
@@ -836,7 +830,7 @@ public:
     loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
     TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
     TS_ASSERT(loadAlg.isExecuted());
-    auto wsReloaded = boost::dynamic_pointer_cast<Workspace2D>(
+    auto wsReloaded = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(0), false);
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
@@ -907,17 +901,15 @@ public:
   }
 
   void test_when_nested_workspaces_are_being_saved() {
-    Workspace2D_sptr ws1 = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr ws1 = std::dynamic_pointer_cast<Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
-    Workspace2D_sptr ws2 = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr ws2 = std::dynamic_pointer_cast<Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
 
-    Mantid::API::WorkspaceGroup_sptr gws1 =
-        boost::make_shared<WorkspaceGroup>();
+    Mantid::API::WorkspaceGroup_sptr gws1 = std::make_shared<WorkspaceGroup>();
     gws1->addWorkspace(ws1);
     gws1->addWorkspace(ws2);
-    Mantid::API::WorkspaceGroup_sptr gws2 =
-        boost::make_shared<WorkspaceGroup>();
+    Mantid::API::WorkspaceGroup_sptr gws2 = std::make_shared<WorkspaceGroup>();
     gws2->addWorkspace(gws1);
     AnalysisDataService::Instance().addOrReplace("gws2", gws2);
 
@@ -1004,9 +996,8 @@ private:
     TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     // create dummy 2D-workspace
-    Workspace2D_sptr localWorkspace2D =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr localWorkspace2D = std::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
     localWorkspace2D->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
     double d = 0.0;
@@ -1052,13 +1043,12 @@ private:
    * @param numSpectra
    * @return
    */
-  boost::shared_ptr<MatrixWorkspace>
+  std::shared_ptr<MatrixWorkspace>
   makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins) const {
-    boost::shared_ptr<MatrixWorkspace> ws2 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<MatrixWorkspace> ws2 = std::make_shared<WorkspaceTester>();
     ws2->initialize(numSpectra, numBins, numBins);
 
-    auto inst = boost::make_shared<Instrument>("TestInstrument");
+    auto inst = std::make_shared<Instrument>("TestInstrument");
     // We get a 1:1 map by default so the detector ID should match the spectrum
     // number
     for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {

@@ -314,7 +314,7 @@ void CentroidPeaks::exec() {
   // For quickly looking up workspace index from det id
   wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap();
 
-  eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inWS);
+  eventW = std::dynamic_pointer_cast<const EventWorkspace>(inWS);
   if (eventW) {
     eventW->sortAll(TOF_SORT, nullptr);
     this->integrateEvent();
@@ -323,14 +323,13 @@ void CentroidPeaks::exec() {
   }
 }
 
-int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
-  boost::shared_ptr<const IComponent> parent =
-      inst->getComponentByName(bankName);
+int CentroidPeaks::findPixelID(const std::string &bankName, int col, int row) {
+  std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+    std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getID();
   } else {
     std::string bankName0 = bankName;
@@ -340,10 +339,10 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
     pixelString << inst->getName() << "/" << bankName0 << "/" << bankName
                 << "/tube" << std::setw(3) << std::setfill('0') << col
                 << "/pixel" << std::setw(4) << std::setfill('0') << row;
-    boost::shared_ptr<const Geometry::IComponent> component =
+    std::shared_ptr<const Geometry::IComponent> component =
         inst->getComponentByName(pixelString.str());
-    boost::shared_ptr<const Detector> pixel =
-        boost::dynamic_pointer_cast<const Detector>(component);
+    std::shared_ptr<const Detector> pixel =
+        std::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
   }
 }

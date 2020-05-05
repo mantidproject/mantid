@@ -144,7 +144,6 @@ public:
   }
 
   void testStrFullCut() {
-    std::vector<double> dblresult;
     double sgldblResult;
     std::string input("100.01 101.02 103.04 105.06 Remainder of string");
     TS_ASSERT_EQUALS(

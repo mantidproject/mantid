@@ -4,8 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidCrystal/PeakBackground.h"
+#include <utility>
+
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidCrystal/PeakBackground.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 
 using namespace Mantid::API;
@@ -24,7 +26,7 @@ PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
                                const Mantid::API::MDNormalization normalisation,
                                const SpecialCoordinateSystem coordinates)
     : HardThresholdBackground(thresholdSignal, normalisation),
-      m_peaksWS(peaksWS), m_radiusEstimate(radiusEstimate),
+      m_peaksWS(std::move(peaksWS)), m_radiusEstimate(radiusEstimate),
       m_mdCoordinates(coordinates) {
 
   if (m_mdCoordinates == QLab) {

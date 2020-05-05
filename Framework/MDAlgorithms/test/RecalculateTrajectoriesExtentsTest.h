@@ -34,8 +34,8 @@ public:
     delete suite;
   }
 
-  IMDEventWorkspace_sptr create_workspace(std::vector<double> extents,
-                                          std::string name) {
+  IMDEventWorkspace_sptr create_workspace(const std::vector<double> &extents,
+                                          const std::string &name) {
     // ---- empty MDEW ----
     TS_ASSERT_EQUALS(extents.size(), 6)
     CreateMDWorkspace algC;
@@ -50,7 +50,7 @@ public:
     algC.setPropertyValue("Units", "m,mm,um");
     algC.setPropertyValue("OutputWorkspace", name);
     algC.execute();
-    IMDEventWorkspace_sptr out = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr out = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(name));
     TS_ASSERT(out);
 
@@ -76,7 +76,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(std::string name, std::vector<double> extents) {
+  void do_test(const std::string &name, std::vector<double> extents) {
     IMDEventWorkspace_sptr inputWS = create_workspace(extents, name);
 
     RecalculateTrajectoriesExtents alg;

@@ -7,16 +7,21 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (BoolTimeSeriesProperty,
-                           FloatTimeSeriesProperty, Int32TimeSeriesProperty,
-                           Int64TimeSeriesProperty, StringTimeSeriesProperty, logger)
+from mantid.kernel import (BoolTimeSeriesProperty, BoolFilteredTimeSeriesProperty,
+                           FloatTimeSeriesProperty, FloatFilteredTimeSeriesProperty,
+                           Int32TimeSeriesProperty, Int32FilteredTimeSeriesProperty,
+                           Int64TimeSeriesProperty, Int64FilteredTimeSeriesProperty,
+                           StringTimeSeriesProperty, StringFilteredTimeSeriesProperty,
+                           logger)
 from mantid.api import MultipleExperimentInfos
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 TimeSeriesProperties = (BoolTimeSeriesProperty,
                         FloatTimeSeriesProperty, Int32TimeSeriesProperty,
                         Int64TimeSeriesProperty, StringTimeSeriesProperty)
+FilteredTimeSeriesProperties = (BoolFilteredTimeSeriesProperty,
+                                FloatFilteredTimeSeriesProperty, Int32FilteredTimeSeriesProperty,
+                                Int64FilteredTimeSeriesProperty, StringFilteredTimeSeriesProperty)
 
 
 def get_type(log):
@@ -96,6 +101,11 @@ class SampleLogsModel(object):
         """Return log of given LogName"""
         return self.run.getLogData(LogName)
 
+    def get_is_log_filtered(self, LogName):
+        """Return if the log of given LogName is filtered"""
+        log = self.get_log(LogName)
+        return isinstance(log, FilteredTimeSeriesProperties)
+
     def get_log_names(self):
         """Returns a list of logs in workspace"""
         return self.run.keys()
@@ -113,10 +123,12 @@ class SampleLogsModel(object):
                                                   Int32TimeSeriesProperty,
                                                   Int64TimeSeriesProperty))
 
-    def get_statistics(self, LogName):
+    def get_statistics(self, LogName, filtered = True):
         """Return the statistics of a particular log"""
         log = self.get_log(LogName)
         if isinstance(log, TimeSeriesProperties):
+            if ((not filtered) and isinstance(log,FilteredTimeSeriesProperties)):
+                log = log.unfiltered()
             return log.getStatistics()
 
     def isMD(self):

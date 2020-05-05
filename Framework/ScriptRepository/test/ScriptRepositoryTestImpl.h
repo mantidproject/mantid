@@ -83,7 +83,8 @@ to simulate changes and new values for the downloading.
 
 class ScriptRepositoryImplLocal : public ScriptRepositoryImpl {
 public:
-  ScriptRepositoryImplLocal(std::string a = "", std::string b = "")
+  ScriptRepositoryImplLocal(const std::string &a = "",
+                            const std::string &b = "")
       : ScriptRepositoryImpl(a, b) {
     repository_json_content = REPOSITORYJSON;
     tofconv_readme_content = TOFCONV_README;

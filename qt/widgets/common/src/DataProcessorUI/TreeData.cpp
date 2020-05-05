@@ -18,7 +18,7 @@ RowData::RowData(const int columnCount) : m_isProcessed{false} {
     m_data.append("");
 }
 
-RowData::RowData(QStringList data)
+RowData::RowData(const QStringList &data)
     : m_data(std::move(data)), m_isProcessed{false} {}
 
 RowData::RowData(const std::vector<std::string> &data) : m_isProcessed{false} {
@@ -311,7 +311,7 @@ bool RowData::reductionFailed() const {
  * prefixes have been applied for specific output properties.
  * @param prefix [in] : if not empty, apply this prefix to the name
  */
-QString RowData::reducedName(const QString prefix) const {
+QString RowData::reducedName(const QString &prefix) const {
   if (prefix.isEmpty())
     return m_reducedName;
   else

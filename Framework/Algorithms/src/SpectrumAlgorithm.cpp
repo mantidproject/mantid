@@ -22,7 +22,7 @@ void SpectrumAlgorithm::declareWorkspaceIndexSetProperties(
   m_indexMinPropertyName = indexMinPropertyName;
   m_indexMaxPropertyName = indexMaxPropertyName;
   m_indexRangePropertyName = indexRangePropertyName;
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   // TODO: The names and descriptions of these properties are temporary and for
   // now follow the old naming from the algorithm ChangeBinOffset, to not break

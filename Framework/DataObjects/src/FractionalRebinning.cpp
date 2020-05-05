@@ -495,8 +495,9 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
  * @param inputWS The input workspace used for testing distribution state
  * @param progress An optional progress object. Reported to once per bin.
  */
-void normaliseOutput(MatrixWorkspace_sptr outputWS,
-                     MatrixWorkspace_const_sptr inputWS, Progress *progress) {
+void normaliseOutput(const MatrixWorkspace_sptr &outputWS,
+                     const MatrixWorkspace_const_sptr &inputWS,
+                     Progress *progress) {
   const bool removeBinWidth(inputWS->isDistribution() &&
                             outputWS->id() != "RebinnedOutput");
   for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {

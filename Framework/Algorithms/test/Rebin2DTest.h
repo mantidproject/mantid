@@ -76,7 +76,7 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
   return ws;
 }
 
-MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
+MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
                                   const std::string &axis1Params,
                                   const std::string &axis2Params,
                                   const bool UseFractionalArea = false) {
@@ -95,7 +95,7 @@ MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
   TS_ASSERT_THROWS_NOTHING(alg.execute(););
   TS_ASSERT(alg.isExecuted());
 
-  MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(outWSName));
   TS_ASSERT(outputWS);
   return outputWS;
@@ -273,9 +273,9 @@ public:
   }
 
 private:
-  void checkData(MatrixWorkspace_const_sptr outputWS, const size_t nxvalues,
-                 const size_t nhist, const bool dist, const bool onAxis1,
-                 const bool small_bins = false) {
+  void checkData(const MatrixWorkspace_const_sptr &outputWS,
+                 const size_t nxvalues, const size_t nhist, const bool dist,
+                 const bool onAxis1, const bool small_bins = false) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nhist);
     TS_ASSERT_EQUALS(outputWS->isDistribution(), dist);
     // Axis sizes

@@ -175,7 +175,7 @@ private:
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
   MatrixWorkspace_const_sptr
-  runAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_const_sptr inWS) {
+  runAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_const_sptr &inWS) {
     // run the algorithm
     TS_ASSERT(algo.execute());
     TS_ASSERT(algo.isExecuted());

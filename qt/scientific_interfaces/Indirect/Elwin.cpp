@@ -384,8 +384,9 @@ void Elwin::setFileExtensionsByName(bool filter) {
                                                   : getExtensions(tabName));
 }
 
-void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
-                                 const QPair<double, double> &range) {
+void Elwin::setDefaultResolution(
+    const Mantid::API::MatrixWorkspace_const_sptr &ws,
+    const QPair<double, double> &range) {
   auto inst = ws->getInstrument();
   auto analyser = inst->getStringParameter("analyser");
 
@@ -414,7 +415,8 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
   }
 }
 
-void Elwin::setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws) {
+void Elwin::setDefaultSampleLog(
+    const Mantid::API::MatrixWorkspace_const_sptr &ws) {
   auto inst = ws->getInstrument();
   // Set sample environment log name
   auto log = inst->getStringParameter("Workflow.SE-log");

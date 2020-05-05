@@ -20,6 +20,7 @@
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QVBoxLayout>
+#include <utility>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using MantidQt::Widgets::MplCpp::cycler;
@@ -116,7 +117,7 @@ void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
   // plot automatically calls "scalex=True, scaley=True"
   m_lines.emplace_back(
       axes.plot(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT));
-  m_activeCurveLabel = curveLabel;
+  m_activeCurveLabel = std::move(curveLabel);
   setXLabel(std::move(xunit));
   // If the current axis limits can fit the data then matplotlib
   // won't change the axis scale. If the intensity of different plots

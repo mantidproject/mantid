@@ -10,8 +10,8 @@
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-#include <boost/make_shared.hpp>
 #include <boost/scoped_array.hpp>
+#include <memory>
 
 // For Python unicode object
 #include <unicodeobject.h>
@@ -20,8 +20,8 @@ using Mantid::Kernel::UnitLabel;
 using namespace boost::python;
 
 namespace {
-boost::shared_ptr<UnitLabel>
-createLabel(const object &ascii, const object &utf8, const object &latex) {
+std::shared_ptr<UnitLabel> createLabel(const object &ascii, const object &utf8,
+                                       const object &latex) {
   using Utf8Char = UnitLabel::Utf8String::value_type;
   if (PyUnicode_Check(utf8.ptr())) {
 #if PY_MAJOR_VERSION >= 3
@@ -34,7 +34,7 @@ createLabel(const object &ascii, const object &utf8, const object &latex) {
     PyUnicode_AsWideChar(reinterpret_cast<PyUnicodeObject *>(utf8.ptr()),
                          buffer.get(), length);
 #endif
-    return boost::make_shared<UnitLabel>(
+    return std::make_shared<UnitLabel>(
         extract<std::string>(ascii)(),
         UnitLabel::Utf8String(buffer.get(), buffer.get() + length),
         extract<std::string>(latex)());

@@ -4,11 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
-import six
-
 import mantid.simpleapi as simpleapi
 from mantid.api import ITableWorkspace, WorkspaceGroup
 from mantid.dataobjects import Workspace2D
@@ -124,8 +120,8 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         self.assertTrue(simpleapi.mtd.doesExist("test"))
         ads_workspace = simpleapi.mtd["test"]
-        six.assertCountEqual(self, ads_workspace.readX(0), [1, 2, 3, 4])
-        six.assertCountEqual(self, ads_workspace.readY(0), [10, 10, 10, 10])
+        self.assertCountEqual(ads_workspace.readX(0), [1, 2, 3, 4])
+        self.assertCountEqual(ads_workspace.readY(0), [10, 10, 10, 10])
 
     def test_that_hiding_the_workspace_removes_it_from_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
@@ -141,8 +137,8 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         ws_property = workspace_handle.workspace
 
-        six.assertCountEqual(self, ws_property.readX(0), [1, 2, 3, 4])
-        six.assertCountEqual(self, ws_property.readY(0), [10, 10, 10, 10])
+        self.assertCountEqual(ws_property.readX(0), [1, 2, 3, 4])
+        self.assertCountEqual(ws_property.readY(0), [10, 10, 10, 10])
 
     def test_that_workspace_property_returns_workspace_when_in_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
@@ -150,8 +146,8 @@ class MuonWorkspaceTest(unittest.TestCase):
         workspace_handle.show("arbitrary_name")
         ws_property = workspace_handle.workspace
 
-        six.assertCountEqual(self, ws_property.readX(0), [1, 2, 3, 4])
-        six.assertCountEqual(self, ws_property.readY(0), [10, 10, 10, 10])
+        self.assertCountEqual(ws_property.readX(0), [1, 2, 3, 4])
+        self.assertCountEqual(ws_property.readY(0), [10, 10, 10, 10])
 
     def test_that_can_change_name_when_workspace_not_in_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)

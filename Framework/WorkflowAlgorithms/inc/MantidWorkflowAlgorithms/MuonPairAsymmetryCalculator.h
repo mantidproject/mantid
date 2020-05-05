@@ -16,9 +16,9 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport MuonPairAsymmetryCalculator : public IMuonAsymmetryCalculator {
 public:
-  MuonPairAsymmetryCalculator(const API::WorkspaceGroup_sptr inputWS,
-                              const std::vector<int> summedPeriods,
-                              const std::vector<int> subtractedPeriods,
+  MuonPairAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS,
+                              const std::vector<int> &summedPeriods,
+                              const std::vector<int> &subtractedPeriods,
                               const int firstPairIndex,
                               const int secondPairIndex,
                               const double alpha = 1);

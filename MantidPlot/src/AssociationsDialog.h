@@ -46,7 +46,7 @@ class AssociationsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  AssociationsDialog(Graph *g, Qt::WFlags fl = nullptr);
+  AssociationsDialog(Graph *g, const Qt::WFlags &fl = nullptr);
 
   void initTablesList(QList<MdiSubWindow *> lst, int curve);
 

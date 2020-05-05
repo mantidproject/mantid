@@ -15,7 +15,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
+#include <memory>
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -226,7 +226,7 @@ void LoadPreNexusMonitors::exec() {
  * geometry
  */
 void LoadPreNexusMonitors::runLoadInstrument(
-    const std::string &instrument, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &instrument, const MatrixWorkspace_sptr &localWorkspace) {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

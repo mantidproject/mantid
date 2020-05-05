@@ -39,9 +39,9 @@ struct Product {
 /** Initalise generic importing properties.
  */
 void ImportMDHistoWorkspaceBase::initGenericImportProps() {
-  auto validator = boost::make_shared<CompositeValidator>();
-  validator->add(boost::make_shared<BoundedValidator<int>>(1, 9));
-  validator->add(boost::make_shared<MandatoryValidator<int>>());
+  auto validator = std::make_shared<CompositeValidator>();
+  validator->add(std::make_shared<BoundedValidator<int>>(1, 9));
+  validator->add(std::make_shared<MandatoryValidator<int>>());
 
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "Dimensionality", -1, validator, Direction::Input),
@@ -145,8 +145,9 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
  * @param unit: the selected unit
  * @returns a unique pointer to an MDFrame
  */
-MDFrame_uptr ImportMDHistoWorkspaceBase::createMDFrame(std::string frame,
-                                                       std::string unit) {
+MDFrame_uptr
+ImportMDHistoWorkspaceBase::createMDFrame(const std::string &frame,
+                                          const std::string &unit) {
   auto frameFactory = makeMDFrameFactoryChain();
   MDFrameArgument frameArg(frame, unit);
   return frameFactory->create(frameArg);

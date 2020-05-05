@@ -38,7 +38,7 @@ std::string getFunctionString(std::string const &workspaceName) {
 MultiDomainFunction_sptr getFunction(std::string const &functionString) {
   auto fun = FunctionFactory::Instance().createInitialized(
       "composite=MultiDomainFunction;" + functionString + ";" + functionString);
-  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+  return std::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
 } // namespace

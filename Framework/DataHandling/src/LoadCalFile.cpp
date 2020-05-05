@@ -106,7 +106,7 @@ LoadCalFile::getInstrument3Ways(Algorithm *alg) {
   } else {
     Algorithm_sptr childAlg =
         alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
+    MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
@@ -237,9 +237,9 @@ void LoadCalFile::exec() {
  *initialized to the right instrument.
  */
 void LoadCalFile::readCalFile(const std::string &calFileName,
-                              GroupingWorkspace_sptr groupWS,
-                              OffsetsWorkspace_sptr offsetsWS,
-                              MaskWorkspace_sptr maskWS) {
+                              const GroupingWorkspace_sptr &groupWS,
+                              const OffsetsWorkspace_sptr &offsetsWS,
+                              const MaskWorkspace_sptr &maskWS) {
   auto doGroup = bool(groupWS);
   auto doOffsets = bool(offsetsWS);
   auto doMask = bool(maskWS);
@@ -360,7 +360,7 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
  * @param detID Detector ID to check
  * @return True if a monitor, false otherwise
  */
-bool LoadCalFile::idIsMonitor(Instrument_const_sptr inst, int detID) {
+bool LoadCalFile::idIsMonitor(const Instrument_const_sptr &inst, int detID) {
   auto monitorList = inst->getMonitors();
   auto it = std::find(monitorList.begin(), monitorList.end(), detID);
   return (it != monitorList.end());

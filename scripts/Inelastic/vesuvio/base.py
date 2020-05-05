@@ -5,9 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods,redefined-builtin
-from __future__ import (absolute_import, division, print_function)
-from six import iteritems
-
 from mantid.api import Algorithm
 
 
@@ -37,7 +34,7 @@ class VesuvioBase(Algorithm):
                 ret_props = [ret_props]
             del kwargs['return_values']
 
-        for name, value in iteritems(kwargs):
+        for name, value in kwargs.items():
             alg.setProperty(name, value)
         alg.execute()
 

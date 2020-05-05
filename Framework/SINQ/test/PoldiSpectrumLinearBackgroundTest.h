@@ -48,8 +48,8 @@ public:
     TS_ASSERT(function);
     TS_ASSERT_EQUALS(function->name(), "PoldiSpectrumLinearBackground");
 
-    boost::shared_ptr<PoldiSpectrumLinearBackground> castedFunction =
-        boost::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(function);
+    std::shared_ptr<PoldiSpectrumLinearBackground> castedFunction =
+        std::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(function);
 
     TS_ASSERT(function);
   }
@@ -57,8 +57,8 @@ public:
   void testSetWorkspace() {
     IFunction_sptr function = FunctionFactory::Instance().createFunction(
         "PoldiSpectrumLinearBackground");
-    boost::shared_ptr<PoldiSpectrumLinearBackground> castedFunction =
-        boost::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(function);
+    std::shared_ptr<PoldiSpectrumLinearBackground> castedFunction =
+        std::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(function);
 
     // default is 0
     TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 0);

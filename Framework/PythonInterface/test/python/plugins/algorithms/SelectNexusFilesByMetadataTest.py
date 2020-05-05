@@ -5,10 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=unused-import
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import *
+
 
 class SelectNexusFilesByMetadataTest(unittest.TestCase):
 
@@ -78,4 +77,3 @@ if __name__=="__main__":
         unittest.main()
     except ImportError:
         pass
-

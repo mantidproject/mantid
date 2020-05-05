@@ -9,8 +9,6 @@
 Wraps a call to the sip code generation executable to strip any throw specifications
 from the generated code as these have been removed from C++17.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 # system imports
 import argparse
 import logging

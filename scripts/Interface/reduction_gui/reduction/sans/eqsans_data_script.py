@@ -7,7 +7,6 @@
 """
     Data set options for EQSANS reduction
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction_gui.reduction.sans.eqsans_sample_script import SampleData as BaseSampleData
 from reduction_gui.reduction.sans.eqsans_background_script import Background
 

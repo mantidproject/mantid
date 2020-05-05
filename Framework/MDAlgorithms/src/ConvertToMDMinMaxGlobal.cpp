@@ -49,7 +49,7 @@ const std::string ConvertToMDMinMaxGlobal::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToMDMinMaxGlobal::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("");
@@ -69,8 +69,7 @@ void ConvertToMDMinMaxGlobal::init() {
 
   /// this variable describes default possible ID-s for Q-dimensions
   declareProperty(
-      "QDimensions", Q_modes[0],
-      boost::make_shared<StringListValidator>(Q_modes),
+      "QDimensions", Q_modes[0], std::make_shared<StringListValidator>(Q_modes),
       "String, describing MD-analysis modes, this algorithm can process. "
       "There are 3 modes currently available and described in details on"
       "*MD Transformation factory* page. "
@@ -79,7 +78,7 @@ void ConvertToMDMinMaxGlobal::init() {
   /// temporary, until dEMode is not properly defined on Workspace
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Direct],
-                  boost::make_shared<StringListValidator>(dE_modes),
+                  std::make_shared<StringListValidator>(dE_modes),
                   "You can analyze neutron energy transfer in **Direct**, "
                   "**Indirect** or **Elastic** mode. "
                   "The analysis mode has to correspond to experimental set up. "
@@ -95,7 +94,7 @@ void ConvertToMDMinMaxGlobal::init() {
   std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
   declareProperty(
       "Q3DFrames", "AutoSelect",
-      boost::make_shared<StringListValidator>(TargFrames),
+      std::make_shared<StringListValidator>(TargFrames),
       "What will be the Q-dimensions of the output workspace in **Q3D** case?"
       "  **AutoSelect**: **Q** by default, **HKL** if sample has a UB matrix."
       "  **Q** - momentum in inverse angstroms. Can be used for both "
@@ -154,7 +153,7 @@ void ConvertToMDMinMaxGlobal::exec() {
       conv->executeAsChildAlg();
 
       wstemp = conv->getProperty("OutputWorkspace");
-      evWS = boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           wstemp);
       if (evWS)
         qmax = evWS->getTofMax() *
@@ -168,7 +167,7 @@ void ConvertToMDMinMaxGlobal::exec() {
       conv->setProperty("Emode", GeometryMode);
       conv->executeAsChildAlg();
       wstemp = conv->getProperty("OutputWorkspace");
-      evWS = boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           wstemp);
       if (evWS) {
         deltaEmin = evWS->getTofMin();

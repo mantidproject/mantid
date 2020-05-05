@@ -142,7 +142,7 @@ public slots:
   void setDatasetNames(const QStringList &names) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
-  void removeDatasets(QList<int> indices);
+  void removeDatasets(const QList<int> &indices);
   void addDatasets(const QStringList &names);
 
 protected:

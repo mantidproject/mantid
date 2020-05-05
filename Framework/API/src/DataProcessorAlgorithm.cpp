@@ -19,6 +19,8 @@
 #include "MantidKernel/System.h"
 #include "Poco/Path.h"
 #include <stdexcept>
+#include <utility>
+
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
@@ -62,7 +64,7 @@ GenericDataProcessorAlgorithm<Base>::GenericDataProcessorAlgorithm()
  *  @return shared pointer to the newly created algorithm object
  */
 template <class Base>
-boost::shared_ptr<Algorithm>
+std::shared_ptr<Algorithm>
 GenericDataProcessorAlgorithm<Base>::createChildAlgorithm(
     const std::string &name, const double startProgress,
     const double endProgress, const bool enableLogging, const int &version) {
@@ -135,7 +137,7 @@ void GenericDataProcessorAlgorithm<Base>::mapPropertyName(
  */
 template <class Base>
 void GenericDataProcessorAlgorithm<Base>::copyProperty(
-    API::Algorithm_sptr alg, const std::string &name) {
+    const API::Algorithm_sptr &alg, const std::string &name) {
   if (!alg->existsProperty(name)) {
     std::stringstream msg;
     msg << "Algorithm \"" << alg->name() << "\" does not have property \""
@@ -232,7 +234,7 @@ GenericDataProcessorAlgorithm<Base>::loadChunk(const size_t rowIndex) {
 template <class Base>
 Workspace_sptr
 GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
-  Workspace_sptr outputWS = partialWS;
+  Workspace_sptr outputWS = std::move(partialWS);
 #ifdef MPI_BUILD
   IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);
@@ -396,7 +398,7 @@ GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData,
  * @param propertyManager :: Name of the property manager to retrieve.
  */
 template <class Base>
-boost::shared_ptr<PropertyManager>
+std::shared_ptr<PropertyManager>
 GenericDataProcessorAlgorithm<Base>::getProcessProperties(
     const std::string &propertyManager) const {
   std::string propertyManagerName(propertyManager);
@@ -410,13 +412,13 @@ GenericDataProcessorAlgorithm<Base>::getProcessProperties(
     propertyManagerName = this->getPropertyValue(m_propertyManagerPropertyName);
   }
 
-  boost::shared_ptr<PropertyManager> processProperties;
+  std::shared_ptr<PropertyManager> processProperties;
   if (PropertyManagerDataService::Instance().doesExist(propertyManagerName)) {
     processProperties =
         PropertyManagerDataService::Instance().retrieve(propertyManagerName);
   } else {
     Base::getLogger().notice() << "Could not find property manager\n";
-    processProperties = boost::make_shared<PropertyManager>();
+    processProperties = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(propertyManagerName,
                                                         processProperties);
   }

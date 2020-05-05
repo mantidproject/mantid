@@ -66,7 +66,7 @@ public:
 
     MultiPeriodGroupWorker worker("MyInputWorkspaces");
 
-    auto alg = boost::make_shared<TestAlgorithm>();
+    auto alg = std::make_shared<TestAlgorithm>();
     alg->initialize();
     alg->setPropertyValue("MyInputWorkspaces", "a, b");
 
@@ -80,7 +80,7 @@ public:
 
     MultiPeriodGroupWorker worker("MyInputWorkspaces");
 
-    auto alg = boost::make_shared<TestAlgorithm>();
+    auto alg = std::make_shared<TestAlgorithm>();
     alg->initialize();
     alg->setPropertyValue("MyInputWorkspaces", "a");
     alg->setPropertyValue("OutputWorkspace", "out_ws");

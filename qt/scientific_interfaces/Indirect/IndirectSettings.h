@@ -51,7 +51,7 @@ private:
   void
   otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
 
-  void connectIndirectInterface(QPointer<UserSubWindow> window);
+  void connectIndirectInterface(const QPointer<UserSubWindow> &window);
 
   QWidget *getDockedOrFloatingWindow();
 

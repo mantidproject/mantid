@@ -137,7 +137,6 @@ public:
 
   void
   test_DAT_Extension_Without_Header_Assumes_Detector_Calibration_File_And_Fails_If_Number_Of_Columns_Incorrect() {
-    const std::string colNames = "spectrum,theta,t0,-,R";
     const std::string contents = "plik det  t0 l0 l1\n"
                                  "    3 130.4653  -0.4157  11.0050   0.6708\n"
                                  "    4 131.9319  -0.5338  11.0050   0.6545";

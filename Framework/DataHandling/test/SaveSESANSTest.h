@@ -88,7 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         loadedWS = API::AnalysisDataService::Instance().retrieve(outWSName));
     API::MatrixWorkspace_sptr data =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
     // Check titles were set
     TS_ASSERT_EQUALS(data->getTitle(), "Sample workspace");
     TS_ASSERT_EQUALS(data->sample().getName(), "Sample set in SaveSESANSTest");

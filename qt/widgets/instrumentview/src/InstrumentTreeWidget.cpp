@@ -70,7 +70,7 @@ InstrumentTreeWidget::findComponentByName(const QString &name) const {
 }
 
 void InstrumentTreeWidget::sendComponentSelectedSignal(
-    const QModelIndex index) {
+    const QModelIndex &index) {
   auto selectedIndex = InstrumentTreeModel::extractIndex(index);
   m_instrWidget->getInstrumentActor().setComponentVisible(selectedIndex);
   emit componentSelected(selectedIndex);

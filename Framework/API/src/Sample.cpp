@@ -68,7 +68,7 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_shape = rhs.m_shape;
   m_environment = rhs.m_environment;
   m_geom_id = rhs.m_geom_id;
-  m_samples = std::vector<boost::shared_ptr<Sample>>(rhs.m_samples);
+  m_samples = std::vector<std::shared_ptr<Sample>>(rhs.m_samples);
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
@@ -144,7 +144,7 @@ const SampleEnvironment &Sample::getEnvironment() const {
  * ownership of the object.
  */
 void Sample::setEnvironment(std::unique_ptr<SampleEnvironment> env) {
-  m_environment = boost::shared_ptr<SampleEnvironment>(std::move(env));
+  m_environment = std::shared_ptr<SampleEnvironment>(std::move(env));
 }
 
 /** Return a const reference to the OrientedLattice of this sample
@@ -284,7 +284,7 @@ std::size_t Sample::size() const { return m_samples.size() + 1; }
  * Adds a sample to the sample collection
  * @param childSample The child sample to be added
  */
-void Sample::addSample(boost::shared_ptr<Sample> childSample) {
+void Sample::addSample(const std::shared_ptr<Sample> &childSample) {
   m_samples.emplace_back(childSample);
 }
 
@@ -302,7 +302,7 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->putAttr("version", 1);
   std::string shapeXML("");
   if (auto csgObject =
-          boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
+          std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
     shapeXML = csgObject->getShapeXML();
   }
   file->putAttr("shape_xml", shapeXML);
@@ -378,8 +378,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     Kernel::Material material;
     material.loadNexus(file, "material");
     // CSGObject expected, if so, set its material
-    if (auto csgObj =
-            boost::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
+    if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
       csgObj->setMaterial(material);
     }
 
@@ -387,7 +386,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     int num_other_samples;
     file->readData("num_other_samples", num_other_samples);
     for (int i = 0; i < num_other_samples; i++) {
-      auto extra = boost::make_shared<Sample>();
+      auto extra = std::make_shared<Sample>();
       extra->loadNexus(file, "sample" + Strings::toString(i + 1));
       this->addSample(extra);
     }
@@ -422,6 +421,37 @@ void Sample::clearOrientedLattice() {
   if (m_lattice) {
     m_lattice.reset(nullptr);
   }
+}
+
+bool Sample::operator==(const Sample &other) const {
+  if (m_samples.size() != other.m_samples.size())
+    return false;
+  for (size_t i = 0; i < m_samples.size(); ++i) {
+    if (*m_samples[i] != *other.m_samples[i])
+      return false;
+  }
+  auto compare = [](const auto &a, const auto &b, auto call_on) {
+    // both null or both not null
+    if (bool(a) ^ bool(b))
+      return false;
+    if (a)
+      return call_on(a) == call_on(b);
+    else
+      return true;
+  };
+  return *m_lattice == *other.m_lattice && this->m_name == other.m_name &&
+         this->m_height == other.m_height && this->m_width == other.m_width &&
+         this->m_thick == other.m_thick && m_geom_id == other.m_geom_id &&
+         compare(m_environment, other.m_environment,
+                 [](const auto &x) { return x->name(); }) &&
+         compare(m_shape, other.m_shape,
+                 [](const auto &x) { return x->shape(); }) &&
+         compare(m_crystalStructure, other.m_crystalStructure,
+                 [](const auto &x) { return *(x->spaceGroup()); });
+}
+
+bool Sample::operator!=(const Sample &other) const {
+  return !this->operator==(other);
 }
 } // namespace API
 } // namespace Mantid

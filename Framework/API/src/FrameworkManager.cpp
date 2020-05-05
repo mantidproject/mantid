@@ -259,76 +259,6 @@ void FrameworkManagerImpl::clearPropertyManagers() {
   PropertyManagerDataService::Instance().clear();
 }
 
-/** Creates and initialises an instance of an algorithm
- *
- *  @param algName :: The name of the algorithm required
- *  @param version :: The version of the algorithm
- *  @return A pointer to the created algorithm.
- *          WARNING! DO NOT DELETE THIS POINTER, because it is owned
- *          by a shared pointer in the AlgorithmManager.
- *
- *  @throw NotFoundError Thrown if algorithm requested is not registered
- */
-IAlgorithm *FrameworkManagerImpl::createAlgorithm(const std::string &algName,
-                                                  const int &version) {
-  IAlgorithm *alg = AlgorithmManager::Instance().create(algName, version).get();
-  return alg;
-}
-
-/** Creates an instance of an algorithm and sets the properties provided
- *
- *  @param algName :: The name of the algorithm required
- *  @param propertiesArray :: A single string containing properties in the
- *                         form "Property1=Value1;Property2=Value2;..."
- *  @param version :: The version of the algorithm
- *  @return A pointer to the created algorithm
- *          WARNING! DO NOT DELETE THIS POINTER, because it is owned
- *          by a shared pointer in the AlgorithmManager.
- *
- *  @throw NotFoundError Thrown if algorithm requested is not registered
- *  @throw std::invalid_argument Thrown if properties string is ill-formed
- */
-IAlgorithm *
-FrameworkManagerImpl::createAlgorithm(const std::string &algName,
-                                      const std::string &propertiesArray,
-                                      const int &version) {
-  // Use the previous method to create the algorithm
-  IAlgorithm *alg = AlgorithmManager::Instance()
-                        .create(algName, version)
-                        .get(); // createAlgorithm(algName);
-  alg->setPropertiesWithString(propertiesArray);
-
-  return alg;
-}
-
-/** Creates an instance of an algorithm, sets the properties provided and
- *       then executes it.
- *
- *  @param algName :: The name of the algorithm required
- *  @param propertiesArray :: A single string containing properties in the
- *                         form "Property1=Value1;Property2=Value2;..."
- *  @param version :: The version of the algorithm
- *  @return A pointer to the executed algorithm
- *          WARNING! DO NOT DELETE THIS POINTER, because it is owned
- *          by a shared pointer in the AlgorithmManager.
- *
- *  @throw NotFoundError Thrown if algorithm requested is not registered
- *  @throw std::invalid_argument Thrown if properties string is ill-formed
- *  @throw runtime_error Thrown if algorithm cannot be executed
- */
-IAlgorithm *FrameworkManagerImpl::exec(const std::string &algName,
-                                       const std::string &propertiesArray,
-                                       const int &version) {
-  // Make use of the previous method for algorithm creation and property
-  // setting
-  IAlgorithm *alg = createAlgorithm(algName, propertiesArray, version);
-
-  // Now execute the algorithm
-  alg->execute();
-
-  return alg;
-}
-
 /** Run any algorithm with a variable number of parameters
  *
  * @param algorithmName
@@ -390,7 +320,7 @@ Workspace *FrameworkManagerImpl::getWorkspace(const std::string &wsName) {
  */
 bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   bool retVal = false;
-  boost::shared_ptr<Workspace> ws_sptr;
+  std::shared_ptr<Workspace> ws_sptr;
   try {
     ws_sptr = AnalysisDataService::Instance().retrieve(wsName);
   } catch (Kernel::Exception::NotFoundError &ex) {
@@ -398,8 +328,8 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
     return false;
   }
 
-  boost::shared_ptr<WorkspaceGroup> ws_grpsptr =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
+  std::shared_ptr<WorkspaceGroup> ws_grpsptr =
+      std::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
   if (ws_grpsptr) {
     //  selected workspace is a group workspace
     AnalysisDataService::Instance().deepRemoveGroup(wsName);
@@ -500,8 +430,8 @@ void FrameworkManagerImpl::setupUsageReporting() {
 /// Update instrument definitions from github
 void FrameworkManagerImpl::updateInstrumentDefinitions() {
   try {
-    IAlgorithm *algDownloadInstrument =
-        this->createAlgorithm("DownloadInstrument");
+    auto algDownloadInstrument =
+        Mantid::API::AlgorithmManager::Instance().create("DownloadInstrument");
     algDownloadInstrument->setAlgStartupLogging(false);
     algDownloadInstrument->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
@@ -513,7 +443,8 @@ void FrameworkManagerImpl::updateInstrumentDefinitions() {
 /// Check if a newer release of Mantid is available
 void FrameworkManagerImpl::checkIfNewerVersionIsAvailable() {
   try {
-    IAlgorithm *algCheckVersion = this->createAlgorithm("CheckMantidVersion");
+    auto algCheckVersion =
+        Mantid::API::AlgorithmManager::Instance().create("CheckMantidVersion");
     algCheckVersion->setAlgStartupLogging(false);
     algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {

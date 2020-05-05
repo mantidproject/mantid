@@ -47,7 +47,7 @@ SaveNXTomo::SaveNXTomo() : API::Algorithm() {
  * Initialise the algorithm
  */
 void SaveNXTomo::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   // Note: this would be better, but it is too restrictive in
   // practice when saving image workspaces loaded from different
   // formats than FITS or not so standard FITS.
@@ -83,7 +83,7 @@ void SaveNXTomo::init() {
 void SaveNXTomo::exec() {
   try {
     MatrixWorkspace_sptr m = getProperty("InputWorkspaces");
-    m_workspaces.emplace_back(boost::dynamic_pointer_cast<Workspace2D>(m));
+    m_workspaces.emplace_back(std::dynamic_pointer_cast<Workspace2D>(m));
   } catch (...) {
   }
 
@@ -102,7 +102,7 @@ bool SaveNXTomo::processGroups() {
 
     for (int i = 0; i < groupWS->getNumberOfEntries(); ++i) {
       m_workspaces.emplace_back(
-          boost::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
+          std::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
     }
   } catch (...) {
   }
@@ -304,7 +304,7 @@ void SaveNXTomo::processAll() {
  * @param workspace the workspace to get data from
  * @param nxFile the nexus file to save data into
  */
-void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
+void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace,
                                       ::NeXus::File &nxFile) {
   try {
     nxFile.openPath("/entry1/tomo_entry/data");
@@ -372,7 +372,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
 }
 
 void SaveNXTomo::writeImageKeyValue(
-    const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile,
+    const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
     int thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
@@ -401,7 +401,7 @@ void SaveNXTomo::writeImageKeyValue(
   nxFile.closeGroup();
 }
 
-void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
+void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace,
                                 ::NeXus::File &nxFile, int thisFileInd) {
   // Add Log information (minus special values - Rotation, ImageKey, Intensity)
   // Unable to add multidimensional string data, storing strings as
@@ -446,7 +446,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
 }
 
 void SaveNXTomo::writeIntensityValue(
-    const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile,
+    const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
     int thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {

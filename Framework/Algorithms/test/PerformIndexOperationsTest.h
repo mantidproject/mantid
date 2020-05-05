@@ -16,7 +16,7 @@ using Mantid::Algorithms::PerformIndexOperations;
 using namespace Mantid::API;
 
 MatrixWorkspace_const_sptr
-doExecute(MatrixWorkspace_sptr inWS,
+doExecute(const MatrixWorkspace_sptr &inWS,
           const std::string &processingInstructions) {
   // Name of the output workspace.
   std::string outWSName("PerformIndexOperationsTest_OutputWS");

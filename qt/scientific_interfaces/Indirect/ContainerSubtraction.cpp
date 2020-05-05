@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
+
+#include <utility>
+
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/Axis.h"
@@ -58,12 +61,12 @@ ContainerSubtraction::~ContainerSubtraction() {
 
 void ContainerSubtraction::setTransformedContainer(
     MatrixWorkspace_sptr workspace, const std::string &name) {
-  m_transformedContainerWS = workspace;
+  m_transformedContainerWS = std::move(workspace);
   AnalysisDataService::Instance().addOrReplace(name, m_transformedContainerWS);
 }
 
 void ContainerSubtraction::setTransformedContainer(
-    MatrixWorkspace_sptr workspace) {
+    const MatrixWorkspace_sptr &workspace) {
   m_transformedContainerWS = workspace;
   AnalysisDataService::Instance().addOrReplace(workspace->getName(),
                                                m_transformedContainerWS);
@@ -456,46 +459,48 @@ MatrixWorkspace_sptr ContainerSubtraction::requestRebinToSample(
 }
 
 MatrixWorkspace_sptr
-ContainerSubtraction::shiftWorkspace(MatrixWorkspace_sptr workspace,
+ContainerSubtraction::shiftWorkspace(const MatrixWorkspace_sptr &workspace,
                                      double shiftValue) const {
-  auto shiftAlg = shiftAlgorithm(workspace, shiftValue);
+  auto shiftAlg = shiftAlgorithm(std::move(workspace), shiftValue);
   shiftAlg->execute();
   return shiftAlg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr
-ContainerSubtraction::scaleWorkspace(MatrixWorkspace_sptr workspace,
+ContainerSubtraction::scaleWorkspace(const MatrixWorkspace_sptr &workspace,
                                      double scaleValue) const {
-  auto scaleAlg = scaleAlgorithm(workspace, scaleValue);
+  auto scaleAlg = scaleAlgorithm(std::move(workspace), scaleValue);
   scaleAlg->execute();
   return scaleAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-ContainerSubtraction::minusWorkspace(MatrixWorkspace_sptr lhsWorkspace,
-                                     MatrixWorkspace_sptr rhsWorkspace) const {
-  auto minusAlg = minusAlgorithm(lhsWorkspace, rhsWorkspace);
+MatrixWorkspace_sptr ContainerSubtraction::minusWorkspace(
+    const MatrixWorkspace_sptr &lhsWorkspace,
+    const MatrixWorkspace_sptr &rhsWorkspace) const {
+  auto minusAlg =
+      minusAlgorithm(std::move(lhsWorkspace), std::move(rhsWorkspace));
   minusAlg->execute();
   return minusAlg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr ContainerSubtraction::rebinToWorkspace(
-    MatrixWorkspace_sptr workspaceToRebin,
-    MatrixWorkspace_sptr workspaceToMatch) const {
-  auto rebinAlg = rebinToWorkspaceAlgorithm(workspaceToRebin, workspaceToMatch);
+    const MatrixWorkspace_sptr &workspaceToRebin,
+    const MatrixWorkspace_sptr &workspaceToMatch) const {
+  auto rebinAlg = rebinToWorkspaceAlgorithm(std::move(workspaceToRebin),
+                                            std::move(workspaceToMatch));
   rebinAlg->execute();
   return rebinAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-ContainerSubtraction::convertToHistogram(MatrixWorkspace_sptr workspace) const {
-  auto convertAlg = convertToHistogramAlgorithm(workspace);
+MatrixWorkspace_sptr ContainerSubtraction::convertToHistogram(
+    const MatrixWorkspace_sptr &workspace) const {
+  auto convertAlg = convertToHistogramAlgorithm(std::move(workspace));
   convertAlg->execute();
   return convertAlg->getProperty("OutputWorkspace");
 }
 
 IAlgorithm_sptr
-ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
+ContainerSubtraction::shiftAlgorithm(const MatrixWorkspace_sptr &workspace,
                                      double shiftValue) const {
   IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
   shift->initialize();
@@ -509,7 +514,7 @@ ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
 }
 
 IAlgorithm_sptr
-ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
+ContainerSubtraction::scaleAlgorithm(const MatrixWorkspace_sptr &workspace,
                                      double scaleValue) const {
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
@@ -522,9 +527,9 @@ ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
   return scale;
 }
 
-IAlgorithm_sptr
-ContainerSubtraction::minusAlgorithm(MatrixWorkspace_sptr lhsWorkspace,
-                                     MatrixWorkspace_sptr rhsWorkspace) const {
+IAlgorithm_sptr ContainerSubtraction::minusAlgorithm(
+    const MatrixWorkspace_sptr &lhsWorkspace,
+    const MatrixWorkspace_sptr &rhsWorkspace) const {
   IAlgorithm_sptr minus = AlgorithmManager::Instance().create("Minus");
   minus->initialize();
   minus->setChild(true);
@@ -536,8 +541,8 @@ ContainerSubtraction::minusAlgorithm(MatrixWorkspace_sptr lhsWorkspace,
 }
 
 IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
-    MatrixWorkspace_sptr workspaceToRebin,
-    MatrixWorkspace_sptr workspaceToMatch) const {
+    const MatrixWorkspace_sptr &workspaceToRebin,
+    const MatrixWorkspace_sptr &workspaceToMatch) const {
   IAlgorithm_sptr rebin =
       AlgorithmManager::Instance().create("RebinToWorkspace");
   rebin->initialize();
@@ -550,7 +555,7 @@ IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
 }
 
 IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
-    MatrixWorkspace_sptr workspace) const {
+    const MatrixWorkspace_sptr &workspace) const {
   IAlgorithm_sptr convert =
       AlgorithmManager::Instance().create("ConvertToHistogram");
   convert->initialize();
@@ -562,7 +567,7 @@ IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
 }
 
 IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
-    MatrixWorkspace_sptr workspace, const std::string &name,
+    const MatrixWorkspace_sptr &workspace, const std::string &name,
     const std::string &type, const std::string &value) const {
   IAlgorithm_sptr shiftLog =
       AlgorithmManager::Instance().create("AddSampleLog");

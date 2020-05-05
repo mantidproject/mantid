@@ -39,9 +39,22 @@ Settings
 Close
     Close the interface.
 
+Other Information
+^^^^^^^^^^^^^^^^^
+
 Red Stars
     Red stars next to browse boxes and other fields indicate that the file
     could not be found. Hover over the star to see more information.
+
+Status Bar
+    The status bar shows the calibration run numbers the GUI is currently using.
+
+Saved File Outputs
+    The location of files saved by the GUI during processing will be shown in the mantid
+    messages log.
+
+    *Note*: The locations are shown at "Notice" level, so may not appear if the messages log
+    is on the incorrect setting.
 
 Calibration
 -----------

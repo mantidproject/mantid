@@ -28,7 +28,7 @@ namespace {
 // Does the actual calculation of the magnetic moment
 void calculate(double *out, const double *xValues, const size_t nData,
                const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector Hdir, const double Hmag,
+               const DoubleFortranVector &Hdir, const double Hmag,
                const double convfact) {
   const double k_B = PhysicalConstants::BoltzmannConstant;
   DoubleFortranVector en;

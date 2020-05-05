@@ -423,7 +423,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   // Create workspace & GSS Files data is always in TOF
 
   MatrixWorkspace_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(
+      std::dynamic_pointer_cast<MatrixWorkspace>(
           WorkspaceFactory::Instance().create("Workspace2D", nHist, xWidth,
                                               yWidth));
   outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -488,7 +488,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
 /** Create the instrument geometry with Instrument
  */
 void LoadGSS::createInstrumentGeometry(
-    MatrixWorkspace_sptr workspace, const std::string &instrumentname,
+    const MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
     const double &primaryflightpath, const std::vector<int> &detectorids,
     const std::vector<double> &totalflightpaths,
     const std::vector<double> &twothetas) {

@@ -102,7 +102,7 @@ private:
     for (auto &registeredFunction : registeredFunctions) {
       if (blackList.count(registeredFunction) == 0) {
         IPeakFunction_sptr peakFunction =
-            boost::dynamic_pointer_cast<IPeakFunction>(
+            std::dynamic_pointer_cast<IPeakFunction>(
                 FunctionFactory::Instance().createFunction(registeredFunction));
 
         if (peakFunction) {

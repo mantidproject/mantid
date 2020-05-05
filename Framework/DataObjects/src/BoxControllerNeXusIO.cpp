@@ -48,7 +48,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
 /**get event type form its string representation*/
 BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(
     const std::vector<std::string> &typesSupported,
-    const std::string typeName) {
+    const std::string &typeName) {
   auto it = std::find(typesSupported.begin(), typesSupported.end(), typeName);
   if (it == typesSupported.end())
     throw std::invalid_argument("Unsupported event type: " + typeName +

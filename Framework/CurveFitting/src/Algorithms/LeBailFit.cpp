@@ -135,13 +135,13 @@ void LeBailFit::init() {
   // Functionality: Fit/Calculation/Background
   std::vector<std::string> functions{"LeBailFit", "Calculation", "MonteCarlo",
                                      "RefineBackground"};
-  auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
+  auto validator = std::make_shared<Kernel::StringListValidator>(functions);
   this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
   // Peak type
   vector<string> peaktypes{"ThermalNeutronBk2BkExpConvPVoigt",
                            "NeutronBk2BkExpConvPVoigt"};
-  auto peaktypevalidator = boost::make_shared<StringListValidator>(peaktypes);
+  auto peaktypevalidator = std::make_shared<StringListValidator>(peaktypes);
   declareProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt",
                   peaktypevalidator, "Peak profile type.");
 
@@ -150,8 +150,7 @@ void LeBailFit::init() {
   // About background:  Background type, input (table workspace or array)
   std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev",
                                     "FullprofPolynomial"};
-  auto bkgdvalidator =
-      boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+  auto bkgdvalidator = std::make_shared<Kernel::StringListValidator>(bkgdtype);
   declareProperty("BackgroundType", "Polynomial", bkgdvalidator,
                   "Background type");
 
@@ -662,7 +661,7 @@ void LeBailFit::execRefineBackground() {
   m_outputWS->mutableY(CALPUREPEAKINDEX) = std::move(valueVec);
 
   // 5. Output background to table workspace
-  auto outtablews = boost::make_shared<TableWorkspace>();
+  auto outtablews = std::make_shared<TableWorkspace>();
   outtablews->addColumn("str", "Name");
   outtablews->addColumn("double", "Value");
   outtablews->addColumn("double", "Error");
@@ -728,7 +727,7 @@ void LeBailFit::proposeNewBackgroundValues() {
 void LeBailFit::createLeBailFunction() {
   // Generate Le Bail function
   m_lebailFunction =
-      boost::make_shared<LeBailFunction>(LeBailFunction(m_peakType));
+      std::make_shared<LeBailFunction>(LeBailFunction(m_peakType));
 
   // Set up profile parameters
   if (m_funcParameters.empty())
@@ -763,7 +762,8 @@ void LeBailFit::createLeBailFunction() {
  * @param wsindex: workspace index of the data to fit against
  */
 API::MatrixWorkspace_sptr
-LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex) {
+LeBailFit::cropWorkspace(const API::MatrixWorkspace_sptr &inpws,
+                         size_t wsindex) {
   // Process input property 'FitRegion' for range of data to fit/calculate
   std::vector<double> fitrange = this->getProperty("FitRegion");
 
@@ -1143,9 +1143,9 @@ void LeBailFit::parseBraggPeaksParametersTable() {
 /** Parse table workspace (from Fit()) containing background parameters to a
  * vector
  */
-void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
-                                              vector<string> &bkgdparnames,
-                                              vector<double> &bkgdorderparams) {
+void LeBailFit::parseBackgroundTableWorkspace(
+    const TableWorkspace_sptr &bkgdparamws, vector<string> &bkgdparnames,
+    vector<double> &bkgdorderparams) {
   g_log.debug() << "DB1105A Parsing background TableWorkspace.\n";
 
   // Clear (output) map
@@ -1395,7 +1395,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 2. Create workspace2D and set the data to spectrum 0 (common among all)
   size_t nbinx = m_dataWS->x(m_wsIndex).size();
   size_t nbiny = m_dataWS->y(m_wsIndex).size();
-  m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+  m_outputWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", nspec, nbinx,
                                                nbiny));
 
@@ -1746,7 +1746,7 @@ void LeBailFit::doMarkovChain(
  * @param tablews :: TableWorkspace containing the Monte Carlo setup
  */
 void LeBailFit::setupRandomWalkStrategyFromTable(
-    DataObjects::TableWorkspace_sptr tablews) {
+    const DataObjects::TableWorkspace_sptr &tablews) {
   g_log.information("Set up random walk strategy from table.");
 
   // Scan the table
@@ -1941,7 +1941,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
  *list
  */
 void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
-                                         string parname) {
+                                         const string &parname) {
   map<string, Parameter>::iterator pariter;
   pariter = m_funcParameters.find(parname);
   if (pariter == m_funcParameters.end()) {
@@ -2094,7 +2094,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
  *proposed new values in
  *         this group
  */
-bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
+bool LeBailFit::proposeNewValues(const vector<string> &mcgroup, Rfactor r,
                                  map<string, Parameter> &curparammap,
                                  map<string, Parameter> &newparammap,
                                  bool prevBetterRwp) {
@@ -2414,7 +2414,7 @@ LeBailFit::convertToDoubleMap(std::map<std::string, Parameter> &inmap) {
 /** Write a set of (XY) data to a column file
  */
 void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR,
-                         string filename) {
+                         const string &filename) {
   ofstream ofile;
   ofile.open(filename.c_str());
 

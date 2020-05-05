@@ -11,7 +11,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "SearchResult.h"
 #include <QAbstractTableModel>
-#include <boost/shared_ptr.hpp>
 #include <map>
 #include <memory>
 #include <vector>

@@ -84,7 +84,7 @@ void MaskDetectors::init() {
       std::make_unique<EnabledWhenProperty>(
           "MaskedWorkspace", ePropertyCriterion::IS_NOT_DEFAULT));
 
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "StartWorkspaceIndex", 0, mustBePosInt,
@@ -110,21 +110,20 @@ void MaskDetectors::init() {
 void MaskDetectors::exec() {
   // Get the input workspace
   Workspace_sptr propWS = getProperty("Workspace");
-  MatrixWorkspace_sptr WS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(propWS);
+  MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(propWS);
   PeaksWorkspace_sptr peaksWS =
-      boost::dynamic_pointer_cast<PeaksWorkspace>(propWS);
+      std::dynamic_pointer_cast<PeaksWorkspace>(propWS);
   if (peaksWS) {
     execPeaks(peaksWS);
     return;
   }
 
   // Is it an event workspace?
-  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(WS);
 
   // Is it a Mask Workspace ?
   MaskWorkspace_sptr inputAsMaskWS =
-      boost::dynamic_pointer_cast<MaskWorkspace>(WS);
+      std::dynamic_pointer_cast<MaskWorkspace>(WS);
   const auto isMaskWS = static_cast<bool>(inputAsMaskWS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
@@ -164,7 +163,7 @@ void MaskDetectors::exec() {
   }
 
   auto maskWS =
-      boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+      std::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
   if (maskWS && prevMasking) { // is a mask workspace
     handleMaskByMaskWorkspace(maskWS, WS, detectorList, indexList, ranges_info);
   } else if (prevMasking) { // is not a mask workspace
@@ -244,8 +243,8 @@ void MaskDetectors::exec() {
  * @param rangeInfo :: information about the spectrum range to use when masking
  */
 void MaskDetectors::handleMaskByMaskWorkspace(
-    const MaskWorkspace_const_sptr maskWs,
-    const API::MatrixWorkspace_const_sptr WS,
+    const MaskWorkspace_const_sptr &maskWs,
+    const API::MatrixWorkspace_const_sptr &WS,
     std::vector<detid_t> &detectorList, std::vector<size_t> &indexList,
     const RangeInfo &rangeInfo) {
 
@@ -280,8 +279,8 @@ void MaskDetectors::handleMaskByMaskWorkspace(
  * @param rangeInfo :: information about the spectrum range to use when masking
  */
 void MaskDetectors::handleMaskByMatrixWorkspace(
-    const API::MatrixWorkspace_const_sptr maskWs,
-    const API::MatrixWorkspace_const_sptr WS,
+    const API::MatrixWorkspace_const_sptr &maskWs,
+    const API::MatrixWorkspace_const_sptr &WS,
     std::vector<detid_t> &detectorList, std::vector<size_t> &indexList,
     const RangeInfo &rangeInfo) {
 
@@ -395,7 +394,7 @@ void MaskDetectors::extractMaskedWSDetIDs(
  * Peaks exec body
  * @param WS :: The input peaks workspace to be masked
  */
-void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
+void MaskDetectors::execPeaks(const PeaksWorkspace_sptr &WS) {
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
@@ -423,7 +422,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
   // If we have a workspace that could contain masking,copy that in too
   if (prevMasking) {
     DataObjects::MaskWorkspace_sptr maskWS =
-        boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+        std::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
     if (maskWS) {
       const auto &maskDetInfo = maskWS->detectorInfo();
       if (detInfo.size() != maskDetInfo.size()) {
@@ -455,7 +454,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
 void MaskDetectors::fillIndexListFromSpectra(
     std::vector<size_t> &indexList,
     std::vector<Indexing::SpectrumNumber> spectraList,
-    const API::MatrixWorkspace_sptr WS,
+    const API::MatrixWorkspace_sptr &WS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
   std::vector<size_t> tmp_index;
@@ -494,7 +493,7 @@ void MaskDetectors::fillIndexListFromSpectra(
  *                            Boolean indicating if these ranges are defined
  */
 void MaskDetectors::appendToIndexListFromWS(
-    std::vector<size_t> &indexList, const MatrixWorkspace_const_sptr sourceWS,
+    std::vector<size_t> &indexList, const MatrixWorkspace_const_sptr &sourceWS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
   std::vector<size_t> tmp_index;
@@ -537,8 +536,8 @@ void MaskDetectors::appendToIndexListFromWS(
  */
 void MaskDetectors::appendToDetectorListFromWS(
     std::vector<detid_t> &detectorList,
-    const MatrixWorkspace_const_sptr inputWs,
-    const MatrixWorkspace_const_sptr maskWs,
+    const MatrixWorkspace_const_sptr &inputWs,
+    const MatrixWorkspace_const_sptr &maskWs,
     const std::tuple<size_t, size_t, bool> &range_info) {
   const auto startIndex = std::get<0>(range_info);
   const auto endIndex = std::get<1>(range_info);
@@ -567,7 +566,7 @@ void MaskDetectors::appendToDetectorListFromWS(
  */
 void MaskDetectors::appendToIndexListFromMaskWS(
     std::vector<size_t> &indexList,
-    const DataObjects::MaskWorkspace_const_sptr maskedWorkspace,
+    const DataObjects::MaskWorkspace_const_sptr &maskedWorkspace,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
   std::vector<size_t> tmp_index;
@@ -610,7 +609,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
 void MaskDetectors::appendToDetectorListFromComponentList(
     std::vector<detid_t> &detectorList,
     const std::vector<std::string> &componentList,
-    const API::MatrixWorkspace_const_sptr WS) {
+    const API::MatrixWorkspace_const_sptr &WS) {
   const auto instrument = WS->getInstrument();
   if (!instrument) {
     g_log.error()
@@ -623,7 +622,7 @@ void MaskDetectors::appendToDetectorListFromComponentList(
     instrument->getDetectorsInBank(dets, compName);
     if (dets.empty()) {
       const auto component = instrument->getComponentByName(compName);
-      const auto det = boost::dynamic_pointer_cast<const IDetector>(component);
+      const auto det = std::dynamic_pointer_cast<const IDetector>(component);
       if (!det) {
         g_log.warning() << "No detectors found in component '" << compName
                         << "'\n";

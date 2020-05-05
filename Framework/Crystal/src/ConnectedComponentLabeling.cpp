@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -65,7 +67,7 @@ size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
  * @param inWS: To clone
  * @return : Cloned MDHistoWorkspace
  */
-boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
+std::shared_ptr<Mantid::API::IMDHistoWorkspace>
 cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
   IMDHistoWorkspace_sptr outWS(inWS->clone());
 
@@ -226,7 +228,7 @@ void memoryCheck(size_t nPoints) {
  * @param nThreads : Optional argument of number of threads to use.
  */
 ConnectedComponentLabeling::ConnectedComponentLabeling(
-    const size_t &startId, const boost::optional<int> nThreads)
+    const size_t &startId, const boost::optional<int> &nThreads)
     : m_startId(startId), m_nThreads(nThreads) {
   if (m_nThreads.is_initialized() && m_nThreads.get() < 0) {
     throw std::invalid_argument(
@@ -278,9 +280,9 @@ int ConnectedComponentLabeling::getNThreads() const {
  * @return : Map of label ids to clusters.
  */
 ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
-    IMDHistoWorkspace_sptr ws, BackgroundStrategy *const baseStrategy,
+    const IMDHistoWorkspace_sptr &ws, BackgroundStrategy *const baseStrategy,
     Progress &progress) const {
-  std::map<size_t, boost::shared_ptr<ICluster>> clusterMap;
+  std::map<size_t, std::shared_ptr<ICluster>> clusterMap;
   VecElements neighbourElements(ws->getNPoints());
 
   const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
@@ -300,7 +302,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
 
     std::vector<VecEdgeIndexPair> parallelEdgeVec(nThreadsToUse);
 
-    std::vector<std::map<size_t, boost::shared_ptr<Cluster>>>
+    std::vector<std::map<size_t, std::shared_ptr<Cluster>>>
         parallelClusterMapVec(nThreadsToUse);
 
     // ------------- Stage One. Local CCL in parallel.
@@ -321,10 +323,10 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
           startLabel, edgeVec);
 
       // Create clusters from labels.
-      std::map<size_t, boost::shared_ptr<Cluster>> &localClusterMap =
+      std::map<size_t, std::shared_ptr<Cluster>> &localClusterMap =
           parallelClusterMapVec[i]; // local cluster map.
       for (size_t labelId = startLabel; labelId != endLabel; ++labelId) {
-        auto cluster = boost::make_shared<Cluster>(
+        auto cluster = std::make_shared<Cluster>(
             labelId); // Create a cluster for the label and key it by the label.
         localClusterMap[labelId] = cluster;
       }
@@ -377,7 +379,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
 
     // Create clusters from labels.
     for (size_t labelId = m_startId; labelId != endLabelId; ++labelId) {
-      auto cluster = boost::make_shared<Cluster>(
+      auto cluster = std::make_shared<Cluster>(
           labelId); // Create a cluster for the label and key it by the label.
       clusterMap[labelId] = cluster;
     }
@@ -403,11 +405,12 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
  * @param progress : Progress object
  * @return Cluster output workspace of results
  */
-boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
+std::shared_ptr<Mantid::API::IMDHistoWorkspace>
 ConnectedComponentLabeling::execute(IMDHistoWorkspace_sptr ws,
                                     BackgroundStrategy *const strategy,
                                     Progress &progress) const {
-  ClusterTuple result = executeAndFetchClusters(ws, strategy, progress);
+  ClusterTuple result =
+      executeAndFetchClusters(std::move(ws), strategy, progress);
   IMDHistoWorkspace_sptr outWS =
       result.get<0>(); // Get the workspace, but discard cluster objects.
   return outWS;

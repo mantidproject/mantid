@@ -78,13 +78,13 @@ public:
 
   bool hasTDimension() const;
 
-  bool isXDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isXDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
-  bool isYDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isYDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
-  bool isZDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isZDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
-  bool isTDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isTDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
   void SetRootNodeCheck(std::string elementName);
 

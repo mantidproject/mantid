@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, too-many-arguments, too-many-branches, too-many-locals
 
-from __future__ import (absolute_import, division, print_function)
 from math import *
 
 try:

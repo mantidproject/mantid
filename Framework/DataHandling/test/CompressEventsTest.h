@@ -37,8 +37,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.0"));
   }
 
-  void doTest(std::string inputName, std::string outputName, double tolerance,
-              int numPixels = 50, double wallClockTolerance = 0.) {
+  void doTest(const std::string &inputName, const std::string &outputName,
+              double tolerance, int numPixels = 50,
+              double wallClockTolerance = 0.) {
     EventWorkspace_sptr input, output;
     EventType eventType = WEIGHTED_NOTIME;
     if (wallClockTolerance > 0.)

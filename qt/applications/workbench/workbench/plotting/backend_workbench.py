@@ -13,8 +13,7 @@ Qt-based matplotlib backend that can operate when called from non-gui threads.
 It uses qtagg for rendering but the ensures that any rendering calls
 are done on the main thread of the application as the default
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 # std imports
 import importlib

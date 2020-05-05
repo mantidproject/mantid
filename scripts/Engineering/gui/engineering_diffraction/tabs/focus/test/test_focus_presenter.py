@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
-from mantid.py3compat.mock import patch, MagicMock
+from unittest import mock
+from unittest.mock import patch, MagicMock
 from Engineering.gui.engineering_diffraction.tabs.focus import model, view, presenter
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 

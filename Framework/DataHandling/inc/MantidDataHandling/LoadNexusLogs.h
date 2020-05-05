@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -32,7 +32,7 @@ data.</LI>
 
 @author Martyn Gigg, Tessella plc
 */
-class DLLExport LoadNexusLogs : public API::DistributedAlgorithm {
+class DLLExport LoadNexusLogs : public API::NexusFileLoader {
 public:
   /// Default constructor
   LoadNexusLogs();
@@ -54,29 +54,55 @@ public:
     return "DataHandling\\Logs;DataHandling\\Nexus";
   }
 
+  int confidence(Kernel::NexusHDF5Descriptor & /*descriptor*/) const override {
+    return 0;
+  }
+
 private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void exec() override;
-  /// Load log data from a group
-  void loadLogs(::NeXus::File &file, const std::string &entry_name,
+  void execLoader() override;
+
+  /**
+   * Load log data from a group
+   * @param file input Nexus file handler
+   * @param absolute_entry_name full entry name in Nexus
+   * @param entry_class type of the entry (NXlog)
+   * @param workspace input workspace
+   */
+  void loadLogs(::NeXus::File &file, const std::string &absolute_entry_name,
                 const std::string &entry_class,
-                boost::shared_ptr<API::MatrixWorkspace> workspace) const;
-  /// Load an NXlog entry
-  void loadNXLog(::NeXus::File &file, const std::string &entry_name,
+                const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+
+  /**
+   * Load an NXlog entry
+   * @param file input Nexus file handler
+   * @param absolute_entry_name full entry name in Nexus
+   * @param entry_class type of the entry (NXlog)
+   * @param workspace input workspace
+   */
+  void loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name,
                  const std::string &entry_class,
-                 boost::shared_ptr<API::MatrixWorkspace> workspace) const;
-  /// Load an IXseblock entry
-  void loadSELog(::NeXus::File &file, const std::string &entry_name,
-                 boost::shared_ptr<API::MatrixWorkspace> workspace) const;
-  void loadVetoPulses(::NeXus::File &file,
-                      boost::shared_ptr<API::MatrixWorkspace> workspace) const;
-  void loadNPeriods(::NeXus::File &file,
-                    boost::shared_ptr<API::MatrixWorkspace> workspace) const;
+                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+
+  /**
+   * Load an IXseblock entry
+   * @param file input Nexus file handler
+   * @param absolute_entry_name full entry name in Nexus
+   * @param workspace input workspace
+   */
+  void loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,
+                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void
+  loadVetoPulses(::NeXus::File &file,
+                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void
+  loadNPeriods(::NeXus::File &file,
+               const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /// Progress reporting object
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
 
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
   /// SNAP

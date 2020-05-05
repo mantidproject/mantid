@@ -7,7 +7,6 @@
 #pylint: disable=invalid-name
 # simply just print out all algorithm names in a directory which can be piped
 # to a file
-from __future__ import (absolute_import, division, print_function)
 import os
 import glob
 

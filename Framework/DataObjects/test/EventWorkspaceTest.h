@@ -321,7 +321,7 @@ public:
   void test_histogram_cache() {
     // Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 =
-        boost::dynamic_pointer_cast<const EventWorkspace>(ew);
+        std::dynamic_pointer_cast<const EventWorkspace>(ew);
 
     // Are the returned arrays the right size?
     MantidVec data1 = ew2->dataY(1);
@@ -412,7 +412,7 @@ public:
 
   void test_histogram_pulse_time_throws_if_index_too_large() {
     const size_t nHistos = 10;
-    EventWorkspace_sptr ws = boost::make_shared<EventWorkspace>();
+    EventWorkspace_sptr ws = std::make_shared<EventWorkspace>();
     ws->initialize(nHistos, 1, 1);
 
     MantidVec X, Y, E;
@@ -421,7 +421,7 @@ public:
                       const std::range_error &);
   }
 
-  void do_test_binning(EventWorkspace_sptr ws, const BinEdges &axis,
+  void do_test_binning(const EventWorkspace_sptr &ws, const BinEdges &axis,
                        size_t expected_occupancy_per_bin) {
     MantidVec Y(NUMBINS - 1);
     MantidVec E(NUMBINS - 1);
@@ -530,7 +530,7 @@ public:
   void test_droppingOffMRU() {
     // Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 =
-        boost::dynamic_pointer_cast<const EventWorkspace>(ew);
+        std::dynamic_pointer_cast<const EventWorkspace>(ew);
 
     // OK, we grab data0 from the MRU.
     const auto &inSpec = ew2->getSpectrum(0);

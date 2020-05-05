@@ -1291,7 +1291,8 @@ double AtomicDistance::conversionTOFMax() const {
 
 // ================================================================================
 
-double timeConversionValue(std::string input_unit, std::string output_unit) {
+double timeConversionValue(const std::string &input_unit,
+                           const std::string &output_unit) {
   std::map<std::string, double> timesList;
   double seconds = 1.0e9;
   double milliseconds = 1.0e-3 * seconds;

@@ -72,10 +72,9 @@ public:
   void setParent(IComponent *) override;
 
   //! Return a pointer to the current parent. as shared pointer
-  boost::shared_ptr<const IComponent> getParent() const override;
+  std::shared_ptr<const IComponent> getParent() const override;
   //! Return an array of all ancestors
-  std::vector<boost::shared_ptr<const IComponent>>
-  getAncestors() const override;
+  std::vector<std::shared_ptr<const IComponent>> getAncestors() const override;
 
   bool isParentNamed(const std::string &expectedName, int maxDepth = -1) const;
 

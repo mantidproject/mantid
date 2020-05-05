@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import csv
 from os import path, makedirs
 from matplotlib import gridspec
@@ -131,6 +129,10 @@ class FocusModel(object):
                                                rb_num)
         self._save_focused_output_files_as_topas_xye(instrument, sample_path, bank, sample_workspace,
                                                      rb_num)
+        logger.notice(f"\n\nFocus files saved to: \"{path.join(path_handling.get_output_path(), 'Focus')}\"\n\n")
+        if rb_num:
+            output_path = path.join(path_handling.get_output_path(), 'User', rb_num, 'Focus')
+            logger.notice(f"\n\nFocus files saved to: \"{output_path}\"\n\n")
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):

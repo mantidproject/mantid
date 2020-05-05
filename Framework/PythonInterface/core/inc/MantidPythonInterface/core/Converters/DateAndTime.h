@@ -22,7 +22,7 @@ to_datetime64(const Types::Core::DateAndTime &dateandtime);
 MANTID_PYTHONINTERFACE_CORE_DLL npy_datetime
 to_npy_datetime(const Types::Core::DateAndTime &dateandtime);
 MANTID_PYTHONINTERFACE_CORE_DLL PyArray_Descr *descr_ns();
-MANTID_PYTHONINTERFACE_CORE_DLL boost::shared_ptr<Types::Core::DateAndTime>
+MANTID_PYTHONINTERFACE_CORE_DLL std::shared_ptr<Types::Core::DateAndTime>
 to_dateandtime(const boost::python::api::object &value);
 } // namespace Converters
 } // namespace PythonInterface

@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
@@ -16,9 +18,10 @@ namespace API {
 IndexProperty::IndexProperty(const std::string &name,
                              const IWorkspaceProperty &workspaceProp,
                              const IndexTypeProperty &indexTypeProp,
-                             Kernel::IValidator_sptr validator)
-    : ArrayProperty(name, "", validator), m_workspaceProp(workspaceProp),
-      m_indexTypeProp(indexTypeProp), m_indices(0), m_indicesExtracted(false) {}
+                             const Kernel::IValidator_sptr &validator)
+    : ArrayProperty(name, "", std::move(validator)),
+      m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp),
+      m_indices(0), m_indicesExtracted(false) {}
 
 IndexProperty *IndexProperty::clone() const { return new IndexProperty(*this); }
 
@@ -126,7 +129,7 @@ std::string IndexProperty::generatePropertyName(const std::string &name) {
 }
 
 const Indexing::IndexInfo &IndexProperty::getIndexInfoFromWorkspace() const {
-  auto wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  auto wksp = std::dynamic_pointer_cast<MatrixWorkspace>(
       m_workspaceProp.getWorkspace());
   if (!wksp)
     throw std::runtime_error("Invalid workspace type provided to "

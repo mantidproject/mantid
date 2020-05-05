@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
@@ -340,7 +342,7 @@ const std::string ApplyMuonDetectorGroupPairing::getGroupWorkspaceNamesManually(
  */
 MatrixWorkspace_sptr
 ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
-    MatrixWorkspace_sptr inputWS1, MatrixWorkspace_sptr inputWS2,
+    const MatrixWorkspace_sptr &inputWS1, const MatrixWorkspace_sptr &inputWS2,
     const double &alpha) {
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("AppendSpectra");
@@ -372,7 +374,7 @@ ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
  * options.
  */
 MatrixWorkspace_sptr ApplyMuonDetectorGroupPairing::createPairWorkspaceManually(
-    Workspace_sptr inputWS, bool noRebin) {
+    const Workspace_sptr &inputWS, bool noRebin) {
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("MuonProcess");
   if (!this->isLogging())
@@ -389,7 +391,7 @@ MatrixWorkspace_sptr ApplyMuonDetectorGroupPairing::createPairWorkspaceManually(
   alg->execute();
 
   Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
 }
 
 /*
@@ -427,8 +429,8 @@ Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput() {
 // Checks that the detector IDs in grouping are in the workspace
 void ApplyMuonDetectorGroupPairing::checkDetectorIDsInWorkspace(
     API::Grouping &grouping, Workspace_sptr workspace) {
-  bool check =
-      MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, workspace);
+  bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(
+      grouping, std::move(workspace));
   if (!check) {
     g_log.error("One or more detector IDs specified in the groups is not "
                 "contained in the InputWorkspace");
@@ -443,19 +445,19 @@ void ApplyMuonDetectorGroupPairing::checkDetectorIDsInWorkspace(
  * to the given options. For use with MuonProcess.
  */
 void ApplyMuonDetectorGroupPairing::setMuonProcessPeriodProperties(
-    IAlgorithm &alg, Workspace_sptr inputWS,
+    IAlgorithm &alg, const Workspace_sptr &inputWS,
     const Muon::AnalysisOptions &options) const {
 
-  auto inputGroup = boost::make_shared<WorkspaceGroup>();
+  auto inputGroup = std::make_shared<WorkspaceGroup>();
   // If is a group, will need to handle periods
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     for (int i = 0; i < group->getNumberOfEntries(); i++) {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       inputGroup->addWorkspace(ws);
     }
     alg.setProperty("SummedPeriodSet", options.summedPeriods);
     alg.setProperty("SubtractedPeriodSet", options.subtractedPeriods);
-  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  } else if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
     alg.setProperty("SummedPeriodSet", "1");

@@ -32,7 +32,7 @@ public:
   }
 
   void test_workspace_constructor_fills_map() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(3, 1, 1);
     // Override some of the default detector numbers to make it more interesting
     ws->getSpectrum(0).setDetectorIDs(std::set<detid_t>());
@@ -151,7 +151,7 @@ public:
   }
 
   void test_getDetectorIDsForSpectrumNo() {
-    MatrixWorkspace_const_sptr ws = boost::make_shared<WorkspaceTester>();
+    MatrixWorkspace_const_sptr ws = std::make_shared<WorkspaceTester>();
     SpectrumDetectorMapping map(ws);
     // The happy path is tested in the methods above. Just test invalid entry
     // here.

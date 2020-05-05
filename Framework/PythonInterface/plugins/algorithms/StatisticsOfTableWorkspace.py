@@ -6,13 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 
-from __future__ import (absolute_import, division, print_function)
-
 import collections
 
 import numpy as np
-from six import iteritems
-
 import mantid.simpleapi as ms
 from mantid import logger, mtd
 from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, PythonAlgorithm
@@ -89,7 +85,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
             except:
                 logger.notice('Column \'%s\' is not numerical, skipping' % column_name)
 
-        for index, stat_name in iteritems(stats):
+        for index, stat_name in stats.items():
             stat = collections.OrderedDict(stat_name)
             stat['Statistic'] = index
             out_ws.addRow(stat)

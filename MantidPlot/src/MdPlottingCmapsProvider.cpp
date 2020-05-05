@@ -90,7 +90,7 @@ void MdPlottingCmapsProvider::getColorMapsForVSI(QStringList &colorMapNames) {
 
 void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
     QStringList &colorMapNames, QStringList &colorMapFiles,
-    QString colorMapDirectory, QString fileType) {
+    const QString &colorMapDirectory, const QString &fileType) {
   QDir directory(colorMapDirectory);
 
   QStringList filter(QString("*.%1").arg(fileType));
@@ -105,7 +105,7 @@ void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
 
 std::vector<int>
 MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
-    QStringList colorMapNamesSliceViewer, QStringList colorMapNamesVsi) {
+    QStringList colorMapNamesSliceViewer, const QStringList &colorMapNamesVsi) {
   int index = 0;
 
   std::vector<int> indexVector;

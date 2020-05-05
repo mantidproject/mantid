@@ -117,8 +117,8 @@ Expression &Expression::operator=(const Expression &expr) {
   m_funct = expr.m_funct;
   m_op = expr.m_op;
   m_terms = expr.m_terms;
-  // m_expr = expr.m_expr;
-  // m_tokens = expr.m_tokens;
+  m_expr = expr.m_expr;
+  m_tokens = expr.m_tokens;
   return *this;
 }
 

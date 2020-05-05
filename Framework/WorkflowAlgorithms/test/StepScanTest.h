@@ -50,7 +50,7 @@ public:
     prop->addValue("2010-01-01T00:01:05", 5.0);
     inputWS->mutableRun().addProperty(prop);
 
-    stepScan = boost::make_shared<StepScan>();
+    stepScan = std::make_shared<StepScan>();
     stepScan->initialize();
     stepScan->setProperty("InputWorkspace", inputWS);
     stepScan->setPropertyValue("OutputWorkspace", outWSName);

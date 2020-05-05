@@ -23,8 +23,6 @@ if __name__ == '__main__':
     except ImportError:
         pass
 
-    from six import iteritems as _iteritems
-
     # Import MantidPlot python commands
     import mantidplot
     from mantidplot import *
@@ -70,7 +68,7 @@ if __name__ == '__main__':
             return []
         from mantid.simpleapi import _get_function_spec
         keywords = []
-        for name,obj in _iteritems(definitions):
+        for name,obj in definitions.items():
             if name.startswith('_') : continue
             if _inspect.isclass(obj) or _inspect.ismodule(obj):
                 continue

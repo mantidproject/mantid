@@ -83,7 +83,7 @@ const std::string ConjoinXRuns::summary() const {
 void ConjoinXRuns::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
-          INPUT_WORKSPACE_PROPERTY, boost::make_shared<ADSValidator>()),
+          INPUT_WORKSPACE_PROPERTY, std::make_shared<ADSValidator>()),
       "The names of the input workspaces or workspace groups as a list. At "
       "least two point-data MatrixWorkspaces are "
       "required, having the same instrument, same number of spectra and "
@@ -121,7 +121,7 @@ void ConjoinXRuns::init() {
                                                          STOP_BEHAVIOUR};
   declareProperty(
       "FailBehaviour", SKIP_BEHAVIOUR,
-      boost::make_shared<StringListValidator>(failBehaviourOptions),
+      std::make_shared<StringListValidator>(failBehaviourOptions),
       "Choose whether to skip the workspace and continue, or stop and "
       "throw and error, when encountering a failure on merging.");
 }
@@ -198,7 +198,7 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
  * @return : empty if the log exists, is numeric, and matches the size of the
  * workspace, error message otherwise
  */
-std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
+std::string ConjoinXRuns::checkLogEntry(const MatrixWorkspace_sptr &ws) const {
   std::string result;
   if (!m_logEntry.empty()) {
 
@@ -250,7 +250,8 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
  * @param ws : the input workspace
  * @return : the x-axis to use for the output workspace
  */
-std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
+std::vector<double>
+ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws) const {
 
   std::vector<double> axis;
   axis.reserve(ws->y(0).size());
@@ -403,7 +404,7 @@ void ConjoinXRuns::exec() {
                       << ". Reason: \"" << e.what() << "\". Skipping.\n";
         sampleLogsBehaviour.resetSampleLogs(temp);
         // remove the skipped one from the list
-        m_inputWS.erase(it);
+        it = m_inputWS.erase(it);
         --it;
       } else {
         throw std::invalid_argument(e);

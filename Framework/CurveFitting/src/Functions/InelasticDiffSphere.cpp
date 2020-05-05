@@ -257,10 +257,10 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
  * @param ws Pointer to workspace
  */
 void InelasticDiffSphere::setWorkspace(
-    boost::shared_ptr<const API::Workspace> ws) {
+    std::shared_ptr<const API::Workspace> ws) {
   m_qValueCache.clear();
 
-  auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+  auto workspace = std::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (!workspace)
     return;
 

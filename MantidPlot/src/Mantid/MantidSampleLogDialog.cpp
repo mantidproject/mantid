@@ -35,7 +35,8 @@ using namespace Mantid::Kernel;
  *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
  */
 MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
-                                             MantidUI *mui, Qt::WFlags flags,
+                                             MantidUI *mui,
+                                             const Qt::WFlags &flags,
                                              size_t experimentInfoIndex)
     : SampleLogDialogBase(wsname, mui->appWindow(), flags, experimentInfoIndex),
       m_mantidUI(mui) {

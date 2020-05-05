@@ -29,7 +29,7 @@ void HFIRSANSNormalise::init() {
 
   std::vector<std::string> normOptions{"Monitor", "Timer"};
   this->declareProperty("NormalisationType", "Monitor",
-                        boost::make_shared<StringListValidator>(normOptions),
+                        std::make_shared<StringListValidator>(normOptions),
                         "Type of Normalisation to use");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",

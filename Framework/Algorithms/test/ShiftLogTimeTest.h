@@ -61,7 +61,7 @@ private:
    * @param in_name Name of the input workspace.
    * @param out_name Name of the output workspace.
    */
-  void verify(const std::string in_name, const std::string out_name,
+  void verify(const std::string &in_name, const std::string &out_name,
               const int shift) {
     DateAndTime start(start_str);
 

@@ -77,7 +77,7 @@ public:
     MatrixWorkspace_sptr output = runAlgorithm(eventWS, wsIndex);
 
     EventWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(output);
+        std::dynamic_pointer_cast<EventWorkspace>(output);
     TSM_ASSERT("Output should be an event workspace", outputWS);
     const size_t numEvents = outputWS->getNumberEvents();
     TS_ASSERT_EQUALS(numEvents, eventsPerPixel);
@@ -88,7 +88,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
                                     const int index) {
     ExtractSingleSpectrum extractor;
     extractor.initialize();
@@ -106,8 +106,8 @@ private:
     return extractor.getProperty("OutputWorkspace");
   }
 
-  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
-                         const detid_t detID) {
+  void do_Spectrum_Tests(const MatrixWorkspace_sptr &outputWS,
+                         const specnum_t specID, const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(0));
     const auto &spectrum = outputWS->getSpectrum(0);

@@ -1077,6 +1077,32 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
 }
 
 /**
+ * Return the time series's filtered times as a vector<DateAndTime>
+ * @return A vector of DateAndTime objects
+ */
+template <typename TYPE>
+std::vector<DateAndTime>
+TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
+  if (m_filter.empty()) {
+    return this->timesAsVector(); // no filtering to do
+  }
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+  sortIfNecessary();
+
+  std::vector<DateAndTime> out;
+
+  for (const auto &value : m_values) {
+    if (isTimeFiltered(value.time())) {
+      out.emplace_back(value.time());
+    }
+  }
+
+  return out;
+}
+
+/**
  * @return Return the series as list of times, where the time is the number of
  * seconds since the start.
  */
@@ -1269,6 +1295,12 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::maxValue() const {
       ->value();
 }
 
+template <typename TYPE> double TimeSeriesProperty<TYPE>::mean() const {
+  Mantid::Kernel::Statistics raw_stats = Mantid::Kernel::getStatistics(
+      this->filteredValuesAsVector(), StatOptions::Mean);
+  return raw_stats.mean;
+}
+
 /// Returns the number of values at UNIQUE time intervals in the time series
 /// @returns The number of unique time interfaces
 template <typename TYPE> int TimeSeriesProperty<TYPE>::size() const {
@@ -1388,7 +1420,7 @@ TimeSeriesProperty<TYPE>::setValueFromJson(const Json::Value & /*unused*/) {
  */
 template <typename TYPE>
 std::string TimeSeriesProperty<TYPE>::setDataItem(
-    const boost::shared_ptr<DataItem> /*unused*/) {
+    const std::shared_ptr<DataItem> & /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from "
                                        "DataItem");

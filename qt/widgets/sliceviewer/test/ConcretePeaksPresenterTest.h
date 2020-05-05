@@ -19,9 +19,10 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockObjects.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <string>
+#include <utility>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -30,12 +31,12 @@ using namespace Mantid::Kernel;
 using namespace testing;
 
 // Alias.
-using MDGeometry_sptr = boost::shared_ptr<Mantid::API::MDGeometry>;
+using MDGeometry_sptr = std::shared_ptr<Mantid::API::MDGeometry>;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
   /// Alias.
   using ConcretePeaksPresenter_sptr =
-      boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>;
+      std::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>;
 
   /// Helper method to create a good 'Integrated' peaks workspace
   Mantid::API::IPeaksWorkspace_sptr
@@ -50,7 +51,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
   }
 
   /// Helper method to create a mock MDDimension.
-  IMDDimension_sptr createExpectedMDDimension(const std::string returnLabel) {
+  IMDDimension_sptr createExpectedMDDimension(const std::string &returnLabel) {
     auto *pDim = new NiceMock<MockIMDDimension>;
     IMDDimension_sptr dim(pDim);
     EXPECT_CALL(*pDim, getName()).WillRepeatedly(Return(returnLabel));
@@ -74,7 +75,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
     EXPECT_CALL(*pGeometry, getDimension(1)).WillRepeatedly(Return(KDim));
     EXPECT_CALL(*pGeometry, getDimension(2)).WillRepeatedly(Return(LDim));
 
-    return boost::shared_ptr<MockMDGeometry>(pGeometry);
+    return std::shared_ptr<MockMDGeometry>(pGeometry);
   }
 
   /** Make the tests easier to write and understand by utilising
@@ -86,7 +87,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
   private:
     PeakOverlayViewFactory_sptr m_viewFactory;
     IPeaksWorkspace_sptr m_peaksWS;
-    boost::shared_ptr<MDGeometry> m_mdWS;
+    std::shared_ptr<MDGeometry> m_mdWS;
     PeakTransformFactory_sptr m_transformFactory;
 
   public:
@@ -100,16 +101,20 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
     }
 
     void withViewFactory(PeakOverlayViewFactory_sptr val) {
-      m_viewFactory = val;
+      m_viewFactory = std::move(val);
     }
-    void withPeaksWorkspace(IPeaksWorkspace_sptr val) { m_peaksWS = val; }
-    void withMDWorkspace(boost::shared_ptr<MDGeometry> val) { m_mdWS = val; }
+    void withPeaksWorkspace(IPeaksWorkspace_sptr val) {
+      m_peaksWS = std::move(val);
+    }
+    void withMDWorkspace(std::shared_ptr<MDGeometry> val) {
+      m_mdWS = std::move(val);
+    }
     void withTransformFactory(PeakTransformFactory_sptr val) {
-      m_transformFactory = val;
+      m_transformFactory = std::move(val);
     }
 
     ConcretePeaksPresenter_sptr create() {
-      return boost::make_shared<ConcretePeaksPresenter>(
+      return std::make_shared<ConcretePeaksPresenter>(
           m_viewFactory, m_peaksWS, m_mdWS, m_transformFactory);
     }
   };
@@ -135,7 +140,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
     }
 
     // Create a mock view object that will be returned by the mock factory.
-    auto mockView = boost::make_shared<NiceMock<MockPeakOverlayView>>();
+    auto mockView = std::make_shared<NiceMock<MockPeakOverlayView>>();
     EXPECT_CALL(*mockView.get(), getRadius()).WillRepeatedly(Return(radius));
 
     // Create a widget factory mock
@@ -196,7 +201,7 @@ public:
 
     // Mock View Factory Product
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     // Mock View Factory for integrated peaks. We expect that this will never be
     // used.
@@ -252,7 +257,7 @@ public:
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     EXPECT_CALL(*pMockView, updateView())
         .Times(1); // Single view, for this presenter, will only update once.
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     EXPECT_CALL(*pMockViewFactory, createView(_, _))
         .WillRepeatedly(Return(mockView));
@@ -304,7 +309,7 @@ public:
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     EXPECT_CALL(*pMockView, setSlicePoint(slicePoint, _))
         .Times(1); // Only one widget for this presenter
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     EXPECT_CALL(*mockViewFactory, createView(_, _))
         .WillRepeatedly(Return(mockView));
@@ -360,7 +365,7 @@ public:
     // Create a mock view object that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks);
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     EXPECT_CALL(*mockViewFactory, createView(_, _))
         .WillRepeatedly(Return(mockView));
@@ -414,7 +419,7 @@ public:
         .Times(expectedNumberPeaks); // This will be called automatically
                                      // because the presenter won't be able to
                                      // map Qx (below).
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     EXPECT_CALL(*mockViewFactory, createView(_, _))
         .WillRepeatedly(Return(mockView));
@@ -463,7 +468,7 @@ public:
     // Create a mock view object/product that will be returned by the mock
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
     EXPECT_CALL(*pMockView, changeForegroundColour(colorToChangeTo))
         .Times(1); // Expect that the foreground colour will be changed.
     EXPECT_CALL(*pMockView, updateView())
@@ -498,7 +503,7 @@ public:
     // Create a mock view object/product that will be returned by the mock
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     EXPECT_CALL(*pMockView, changeBackgroundColour(colorToChangeTo))
         .Times(1); // Expect that the background colour will be changed.
@@ -534,7 +539,7 @@ public:
     // Create a mock view object/product that will be returned by the mock
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
     EXPECT_CALL(*pMockView, showView())
         .Times(2); // Expect that the view will be forced to SHOW.
     EXPECT_CALL(*pMockView, hideView())
@@ -586,7 +591,7 @@ public:
     // Create a mock view object/product that will be returned by the mock
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
     EXPECT_CALL(*pMockView, getBoundingBox(_))
         .Times(1)
         .WillOnce(Return(PeakBoundingBox())); // Expect that the bounding box
@@ -621,7 +626,7 @@ public:
     // Create a mock view object/product that will be returned by the mock
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
     EXPECT_CALL(*pMockView, getOccupancyInView())
         .WillOnce(
             Return(occupancyInView)); // The occupancy that the VIEW returns.
@@ -655,7 +660,7 @@ public:
     // Create a mock view object/product that will be returned by the mock
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
     EXPECT_CALL(*pMockView, getOccupancyIntoView())
         .WillOnce(
             Return(occupancyIntoView)); // The occupancy that the VIEW returns.
@@ -689,7 +694,7 @@ public:
     // factory.
 
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
@@ -759,7 +764,7 @@ public:
 
     // We are creating another comparison peaks presenter, which will deliver a
     // set of peaks workspaces.
-    auto other = boost::make_shared<MockPeaksPresenter>();
+    auto other = std::make_shared<MockPeaksPresenter>();
     SetPeaksWorkspaces result;
     result.insert(a);
     result.insert(b);
@@ -781,7 +786,7 @@ public:
     // Create a mock view object/product that will be returned by the mock
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
+    auto mockView = std::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
 
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
@@ -822,7 +827,7 @@ public:
     using namespace Mantid::DataObjects;
     Peak *pPeak = dynamic_cast<Peak *>(&peak);
     pPeak->setPeakShape(
-        boost::make_shared<PeakShapeSpherical>(radius, Mantid::Kernel::HKL));
+        std::make_shared<PeakShapeSpherical>(radius, Mantid::Kernel::HKL));
   }
 
   void test_delete_in() {

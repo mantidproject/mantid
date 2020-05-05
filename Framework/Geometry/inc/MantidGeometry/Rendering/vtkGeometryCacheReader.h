@@ -37,7 +37,7 @@ private:
   std::string mFileName;         ///< The file name
   // Private Methods
   void Init();
-  Poco::XML::Element *getElementByObjectName(std::string name);
+  Poco::XML::Element *getElementByObjectName(const std::string &name);
   void readPoints(Poco::XML::Element *pEle, int noOfPoints,
                   std::vector<double> &points);
   void readTriangles(Poco::XML::Element *pEle, int noOfTriangles,

@@ -72,10 +72,10 @@ void IsoRotDiff::setAttribute(const std::string &name, const Attribute &att) {
  * @brief Initialize elastic and inelastic parts, aliases, attributes, and ties
  */
 void IsoRotDiff::init() {
-  m_elastic = boost::dynamic_pointer_cast<ElasticIsoRotDiff>(
+  m_elastic = std::dynamic_pointer_cast<ElasticIsoRotDiff>(
       API::FunctionFactory::Instance().createFunction("ElasticIsoRotDiff"));
   this->addFunction(m_elastic);
-  m_inelastic = boost::dynamic_pointer_cast<InelasticIsoRotDiff>(
+  m_inelastic = std::dynamic_pointer_cast<InelasticIsoRotDiff>(
       API::FunctionFactory::Instance().createFunction("InelasticIsoRotDiff"));
   this->addFunction(m_inelastic);
 

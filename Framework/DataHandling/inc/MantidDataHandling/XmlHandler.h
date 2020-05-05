@@ -21,7 +21,7 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL XmlHandler {
 public:
   XmlHandler() = default;
-  XmlHandler(std::string);
+  XmlHandler(const std::string &);
 
   std::map<std::string, std::string>
   get_metadata(const std::vector<std::string> &tags_to_ignore);

@@ -33,7 +33,7 @@ struct DasEvent {
 };
 
 /** Creates a dummy file with so many bytes */
-static void MakeDummyFile(std::string filename, size_t num_bytes) {
+static void MakeDummyFile(const std::string &filename, size_t num_bytes) {
   std::vector<char> buffer(num_bytes);
   for (size_t i = 0; i < num_bytes; i++) {
     // Put 1,2,3 in 32-bit ints

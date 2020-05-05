@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import re
 
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -124,7 +122,9 @@ class PairingTablePresenter(object):
             self._model.add_pair_to_analysis(pair_name)
         else:
             self._model.remove_pair_from_analysis(pair_name)
-        self.selected_pair_changed_notifier.notify_subscribers(state)
+
+        pair_info = {'is_added': pair_added, 'name': pair_name}
+        self.selected_pair_changed_notifier.notify_subscribers(pair_info)
 
     def plot_default_case(self):
         for row in range(self._view.num_rows()):

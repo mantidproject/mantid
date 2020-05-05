@@ -65,6 +65,7 @@
 
 #include <numeric>
 #include <stdexcept>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -656,7 +657,7 @@ void InstrumentWidget::setColorMapMaxValue(double maxValue) {
  * This is the callback for the combo box that selects the view direction
  */
 void InstrumentWidget::setViewDirection(const QString &input) {
-  auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
+  auto p3d = std::dynamic_pointer_cast<Projection3D>(getSurface());
   if (p3d) {
     p3d->setViewDirection(input);
   }
@@ -802,7 +803,7 @@ void InstrumentWidget::helpClicked() {
 }
 
 void InstrumentWidget::set3DAxesState(bool on) {
-  auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
+  auto p3d = std::dynamic_pointer_cast<Projection3D>(getSurface());
   if (p3d) {
     p3d->set3DAxesState(on);
     updateInstrumentView();
@@ -849,7 +850,7 @@ void InstrumentWidget::changeColorMapRange(double minValue, double maxValue) {
 }
 
 void InstrumentWidget::setWireframe(bool on) {
-  auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
+  auto p3d = std::dynamic_pointer_cast<Projection3D>(getSurface());
   if (p3d) {
     p3d->setWireframe(on);
   }
@@ -893,7 +894,8 @@ void InstrumentWidget::executeAlgorithm(const QString & /*unused*/,
   // emit execMantidAlgorithm(alg_name, param_list, this);
 }
 
-void InstrumentWidget::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void InstrumentWidget::executeAlgorithm(
+    const Mantid::API::IAlgorithm_sptr &alg) {
   try {
     alg->executeAsync();
   } catch (Poco::NoThreadAvailableException &) {
@@ -1011,9 +1013,9 @@ bool InstrumentWidget::overlay(const QString &wsName) {
 
   auto workspace = getWorkspaceFromADS(wsName.toStdString());
 
-  auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
-  auto table = boost::dynamic_pointer_cast<ITableWorkspace>(workspace);
-  auto mask = boost::dynamic_pointer_cast<IMaskWorkspace>(workspace);
+  auto pws = std::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
+  auto table = std::dynamic_pointer_cast<ITableWorkspace>(workspace);
+  auto mask = std::dynamic_pointer_cast<IMaskWorkspace>(workspace);
 
   if (!pws && !table && !mask) {
     QMessageBox::warning(this, "Mantid - Warning",
@@ -1184,8 +1186,8 @@ void InstrumentWidget::updateInstrumentDetectors() {
 }
 
 void InstrumentWidget::deletePeaksWorkspace(
-    Mantid::API::IPeaksWorkspace_sptr pws) {
-  this->getSurface()->deletePeaksWorkspace(pws);
+    const Mantid::API::IPeaksWorkspace_sptr &pws) {
+  this->getSurface()->deletePeaksWorkspace(std::move(pws));
   updateInstrumentView();
 }
 
@@ -1336,7 +1338,7 @@ bool InstrumentWidget::hasWorkspace(const std::string &wsName) const {
 }
 
 void InstrumentWidget::handleWorkspaceReplacement(
-    const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
+    const std::string &wsName, const std::shared_ptr<Workspace> &workspace) {
   if (!hasWorkspace(wsName) || !m_instrumentActor) {
     return;
   }
@@ -1344,7 +1346,7 @@ void InstrumentWidget::handleWorkspaceReplacement(
   WorkspaceReplacementFlagHolder wsReplace(m_wsReplace);
   // Check if it's still the same workspace underneath (as well as having
   // the same name)
-  auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+  auto matrixWS = std::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
   if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
     emit preDeletingHandle();
     close();
@@ -1364,14 +1366,14 @@ void InstrumentWidget::handleWorkspaceReplacement(
  */
 void InstrumentWidget::preDeleteHandle(
     const std::string &ws_name,
-    const boost::shared_ptr<Workspace> workspace_ptr) {
+    const std::shared_ptr<Workspace> &workspace_ptr) {
   if (hasWorkspace(ws_name)) {
     emit preDeletingHandle();
     close();
     return;
   }
   Mantid::API::IPeaksWorkspace_sptr pws =
-      boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
+      std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
   if (pws) {
     deletePeaksWorkspace(pws);
     return;
@@ -1379,7 +1381,7 @@ void InstrumentWidget::preDeleteHandle(
 }
 
 void InstrumentWidget::afterReplaceHandle(
-    const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
+    const std::string &wsName, const std::shared_ptr<Workspace> &workspace) {
   handleWorkspaceReplacement(wsName, workspace);
 }
 
@@ -1400,10 +1402,10 @@ void InstrumentWidget::clearADSHandle() {
  * Overlay a peaks workspace on the surface projection
  * @param ws :: peaks workspace to overlay
  */
-void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
+void InstrumentWidget::overlayPeaksWorkspace(const IPeaksWorkspace_sptr &ws) {
   auto surface = getUnwrappedSurface();
   if (surface) {
-    surface->setPeaksWorkspace(ws);
+    surface->setPeaksWorkspace(std::move(ws));
     updateInstrumentView();
   }
 }
@@ -1412,10 +1414,10 @@ void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
  * Overlay a mask workspace on the surface projection
  * @param ws :: mask workspace to overlay
  */
-void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
+void InstrumentWidget::overlayMaskedWorkspace(const IMaskWorkspace_sptr &ws) {
   auto &actor = getInstrumentActor();
   actor.setMaskMatrixWorkspace(
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
   actor.updateColors();
   updateInstrumentDetectors();
   emit maskedWorkspaceOverlayed();
@@ -1425,7 +1427,7 @@ void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
  * Overlay a table workspace containing shape parameters
  * @param ws :: a workspace of shape parameters to create
  */
-void InstrumentWidget::overlayShapesWorkspace(ITableWorkspace_sptr ws) {
+void InstrumentWidget::overlayShapesWorkspace(const ITableWorkspace_sptr &ws) {
   auto surface = getUnwrappedSurface();
   if (surface) {
     surface->loadShapesFromTableWorkspace(ws);
@@ -1457,8 +1459,8 @@ Workspace_sptr InstrumentWidget::getWorkspaceFromADS(const std::string &name) {
  * Get an unwrapped surface
  * @return a handle to the unwrapped surface (or null if view was not found).
  */
-boost::shared_ptr<UnwrappedSurface> InstrumentWidget::getUnwrappedSurface() {
-  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(getSurface());
+std::shared_ptr<UnwrappedSurface> InstrumentWidget::getUnwrappedSurface() {
+  auto surface = std::dynamic_pointer_cast<UnwrappedSurface>(getSurface());
   if (!surface) {
     QMessageBox::warning(
         this, "Mantid - Warning",

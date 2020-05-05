@@ -21,8 +21,9 @@ namespace MantidWidgets {
 namespace DataProcessor {
 struct EXPORT_OPT_MANTIDQT_COMMON PostprocessingStep {
 public:
-  PostprocessingStep(QString options);
-  PostprocessingStep(QString options, PostprocessingAlgorithm algorithm,
+  PostprocessingStep(const QString &options);
+  PostprocessingStep(const QString &options,
+                     const PostprocessingAlgorithm &algorithm,
                      std::map<QString, QString> map);
 
   void postProcessGroup(const QString &outputWSName,

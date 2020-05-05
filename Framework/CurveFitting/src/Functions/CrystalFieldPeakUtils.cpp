@@ -150,7 +150,7 @@ API::IPeakFunction_sptr createPeak(const std::string &peakShape, double centre,
                                    double fwhmVariation, double defaultFWHM,
                                    bool isGood, bool fixAllPeaks) {
   auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
-  auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
+  auto peak = std::dynamic_pointer_cast<API::IPeakFunction>(fun);
   if (!peak) {
     throw std::runtime_error("A peak function is expected.");
   }

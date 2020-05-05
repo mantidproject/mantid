@@ -64,6 +64,7 @@
 #include <QMessageBox>
 #include <QSignalMapper>
 #include <QTableWidgetItem>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
@@ -514,7 +515,7 @@ void MuonFitPropertyBrowser::setNormalization() {
  * @param name :: the ws name to get normalization for
  * @returns the normalization
  */
-void MuonFitPropertyBrowser::setNormalization(const std::string name) {
+void MuonFitPropertyBrowser::setNormalization(const std::string &name) {
   m_normalizationValue.clear();
   QString label;
   auto norms = readMultipleNormalization();
@@ -694,11 +695,11 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     if (m_compositeFunction->nFunctions() > 1) {
 
       alg->setProperty("InputFunction",
-                       boost::dynamic_pointer_cast<IFunction>(
+                       std::dynamic_pointer_cast<IFunction>(
                            m_functionBrowser->getGlobalFunction()));
     } else {
       alg->setProperty("InputFunction",
-                       boost::dynamic_pointer_cast<IFunction>(
+                       std::dynamic_pointer_cast<IFunction>(
                            m_compositeFunction->getFunction(0)));
     }
 
@@ -757,7 +758,7 @@ std::map<std::string, double> readMultipleNormalization() {
   if (AnalysisDataService::Instance().doesExist(
           "MuonAnalysisTFNormalizations")) {
     Mantid::API::ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "MuonAnalysisTFNormalizations"));
     auto colNorm = table->getColumn("norm");
@@ -810,10 +811,10 @@ void MuonFitPropertyBrowser::runFit() {
     if (m_compositeFunction->name() == "MultiBG") {
       alg->setPropertyValue("Function", "");
     } else if (m_compositeFunction->nFunctions() > 1) {
-      alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
+      alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(
                                        m_compositeFunction));
     } else {
-      alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
+      alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(
                                        m_compositeFunction->getFunction(0)));
     }
     if (rawData())
@@ -891,7 +892,7 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
   return dynamic_cast<MatrixWorkspace *>(ws.get()) != nullptr;
 }
 
-void MuonFitPropertyBrowser::setFitWorkspaces(const std::string input) {
+void MuonFitPropertyBrowser::setFitWorkspaces(const std::string &input) {
   // Copy experiment info to output workspace
   if (AnalysisDataService::Instance().doesExist(outputName() + "_Workspace")) {
     // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
@@ -910,7 +911,7 @@ void MuonFitPropertyBrowser::setFitWorkspaces(const std::string input) {
     if (outGroup->size() == m_workspacesToFit.size()) {
       for (size_t i = 0; i < outGroup->size(); i++) {
         auto outWs =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(outGroup->getItem(i));
+            std::dynamic_pointer_cast<MatrixWorkspace>(outGroup->getItem(i));
         auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             m_workspacesToFit[i]);
         if (inWs && outWs) {
@@ -1010,7 +1011,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 
   // Create a group for label
   try {
-    ads.addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.addOrReplace(groupName, std::make_shared<WorkspaceGroup>());
     ads.addToGroup(groupName, baseName + "_NormalisedCovarianceMatrix");
     ads.addToGroup(groupName, baseName + "_Parameters");
     ads.addToGroup(groupName, baseName + "_Workspaces");
@@ -1027,7 +1028,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
  * @param baseName :: [input] The common name of the workspaces of interest
  */
 void MuonFitPropertyBrowser::finishAfterTFSimultaneousFit(
-    const Mantid::API::IAlgorithm *alg, const std::string baseName) const {
+    const Mantid::API::IAlgorithm *alg, const std::string &baseName) const {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   try {
     std::vector<std::string> wsList =
@@ -1054,7 +1055,7 @@ void MuonFitPropertyBrowser::finishAfterTFSimultaneousFit(
   std::string groupName = baseName;
   // Create a group for label
   try {
-    ads.addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.addOrReplace(groupName, std::make_shared<WorkspaceGroup>());
     ads.addToGroup(groupName, baseName + "_NormalisedCovarianceMatrix");
     ads.addToGroup(groupName, baseName + "_Parameters");
     ads.addToGroup(groupName, baseName + "_Workspaces");
@@ -1176,7 +1177,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       m_compositeFunction->nFunctions() > 0) {
     alg->initialize();
     IFunction_sptr old =
-        boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
+        std::dynamic_pointer_cast<IFunction>(m_compositeFunction);
 
     QStringList globals;
 
@@ -1185,7 +1186,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       old = m_functionBrowser->getGlobalFunction();
       globals = m_functionBrowser->getGlobalParameters();
     } else if (!enabled && !m_isMultiFittingMode) {
-      old = boost::dynamic_pointer_cast<CompositeFunction>(old);
+      old = std::dynamic_pointer_cast<CompositeFunction>(old);
     }
     alg->setProperty("InputFunction", old);
     alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
@@ -1202,7 +1203,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
     if (m_isMultiFittingMode) {
       // update values in browser
       if (func->getNumberDomains() > 1) {
-        auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(func);
+        auto tmp = std::dynamic_pointer_cast<MultiDomainFunction>(func);
         old = tmp->getFunction(0);
       } else {
         old = func;
@@ -1259,7 +1260,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
  */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   IFunction_sptr old =
-      boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
+      std::dynamic_pointer_cast<IFunction>(m_compositeFunction);
   if (old->nParams() > 0) {
     ConvertFitFunctionForMuonTFAsymmetry(enabled);
     // Show or hide the TFAsymmetry fit
@@ -1827,7 +1828,7 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
  * selects the relevant group/pair
  * @param name :: string of the ws
  */
-void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
+void MuonFitPropertyBrowser::setSingleFitLabel(const std::string &name) {
   clearChosenGroups();
   clearChosenPeriods();
   std::vector<std::string> splitName;
@@ -1898,7 +1899,7 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
 }
 void MuonFitPropertyBrowser::setGroupNames(
     std::vector<std::string> groupNames) {
-  m_groupsList = groupNames;
+  m_groupsList = std::move(groupNames);
 }
 void MuonFitPropertyBrowser::setTFAsymm(bool state) {
   m_boolManager->setValue(m_TFAsymmMode, state);

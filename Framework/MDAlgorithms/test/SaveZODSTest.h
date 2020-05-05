@@ -27,8 +27,8 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  std::string do_test(std::string InputWorkspace, std::string Filename,
-                      bool expectSuccess = true) {
+  std::string do_test(const std::string &InputWorkspace,
+                      const std::string &Filename, bool expectSuccess = true) {
     SaveZODS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

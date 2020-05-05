@@ -10,7 +10,6 @@
 """
 TOFTOF reduction workflow gui.
 """
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtCore import (Qt)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
 from qtpy.QtWidgets import (QButtonGroup, QCheckBox, QDoubleSpinBox, QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QRadioButton, QSizePolicy, QSpacerItem, QWidget, QVBoxLayout)  # noqa

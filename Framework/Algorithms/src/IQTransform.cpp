@@ -7,12 +7,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/IQTransform.h"
+#include <utility>
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/IQTransform.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -37,7 +39,7 @@ using namespace Kernel;
 using namespace API;
 
 IQTransform::IQTransform()
-    : API::Algorithm(), m_label(boost::make_shared<Units::Label>()) {
+    : API::Algorithm(), m_label(std::make_shared<Units::Label>()) {
   /* Just for fun, this is implemented as follows....
    * We fill a map below with the transformation name as the key and
    * a function pointer to the method that does the transformation as
@@ -57,7 +59,7 @@ IQTransform::IQTransform()
 }
 
 void IQTransform::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   // Require the input to be in units of Q and to be a distribution
   // (which the result of a SANS reduction in Mantid will be)
   wsValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
@@ -79,12 +81,12 @@ void IQTransform::init() {
     plottype.insert(it->first);
   }
   declareProperty(
-      "TransformType", "", boost::make_shared<StringListValidator>(plottype),
+      "TransformType", "", std::make_shared<StringListValidator>(plottype),
       "The name of the transformation to be performed on the workspace");
 
   // A background to be subtracted can be a value or a workspace. Both
   // properties are optional.
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "BackgroundValue", 0.0, mustBePositive,
@@ -157,11 +159,11 @@ void IQTransform::exec() {
  *  @param background The workspace containing the background values
  */
 API::MatrixWorkspace_sptr
-IQTransform::subtractBackgroundWS(API::MatrixWorkspace_sptr ws,
-                                  API::MatrixWorkspace_sptr background) {
+IQTransform::subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
+                                  const API::MatrixWorkspace_sptr &background) {
   g_log.debug() << "Subtracting the workspace " << background->getName()
                 << " from the input workspace.\n";
-  return ws - background;
+  return std::move(ws) - background;
 }
 
 /** @name Available transformation functions */
@@ -172,7 +174,7 @@ IQTransform::subtractBackgroundWS(API::MatrixWorkspace_sptr ws,
  *  @throw std::range_error if an attempt is made to take log of a negative
  * number
  */
-void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws) {
+void IQTransform::guinierSpheres(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -192,7 +194,7 @@ void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws) {
  *  @throw std::range_error if an attempt is made to take log of a negative
  * number
  */
-void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws) {
+void IQTransform::guinierRods(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -215,7 +217,7 @@ void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws) {
  *  @throw std::range_error if an attempt is made to take log of a negative
  * number
  */
-void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws) {
+void IQTransform::guinierSheets(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -237,7 +239,7 @@ void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws) {
  *  The output is set to zero for negative input Y values
  *  @param ws The workspace to be transformed
  */
-void IQTransform::zimm(API::MatrixWorkspace_sptr ws) {
+void IQTransform::zimm(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -261,7 +263,7 @@ void IQTransform::zimm(API::MatrixWorkspace_sptr ws) {
  *  The output is set to zero for negative input Y values
  *  @param ws The workspace to be transformed
  */
-void IQTransform::debyeBueche(API::MatrixWorkspace_sptr ws) {
+void IQTransform::debyeBueche(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -284,7 +286,7 @@ void IQTransform::debyeBueche(API::MatrixWorkspace_sptr ws) {
 /** Performs the Holtzer transformation: IQ v Q
  *  @param ws The workspace to be transformed
  */
-void IQTransform::holtzer(API::MatrixWorkspace_sptr ws) {
+void IQTransform::holtzer(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -299,7 +301,7 @@ void IQTransform::holtzer(API::MatrixWorkspace_sptr ws) {
 /** Performs the Kratky transformation: IQ^2 v Q
  *  @param ws The workspace to be transformed
  */
-void IQTransform::kratky(API::MatrixWorkspace_sptr ws) {
+void IQTransform::kratky(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -317,7 +319,7 @@ void IQTransform::kratky(API::MatrixWorkspace_sptr ws) {
 /** Performs the Porod transformation: IQ^4 v Q
  *  @param ws The workspace to be transformed
  */
-void IQTransform::porod(API::MatrixWorkspace_sptr ws) {
+void IQTransform::porod(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -337,7 +339,7 @@ void IQTransform::porod(API::MatrixWorkspace_sptr ws) {
  *  @throw std::range_error if an attempt is made to take log of a negative
  * number
  */
-void IQTransform::logLog(API::MatrixWorkspace_sptr ws) {
+void IQTransform::logLog(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
@@ -360,7 +362,7 @@ void IQTransform::logLog(API::MatrixWorkspace_sptr ws) {
  *  @throw std::range_error if an attempt is made to take log of a negative
  * number
  */
-void IQTransform::general(API::MatrixWorkspace_sptr ws) {
+void IQTransform::general(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);

@@ -4,6 +4,7 @@ if(CXXTEST_FOUND)
 )
 
   cxxtest_add_test(RemoteAlgorithmsTest ${TEST_FILES})
+  target_include_directories(RemoteAlgorithmsTest PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
   target_link_libraries(RemoteAlgorithmsTest
                         LINK_PRIVATE
                         ${TCMALLOC_LIBRARIES_LINKTIME}

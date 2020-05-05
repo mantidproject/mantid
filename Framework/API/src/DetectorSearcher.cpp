@@ -30,8 +30,9 @@ double getQSign() {
  * @param instrument :: the instrument to find detectors in
  * @param detInfo :: the Geometry::DetectorInfo object for this instrument
  */
-DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
-                                   const Geometry::DetectorInfo &detInfo)
+DetectorSearcher::DetectorSearcher(
+    const Geometry::Instrument_const_sptr &instrument,
+    const Geometry::DetectorInfo &detInfo)
     : m_usingFullRayTrace(instrument->containsRectDetectors() ==
                           Geometry::Instrument::ContainsState::Full),
       m_crystallography_convention(getQSign()), m_detInfo(detInfo),

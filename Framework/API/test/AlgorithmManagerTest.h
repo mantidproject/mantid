@@ -10,7 +10,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/ActiveResult.h>
@@ -106,12 +105,6 @@ public:
   }
   static void destroySuite(AlgorithmManagerTest *suite) { delete suite; }
 
-  AlgorithmManagerTest() {
-    // A test fails unless algorithms.retained is big enough
-    Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained",
-                                                        "5");
-  }
-
   void testVersionFail() {
     const size_t nalgs = AlgorithmFactory::Instance().getKeys().size();
     TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(),
@@ -148,12 +141,12 @@ public:
     IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING(
         alg = AlgorithmManager::Instance().create("AlgTest", 1));
-    TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy *>(alg.get()),
-                      static_cast<AlgorithmProxy *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()),
+                      static_cast<Algorithm *>(nullptr));
     TS_ASSERT_THROWS_NOTHING(
         alg = AlgorithmManager::Instance().create("AlgTestSecond", 1));
-    TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy *>(alg.get()),
-                      static_cast<AlgorithmProxy *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()),
+                      static_cast<Algorithm *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<IAlgorithm *>(alg.get()),
                       static_cast<IAlgorithm *>(nullptr));
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),
@@ -169,17 +162,6 @@ public:
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 1);
     TS_ASSERT_DIFFERS(Aptr.get(), static_cast<Algorithm *>(nullptr));
     TS_ASSERT_DIFFERS(Bptr.get(), static_cast<Algorithm *>(nullptr));
-  }
-
-  void testCreateNoProxy() {
-    AlgorithmManager::Instance().clear();
-    IAlgorithm_sptr Aptr, Bptr;
-    Aptr = AlgorithmManager::Instance().create("AlgTest", -1, true);
-    Bptr = AlgorithmManager::Instance().create("AlgTest", -1, false);
-    TSM_ASSERT("Was created as a AlgorithmProxy",
-               dynamic_cast<AlgorithmProxy *>(Aptr.get()));
-    TSM_ASSERT("Was NOT created as a AlgorithmProxy",
-               dynamic_cast<AlgorithmProxy *>(Bptr.get()) == nullptr);
   }
 
   // This will be called back when an algo starts
@@ -200,112 +182,14 @@ public:
     AlgorithmManager::Instance().notificationCenter.addObserver(my_observer);
 
     IAlgorithm_sptr Aptr, Bptr;
-    Aptr = AlgorithmManager::Instance().create("AlgTest", -1, true);
-    Bptr = AlgorithmManager::Instance().create("AlgTest", -1, false);
-
-    m_notificationValue = 0;
-    Poco::ActiveResult<bool> resB = Bptr->executeAsync();
-    resB.wait();
-    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
+    Aptr = AlgorithmManager::Instance().create("AlgTest", -1);
 
     m_notificationValue = 0;
     Poco::ActiveResult<bool> resA = Aptr->executeAsync();
     resA.wait();
-    TSM_ASSERT_EQUALS("Notification was received (proxy).", m_notificationValue,
-                      12345);
+    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
 
     AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
-  }
-
-  /** Keep the right number of algorithms in the list.
-   *  This also tests setMaxAlgorithms().
-   */
-  void testDroppingOldOnes() {
-    AlgorithmManager::Instance().setMaxAlgorithms(5);
-    AlgorithmManager::Instance().clear();
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 0);
-
-    IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgTest");
-    // Fill up the list
-    for (size_t i = 1; i < 5; i++)
-      AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The first one is still in the list
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  first->getAlgorithmID()) == first);
-
-    // Add one more, drops the oldest one
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-    TS_ASSERT(
-        !AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()));
-  }
-
-  /** Keep one algorithm running, drop the second-oldest one etc. */
-  void testDroppingOldOnes_whenAnAlgorithmIsStillRunning() {
-    AlgorithmManager::Instance().clear();
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 0);
-
-    // Create one algorithm that appears never to stop
-    IAlgorithm_sptr first =
-        AlgorithmManager::Instance().create("AlgRunsForever");
-
-    IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
-
-    // Another long-running algo
-    IAlgorithm_sptr third =
-        AlgorithmManager::Instance().create("AlgRunsForever");
-
-    for (size_t i = 3; i < 5; i++)
-      AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The first three created are in the list
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  first->getAlgorithmID()) == first);
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  second->getAlgorithmID()) == second);
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  third->getAlgorithmID()) == third);
-
-    // Add one more, drops the SECOND oldest one
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   first->getAlgorithmID()) == first);
-    TSM_ASSERT(
-        "The second oldest was popped, so trying to get it should return null",
-        !AlgorithmManager::Instance().getAlgorithm(second->getAlgorithmID()));
-
-    // One more time
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The right ones are at the front
-    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   first->getAlgorithmID()) == first);
-    TSM_ASSERT("The third algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   third->getAlgorithmID()) == third);
-    AlgorithmManager::Instance().cancelAll();
-  }
-
-  void testDroppingOldOnes_extremeCase() {
-    /** Extreme case where your queue fills up and all algos are running */
-    AlgorithmManager::Instance().clear();
-    for (size_t i = 0; i < 5; i++) {
-      AlgorithmManager::Instance().create("AlgRunsForever");
-    }
-
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-    // Create another that takes it past the normal max size (of 5)
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 6);
-    AlgorithmManager::Instance().cancelAll();
   }
 
   void testThreadSafety() {
@@ -317,7 +201,6 @@ public:
 
   void testRemovingByIdRemovesCorrectObject() {
     auto &mgr = AlgorithmManager::Instance();
-    mgr.setMaxAlgorithms(10);
     const size_t initialManagerSize = mgr.size();
     // 2 different ids for same named algorithm
     auto alg1 = mgr.create("AlgTest");
@@ -329,8 +212,6 @@ public:
     // the right one?
     auto foundAlg = mgr.getAlgorithm(alg2->getAlgorithmID());
     TS_ASSERT(foundAlg);
-
-    mgr.setMaxAlgorithms(5);
   }
 
   void test_runningInstancesOf() {
@@ -352,7 +233,7 @@ public:
     // Create another 'runs forever' algorithm (without proxy) and another
     // 'normal' one
     auto aRunningAlgorithm =
-        AlgorithmManager::Instance().create("AlgRunsForever", 1, false);
+        AlgorithmManager::Instance().create("AlgRunsForever", 1);
     TS_ASSERT(
         AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
     TS_ASSERT_EQUALS(AlgorithmManager::Instance()
@@ -378,8 +259,8 @@ public:
     for (size_t i = 0; i < 5; i++) {
       // Create without proxy so that I can cast it to an Algorithm and get at
       // getCancel()
-      algs[i] = boost::dynamic_pointer_cast<Algorithm>(
-          AlgorithmManager::Instance().create("AlgRunsForever", 1, false));
+      algs[i] = std::dynamic_pointer_cast<Algorithm>(
+          AlgorithmManager::Instance().create("AlgRunsForever", 1));
       TS_ASSERT(!algs[i]->getCancel());
     }
 

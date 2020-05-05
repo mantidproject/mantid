@@ -4,9 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import io
-import six
 import numpy as np
 import AbinsModules
 from mantid.kernel import Atom, logger
@@ -538,9 +536,8 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         end_message = ["INFORMATION", "*******************************************************************************",
                        "GAMMA"]
 
-        if not six.PY2:
-            for i, item in enumerate(end_message):
-                end_message[i] = bytes(item, "utf8")
+        for i, item in enumerate(end_message):
+            end_message[i] = bytes(item, "utf8")
 
         while not self._parser.file_end(file_obj=file_obj):
 

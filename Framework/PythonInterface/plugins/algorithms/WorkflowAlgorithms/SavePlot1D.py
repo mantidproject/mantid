@@ -5,20 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,redefined-builtin
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
-
 import mantid
 from mantid.kernel import Direction, IntArrayProperty, StringArrayProperty, StringListValidator
 import sys
-
-try:
-    from plotly import tools as toolsly
-    from plotly.offline import plot
-    import plotly.graph_objs as go
-    have_plotly = True
-except ImportError:
-    have_plotly = False
+import importlib
 
 
 class SavePlot1D(mantid.api.PythonAlgorithm):
@@ -52,6 +42,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                                                      action=mantid.api.FileAction.OptionalSave,
                                                      extensions=['.png']),
                              doc='Name of the image file to savefile.')
+        have_plotly = importlib.util.find_spec("plotly") is not None
         if have_plotly:
             outputTypes = ['image', 'plotly', 'plotly-full']
         else:
@@ -145,6 +136,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return (xlabel, ylabel)
 
     def savePlotly(self, fullPage):
+        from plotly import tools as toolsly
+        from plotly.offline import plot
+        import plotly.graph_objs as go
         spectraNames = self.getProperty('SpectraNames').value
 
         if isinstance(self._wksp, mantid.api.WorkspaceGroup):
@@ -195,6 +189,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             return str(div)
 
     def toScatterAndLabels(self, wksp, spectraNames):
+        import plotly.graph_objs as go
         data = []
         for i in range(wksp.getNumberHistograms()):
             if len(spectraNames) > i:

@@ -59,7 +59,7 @@ public:
     return n;
   }
 
-  bool loadWorkspace(const std::string &filename, const std::string wsName) {
+  bool loadWorkspace(const std::string &filename, const std::string &wsName) {
     LoadNexusProcessed load;
     load.initialize();
     load.setProperty("Filename", filename);
@@ -111,9 +111,6 @@ public:
                              groupName + "_1," + groupName + "_2");
     grpAlg->setPropertyValue("OutputWorkspace", groupName);
     grpAlg->execute();
-
-    // name of the output file
-    const std::string outFilename("SavePDFGUIGroup.gr");
 
     // run the algorithm with a group
     SavePDFGui alg;

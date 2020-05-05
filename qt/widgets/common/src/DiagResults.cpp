@@ -112,7 +112,8 @@ void DiagResults::updateResults(const QString &testSummary) {
 // Private member functions
 //----------------------
 /// insert a row at the bottom of the grid
-int DiagResults::addRow(QString firstColumn, QString secondColumn) {
+int DiagResults::addRow(const QString &firstColumn,
+                        const QString &secondColumn) {
   // set row to one past the end of the number of rows that currently exist
   int row = m_Grid->rowCount();
   m_Grid->addWidget(new QLabel(firstColumn), row, 0);
@@ -124,7 +125,7 @@ int DiagResults::addRow(QString firstColumn, QString secondColumn) {
  *  @param row :: the row where the data will be displayed
  *  @param text :: the text that should be displayed in the first column
  */
-void DiagResults::updateRow(int row, QString text) {
+void DiagResults::updateRow(int row, const QString &text) {
   // Get the text label from the grid
   QWidget *widget = m_Grid->itemAtPosition(row, 1)->widget();
   QLabel *label = qobject_cast<QLabel *>(widget);

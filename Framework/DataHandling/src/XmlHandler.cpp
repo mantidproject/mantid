@@ -23,7 +23,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-XmlHandler::XmlHandler(std::string filename) {
+XmlHandler::XmlHandler(const std::string &filename) {
   std::ifstream in(filename);
   Poco::XML::InputSource src(in);
   Poco::XML::DOMParser parser;

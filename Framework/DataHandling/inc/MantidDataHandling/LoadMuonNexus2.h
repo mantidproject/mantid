@@ -79,9 +79,9 @@ private:
   HistogramData::Histogram
   loadData(const Mantid::HistogramData::BinEdges &edges,
            const Mantid::NeXus::NXInt &counts, int period, int spec);
-  void loadLogs(API::MatrixWorkspace_sptr ws, Mantid::NeXus::NXEntry &entry,
-                int period);
-  void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
+  void loadLogs(const API::MatrixWorkspace_sptr &ws,
+                Mantid::NeXus::NXEntry &entry, int period);
+  void loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace);
   std::map<int, std::set<int>>
   loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
 };

@@ -15,6 +15,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Matrix.h"
 #include <map>
 #include <memory>
 
@@ -51,7 +52,7 @@ public:
   /// Constructor
   MeshObject(const std::vector<uint32_t> &faces,
              const std::vector<Kernel::V3D> &vertices,
-             const Kernel::Material material);
+             const Kernel::Material &material);
   /// Constructor
   MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);
@@ -124,9 +125,9 @@ public:
   // Initialize Drawing
   void initDraw() const override;
   // Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
+  std::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
-  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+  void setGeometryHandler(const std::shared_ptr<GeometryHandler> &h);
 
   detail::ShapeInfo::GeometryShape shape() const override;
   const detail::ShapeInfo &shapeInfo() const override;
@@ -144,6 +145,8 @@ public:
 
   void rotate(const Kernel::Matrix<double> &);
   void translate(const Kernel::V3D &);
+  void multiply(const Kernel::Matrix<double> &);
+  void scale(const double scaleFactor);
   void updateGeometryHandler();
 
 private:
@@ -167,7 +170,7 @@ private:
   const double M_TOLERANCE = 0.000001;
 
   /// Geometry Handle for rendering
-  boost::shared_ptr<GeometryHandler> m_handler;
+  std::shared_ptr<GeometryHandler> m_handler;
 
   // String from which object may be defined
   std::string m_string;
@@ -176,9 +179,9 @@ private:
   std::string m_id;
 
   /// a pointer to a class for reading from the geometry cache
-  boost::shared_ptr<vtkGeometryCacheReader> m_vtk_cache_reader;
+  std::shared_ptr<vtkGeometryCacheReader> m_vtk_cache_reader;
   /// a pointer to a class for writing to the geometry cache
-  boost::shared_ptr<vtkGeometryCacheWriter> m_vtk_cache_writer;
+  std::shared_ptr<vtkGeometryCacheWriter> m_vtk_cache_writer;
 
   /// Contents
   /// Triangles are specified by indices into a list of vertices.

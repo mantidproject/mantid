@@ -50,7 +50,7 @@ QString DLLExport plotsString(const GroupData &groupData,
                               const ProcessingAlgorithm &processor);
 
 QString DLLExport
-reduceRowString(const RowData_sptr data, const QString &instrument,
+reduceRowString(const RowData_sptr &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
@@ -77,9 +77,10 @@ QString DLLExport completeOutputProperties(const QString &algName,
 class DLLExport GenerateNotebook {
 
 public:
-  GenerateNotebook(QString name, QString instrument, WhiteList whitelist,
+  GenerateNotebook(const QString &name, const QString &instrument,
+                   WhiteList whitelist,
                    std::map<QString, PreprocessingAlgorithm> preprocessMap,
-                   ProcessingAlgorithm processor,
+                   const ProcessingAlgorithm &processor,
                    boost::optional<PostprocessingStep> postprocessingStep,
                    ColumnOptionsMap preprocessingInstructionsMap);
   virtual ~GenerateNotebook() = default;

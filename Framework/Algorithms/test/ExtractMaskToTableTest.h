@@ -140,7 +140,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable1"));
     TS_ASSERT(outws);
     if (!outws)
@@ -189,7 +189,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace2", inputws);
 
     // Create a table workspace to append to
-    auto existtablews = boost::make_shared<TableWorkspace>();
+    auto existtablews = std::make_shared<TableWorkspace>();
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
     existtablews->addColumn("str", "DetectorIDsList");
@@ -216,7 +216,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
@@ -295,7 +295,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace2", inputws);
 
     // Create a table workspace to append to
-    auto existtablews = boost::make_shared<TableWorkspace>();
+    auto existtablews = std::make_shared<TableWorkspace>();
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
     existtablews->addColumn("str", "DetectorIDsList");
@@ -322,7 +322,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
@@ -427,7 +427,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable3"));
     TS_ASSERT(outws);
     if (!outws)

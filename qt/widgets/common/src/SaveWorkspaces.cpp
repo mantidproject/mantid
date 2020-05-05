@@ -37,7 +37,7 @@ void setDetectorNamesOnCanSasFormat(QString &saveCommands,
       Mantid::API::AnalysisDataService::Instance().retrieve(
           wspaces[j]->text().toStdString());
   Mantid::API::MatrixWorkspace_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
   if (matrix_workspace) {
     if (matrix_workspace->getInstrument()->getName() == "SANS2D")
       saveCommands += "'front-detector, rear-detector'";
@@ -482,7 +482,7 @@ SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget *workspaces) {
  * workspaces.
  */
 void SaveWorkspaces::removeZeroFreeWorkspaces(
-    QHash<QString, QString> workspaces) {
+    const QHash<QString, QString> &workspaces) {
   auto zeroFreeWorkspaceNames = workspaces.values();
   for (auto &zeroFreeWorkspaceName : zeroFreeWorkspaceNames) {
     emit deleteZeroErrorFreeWorkspace(zeroFreeWorkspaceName);

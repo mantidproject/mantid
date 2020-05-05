@@ -17,7 +17,7 @@ using namespace boost::python;
 
 namespace {
 SpaceGroup_sptr getSpaceGroup(CrystalStructure &self) {
-  return boost::const_pointer_cast<SpaceGroup>(self.spaceGroup());
+  return std::const_pointer_cast<SpaceGroup>(self.spaceGroup());
 }
 
 std::vector<std::string> getScatterers(const CrystalStructure &self) {

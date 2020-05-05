@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsPresenter.h"
 
+#include <utility>
+
 using namespace Mantid::API;
 
 namespace MantidQt {
@@ -56,12 +58,12 @@ void IndirectFitOutputOptionsPresenter::setAvailablePlotOptions(
 
 void IndirectFitOutputOptionsPresenter::setResultWorkspace(
     WorkspaceGroup_sptr groupWorkspace) {
-  m_model->setResultWorkspace(groupWorkspace);
+  m_model->setResultWorkspace(std::move(groupWorkspace));
 }
 
 void IndirectFitOutputOptionsPresenter::setPDFWorkspace(
     WorkspaceGroup_sptr groupWorkspace) {
-  m_model->setPDFWorkspace(groupWorkspace);
+  m_model->setPDFWorkspace(std::move(groupWorkspace));
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotWorkspaces() {

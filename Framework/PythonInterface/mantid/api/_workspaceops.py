@@ -10,13 +10,12 @@
 
     It is intended for internal use.
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 import inspect as _inspect
 import sys
 
-from six import Iterator, get_function_code, iteritems
+from inspect import getsource
 
 from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
 from mantid.kernel.funcinspect import customise_func, lhs_info
@@ -63,7 +62,7 @@ def attach_binary_operators_to_workspace():
     operations["Divide"] = divops
 
     # Loop through and add each one in turn
-    for alg, attributes in iteritems(operations):
+    for alg, attributes in operations.items():
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
@@ -149,7 +148,7 @@ def attach_unary_operators_to_workspace():
         'NotMD': '__invert__'
     }
     # Loop through and add each one in turn
-    for alg, attributes in iteritems(operations):
+    for alg, attributes in operations.items():
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg)
@@ -204,7 +203,7 @@ def attach_tableworkspaceiterator():
     """Attaches the iterator code to a table workspace."""
 
     def __iter_method(self):
-        class ITableWorkspaceIter(Iterator):
+        class ITableWorkspaceIter(object):
             def __init__(self, wksp):
                 self.__wksp = wksp
                 self.__pos = 0
@@ -254,7 +253,7 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         signature = func_obj.__signature__.replace(parameters=func_parameters)
     else:
         signature = ['self']
-        signature.extend(get_function_code(func_obj).co_varnames)
+        signature.extend(getsource(func_obj).co_varnames)
         signature = tuple(signature)
     customise_func(_method_impl, func_obj.__name__,
                    signature, func_obj.__doc__)

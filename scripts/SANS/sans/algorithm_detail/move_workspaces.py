@@ -6,10 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods, invalid-name
 
-from __future__ import (absolute_import, division, print_function)
 import math
 from mantid.api import MatrixWorkspace
-from six import with_metaclass
 from abc import (ABCMeta, abstractmethod)
 from sans.state.StateObjects.StateMoveDetectors import StateMove
 from sans.common.enums import CanonicalCoordinates, DetectorType, SANSInstrument
@@ -334,7 +332,7 @@ def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, u
 # -------------------------------------------------
 # Move classes
 # -------------------------------------------------
-class SANSMove(with_metaclass(ABCMeta, object)):
+class SANSMove(metaclass=ABCMeta):
     def __init__(self):
         super(SANSMove, self).__init__()
 

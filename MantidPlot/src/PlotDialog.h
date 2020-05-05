@@ -69,7 +69,7 @@ class PlotDialog : public QDialog {
 
 public:
   PlotDialog(bool showExtended, ApplicationWindow *app, MultiLayer *ml,
-             Qt::WFlags fl = nullptr);
+             const Qt::WFlags &fl = nullptr);
   void initFonts(const QFont &titlefont, const QFont &axesfont,
                  const QFont &numbersfont, const QFont &legendfont);
   void insertColumnsList(const QStringList &names) { columnNames = names; };

@@ -10,7 +10,7 @@ import unittest
 
 from mantid import simpleapi, ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 
 
 def create_simple_workspace(data_x, data_y, run_number=0):

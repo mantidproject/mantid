@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
@@ -45,12 +43,13 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.parameter_display_combo.addItems(data_list)
 
         index = self.parameter_display_combo.findText(name)
-        self.parameter_display_combo.blockSignals(False)
 
         if index != -1:
             self.parameter_display_combo.setCurrentIndex(index)
         else:
             self.parameter_display_combo.setCurrentIndex(0)
+
+        self.parameter_display_combo.blockSignals(False)
 
     def increment_display_combo_box(self):
         index = self.parameter_display_combo.currentIndex()

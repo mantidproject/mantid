@@ -16,7 +16,7 @@ from shutil import rmtree
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.project import projectsaver
 
 

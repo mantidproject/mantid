@@ -29,12 +29,11 @@ namespace API {
  * Direction enum (i.e. 0-2)
  */
 template <typename TYPE>
-WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
-                                           const std::string &wsName,
-                                           const unsigned int direction,
-                                           Kernel::IValidator_sptr validator)
-    : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(
-          name, boost::shared_ptr<TYPE>(), validator, direction),
+WorkspaceProperty<TYPE>::WorkspaceProperty(
+    const std::string &name, const std::string &wsName,
+    const unsigned int direction, const Kernel::IValidator_sptr &validator)
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(
+          name, std::shared_ptr<TYPE>(), validator, direction),
       m_workspaceName(wsName), m_initialWSName(wsName),
       m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock) {}
 
@@ -51,13 +50,12 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
  * Direction enum (i.e. 0-2)
  */
 template <typename TYPE>
-WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
-                                           const std::string &wsName,
-                                           const unsigned int direction,
-                                           const PropertyMode::Type optional,
-                                           Kernel::IValidator_sptr validator)
-    : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(
-          name, boost::shared_ptr<TYPE>(), validator, direction),
+WorkspaceProperty<TYPE>::WorkspaceProperty(
+    const std::string &name, const std::string &wsName,
+    const unsigned int direction, const PropertyMode::Type optional,
+    const Kernel::IValidator_sptr &validator)
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(
+          name, std::shared_ptr<TYPE>(), validator, direction),
       m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional),
       m_locking(LockMode::Lock) {}
 
@@ -78,14 +76,12 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
  * Direction enum (i.e. 0-2)
  */
 template <typename TYPE>
-WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
-                                           const std::string &wsName,
-                                           const unsigned int direction,
-                                           const PropertyMode::Type optional,
-                                           const LockMode::Type locking,
-                                           Kernel::IValidator_sptr validator)
-    : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(
-          name, boost::shared_ptr<TYPE>(), validator, direction),
+WorkspaceProperty<TYPE>::WorkspaceProperty(
+    const std::string &name, const std::string &wsName,
+    const unsigned int direction, const PropertyMode::Type optional,
+    const LockMode::Type locking, const Kernel::IValidator_sptr &validator)
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(
+          name, std::shared_ptr<TYPE>(), validator, direction),
       m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional),
       m_locking(locking) {}
 
@@ -93,7 +89,7 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
 /// the default name from the original object
 template <typename TYPE>
 WorkspaceProperty<TYPE>::WorkspaceProperty(const WorkspaceProperty &right)
-    : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(right),
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(right),
       m_workspaceName(right.m_workspaceName),
       m_initialWSName(right.m_initialWSName), m_optional(right.m_optional),
       m_locking(right.m_locking) {}
@@ -105,7 +101,7 @@ WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::
 operator=(const WorkspaceProperty &right) {
   if (&right == this)
     return *this;
-  Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(right);
+  Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::operator=(right);
   return *this;
 }
 
@@ -116,12 +112,12 @@ operator=(const WorkspaceProperty &right) {
  */
 template <typename TYPE>
 WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::
-operator=(const boost::shared_ptr<TYPE> &value) {
+operator=(const std::shared_ptr<TYPE> &value) {
   std::string wsName = value->getName();
   if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
     m_workspaceName = wsName;
   }
-  Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(value);
+  Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::operator=(value);
   return *this;
 }
 
@@ -181,7 +177,7 @@ std::string WorkspaceProperty<TYPE>::getDefault() const {
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
   m_workspaceName = value;
-  if (Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::autoTrim()) {
+  if (Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::autoTrim()) {
     boost::trim(m_workspaceName);
   }
   retrieveWorkspaceFromADS();
@@ -212,13 +208,13 @@ WorkspaceProperty<TYPE>::setValueFromJson(const Json::Value &value) {
  */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::setDataItem(
-    const boost::shared_ptr<Kernel::DataItem> value) {
-  boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
+    const std::shared_ptr<Kernel::DataItem> &value) {
+  std::shared_ptr<TYPE> typed = std::dynamic_pointer_cast<TYPE>(value);
   if (typed) {
     if (this->direction() == Kernel::Direction::Input) {
       m_workspaceName = typed->getName();
     }
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value = typed;
+    Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value = typed;
   } else {
     this->clear();
   }
@@ -248,7 +244,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
   if (this->direction() == Kernel::Direction::Input ||
       this->direction() == Kernel::Direction::InOut) {
     // Workspace groups will not have a value since they are not of type TYPE
-    if (!Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value) {
+    if (!Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value) {
       Mantid::API::Workspace_sptr wksp;
       // if the workspace name is empty then there is no point asking the ADS
       if (m_workspaceName.empty()) {
@@ -277,9 +273,9 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
 
       // At this point we have a valid pointer to a Workspace so we need to
       // test whether it is a group
-      if (boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp)) {
+      if (std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp)) {
         return isValidGroup(
-            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
+            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
       } else {
         error = "Workspace " + this->value() + " is not of the correct type";
       }
@@ -288,7 +284,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
   }
   // Call superclass method to access any attached validators (which do their
   // own logging)
-  return Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::isValid();
+  return Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::isValid();
 }
 
 /** Indicates if the object is still pointing to the same workspace
@@ -410,7 +406,7 @@ void WorkspaceProperty<TYPE>::setIsMasterRank(bool isMasterRank) {
  */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::isValidGroup(
-    boost::shared_ptr<WorkspaceGroup> wsGroup) const {
+    const std::shared_ptr<WorkspaceGroup> &wsGroup) const {
   g_log.debug() << " Input WorkspaceGroup found \n";
 
   std::vector<std::string> wsGroupNames = wsGroup->getNames();
@@ -418,7 +414,7 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(
 
   // Cycle through each workspace in the group ...
   for (const auto &memberWsName : wsGroupNames) {
-    boost::shared_ptr<Workspace> memberWs =
+    std::shared_ptr<Workspace> memberWs =
         AnalysisDataService::Instance().retrieve(memberWsName);
 
     // Table Workspaces are ignored
@@ -432,10 +428,9 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(
     } else {
       // ... and if it is a workspace of incorrect type, exclude the group by
       // returning an error.
-      if (!boost::dynamic_pointer_cast<TYPE>(memberWs)) {
+      if (!std::dynamic_pointer_cast<TYPE>(memberWs)) {
         error = "Workspace " + memberWsName + " is not of type " +
-                Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
-                ".";
+                Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::type() + ".";
 
         g_log.debug() << error << '\n';
 
@@ -501,8 +496,8 @@ std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
 
 /// Reset the pointer to the workspace
 template <typename TYPE> void WorkspaceProperty<TYPE>::clear() {
-  Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
-      boost::shared_ptr<TYPE>();
+  Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value =
+      std::shared_ptr<TYPE>();
 }
 
 /** Attempts to retreive the data from the ADS
@@ -512,7 +507,7 @@ template <typename TYPE>
 void WorkspaceProperty<TYPE>::retrieveWorkspaceFromADS() {
   // Try and get the workspace from the ADS, but don't worry if we can't
   try {
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
+    Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value =
         AnalysisDataService::Instance().retrieveWS<TYPE>(m_workspaceName);
   } catch (Kernel::Exception::NotFoundError &) {
     // Set to null property if not found

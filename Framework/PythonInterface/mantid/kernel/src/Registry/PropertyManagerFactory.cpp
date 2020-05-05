@@ -8,8 +8,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/python/extract.hpp>
+#include <memory>
 
 using boost::python::extract;
 using boost::python::handle;
@@ -26,9 +26,9 @@ namespace Registry {
  * @param mapping A Python dictionary instance
  * @return A new C++ PropertyManager instance
  */
-boost::shared_ptr<Kernel::PropertyManager>
+std::shared_ptr<Kernel::PropertyManager>
 createPropertyManager(const boost::python::dict &mapping) {
-  auto pmgr = boost::make_shared<PropertyManager>();
+  auto pmgr = std::make_shared<PropertyManager>();
 #if PY_MAJOR_VERSION >= 3
   object view(mapping.attr("items")());
   object itemIter(handle<>(PyObject_GetIter(view.ptr())));

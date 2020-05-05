@@ -10,7 +10,6 @@ Plot data in SCDcalib.log file from Mantid SCD Calibration.
 A. J. Schultz, V. E. Lynch, August 2015
 """
 
-from __future__ import (absolute_import, division, print_function)
 import pylab
 import os
 import math

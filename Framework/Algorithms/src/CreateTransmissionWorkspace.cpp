@@ -4,8 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/CreateTransmissionWorkspace.h"
+#include <utility>
+
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
+#include "MantidAlgorithms/CreateTransmissionWorkspace.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -40,7 +42,7 @@ const std::string CreateTransmissionWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateTransmissionWorkspace::init() {
-  auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+  auto inputValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
@@ -154,7 +156,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     const OptionalMinMax &wavelengthMonitorBackgroundInterval,
     const OptionalMinMax &wavelengthMonitorIntegrationInterval,
     const OptionalInteger &i0MonitorIndex,
-    MatrixWorkspace_sptr firstTransmissionRun,
+    const MatrixWorkspace_sptr &firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
@@ -163,7 +165,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
   /*make struct of optional inputs to refactor method arguments*/
   /*make a using statements defining OptionalInteger for MonitorIndex*/
   auto trans1InLam =
-      toLam(firstTransmissionRun, processingCommands, i0MonitorIndex,
+      toLam(std::move(firstTransmissionRun), processingCommands, i0MonitorIndex,
             wavelengthInterval, wavelengthMonitorBackgroundInterval);
   MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
   MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();

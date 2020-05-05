@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, CreateWorkspace, SetSampleMaterial, SetUB
 from mantid.geometry import CrystalStructure, CSGObject, OrientedLattice
@@ -126,8 +124,12 @@ class SampleTest(unittest.TestCase):
     def test_deep_copyable(self):
         self.do_test_copyable(copy.deepcopy)
 
-
-
+    def test_equals(self):
+        a = Sample()
+        b = Sample()
+        self.assertEqual(a, b)
+        b.setThickness(10)
+        self.assertNotEqual(a, b)
 
 if __name__ == '__main__':
     unittest.main()

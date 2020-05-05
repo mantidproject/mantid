@@ -22,6 +22,7 @@
 #include <list>
 #include <numeric>
 #include <queue>
+#include <utility>
 
 #include "boost/math/distributions.hpp"
 
@@ -210,14 +211,14 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
 /// Converts the value-parameter to d-spacing. Assumes unit to be Q if empty.
 double PoldiPeakSearch::getTransformedCenter(double value,
                                              const Unit_sptr &unit) const {
-  if (boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+  if (std::dynamic_pointer_cast<Units::dSpacing>(unit)) {
     return value;
   }
 
   // This is required to preserve default behavior which assumes Q.
   Unit_sptr transformUnit = unit;
 
-  if (!unit || boost::dynamic_pointer_cast<Units::Empty>(unit)) {
+  if (!unit || std::dynamic_pointer_cast<Units::Empty>(unit)) {
     transformUnit = UnitFactory::Instance().create("MomentumTransfer");
   }
 
@@ -314,7 +315,7 @@ PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
  * @param error :: Error that is set on the workspace.
  */
 void PoldiPeakSearch::setErrorsOnWorkspace(
-    Workspace2D_sptr correlationWorkspace, double error) const {
+    const Workspace2D_sptr &correlationWorkspace, double error) const {
   MantidVec &errors = correlationWorkspace->dataE(0);
 
   std::fill(errors.begin(), errors.end(), error);
@@ -332,7 +333,7 @@ void PoldiPeakSearch::setErrorsOnWorkspace(
  * @return Vector only with counts that belong to the background.
  */
 MantidVec PoldiPeakSearch::getBackground(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
   size_t backgroundPoints =
       getNumberOfBackgroundPoints(peakPositions, correlationCounts);
@@ -366,9 +367,10 @@ MantidVec PoldiPeakSearch::getBackground(
  * @return Background estimation with error.
  */
 UncertainValue PoldiPeakSearch::getBackgroundWithSigma(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
-  MantidVec background = getBackground(peakPositions, correlationCounts);
+  MantidVec background =
+      getBackground(std::move(peakPositions), correlationCounts);
 
   /* Instead of using Mean and Standard deviation, which are appropriate
    * for data originating from a normal distribution (which is not the case
@@ -420,7 +422,7 @@ bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(
  * @return Number of background points.
  */
 size_t PoldiPeakSearch::getNumberOfBackgroundPoints(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
   /* subtracting 2, to match original algorithm, where
    * the first and the last point of the spectrum are not
@@ -528,7 +530,7 @@ bool PoldiPeakSearch::vectorElementGreaterThan(
   return *first > *second;
 }
 
-bool PoldiPeakSearch::isLessThanMinimum(PoldiPeak_sptr peak) {
+bool PoldiPeakSearch::isLessThanMinimum(const PoldiPeak_sptr &peak) {
   return peak->intensity().value() <= m_minimumPeakHeight;
 }
 
@@ -537,16 +539,16 @@ void PoldiPeakSearch::init() {
                       "InputWorkspace", "", Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
-  boost::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  std::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
+      std::make_shared<BoundedValidator<int>>();
   minPeakSeparationValidator->setLower(1);
   declareProperty("MinimumPeakSeparation", 15, minPeakSeparationValidator,
                   "Minimum number of points in the spectrum by which two peaks "
                   "have to be separated.",
                   Direction::Input);
 
-  boost::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  std::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator =
+      std::make_shared<BoundedValidator<int>>();
   maxPeakNumberValidator->setLower(1);
   declareProperty("MaximumPeakNumber", 24, maxPeakNumberValidator,
                   "Maximum number of peaks to be detected.", Direction::Input);

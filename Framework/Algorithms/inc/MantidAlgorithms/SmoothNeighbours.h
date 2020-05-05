@@ -105,7 +105,7 @@ private:
   void setupNewInstrument(API::MatrixWorkspace &outws) const;
 
   /// Build the instrument/detector setup in workspace
-  void spreadPixels(API::MatrixWorkspace_sptr outws);
+  void spreadPixels(const API::MatrixWorkspace_sptr &outws);
 
   /// Non rectangular detector group name
   static const std::string NON_UNIFORM_GROUP;

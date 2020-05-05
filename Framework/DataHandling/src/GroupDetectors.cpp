@@ -26,7 +26,7 @@ void GroupDetectors::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "Workspace", "", Direction::InOut,
-          boost::make_shared<CommonBinsValidator>()),
+          std::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
   declareProperty(

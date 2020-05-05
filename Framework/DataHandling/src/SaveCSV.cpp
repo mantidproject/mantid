@@ -105,7 +105,7 @@ void SaveCSV::exec() {
 
   if (workspaceID.find("Workspace2D") != std::string::npos) {
     const Workspace2D_sptr localworkspace =
-        boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
+        std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Get info from 2D workspace
     const size_t numberOfHist = localworkspace->getNumberHistograms();
@@ -184,9 +184,10 @@ void SaveCSV::exec() {
   outCSV_File.close();
 }
 
-void SaveCSV::saveXerrors(std::ofstream &stream,
-                          const Mantid::DataObjects::Workspace2D_sptr workspace,
-                          const size_t numberOfHist) {
+void SaveCSV::saveXerrors(
+    std::ofstream &stream,
+    const Mantid::DataObjects::Workspace2D_sptr &workspace,
+    const size_t numberOfHist) {
   // If there isn't a dx values present in the first entry then return
   if (!workspace->hasDx(0)) {
     return;

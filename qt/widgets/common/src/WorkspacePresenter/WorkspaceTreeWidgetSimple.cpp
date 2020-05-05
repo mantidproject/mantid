@@ -42,10 +42,11 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)),
       m_showAlgorithmHistory(new QAction("Show History", this)),
-      m_showDetectors(new QAction("Show Detectors", this)) {
+      m_showDetectors(new QAction("Show Detectors", this)),
+      m_plotAdvanced(new QAction("Advanced...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
-  m_tree->m_doubleClickAction = [&](QString wsName) {
+  m_tree->m_doubleClickAction = [&](const QString &wsName) {
     emit workspaceDoubleClicked(wsName);
   };
 
@@ -72,6 +73,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
           SLOT(onShowAlgorithmHistoryClicked()));
   connect(m_showDetectors, SIGNAL(triggered()), this,
           SLOT(onShowDetectorsClicked()));
+  connect(m_plotAdvanced, SIGNAL(triggered()), this,
+          SLOT(onPlotAdvancedClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -102,8 +105,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } catch (Exception::NotFoundError &) {
       return;
     }
-    if (auto matrixWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+    if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
 
       // Don't plot 1D spectra if only one X value
@@ -125,6 +127,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_overplotSpectrum);
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+        plotSubMenu->addAction(m_plotAdvanced);
       } else {
         plotSubMenu->addAction(m_plotBin);
       }
@@ -143,28 +146,28 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
       menu->addAction(m_showDetectors);
-    } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
+    } else if (std::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
-      if (boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
+      if (std::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
         menu->addAction(m_showDetectors);
       }
-    } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+    } else if (std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
       menu->addAction(m_sliceViewer);
     } else if (auto wsGroup =
-                   boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+                   std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
       auto workspaces = wsGroup->getAllItems();
       bool containsMatrixWorkspace{false};
       bool containsPeaksWorkspace{false};
 
       for (auto ws : workspaces) {
-        if (auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+        if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
           containsMatrixWorkspace = true;
           break;
         } else if (auto peaksWS =
-                       boost::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
+                       std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
           containsPeaksWorkspace = true;
         }
       }
@@ -178,6 +181,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_overplotSpectrum);
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+        plotSubMenu->addAction(m_plotAdvanced);
 
         plotSubMenu->addSeparator();
         plotSubMenu->addAction(m_plotColorfill);
@@ -249,6 +253,10 @@ void WorkspaceTreeWidgetSimple::onShowAlgorithmHistoryClicked() {
 
 void WorkspaceTreeWidgetSimple::onShowDetectorsClicked() {
   emit showDetectorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotAdvancedClicked() {
+  emit plotAdvancedClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

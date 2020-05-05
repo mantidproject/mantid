@@ -128,7 +128,7 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
     loadAlg->setProperty("Filename", referenceFluxFile);
     loadAlg->executeAsChildAlg();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
-    fluxRefWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
+    fluxRefWS = std::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
     m_output_message +=
         "   | Loaded flux reference " + referenceFluxFile + "\n";
 

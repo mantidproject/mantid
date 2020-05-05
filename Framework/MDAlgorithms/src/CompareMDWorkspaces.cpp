@@ -130,7 +130,8 @@ void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
 /** Compare the dimensions etc. of two MDWorkspaces
  */
 void CompareMDWorkspaces::compareMDGeometry(
-    Mantid::API::IMDWorkspace_sptr ws1, Mantid::API::IMDWorkspace_sptr ws2) {
+    const Mantid::API::IMDWorkspace_sptr &ws1,
+    const Mantid::API::IMDWorkspace_sptr &ws2) {
   compare(ws1->getNumDims(), ws2->getNumDims(),
           "Workspaces have a different number of dimensions");
   for (size_t d = 0; d < ws1->getNumDims(); d++) {
@@ -156,8 +157,8 @@ void CompareMDWorkspaces::compareMDGeometry(
 /** Compare the dimensions etc. of two MDWorkspaces
  */
 void CompareMDWorkspaces::compareMDHistoWorkspaces(
-    Mantid::DataObjects::MDHistoWorkspace_sptr ws1,
-    Mantid::DataObjects::MDHistoWorkspace_sptr ws2) {
+    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
+    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2) {
   compare(ws1->getNumDims(), ws2->getNumDims(),
           "Workspaces have a different number of dimensions");
   compare(ws1->getNPoints(), ws2->getNPoints(),
@@ -188,7 +189,7 @@ template <typename MDE, size_t nd>
 void CompareMDWorkspaces::compareMDWorkspaces(
     typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(inWS2);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(inWS2);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to PlusMD.");
 
@@ -309,20 +310,20 @@ void CompareMDWorkspaces::doComparison() {
   if (!ws1 || !ws2)
     throw std::invalid_argument("Invalid workspace given.");
 
-  MatrixWorkspace_sptr mws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws1);
-  MatrixWorkspace_sptr mws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws2);
+  MatrixWorkspace_sptr mws1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws1);
+  MatrixWorkspace_sptr mws2 = std::dynamic_pointer_cast<MatrixWorkspace>(ws2);
   if (mws1 || mws2)
     throw std::invalid_argument("Cannot compare MatrixWorkspaces. Please use "
                                 "CompareWorkspaces algorithm instead.");
 
   MDHistoWorkspace_sptr histo1 =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(ws1);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(ws1);
   MDHistoWorkspace_sptr histo2 =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(ws2);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(ws2);
   IMDEventWorkspace_sptr event1 =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
   IMDEventWorkspace_sptr event2 =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(ws2);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(ws2);
 
   try {
     compare(ws1->id(), ws2->id(), "Workspaces are of different types");

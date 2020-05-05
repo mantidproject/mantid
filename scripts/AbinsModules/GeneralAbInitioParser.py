@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-import six
 import re
 import AbinsModules
 
@@ -29,11 +26,10 @@ class GeneralAbInitioParser(object):
             This string will be compiled to a Python re.Pattern .
         :type regex: str
         """
-        if not six.PY2:
-            if msg is not None:
-                msg = bytes(msg, "utf8")
-            if regex is not None:
-                regex = bytes(regex, "utf8")
+        if msg is not None:
+            msg = bytes(msg, "utf8")
+        if regex is not None:
+            regex = bytes(regex, "utf8")
 
         if msg and regex:
             raise ValueError("msg or regex should be provided, not both")
@@ -59,8 +55,7 @@ class GeneralAbInitioParser(object):
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
-        if not six.PY2:
-            msg = bytes(msg, "utf8")
+        msg = bytes(msg, "utf8")
 
         found = False
         last_entry = None
@@ -103,8 +98,7 @@ class GeneralAbInitioParser(object):
             pos = file_obj.tell()
             line = file_obj.readline()
             file_obj.seek(pos)
-            if not six.PY2:
-                item = bytes(item, "utf8")
+            item = bytes(item, "utf8")
             if item in line:
                 return True
         return False
@@ -115,8 +109,7 @@ class GeneralAbInitioParser(object):
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
-        if not six.PY2:
-            msg = bytes(msg, "utf8")
+        msg = bytes(msg, "utf8")
         while not self.file_end(file_obj=file_obj):
             pos = file_obj.tell()
             line = file_obj.readline()

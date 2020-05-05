@@ -68,7 +68,6 @@ between reduction steps.  The benefits to this new method are as follows:
    passing settings to each other via PropertyManager objects.
 """
 
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *

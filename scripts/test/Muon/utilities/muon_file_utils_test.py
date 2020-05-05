@@ -8,7 +8,7 @@ import os
 from io import StringIO
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 import Muon.GUI.Common.utilities.muon_file_utils as utils
 
 

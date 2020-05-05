@@ -42,7 +42,7 @@ private:
   void init() override;
   void exec() override;
 
-  void setGroupingSampleLogs(MatrixWorkspace_sptr workspace);
+  void setGroupingSampleLogs(const MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Muon

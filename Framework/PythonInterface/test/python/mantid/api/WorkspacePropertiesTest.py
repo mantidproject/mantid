@@ -7,8 +7,6 @@
 """Tests the construction of the various workspace
 property types
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty,
@@ -16,6 +14,7 @@ from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspa
                         IMDWorkspaceProperty, IMDHistoWorkspaceProperty, IMDEventWorkspaceProperty,
                         PropertyMode, LockMode)
 from mantid.kernel import Direction, Property
+
 
 class WorkspacePropertiesTest(unittest.TestCase):
 

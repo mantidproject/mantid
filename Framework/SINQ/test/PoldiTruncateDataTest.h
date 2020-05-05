@@ -46,7 +46,7 @@ public:
   }
 
   void testSetChopper() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
 
     TestablePoldiTruncateData truncate;
 
@@ -98,7 +98,7 @@ public:
   }
 
   void testCalculateBinCount() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
@@ -127,7 +127,7 @@ public:
   }
 
   void testGetMaximumTimeValue() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
@@ -146,7 +146,7 @@ public:
   }
 
   void testGetMinimumExtraTimeValue() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
@@ -171,7 +171,7 @@ public:
   }
 
   void testGetCroppedWorkspace() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(2).WillRepeatedly(Return(1500.0));
 
     MatrixWorkspace_sptr inputWorkspace =
@@ -200,7 +200,7 @@ public:
   }
 
   void testGetExtraCountsWorkspace() {
-    boost::shared_ptr<MockChopper> chopper = boost::make_shared<MockChopper>();
+    std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(2).WillRepeatedly(Return(1500.0));
 
     MatrixWorkspace_sptr inputWorkspace =

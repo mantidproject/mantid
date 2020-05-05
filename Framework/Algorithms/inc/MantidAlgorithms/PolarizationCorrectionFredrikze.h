@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -38,17 +38,16 @@ public:
 private:
   void init() override;
   void exec() override;
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
   getEfficiencyWorkspace(const std::string &label);
-  boost::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPA(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
-  boost::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPNR(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
-  add(boost::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
-      const double &rhs);
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
-  multiply(boost::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
+  std::shared_ptr<Mantid::API::WorkspaceGroup>
+  execPA(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
+  std::shared_ptr<Mantid::API::WorkspaceGroup>
+  execPNR(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
+  add(std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS, const double &rhs);
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
+  multiply(std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
            const double &rhs);
 };
 

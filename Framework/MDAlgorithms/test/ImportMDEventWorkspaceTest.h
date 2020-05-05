@@ -72,7 +72,7 @@ public:
   /// Create a simple input file.
   MDFileObject(
       const FileContentsBuilder &builder = FileContentsBuilder(),
-      std::string filename = "test_import_md_event_workspace_file.txt") {
+      const std::string &filename = "test_import_md_event_workspace_file.txt") {
     Poco::Path path(
         Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
     path.append(filename);
@@ -366,7 +366,7 @@ Performance Tests
 class ImportMDEventWorkspaceTestPerformance : public CxxTest::TestSuite {
 private:
   const size_t nRows;
-  boost::shared_ptr<MDFileObject> infile;
+  std::shared_ptr<MDFileObject> infile;
 
 public:
   static ImportMDEventWorkspaceTestPerformance *createSuite() {
@@ -391,7 +391,7 @@ public:
     }
     // Create a file from the contents.
     fileContents.setMDEventEntries(mdData);
-    infile = boost::make_shared<MDFileObject>(fileContents);
+    infile = std::make_shared<MDFileObject>(fileContents);
   }
 
   void testRead() {

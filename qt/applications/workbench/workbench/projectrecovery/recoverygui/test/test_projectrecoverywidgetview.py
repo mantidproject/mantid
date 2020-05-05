@@ -7,11 +7,9 @@
 #  This file is part of the mantidqt package
 #
 
-from __future__ import (absolute_import, unicode_literals)
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
 

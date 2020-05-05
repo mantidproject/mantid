@@ -58,7 +58,7 @@ void LoadNexusMonitors::exec() {
   // - Rename all the children of the group to _1, _2, _3, etc
   // - Cause the return value in Python to be a tuple that contains the group
   //   workspace, followed by references to its children as siblings
-  auto ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+  auto ws_group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
   if (ws_group) {
     auto child_count = ws_group->size();
     for (decltype(child_count) i = 0; i < child_count; ++i) {

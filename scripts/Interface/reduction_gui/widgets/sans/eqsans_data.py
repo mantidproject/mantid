@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
-import six
 from qtpy.QtWidgets import (QButtonGroup, QFrame, QMessageBox)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
 import os
@@ -21,8 +19,7 @@ except ImportError:
     Logger("DataSetsWidget").information('Using legacy ui importer')
     from mantidplot import load_ui
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class DataSetsWidget(BaseWidget):

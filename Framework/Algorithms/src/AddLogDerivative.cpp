@@ -34,11 +34,11 @@ void AddLogDerivative::init() {
                                             Direction::InOut),
       "An input/output workspace. The new log will be added to it.");
   declareProperty(
-      "LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
       "The name that will identify the log entry to perform a derivative.\n"
       "This log must be a numerical series (double).");
   declareProperty("Derivative", 1,
-                  boost::make_shared<BoundedValidator<int>>(1, 10),
+                  std::make_shared<BoundedValidator<int>>(1, 10),
                   "How many derivatives to perform. Default 1.");
   declareProperty("NewLogName", "",
                   "Name of the newly created log. If not "
@@ -103,8 +103,9 @@ Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
   DateAndTime start = input->nthTime(0);
   std::vector<DateAndTime> timeFull;
   timeFull.reserve(times.size());
-  for (const double time : times)
-    timeFull.emplace_back(start + time);
+
+  std::transform(times.begin(), times.end(), std::back_inserter(timeFull),
+                 [&start](const double time) { return start + time; });
 
   // Create the TSP out of it
   auto out = new TimeSeriesProperty<double>(name);

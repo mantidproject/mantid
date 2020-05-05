@@ -35,7 +35,7 @@
 // clang-format on
 
 #include "MantidDataObjects/Workspace2D.h"
-#include <boost/shared_array.hpp>
+#include <memory>
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm {
@@ -64,7 +64,7 @@ private:
   // A dictionary
   std::map<std::string, std::string> dictionary;
 
-  void loadDictionary(std::string dictionaryFile);
+  void loadDictionary(const std::string &dictionaryFile);
 
   void load2DWorkspace(NeXus::File *fin);
 
@@ -80,10 +80,10 @@ private:
 
   std::unordered_set<std::string> populateSpecialMap();
 
-  void addMetaData(NeXus::File *fin, Mantid::API::Workspace_sptr ws,
-                   Mantid::API::ExperimentInfo_sptr info);
+  void addMetaData(NeXus::File *fin, const Mantid::API::Workspace_sptr &ws,
+                   const Mantid::API::ExperimentInfo_sptr &info);
 
-  int safeOpenpath(NeXus::File *fin, std::string path);
+  int safeOpenpath(NeXus::File *fin, const std::string &path);
   int calculateCAddress(int *pos, int *dim, int rank);
   int calculateF77Address(int *pos, int rank);
 };

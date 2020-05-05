@@ -621,7 +621,7 @@ template <typename FD>
 void LoadEMU<FD>::createWorkspace(const std::string &title) {
 
   // Create the workspace
-  m_localWorkspace = boost::make_shared<DataObjects::EventWorkspace>();
+  m_localWorkspace = std::make_shared<DataObjects::EventWorkspace>();
   m_localWorkspace->initialize(HISTOGRAMS, 2, 1);
 
   // set the units
@@ -680,7 +680,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
 
   // lambda to simplify loading instrument parameters
   auto instr = m_localWorkspace->getInstrument();
-  auto iparam = [&instr](std::string tag) {
+  auto iparam = [&instr](const std::string &tag) {
     return instr->getNumberParameter(tag)[0];
   };
 
@@ -690,7 +690,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   //
   double sampleAnalyser = iparam("SampleAnalyser");
   auto endID = static_cast<detid_t>(DETECTOR_TUBES * PIXELS_PER_TUBE);
-  for (detid_t detID = 0; detID < endID; detID++)
+  for (detid_t detID = 0; detID < endID; ++detID)
     updateNeutronicPostions(detID, sampleAnalyser);
 
   // get the detector map from raw input to a physical detector
@@ -1363,7 +1363,7 @@ void LoadEMUTar::exec() {
       tarFile.select(itf->c_str());
   };
   auto extractFile = [&](Poco::TemporaryFile &tfile) {
-    boost::shared_ptr<FILE> handle(fopen(tfile.path().c_str(), "wb"), fclose);
+    std::shared_ptr<FILE> handle(fopen(tfile.path().c_str(), "wb"), fclose);
     if (handle) {
       // copy content
       char buffer[4096];

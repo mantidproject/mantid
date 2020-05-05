@@ -7,7 +7,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
@@ -205,7 +205,7 @@ API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(
         " there are more dimensions requested then instantiated");
   API::IMDEventWorkspace *pWs = (*(wsCreatorFP[nd]))(
       eventType, preferredNormalization, preferredNormalizationHisto);
-  return boost::shared_ptr<API::IMDEventWorkspace>(pWs);
+  return std::shared_ptr<API::IMDEventWorkspace>(pWs);
 }
 
 /** Create a MDBox or MDGridBoxof the given type

@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidKernel/Material.h"
@@ -27,32 +27,24 @@ using Mantid::API::MatrixWorkspace_sptr;
 class SetSampleMaterialTest : public CxxTest::TestSuite {
 public:
   void testName() {
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     TS_ASSERT_EQUALS(setmat->name(), "SetSampleMaterial");
   }
 
   void testVersion() {
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     TS_ASSERT_EQUALS(setmat->version(), 1);
   }
 
   void testInit() {
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     TS_ASSERT_THROWS_NOTHING(setmat->initialize());
     TS_ASSERT(setmat->isInitialized());
   }
 
   void testExecAl2O3() {
     std::string wsName = "SetSampleMaterialTestWS";
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     if (!setmat->isInitialized())
       setmat->initialize();
 
@@ -93,9 +85,7 @@ public:
 
   void testExecAl2O3overrides() {
     std::string wsName = "SetSampleMaterialTestWS";
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     if (!setmat->isInitialized())
       setmat->initialize();
 
@@ -136,9 +126,7 @@ public:
 
   void testExecBaTiO3() {
     std::string wsName = "SetSampleMaterialTestWS";
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     if (!setmat->isInitialized())
       setmat->initialize();
 
@@ -180,9 +168,7 @@ public:
   void testExecMat_Formula() {
 
     std::string wsName = "SetSampleMaterialTestWS_formula";
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     if (!setmat->isInitialized())
       setmat->initialize();
 
@@ -224,9 +210,7 @@ public:
   void testExecMat_OneAtom() {
 
     std::string wsName = "SetSampleMaterialTestWS_oneatom";
-    IAlgorithm *setmat =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SetSampleMaterial");
+    auto setmat = AlgorithmManager::Instance().create("SetSampleMaterial");
     if (!setmat->isInitialized())
       setmat->initialize();
 

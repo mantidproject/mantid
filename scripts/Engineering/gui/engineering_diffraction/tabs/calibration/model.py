@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from os import path, makedirs
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
@@ -318,6 +316,7 @@ class CalibrationModel(object):
         elif bank is None:  # Custom cropped files use the north bank template.
             north_kwargs()
             generate_output_file([difa[0]], [difc[0]], [tzero[0]], "cropped", kwargs)
+        logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
     @staticmethod
     def get_info_from_file(file_path):

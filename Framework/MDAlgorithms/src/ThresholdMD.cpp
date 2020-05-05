@@ -54,7 +54,7 @@ void ThresholdMD::init() {
   propOptions.emplace_back(GreaterThan());
 
   declareProperty("Condition", LessThan(),
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Selected threshold condition. Any value which does meet "
                   "this condition with respect to the ReferenceValue will be "
                   "overwritten.");
@@ -98,7 +98,7 @@ void ThresholdMD::exec() {
     alg->setProperty("InputWorkspace", inputWS);
     alg->executeAsChildAlg();
     IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-    outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+    outWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
   }
 
   const int64_t nPoints = inputWS->getNPoints();

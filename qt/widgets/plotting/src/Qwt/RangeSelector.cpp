@@ -305,7 +305,7 @@ void RangeSelector::detach() {
   m_mrkMax->attach(nullptr);
 }
 
-void RangeSelector::setColour(QColor colour) {
+void RangeSelector::setColour(const QColor &colour) {
   m_pen->setColor(colour);
   switch (m_type) {
   case XMINMAX:

@@ -25,7 +25,7 @@ using namespace API;
 void ElasticWindow::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("DeltaE")),
+                      std::make_shared<WorkspaceUnitValidator>("DeltaE")),
                   "The input workspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputInQ", "", Direction::Output),
@@ -35,10 +35,10 @@ void ElasticWindow::init() {
                                             Direction::Output),
       "The name for output workspace with the X axis in units of Q^2.");
   declareProperty("IntegrationRangeStart", EMPTY_DBL(),
-                  boost::make_shared<MandatoryValidator<double>>(),
+                  std::make_shared<MandatoryValidator<double>>(),
                   "Start Point of Range 1");
   declareProperty("IntegrationRangeEnd", EMPTY_DBL(),
-                  boost::make_shared<MandatoryValidator<double>>(),
+                  std::make_shared<MandatoryValidator<double>>(),
                   "End Point of Range 1");
   declareProperty("BackgroundRangeStart", EMPTY_DBL(), "Start Point of Range 2",
                   Direction::Input);
