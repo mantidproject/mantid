@@ -38,10 +38,17 @@ public:
             Mantid::API::ITableWorkspace_sptr parameterTable,
             const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) override;
 
+  void addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                       Mantid::API::ITableWorkspace_sptr parameterTable,
+                       const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+                       FitDomainIndex fitDomainIndex) override;
+
 private:
   std::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   std::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
-  std::vector<std::unordered_map<std::string, ParameterValue>> m_parameters;
+  std::unordered_map<int, std::unordered_map<std::string, ParameterValue>>
+      m_parameters;
+  std::unordered_map<int, ResultLocationNew> m_outputResultLocations;
 };
 
 } // namespace IDA

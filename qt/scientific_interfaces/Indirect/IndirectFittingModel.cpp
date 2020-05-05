@@ -507,19 +507,23 @@ void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
+  m_fitFunction =
+      extractFirstInnerFunction(fitAlgorithm->getPropertyValue("Function"));
   m_fitOutput->addOutput(group, parameters, result);
+  m_previousModelSelected = isPreviousModelSelected();
 }
 
 void IndirectFittingModel::addSingleFitOutput(
-    const IAlgorithm_sptr &fitAlgorithm, TableDatasetIndex index) {
-  // auto group = getOutputGroup(fitAlgorithm);
-  // auto parameters = getOutputParameters(fitAlgorithm);
-  // auto result = getOutputResult(fitAlgorithm);
-  // int spectrum = fitAlgorithm->getProperty("WorkspaceIndex");
-  // m_fitFunction = FunctionFactory::Instance().createInitialized(
-  //     fitAlgorithm->getPropertyValue("Function"));
-  // addOutput(group, parameters, result, m_fittingData[index].get(),
-  //           WorkspaceIndex{spectrum});
+    const IAlgorithm_sptr &fitAlgorithm, TableDatasetIndex index,
+    WorkspaceIndex spectrum) {
+  auto group = getOutputGroup(fitAlgorithm);
+  auto parameters = getOutputParameters(fitAlgorithm);
+  auto result = getOutputResult(fitAlgorithm);
+  m_fitFunction = FunctionFactory::Instance().createInitialized(
+      fitAlgorithm->getPropertyValue("Function"));
+  auto fitDomainIndex = m_fitDataModel->getDomainIndex(index, spectrum);
+  m_fitOutput->addSingleOutput(group, parameters, result, fitDomainIndex);
+  m_previousModelSelected = isPreviousModelSelected();
 }
 
 FittingMode IndirectFittingModel::getFittingMode() const {

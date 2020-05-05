@@ -71,14 +71,14 @@ getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &workspace,
   return std::vector<std::string>();
 }
 
-std::vector<std::unordered_map<std::string,
-                               MantidQt::CustomInterfaces::IDA::ParameterValue>>
+std::unordered_map<int, std::unordered_map<std::string, ParameterValue>>
 extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
   auto rowCount = tableWs->rowCount();
   TableRowExtractor extractRowFromTable(std::move(tableWs));
-  std::vector<std::unordered_map<std::string, ParameterValue>> parameterMap;
-  for (size_t rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
-    parameterMap.emplace_back(extractRowFromTable(rowIndex));
+  std::unordered_map<int, std::unordered_map<std::string, ParameterValue>>
+      parameterMap;
+  for (int rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
+    parameterMap.emplace(rowIndex, extractRowFromTable(rowIndex));
   }
   return parameterMap;
 }
@@ -101,8 +101,10 @@ IndirectFitOutputModel::getParameters(FitDomainIndex index) const {
 
 boost::optional<ResultLocationNew>
 IndirectFitOutputModel::getResultLocation(FitDomainIndex index) const {
-  return ResultLocationNew(m_resultGroup.lock(),
-                           WorkspaceGroupIndex{index.value});
+  if (m_outputResultLocations.count(index.value) == 1) {
+    return m_outputResultLocations.at(index.value);
+  }
+  return boost::none;
 }
 
 std::vector<std::string>
@@ -127,6 +129,7 @@ void IndirectFitOutputModel::clear() {
   m_resultGroup.reset();
   m_resultWorkspace.reset();
   m_parameters.clear();
+  m_outputResultLocations.clear();
 }
 
 void IndirectFitOutputModel::addOutput(
@@ -136,6 +139,25 @@ void IndirectFitOutputModel::addOutput(
   m_parameters = extractParametersFromTable(parameterTable);
   m_resultGroup = resultGroup;
   m_resultWorkspace = resultWorkspace;
+  m_outputResultLocations.clear();
+  for (int index = 0; index < resultGroup->size(); index++) {
+    m_outputResultLocations.emplace(
+        index, ResultLocationNew(resultGroup, WorkspaceGroupIndex{index}));
+  }
+}
+
+void IndirectFitOutputModel::addSingleOutput(
+    const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+    Mantid::API::ITableWorkspace_sptr parameterTable,
+    const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+    FitDomainIndex fitDomainIndex) {
+  TableRowExtractor extractRowFromTable(std::move(parameterTable));
+  m_parameters.insert_or_assign(fitDomainIndex.value, extractRowFromTable(0));
+  m_outputResultLocations.insert_or_assign(
+      fitDomainIndex.value,
+      ResultLocationNew(resultGroup, WorkspaceGroupIndex{0}));
+  m_resultWorkspace = resultWorkspace;
+  m_resultGroup = resultGroup;
 }
 
 } // namespace IDA

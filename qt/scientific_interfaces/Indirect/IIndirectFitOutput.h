@@ -9,8 +9,8 @@
 #include "DllConfig.h"
 #include "Indextypes.h"
 //#include "IndirectFitOutput.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 
@@ -58,6 +58,12 @@ public:
   addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
             Mantid::API::ITableWorkspace_sptr parameterTable,
             const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) = 0;
+
+  virtual void addSingleOutput(
+      const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+      Mantid::API::ITableWorkspace_sptr parameterTable,
+      const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+      FitDomainIndex fitDomainIndex) = 0;
 };
 
 } // namespace IDA

@@ -373,7 +373,8 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
     m_fittingAlgorithm.reset();
   } else
     m_fittingModel->addSingleFitOutput(m_fittingAlgorithm,
-                                       m_currentTableDatasetIndex);
+                                       m_currentTableDatasetIndex,
+                                       m_singleFitWorkspaceIndex);
 }
 
 /**
@@ -527,6 +528,7 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
                                        WorkspaceIndex spectrum) {
   if (validate()) {
+    m_singleFitWorkspaceIndex = spectrum;
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);

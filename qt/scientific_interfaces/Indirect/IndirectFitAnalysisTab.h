@@ -163,6 +163,7 @@ private:
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
   TableDatasetIndex m_currentTableDatasetIndex;
+  WorkspaceIndex m_singleFitWorkspaceIndex;
 };
 
 } // namespace IDA

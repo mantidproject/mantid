@@ -105,7 +105,7 @@ public:
 
   // IIndirectFitOutput
   void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm,
-                          TableDatasetIndex index);
+                          TableDatasetIndex index, WorkspaceIndex spectrum);
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   // Generic
