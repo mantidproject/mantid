@@ -58,7 +58,6 @@ CoordTransform *CoordTransformDistance::clone() const {
   return new CoordTransformDistance(*this);
 }
 
-
 //----------------------------------------------------------------------------------------------
 /** Apply the coordinate transformation.
  *
@@ -74,7 +73,7 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
   if (outD == 1) {
     coord_t distanceSquared = 0;
     if (m_eigenvals.size() == 3) {
-      // ellipsoid transfrom with ratio of axes given by standard deviation 
+      // ellipsoid transfrom with ratio of axes given by standard deviation
       // i.e. sqrt(eigenvals)
       // convert 3D coords to V3D for vector algebra
       V3D inV3D =
@@ -82,7 +81,7 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
               inputVector[2] - m_center[2]);
       for (size_t d = 0; d < inD; d++) {
         coord_t dist = m_eigenvects[d].scalar_prod(inV3D);
-        distanceSquared += (dist * dist) * m_maxEigenval/m_eigenvals[d];
+        distanceSquared += (dist * dist) * m_maxEigenval / m_eigenvals[d];
       }
     } else {
       // nd spherical transform

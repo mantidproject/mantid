@@ -63,8 +63,9 @@ private:
   template <typename MDE, size_t nd>
   void findEllipsoid(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
                      const Mantid::API::CoordTransform &getRadiusSq,
-                     const Mantid::Kernel::V3D &pos, const coord_t &radiusSquared,
-                     const bool &qAxisBool, const double &bgDensity,
+                     const Mantid::Kernel::V3D &pos,
+                     const coord_t &radiusSquared, const bool &qAxisBool,
+                     const double &bgDensity,
                      std::vector<Mantid::Kernel::V3D> &eigenvects,
                      std::vector<double> &eigenvals);
 
