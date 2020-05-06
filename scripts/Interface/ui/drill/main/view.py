@@ -439,6 +439,7 @@ class DrillView(QMainWindow):
         self.processRows.setDisabled(state)
         self.processAll.setDisabled(state)
         self.table.setDisabled(state)
+        self.table.clearSelection()
 
     def set_row_processing(self, row):
         """
