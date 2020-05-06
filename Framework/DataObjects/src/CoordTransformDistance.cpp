@@ -42,7 +42,7 @@ CoordTransformDistance::CoordTransformDistance(
   for (size_t d = 0; d < inD; d++) {
     m_center.push_back(center[d]);
     m_dimensionsUsed.push_back(dimensionsUsed[d]);
-    if (inD == 3 & eigenvals.size() == 3 & eigenvects.size() == 3) {
+    if (inD == 3 && eigenvals.size() == 3 && eigenvects.size() == 3) {
       // coord transform for ellipsoid specified (only in 3D)
       m_eigenvals.push_back(eigenvals[d]);
       m_eigenvects.push_back(eigenvects[d]);
