@@ -19,11 +19,12 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoWidget::ImageInfoWidget(std::string &wsName, QWidget *parent)
+ImageInfoWidget::ImageInfoWidget(std::string &wsName, DisplayType *type,
+                                 QWidget *parent)
     : QTableWidget(2, 0, parent) {
   auto workspace =
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-  m_model = std::make_unique<ImageInfoModel>(workspace);
+  m_model = std::make_unique<ImageInfoModel>(workspace, type);
 }
 
 /**

@@ -30,7 +30,8 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoModel::ImageInfoModel(Workspace_sptr &ws) : m_workspace(ws) {
+ImageInfoModel::ImageInfoModel(Workspace_sptr &ws, DisplayType *type)
+    : m_workspace(ws), m_displayType(type) {
 
   auto matWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
   if (matWs) {
@@ -72,11 +73,15 @@ ImageInfoModel::getInfoList(const double x, const double y, const double z) {
   return list;
 }
 
-std::vector<std::string>
-ImageInfoModel::getMatrixWorkspaceInfo(const double x, const double y,
-                                       const double value,
-                                       MatrixWorkspace_sptr ws) {
+std::vector<std::string> ImageInfoModel::getMatrixWorkspaceInfo(
+    const double xDisplayCoord, const double yDisplayCoord, const double value,
+    MatrixWorkspace_sptr ws) {
   std::vector<std::string> list;
+  double x(xDisplayCoord);
+  double y(yDisplayCoord);
+  if (m_displayType) {
+    m_displayType->convertToDataCoord(xDisplayCoord, yDisplayCoord, x, y);
+  }
 
   if (x >= m_xMax || x <= m_xMin || y >= m_yMax || y < 0)
     return list;

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/DisplayType.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 
 #include <QTableWidget>
@@ -23,7 +24,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public QTableWidget {
   Q_OBJECT
 
 public:
-  ImageInfoWidget(std::string &wsName, QWidget *parent = nullptr);
+  ImageInfoWidget(std::string &wsName, DisplayType *type = nullptr,
+                  QWidget *parent = nullptr);
   ~ImageInfoWidget() override;
 
   void updateTable(const double x, const double y, const double z);

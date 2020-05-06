@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/DisplayType.h"
 
 #include <string>
 #include <vector>
@@ -32,7 +33,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModel {
 
 public:
-  ImageInfoModel(Mantid::API::Workspace_sptr &ws);
+  ImageInfoModel(Mantid::API::Workspace_sptr &ws, DisplayType *type = nullptr);
   ~ImageInfoModel();
 
   std::vector<std::string> getInfoList(const double x, const double y,
@@ -53,6 +54,7 @@ private:
   std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_source;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
+  DisplayType *m_displayType;
   double m_xMin;
   double m_xMax;
   double m_yMax;

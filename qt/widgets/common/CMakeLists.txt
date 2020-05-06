@@ -79,6 +79,7 @@ set(
   src/SequentialFitDialog.cpp
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
+  src/SliceViewerDisplayType.cpp
   src/SlitCalculator.cpp
   src/TextPropertyWidget.cpp
   src/TSVSerialiser.cpp
@@ -148,6 +149,7 @@ set(
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
   inc/MantidQtWidgets/Common/DataSelector.h
+  inc/MantidQtWidgets/Common/DisplayType.h
   inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
@@ -199,6 +201,7 @@ set(
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
   inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
+  inc/MantidQtWidgets/Common/SliceViewerDisplayType.h
   inc/MantidQtWidgets/Common/SlitCalculator.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
@@ -458,6 +461,7 @@ set(
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
   src/SequentialFitDialog.cpp
+  src/SliceViewerDisplayType.cpp
   src/SlicingAlgorithmDialog.cpp
   src/SlitCalculator.cpp
   src/TrackedAction.cpp
@@ -536,6 +540,7 @@ set(
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
   inc/MantidQtWidgets/Common/DataSelector.h
+  inc/MantidQtWidgets/Common/DisplayType.h
   inc/MantidQtWidgets/Common/DiagResults.h
   inc/MantidQtWidgets/Common/DoubleSpinBox.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
@@ -571,6 +576,7 @@ set(
   inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.h
+  inc/MantidQtWidgets/Common/SliceViewerDisplayType.h
   inc/MantidQtWidgets/Common/SlitCalculator.h
   inc/MantidQtWidgets/Common/TrackedAction.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
