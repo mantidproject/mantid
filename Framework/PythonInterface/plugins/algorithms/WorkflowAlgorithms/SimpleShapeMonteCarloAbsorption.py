@@ -254,10 +254,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
             set_sample_alg.setProperty("Material", sample_material)
 
-            #try:
             set_sample_alg.execute()
-            #except RuntimeError as exc:
-            #    raise RuntimeError("Supplied chemical formula was invalid: \n" + str(exc))
 
         prog.report('Calculating sample corrections')
 
