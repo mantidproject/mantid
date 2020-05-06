@@ -120,7 +120,6 @@ class MuonWorkspaceWrapper(object):
         if len(self.name) > 0:
             # add workspace to ADS
             if self.is_hidden:
-                print(self.name, self._workspace_name, self.workspace)
                 AnalysisDataService.addOrReplace(self._workspace_name, self.workspace)
 
             self._add_to_appropriate_groups()
