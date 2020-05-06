@@ -158,7 +158,7 @@ void MonteCarloAbsorption::init() {
                       std::make_unique<EnabledWhenProperty>(
                           "ResimulateTracksForDifferentWavelengths",
                           ePropertyCriterion::IS_NOT_DEFAULT));
-  auto scatteringOptionValidator = boost::make_shared<StringListValidator>();
+  auto scatteringOptionValidator = std::make_shared<StringListValidator>();
   scatteringOptionValidator->addAllowedValue("SampleAndEnvironment");
   scatteringOptionValidator->addAllowedValue("SampleOnly");
   scatteringOptionValidator->addAllowedValue("EnvironmentOnly");
