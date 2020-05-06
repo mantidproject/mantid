@@ -36,7 +36,7 @@ Data Handling
 
 The :ref:`LoadISISNexus <algm-LoadISISNexus>` algorithm has been modified to remove the VMS compatibility block.
 This has lead to the removal of the following variables from the sample logs as they were deemed unnecessary: dmp,
-dmp_freq, dmp_units dur, dur_freq, dur_secs, dur_wanted, durunits, mon_sum1, mon_sum2, mon_sum3, run_header.
+dmp_freq, dmp_units dur, dur_freq, dur_secs, dur_wanted, durunits, mon_sum1, mon_sum2, mon_sum3, run_header (this is available in the workspace title).
 
 Data Objects
 ------------
