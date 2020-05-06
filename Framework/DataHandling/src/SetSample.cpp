@@ -617,8 +617,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
         auto canMaterial = reader.buildMaterial();
         shape->setMaterial(*canMaterial);
       }
-      const SampleEnvironment se("unnamed",
-                                 std::make_shared<Container>(shape));
+      const SampleEnvironment se("unnamed", std::make_shared<Container>(shape));
       exptInfo.mutableSample().setEnvironment(
           std::make_unique<SampleEnvironment>(se));
     }
