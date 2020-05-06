@@ -923,6 +923,37 @@ signals:
 };
 
 // ---------------------------------
+// ImageInformationWidget
+// ---------------------------------
+class DisplayType {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/DisplayType.h"
+%End
+public:
+    DisplayType();
+	virtual void convertToDataCoord(const double xDisplayCoord, const double yDisplayCoord, double &xDataCoord, double &yDataCoord) = 0;
+};
+
+class ImageInfoWidget : public QTableWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ImageInfoWidget.h"
+%End
+public:
+    ImageInfoWidget(std::string &wsName, DisplayType *type, QWidget *parent = nullptr);
+	void updateTable(const double x, const double y, const double z);
+};
+
+class SliceViewerDisplayType : public DisplayType {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/SliceViewerDisplayType.h"
+%End
+public:
+    SliceViewerDisplayType();
+	void convertToDataCoord(const double xDisplayCoord, const double yDisplayCoord, double &xDataCoord, double &yDataCoord);
+	void changeDimensions(const int xAxisState, const int yAxisState);
+};
+
+// ---------------------------------
 // DataSelector
 // ---------------------------------
 class DataSelector : QWidget

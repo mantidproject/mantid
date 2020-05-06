@@ -23,6 +23,7 @@ from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitte
 # local imports
 from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
+from mantidqt.widgets.sliceviewer.imageinfowidget import ImageInfoWidget
 from .dimensionwidget import DimensionWidget
 from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar, ToolItemText
@@ -35,7 +36,8 @@ from .peaksviewer.representation.painter import MplPainter
 
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+
+    def __init__(self, presenter, dims_info, can_normalise, workspace_name, parent=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -46,9 +48,11 @@ class SliceViewerDataView(QWidget):
         self.nonortho_tr = None
 
         # Dimension widget
+        self.dimensions_layout = QHBoxLayout()
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
+        self.dimensions_layout.addWidget(self.dimensions)
 
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0,0,0,0)
@@ -80,6 +84,7 @@ class SliceViewerDataView(QWidget):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
         self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
+        self.canvas.mpl_connect('button_press_event', self.mouse_click)
         self.create_axes_orthogonal()
         mpl_layout.addWidget(self.canvas)
         self.colorbar_label = QLabel("Colormap")
@@ -91,18 +96,25 @@ class SliceViewerDataView(QWidget):
         mpl_layout.addLayout(self.colorbar_layout)
 
         # MPL toolbar
-        self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
+        self.toolbar_layout = QHBoxLayout()
+        self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self, False)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
         self.mpl_toolbar.linePlotsClicked.connect(self.on_line_plots_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
+        self.toolbar_layout.addWidget(self.mpl_toolbar)
+
+        self.image_info_widget = ImageInfoWidget(workspace_name, self)
+        self.dimensions.axesChanged.connect(self.image_info_widget.display_type.changeDimensions)
+        self.toolbar_layout.addStretch(1)
+        self.toolbar_layout.addWidget(self.image_info_widget)
 
         # layout
         layout = QGridLayout(self)
         layout.setSpacing(1)
-        layout.addWidget(self.dimensions, 0, 0)
-        layout.addWidget(self.mpl_toolbar, 1, 0)
+        layout.addLayout(self.dimensions_layout, 0, 0)
+        layout.addLayout(self.toolbar_layout, 1, 0)
         layout.addLayout(mpl_layout, 2, 0)
 
     @property
@@ -382,8 +394,12 @@ class SliceViewerDataView(QWidget):
         self.canvas.draw_idle()
 
     def mouse_move(self, event):
-        if self.line_plots and event.inaxes == self.ax:
-            self.update_line_plots(event.xdata, event.ydata)
+        if event.inaxes == self.ax:
+            data = self.image.get_cursor_data(event)
+            if data and self.image_info_widget.track_cursor.checkState() == Qt.Checked:
+                self.image_info_widget.table_widget.updateTable(event.xdata, event.ydata, data)
+            if self.line_plots:
+                self.update_line_plots(event.xdata, event.ydata)
 
     def mouse_outside_image(self, _):
         """
@@ -393,6 +409,12 @@ class SliceViewerDataView(QWidget):
         if self.line_plots:
             self.delete_line_plot_lines()
             self.canvas.draw_idle()
+
+    def mouse_click(self, event):
+        if event.inaxes == self.ax and event.button == MouseButton.LEFT:
+            data = self.image.get_cursor_data(event)
+            if data and self.image_info_widget.track_cursor.checkState() == Qt.Unchecked:
+                self.image_info_widget.table_widget.updateTable(event.xdata, event.ydata, data)
 
     def plot_x_line(self, x, y):
         try:
@@ -460,7 +482,8 @@ class SliceViewerDataView(QWidget):
 
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
-    def __init__(self, presenter, dims_info, can_normalise, parent=None):
+
+    def __init__(self, presenter, dims_info, can_normalise, workspace_name, parent=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -469,7 +492,7 @@ class SliceViewerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)
-        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, workspace_name, self)
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None

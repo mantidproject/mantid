@@ -25,6 +25,14 @@ ImageInfoWidget::ImageInfoWidget(std::string &wsName, DisplayType *type,
   auto workspace =
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
   m_model = std::make_unique<ImageInfoModel>(workspace, type);
+  horizontalHeader()->hide();
+  verticalHeader()->hide();
+
+  int height = 20;
+  for (int i = 0; i < rowCount(); i++)
+    height += rowHeight(i);
+
+  setFixedHeight(height);
 }
 
 /**
@@ -53,6 +61,12 @@ void ImageInfoWidget::updateTable(const double x, const double y,
       row = 0;
       column++;
     }
+
+    resizeColumnsToContents();
+    int table_width = 2;
+    for (int i = 0; i < info.size() / 2; i++)
+      table_width += columnWidth(i);
+    setMaximumWidth(table_width);
   }
 }
 

@@ -43,7 +43,7 @@ class SliceViewer(object):
         self.normalization = mantid.api.MDNormalization.NoNormalization
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
-                                                      self.model.can_normalize_workspace(), parent)
+                                                      self.model.can_normalize_workspace(), ws.name(), parent)
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
