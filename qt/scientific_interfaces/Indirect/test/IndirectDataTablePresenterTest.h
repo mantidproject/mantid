@@ -57,84 +57,73 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 /// Mock object to mock the model
 class MockIndirectDataTableModel : public IIndirectFitData {
 public:
-  virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
-  MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName))
-  virtual Mantid::API::MatrixWorkspace_sptr
-  getWorkspace(TableDatasetIndex index) const = 0;
-  virtual Spectra getSpectra(TableDatasetIndex index) const = 0;
-  virtual bool isMultiFit() const = 0;
-  virtual TableDatasetIndex numberOfWorkspaces() const = 0;
-  virtual int getNumberOfSpectra(TableDatasetIndex index) const = 0;
-  virtual int getNumberOfDomains() const = 0;
-  virtual FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
-                                        WorkspaceIndex spectrum) const = 0;
-  virtual std::vector<double> getQValuesForData() const = 0;
-  virtual std::vector<std::pair<std::string, int>>
-  getResolutionsForFit() const = 0;
-  virtual std::vector<std::string> getWorkspaceNames() const = 0;
+  MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
+  MOCK_CONST_METHOD1(
+      getWorkspace, Mantid::API::MatrixWorkspace_sptr(TableDatasetIndex index));
+  MOCK_CONST_METHOD1(getSpectra, Spectra(TableDatasetIndex index));
+  MOCK_CONST_METHOD0(isMultiFit, bool());
+  MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
+  MOCK_CONST_METHOD1(getNumberOfSpectra, int(TableDatasetIndex index));
+  MOCK_CONST_METHOD0(getNumberOfDomains, int());
+  MOCK_CONST_METHOD2(getDomainIndex,
+                     FitDomainIndex(TableDatasetIndex dataIndex,
+                                    IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
+  MOCK_CONST_METHOD0(getResolutionsForFit,
+                     std::vector<std::pair<std::string, int>>());
+  MOCK_CONST_METHOD0(getWorkspaceNames, std::vector<std::string>());
 
-  virtual void setSpectra(const std::string &spectra,
-                          TableDatasetIndex dataIndex) = 0;
-  virtual void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex) = 0;
-  virtual void setSpectra(const Spectra &spectra,
-                          TableDatasetIndex dataIndex) = 0;
-  virtual void addWorkspace(const std::string &workspaceName) = 0;
-  virtual void addWorkspace(const std::string &workspaceName,
-                            const std::string &spectra) = 0;
-  virtual void addWorkspace(const std::string &workspaceName,
-                            const Spectra &spectra) = 0;
-  virtual void removeWorkspace(TableDatasetIndex index) = 0;
-  virtual void removeDataByIndex(FitDomainIndex fitDomainIndex) = 0;
-  virtual void clear() = 0;
+  MOCK_METHOD2(setSpectra,
+               void(const std::string &spectra, TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setSpectra,
+               void(Spectra &&spectra, TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setSpectra,
+               void(const Spectra &spectra, TableDatasetIndex dataIndex));
+  MOCK_METHOD1(addWorkspace, void(const std::string &workspaceName));
+  MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName,
+                                  const std::string &spectra));
+  MOCK_METHOD2(addWorkspace,
+               void(const std::string &workspaceName, const Spectra &spectra));
+  MOCK_METHOD1(removeWorkspace, void(TableDatasetIndex index));
+  MOCK_METHOD1(removeDataByIndex, void(FitDomainIndex fitDomainIndex));
+  MOCK_METHOD0(clear, void());
 
-  virtual std::pair<double, double>
-  getFittingRange(TableDatasetIndex dataIndex,
-                  WorkspaceIndex spectrum) const = 0;
-  virtual std::string getExcludeRegion(TableDatasetIndex dataIndex,
-                                       WorkspaceIndex index) const = 0;
-  virtual std::vector<double>
-  getExcludeRegionVector(TableDatasetIndex dataIndex,
-                         WorkspaceIndex index) const = 0;
-  virtual void setStartX(double startX, TableDatasetIndex dataIndex,
-                         WorkspaceIndex spectrum) = 0;
-  virtual void setStartX(double startX, TableDatasetIndex dataIndex) = 0;
-  virtual void setEndX(double endX, TableDatasetIndex dataIndex,
-                       WorkspaceIndex spectrum) = 0;
-  virtual void setEndX(double endX, TableDatasetIndex dataIndex) = 0;
-  virtual void setExcludeRegion(const std::string &exclude,
-                                TableDatasetIndex dataIndex,
-                                WorkspaceIndex spectrum) = 0;
-  virtual void setResolution(const std::string &name,
-                             TableDatasetIndex index) = 0;
-
-  virtual Mantid::API::MatrixWorkspace_sptr
-  getWorkspace(FitDomainIndex index) const = 0;
-  virtual std::pair<double, double>
-  getFittingRange(FitDomainIndex index) const = 0;
-  virtual int getSpectrum(FitDomainIndex index) const = 0;
-  virtual std::vector<double>
-  getExcludeRegionVector(FitDomainIndex index) const = 0;
-  virtual std::string getExcludeRegion(FitDomainIndex index) const = 0;
-  /// Public methods
   MOCK_CONST_METHOD2(getFittingRange,
                      std::pair<double, double>(TableDatasetIndex dataIndex,
                                                IDA::WorkspaceIndex spectrum));
   MOCK_CONST_METHOD2(getExcludeRegion, std::string(TableDatasetIndex dataIndex,
                                                    IDA::WorkspaceIndex index));
-  MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
-
+  MOCK_CONST_METHOD2(getExcludeRegionVector,
+                     std::vector<double>(TableDatasetIndex dataIndex,
+                                         IDA::WorkspaceIndex index));
   MOCK_METHOD3(setStartX, void(double startX, TableDatasetIndex dataIndex,
                                IDA::WorkspaceIndex spectrum));
+  MOCK_METHOD2(setStartX, void(double startX, TableDatasetIndex dataIndex));
   MOCK_METHOD3(setEndX, void(double endX, TableDatasetIndex dataIndex,
                              IDA::WorkspaceIndex spectrum));
-
-  MOCK_METHOD2(setStartX, void(double startX, TableDatasetIndex dataIndex));
   MOCK_METHOD2(setEndX, void(double endX, TableDatasetIndex dataIndex));
 
   MOCK_METHOD3(setExcludeRegion,
-               void(std::string const &exclude, TableDatasetIndex dataIndex,
+               void(const std::string &exclude, TableDatasetIndex dataIndex,
                     IDA::WorkspaceIndex spectrum));
+  MOCK_METHOD2(setResolution,
+               void(const std::string &name, TableDatasetIndex index));
+
+  MOCK_CONST_METHOD1(getWorkspace,
+                     Mantid::API::MatrixWorkspace_sptr(FitDomainIndex index));
+  MOCK_CONST_METHOD1(getFittingRange,
+                     std::pair<double, double>(FitDomainIndex index));
+  MOCK_CONST_METHOD1(getSpectrum, int(FitDomainIndex index));
+  MOCK_CONST_METHOD1(getExcludeRegionVector,
+                     std::vector<double>(FitDomainIndex index));
+  MOCK_CONST_METHOD1(getExcludeRegion, std::string(FitDomainIndex index));
+
+  MOCK_CONST_METHOD1(
+      getSubIndices,
+      std::pair<TableDatasetIndex, IDA::WorkspaceIndex>(FitDomainIndex));
+
+  MOCK_METHOD0(switchToSingleInputMode, void());
+  MOCK_METHOD0(switchToMultipleInputMode, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
