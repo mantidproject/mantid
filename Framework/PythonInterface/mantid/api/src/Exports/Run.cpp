@@ -9,6 +9,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
@@ -40,7 +41,26 @@ namespace bpl = boost::python;
  */
 double getPropertyAsSingleValueWithDefaultStatistic(Run &self,
                                                     const std::string &name) {
+  //   Before calling the function we need to release the GIL,
+  //   drop the Python threadstate and reset anything installed
+  //   via PyEval_SetTrace while we execute the C++ code -
+  //   ReleaseGlobalInterpreter does this for us
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
+      releaseGlobalInterpreterLock;
   return self.getPropertyAsSingleValue(name);
+}
+
+/**
+ * Wrapper around getPropertyAsSingleValue to use TimeAveragedMean as the
+ * StatisticType.
+ * @param self A reference to the Run object
+ * @param name A name of a log
+ * @return A double value
+ */
+double getPropertyAsSingleValueWithTimeAveragedMean(Run &self,
+                                                    const std::string &name) {
+  return self.getPropertyAsSingleValue(name,
+                                       Mantid::Kernel::Math::TimeAveragedMean);
 }
 
 /**
@@ -178,6 +198,12 @@ void export_Run() {
            (arg("self"), arg("name")),
            "Return a log as a single float value. Time series values are "
            "averaged.")
+
+      .def("getPropertyAsSingleValueWithTimeAveragedMean",
+           getPropertyAsSingleValueWithTimeAveragedMean,
+           (arg("self"), arg("name")),
+           "Returns a log as a single float value. Calculated using "
+           "time-averaged mean.")
 
       .def("getTimeAveragedStd", &Run::getTimeAveragedStd,
            (arg("self"), arg("name")),

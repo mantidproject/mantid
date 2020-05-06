@@ -12,7 +12,8 @@
 #include <set>
 #include <string>
 
-namespace Mantid::Kernel {
+namespace Mantid {
+namespace Kernel {
 
 class MANTID_KERNEL_DLL NexusHDF5Descriptor {
 
@@ -90,4 +91,5 @@ private:
   const std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
-} // namespace Mantid::Kernel
+} // namespace Kernel
+} // namespace Mantid

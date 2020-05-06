@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
@@ -49,6 +50,9 @@ private:
   void addMeshToVector(const Mantid::Geometry::MeshObject &mesh);
   size_t addMeshToVector(const Mantid::Geometry::MeshObject &mesh,
                          size_t offset);
+  void mergeSampleEnvironmentIntoSingleMesh(
+      const Mantid::Geometry::MeshObject &sample,
+      const std::vector<const Geometry::MeshObject *> &environmentPieces);
 
   std::vector<Kernel::V3D> m_vertices;
   std::vector<uint32_t> m_triangle;

@@ -8,6 +8,7 @@
 
 from matplotlib.axes import ErrorbarContainer
 from matplotlib.collections import QuadMesh
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 def generate_ax_name(ax):
@@ -73,7 +74,7 @@ def image_in_figure(fig):
 def legend_in_figure(fig):
     """Return True if there's a legend in the Figure object"""
     for ax in fig.get_axes():
-        if ax.get_legend() or ax.legend_:
+        if ax.get_legend() and ax.get_legend().get_texts():
             return True
     return False
 
@@ -121,4 +122,4 @@ def get_colorbars_from_fig(fig):
 
 def get_images_from_ax(ax):
     """Returns a list of image objects in the given Axes"""
-    return ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)]
+    return ax.images + [col for col in ax.collections if isinstance(col, QuadMesh) or isinstance(col, Poly3DCollection)]

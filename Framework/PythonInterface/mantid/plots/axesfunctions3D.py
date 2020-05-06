@@ -19,7 +19,7 @@ def _set_labels_3d(axes, workspace, indices=None):
     """
     Helper function to automatically set axis labels for 3D plots
     """
-    labels = get_axes_labels(workspace, indices)
+    labels = get_axes_labels(workspace, indices, normalize_by_bin_width=False)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
     axes.set_zlabel(labels[0])

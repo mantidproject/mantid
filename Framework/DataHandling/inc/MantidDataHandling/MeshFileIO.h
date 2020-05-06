@@ -39,6 +39,7 @@ public:
             const std::vector<double> &translationVector);
 
   Kernel::V3D createScaledV3D(double xVal, double yVal, double zVal);
+  ScaleUnits getScaleType() { return m_scaleType; }
 
 protected:
   MeshFileIO(ScaleUnits scaleType) : m_scaleType(scaleType) {}
@@ -80,7 +81,7 @@ protected:
     }
   }
 };
-inline ScaleUnits getScaleType(const std::string &scaleProperty) {
+inline ScaleUnits getScaleTypeFromStr(const std::string &scaleProperty) {
   ScaleUnits scaleType;
   if (scaleProperty == "m") {
     scaleType = ScaleUnits::metres;

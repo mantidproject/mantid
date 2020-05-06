@@ -248,19 +248,18 @@ def contains_algorithm(filename):
     """
         Inspects the file to look for an algorithm registration line
     """
-    if _sys.version_info[0] < 3:
-        def readlines_reversed(f):
-            return reversed(f.readlines())
-    else:
-        def readlines_reversed(f):
-            return reversed(list(f.readlines()))
-    #endif
     alg_found = True
     try:
         from io import open
         with open(filename,'r', encoding='UTF-8') as plugin_file:
-            for line in readlines_reversed(plugin_file):
-                if 'AlgorithmFactory.subscribe' in line:
+            # linear search through file
+            # looking from the bottom would be better, but searching from the top doesn't appear to
+            # affect performance
+            for line in plugin_file:
+                if 'class' in line and 'Algorithm' in line:
+                    alg_found = True
+                    break
+                elif 'AlgorithmFactory.subscribe' in line:
                     alg_found = True
                     break
     except Exception as exc:

@@ -197,6 +197,8 @@ public:
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
+  /// Get filtered times as a vector
+  std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
@@ -228,6 +230,8 @@ public:
   TYPE minValue() const;
   /// Returns the maximum value found in the series
   TYPE maxValue() const;
+  /// Returns the mean value found in the series
+  double mean() const;
 
   /// Returns the number of values at UNIQUE time intervals in the time series
   int size() const override;
