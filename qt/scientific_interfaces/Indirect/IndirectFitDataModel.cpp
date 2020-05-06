@@ -51,7 +51,6 @@ bool IndirectFitDataModel::hasWorkspace(
   auto const names = getWorkspaceNames();
   auto const iter = std::find(names.begin(), names.end(), workspaceName);
   return iter != names.end();
-  return true;
 }
 
 Mantid::API::MatrixWorkspace_sptr

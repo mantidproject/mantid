@@ -137,7 +137,7 @@ public:
   void removeFittingData();
 
 protected:
-  std::string createOutputName(std::string fitMode) const;
+  std::string createOutputName(const std::string &fitMode) const;
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;

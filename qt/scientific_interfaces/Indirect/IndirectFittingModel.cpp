@@ -29,8 +29,8 @@ using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
-std::string getFitDataName(std::string baseWorkspaceName,
-                           Spectra workspaceIndexes) {
+std::string getFitDataName(const std::string &baseWorkspaceName,
+                           const Spectra &workspaceIndexes) {
   return baseWorkspaceName + workspaceIndexes.getString();
 }
 
@@ -272,10 +272,9 @@ std::unordered_map<FittingMode, std::string> fitModeToName =
         {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 IndirectFittingModel::IndirectFittingModel()
-    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {
-  m_fitDataModel = std::make_unique<IndirectFitDataModel>();
-  m_fitOutput = std::make_unique<IndirectFitOutputModel>();
-}
+    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
+      m_fitDataModel(std::make_unique<IndirectFitDataModel>()),
+      m_fitOutput(std::make_unique<IndirectFitOutputModel>()) {}
 
 bool IndirectFittingModel::hasWorkspace(
     std::string const &workspaceName) const {
@@ -327,7 +326,8 @@ void IndirectFittingModel::setFitTypeString(const std::string &fitType) {
   m_fitString = fitType;
 }
 
-std::string IndirectFittingModel::createOutputName(std::string fitMode) const {
+std::string
+IndirectFittingModel::createOutputName(const std::string &fitMode) const {
   std::string inputWorkspace =
       isMultiFit() ? "Multi" : m_fitDataModel->getWorkspaceNames()[0];
   std::string spectra =
