@@ -17,6 +17,17 @@ from .specifications import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 
+class DrillException(Exception):
+    """
+    Custom exception that contains a list of invalid submitted elements.
+    Each element in the list is a tuple (element number, text message).
+    """
+
+    def __init__(self, elements):
+        super(DrillException, self).__init__()
+        self.elements = elements
+
+
 class DrillModel(QObject):
 
     settings = dict()
@@ -61,13 +72,22 @@ class DrillModel(QObject):
         # to be sure that the pool is cleared
         self.tasksPool.abortProcessing()
         # TODO: check the elements before algorithm submission
+        tasks = list()
+        errors = list()
         for e in elements:
             if (e < len(self.samples) and len(self.samples[e]) > 0):
                 kwargs = self.convolute(self.samples[e])
                 kwargs.update(self.settings)
                 kwargs['OutputWorkspace'] = "sample_" + str(e)
-                task = DrillTask(e, self.algorithm, **kwargs)
-                self.tasksPool.addProcess(task)
+                try:
+                    tasks.append(DrillTask(e, self.algorithm, **kwargs))
+                except Exception as ex:
+                    errors.append((e, str(ex)))
+        if errors:
+            raise DrillException(errors)
+        else:
+            for t in tasks:
+                self.tasksPool.addProcess(t)
 
     def stop_process(self):
         self.tasksPool.abortProcessing()

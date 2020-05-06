@@ -56,9 +56,13 @@ class DrillPresenter:
         self.model.change_data(row, column, contents)
 
     def on_process(self, rows):
-        self.model.process(rows)
-        self.view.set_disabled(True)
-        self.view.set_progress(0, 100)
+        try:
+            self.model.process(rows)
+        except Exception as e:
+            self.view.set_popup(e.elements)
+        else:
+            self.view.set_disabled(True)
+            self.view.set_progress(0, 100)
 
     def on_process_stop(self):
         self.model.stop_process();

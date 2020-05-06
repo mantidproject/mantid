@@ -8,7 +8,7 @@
 import os
 
 from qtpy.QtWidgets import QMainWindow, QFileDialog, QHeaderView, \
-                           QAbstractItemView, QTableWidgetItem
+                           QAbstractItemView, QTableWidgetItem, QMessageBox
 from qtpy.QtGui import QIcon
 from qtpy.QtCore import *
 from qtpy import uic
@@ -467,4 +467,23 @@ class DrillView(QMainWindow):
             row (int): the row index
         """
         self.table.setRowErrorColor(row)
+
+    def set_popup(self, elements):
+        """
+        Display a popup window that represents errors repported by the row
+        processing.
+
+        Args:
+            elements (list(tuple(int, str))): list of error messages and the
+                                              corresponding row
+        """
+        window = QMessageBox(self)
+        window.setWindowTitle("Error")
+        text = str()
+        for e in elements:
+            text += ("Row " + str(int(e[0]) + 1) + ":\n")
+            text += e[1]
+            text += '\n\n'
+        window.setText(text[:-2])
+        window.show()
 
