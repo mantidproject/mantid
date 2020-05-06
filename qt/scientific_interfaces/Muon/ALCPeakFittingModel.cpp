@@ -16,12 +16,13 @@
 
 #include <Poco/ActiveResult.h>
 #include <QApplication>
+#include <utility>
 
 using namespace Mantid::API;
 
 namespace {
 
-MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr inputWorkspace,
+MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace,
                                      const int workspaceIndex) {
   auto extracter = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extracter->setChild(true);
@@ -33,8 +34,9 @@ MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr inputWorkspace,
   return output;
 }
 
-MatrixWorkspace_sptr evaluateFunction(IFunction_const_sptr function,
-                                      MatrixWorkspace_sptr inputWorkspace) {
+MatrixWorkspace_sptr
+evaluateFunction(const IFunction_const_sptr &function,
+                 const MatrixWorkspace_sptr &inputWorkspace) {
   auto fit = AlgorithmManager::Instance().create("Fit");
   fit->setChild(true);
   fit->setProperty("Function", function->asString());
@@ -52,14 +54,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 void ALCPeakFittingModel::setData(MatrixWorkspace_sptr newData) {
-  m_data = newData;
+  m_data = std::move(newData);
   emit dataChanged();
 }
 
 MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace() {
   if (m_data && m_data->getNumberHistograms() > 2) {
 
-    return boost::const_pointer_cast<MatrixWorkspace>(m_data);
+    return std::const_pointer_cast<MatrixWorkspace>(m_data);
 
   } else {
 
@@ -79,7 +81,7 @@ ITableWorkspace_sptr ALCPeakFittingModel::exportFittedPeaks() {
 }
 
 void ALCPeakFittingModel::setFittedPeaks(IFunction_const_sptr fittedPeaks) {
-  m_fittedPeaks = fittedPeaks;
+  m_fittedPeaks = std::move(fittedPeaks);
   emit fittedPeaksChanged();
 }
 
@@ -88,7 +90,7 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   fit->setChild(true);
   fit->setProperty("Function", peaks->asString());
   fit->setProperty("InputWorkspace",
-                   boost::const_pointer_cast<MatrixWorkspace>(m_data));
+                   std::const_pointer_cast<MatrixWorkspace>(m_data));
   fit->setProperty("CreateOutput", true);
   fit->setProperty("OutputCompositeMembers", true);
 
@@ -111,7 +113,7 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
 MatrixWorkspace_sptr
 ALCPeakFittingModel::guessData(IFunction_const_sptr function,
                                const std::vector<double> &xValues) {
-  const auto inputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  const auto inputWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
                                           xValues.size()));
   inputWorkspace->mutableX(0) = xValues;

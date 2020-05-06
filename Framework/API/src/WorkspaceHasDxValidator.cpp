@@ -11,7 +11,7 @@ namespace API {
 
 /// Return a deep clone of this validator.
 Kernel::IValidator_sptr WorkspaceHasDxValidator::clone() const {
-  return boost::make_shared<WorkspaceHasDxValidator>(*this);
+  return std::make_shared<WorkspaceHasDxValidator>(*this);
 }
 
 /// Return an error string if not all histograms in ws have Dx, otherwise an

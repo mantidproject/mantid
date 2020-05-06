@@ -46,7 +46,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: Qt window flags
    */
-  PlotWizard(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  PlotWizard(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 private:
   //! Button "Plot"

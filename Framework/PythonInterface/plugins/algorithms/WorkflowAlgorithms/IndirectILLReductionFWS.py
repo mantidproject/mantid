@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 import time
 from mantid import mtd
@@ -627,7 +625,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
             self._set_x_label(wsname)
 
-        for energy, ws_list in iteritems(self._all_runs[label]):
+        for energy, ws_list in self._all_runs[label].items():
             for ws in ws_list:
                 DeleteWorkspace(ws)
 

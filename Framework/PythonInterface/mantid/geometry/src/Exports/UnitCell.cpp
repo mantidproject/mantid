@@ -30,7 +30,7 @@ namespace //<unnamed>
 using namespace Mantid::PythonInterface;
 
 /// Pass-through function to set the unit cell from a 2D numpy array
-void recalculateFromGstar(UnitCell &self, object values) {
+void recalculateFromGstar(UnitCell &self, const object &values) {
   // Create a double matrix and put this in to the unit cell
   self.recalculateFromGstar(Converters::PyObjectToMatrix(values)());
 }

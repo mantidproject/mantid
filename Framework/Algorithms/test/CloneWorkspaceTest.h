@@ -162,7 +162,7 @@ public:
     Workspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(out = ads.retrieve("clonedgroup"))
     WorkspaceGroup_const_sptr outgroup;
-    TS_ASSERT(outgroup = boost::dynamic_pointer_cast<WorkspaceGroup>(out))
+    TS_ASSERT(outgroup = std::dynamic_pointer_cast<WorkspaceGroup>(out))
     TS_ASSERT_EQUALS(outgroup->size(), 3)
     TS_ASSERT_DIFFERS(outgroup, ingroup)
     Workspace_sptr out1, out2, out3;
@@ -192,7 +192,7 @@ public:
    */
   void test_exec_TableWorkspace() {
     // 1. Create input table workspace
-    auto inpWS = boost::make_shared<TableWorkspace>();
+    auto inpWS = std::make_shared<TableWorkspace>();
 
     inpWS->addColumn("str", "Name");
     inpWS->addColumn("double", "Value");
@@ -218,7 +218,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outWS = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outWS = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestTableOut"));
     TS_ASSERT(outWS);
 

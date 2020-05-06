@@ -33,10 +33,10 @@ private:
   std::vector<API::MatrixWorkspace_sptr> interpolateWorkspaces(
       std::vector<API::MatrixWorkspace_sptr> const &workspaces);
   API::MatrixWorkspace_sptr
-  interpolatePointDataWorkspace(API::MatrixWorkspace_sptr ws,
+  interpolatePointDataWorkspace(const API::MatrixWorkspace_sptr &ws,
                                 size_t const maxSize);
   API::MatrixWorkspace_sptr
-  interpolateHistogramWorkspace(API::MatrixWorkspace_sptr ws,
+  interpolateHistogramWorkspace(const API::MatrixWorkspace_sptr &ws,
                                 size_t const maxSize);
 };
 

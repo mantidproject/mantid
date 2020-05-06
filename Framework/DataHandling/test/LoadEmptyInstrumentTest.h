@@ -38,7 +38,7 @@ public:
   static void destroySuite(LoadEmptyInstrumentTest *suite) { delete suite; }
 
   /// Helper that checks that each spectrum has one detector
-  void check_workspace_detectors(MatrixWorkspace_sptr output,
+  void check_workspace_detectors(const MatrixWorkspace_sptr &output,
                                  size_t numberDetectors) {
     TS_ASSERT_EQUALS(output->getNumberHistograms(), numberDetectors);
     for (size_t i = 0; i < output->getNumberHistograms(); i++) {
@@ -274,8 +274,8 @@ public:
     TS_ASSERT_DELTA(param->value<double>(), 77.0, 0.0001);
 
     // test that can hold of "string" parameter in two ways
-    boost::shared_ptr<const Instrument> i = ws->getInstrument();
-    boost::shared_ptr<const IComponent> ptrNickelHolder =
+    std::shared_ptr<const Instrument> i = ws->getInstrument();
+    std::shared_ptr<const IComponent> ptrNickelHolder =
         i->getComponentByName("nickel-holder");
     std::string dummyString =
         paramMap.getString(&(*ptrNickelHolder), "fjols-string");
@@ -409,7 +409,7 @@ public:
     TS_ASSERT_DELTA(ptrDet1206.getPos().Z(), 1, 0.0001);
 
     // testing r-position, t-position and p-position parameters
-    boost::shared_ptr<const IComponent> ptrRTP_Test =
+    std::shared_ptr<const IComponent> ptrRTP_Test =
         i->getComponentByName("rtpTest1");
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 0.0, 0.0001);
@@ -452,7 +452,7 @@ public:
     MatrixWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-    boost::shared_ptr<const Instrument> i = ws->getInstrument();
+    std::shared_ptr<const Instrument> i = ws->getInstrument();
 
     const auto &detectorInfo = ws->detectorInfo();
 
@@ -735,7 +735,7 @@ public:
 
     if (asEvent) {
       EventWorkspace_sptr eventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(ws);
+          std::dynamic_pointer_cast<EventWorkspace>(ws);
       TS_ASSERT(eventWS);
     }
 

@@ -9,7 +9,6 @@
 #include "ProjectRecoveryModel.h"
 #include <QDialog>
 #include <QStringList>
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {

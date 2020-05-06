@@ -9,7 +9,7 @@ import numpy as np
 
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, DeleteWorkspace, FindPeaksAutomatic
 from mantid.api import mtd
-from mantid.py3compat import mock
+from unittest import mock
 
 import plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic as _FindPeaksAutomatic
 
@@ -339,12 +339,12 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         self.assertPeakFound(peak2, self.centre[1], self.height[1]+10, self.width[1], 0.05)
 
     def test_find_peaks_is_called_if_scipy_version_higher_1_1_0(self):
-        with mock.patch(
-                'plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.scipy') as mock_scipy:
-            mock_scipy.__version__ = '1.1.0'
-            mock_scipy.signal.find_peaks.return_value = (self.peakids, {
-                'prominences': self.peakids
-            })
+        mock_scipy = mock.MagicMock()
+        mock_scipy.__version__ = '1.1.0'
+        mock_scipy.signal.find_peaks.return_value = (self.peakids, {
+            'prominences': self.peakids
+        })
+        with mock.patch.dict('sys.modules', scipy=mock_scipy):
             self.alg_instance.process(self.x_values,
                                       self.y_values,
                                       raw_error=np.sqrt(self.y_values),
@@ -360,12 +360,12 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             self.assertEqual(0, mock_scipy.signal.find_peaks_cwt.call_count)
 
     def test_find_peaks_cwt_is_called_if_scipy_version_lower_1_1_0(self):
-        with mock.patch(
-                'plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.scipy') as mock_scipy:
-            mock_scipy.__version__ = '1.0.0'
-            mock_scipy.signal.find_peaks.return_value = (self.peakids, {
-                'prominences': self.peakids
-            })
+        mock_scipy = mock.MagicMock()
+        mock_scipy.__version__ = '1.0.0'
+        mock_scipy.signal.find_peaks.return_value = (self.peakids, {
+            'prominences': self.peakids
+        })
+        with mock.patch.dict('sys.modules', scipy=mock_scipy):
             self.alg_instance.process(self.x_values,
                                       self.y_values,
                                       raw_error=np.sqrt(self.y_values),

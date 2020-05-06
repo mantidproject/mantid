@@ -7,6 +7,7 @@
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -23,7 +24,7 @@ InvalidParameterParser::createParameter(Poco::XML::Element *parameterElement) {
 
 InvalidParameter *
 InvalidParameterParser::parseInvalidParameter(std::string value) {
-  return new InvalidParameter(value);
+  return new InvalidParameter(std::move(value));
 }
 
 void InvalidParameterParser::setSuccessorParser(

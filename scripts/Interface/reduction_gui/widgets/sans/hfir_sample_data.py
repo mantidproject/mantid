@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,protected-access
-from __future__ import (absolute_import, division, print_function)
-import six
 import os
 from qtpy.QtWidgets import (QFrame, QGroupBox, QMessageBox)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
@@ -20,8 +18,7 @@ except ImportError:
     Logger("DirectBeam").information('Using legacy ui importer')
     from mantidplot import load_ui
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class DirectBeam(BaseWidget):

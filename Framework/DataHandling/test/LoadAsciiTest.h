@@ -257,7 +257,7 @@ private:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
     MatrixWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       if (dataCheck) {
         checkData(outputWS, threeColumn);
@@ -275,7 +275,7 @@ private:
     return outputWS;
   }
 
-  void checkData(const Mantid::API::MatrixWorkspace_sptr outputWS,
+  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                  const bool threeColumn) {
     if (threeColumn) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);

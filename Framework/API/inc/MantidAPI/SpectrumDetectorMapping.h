@@ -31,7 +31,7 @@ class MANTID_API_DLL SpectrumDetectorMapping {
   using sdmap = std::unordered_map<specnum_t, std::set<detid_t>>;
 
 public:
-  explicit SpectrumDetectorMapping(MatrixWorkspace_const_sptr workspace,
+  explicit SpectrumDetectorMapping(const MatrixWorkspace_const_sptr &workspace,
                                    const bool useSpecNoIndex = true);
   SpectrumDetectorMapping(
       const std::vector<specnum_t> &spectrumNumbers,

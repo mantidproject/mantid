@@ -51,8 +51,8 @@ void SaveFullprofResolution::init() {
                       "OutputFilename", "", API::FileProperty::Save, exts),
                   "Name of the output .irf file.");
 
-  boost::shared_ptr<BoundedValidator<int>> bankboundval =
-      boost::make_shared<BoundedValidator<int>>();
+  std::shared_ptr<BoundedValidator<int>> bankboundval =
+      std::make_shared<BoundedValidator<int>>();
   bankboundval->setLower(0);
   declareProperty("Bank", EMPTY_INT(),
                   "Bank number of the parameters belonged to. ");
@@ -62,7 +62,7 @@ void SaveFullprofResolution::init() {
       "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
   supportedfunctions.emplace_back("Jason Hodge's function (profile 10)");
   auto funcvalidator =
-      boost::make_shared<StringListValidator>(supportedfunctions);
+      std::make_shared<StringListValidator>(supportedfunctions);
   declareProperty("ProfileFunction", "Jason Hodge's function (profile 10)",
                   funcvalidator, "Profile number defined in Fullprof.");
 
@@ -480,7 +480,7 @@ std::string SaveFullprofResolution::toProf9IrfString() {
 /** Check wether a profile parameter map has the parameter
  */
 bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap,
-                                     std::string key) {
+                                     const std::string &key) {
   map<string, double>::iterator fiter;
   fiter = profmap.find(key);
   bool exist = true;

@@ -26,7 +26,7 @@ using Mantid::Crystal::FindClusterFaces;
 
 namespace {
 // Helper function to create a peaks workspace.
-IPeaksWorkspace_sptr create_peaks_WS(Instrument_sptr inst) {
+IPeaksWorkspace_sptr create_peaks_WS(const Instrument_sptr &inst) {
   PeaksWorkspace *pPeaksWS = new PeaksWorkspace();
   pPeaksWS->setCoordinateSystem(Mantid::Kernel::HKL);
   IPeaksWorkspace_sptr peakWS(pPeaksWS);
@@ -384,7 +384,7 @@ public:
     IMDHistoWorkspace_sptr inWS =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 2, 1);
 
-    IPeaksWorkspace_sptr filterWS = boost::make_shared<PeaksWorkspace>();
+    IPeaksWorkspace_sptr filterWS = std::make_shared<PeaksWorkspace>();
     TS_ASSERT_THROWS(doExecuteWithFilter(inWS, filterWS),
                      std::invalid_argument &);
   }

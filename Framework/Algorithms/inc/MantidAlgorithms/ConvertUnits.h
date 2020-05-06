@@ -69,12 +69,12 @@ public:
 
 protected:
   /// Reverses the workspace if X values are in descending order
-  void reverse(API::MatrixWorkspace_sptr WS);
+  void reverse(const API::MatrixWorkspace_sptr &WS);
 
   /// For conversions to energy transfer, removes bins corresponding to
   /// inaccessible values
   API::MatrixWorkspace_sptr
-  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
+  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr &workspace);
 
   const std::string workspaceMethodName() const override {
     return "convertUnits";
@@ -87,21 +87,21 @@ protected:
   void init() override;
   void exec() override;
 
-  void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
+  void setupMemberVariables(const API::MatrixWorkspace_const_sptr &inputWS);
   virtual void storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS);
   API::MatrixWorkspace_sptr
-  setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
+  setupOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
 
   /// Executes the main part of the algorithm that handles the conversion of the
   /// units
   API::MatrixWorkspace_sptr
-  executeUnitConversion(const API::MatrixWorkspace_sptr inputWS);
+  executeUnitConversion(const API::MatrixWorkspace_sptr &inputWS);
 
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
   API::MatrixWorkspace_sptr
-  convertQuickly(API::MatrixWorkspace_const_sptr inputWS, const double &factor,
-                 const double &power);
+  convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS,
+                 const double &factor, const double &power);
 
   /// Internal function to gather detector specific L2, theta and efixed values
   bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
@@ -118,11 +118,11 @@ protected:
 
   // Calls Rebin as a Child Algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr
-  alignBins(const API::MatrixWorkspace_sptr workspace);
+  alignBins(const API::MatrixWorkspace_sptr &workspace);
   const std::vector<double>
-  calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
+  calculateRebinParams(const API::MatrixWorkspace_const_sptr &workspace) const;
 
-  void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
+  void putBackBinWidth(const API::MatrixWorkspace_sptr &outputWS);
 
   std::size_t m_numberOfSpectra{
       0};                     ///< The number of spectra in the input workspace

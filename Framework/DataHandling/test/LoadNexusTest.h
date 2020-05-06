@@ -67,7 +67,7 @@ public:
     // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1"));
 
     MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -116,9 +116,9 @@ public:
          outputSpace + "_4"));
 
     MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output1);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output1);
     MatrixWorkspace_sptr output2D2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output2);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output2);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006475.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);

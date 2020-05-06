@@ -57,7 +57,7 @@ void ModifyDetectorDotDatFile::exec() {
   std::string outputFilename = getPropertyValue("OutputFilename");
 
   Workspace_sptr ws1 = getProperty("InputWorkspace");
-  ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+  ExperimentInfo_sptr ws = std::dynamic_pointer_cast<ExperimentInfo>(ws1);
 
   // Check instrument
   Instrument_const_sptr inst = ws->getInstrument();

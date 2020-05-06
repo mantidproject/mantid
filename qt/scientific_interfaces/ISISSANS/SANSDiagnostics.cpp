@@ -15,7 +15,7 @@
 #include "MantidKernel/UserStringParser.h"
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using Mantid::detid_t;
 using Mantid::specnum_t;
@@ -220,7 +220,7 @@ QString SANSDiagnostics::getMemberWorkspace(int period) {
     return "";
   }
   if (Mantid::API::WorkspaceGroup_sptr wsgrp_sptr =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr)) {
+          std::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr)) {
     std::vector<std::string> members = wsgrp_sptr->getNames();
     try {
       return QString::fromStdString(
@@ -243,7 +243,7 @@ bool SANSDiagnostics::isMultiPeriod() {
     return false;
   }
   Mantid::API::WorkspaceGroup_sptr wsgrp_sptr =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
+      std::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
   return (wsgrp_sptr ? true : false);
 }
 /// Deisplays rectangular detecctors of the selected member workspace.
@@ -293,7 +293,7 @@ void SANSDiagnostics::displayRectangularDetectors(const QString &wsName) {
   }
 
   // get rectangular detector details.
-  std::vector<boost::shared_ptr<RectDetectorDetails>> rectDetectors =
+  std::vector<std::shared_ptr<RectDetectorDetails>> rectDetectors =
       rectangularDetectorDetails(ws_sptr);
   m_rectDetectors.assign(rectDetectors.begin(), rectDetectors.end());
   if (rectDetectors.empty()) {
@@ -334,7 +334,7 @@ void SANSDiagnostics::displayRectangularDetectors(const QString &wsName) {
  * @return detector name
  */
 const QString SANSDiagnostics::getDetectorName(int index) {
-  boost::shared_ptr<RectDetectorDetails> rectDet;
+  std::shared_ptr<RectDetectorDetails> rectDet;
   try {
     rectDet = m_rectDetectors.at(index);
   } catch (std::out_of_range &) {
@@ -350,27 +350,26 @@ const QString SANSDiagnostics::getDetectorName(int index) {
  * @param ws_sptr shared pointer to workspace
  * @returns vector of rectangular detectors details
  */
-std::vector<boost::shared_ptr<RectDetectorDetails>>
+std::vector<std::shared_ptr<RectDetectorDetails>>
 SANSDiagnostics::rectangularDetectorDetails(
     Mantid::API::Workspace_sptr &ws_sptr) {
 
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
   if (!mws_sptr) {
-    return std::vector<boost::shared_ptr<RectDetectorDetails>>();
+    return std::vector<std::shared_ptr<RectDetectorDetails>>();
   }
   Mantid::Geometry::Instrument_const_sptr inst = mws_sptr->getInstrument();
   if (!inst) {
-    return std::vector<boost::shared_ptr<RectDetectorDetails>>();
+    return std::vector<std::shared_ptr<RectDetectorDetails>>();
   }
-  std::vector<boost::shared_ptr<RectDetectorDetails>> rectDetectors;
+  std::vector<std::shared_ptr<RectDetectorDetails>> rectDetectors;
   for (int i = 0; i < inst->nelements(); i++) {
     Mantid::Geometry::IComponent_sptr comp = (*inst)[i];
-    boost::shared_ptr<Mantid::Geometry::RectangularDetector> det =
-        boost::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>(
-            comp);
+    std::shared_ptr<Mantid::Geometry::RectangularDetector> det =
+        std::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>(comp);
     if (det) {
-      auto rect = boost::make_shared<RectDetectorDetails>();
+      auto rect = std::make_shared<RectDetectorDetails>();
       rect->setDetectorName(QString::fromStdString(det->getName()));
       rect->setMinimumDetectorId(det->minDetectorID());
       rect->setMaximumDetectorId(det->maxDetectorID());
@@ -378,15 +377,16 @@ SANSDiagnostics::rectangularDetectorDetails(
 
     } else {
 
-      boost::shared_ptr<Mantid::Geometry::ICompAssembly> assem =
-          boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(comp);
+      std::shared_ptr<Mantid::Geometry::ICompAssembly> assem =
+          std::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(comp);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
-          det = boost::dynamic_pointer_cast<
-              Mantid::Geometry::RectangularDetector>((*assem)[j]);
+          det =
+              std::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>(
+                  (*assem)[j]);
           if (det) {
 
-            auto rect = boost::make_shared<RectDetectorDetails>();
+            auto rect = std::make_shared<RectDetectorDetails>();
             rect->setDetectorName(QString::fromStdString(det->getName()));
             rect->setMinimumDetectorId(det->minDetectorID());
             rect->setMaximumDetectorId(det->maxDetectorID());
@@ -410,7 +410,7 @@ void SANSDiagnostics::getSpectraList(
   // This metod was wrong ticket #2470. The solution here will cause the system
   // not to perform very well.
   // The best option would be put this information inside the DetectorDetails
-  boost::shared_ptr<RectDetectorDetails> rectDet;
+  std::shared_ptr<RectDetectorDetails> rectDet;
   try {
     rectDet = m_rectDetectors.at(detNum);
   } catch (std::out_of_range &) {
@@ -628,7 +628,7 @@ void SANSDiagnostics::firstDetectorHorizontalIntegralClicked() {
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
   if (!mws_sptr) {
     return;
   }
@@ -671,7 +671,7 @@ void SANSDiagnostics::firstDetectorVerticalIntegralClicked() {
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
   if (!mws_sptr) {
     return;
   }
@@ -713,7 +713,7 @@ void SANSDiagnostics::firstDetectorTimeIntegralClicked() {
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
   if (!mws_sptr) {
     return;
   }
@@ -902,7 +902,7 @@ void SANSDiagnostics::TimeIntegralClicked(const QString &range,
   }
 
   Mantid::API::MatrixWorkspace_sptr mloadedws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedws_sptr);
   if (!loadedws_sptr) {
     return;
   }
@@ -1023,7 +1023,7 @@ void SANSDiagnostics::secondDetectorHorizontalIntegralClicked() {
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
   if (!mws_sptr) {
     return;
   }
@@ -1064,7 +1064,7 @@ void SANSDiagnostics::secondDetectorVerticalIntegralClicked() {
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
   if (!mws_sptr) {
     return;
   }
@@ -1105,7 +1105,7 @@ void SANSDiagnostics::secondDetectorTimeIntegralClicked() {
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
   if (!mws_sptr) {
     return;
   }
@@ -1144,7 +1144,7 @@ int SANSDiagnostics::getTotalNumberofPeriods() {
     return 0;
   }
   if (Mantid::API::WorkspaceGroup_sptr wsgrp_sptr =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr)) {
+          std::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr)) {
     return wsgrp_sptr->getNumberOfEntries();
   }
   return 1;
@@ -1185,7 +1185,7 @@ void SANSDiagnostics::saveSettings() {
  * @param orientation - orientation of the detector
  */
 bool SANSDiagnostics::executeSumRowColumn(
-    const std::vector<unsigned int> &values, const QString ipws,
+    const std::vector<unsigned int> &values, const QString &ipws,
     const QString &opws, const QString &orientation) {
   if (values.empty()) {
     return false;
@@ -1229,7 +1229,7 @@ bool SANSDiagnostics::executeSumRowColumn(
  * @param hvMin minimum value of
  * @param hvMax
  */
-bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
+bool SANSDiagnostics::runsumRowColumn(const QString &ipwsName,
                                       const QString &opwsName,
                                       const QString &orientation,
                                       const QString &hvMin,
@@ -1431,8 +1431,8 @@ void SANSDiagnostics::enableMaskFileControls() {
  * @returns an output workspace name
  */
 QString SANSDiagnostics::createOutputWorkspaceName(
-    QString originalWorkspaceName, QString detectorName,
-    QString integrationType, QString min, QString max) {
+    const QString &originalWorkspaceName, const QString &detectorName,
+    const QString &integrationType, const QString &min, const QString &max) {
   // Get run number from the loaded workspace
   boost::optional<int> runNumber = boost::none;
   try {
@@ -1440,7 +1440,7 @@ QString SANSDiagnostics::createOutputWorkspaceName(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             originalWorkspaceName.toStdString());
     Mantid::API::MatrixWorkspace_sptr matrix_ws_sptr =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
 
     if (matrix_ws_sptr) {
       runNumber = matrix_ws_sptr->getRunNumber();

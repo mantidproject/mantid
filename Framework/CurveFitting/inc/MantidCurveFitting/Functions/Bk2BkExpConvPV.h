@@ -74,9 +74,9 @@ private:
   mutable double mUpperTOF;
 };
 
-// typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
+// typedef std::shared_ptr<TableWorkspace> TableWorkspace_sptr;
 
-using Bk2BkExpConvPV_sptr = boost::shared_ptr<Bk2BkExpConvPV>;
+using Bk2BkExpConvPV_sptr = std::shared_ptr<Bk2BkExpConvPV>;
 
 } // namespace Functions
 } // namespace CurveFitting

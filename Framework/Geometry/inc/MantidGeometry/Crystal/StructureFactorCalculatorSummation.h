@@ -39,7 +39,7 @@ protected:
 };
 
 using StructureFactorSummation_sptr =
-    boost::shared_ptr<StructureFactorCalculatorSummation>;
+    std::shared_ptr<StructureFactorCalculatorSummation>;
 
 } // namespace Geometry
 } // namespace Mantid

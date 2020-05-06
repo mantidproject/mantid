@@ -13,7 +13,6 @@ Public methods:
     screenshot(): take a screenshot and save to a report
 
 """
-from __future__ import (absolute_import, division, print_function)
 import sys
 import os
 import unittest
@@ -33,6 +32,7 @@ except:
     qtest = False
     print("QTest not available")
 
+
 def moveMouseToCentre(widget):
     """Moves the mouse over the widget
     """
@@ -40,6 +40,7 @@ def moveMouseToCentre(widget):
         QtCore.QCoreApplication.processEvents()
         threadsafe_call(QTest.mouseMove, widget)
         QtCore.QCoreApplication.processEvents()
+
 
 def runTests(classname):
     """ Run the test suite in the class.

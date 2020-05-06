@@ -36,9 +36,10 @@
 #include <Poco/String.h>
 #include <Poco/XML/XMLWriter.h>
 
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 #include <unordered_set>
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -61,8 +62,8 @@ Kernel::Logger g_log("InstrumentDefinitionParser");
 /** Default Constructor - not very functional in this state
  */
 InstrumentDefinitionParser::InstrumentDefinitionParser()
-    : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
+    : m_xmlFile(std::make_shared<NullIDFObject>()),
+      m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -78,8 +79,8 @@ InstrumentDefinitionParser::InstrumentDefinitionParser()
 InstrumentDefinitionParser::InstrumentDefinitionParser(
     const std::string &filename, const std::string &instName,
     const std::string &xmlText)
-    : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
+    : m_xmlFile(std::make_shared<NullIDFObject>()),
+      m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -95,11 +96,11 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(
  * @param xmlText :: XML contents of IDF
  */
 InstrumentDefinitionParser::InstrumentDefinitionParser(
-    const IDFObject_const_sptr xmlFile,
-    const IDFObject_const_sptr expectedCacheFile, const std::string &instName,
+    const IDFObject_const_sptr &xmlFile,
+    const IDFObject_const_sptr &expectedCacheFile, const std::string &instName,
     const std::string &xmlText)
-    : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
+    : m_xmlFile(std::make_shared<NullIDFObject>()),
+      m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
       m_deltaOffsets(false), m_angleConvertConst(1.0),
       m_indirectPositions(false), m_cachingOption(NoneApplied) {
@@ -123,7 +124,7 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
                                             const std::string &xmlText,
                                             const std::string &vtpFilename) {
 
-  IDFObject_const_sptr xmlFile = boost::make_shared<const IDFObject>(filename);
+  IDFObject_const_sptr xmlFile = std::make_shared<const IDFObject>(filename);
 
   // Handle the parameters
   m_instName = instName;
@@ -132,7 +133,7 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
   // Create our new instrument
   // We don't want the instrument name taken out of the XML file itself, it
   // should come from the filename (or the property)
-  m_instrument = boost::make_shared<Instrument>(m_instName);
+  m_instrument = std::make_shared<Instrument>(m_instName);
 
   // Save the XML file path and contents
   m_instrument->setFilename(filename);
@@ -141,9 +142,9 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
   // Use the filename to construct the cachefile name so that there is a 1:1 map
   // between a definition file & cache
   if (vtpFilename.empty()) {
-    m_cacheFile = boost::make_shared<const IDFObject>(createVTPFileName());
+    m_cacheFile = std::make_shared<const IDFObject>(createVTPFileName());
   } else {
-    m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
+    m_cacheFile = std::make_shared<const IDFObject>(vtpFilename);
   }
 }
 
@@ -414,7 +415,7 @@ void InstrumentDefinitionParser::checkComponentContainsLocationElement(
  * @param filename :: Name of the IDF, for exception message
  */
 void InstrumentDefinitionParser::checkIdListExistsAndDefinesEnoughIDs(
-    IdList idList, Element *pElem, const std::string &filename) const {
+    const IdList &idList, Element *pElem, const std::string &filename) const {
   if (idList.counted != static_cast<int>(idList.vec.size())) {
     std::stringstream ss1, ss2;
     ss1 << idList.vec.size();
@@ -502,7 +503,7 @@ void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
 
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
     // Only CSGObjects can be combined into one shape.
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+    if (auto csgObj = std::dynamic_pointer_cast<CSGObject>(
             mapTypeNameToShape[typeName])) {
       csgObj->setName(static_cast<int>(iType));
     }
@@ -530,7 +531,7 @@ void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
     // that does not contain any component elements
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
     // Name can be set only for a CSGObject.
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+    if (auto csgObj = std::dynamic_pointer_cast<CSGObject>(
             mapTypeNameToShape[typeName])) {
       csgObj->setName(static_cast<int>(iType));
     }
@@ -1090,7 +1091,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     Handedness handedness = s_handedness == "right" ? Right : Left;
 
     // Overwrite the default reference frame.
-    m_instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+    m_instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
         pointingUp, alongBeam, thetaSign, handedness, s_origin));
   }
 }
@@ -1268,7 +1269,7 @@ void InstrumentDefinitionParser::appendAssembly(
     }
     if (pType->getAttribute("object_created") == "no") {
       pType->setAttribute("object_created", "yes");
-      boost::shared_ptr<Geometry::IObject> obj = objAss->createOutline();
+      std::shared_ptr<Geometry::IObject> obj = objAss->createOutline();
       if (obj) {
         mapTypeNameToShape[pType->getAttribute("name")] = obj;
       } else { // object failed to be created
@@ -1419,7 +1420,7 @@ void InstrumentDefinitionParser::createGridDetector(
   // Given that this leaf component is actually an assembly, its constituent
   // component detector shapes comes from its type attribute.
   const std::string shapeType = pType->getAttribute("type");
-  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
+  std::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
   // These parameters are in the TYPE defining RectangularDetector
   if (pType->hasAttribute("xpixels"))
     xpixels = std::stoi(pType->getAttribute("xpixels"));
@@ -1467,13 +1468,13 @@ void InstrumentDefinitionParser::createGridDetector(
   try {
     for (int z = 0; z < bank->nelements(); ++z) {
       auto zLayer =
-          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[z]);
+          std::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[z]);
       for (int x = 0; x < zLayer->nelements(); ++x) {
         auto xColumn =
-            boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*zLayer)[x]);
+            std::dynamic_pointer_cast<Geometry::ICompAssembly>((*zLayer)[x]);
         for (int y = 0; y < xColumn->nelements(); ++y) {
-          boost::shared_ptr<Geometry::Detector> detector =
-              boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+          std::shared_ptr<Geometry::Detector> detector =
+              std::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
           if (detector) {
             // Make default facing for the pixel
             auto *comp = static_cast<IComponent *>(detector.get());
@@ -1529,7 +1530,7 @@ void InstrumentDefinitionParser::createRectangularDetector(
   // Given that this leaf component is actually an assembly, its constituent
   // component detector shapes comes from its type attribute.
   const std::string shapeType = pType->getAttribute("type");
-  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
+  std::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
 
   // These parameters are in the TYPE defining RectangularDetector
   if (pType->hasAttribute("xpixels"))
@@ -1568,11 +1569,11 @@ void InstrumentDefinitionParser::createRectangularDetector(
   // the instrument.
   try {
     for (int x = 0; x < bank->nelements(); x++) {
-      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
-          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
+      std::shared_ptr<Geometry::ICompAssembly> xColumn =
+          std::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
       for (int y = 0; y < xColumn->nelements(); y++) {
-        boost::shared_ptr<Geometry::Detector> detector =
-            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        std::shared_ptr<Geometry::Detector> detector =
+            std::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           // Make default facing for the pixel
           auto *comp = static_cast<IComponent *>(detector.get());
@@ -1628,7 +1629,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   // Given that this leaf component is actually an assembly, its constituent
   // component detector shapes comes from its type attribute.
   const std::string shapeType = pType->getAttribute("type");
-  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
+  std::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
 
   std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
@@ -1712,11 +1713,11 @@ void InstrumentDefinitionParser::createStructuredDetector(
   // the instrument.
   try {
     for (int x = 0; x < bank->nelements(); x++) {
-      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
-          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
+      std::shared_ptr<Geometry::ICompAssembly> xColumn =
+          std::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
       for (int y = 0; y < xColumn->nelements(); y++) {
-        boost::shared_ptr<Geometry::Detector> detector =
-            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        std::shared_ptr<Geometry::Detector> detector =
+            std::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           // Make default facing for the pixel
           auto *comp = static_cast<IComponent *>(detector.get());
@@ -1990,7 +1991,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
  *  @throw InstrumentDefinitionError Thrown if type not defined in XML
  *definition
  */
-bool InstrumentDefinitionParser::isAssembly(std::string type) const {
+bool InstrumentDefinitionParser::isAssembly(const std::string &type) const {
   const std::string filename = m_xmlFile->getFileFullPathStr();
   auto it = isTypeAssembly.find(type);
 
@@ -2368,8 +2369,8 @@ void InstrumentDefinitionParser::setLogfile(
 
     std::vector<std::string> allowedUnits = UnitFactory::Instance().getKeys();
 
-    boost::shared_ptr<Interpolation> interpolation =
-        boost::make_shared<Interpolation>();
+    std::shared_ptr<Interpolation> interpolation =
+        std::make_shared<Interpolation>();
 
     if (numberLookUp >= 1) {
       auto *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
@@ -2447,7 +2448,7 @@ void InstrumentDefinitionParser::setLogfile(
     }
 
     auto cacheKey = std::make_pair(paramName, comp);
-    auto cacheValue = boost::make_shared<XMLInstrumentParameter>(
+    auto cacheValue = std::make_shared<XMLInstrumentParameter>(
         logfileID, value, interpolation, formula, formulaUnit, resultUnit,
         paramName, type, tie, constraint, penaltyFactor, fittingFunction,
         extractSingleValueAs, eq, comp, m_angleConvertConst, description);
@@ -2471,7 +2472,7 @@ void InstrumentDefinitionParser::setLogfile(
  *algorithm
  */
 void InstrumentDefinitionParser::setComponentLinks(
-    boost::shared_ptr<Geometry::Instrument> &instrument,
+    std::shared_ptr<Geometry::Instrument> &instrument,
     Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress) {
   // check if any logfile cache units set. As of this writing the only unit to
   // check is if "angle=radian"
@@ -2503,13 +2504,13 @@ void InstrumentDefinitionParser::setComponentLinks(
 
       std::string id = curElem->getAttribute("id");
       std::string name = curElem->getAttribute("name");
-      std::vector<boost::shared_ptr<const Geometry::IComponent>> sharedIComp;
+      std::vector<std::shared_ptr<const Geometry::IComponent>> sharedIComp;
 
       // If available, use the detector id as it's the most specific.
       if (id.length() > 0) {
         int detid;
         std::stringstream(id) >> detid;
-        boost::shared_ptr<const Geometry::IComponent> detector =
+        std::shared_ptr<const Geometry::IComponent> detector =
             instrument->getDetector(static_cast<detid_t>(detid));
 
         // If we didn't find anything with the detector id, explain why to the
@@ -2530,7 +2531,7 @@ void InstrumentDefinitionParser::setComponentLinks(
         // the
         // detector id.
         if (name.length() > 0) {
-          auto comp = boost::dynamic_pointer_cast<const IComponent>(detector);
+          auto comp = std::dynamic_pointer_cast<const IComponent>(detector);
           if (comp) {
             bool consistent =
                 (comp->getFullName() == name || comp->getName() == name);
@@ -2552,15 +2553,15 @@ void InstrumentDefinitionParser::setComponentLinks(
           // name.
           sharedIComp = instrument->getAllComponentsWithName(name);
         } else { // Pathname given. Assume it is unique.
-          boost::shared_ptr<const Geometry::IComponent> shared =
+          std::shared_ptr<const Geometry::IComponent> shared =
               instrument->getComponentByName(name);
           sharedIComp.emplace_back(shared);
         }
       }
 
       for (auto &ptr : sharedIComp) {
-        boost::shared_ptr<const Geometry::Component> sharedComp =
-            boost::dynamic_pointer_cast<const Geometry::Component>(ptr);
+        std::shared_ptr<const Geometry::Component> sharedComp =
+            std::dynamic_pointer_cast<const Geometry::Component>(ptr);
         if (sharedComp) {
           // Not empty Component
           if (sharedComp->isParametrized()) {
@@ -2580,18 +2581,19 @@ void InstrumentDefinitionParser::setComponentLinks(
 Apply the cache.
 @param cacheToApply : Cache file object to use the the geometries.
 */
-void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
+void InstrumentDefinitionParser::applyCache(
+    const IDFObject_const_sptr &cacheToApply) {
   const std::string cacheFullPath = cacheToApply->getFileFullPathStr();
   g_log.information("Loading geometry cache from " + cacheFullPath);
   // create a vtk reader
-  std::map<std::string, boost::shared_ptr<Geometry::IObject>>::iterator objItr;
-  boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(
+  std::map<std::string, std::shared_ptr<Geometry::IObject>>::iterator objItr;
+  std::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(
       new Mantid::Geometry::vtkGeometryCacheReader(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
     // caching only applies to CSGObject
     if (auto csgObj =
-            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+            std::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
       csgObj->setVtkGeometryCacheReader(reader);
     }
   }
@@ -2605,14 +2607,14 @@ Write the cache file from the IDF file and apply it.
 InstrumentDefinitionParser::CachingOption
 InstrumentDefinitionParser::writeAndApplyCache(
     IDFObject_const_sptr firstChoiceCache, IDFObject_const_sptr fallBackCache) {
-  IDFObject_const_sptr usedCache = firstChoiceCache;
+  IDFObject_const_sptr usedCache = std::move(firstChoiceCache);
   auto cachingOption = WroteGeomCache;
 
   g_log.notice("Geometry cache is not available");
   try {
     Poco::File dir = usedCache->getParentDirectory();
     if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
-      usedCache = fallBackCache;
+      usedCache = std::move(fallBackCache);
       cachingOption = WroteCacheTemp;
       g_log.information()
           << "Geometrycache directory is read only, writing cache "
@@ -2627,14 +2629,14 @@ InstrumentDefinitionParser::writeAndApplyCache(
   const std::string cacheFullPath = usedCache->getFileFullPathStr();
   g_log.notice() << "Creating cache in " << cacheFullPath << "\n";
   // create a vtk writer
-  std::map<std::string, boost::shared_ptr<Geometry::IObject>>::iterator objItr;
-  boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(
+  std::map<std::string, std::shared_ptr<Geometry::IObject>>::iterator objItr;
+  std::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(
       new Mantid::Geometry::vtkGeometryCacheWriter(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
     // caching only applies to CSGObject
     if (auto csgObj =
-            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+            std::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
       csgObj->setVtkGeometryCacheWriter(writer);
     }
   }
@@ -2651,7 +2653,7 @@ InstrumentDefinitionParser::setupGeometryCache() {
   // If the instrument directory is writable, put them there else use
   // temporary
   // directory.
-  IDFObject_const_sptr fallBackCache = boost::make_shared<const IDFObject>(
+  IDFObject_const_sptr fallBackCache = std::make_shared<const IDFObject>(
       Poco::Path(ConfigService::Instance().getTempDir())
           .append(this->getMangledName() + ".vtp")
           .toString());

@@ -40,7 +40,7 @@ public:
 
   /// Calculate function values
   void function1D(std::vector<double> &out,
-                  const std::vector<double> xValues) const;
+                  const std::vector<double> &xValues) const;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
@@ -68,7 +68,7 @@ private:
 };
 
 using ThermalNeutronDtoTOFFunction_sptr =
-    boost::shared_ptr<ThermalNeutronDtoTOFFunction>;
+    std::shared_ptr<ThermalNeutronDtoTOFFunction>;
 
 /// Calcualte TOF from d-spacing value for thermal neutron
 inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t,

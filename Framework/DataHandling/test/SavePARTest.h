@@ -92,7 +92,7 @@ public:
     API::Workspace_sptr sample =
         API::AnalysisDataService::Instance().retrieve(TestOutputParTableWSName);
     DataObjects::TableWorkspace_sptr spTW =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(sample);
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(sample);
     TSM_ASSERT(
         "should be able to retrieve sample workspace from the dataservice",
         spTW);

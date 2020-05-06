@@ -183,7 +183,7 @@ public:
     TS_ASSERT_EQUALS(fit->getPropertyValue("OutputStatus"), "success");
 
     // ITableWorkspace_sptr covar =
-    // boost::dynamic_pointer_cast<ITableWorkspace>(
+    // std::dynamic_pointer_cast<ITableWorkspace>(
     //  API::AnalysisDataService::Instance().retrieve("Output_NormalisedCovarianceMatrix"));
 
     // TS_ASSERT(covar);
@@ -206,7 +206,7 @@ public:
     TS_ASSERT_DIFFERS(fun->getError(0), 0.0);
     TS_ASSERT_DIFFERS(fun->getError(1), 0.0);
 
-    ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(
+    ITableWorkspace_sptr params = std::dynamic_pointer_cast<ITableWorkspace>(
         API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     TS_ASSERT(params);

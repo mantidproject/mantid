@@ -119,8 +119,7 @@ public:
     TS_ASSERT_EQUALS(outXs.size(), inXs.size())
     TS_ASSERT(outputWS->hasDx(0))
     const auto &inYs = inputWS->y(0);
-    const auto &outYs = outputWS->y(0);
-    TS_ASSERT_EQUALS(outYs.rawData(), inYs.rawData())
+    TS_ASSERT_EQUALS(outputWS->y(0).rawData(), inYs.rawData())
     const auto &inEs = inputWS->e(0);
     const auto &outEs = outputWS->e(0);
     TS_ASSERT_EQUALS(outEs.rawData(), inEs.rawData())
@@ -251,7 +250,7 @@ private:
     constexpr int nBins{10};
     auto inputWS = make_ws(0.5 * deg2rad, nBins, logValues);
     const std::vector<int> foreground(2, 0);
-    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    auto alg = std::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
@@ -283,10 +282,10 @@ private:
     TS_ASSERT(!alg->isExecuted())
   }
 
-  static API::Algorithm_sptr make_alg(API::MatrixWorkspace_sptr inputWS,
+  static API::Algorithm_sptr make_alg(const API::MatrixWorkspace_sptr &inputWS,
                                       const std::string &sumType,
                                       const std::vector<int> &foreground) {
-    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    auto alg = std::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
@@ -496,7 +495,7 @@ private:
   static API::IAlgorithm_sptr
   makeAlgorithm(API::MatrixWorkspace_sptr &reflectedWS) {
     std::vector<int> foreground(2, 0);
-    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    auto alg = std::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();

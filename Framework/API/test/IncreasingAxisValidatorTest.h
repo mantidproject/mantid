@@ -12,7 +12,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <algorithm>
 
@@ -28,13 +28,13 @@ public:
   static void destroySuite(IncreasingAxisValidatorTest *suite) { delete suite; }
 
   IncreasingAxisValidatorTest() {
-    m_right_ws = boost::make_shared<WorkspaceTester>();
+    m_right_ws = std::make_shared<WorkspaceTester>();
     m_right_ws->initialize(1, 3, 3);
 
     auto points = {0.0, 1.0, 2.0};
     m_right_ws->setPoints(0, points);
 
-    m_wrong_ws = boost::make_shared<WorkspaceTester>();
+    m_wrong_ws = std::make_shared<WorkspaceTester>();
     m_wrong_ws->initialize(1, 3, 3);
 
     auto bad_points = {2.0, 1.0, 0.0};
@@ -47,7 +47,7 @@ public:
   void testWrong() { TS_ASSERT_DIFFERS(validator.isValid(m_wrong_ws), ""); }
 
   void testSingleValuedWorkspace() {
-    auto testWS = boost::make_shared<AxeslessWorkspaceTester>();
+    auto testWS = std::make_shared<AxeslessWorkspaceTester>();
     testWS->initialize(1, 3, 3);
     std::string s;
     TS_ASSERT_THROWS_NOTHING(s = validator.isValid(testWS))

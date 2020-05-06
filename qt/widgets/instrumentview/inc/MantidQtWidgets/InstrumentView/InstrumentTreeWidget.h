@@ -39,7 +39,7 @@ public:
   QStringList
   findExpandedComponents(const QModelIndex &parent = QModelIndex()) const;
 public slots:
-  void sendComponentSelectedSignal(const QModelIndex /*index*/);
+  void sendComponentSelectedSignal(const QModelIndex & /*index*/);
 signals:
   void componentSelected(size_t /*_t1*/);
 

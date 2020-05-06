@@ -44,7 +44,7 @@ void SaveHKL::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
                   "Multiply FSQ and sig(FSQ) by scaleFactor");
@@ -78,7 +78,7 @@ void SaveHKL::init() {
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],
-                  boost::make_shared<StringListValidator>(histoTypes),
+                  std::make_shared<StringListValidator>(histoTypes),
                   "Sort the histograms by bank, run number or both (default).");
   declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive,
                   "The minimum I/sig(I) ratio");
@@ -436,14 +436,14 @@ void SaveHKL::exec() {
               1.0 - std::exp(-mu * depth); // efficiency at center of detector
 
           // Distance to center of detector
-          boost::shared_ptr<const IComponent> det0 =
+          std::shared_ptr<const IComponent> det0 =
               inst->getComponentByName(p.getBankName());
           if (inst->getName() ==
               "CORELLI") // for Corelli with sixteenpack under bank
           {
             std::vector<Geometry::IComponent_const_sptr> children;
-            boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-                boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            std::shared_ptr<const Geometry::ICompAssembly> asmb =
+                std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
                     inst->getComponentByName(p.getBankName()));
             asmb->getChildren(children, false);
             det0 = children[0];
@@ -747,16 +747,16 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
 
   return spect;
 }
-void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
+void SaveHKL::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
-  boost::shared_ptr<const IComponent> parent =
+  std::shared_ptr<const IComponent> parent =
       m_ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
@@ -765,17 +765,17 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
         "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
       parent = children[0];
     }
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     nRows = static_cast<int>(grandchildren.size());

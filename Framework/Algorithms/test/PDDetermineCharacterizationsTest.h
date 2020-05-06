@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -44,8 +44,7 @@ public:
     m_logWSName = "_det_char_log";
 
     {
-      auto alg =
-          FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+      auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
       alg->setPropertyValue("DataX",
                             "-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0");
       alg->setPropertyValue("DataY",
@@ -54,7 +53,7 @@ public:
       TS_ASSERT(alg->execute());
     }
     {
-      auto alg = FrameworkManager::Instance().createAlgorithm("AddSampleLog");
+      auto alg = AlgorithmManager::Instance().create("AddSampleLog");
       alg->setPropertyValue("LogName", "frequency");
       alg->setProperty("LogText", frequency);
       alg->setPropertyValue("LogUnit", "Hz");
@@ -63,7 +62,7 @@ public:
       TS_ASSERT(alg->execute());
     }
     {
-      auto alg = FrameworkManager::Instance().createAlgorithm("AddSampleLog");
+      auto alg = AlgorithmManager::Instance().create("AddSampleLog");
       alg->setPropertyValue("LogName", "LambdaRequest");
       alg->setPropertyValue("LogText", wavelength);
       alg->setPropertyValue("LogUnit", "Angstrom");
@@ -73,7 +72,7 @@ public:
     }
 
     if (!canName.empty()) {
-      auto alg = FrameworkManager::Instance().createAlgorithm("AddSampleLog");
+      auto alg = AlgorithmManager::Instance().create("AddSampleLog");
       alg->setPropertyValue("LogName", "SampleContainer");
       alg->setPropertyValue("LogText", canName);
       alg->setPropertyValue("LogType", "String");
@@ -82,8 +81,8 @@ public:
     }
   }
 
-  void addRow(ITableWorkspace_sptr wksp, const double freq, const double wl,
-              const int bank, const std::string &van,
+  void addRow(const ITableWorkspace_sptr &wksp, const double freq,
+              const double wl, const int bank, const std::string &van,
               const std::string &van_back, const std::string &can,
               const std::string &empty_env, const std::string &empty_inst,
               const std::string &dmin, const std::string &dmax,
@@ -176,7 +175,7 @@ public:
                      const double tofmin, const double tofmax,
                      const double wlmin, const double wlmax) {
 
-    PropertyManager_sptr expectedInfo = boost::make_shared<PropertyManager>();
+    PropertyManager_sptr expectedInfo = std::make_shared<PropertyManager>();
     expectedInfo->declareProperty(
         std::make_unique<PropertyWithValue<double>>("frequency", freq));
     expectedInfo->declareProperty(
@@ -209,8 +208,8 @@ public:
     return expectedInfo;
   }
 
-  void compareResult(PropertyManager_sptr expected,
-                     PropertyManager_sptr observed) {
+  void compareResult(const PropertyManager_sptr &expected,
+                     const PropertyManager_sptr &observed) {
     TS_ASSERT_EQUALS(expected->propertyCount(), observed->propertyCount());
 
     const std::vector<Property *> &expectedProps = expected->getProperties();

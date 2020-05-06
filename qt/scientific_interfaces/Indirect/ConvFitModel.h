@@ -14,7 +14,7 @@ namespace IDA {
 
 using ResolutionCollectionType =
     IndexCollectionType<TableDatasetIndex,
-                        boost::weak_ptr<Mantid::API::MatrixWorkspace>>;
+                        std::weak_ptr<Mantid::API::MatrixWorkspace>>;
 using ExtendedResolutionType =
     IndexCollectionType<TableDatasetIndex, std::string>;
 
@@ -41,7 +41,7 @@ public:
                     const Spectra &spectra) override;
   void removeWorkspace(TableDatasetIndex index) override;
   void setResolution(const std::string &name, TableDatasetIndex index);
-  void setResolution(Mantid::API::MatrixWorkspace_sptr resolution,
+  void setResolution(const Mantid::API::MatrixWorkspace_sptr &resolution,
                      TableDatasetIndex index);
   void setFitTypeString(const std::string &fitType);
 

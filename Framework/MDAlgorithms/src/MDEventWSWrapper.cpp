@@ -4,8 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidMDAlgorithms/MDEventWSWrapper.h"
+#include <utility>
+
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidMDAlgorithms/MDEventWSWrapper.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -20,8 +22,8 @@ namespace MDAlgorithms {
 template <size_t nd>
 void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
 
-  boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>
-      ws = boost::shared_ptr<
+  std::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>
+      ws = std::shared_ptr<
           DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>(
           new DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>());
 
@@ -202,7 +204,7 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD) {
 /// set up existing workspace pointer as internal pointer for the class to
 /// perform proper MD operations on this workspace
 void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
-  m_Workspace = spWS;
+  m_Workspace = std::move(spWS);
   m_NDimensions = m_Workspace->getNumDims();
 }
 

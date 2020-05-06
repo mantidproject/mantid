@@ -26,7 +26,7 @@ public:
          const std::vector<double> &ellipsoidParams, const int randomSeed,
          const bool randomizeSignal);
 
-  void fill(API::IMDEventWorkspace_sptr workspace);
+  void fill(const API::IMDEventWorkspace_sptr &workspace);
 
 private:
   void setupDetectorCache(const API::IMDEventWorkspace &workspace);

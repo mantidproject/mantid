@@ -34,7 +34,7 @@ DECLARE_ALGORITHM(CreateLogTimeCorrection)
 void CreateLogTimeCorrection::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "Name of the input workspace to generate log correct from.");
 
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
@@ -122,7 +122,7 @@ std::vector<double> CreateLogTimeCorrection::calculateCorrections(
 TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
     const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {
-  auto tablews = boost::make_shared<TableWorkspace>();
+  auto tablews = std::make_shared<TableWorkspace>();
 
   tablews->addColumn("int", "DetectorID");
   tablews->addColumn("double", "Correction");
@@ -149,7 +149,7 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
 /** Write correction map to a text file
  */
 void CreateLogTimeCorrection::writeCorrectionToFile(
-    const string filename, const Geometry::DetectorInfo &detectorInfo,
+    const string &filename, const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {
   ofstream ofile;
   ofile.open(filename.c_str());

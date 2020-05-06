@@ -174,13 +174,13 @@ public:
    * @param do_in_place
    * @param PulseFilter :: PulseFilter parameter
    */
-  void do_test_fake(std::string log_name, double min, double max,
+  void do_test_fake(const std::string &log_name, double min, double max,
                     int seconds_kept, bool add_proton_charge = true,
                     bool do_in_place = false, bool PulseFilter = false) {
     EventWorkspace_sptr ew = createInputWS(add_proton_charge);
     std::string inputName = "input_filtering";
     AnalysisDataService::Instance().addOrReplace(
-        inputName, boost::dynamic_pointer_cast<MatrixWorkspace>(ew));
+        inputName, std::dynamic_pointer_cast<MatrixWorkspace>(ew));
 
     // Save some of the starting values
     size_t start_blocksize = ew->blocksize();

@@ -105,7 +105,7 @@ protected:
 };
 
 /// typedef for a shared pointer
-using FunctionValues_sptr = boost::shared_ptr<FunctionValues>;
+using FunctionValues_sptr = std::shared_ptr<FunctionValues>;
 
 } // namespace API
 } // namespace Mantid

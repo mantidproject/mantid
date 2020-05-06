@@ -20,7 +20,7 @@
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <boost/math/distributions/normal.hpp>
 #include <functional>
@@ -120,7 +120,7 @@ DECLARE_ALGORITHM(PoldiFitPeaks1D2)
 
 PoldiFitPeaks1D2::PoldiFitPeaks1D2()
     : m_peaks(), m_profileTemplate(),
-      m_fitplots(boost::make_shared<WorkspaceGroup>()), m_fwhmMultiples(1.0),
+      m_fitplots(std::make_shared<WorkspaceGroup>()), m_fwhmMultiples(1.0),
       m_maxRelativeFwhm(0.02) {}
 
 /// Algorithm's name for identification. @see Algorithm::name
@@ -137,16 +137,16 @@ void PoldiFitPeaks1D2::init() {
       std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "",
                                                        Direction::Input),
       "An input workspace containing a POLDI auto-correlation spectrum.");
-  boost::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
-      boost::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
+      std::make_shared<BoundedValidator<double>>();
   minFwhmPerDirection->setLower(2.0);
   declareProperty(
       "FwhmMultiples", 2.0, minFwhmPerDirection,
       "Each peak will be fitted using x times FWHM data in each direction.",
       Direction::Input);
 
-  boost::shared_ptr<BoundedValidator<double>> allowedOverlapFraction =
-      boost::make_shared<BoundedValidator<double>>(0.0, 1.0);
+  std::shared_ptr<BoundedValidator<double>> allowedOverlapFraction =
+      std::make_shared<BoundedValidator<double>>(0.0, 1.0);
   declareProperty("AllowedOverlap", 0.25, allowedOverlapFraction,
                   "If a fraction larger than this value overlaps with the next "
                   "range, the ranges are merged.");
@@ -159,7 +159,7 @@ void PoldiFitPeaks1D2::init() {
   std::vector<std::string> peakFunctions =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
 
-  boost::shared_ptr<ListValidator<std::string>> peakFunctionNames(
+  std::shared_ptr<ListValidator<std::string>> peakFunctionNames(
       new ListValidator<std::string>(peakFunctions));
   declareProperty("PeakFunction", "Gaussian", peakFunctionNames,
                   "Peak function that will be fitted to all peaks.",
@@ -183,7 +183,7 @@ void PoldiFitPeaks1D2::setPeakFunction(const std::string &peakFunction) {
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D2::getInitializedPeakCollection(
     const DataObjects::TableWorkspace_sptr &peakTable) const {
-  auto peakCollection = boost::make_shared<PoldiPeakCollection>(peakTable);
+  auto peakCollection = std::make_shared<PoldiPeakCollection>(peakTable);
   peakCollection->setProfileFunctionName(m_profileTemplate);
 
   return peakCollection;
@@ -194,7 +194,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getRefinedRanges(
   std::vector<RefinedRange_sptr> ranges;
   for (size_t i = 0; i < peaks->peakCount(); ++i) {
     ranges.emplace_back(
-        boost::make_shared<RefinedRange>(peaks->peak(i), m_fwhmMultiples));
+        std::make_shared<RefinedRange>(peaks->peak(i), m_fwhmMultiples));
   }
 
   return ranges;
@@ -207,7 +207,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
 
   std::vector<RefinedRange_sptr> reducedRanges;
   reducedRanges.emplace_back(
-      boost::make_shared<RefinedRange>(*(workingRanges.front())));
+      std::make_shared<RefinedRange>(*(workingRanges.front())));
 
   double allowedOverlap = getProperty("AllowedOverlap");
 
@@ -217,7 +217,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
 
     if (!lastReduced->contains(*current) &&
         !lastReduced->overlaps(*current, allowedOverlap)) {
-      reducedRanges.emplace_back(boost::make_shared<RefinedRange>(*current));
+      reducedRanges.emplace_back(std::make_shared<RefinedRange>(*current));
     } else {
       lastReduced->merge(*current);
     }
@@ -228,7 +228,7 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
 
 API::IFunction_sptr
 PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
-  auto totalProfile = boost::make_shared<CompositeFunction>();
+  auto totalProfile = std::make_shared<CompositeFunction>();
   totalProfile->initialize();
 
   std::vector<PoldiPeak_sptr> peaks = range->getPeaks();
@@ -246,7 +246,7 @@ PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
 
 IFunction_sptr
 PoldiFitPeaks1D2::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
-  IPeakFunction_sptr clonedProfile = boost::dynamic_pointer_cast<IPeakFunction>(
+  IPeakFunction_sptr clonedProfile = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(m_profileTemplate));
   clonedProfile->setCentre(poldiPeak->q());
   clonedProfile->setFwhm(poldiPeak->fwhm(PoldiPeak::AbsoluteQ));
@@ -256,9 +256,10 @@ PoldiFitPeaks1D2::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
 }
 
 void PoldiFitPeaks1D2::setValuesFromProfileFunction(
-    PoldiPeak_sptr poldiPeak, const IFunction_sptr &fittedFunction) const {
+    const PoldiPeak_sptr &poldiPeak,
+    const IFunction_sptr &fittedFunction) const {
   IPeakFunction_sptr peakFunction =
-      boost::dynamic_pointer_cast<IPeakFunction>(fittedFunction);
+      std::dynamic_pointer_cast<IPeakFunction>(fittedFunction);
 
   if (peakFunction) {
     poldiPeak->setIntensity(
@@ -271,8 +272,8 @@ void PoldiFitPeaks1D2::setValuesFromProfileFunction(
   }
 }
 
-double
-PoldiFitPeaks1D2::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const {
+double PoldiFitPeaks1D2::getFwhmWidthRelation(
+    const IPeakFunction_sptr &peakFunction) const {
   return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
 
@@ -298,7 +299,7 @@ PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sptr &peaks) {
 
       IFunction_sptr fitFunction = fit->getProperty("Function");
       CompositeFunction_sptr composite =
-          boost::dynamic_pointer_cast<CompositeFunction>(fitFunction);
+          std::dynamic_pointer_cast<CompositeFunction>(fitFunction);
 
       if (!composite) {
         throw std::runtime_error("Not a composite function!");
@@ -363,7 +364,7 @@ int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(
 PoldiPeakCollection_sptr PoldiFitPeaks1D2::getReducedPeakCollection(
     const PoldiPeakCollection_sptr &peaks) const {
   PoldiPeakCollection_sptr reducedPeaks =
-      boost::make_shared<PoldiPeakCollection>();
+      std::make_shared<PoldiPeakCollection>();
   reducedPeaks->setProfileFunctionName(peaks->getProfileFunctionName());
 
   for (size_t i = 0; i < peaks->peakCount(); ++i) {

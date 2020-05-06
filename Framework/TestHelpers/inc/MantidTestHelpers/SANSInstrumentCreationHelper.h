@@ -31,14 +31,14 @@ public:
    * @param workspace: name of the workspace to be created.
    */
   static Mantid::DataObjects::Workspace2D_sptr
-  createSANSInstrumentWorkspace(std::string workspace);
+  createSANSInstrumentWorkspace(const std::string &workspace);
   /** Run the Child Algorithm LoadInstrument (as for LoadRaw)
    * @param inst_name :: The name written in the Nexus file
    * @param workspace :: The workspace to insert the instrument into
    */
   static void
   runLoadInstrument(const std::string &inst_name,
-                    Mantid::DataObjects::Workspace2D_sptr workspace);
+                    const Mantid::DataObjects::Workspace2D_sptr &workspace);
 
   /**
    * Populate spectra mapping to detector IDs
@@ -48,6 +48,6 @@ public:
    * @param nybins: number of bins in Y
    */
   static void
-  runLoadMappingTable(Mantid::DataObjects::Workspace2D_sptr workspace,
+  runLoadMappingTable(const Mantid::DataObjects::Workspace2D_sptr &workspace,
                       int nxbins, int nybins);
 };

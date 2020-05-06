@@ -13,8 +13,6 @@ import sys
 from qtpy.QtCore import Qt, QMetaObject, QObject, QThread, Slot
 from qtpy.QtWidgets import QApplication
 
-from six import reraise
-
 
 class QAppThreadCall(QObject):
     """
@@ -51,7 +49,7 @@ class QAppThreadCall(QObject):
             QMetaObject.invokeMethod(self, "on_call",
                                      Qt.BlockingQueuedConnection)
             if self._exc_info is not None:
-                reraise(*self._exc_info)
+                raise self._exc_info[1].with_traceback(self._exc_info[2])
             return self._result
 
     @Slot()

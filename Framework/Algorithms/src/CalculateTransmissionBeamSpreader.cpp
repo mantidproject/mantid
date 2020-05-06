@@ -34,7 +34,7 @@ using namespace HistogramData;
 using std::size_t;
 
 void CalculateTransmissionBeamSpreader::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
@@ -59,13 +59,13 @@ void CalculateTransmissionBeamSpreader::init() {
                                                         Direction::Output),
                   "The fitted transmission correction");
 
-  auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();
+  auto zeroOrMore = std::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
   declareProperty("IncidentBeamMonitor", 2, zeroOrMore,
                   "The UDET of the incident beam monitor");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty("SpreaderTransmissionValue", 1.0, mustBePositive,
@@ -83,7 +83,7 @@ void CalculateTransmissionBeamSpreader::init() {
   options[0] = "Linear";
   options[1] = "Log";
   declareProperty("FitMethod", "Log",
-                  boost::make_shared<StringListValidator>(options),
+                  std::make_shared<StringListValidator>(options),
                   "Whether to fit directly to the transmission curve (Linear) "
                   "or to the log of it (Log)");
 
@@ -240,8 +240,8 @@ void CalculateTransmissionBeamSpreader::exec() {
  *  @param WS ::    The workspace containing the spectrum to sum
  *  @return A Workspace2D containing the sum
  */
-API::MatrixWorkspace_sptr
-CalculateTransmissionBeamSpreader::sumSpectra(API::MatrixWorkspace_sptr WS) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(
+    const API::MatrixWorkspace_sptr &WS) {
   Algorithm_sptr childAlg = createChildAlgorithm("SumSpectra");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("IncludeMonitors", false);
@@ -255,9 +255,8 @@ CalculateTransmissionBeamSpreader::sumSpectra(API::MatrixWorkspace_sptr WS) {
  *  @param index :: The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
-API::MatrixWorkspace_sptr
-CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
-                                                   const size_t index) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(
+    const API::MatrixWorkspace_sptr &WS, const size_t index) {
   // Check that given spectra are monitors
   if (!WS->spectrumInfo().isMonitor(index)) {
     g_log.information(
@@ -277,8 +276,8 @@ CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
  *  @param WS :: The single-spectrum workspace to fit
  *  @return A workspace containing the fit
  */
-API::MatrixWorkspace_sptr
-CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(
+    const API::MatrixWorkspace_sptr &WS) {
   g_log.information("Fitting the experimental transmission curve");
   Algorithm_sptr childAlg = createChildAlgorithm("Linear", 0.6, 1.0);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);

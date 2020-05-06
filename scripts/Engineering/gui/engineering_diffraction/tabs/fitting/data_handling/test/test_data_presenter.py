@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
-from mantid.py3compat.mock import patch
+from unittest import mock
+from unittest.mock import patch
 
 from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import data_model, data_presenter, data_view
 

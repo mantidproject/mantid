@@ -95,8 +95,9 @@ public:
   }
 
   /// Run the mock algorithm
-  void doTest(MockBinaryOperationMD &alg, std::string lhs, std::string rhs,
-              std::string outName, bool succeeds = true) {
+  void doTest(MockBinaryOperationMD &alg, const std::string &lhs,
+              const std::string &rhs, const std::string &outName,
+              bool succeeds = true) {
     out.reset();
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -108,10 +109,10 @@ public:
       TS_ASSERT(alg.isExecuted());
       TSM_ASSERT("Algorithm methods were called as expected",
                  testing::Mock::VerifyAndClearExpectations(&alg));
-      out = boost::dynamic_pointer_cast<IMDWorkspace>(
+      out = std::dynamic_pointer_cast<IMDWorkspace>(
           AnalysisDataService::Instance().retrieve(outName));
       TS_ASSERT(out);
-      auto outHisto = boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
+      auto outHisto = std::dynamic_pointer_cast<MDHistoWorkspace>(out);
       if (outHisto) {
         TS_ASSERT(outHisto->getExperimentInfo(0)->run().hasProperty(
             "mdhisto_was_modified"));

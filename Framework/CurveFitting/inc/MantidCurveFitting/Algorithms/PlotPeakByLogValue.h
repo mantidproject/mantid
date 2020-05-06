@@ -64,15 +64,17 @@ private:
   void exec() override;
 
   /// Set any WorkspaceIndex attributes in the fitting function
-  void setWorkspaceIndexAttribute(API::IFunction_sptr fun, int wsIndex) const;
+  void setWorkspaceIndexAttribute(const API::IFunction_sptr &fun,
+                                  int wsIndex) const;
 
-  boost::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
-                                            bool outputCompositeMembers,
-                                            bool outputConvolvedMembers,
-                                            const API::IFunction_sptr &ifun,
-                                            const InputSpectraToFit &data);
+  std::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
+                                          bool outputCompositeMembers,
+                                          bool outputConvolvedMembers,
+                                          const API::IFunction_sptr &ifun,
+                                          const InputSpectraToFit &data);
 
-  double calculateLogValue(std::string logName, const InputSpectraToFit &data);
+  double calculateLogValue(const std::string &logName,
+                           const InputSpectraToFit &data);
 
   API::ITableWorkspace_sptr
   createResultsTable(const std::string &logName,

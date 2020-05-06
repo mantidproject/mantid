@@ -11,8 +11,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "RingProfileTest.h"
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 using Mantid::Algorithms::RadiusSum;
 using namespace Mantid::API;
 
@@ -24,8 +24,8 @@ public:
   static void destroySuite(RadiusSumTest *suite) { delete suite; }
 
   // released automatically when it goes out of scope
-  boost::shared_ptr<RadiusSum> algInstance() {
-    boost::shared_ptr<RadiusSum> alg = boost::make_shared<RadiusSum>();
+  std::shared_ptr<RadiusSum> algInstance() {
+    std::shared_ptr<RadiusSum> alg = std::make_shared<RadiusSum>();
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
     return alg;

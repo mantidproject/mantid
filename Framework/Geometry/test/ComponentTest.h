@@ -136,7 +136,7 @@ public:
     Component parent("Parent", V3D(1, 1, 1), Quat(1, 1, 1, 1));
     Component q("Child", V3D(5, 6, 7), &parent);
 
-    std::vector<boost::shared_ptr<const IComponent>> ancs = q.getAncestors();
+    std::vector<std::shared_ptr<const IComponent>> ancs = q.getAncestors();
     TS_ASSERT(ancs.size() == 1);
     TS_ASSERT_EQUALS(ancs[0]->getName(), parent.getName());
   }
@@ -154,7 +154,7 @@ public:
     TS_ASSERT(pq.getParent());
     TS_ASSERT(pq.getParent()->isParametrized());
 
-    std::vector<boost::shared_ptr<const IComponent>> ancs = pq.getAncestors();
+    std::vector<std::shared_ptr<const IComponent>> ancs = pq.getAncestors();
     TS_ASSERT(ancs.size() == 1);
     TS_ASSERT_EQUALS(ancs[0]->getName(), parent.getName());
     TS_ASSERT(ancs[0]->isParametrized());

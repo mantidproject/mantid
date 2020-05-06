@@ -150,7 +150,7 @@ public:
         output = AnalysisDataService::Instance().retrieve(outputSpace1));
 
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = inputSpace->blocksize(), output2D->blocksize());
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
@@ -211,7 +211,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -277,8 +277,8 @@ public:
                      const std::runtime_error &);
   }
 
-  void dotestExecEvent(std::string inName, std::string outName,
-                       std::string indices_list) {
+  void dotestExecEvent(const std::string &inName, const std::string &outName,
+                       const std::string &indices_list) {
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;
@@ -410,7 +410,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -483,7 +483,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -568,7 +568,6 @@ public:
     testSig = std::sqrt(testSig);
     // Set the properties
     alg2.setProperty("InputWorkspace", tws);
-    const std::string outputSpace2 = "SumSpectraOut2";
     alg2.setPropertyValue("OutputWorkspace", outName);
     alg2.setProperty("IncludeMonitors", false);
     alg2.setProperty("WeightedSum", true);
@@ -581,7 +580,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -643,7 +642,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWsName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect one less because of inf and NaN
@@ -680,7 +679,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWsName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect a NaN and an Inf to propagate here

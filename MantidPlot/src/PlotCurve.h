@@ -109,8 +109,8 @@ protected:
   int d_skip_symbols;
   bool m_isDistribution;
   // x and y units
-  boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
-  boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
+  std::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
+  std::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 };
 
 class DataCurve : public PlotCurve {

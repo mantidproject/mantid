@@ -96,7 +96,7 @@ private:
 private:
   // internal helper function which extract one or two axis from input matrix
   // workspace;
-  static void getAxes(API::MatrixWorkspace_const_sptr inWS,
+  static void getAxes(const API::MatrixWorkspace_const_sptr &inWS,
                       API::NumericAxis *&pXAxis, API::NumericAxis *&pYAxis);
 };
 

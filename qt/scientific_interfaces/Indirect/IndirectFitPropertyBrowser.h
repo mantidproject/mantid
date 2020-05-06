@@ -66,7 +66,7 @@ public:
       TableRowIndex nData, const QStringList &datasetNames,
       const std::vector<double> &qValues,
       const std::vector<std::pair<std::string, int>> &fitResolutions);
-  void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
+  void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);

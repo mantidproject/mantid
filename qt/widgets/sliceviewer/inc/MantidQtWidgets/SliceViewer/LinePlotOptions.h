@@ -19,7 +19,7 @@ public:
   LinePlotOptions(QWidget *parent = nullptr, bool logScaleOption = false);
   ~LinePlotOptions() override;
 
-  void setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  void setOriginalWorkspace(const Mantid::API::IMDWorkspace_sptr &ws);
 
   int getPlotAxis() const;
   void setPlotAxis(int choice);

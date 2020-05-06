@@ -160,7 +160,7 @@ void SaveGDA::exec() {
 
   for (int i = 0; i < inputWS->getNumberOfEntries(); ++i) {
     const auto ws = inputWS->getItem(i);
-    const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
     const auto &d = matrixWS->x(0);
     const size_t bankIndex(groupingScheme[i] - 1);
@@ -216,7 +216,7 @@ std::map<std::string, std::string> SaveGDA::validateInputs() {
 
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
   for (const auto &ws : *inputWS) {
-    const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (matrixWS) {
       if (matrixWS->getNumberHistograms() != 1) {
         inputWSIssue = "The workspace " + matrixWS->getName() +

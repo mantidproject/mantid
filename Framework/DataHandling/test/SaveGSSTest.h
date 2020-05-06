@@ -67,7 +67,7 @@ API::MatrixWorkspace_sptr generateTestMatrixWorkspace(const std::string &wsName,
                                                       int numHistograms,
                                                       int numBins) {
   // Create workspace
-  MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr dataws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
           numHistograms, numBins, false, false, true, "TestFake"));
   populateWorkspaceWithLogData(dataws.get());

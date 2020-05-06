@@ -58,7 +58,8 @@ private:
   bool areEqual(double, double, double);
   int roundUp(double);
   std::vector<double> makeTofAxis(int, double, size_t, double);
-  void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);
+  void setTofInWS(const std::vector<double> &,
+                  const API::MatrixWorkspace_sptr &);
 
   DataObjects::Workspace2D_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outputWS;

@@ -10,8 +10,7 @@
 # Load 'pymantidplot' which cannot be called 'mantidplot' because of
 # name conflict with the MantidPlot binary (especially on osx)
 #-------------------------------------------------------------------
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 import os.path as osp
 import sys
@@ -25,6 +24,7 @@ import pymantidplot.qtiplot
 
 # error early if PyQt4 cannot be used
 import PyQt4
+
 
 def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     '''This is copied from mantidqt.utils.qt and should be deprecated as

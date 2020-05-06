@@ -7,8 +7,6 @@
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import datetime
 
 import numpy as np
@@ -16,6 +14,7 @@ from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -605,6 +604,7 @@ def get_sample_log(workspace, **kwargs):
     if not run.hasProperty(LogName):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
+
     try:
         units = tsp.units
     except UnicodeDecodeError as exc:
@@ -614,8 +614,14 @@ def get_sample_log(workspace, **kwargs):
                             mantid.kernel.Int32TimeSeriesProperty,
                             mantid.kernel.Int64TimeSeriesProperty)):
         raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
-    times = tsp.times.astype('datetime64[us]')
-    y = tsp.value
+    Filtered = kwargs.pop('Filtered', True)
+    if not Filtered:
+        #these methods access the unfiltered data
+        times = tsp.times.astype('datetime64[us]')
+        y = tsp.value
+    else:
+        times = tsp.filtered_times.astype('datetime64[us]')
+        y = tsp.filtered_value
     FullTime = kwargs.pop('FullTime', False)
     StartFromLog = kwargs.pop('StartFromLog', False)
     if FullTime:
@@ -1032,3 +1038,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
                                              "as the range between min value and max value is too large")
         figure.colorbar(image, ticks=locator)
+
+
+def figure_contains_only_3d_plots(fig) -> bool:
+    return all(isinstance(ax, Axes3D) for ax in fig.get_axes())

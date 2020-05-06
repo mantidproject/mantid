@@ -74,7 +74,7 @@ void DgsRemap::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-void DgsRemap::execMasking(MatrixWorkspace_sptr iWS) {
+void DgsRemap::execMasking(const MatrixWorkspace_sptr &iWS) {
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   if (maskWS) {
     IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
@@ -84,7 +84,7 @@ void DgsRemap::execMasking(MatrixWorkspace_sptr iWS) {
   }
 }
 
-void DgsRemap::execGrouping(MatrixWorkspace_sptr iWS,
+void DgsRemap::execGrouping(const MatrixWorkspace_sptr &iWS,
                             MatrixWorkspace_sptr &oWS) {
   MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
   std::string oldGroupingFile = this->getProperty("OldGroupingFile");
@@ -101,7 +101,7 @@ void DgsRemap::execGrouping(MatrixWorkspace_sptr iWS,
       int64_t ngroups = 0;
       std::vector<int> groupDetIdList;
       GroupingWorkspace_sptr gWS =
-          boost::dynamic_pointer_cast<GroupingWorkspace>(groupWS);
+          std::dynamic_pointer_cast<GroupingWorkspace>(groupWS);
       gWS->makeDetectorIDToGroupVector(groupDetIdList, ngroups);
       group->setProperty("DetectorList", groupDetIdList);
     }

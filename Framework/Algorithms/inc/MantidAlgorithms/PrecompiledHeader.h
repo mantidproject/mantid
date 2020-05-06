@@ -11,4 +11,4 @@
 #include "MantidKernel/Exception.h"
 
 // Boost
-#include <boost/shared_ptr.hpp>
+#include <memory>

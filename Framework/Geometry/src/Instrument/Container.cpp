@@ -15,7 +15,8 @@
 #include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
-#include <boost/make_shared.hpp>
+#include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -53,9 +54,9 @@ void updateTreeValues(Poco::XML::Element *root,
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
-Container::Container() : m_shape(boost::make_shared<CSGObject>()) {}
+Container::Container() : m_shape(std::make_shared<CSGObject>()) {}
 
-Container::Container(IObject_sptr shape) : m_shape(shape) {}
+Container::Container(IObject_sptr shape) : m_shape(std::move(shape)) {}
 
 Container::Container(const Container &container)
     : m_shape(IObject_sptr(container.m_shape->clone())),
@@ -67,7 +68,7 @@ Container::Container(const Container &container)
  * @param xml Definition of the shape in xml
  */
 Container::Container(std::string xml)
-    : m_shape(boost::make_shared<CSGObject>(xml)) {}
+    : m_shape(std::make_shared<CSGObject>(xml)) {}
 
 /**
  * @return True if the can contains a definition of the sample shape
@@ -146,7 +147,7 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
  */
 void Container::setID(const std::string &id) {
   // We only do anything if the contained shape is a CSGObject
-  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(m_shape)) {
+  if (auto csgObj = std::dynamic_pointer_cast<CSGObject>(m_shape)) {
     csgObj->setID(id);
   }
 }

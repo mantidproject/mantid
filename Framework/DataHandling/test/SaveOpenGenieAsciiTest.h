@@ -59,7 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(nxsLoader.execute());
 
     const auto ws = AnalysisDataService::Instance().retrieve(wsName);
-    const auto inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    const auto inputWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
     auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(inputWs, fileHandle.path());
@@ -82,7 +82,7 @@ private:
   const std::string m_inputNexusFile{"SaveOpenGenieAsciiInput.nxs"};
 
   std::unique_ptr<SaveOpenGenieAscii>
-  createAlg(MatrixWorkspace_sptr ws, const std::string &tempFilePath) {
+  createAlg(const MatrixWorkspace_sptr &ws, const std::string &tempFilePath) {
     auto alg = std::make_unique<SaveOpenGenieAscii>();
     alg->initialize();
 

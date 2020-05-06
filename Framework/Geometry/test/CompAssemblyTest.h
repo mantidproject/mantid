@@ -76,7 +76,7 @@ public:
     bank.add(det2);
     bank.add(det3);
     TS_ASSERT_EQUALS(bank.nelements(), 3);
-    boost::shared_ptr<IComponent> det1copy;
+    std::shared_ptr<IComponent> det1copy;
     TS_ASSERT_THROWS_NOTHING(det1copy = bank[0]);
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
     // show that they are the same object
@@ -188,7 +188,7 @@ public:
     bank.addCopy(&det2);
     bank.addCopy(&det3, "ChangedDet3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 3);
-    boost::shared_ptr<IComponent> detcopy;
+    std::shared_ptr<IComponent> detcopy;
     TS_ASSERT_THROWS_NOTHING(detcopy = bank[0]);
     TS_ASSERT_EQUALS(det1.getName(), detcopy->getName());
     // show that they are NOT the same object
@@ -438,7 +438,7 @@ public:
 
   void
   test_That_The_Bounding_Box_Is_The_Correct_Size_For_All_Of_The_Constituents() {
-    boost::shared_ptr<CompAssembly> bank =
+    std::shared_ptr<CompAssembly> bank =
         ComponentCreationHelper::createTestAssemblyOfFourCylinders();
     TS_ASSERT(bank);
     TS_ASSERT_EQUALS(bank->nelements(), 4);
@@ -507,7 +507,7 @@ public:
     CompAssembly *bank3 = new CompAssembly("bank 111", detectors);
 
     // add some rectangular detectors
-    boost::shared_ptr<IObject> cuboidShape =
+    std::shared_ptr<IObject> cuboidShape =
         ComponentCreationHelper::createCuboid(0.5);
 
     for (size_t i = 0; i < 15; i++) {

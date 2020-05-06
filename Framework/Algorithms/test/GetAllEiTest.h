@@ -503,7 +503,7 @@ public:
     TS_ASSERT_DELTA(zeros[2], 7.85, 1.e-3);
   }
   void test_binRanges() {
-    std::vector<size_t> bin_min, bin_max, zeros;
+    std::vector<size_t> bin_min, bin_max;
     // Index           0 1 2 3 4 5 6 7 8 9  10 11 12 13
     double debin[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15};
     std::vector<double> ebin(debin, debin + sizeof(debin) / sizeof(double));

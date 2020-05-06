@@ -22,6 +22,7 @@
 #include <boost/range/algorithm/remove_if.hpp>
 #include <boost/utility.hpp>
 #include <set>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -36,14 +37,15 @@ Mantid::Kernel::Logger g_log("ScriptBuilder");
 const std::string COMMENT_ALG = "Comment";
 
 ScriptBuilder::ScriptBuilder(
-    boost::shared_ptr<HistoryView> view, std::string versionSpecificity,
+    const std::shared_ptr<HistoryView> &view, std::string versionSpecificity,
     bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
     std::vector<std::vector<std::string>> ignoreTheseAlgProperties,
     bool appendExecCount)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
-      m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs),
-      m_propertiesToIgnore(ignoreTheseAlgProperties),
+      m_versionSpecificity(std::move(versionSpecificity)),
+      m_timestampCommands(appendTimestamp),
+      m_algsToIgnore(std::move(ignoreTheseAlgs)),
+      m_propertiesToIgnore(std::move(ignoreTheseAlgProperties)),
       m_execCount(appendExecCount) {}
 
 /**
@@ -107,7 +109,7 @@ void ScriptBuilder::writeHistoryToStream(
 
 void ScriptBuilder::createStringForAlg(
     std::ostringstream &os,
-    boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory) {
+    std::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory) {
   os << buildAlgorithmString(*algHistory);
   if (m_timestampCommands) {
     os << " # " << algHistory->executionDate().toISO8601String();

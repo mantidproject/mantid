@@ -42,7 +42,7 @@ private:
   void exec() override;
 
   /// Save the MDHistoWorkspace.
-  void doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws);
+  void doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
   /// Save a generic matrix
   template <typename T>

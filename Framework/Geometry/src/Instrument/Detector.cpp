@@ -45,7 +45,7 @@ Detector::Detector(const std::string &name, int id, IComponent *parent)
  *  @param parent :: The parent component
  */
 Detector::Detector(const std::string &name, int id,
-                   boost::shared_ptr<IObject> shape, IComponent *parent)
+                   const std::shared_ptr<IObject> &shape, IComponent *parent)
     : IDetector(), ObjComponent(name, shape, parent), m_id(id) {}
 
 /** Gets the detector id

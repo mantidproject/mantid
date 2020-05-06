@@ -29,7 +29,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-LayerDialog::LayerDialog(QWidget *parent, Qt::WFlags fl)
+LayerDialog::LayerDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), multi_layer(nullptr) {
   setObjectName("LayerDialog");
   setWindowTitle(tr("MantidPlot - Arrange Layers"));

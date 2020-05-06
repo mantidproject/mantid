@@ -8,8 +8,8 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_cow.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <iterator>
+#include <memory>
 #include <numeric>
 #include <sstream>
 #include <utility>
@@ -32,27 +32,26 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
 } // namespace
 
 ComponentInfo::ComponentInfo()
-    : m_assemblySortedDetectorIndices(
-          boost::make_shared<std::vector<size_t>>(0)),
+    : m_assemblySortedDetectorIndices(std::make_shared<std::vector<size_t>>(0)),
       m_size(0), m_detectorInfo(nullptr) {}
 
 ComponentInfo::ComponentInfo(
-    boost::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
-    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+    std::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
+    std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         detectorRanges,
-    boost::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
-    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+    std::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
+    std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
-    boost::shared_ptr<const std::vector<size_t>> parentIndices,
-    boost::shared_ptr<std::vector<std::vector<size_t>>> children,
-    boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-    boost::shared_ptr<std::vector<Eigen::Quaterniond,
-                                  Eigen::aligned_allocator<Eigen::Quaterniond>>>
+    std::shared_ptr<const std::vector<size_t>> parentIndices,
+    std::shared_ptr<std::vector<std::vector<size_t>>> children,
+    std::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+    std::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
         rotations,
-    boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-    boost::shared_ptr<std::vector<ComponentType>> componentType,
-    boost::shared_ptr<const std::vector<std::string>> names,
-    int64_t sourceIndex, int64_t sampleIndex)
+    std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
+    std::shared_ptr<std::vector<ComponentType>> componentType,
+    std::shared_ptr<const std::vector<std::string>> names, int64_t sourceIndex,
+    int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),

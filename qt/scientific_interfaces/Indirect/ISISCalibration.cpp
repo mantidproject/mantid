@@ -452,7 +452,7 @@ void ISISCalibration::calPlotRaw() {
     return;
   }
 
-  const auto input = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  const auto input = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
   m_uiForm.ppCalibration->clear();
@@ -493,7 +493,7 @@ void ISISCalibration::calPlotEnergy() {
     return;
   }
 
-  MatrixWorkspace_sptr energyWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr energyWs = std::dynamic_pointer_cast<MatrixWorkspace>(
       reductionOutputGroup->getItem(0));
   if (!energyWs) {
     g_log.warning("No result workspaces, cannot plot energy preview.");
@@ -522,7 +522,8 @@ void ISISCalibration::calPlotEnergy() {
  *
  * @param ws :: Mantid workspace containing the loaded instrument
  */
-void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws) {
+void ISISCalibration::calSetDefaultResolution(
+    const MatrixWorkspace_const_sptr &ws) {
   auto inst = ws->getInstrument();
   auto analyser = inst->getStringParameter("analyser");
 
@@ -816,8 +817,8 @@ void ISISCalibration::setSaveEnabled(bool enabled) {
 
 void ISISCalibration::updateRunButton(bool enabled,
                                       std::string const &enableOutputButtons,
-                                      QString const message,
-                                      QString const tooltip) {
+                                      QString const &message,
+                                      QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

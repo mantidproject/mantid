@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 ###############################################################################
 # This has to be tested through a workspace as it cannot be created in
@@ -15,6 +13,7 @@ from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.geometry import Instrument
 from mantid.api import Sample, Run
 from math import pi
+
 
 class ExperimentInfoTest(unittest.TestCase):
 

@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -54,13 +55,13 @@ inline double scatteringXS(const double realLength, const double imagLength) {
 } // namespace
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
-    const boost::shared_ptr<PhysicalConstants::Atom> &atom,
+    const std::shared_ptr<PhysicalConstants::Atom> &atom,
     const double multiplicity)
     : atom(atom), multiplicity(multiplicity) {}
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
     const PhysicalConstants::Atom &atom, const double multiplicity)
-    : atom(boost::make_shared<PhysicalConstants::Atom>(atom)),
+    : atom(std::make_shared<PhysicalConstants::Atom>(atom)),
       multiplicity(multiplicity) {}
 
 /**
@@ -180,6 +181,11 @@ void Material::calculateTotalScatterXSection() {
     m_totalScatterXSection = weightedTotal;
   }
 }
+
+void Material::setAttenuationProfile(AttenuationProfile attenuationOverride) {
+  m_attenuationOverride = std::move(attenuationOverride);
+}
+
 /**
  * Returns the name
  * @returns A string containing the name of the material
@@ -250,14 +256,27 @@ double Material::absorbXSection(const double lambda) const {
 }
 
 /**
+ * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
+ * reference lambda)
+ * @return The attenuation coefficient in m-1
+ */
+double Material::attenuationCoefficient(const double lambda) const {
+  if (!m_attenuationOverride) {
+    return 100 * numberDensity() *
+           (totalScatterXSection() + absorbXSection(lambda));
+  } else {
+    return m_attenuationOverride->getAttenuationCoefficient(lambda);
+  }
+}
+
+/**
  * @param distance Distance (m) travelled
  * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
  * reference lambda)
- * @return The dimensionless attenuation coefficient
+ * @return The dimensionless attenuation factor
  */
 double Material::attenuation(const double distance, const double lambda) const {
-  return exp(-100 * numberDensity() *
-             (totalScatterXSection() + absorbXSection(lambda)) * distance);
+  return exp(-attenuationCoefficient(lambda) * distance);
 }
 
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
@@ -564,7 +583,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
       file->readData("coh_scatt_length", neutron.coh_scatt_length);
       file->readData("inc_scatt_length", neutron.inc_scatt_length);
 
-      m_chemicalFormula.emplace_back(boost::make_shared<Atom>(neutron), 1);
+      m_chemicalFormula.emplace_back(std::make_shared<Atom>(neutron), 1);
     }
     // the other option is empty which does not need to be addressed
   } else {
@@ -600,7 +619,7 @@ getAtomName(const std::string &text) // TODO change to get number after letters
 } // namespace
 
 Material::ChemicalFormula
-Material::parseChemicalFormula(const std::string chemicalSymbol) {
+Material::parseChemicalFormula(const std::string &chemicalSymbol) {
   Material::ChemicalFormula CF;
 
   tokenizer tokens(chemicalSymbol, " -",

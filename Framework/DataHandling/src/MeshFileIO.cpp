@@ -35,8 +35,8 @@ Kernel::Matrix<double> MeshFileIO::generateMatrix(double xRotation,
  * @param zRotation The z rotation required in radians
  * @returns a shared pointer to the newly rotated environment
  */
-boost::shared_ptr<Geometry::MeshObject>
-MeshFileIO::rotate(boost::shared_ptr<Geometry::MeshObject> environmentMesh,
+std::shared_ptr<Geometry::MeshObject>
+MeshFileIO::rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
                    double xRotation, double yRotation, double zRotation) {
   const std::vector<double> rotationMatrix =
       generateMatrix(xRotation, yRotation, zRotation);
@@ -86,9 +86,9 @@ Kernel::Matrix<double> MeshFileIO::generateZRotation(double zRotation) {
  * @param translationVector The 3D translation to apply
  * @returns a shared pointer to the newly translated environment
  */
-boost::shared_ptr<Geometry::MeshObject>
-MeshFileIO::translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh,
-                      const std::vector<double> translationVector) {
+std::shared_ptr<Geometry::MeshObject>
+MeshFileIO::translate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
+                      const std::vector<double> &translationVector) {
   std::vector<double> checkVector = std::vector<double>(3, 0.0);
   if (translationVector != checkVector) {
     if (translationVector.size() != 3) {

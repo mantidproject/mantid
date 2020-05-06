@@ -41,7 +41,7 @@ ConvertToConstantL2::ConvertToConstantL2()
  *
  */
 void ConvertToConstantL2::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
@@ -141,7 +141,7 @@ void ConvertToConstantL2::exec() {
  * @s - input property name
  *
  */
-double ConvertToConstantL2::getRunProperty(std::string s) {
+double ConvertToConstantL2::getRunProperty(const std::string &s) {
   const auto &run = m_inputWS->run();
   if (!run.hasProperty(s)) {
     throw Exception::NotFoundError("Sample log property not found", s);
@@ -160,7 +160,7 @@ double ConvertToConstantL2::getRunProperty(std::string s) {
  * @s - input property name
  *
  */
-double ConvertToConstantL2::getInstrumentProperty(std::string s) {
+double ConvertToConstantL2::getInstrumentProperty(const std::string &s) {
   std::vector<std::string> prop = m_instrument->getStringParameter(s);
   if (prop.empty()) {
     const std::string mesg = "Property <" + s + "> doesn't exist!";

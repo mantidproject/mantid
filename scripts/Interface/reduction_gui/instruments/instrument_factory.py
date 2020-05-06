@@ -9,7 +9,6 @@
     This module is responsible for the association between an instrument name
     and its corresponding interface class.
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction_gui.instruments.hfir_interface_dev import HFIRInterface
 from reduction_gui.instruments.eqsans_interface_dev import EQSANSInterface
 from reduction_gui.instruments.dgs_interface_dev import DgsInterface

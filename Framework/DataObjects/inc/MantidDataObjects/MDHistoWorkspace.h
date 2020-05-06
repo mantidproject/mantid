@@ -91,7 +91,8 @@ public:
                        const Mantid::Kernel::VMD &end,
                        Mantid::API::MDNormalization normalize) const override;
 
-  void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
+  void checkWorkspaceSize(const MDHistoWorkspace &other,
+                          const std::string &operation);
 
   // --------------------------------------------------------------------------------------------
   MDHistoWorkspace &operator+=(const MDHistoWorkspace &b);
@@ -525,10 +526,10 @@ protected:
 };
 
 /// A shared pointer to a MDHistoWorkspace
-using MDHistoWorkspace_sptr = boost::shared_ptr<MDHistoWorkspace>;
+using MDHistoWorkspace_sptr = std::shared_ptr<MDHistoWorkspace>;
 
 /// A shared pointer to a const MDHistoWorkspace
-using MDHistoWorkspace_const_sptr = boost::shared_ptr<const MDHistoWorkspace>;
+using MDHistoWorkspace_const_sptr = std::shared_ptr<const MDHistoWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

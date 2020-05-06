@@ -137,7 +137,7 @@ bool WorkspaceGroup::containsInChildren(const std::string &wsName) const {
   for (const auto &workspace : m_workspaces) {
     if (workspace->isGroup()) {
       // Recursive containsInChildren search
-      const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+      const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
       if (group->containsInChildren(wsName)) {
         return true;
       }
@@ -191,9 +191,11 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
   std::vector<std::string> out;
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   out.reserve(m_workspaces.size());
-  for (const auto &workspace : m_workspaces) {
-    out.emplace_back(workspace->getName());
-  }
+
+  std::transform(m_workspaces.begin(), m_workspaces.end(),
+                 std::back_inserter(out),
+                 [](const auto &ws) { return ws->getName(); });
+
   return out;
 }
 
@@ -462,7 +464,7 @@ bool WorkspaceGroup::isMultiperiod() const {
   // Loop through all inner workspaces, checking each one in turn.
   for (const auto &workspace : m_workspaces) {
     if (MatrixWorkspace_sptr ws =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+            std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       try {
         Kernel::Property *nPeriodsProp = ws->run().getLogData("nperiods");
         int num = -1;
@@ -517,8 +519,9 @@ size_t WorkspaceGroup::getMemorySize() const {
   for (auto workspace : m_workspaces) {
     // If the workspace is a group
     if (workspace->getMemorySize() == 0) {
-      total = total + boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)
-                          ->getMemorySize();
+      total =
+          total +
+          std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getMemorySize();
       continue;
     }
     total = total + workspace->getMemorySize();

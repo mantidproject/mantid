@@ -20,6 +20,8 @@
 
 #include <hdf5_hl.h>
 
+#include <utility>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -47,9 +49,9 @@ int LoadSassena::confidence(Kernel::NexusDescriptor &descriptor) const {
  * @param ws pointer to workspace to be added and registered
  * @param description
  */
-void LoadSassena::registerWorkspace(API::WorkspaceGroup_sptr gws,
-                                    const std::string wsName,
-                                    DataObjects::Workspace2D_sptr ws,
+void LoadSassena::registerWorkspace(const API::WorkspaceGroup_sptr &gws,
+                                    const std::string &wsName,
+                                    const DataObjects::Workspace2D_sptr &ws,
                                     const std::string &description) {
   UNUSED_ARG(description);
   API::AnalysisDataService::Instance().add(wsName, ws);
@@ -63,7 +65,7 @@ void LoadSassena::registerWorkspace(API::WorkspaceGroup_sptr gws,
  * @param dims storing dimensionality
  */
 
-herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
+herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string &setName,
                                 hsize_t *dims) const {
   H5T_class_t class_id;
   size_t type_size;
@@ -82,7 +84,7 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
  * @param buf storing dataset
  */
 herr_t LoadSassena::dataSetDouble(const hid_t &h5file,
-                                  const std::string setName,
+                                  const std::string &setName,
                                   std::vector<double> &buf) {
   herr_t errorcode =
       H5LTread_dataset_double(h5file, setName.c_str(), buf.data());
@@ -110,7 +112,8 @@ bool compare(const mypair &left, const mypair &right) {
  * increasing order of momemtum transfer
  */
 HistogramData::Points
-LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
+LoadSassena::loadQvectors(const hid_t &h5file,
+                          const API::WorkspaceGroup_sptr &gws,
                           std::vector<int> &sorting_indexes) {
 
   // store the modulus of the vector
@@ -154,7 +157,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
       sorting_indexes.emplace_back(iq);
 
   DataObjects::Workspace2D_sptr ws =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", nq, 3, 3));
   std::string wsName = gwsName + std::string("_") + setName;
   ws->setTitle(wsName);
@@ -169,7 +172,8 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
       "MomentumTransfer"); // Set the Units
 
   this->registerWorkspace(
-      gws, wsName, ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
+      std::move(gws), wsName, ws,
+      "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
   return HistogramData::Points(std::move(qvmod));
 }
 
@@ -184,8 +188,9 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
  * @param sorting_indexes permutation of qvmod indexes to render it in
  * increasing order of momemtum transfer
  */
-void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                         const std::string setName,
+void LoadSassena::loadFQ(const hid_t &h5file,
+                         const API::WorkspaceGroup_sptr &gws,
+                         const std::string &setName,
                          const HistogramData::Points &qvmod,
                          const std::vector<int> &sorting_indexes) {
 
@@ -200,7 +205,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
 
   DataObjects::Workspace2D_sptr ws =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", 2, nq, nq));
   const std::string wsName = gwsName + std::string("_") + setName;
   ws->setTitle(wsName);
@@ -221,7 +226,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
   this->registerWorkspace(
-      gws, wsName, ws,
+      std::move(gws), wsName, ws,
       "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
 }
 
@@ -238,8 +243,9 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
  * @param sorting_indexes permutation of qvmod indexes to render it in
  * increasing order of momemtum transfer
  */
-void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                          const std::string setName,
+void LoadSassena::loadFQT(const hid_t &h5file,
+                          const API::WorkspaceGroup_sptr &gws,
+                          const std::string &setName,
                           const HistogramData::Points &qvmod,
                           const std::vector<int> &sorting_indexes) {
 
@@ -264,14 +270,14 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   const double dt =
       getProperty("TimeUnit"); // time unit increment, in picoseconds;
   DataObjects::Workspace2D_sptr wsRe =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", nq, nt, nt));
   const std::string wsReName =
       gwsName + std::string("_") + setName + std::string(".Re");
   wsRe->setTitle(wsReName);
 
   DataObjects::Workspace2D_sptr wsIm =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", nq, nt, nt));
   const std::string wsImName =
       gwsName + std::string("_") + setName + std::string(".Im");
@@ -302,13 +308,13 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 
   // Set the Time unit for the X-axis
   wsRe->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Label");
-  auto unitPtr = boost::dynamic_pointer_cast<Kernel::Units::Label>(
-      wsRe->getAxis(0)->unit());
+  auto unitPtr =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(wsRe->getAxis(0)->unit());
   unitPtr->setLabel("Time", "picoseconds");
 
   wsIm->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Label");
-  unitPtr = boost::dynamic_pointer_cast<Kernel::Units::Label>(
-      wsIm->getAxis(0)->unit());
+  unitPtr =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(wsIm->getAxis(0)->unit());
   unitPtr->setLabel("Time", "picoseconds");
 
   // Create a numeric axis to replace the default vertical one
@@ -376,19 +382,19 @@ void LoadSassena::init() {
  */
 void LoadSassena::exec() {
   // auto
-  // gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(getProperty("OutputWorkspace"));
+  // gws=std::dynamic_pointer_cast<API::WorkspaceGroup>(getProperty("OutputWorkspace"));
   // API::WorkspaceGroup_sptr gws=getProperty("OutputWorkspace");
   API::Workspace_sptr ows = getProperty("OutputWorkspace");
 
   API::WorkspaceGroup_sptr gws =
-      boost::dynamic_pointer_cast<API::WorkspaceGroup>(ows);
+      std::dynamic_pointer_cast<API::WorkspaceGroup>(ows);
   if (gws && API::AnalysisDataService::Instance().doesExist(gws->getName())) {
     // gws->deepRemoveAll(); // remove workspace members
     API::AnalysisDataService::Instance().deepRemoveGroup(gws->getName());
   } else {
-    gws = boost::make_shared<API::WorkspaceGroup>();
+    gws = std::make_shared<API::WorkspaceGroup>();
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<API::Workspace>(gws));
+                std::dynamic_pointer_cast<API::Workspace>(gws));
   }
 
   // populate m_validSets

@@ -880,6 +880,13 @@ void UnitCell::recalculateFromGstar(const DblMatrix &NewGstar) {
   calculateB();
 }
 
+bool UnitCell::operator==(const UnitCell &other) const {
+  return da == other.da; // da error not used in comparison
+}
+bool UnitCell::operator!=(const UnitCell &other) const {
+  return !this->operator==(other);
+}
+
 std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
   // always show the lattice constants
   out << "Lattice Parameters:" << std::fixed << std::setprecision(6)

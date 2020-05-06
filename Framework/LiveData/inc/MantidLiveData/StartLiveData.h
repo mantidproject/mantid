@@ -43,7 +43,7 @@ private:
   void afterPropertySet(const std::string &) override;
 
   void copyListenerProperties(
-      const boost::shared_ptr<Mantid::API::ILiveListener> &listener);
+      const std::shared_ptr<Mantid::API::ILiveListener> &listener);
   void removeListenerProperties();
 };
 

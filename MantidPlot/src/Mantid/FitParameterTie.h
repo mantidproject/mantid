@@ -8,7 +8,7 @@
 
 #include <QList>
 #include <QString>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -25,7 +25,7 @@ class FitParameterTie {
 public:
   /// Constructor
   explicit FitParameterTie(
-      boost::shared_ptr<Mantid::API::CompositeFunction> cf);
+      const std::shared_ptr<Mantid::API::CompositeFunction> &cf);
   /// Destructor
   ~FitParameterTie();
   /// Set the tying expression, e.g. "f1.Sigma = 2*f0.Sigma + 1"
@@ -54,7 +54,7 @@ private:
   /// Function indeces used in the expression
   QList<int> m_iFunctions;
   /// A copy of the edited function
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  std::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
   /// The property
   QtProperty *m_prop;
 };

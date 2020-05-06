@@ -46,10 +46,10 @@ public:
 
   void setTightLayout(QHash<QString, QVariant> const &args);
   QColor faceColor() const;
-  void setFaceColor(const QColor color);
+  void setFaceColor(const QColor &color);
   void setFaceColor(const char *color);
   Axes addAxes(double left, double bottom, double width, double height);
-  Axes addSubPlot(const int subplotspec, const QString projection = "");
+  Axes addSubPlot(const int subplotspec, const QString &projection = "");
   Common::Python::Object
   colorbar(const ScalarMappable &mappable, const Axes &cax,
            const Common::Python::Object &ticks = Common::Python::Object(),

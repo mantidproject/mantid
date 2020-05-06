@@ -38,7 +38,7 @@ void PeakPicker::remove() { m_peakMarker->remove(); }
 
 void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
   if (peak) {
-    m_peak = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
+    m_peak = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
         Mantid::API::FunctionFactory::Instance().createInitialized(
             peak->asString()));
     m_peakMarker->updatePeak(peak->centre(), peak->height(), peak->fwhm());

@@ -38,7 +38,7 @@ struct StartAndEndTime {
   Mantid::Types::Core::DateAndTime endTime;
 };
 
-StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
+StartAndEndTime getStartAndEndTimesFromRawFile(const std::string &filename) {
   FILE *rawFile = fopen(filename.c_str(), "rb");
   if (!rawFile)
     throw std::runtime_error("Cannot open RAW file for reading: " + filename);
@@ -58,7 +58,7 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
 }
 
 StartAndEndTime getStartAndEndTimesFromNexusFile(
-    std::string filename,
+    const std::string &filename,
     const Mantid::Types::Core::DateAndTime &startTimeDefault,
     const Mantid::Types::Core::DateAndTime &endTimeDefault) {
   StartAndEndTime startAndEndTime;
@@ -107,13 +107,13 @@ void CreateSimulationWorkspace::init() {
   using namespace Kernel;
 
   declareProperty("Instrument", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "An instrument name or filename ( a full path or string "
                   "containing an xml extension).",
                   Direction::Input);
 
   declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "BinParams", boost::make_shared<RebinParamsValidator>(),
+                      "BinParams", std::make_shared<RebinParamsValidator>(),
                       Direction::Input),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. See Rebin for more details");
@@ -124,7 +124,7 @@ void CreateSimulationWorkspace::init() {
 
   auto knownUnits = UnitFactory::Instance().getKeys();
   declareProperty("UnitX", "DeltaE",
-                  boost::make_shared<ListValidator<std::string>>(knownUnits),
+                  std::make_shared<ListValidator<std::string>>(knownUnits),
                   "The unit to assign to the X axis", Direction::Input);
 
   declareProperty(std::make_unique<FileProperty>("DetectorTableFilename", "",
@@ -193,7 +193,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
   m_outputWS->getAxis(0)->setUnit(getProperty("UnitX"));
   m_outputWS->setYUnit("SpectraNumber");
 
-  m_progress = boost::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
+  m_progress = std::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
@@ -380,7 +380,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
   // If requested update the instrument to positions in the raw file
   const auto &pmap = m_outputWS->constInstrumentParameters();
   Geometry::Instrument_const_sptr instrument = m_outputWS->getInstrument();
-  boost::shared_ptr<Geometry::Parameter> updateDets =
+  std::shared_ptr<Geometry::Parameter> updateDets =
       pmap.get(instrument->getComponentID(), "det-pos-source");
   if (!updateDets)
     return; // No tag, use IDF
@@ -411,7 +411,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
  * @param workspace: dummy workspace
  */
 void CreateSimulationWorkspace::setStartDate(
-    API::MatrixWorkspace_sptr workspace) {
+    const API::MatrixWorkspace_sptr &workspace) {
   const std::string detTableFile = getProperty("DetectorTableFilename");
   auto hasDetTableFile = !detTableFile.empty();
   auto &run = workspace->mutableRun();

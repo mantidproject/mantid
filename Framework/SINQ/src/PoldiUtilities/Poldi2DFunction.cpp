@@ -79,8 +79,8 @@ void Poldi2DFunction::poldiFunction1D(const std::vector<int> &indices,
                                       FunctionValues &values) const {
   for (size_t i = 0; i < nFunctions(); ++i) {
     IFunction_sptr currentFunction = getFunction(i);
-    boost::shared_ptr<IPoldiFunction1D> spectrumFunction =
-        boost::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
+    std::shared_ptr<IPoldiFunction1D> spectrumFunction =
+        std::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
 
     if (spectrumFunction) {
       spectrumFunction->poldiFunction1D(indices, domain, values);

@@ -4,15 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import sys
 import numpy as np
 import unittest
 import mantid
 from mantid.simpleapi import ExportSpectraMask,DeleteWorkspace
-from six.moves import range
+
 
 class ExportSpectraMaskTest(unittest.TestCase):
     def __init__(self,method_name):

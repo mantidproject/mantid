@@ -34,14 +34,14 @@ const std::string SetUB::category() const { return "Crystal\\UBMatrix"; }
 /** Initialize the algorithm's properties.
  */
 void SetUB::init() {
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  auto reasonableAngle = boost::make_shared<BoundedValidator<double>>();
+  auto reasonableAngle = std::make_shared<BoundedValidator<double>>();
   reasonableAngle->setLower(5.0);
   reasonableAngle->setUpper(175.0);
   // clang-format off
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
-  auto threeVthree = boost::make_shared<ArrayLengthValidator<double> >(9);
+  auto mustBe3D = std::make_shared<ArrayLengthValidator<double> >(3);
+  auto threeVthree = std::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   std::vector<double> zeroes(9, 0.), u0(3, 0), v0(3, 0);
   u0[0] = 1.;
@@ -126,7 +126,7 @@ void SetUB::exec() {
 
   // Sample copy;
   MultipleExperimentInfos_sptr mdws =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
+      std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
   if (mdws != nullptr) {
     int sampleNumber = getProperty("MDSampleNumber");
     if ((sampleNumber == EMPTY_INT()) ||
@@ -152,7 +152,7 @@ void SetUB::exec() {
     }
   } else // peaks workspace or matrix workspace
   {
-    ExperimentInfo_sptr ei = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+    ExperimentInfo_sptr ei = std::dynamic_pointer_cast<ExperimentInfo>(ws);
     if (!ei)
       throw std::invalid_argument("Wrong type of workspace");
     ei->mutableSample().setOrientedLattice(std::move(lattice));

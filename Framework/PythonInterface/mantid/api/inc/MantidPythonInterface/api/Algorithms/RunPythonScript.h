@@ -29,7 +29,7 @@ private:
   /// Return the code string to execute
   std::string scriptCode() const;
   /// Sets up the code context & executes it
-  boost::shared_ptr<API::Workspace>
+  std::shared_ptr<API::Workspace>
   executeScript(const std::string &script) const;
   /// Execute the code in the given local context
   boost::python::dict doExecuteScript(const std::string &script) const;
@@ -37,7 +37,7 @@ private:
   /// the script
   boost::python::dict buildLocals() const;
   /// Extracts any output workspace pointer that was created
-  boost::shared_ptr<API::Workspace>
+  std::shared_ptr<API::Workspace>
   extractOutputWorkspace(const boost::python::dict &locals) const;
 };
 

@@ -56,7 +56,7 @@ public:
     TS_ASSERT_EQUALS(sum, 18816);
 
     // test dimensions
-    boost::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
+    std::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
     TS_ASSERT_EQUALS(dimi->getNBins(), 360);
     TS_ASSERT_DELTA(dimi->getMinimum(), 32471.4, .1);
     TS_ASSERT_DELTA(dimi->getMaximum(), 194590.43, .1);

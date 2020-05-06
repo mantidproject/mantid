@@ -62,8 +62,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     if (!saveNexusP.isInitialized())
       saveNexusP.initialize();
 
@@ -72,7 +71,6 @@ public:
     // specify name of file to save workspace to
     outputFile = "testSaveLoadrawCSP.nxs";
     remove(outputFile.c_str());
-    std::string dataName = "spectra";
     std::string title = "Workspace from Loadraw CSP78173";
     saveNexusP.setPropertyValue("FileName", outputFile);
     outputFile = saveNexusP.getPropertyValue("Filename");
@@ -121,8 +119,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             myOutputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // set to 4 for CSP78173
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 4);
     // Check two X vectors are the same
@@ -153,13 +150,13 @@ public:
     const auto &detectorInfo = output->detectorInfo();
 
     // std::cerr << "Count = " << i.use_count();
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT(source != nullptr);
     if (source != nullptr) {
       TS_ASSERT_EQUALS(source->getName(), "source");
       TS_ASSERT_DELTA(detectorInfo.sourcePosition().Y(), 0.0, 0.01);
 
-      boost::shared_ptr<const IComponent> samplepos = i->getSample();
+      std::shared_ptr<const IComponent> samplepos = i->getSample();
       TS_ASSERT_EQUALS(samplepos->getName(), "some-surface-holder");
       TS_ASSERT_DELTA(detectorInfo.samplePosition().X(), 0.0, 0.01);
 

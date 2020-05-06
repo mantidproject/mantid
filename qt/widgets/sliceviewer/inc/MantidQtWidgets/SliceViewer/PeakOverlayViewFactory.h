@@ -10,7 +10,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayView.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -34,7 +34,7 @@ class PeaksPresenter;
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayViewFactory {
 public:
   /// Create a peak view from the index of a peak in the peaks workspace
-  virtual boost::shared_ptr<PeakOverlayView>
+  virtual std::shared_ptr<PeakOverlayView>
   createView(PeaksPresenter *const presenter,
              Mantid::Geometry::PeakTransform_const_sptr transform) const = 0;
   /// Destructor
@@ -45,11 +45,11 @@ public:
   virtual std::string getPlotYLabel() const = 0;
   /// Same factory settings for a different peaks workspace
   virtual void swapPeaksWorkspace(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) = 0;
+      std::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) = 0;
   virtual void getNonOrthogonalInfo(NonOrthogonalAxis &info) = 0;
 };
 
 /// Factory Shared Pointer typedef.
-using PeakOverlayViewFactory_sptr = boost::shared_ptr<PeakOverlayViewFactory>;
+using PeakOverlayViewFactory_sptr = std::shared_ptr<PeakOverlayViewFactory>;
 } // namespace SliceViewer
 } // namespace MantidQt

@@ -4,14 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import copy
 from mantid.geometry import Goniometer
 from mantid.kernel import DateAndTime, FloatTimeSeriesProperty
 from mantid.api import Run
 import numpy as np
+
 
 class RunTest(unittest.TestCase):
 
@@ -155,6 +154,12 @@ class RunTest(unittest.TestCase):
 
     def test_deep_copyable(self):
         self.do_test_copyable(copy.deepcopy)
+
+    def test_equals(self):
+        other = copy.deepcopy(self._run)
+        self.assertEqual(self._run, other)
+        other.addProperty("pressure", 1, True)
+        self.assertNotEqual(self._run, other)
 
 
 if __name__ == '__main__':

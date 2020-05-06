@@ -44,7 +44,7 @@ public:
 
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 1);
     // Check that what is left is correct
-    MatrixWorkspace_sptr wsTwo = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr wsTwo = std::dynamic_pointer_cast<MatrixWorkspace>(
         dataStore.retrieve(testName2));
     TS_ASSERT(wsTwo);
     if (!wsTwo)

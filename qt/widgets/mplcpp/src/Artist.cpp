@@ -26,7 +26,7 @@ Artist::Artist(Python::Object obj) : InstanceHolder(std::move(obj), "draw") {}
  * Set properties on the Artist given by the dict of kwargs
  * @param kwargs A dict of known matplotlib.artist.Artist properties
  */
-void Artist::set(Python::Dict kwargs) {
+void Artist::set(const Python::Dict &kwargs) {
   GlobalInterpreterLock lock;
   auto args = Python::NewRef(Py_BuildValue("()"));
   pyobj().attr("set")(*args, **kwargs);

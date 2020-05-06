@@ -62,11 +62,11 @@ void DiffRotDiscreteCircle::setAttribute(const std::string &name,
  * @brief Initialize elastic and inelastic parts, aliases, attributes, and ties
  */
 void DiffRotDiscreteCircle::init() {
-  m_elastic = boost::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
+  m_elastic = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
       API::FunctionFactory::Instance().createFunction(
           "ElasticDiffRotDiscreteCircle"));
   this->addFunction(m_elastic);
-  m_inelastic = boost::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
+  m_inelastic = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
       API::FunctionFactory::Instance().createFunction(
           "InelasticDiffRotDiscreteCircle"));
   this->addFunction(m_inelastic);

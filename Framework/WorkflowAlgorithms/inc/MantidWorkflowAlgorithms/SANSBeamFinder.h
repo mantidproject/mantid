@@ -40,11 +40,11 @@ private:
   void exec() override;
   API::MatrixWorkspace_sptr
   loadBeamFinderFile(const std::string &beamCenterFile);
-  void maskEdges(API::MatrixWorkspace_sptr beamCenterWS, int high, int low,
-                 int left, int right,
+  void maskEdges(const API::MatrixWorkspace_sptr &beamCenterWS, int high,
+                 int low, int left, int right,
                  const std::string &componentName = "detector1");
 
-  boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
+  std::shared_ptr<Kernel::PropertyManager> m_reductionManager;
   std::string m_output_message;
 };
 

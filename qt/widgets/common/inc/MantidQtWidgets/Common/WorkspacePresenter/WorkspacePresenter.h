@@ -10,7 +10,6 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h"
-#include <boost/weak_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {

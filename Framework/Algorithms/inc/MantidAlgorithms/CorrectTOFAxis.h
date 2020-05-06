@@ -43,8 +43,8 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  void useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs);
-  void correctManually(API::MatrixWorkspace_sptr outputWs);
+  void useReferenceWorkspace(const API::MatrixWorkspace_sptr &outputWs);
+  void correctManually(const API::MatrixWorkspace_sptr &outputWs);
   double averageL2(const API::SpectrumInfo &spectrumInfo);
   void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2,
                        double &epp);

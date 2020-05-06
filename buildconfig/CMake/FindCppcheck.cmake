@@ -61,15 +61,6 @@ if(CPPCHECK_EXECUTABLE)
 endif()
 
 mark_as_advanced(CPPCHECK_EXECUTABLE)
-if(CPPCHECK_EXECUTABLE)
-  if (${CPPCHECK_VERSION} VERSION_LESS 1.71)
-    set ( CPPCHECK_ARGS --enable=all --inline-suppr --max-configs=120
-                        --suppressions ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/CppCheck_Suppressions.txt )
-  else()
-    set ( CPPCHECK_ARGS --enable=all --inline-suppr --max-configs=120
-                        --suppressions-list=${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/CppCheck_Suppressions.txt )
-  endif()
-endif()
 set ( CPPCHECK_NUM_THREADS 0 CACHE STRING "Number of threads to use when running cppcheck" )
 set ( CPPCHECK_GENERATE_XML OFF CACHE BOOL "Generate xml output files from cppcheck" )
 

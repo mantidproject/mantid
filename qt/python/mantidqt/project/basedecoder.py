@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 from mantidqt.utils.qt import import_qt
 
 BaseDecoder = import_qt('._common', 'mantidqt', 'BaseDecoder')

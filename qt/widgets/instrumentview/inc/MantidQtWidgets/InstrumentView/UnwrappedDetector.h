@@ -10,8 +10,8 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
-#include <boost/shared_ptr.hpp>
 #include <limits>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -34,7 +34,7 @@ This class keeps information used to draw a detector on an unwrapped surface.
 class UnwrappedDetector {
 public:
   UnwrappedDetector();
-  UnwrappedDetector(GLColor color, size_t detIndex);
+  UnwrappedDetector(const GLColor &color, size_t detIndex);
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
   bool empty() const;

@@ -30,13 +30,13 @@ public:
   /// @name Plot creation functions
   ///@{
   Line2D plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
-              const size_t wkspIndex, const QString lineColour,
-              const QString label,
+              const size_t wkspIndex, const QString &lineColour,
+              const QString &label,
               const boost::optional<QHash<QString, QVariant>> &otherKwargs =
                   boost::none);
   ErrorbarContainer errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                             const size_t wkspIndex, const QString lineColour,
-                             const QString label,
+                             const size_t wkspIndex, const QString &lineColour,
+                             const QString &label,
                              const boost::optional<QHash<QString, QVariant>>
                                  &otherKwargs = boost::none);
   void pcolormesh(const Mantid::API::MatrixWorkspace_sptr &workspace,

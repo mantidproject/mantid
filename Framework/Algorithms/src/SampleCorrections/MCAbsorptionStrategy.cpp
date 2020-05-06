@@ -64,7 +64,7 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
  */
 void MCAbsorptionStrategy::calculate(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &finalPos,
-    Mantid::HistogramData::Points lambdas, double lambdaFixed,
+    const Mantid::HistogramData::Points &lambdas, double lambdaFixed,
     Mantid::API::ISpectrum &attenuationFactorsSpectrum) {
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   const auto nbins = static_cast<int>(lambdas.size());

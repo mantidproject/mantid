@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataPresenter.h"
+
+#include <utility>
+
 #include "IndirectAddWorkspaceDialog.h"
 
 namespace MantidQt {
@@ -208,8 +211,8 @@ void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
 
 DataForParameterEstimationCollection
 IndirectFitDataPresenter::getDataForParameterEstimation(
-    EstimationDataSelector selector) const {
-  return m_model->getDataForParameterEstimation(selector);
+    const EstimationDataSelector &selector) const {
+  return m_model->getDataForParameterEstimation(std::move(selector));
 }
 
 void IndirectFitDataPresenter::selectReplacedWorkspace(

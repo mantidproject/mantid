@@ -12,6 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 #include <boost/algorithm/string.hpp>
+#include <memory>
 #include <sstream>
 
 #include "MantidKernel/StringTokenizer.h"
@@ -39,7 +40,7 @@ AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
  * @param version :: the version of the algroithm to create
  * @returns a shared pointer to the created algorithm
  */
-boost::shared_ptr<Algorithm>
+std::shared_ptr<Algorithm>
 AlgorithmFactoryImpl::create(const std::string &name,
                              const int &version) const {
   int local_version = version;
@@ -196,8 +197,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
       std::string name = *itr;
       // check the categories
       std::pair<std::string, int> namePair = decodeName(name);
-      boost::shared_ptr<IAlgorithm> alg =
-          create(namePair.first, namePair.second);
+      std::shared_ptr<IAlgorithm> alg = create(namePair.first, namePair.second);
       std::vector<std::string> categories = alg->categories();
       bool toBeRemoved = true;
 
@@ -266,7 +266,7 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
     std::string name = *itr;
     // decode the name and create an instance
     std::pair<std::string, int> namePair = decodeName(name);
-    boost::shared_ptr<IAlgorithm> alg = create(namePair.first, namePair.second);
+    std::shared_ptr<IAlgorithm> alg = create(namePair.first, namePair.second);
     // extract out the categories
     std::vector<std::string> categories = alg->categories();
 
@@ -350,7 +350,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
     } else
       continue;
 
-    boost::shared_ptr<IAlgorithm> alg = create(desc.name, desc.version);
+    std::shared_ptr<IAlgorithm> alg = create(desc.name, desc.version);
     auto categories = alg->categories();
     desc.alias = alg->alias();
 
@@ -406,7 +406,7 @@ void AlgorithmFactoryImpl::fillHiddenCategories(
  * @returns the name of the algroithm
  */
 const std::string AlgorithmFactoryImpl::extractAlgName(
-    const boost::shared_ptr<IAlgorithm> alg) const {
+    const std::shared_ptr<IAlgorithm> &alg) const {
   return alg->name();
 }
 
@@ -415,7 +415,7 @@ const std::string AlgorithmFactoryImpl::extractAlgName(
  * @returns the version of the algroithm
  */
 int AlgorithmFactoryImpl::extractAlgVersion(
-    const boost::shared_ptr<IAlgorithm> alg) const {
+    const std::shared_ptr<IAlgorithm> &alg) const {
   return alg->version();
 }
 
@@ -427,7 +427,7 @@ int AlgorithmFactoryImpl::extractAlgVersion(
  * @param version :: Algorithm version
  * @returns A shared pointer to the algorithm object
  */
-boost::shared_ptr<Algorithm>
+std::shared_ptr<Algorithm>
 AlgorithmFactoryImpl::createAlgorithm(const std::string &name,
                                       const int version) const {
   return Kernel::DynamicFactory<Algorithm>::create(createName(name, version));

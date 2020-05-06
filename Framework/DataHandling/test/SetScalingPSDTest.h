@@ -128,7 +128,7 @@ public:
   }
 
 private:
-  std::string createTestScalingFile(Workspace2D_sptr testWS) {
+  std::string createTestScalingFile(const Workspace2D_sptr &testWS) {
     // NOTE: The only values read by the algorithm are the number of detectors
     // and then from each detector line
     // det no., (l2,theta,phi). All other values will be set to -1 here
@@ -166,7 +166,7 @@ private:
     loader.execute();
     Workspace_sptr result =
         AnalysisDataService::Instance().retrieve(outputName);
-    return boost::dynamic_pointer_cast<Workspace2D>(result);
+    return std::dynamic_pointer_cast<Workspace2D>(result);
   }
 
   IAlgorithm_sptr createAlgorithm() {

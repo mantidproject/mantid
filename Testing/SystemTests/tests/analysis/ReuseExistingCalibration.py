@@ -9,7 +9,6 @@
     Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
     in successive reductions.
 """
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 
 

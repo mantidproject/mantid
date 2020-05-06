@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -45,8 +45,7 @@ public:
     TS_ASSERT_EQUALS(descr, "test fjols description.");
 
     // load in additional parameters
-    auto pLoaderPF =
-        FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
 
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue(
@@ -136,8 +135,7 @@ public:
         "</parameter-file>";
 
     // load in additional parameters
-    auto pLoaderPF =
-        FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
 
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue("ParameterXML", parameterXML);
@@ -200,8 +198,7 @@ public:
     load_IDF2();
 
     // Run algorithm without file or string properties set
-    auto pLoaderPF =
-        FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
@@ -210,7 +207,7 @@ public:
 
   void load_IDF2() {
     auto pLoadInstrument =
-        FrameworkManager::Instance().createAlgorithm("LoadInstrument");
+        AlgorithmManager::Instance().create("LoadInstrument");
 
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->initialize());
 
@@ -218,7 +215,7 @@ public:
     wsName = "LoadParameterFileTestIDF2";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));

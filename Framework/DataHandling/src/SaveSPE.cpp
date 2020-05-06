@@ -95,7 +95,7 @@ SaveSPE::SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(0) {}
  */
 void SaveSPE::init() {
   // Data must be in Energy Transfer and common bins
-  auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+  auto wsValidator = std::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
@@ -210,7 +210,7 @@ void SaveSPE::writeSPEFile(FILE *outSPEFile,
  *  @param WS :: the workspace to be saved
  *  @param outFile :: the file object to write to
  */
-void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
+void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr &WS,
                          FILE *const outFile) {
   // We write out values NUM_PER_LINE at a time, so will need to do extra work
   // if nBins isn't a factor of NUM_PER_LINE
@@ -286,7 +286,7 @@ void SaveSPE::check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
  *  @param outFile :: the file object to write to
  *  @param wsIn :: the index number of the histogram to write
  */
-void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
+void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr &WS,
                         FILE *const outFile, const int wsIn) const {
   check_and_copy_spectra(WS->y(wsIn), WS->e(wsIn), m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);

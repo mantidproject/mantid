@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,unused-import
-from __future__ import (absolute_import, division, print_function)
 import sys
 from DGSPlanner import DGSPlannerGUI
 from mantidqt.gui_helper import get_qapplication

@@ -145,6 +145,20 @@ public:
     runTestInvalidCells(table, expectedErrors({0}, {8}));
   }
 
+  void testValidBackgroundProcessingInstructions() {
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "1-3"})});
+    auto results = runTestValid(table);
+    TS_ASSERT_EQUALS(results.size(), 1);
+    TS_ASSERT(results[0].backgroundProcessingInstructions().is_initialized());
+    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().get(),
+                     "1-3");
+  }
+
+  void testInvalidBackgroundProcessingInstructions() {
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "bad"})});
+    runTestInvalidCells(table, expectedErrors({0}, {9}));
+  }
+
   void testAnglesThatDifferByTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.501"})});
     auto results = runTestValid(table);
@@ -173,22 +187,23 @@ private:
   Table emptyTable() { return Table(); }
   Cells emptyRow() { return Cells(); }
 
-  std::vector<InvalidDefaultsError> expectedErrors(std::vector<int> rows,
-                                                   std::vector<int> columns) {
+  std::vector<InvalidDefaultsError>
+  expectedErrors(const std::vector<int> &rows,
+                 const std::vector<int> &columns) {
     std::vector<InvalidDefaultsError> errors;
     for (auto row : rows)
       errors.emplace_back(InvalidDefaultsError(row, columns));
     return errors;
   }
 
-  std::vector<PerThetaDefaults> runTestValid(Table table) {
+  std::vector<PerThetaDefaults> runTestValid(const Table &table) {
     PerThetaDefaultsTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isValid());
     return result.assertValid();
   }
 
-  void runTestInvalidThetas(Table table,
+  void runTestInvalidThetas(const Table &table,
                             ThetaValuesValidationError thetaValuesError,
                             std::vector<InvalidDefaultsError> expectedErrors) {
     PerThetaDefaultsTableValidator validator;
@@ -200,7 +215,7 @@ private:
     TS_ASSERT_EQUALS(validationError.errors(), expectedErrors);
   }
 
-  void runTestInvalidCells(Table table,
+  void runTestInvalidCells(const Table &table,
                            std::vector<InvalidDefaultsError> expectedErrors) {
     PerThetaDefaultsTableValidator validator;
     auto result = validator(table, TOLERANCE);

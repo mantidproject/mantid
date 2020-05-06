@@ -112,11 +112,11 @@ private:
   void BuildLamdaWeights();
   double absor_sphere(double &twoth, double &wl);
   void scale_init(const Geometry::IDetector &det,
-                  Geometry::Instrument_const_sptr inst, double &L2,
+                  const Geometry::Instrument_const_sptr &inst, double &L2,
                   double &depth, double &pathlength, std::string &bankName);
   void scale_exec(std::string &bankName, double &lambda, double &depth,
-                  Geometry::Instrument_const_sptr inst, double &pathlength,
-                  double &value);
+                  const Geometry::Instrument_const_sptr &inst,
+                  double &pathlength, double &value);
 
   double m_smu;                       ///< linear scattering coefficient in 1/cm
   double m_amu;                       ///< linear absoprtion coefficient in 1/cm

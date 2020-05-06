@@ -10,8 +10,6 @@ The main information in the table model are the run numbers and the selected per
 information regarding the custom output name and the information in the options tab.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.kernel import Logger
 from sans.common.enums import RowState
 from sans.gui_logic.models.RowEntries import RowEntries

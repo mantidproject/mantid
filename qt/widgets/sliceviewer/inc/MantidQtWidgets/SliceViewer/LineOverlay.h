@@ -92,7 +92,7 @@ private:
   int height() const;
   int width() const;
 
-  QRect drawHandle(QPainter &painter, QPointF coords, QColor brush);
+  QRect drawHandle(QPainter &painter, QPointF coords, const QColor &brush);
   void paintEvent(QPaintEvent *event) override;
 
   eHandleID mouseOverHandle(QPoint pos);

@@ -30,7 +30,7 @@ class TiledWindow : public MdiSubWindow {
 public:
   TiledWindow(QWidget *parent, const QString &label,
               const QString &name = QString(), int nrows = 1, int ncols = 1,
-              Qt::WFlags f = nullptr);
+              const Qt::WFlags &f = nullptr);
 
   /// Populate a menu with actions
   void populateMenu(QMenu *menu);

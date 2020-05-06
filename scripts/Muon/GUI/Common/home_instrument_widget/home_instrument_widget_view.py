@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments, show_file_browser_and_return_selection

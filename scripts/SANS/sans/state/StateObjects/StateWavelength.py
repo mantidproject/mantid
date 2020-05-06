@@ -6,11 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the state of the event slices which should be reduced."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, SANSFacility)
@@ -18,7 +15,7 @@ from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 
 
-class StateWavelength(with_metaclass(JsonSerializable)):
+class StateWavelength(metaclass=JsonSerializable):
     def __init__(self):
         super(StateWavelength, self).__init__()
         self.rebin_type = RebinType.REBIN

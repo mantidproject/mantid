@@ -8,10 +8,11 @@
 #include "MantidAPI/CompositeFunction.h"
 #include <QRegExp>
 #include <stdexcept>
+#include <utility>
 
 /// Constructor
 FitParameterTie::FitParameterTie(
-    boost::shared_ptr<Mantid::API::CompositeFunction> cf)
+    const std::shared_ptr<Mantid::API::CompositeFunction> &cf)
     : m_compositeFunction(cf), m_prop(nullptr) {}
 
 /// Destructor

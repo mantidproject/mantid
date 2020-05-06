@@ -74,7 +74,7 @@ struct Operation {
   Operation(int op = 0) : binaryop(op) {}
 
   /// Return the string that represnts the result of this operation
-  QString toString(QString left, QString right) const;
+  QString toString(const QString &left, const QString &right) const;
 
   /// The stored operation
   int binaryop;

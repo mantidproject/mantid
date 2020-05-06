@@ -253,7 +253,7 @@ public:
                                                  1.0, 1e-4, 129);
     ok = bool(base);
     if (!base) {
-      base = boost::make_shared<ChebfunBase>(10, lBound, rBound, 1e-4);
+      base = std::make_shared<ChebfunBase>(10, lBound, rBound, 1e-4);
       P = base->fit(*this);
       A = base->calcA(P);
     }

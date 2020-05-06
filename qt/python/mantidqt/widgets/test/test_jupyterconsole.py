@@ -7,8 +7,6 @@
 #    This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import)
-
 # system imports
 # import readline (if available) before QApplication starts to avoid segfault with IPython 5 and Python 3
 try:

@@ -44,7 +44,8 @@ public:
   /// Move detectors with parameters
   void moveDetector(double x, double y, double z, double rotx, double roty,
                     double rotz, double scalex, double scaley,
-                    std::string detname, API::Workspace_sptr inputW) const;
+                    std::string detname,
+                    const API::Workspace_sptr &inputW) const;
 
 private:
   /// Call the appropriate load function
@@ -54,7 +55,7 @@ private:
   void loadWorkspace(const std::string &wsName) const;
 
   /// Load the points from a Workspace
-  void loadWorkspace(boost::shared_ptr<API::Workspace> ws) const;
+  void loadWorkspace(std::shared_ptr<API::Workspace> ws) const;
 
   /// Clear all data
   void clear() const;
@@ -72,7 +73,7 @@ private:
   static const int defaultIndexValue;
 
   /// Temporary workspace holder
-  mutable boost::shared_ptr<API::Workspace> m_workspace;
+  mutable std::shared_ptr<API::Workspace> m_workspace;
 
   /// Stores bank
   mutable std::string m_bank;

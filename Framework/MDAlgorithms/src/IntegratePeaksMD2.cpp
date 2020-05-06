@@ -124,7 +124,7 @@ void IntegratePeaksMD2::init() {
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
   peakNames.emplace_back("NoFit");
   declareProperty("ProfileFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peakNames),
+                  std::make_shared<StringListValidator>(peakNames),
                   "Fitting function for profile that is used only with "
                   "Cylinder integration.");
 
@@ -132,7 +132,7 @@ void IntegratePeaksMD2::init() {
   integrationOptions[0] = "Sum";
   integrationOptions[1] = "GaussianQuadrature";
   auto integrationvalidator =
-      boost::make_shared<StringListValidator>(integrationOptions);
+      std::make_shared<StringListValidator>(integrationOptions);
   declareProperty("IntegrationOption", "GaussianQuadrature",
                   integrationvalidator,
                   "Integration method for calculating intensity "
@@ -229,15 +229,15 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     size_t histogramNumber = peakWS->getNumberPeaks();
     Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, numSteps, numSteps);
-    wsProfile2D = boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+    wsProfile2D = std::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("ProfilesData", wsProfile2D);
     Workspace_sptr wsFit = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, numSteps, numSteps);
-    wsFit2D = boost::dynamic_pointer_cast<Workspace2D>(wsFit);
+    wsFit2D = std::dynamic_pointer_cast<Workspace2D>(wsFit);
     AnalysisDataService::Instance().addOrReplace("ProfilesFit", wsFit2D);
     Workspace_sptr wsDiff = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, numSteps, numSteps);
-    wsDiff2D = boost::dynamic_pointer_cast<Workspace2D>(wsDiff);
+    wsDiff2D = std::dynamic_pointer_cast<Workspace2D>(wsDiff);
     AnalysisDataService::Instance().addOrReplace("ProfilesFitDiff", wsDiff2D);
     auto newAxis1 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
     auto newAxis2 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
@@ -595,8 +595,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         out << std::setw(20) << std::fixed << std::setprecision(10) << chi2
             << "\n";
 
-        boost::shared_ptr<const CompositeFunction> fun =
-            boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
+        std::shared_ptr<const CompositeFunction> fun =
+            std::dynamic_pointer_cast<const CompositeFunction>(ifun);
 
         const auto &x = wsProfile2D->x(i);
         wsFit2D->setSharedX(i, wsProfile2D->sharedX(i));
@@ -961,8 +961,8 @@ double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
 }
 
 void IntegratePeaksMD2::runMaskDetectors(
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
-    std::string values) {
+    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+    const std::string &property, const std::string &values) {
   // For CORELLI do not count as edge if next to another detector bank
   if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
     IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
@@ -990,7 +990,7 @@ void IntegratePeaksMD2::runMaskDetectors(
 }
 
 void IntegratePeaksMD2::checkOverlap(
-    int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
+    int i, const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius) {
   // Get a direct ref to that peak.
   IPeak &p1 = peakWS->getPeak(i);
@@ -1061,8 +1061,8 @@ void IntegratePeaksMD2::exec() {
 }
 
 double f_eval2(double x, void *params) {
-  boost::shared_ptr<const API::CompositeFunction> fun =
-      *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(
+  std::shared_ptr<const API::CompositeFunction> fun =
+      *reinterpret_cast<std::shared_ptr<const API::CompositeFunction> *>(
           params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);

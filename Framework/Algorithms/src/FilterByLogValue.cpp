@@ -39,7 +39,7 @@ void FilterByLogValue::init() {
                   "The name to use for the output workspace");
 
   declareProperty(
-      "LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
       "Name of the sample log to use to filter.\n"
       "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
@@ -49,7 +49,7 @@ void FilterByLogValue::init() {
   declareProperty("MaximumValue", Mantid::EMPTY_DBL(),
                   "Maximum log value for which to keep events.");
 
-  auto min = boost::make_shared<BoundedValidator<double>>();
+  auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty("TimeTolerance", 0.0, min,
                   "Tolerance, in seconds, for the event times to keep. A good "
@@ -64,7 +64,7 @@ void FilterByLogValue::init() {
   types[0] = CENTRE;
   types[1] = LEFT;
   declareProperty("LogBoundary", types[0],
-                  boost::make_shared<StringListValidator>(types),
+                  std::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of "
                   "the time, or beginning (left) boundary");
 

@@ -96,7 +96,7 @@ private:
 
   /// Check what x units this workspace has
   FindSXPeaksHelper::XAxisUnit getWorkspaceXAxisUnit(
-      Mantid::API::MatrixWorkspace_const_sptr workspace) const;
+      const Mantid::API::MatrixWorkspace_const_sptr &workspace) const;
 
   /// The value in X to start the search from
   double m_MinRange;

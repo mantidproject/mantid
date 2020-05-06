@@ -96,7 +96,7 @@ public:
     TS_ASSERT(workspace.get());
 
     MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     TS_ASSERT(matrix_ws.get());
 
     // Test proton charge from the sample block
@@ -104,7 +104,7 @@ public:
 
     doHistoryTest(matrix_ws);
 
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
+    std::shared_ptr<const Mantid::Geometry::Instrument> inst =
         matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
@@ -198,7 +198,7 @@ public:
 
     // Test some aspects of the file
     MatrixWorkspace_sptr workspace;
-    workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
     TS_ASSERT(workspace.get());
 
@@ -221,7 +221,7 @@ public:
     load.setPropertyValue("OutputWorkspace", output_ws);
     load.execute();
 
-    workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
     TS_ASSERT(workspace.get());
 
@@ -262,7 +262,7 @@ public:
     TS_ASSERT(workspace.get());
 
     EventWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+        std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -461,13 +461,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         workspace = AnalysisDataService::Instance().retrieve("group"));
     WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+        std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TS_ASSERT(group);
     int groupSize = group->getNumberOfEntries();
     TS_ASSERT_EQUALS(groupSize, 12);
     for (int i = 0; i < groupSize; ++i) {
       MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 10);
@@ -491,13 +491,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         workspace = AnalysisDataService::Instance().retrieve("group"));
     WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+        std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TS_ASSERT(group);
     int groupSize = group->getNumberOfEntries();
     TS_ASSERT_EQUALS(groupSize, 3);
     for (int i = 0; i < groupSize; ++i) {
       MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
@@ -522,13 +522,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         workspace = AnalysisDataService::Instance().retrieve("group"));
     WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+        std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TS_ASSERT(group);
     int groupSize = group->getNumberOfEntries();
     TS_ASSERT_EQUALS(groupSize, 3);
     for (int i = 0; i < groupSize; ++i) {
       MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
@@ -550,14 +550,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
     TS_ASSERT_THROWS_NOTHING(
         workspace = AnalysisDataService::Instance().retrieve("group2"));
-    group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TS_ASSERT(group);
     groupSize = group->getNumberOfEntries();
     TS_ASSERT_EQUALS(groupSize, 3);
 
     for (int i = 0; i < groupSize; ++i) {
       MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
@@ -580,8 +580,8 @@ public:
         "HRPDparameters");
 
     // test to see if parameters are loaded
-    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>>
-        bankComp = ws->getInstrument()->getAllComponentsWithName("bank_bsk");
+    std::vector<std::shared_ptr<const Mantid::Geometry::IComponent>> bankComp =
+        ws->getInstrument()->getAllComponentsWithName("bank_bsk");
 
     TS_ASSERT(bankComp[0]->getParameterNames().size() == 3);
   }
@@ -691,7 +691,7 @@ public:
 
     Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
     auto peakWS =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
     TS_ASSERT(peakWS);
 
     TS_ASSERT_EQUALS(3, peakWS->getNumberPeaks());
@@ -716,7 +716,7 @@ public:
 
     Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
     auto peakWS =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
     TS_ASSERT(peakWS);
   }
 
@@ -754,7 +754,7 @@ public:
     Mantid::API::Workspace_sptr loadedWS =
         loadAlg.getProperty("OutputWorkspace");
     auto loadedPeaksWS =
-        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+        std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
     Poco::File testFile(filePath);
     if (testFile.exists()) {
       testFile.remove();
@@ -816,7 +816,7 @@ public:
     Mantid::API::Workspace_sptr loadedWS =
         loadAlg.getProperty("OutputWorkspace");
     auto loadedPeaksWS =
-        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+        std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
     Poco::File testFile(filePath);
     if (testFile.exists()) {
       testFile.remove();
@@ -884,7 +884,7 @@ public:
     if (!loadAlg.isExecuted())
       return; // Nothing to check
 
-    auto outTable = boost::dynamic_pointer_cast<const TableWorkspace>(
+    auto outTable = std::dynamic_pointer_cast<const TableWorkspace>(
         outTableEntry.retrieve());
     TS_ASSERT(outTable);
 
@@ -972,7 +972,7 @@ public:
           3, static_cast<double>(index), static_cast<double>(index), true);
       AnalysisDataService::Instance().addOrReplace(workspaceName, ws);
       alg.setProperty("InputWorkspace",
-                      boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+                      std::dynamic_pointer_cast<MatrixWorkspace>(ws));
       if (index == 0) {
         alg.setProperty("Append", false);
       } else {
@@ -1023,13 +1023,13 @@ public:
 
     Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
     WorkspaceGroup_sptr asGroupWS =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     TSM_ASSERT("We expect a group workspace back", asGroupWS);
     TSM_ASSERT_EQUALS("We expect the size to be 2", 2, asGroupWS->size());
     MatrixWorkspace_sptr period1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(0));
     MatrixWorkspace_sptr period2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(1));
 
     TSM_ASSERT("We expect the group workspace is multiperiod",
                asGroupWS->isMultiperiod());
@@ -1078,7 +1078,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
-    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    const auto outWS = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
     const size_t numBins = outWS->blocksize();
     for (size_t i = 0; i < numBins; ++i) {
@@ -1100,7 +1100,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
-    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    const auto outWS = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
     const size_t numBins = outWS->blocksize();
     for (size_t i = 0; i < numBins; ++i) {
@@ -1109,8 +1109,90 @@ public:
     }
   }
 
+  void test_log_filtering_survives_save_and_load() {
+    LoadNexus alg;
+    std::string group_ws = "test_log_filtering_survives_save_and_load";
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    testFile = "POLREF00014966.nxs";
+    alg.setPropertyValue("Filename", testFile);
+    testFile = alg.getPropertyValue("Filename");
+
+    alg.setPropertyValue("OutputWorkspace", group_ws);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Test some aspects of the file
+    auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(group_ws + "_1"));
+    // should be filtered
+    check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
+    // should not be filtered
+    check_log(workspace, "periods", 37, 1, 1);
+    check_log(workspace, "period 1", 36, 505, true);
+    check_log(workspace, "running", 72, 501, true);
+
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setProperty("InputWorkspace", workspace);
+    std::string filename =
+        "LoadNexusProcessed_test_log_filtering_survives_save_and_load.nxs";
+    save.setPropertyValue("Filename", filename);
+    filename = save.getPropertyValue("Filename");
+    save.execute();
+    LoadNexusProcessed load;
+    load.initialize();
+    load.setPropertyValue("Filename", filename);
+    load.setPropertyValue("OutputWorkspace", output_ws);
+    load.execute();
+
+    auto reloadedWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(output_ws));
+    // should not change as should be filtered as before
+    check_log(reloadedWorkspace, "raw_uah_log", 429, 17, 99.4740982879);
+    // should not change as should not be filtered as before
+    check_log(reloadedWorkspace, "periods", 37, 1, 1);
+    check_log(reloadedWorkspace, "period 1", 36, 505, true);
+    check_log(reloadedWorkspace, "running", 72, 501, true);
+
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
+
 private:
-  void doHistoryTest(MatrixWorkspace_sptr matrix_ws) {
+  template <typename TYPE>
+  void check_log(Mantid::API::MatrixWorkspace_sptr &workspace,
+                 const std::string &logName, const int noOfEntries,
+                 const int firstInterval, const TYPE firstValue) {
+    TS_ASSERT(workspace.get());
+    auto run = workspace->run();
+
+    auto prop = run.getLogData(logName);
+    TSM_ASSERT(logName + " Log was not found", prop);
+    if (prop) {
+      auto log =
+          dynamic_cast<TimeSeriesProperty<TYPE> *>(run.getLogData(logName));
+      TSM_ASSERT(logName + " Log was not the expected type", log);
+      if (log) {
+        // middle value is invalid and is filtered out
+        TSM_ASSERT_EQUALS(logName + " Log size not as expected", log->size(),
+                          noOfEntries);
+        TSM_ASSERT_EQUALS(logName + " Log first interval not as expected",
+                          log->nthInterval(0).length().total_seconds(),
+                          firstInterval);
+        templated_equality_check(logName + " Log first value not as expected",
+                                 log->nthValue(0), firstValue);
+      }
+    }
+  }
+
+  template <typename TYPE>
+  void templated_equality_check(const std::string &message, const TYPE value,
+                                const TYPE refValue) {
+    TSM_ASSERT_EQUALS(message, value, refValue);
+  }
+
+  void doHistoryTest(const MatrixWorkspace_sptr &matrix_ws) {
     const WorkspaceHistory history = matrix_ws->getHistory();
     int nalgs = static_cast<int>(history.size());
     TS_ASSERT_EQUALS(nalgs, 4);
@@ -1147,7 +1229,7 @@ private:
     TS_ASSERT(workspace.get());
 
     EventWorkspace_sptr ews =
-        boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+        std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TS_ASSERT(ews);
     if (!ews)
       return;
@@ -1176,7 +1258,7 @@ private:
     TS_ASSERT(workspace.get());
 
     MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     TS_ASSERT(matrix_ws.get());
 
     // Testing the number of histograms
@@ -1185,7 +1267,7 @@ private:
     // Test history
     doHistoryTest(matrix_ws);
 
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
+    std::shared_ptr<const Mantid::Geometry::Instrument> inst =
         matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
@@ -1201,7 +1283,7 @@ private:
    * be present
    */
   void doSpectrumListTests(LoadNexusProcessed &alg,
-                           const std::vector<int> expectedSpectra) {
+                           const std::vector<int> &expectedSpectra) {
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -1212,7 +1294,7 @@ private:
     TS_ASSERT(workspace.get());
 
     MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     TS_ASSERT(matrix_ws.get());
 
     // Test spectrum numbers are as expected
@@ -1228,7 +1310,7 @@ private:
 
     doHistoryTest(matrix_ws);
 
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
+    std::shared_ptr<const Mantid::Geometry::Instrument> inst =
         matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
@@ -1260,8 +1342,7 @@ private:
 
     SaveNexusProcessed alg;
     alg.initialize();
-    alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<Workspace>(ws));
+    alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(ws));
     m_savedTmpEventFile = "LoadNexusProcessed_TmpEvent.nxs";
     alg.setPropertyValue("Filename", m_savedTmpEventFile);
     alg.setPropertyValue("Title",
@@ -1437,6 +1518,12 @@ private:
   std::string m_savedTmpEventFile;
   static const EventType m_savedTmpType = TOF;
 };
+
+template <>
+void LoadNexusProcessedTest::templated_equality_check(
+    const std::string &message, const double value, const double refValue) {
+  TSM_ASSERT_DELTA(message, value, refValue, 1e-5);
+}
 
 //------------------------------------------------------------------------------
 // Performance test

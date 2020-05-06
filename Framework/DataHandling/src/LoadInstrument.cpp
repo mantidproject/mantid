@@ -69,7 +69,7 @@ void LoadInstrument::init() {
   declareProperty(
       std::make_unique<PropertyWithValue<OptionalBool>>(
           "RewriteSpectraMap", OptionalBool::Unset,
-          boost::make_shared<MandatoryValidator<OptionalBool>>()),
+          std::make_shared<MandatoryValidator<OptionalBool>>()),
       "If set to True then a 1:1 map between the spectrum numbers and "
       "detector/monitor IDs is set up such that the detector/monitor IDs in "
       "the IDF are ordered from smallest to largest number and then assigned "
@@ -97,7 +97,7 @@ void LoadInstrument::init() {
  */
 void LoadInstrument::exec() {
   // Get the input workspace
-  boost::shared_ptr<API::MatrixWorkspace> ws = getProperty("Workspace");
+  std::shared_ptr<API::MatrixWorkspace> ws = getProperty("Workspace");
   std::string filename = getPropertyValue("Filename");
   std::string instname = getPropertyValue("InstrumentName");
   // std::pair<std::string, std::string> loader_type;
@@ -225,7 +225,7 @@ void LoadInstrument::exec() {
         Instrument_const_sptr ins =
             NexusGeometry::NexusGeometryParser::createInstrument(
                 filename, NexusGeometry::makeLogger(&m_log));
-        instrument = boost::const_pointer_cast<Instrument>(ins);
+        instrument = std::const_pointer_cast<Instrument>(ins);
       }
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
@@ -255,7 +255,8 @@ void LoadInstrument::exec() {
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 void LoadInstrument::runLoadParameterFile(
-    const boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
+    const std::shared_ptr<API::MatrixWorkspace> &ws,
+    const std::string &filename) {
   g_log.debug("Loading the parameter definition...");
 
   // First search for XML parameter file in same folder as IDF file
@@ -311,8 +312,9 @@ void LoadInstrument::runLoadParameterFile(
 /// Search the directory for the Parameter IDF file and return full path name if
 /// found, else return "".
 //  directoryName must include a final '/'.
-std::string LoadInstrument::getFullPathParamIDF(std::string directoryName,
-                                                std::string filename) {
+std::string
+LoadInstrument::getFullPathParamIDF(const std::string &directoryName,
+                                    const std::string &filename) {
   Poco::Path directoryPath(directoryName);
   directoryPath.makeDirectory();
   // Remove the path from the filename

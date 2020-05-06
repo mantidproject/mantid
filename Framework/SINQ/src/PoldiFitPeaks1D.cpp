@@ -46,8 +46,8 @@ void PoldiFitPeaks1D::init() {
       std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "",
                                                        Direction::Input),
       "An input workspace containing a POLDI auto-correlation spectrum.");
-  boost::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
-      boost::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
+      std::make_shared<BoundedValidator<double>>();
   minFwhmPerDirection->setLower(2.0);
   declareProperty(
       "FwhmMultiples", 2.0, minFwhmPerDirection,
@@ -57,7 +57,7 @@ void PoldiFitPeaks1D::init() {
   std::vector<std::string> peakFunctions =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
   auto peakFunctionNames =
-      boost::make_shared<ListValidator<std::string>>(peakFunctions);
+      std::make_shared<ListValidator<std::string>>(peakFunctions);
   declareProperty("PeakFunction", "Gaussian", peakFunctionNames,
                   "Peak function that will be fitted to all peaks.",
                   Direction::Input);
@@ -84,7 +84,7 @@ void PoldiFitPeaks1D::setPeakFunction(const std::string &peakFunction) {
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(
     const DataObjects::TableWorkspace_sptr &peakTable) const {
-  auto peakCollection = boost::make_shared<PoldiPeakCollection>(peakTable);
+  auto peakCollection = std::make_shared<PoldiPeakCollection>(peakTable);
   peakCollection->setProfileFunctionName(m_profileTemplate);
 
   return peakCollection;
@@ -92,7 +92,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(
 
 IFunction_sptr
 PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
-  IPeakFunction_sptr clonedProfile = boost::dynamic_pointer_cast<IPeakFunction>(
+  IPeakFunction_sptr clonedProfile = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(m_profileTemplate));
   clonedProfile->setCentre(poldiPeak->q());
   clonedProfile->setFwhm(poldiPeak->fwhm(PoldiPeak::AbsoluteQ));
@@ -100,7 +100,7 @@ PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
 
   IFunction_sptr clonedBackground = m_backgroundTemplate->clone();
 
-  auto totalProfile = boost::make_shared<CompositeFunction>();
+  auto totalProfile = std::make_shared<CompositeFunction>();
   totalProfile->initialize();
   totalProfile->addFunction(clonedProfile);
   totalProfile->addFunction(clonedBackground);
@@ -113,14 +113,14 @@ PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
 }
 
 void PoldiFitPeaks1D::setValuesFromProfileFunction(
-    PoldiPeak_sptr poldiPeak, const IFunction_sptr &fittedFunction) const {
+    const PoldiPeak_sptr &poldiPeak,
+    const IFunction_sptr &fittedFunction) const {
   CompositeFunction_sptr totalFunction =
-      boost::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
+      std::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
 
   if (totalFunction) {
     IPeakFunction_sptr peakFunction =
-        boost::dynamic_pointer_cast<IPeakFunction>(
-            totalFunction->getFunction(0));
+        std::dynamic_pointer_cast<IPeakFunction>(totalFunction->getFunction(0));
 
     if (peakFunction) {
       poldiPeak->setIntensity(
@@ -134,8 +134,8 @@ void PoldiFitPeaks1D::setValuesFromProfileFunction(
   }
 }
 
-double
-PoldiFitPeaks1D::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const {
+double PoldiFitPeaks1D::getFwhmWidthRelation(
+    const IPeakFunction_sptr &peakFunction) const {
   return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
 
@@ -153,7 +153,7 @@ void PoldiFitPeaks1D::exec() {
 
   Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 
-  auto fitPlotGroup = boost::make_shared<WorkspaceGroup>();
+  auto fitPlotGroup = std::make_shared<WorkspaceGroup>();
 
   for (size_t i = 0; i < m_peaks->peakCount(); ++i) {
     PoldiPeak_sptr currentPeak = m_peaks->peak(i);

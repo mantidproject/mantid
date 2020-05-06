@@ -11,7 +11,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <memory>
 
@@ -40,31 +40,31 @@ public:
   MDGeometry(const MDGeometry &other);
   virtual ~MDGeometry();
   void initGeometry(
-      std::vector<boost::shared_ptr<Geometry::IMDDimension>> &dimensions);
+      std::vector<std::shared_ptr<Geometry::IMDDimension>> &dimensions);
 
   // --------------------------------------------------------------------------------------------
   // These are the main methods for dimensions, that CAN be overridden (e.g. by
   // MatrixWorkspace)
   virtual size_t getNumDims() const;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  virtual std::shared_ptr<const Mantid::Geometry::IMDDimension>
   getDimension(size_t index) const;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  virtual std::shared_ptr<const Mantid::Geometry::IMDDimension>
   getDimensionWithId(std::string id) const;
   size_t getDimensionIndexByName(const std::string &name) const;
   size_t getDimensionIndexById(const std::string &id) const;
-  std::vector<boost::shared_ptr<const Geometry::IMDDimension>>
+  std::vector<std::shared_ptr<const Geometry::IMDDimension>>
   getNonIntegratedDimensions() const;
   virtual std::vector<coord_t> estimateResolution() const;
 
   // --------------------------------------------------------------------------------------------
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
+  std::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
+  std::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
+  std::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
+  std::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
 
   std::string getGeometryXML() const;
 
-  void addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim);
+  void addDimension(const std::shared_ptr<Mantid::Geometry::IMDDimension> &dim);
   void addDimension(Mantid::Geometry::IMDDimension *dim);
 
   // --------------------------------------------------------------------------------------------
@@ -76,8 +76,8 @@ public:
   // --------------------------------------------------------------------------------------------
   bool hasOriginalWorkspace(size_t index = 0) const;
   size_t numOriginalWorkspaces() const;
-  boost::shared_ptr<Workspace> getOriginalWorkspace(size_t index = 0) const;
-  void setOriginalWorkspace(boost::shared_ptr<Workspace> ws, size_t index = 0);
+  std::shared_ptr<Workspace> getOriginalWorkspace(size_t index = 0) const;
+  void setOriginalWorkspace(std::shared_ptr<Workspace> ws, size_t index = 0);
   Mantid::API::CoordTransform const *
   getTransformFromOriginal(size_t index = 0) const;
   void setTransformFromOriginal(Mantid::API::CoordTransform *transform,
@@ -125,14 +125,14 @@ public:
 protected:
   /// Function called when observer objects recieves a notification
   void
-  deleteNotificationReceived(const boost::shared_ptr<const Workspace> &deleted);
+  deleteNotificationReceived(const std::shared_ptr<const Workspace> &deleted);
 
   /// Vector of the dimensions used, in the order X Y Z t, etc.
-  std::vector<boost::shared_ptr<Geometry::IMDDimension>> m_dimensions;
+  std::vector<std::shared_ptr<Geometry::IMDDimension>> m_dimensions;
 
   /// Pointer to the original workspace(s), if this workspace is a coordinate
   /// transformation from an original workspace.
-  std::vector<boost::shared_ptr<Workspace>> m_originalWorkspaces;
+  std::vector<std::shared_ptr<Workspace>> m_originalWorkspaces;
 
   /// Vector of the origin (in the original workspace) that corresponds to
   /// 0,0,0... in this workspace
@@ -140,12 +140,12 @@ protected:
 
   /// Coordinate Transformation that goes from the original workspace to this
   /// workspace's coordinates.
-  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform>>
+  std::vector<std::shared_ptr<const Mantid::API::CoordTransform>>
       m_transforms_FromOriginal;
 
   /// Coordinate Transformation that goes from this workspace's coordinates to
   /// the original workspace coordinates.
-  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform>>
+  std::vector<std::shared_ptr<const Mantid::API::CoordTransform>>
       m_transforms_ToOriginal;
 
   /// Helper that deals with notifications and observing the ADS

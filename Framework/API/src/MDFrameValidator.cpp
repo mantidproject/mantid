@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MDFrameValidator.h"
 #include "MantidKernel/IValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::Kernel::IValidator_sptr;
 
@@ -24,7 +24,7 @@ MDFrameValidator::MDFrameValidator(const std::string &frameName)
  * Clone the current state
  */
 Kernel::IValidator_sptr MDFrameValidator::clone() const {
-  return boost::make_shared<MDFrameValidator>(*this);
+  return std::make_shared<MDFrameValidator>(*this);
 }
 
 /** Checks that the frame of the MDWorkspace matches the expected frame.

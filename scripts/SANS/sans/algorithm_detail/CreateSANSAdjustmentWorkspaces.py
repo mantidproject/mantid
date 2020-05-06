@@ -8,8 +8,6 @@
     wavelength adjustment and pixel-and-wavelength adjustment workspaces.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment
 from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor

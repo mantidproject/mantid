@@ -41,7 +41,7 @@ using namespace Mantid::Kernel;
  */
 LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
                                                    QWidget *parentContainer,
-                                                   Qt::WFlags flags,
+                                                   const Qt::WFlags &flags,
                                                    size_t experimentInfoIndex)
     : SampleLogDialogBase(wsname, parentContainer, flags, experimentInfoIndex) {
 

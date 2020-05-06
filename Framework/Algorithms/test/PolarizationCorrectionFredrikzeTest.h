@@ -20,7 +20,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -47,7 +47,7 @@ public:
   }
 
   void test_set_wrong_workspace_type_throws() {
-    MatrixWorkspace_sptr ws = boost::make_shared<Workspace2D>();
+    MatrixWorkspace_sptr ws = std::make_shared<Workspace2D>();
     PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", ws),
@@ -74,12 +74,11 @@ public:
   }
 
   Mantid::API::WorkspaceGroup_sptr makeWorkspaceGroup() {
-    Mantid::API::WorkspaceGroup_sptr group =
-        boost::make_shared<WorkspaceGroup>();
+    Mantid::API::WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     return group;
   }
 
-  MatrixWorkspace_sptr makeEfficiencies(Workspace_sptr inWS,
+  MatrixWorkspace_sptr makeEfficiencies(const Workspace_sptr &inWS,
                                         const std::string &rho,
                                         const std::string &pp,
                                         const std::string &alpha = "",
@@ -103,7 +102,7 @@ public:
 
   void test_throw_if_PA_and_group_is_wrong_size_throws() {
     Mantid::API::WorkspaceGroup_sptr inWS =
-        boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+        std::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
@@ -125,7 +124,7 @@ public:
 
   void test_throw_if_PNR_and_group_is_wrong_size_throws() {
     Mantid::API::WorkspaceGroup_sptr inWS =
-        boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+        std::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
@@ -146,11 +145,11 @@ public:
 
   void test_throw_group_contains_other_workspace_types() {
     Mantid::API::WorkspaceGroup_sptr inWS =
-        boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+        std::make_shared<WorkspaceGroup>(); // Empty group ws.
 
-    inWS->addWorkspace(boost::make_shared<TableWorkspace>()); // Group now
-                                                              // contains a
-                                                              // table workspace
+    inWS->addWorkspace(std::make_shared<TableWorkspace>()); // Group now
+                                                            // contains a
+                                                            // table workspace
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
@@ -178,7 +177,7 @@ public:
 
   // If polynomials are unity, no changes should be made.
   void test_run_PA_unity() {
-    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
@@ -214,7 +213,8 @@ public:
     }
   }
 
-  void setInstrument(Workspace_sptr ws, const std::string &instrument_name) {
+  void setInstrument(const Workspace_sptr &ws,
+                     const std::string &instrument_name) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
     AnalysisDataService::Instance().addOrReplace("dummy", ws);
     alg->initialize();
@@ -225,7 +225,7 @@ public:
   }
 
   void test_run_PA_default() {
-    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
@@ -263,7 +263,7 @@ public:
   }
 
   void test_run_PA_default_no_instrument_parameters() {
-    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
@@ -285,7 +285,7 @@ public:
   }
 
   void test_run_PNR_unity() {
-    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     auto efficiencies =
@@ -345,7 +345,7 @@ public:
     MatrixWorkspace_sptr efficiencies = join_eff.getProperty("OutputWorkspace");
     TS_ASSERT(efficiencies);
 
-    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     auto Ipp = (Rpp * (Pp + 1.0) * (Ap + 1.0) +
                 Raa * (Pp * (-1.0) + 1.0) * (Ap * (-1.0) + 1.0) +
@@ -387,10 +387,10 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(),
                       groupWS->size());
 
-    auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(0));
-    auto out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(1));
-    auto out3 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(2));
-    auto out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(3));
+    auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(0));
+    auto out2 = std::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(1));
+    auto out3 = std::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(2));
+    auto out4 = std::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(3));
 
     TS_ASSERT_DELTA(out1->y(0)[0], 0.9, 1e-14);
     TS_ASSERT_DELTA(out2->y(0)[0], 0.8, 1e-14);

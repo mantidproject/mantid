@@ -38,7 +38,7 @@ public:
   ConvToMDHistoWS();
 
   size_t initialize(const MDWSDescription &WSD,
-                    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                    std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                     bool ignoreZeros) override;
 
   void runConversion(API::Progress *pProgress) override;

@@ -47,27 +47,27 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void validateManualGroups(std::map<std::string, std::string> &errors);
   void validateGroupsWorkspaces(std::map<std::string, std::string> &errors);
-  void validatePeriods(WorkspaceGroup_sptr inputWS,
+  void validatePeriods(const WorkspaceGroup_sptr &inputWS,
                        std::map<std::string, std::string> &errors);
 
-  WorkspaceGroup_sptr createGroupWorkspace(WorkspaceGroup_sptr inputWS);
-  MatrixWorkspace_sptr appendSpectra(MatrixWorkspace_sptr inputWS1,
-                                     MatrixWorkspace_sptr inputWS2);
+  WorkspaceGroup_sptr createGroupWorkspace(const WorkspaceGroup_sptr &inputWS);
+  MatrixWorkspace_sptr appendSpectra(const MatrixWorkspace_sptr &inputWS1,
+                                     const MatrixWorkspace_sptr &inputWS2);
 
   /// Perform an asymmetry calculation
-  MatrixWorkspace_sptr pairAsymmetryCalc(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr pairAsymmetryCalc(const MatrixWorkspace_sptr &inputWS,
                                          const double &alpha);
   MatrixWorkspace_sptr calcPairAsymmetryWithSummedAndSubtractedPeriods(
       const std::vector<int> &summedPeriods,
       const std::vector<int> &subtractedPeriods,
-      WorkspaceGroup_sptr groupedPeriods, const double &alpha);
+      const WorkspaceGroup_sptr &groupedPeriods, const double &alpha);
 
   /// Execute the algorithm if "SpecifyGroupsManually" is checked
   MatrixWorkspace_sptr execSpecifyGroupsManually();
 
   MatrixWorkspace_sptr execGroupWorkspaceInput();
 
-  void setPairAsymmetrySampleLogs(MatrixWorkspace_sptr workspace);
+  void setPairAsymmetrySampleLogs(const MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Muon

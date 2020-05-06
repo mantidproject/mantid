@@ -26,7 +26,6 @@
     instrument settings.
 
 """
-from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time
@@ -90,7 +89,7 @@ def validate_loader(func): # noqa
                         data_file = self._data_file
 
                     alg = mantid.api.AlgorithmManager.create(algorithm)
-                    if not isinstance(alg, mantid.api.AlgorithmProxy):
+                    if not isinstance(alg, mantid.api.IAlgorithm):
                         raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
                             type(alg)))
 
@@ -242,7 +241,7 @@ def validate_step(func): # noqa
                     if outputworkspace is None:
                         outputworkspace = inputworkspace
                     alg = mantid.AlgorithmManager.create(algorithm)
-                    if not isinstance(alg, mantid.api.AlgorithmProxy):
+                    if not isinstance(alg, mantid.api.IAlgorithm):
                         raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
                             type(alg)))
 

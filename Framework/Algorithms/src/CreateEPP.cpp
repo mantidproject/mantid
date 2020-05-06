@@ -49,7 +49,7 @@ const static std::string STATUS("FitStatus");
  *
  * @param ws The TableWorkspace to add the columns to.
  */
-void addEPPColumns(API::ITableWorkspace_sptr ws) {
+void addEPPColumns(const API::ITableWorkspace_sptr &ws) {
   ws->addColumn("int", ColumnNames::WS_INDEX);
   ws->addColumn("double", ColumnNames::PEAK_CENTRE);
   ws->addColumn("double", ColumnNames::PEAK_CENTRE_ERR);
@@ -87,16 +87,16 @@ const std::string CreateEPP::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CreateEPP::init() {
-  auto inputWSValidator = boost::make_shared<Kernel::CompositeValidator>();
-  inputWSValidator->add(boost::make_shared<API::InstrumentValidator>());
-  inputWSValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("TOF"));
+  auto inputWSValidator = std::make_shared<Kernel::CompositeValidator>();
+  inputWSValidator->add(std::make_shared<API::InstrumentValidator>());
+  inputWSValidator->add(std::make_shared<API::WorkspaceUnitValidator>("TOF"));
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, inputWSValidator),
                   "An input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The calculated output EPP table.");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::SIGMA, 0.0, mustBePositive,
                   "The value to fill the Sigma column with.");
@@ -110,7 +110,7 @@ void CreateEPP::exec() {
       getProperty(PropertyNames::INPUT_WORKSPACE);
   const auto &spectrumInfo = inputWS->spectrumInfo();
   API::ITableWorkspace_sptr outputWS =
-      boost::make_shared<DataObjects::TableWorkspace>();
+      std::make_shared<DataObjects::TableWorkspace>();
   addEPPColumns(outputWS);
   const double sigma = getProperty(PropertyNames::SIGMA);
   const size_t spectraCount = spectrumInfo.size();

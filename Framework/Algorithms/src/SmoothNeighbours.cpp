@@ -56,7 +56,7 @@ SmoothNeighbours::SmoothNeighbours()
 void SmoothNeighbours::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       INPUT_WORKSPACE, "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "The workspace containing the spectra to be averaged.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -64,17 +64,17 @@ void SmoothNeighbours::init() {
                   "the algorithm.");
 
   // Unsigned double
-  auto mustBePositiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDouble = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDouble->setLower(0.0);
 
   // Unsigned int.
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
   std::vector<std::string> propOptions{"Flat", "Linear", "Parabolic",
                                        "Gaussian"};
   declareProperty("WeightedSum", "Flat",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "What sort of Weighting scheme to use?\n"
                   "  Flat: Effectively no-weighting, all weights are 1.\n"
                   "  Linear: Linear weighting 1 - r/R from origin.\n"
@@ -139,7 +139,7 @@ void SmoothNeighbours::init() {
   std::vector<std::string> radiusPropOptions{"Meters", "NumberOfPixels"};
   declareProperty(
       "RadiusUnits", "Meters",
-      boost::make_shared<StringListValidator>(radiusPropOptions),
+      std::make_shared<StringListValidator>(radiusPropOptions),
       "Units used to specify the radius.\n"
       "  Meters : Radius is in meters.\n"
       "  NumberOfPixels : Radius is in terms of the number of pixels.");
@@ -193,23 +193,23 @@ void SmoothNeighbours::findNeighboursRectangular() {
   Progress prog(this, 0.0, 1.0, inst->nelements());
 
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector>> detList;
+  std::vector<std::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
+    std::shared_ptr<RectangularDetector> det;
+    std::shared_ptr<ICompAssembly> assem;
+    std::shared_ptr<ICompAssembly> assem2;
 
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
       detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
       // for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
+      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
-          det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
+          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             detList.emplace_back(det);
 
@@ -218,10 +218,10 @@ void SmoothNeighbours::findNeighboursRectangular() {
             // PG3).
             // We are not doing a full recursive search since that will be very
             // long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
+            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = boost::dynamic_pointer_cast<RectangularDetector>(
+                det = std::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
@@ -273,7 +273,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   // Loop through the RectangularDetector's we listed before.
   for (Iter1 = v1.begin(); Iter1 != v1.end(); ++Iter1) {
     int i = (*Iter1).second;
-    boost::shared_ptr<RectangularDetector> det = detList[i];
+    std::shared_ptr<RectangularDetector> det = detList[i];
     std::string det_name = det->getName();
     if (det) {
       for (int j = 0; j < det->xpixels(); j += SumX) {
@@ -348,8 +348,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   // Go through every input workspace pixel
   outWI = 0;
   int sum = getProperty("SumNumberOfNeighbours");
-  boost::shared_ptr<const Geometry::IComponent> parent, neighbParent,
-      grandparent, neighbGParent;
+  std::shared_ptr<const Geometry::IComponent> parent, neighbParent, grandparent,
+      neighbGParent;
   auto used = new bool[inWS->getNumberHistograms()];
   if (sum > 1) {
     for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++)
@@ -558,8 +558,7 @@ void SmoothNeighbours::exec() {
   else
     findNeighboursUbiqutious();
 
-  EventWorkspace_sptr wsEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(inWS);
+  EventWorkspace_sptr wsEvent = std::dynamic_pointer_cast<EventWorkspace>(inWS);
   if (wsEvent)
     wsEvent->sortAll(TOF_SORT, m_progress.get());
 
@@ -584,11 +583,11 @@ void SmoothNeighbours::execWorkspace2D() {
 
   MatrixWorkspace_sptr outWS;
   // Make a brand new Workspace2D
-  if (boost::dynamic_pointer_cast<OffsetsWorkspace>(inWS)) {
+  if (std::dynamic_pointer_cast<OffsetsWorkspace>(inWS)) {
     g_log.information() << "Creating new OffsetsWorkspace\n";
     outWS = MatrixWorkspace_sptr(new OffsetsWorkspace(inWS->getInstrument()));
   } else {
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra,
                                                  YLength + 1, YLength));
   }
@@ -685,7 +684,7 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace &outws) const {
 //--------------------------------------------------------------------------------------------
 /** Spread the average over all the pixels
  */
-void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
+void SmoothNeighbours::spreadPixels(const MatrixWorkspace_sptr &outws) {
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = inWS->getNumberHistograms();
 
@@ -693,11 +692,11 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
 
   MatrixWorkspace_sptr outws2;
   // Make a brand new Workspace2D
-  if (boost::dynamic_pointer_cast<OffsetsWorkspace>(inWS)) {
+  if (std::dynamic_pointer_cast<OffsetsWorkspace>(inWS)) {
     g_log.information() << "Creating new OffsetsWorkspace\n";
     outws2 = MatrixWorkspace_sptr(new OffsetsWorkspace(inWS->getInstrument()));
   } else {
-    outws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    outws2 = std::dynamic_pointer_cast<MatrixWorkspace>(
         API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra,
                                                  YLength + 1, YLength));
   }
@@ -738,7 +737,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
 
   EventWorkspace_sptr outWS;
   // Make a brand new EventWorkspace
-  outWS = boost::dynamic_pointer_cast<EventWorkspace>(
+  outWS = std::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", numberOfSpectra, YLength + 1, YLength));
   // Copy geometry over.
@@ -747,7 +746,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
   outWS->sortAll(TOF_SORT, nullptr);
 
   this->setProperty("OutputWorkspace",
-                    boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
+                    std::dynamic_pointer_cast<MatrixWorkspace>(outWS));
 
   // Go through all the output workspace
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outWS))

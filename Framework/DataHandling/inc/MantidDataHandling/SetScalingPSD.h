@@ -86,7 +86,8 @@ private:
                std::map<int, Kernel::V3D> &posMap,
                std::map<int, double> &scaleMap);
   /// read the positions of detectors defined in the raw file
-  void getDetPositionsFromRaw(std::string rawfile, std::vector<int> &detID,
+  void getDetPositionsFromRaw(const std::string &rawfile,
+                              std::vector<int> &detID,
                               std::vector<Kernel::V3D> &pos);
 };
 

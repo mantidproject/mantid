@@ -48,8 +48,8 @@ private:
     return new MementoTableWorkspace();
   }
 
-  static bool expectedColumn(Mantid::API::Column_const_sptr expected,
-                             Mantid::API::Column_const_sptr candidate);
+  static bool expectedColumn(const Mantid::API::Column_const_sptr &expected,
+                             const Mantid::API::Column_const_sptr &candidate);
 };
 } // namespace DataObjects
 } // namespace Mantid

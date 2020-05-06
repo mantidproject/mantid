@@ -11,8 +11,6 @@
 # Here we run the calibration of a selected part of MAPS consisting of several components
 # by running setTubeSpecByString several times.
 
-from __future__ import absolute_import, division, print_function
-
 import tube
 from tube_spec import TubeSpec
 import mantid.simpleapi as mantid

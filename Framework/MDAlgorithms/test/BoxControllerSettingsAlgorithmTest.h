@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/format.hpp>
+#include <utility>
 
 #include <cxxtest/TestSuite.h>
 
@@ -47,8 +48,9 @@ private:
   Helper function. Runs LoadParameterAlg, to get an instrument parameter
   definition from a file onto a workspace.
   */
-  void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws,
-                                                    const ScopedFile &file) {
+  void
+  apply_instrument_parameter_file_to_workspace(const MatrixWorkspace_sptr &ws,
+                                               const ScopedFile &file) {
     // Load the Instrument Parameter file over the existing test workspace +
     // instrument.
     using DataHandling::LoadParameterFile;
@@ -63,7 +65,7 @@ private:
   MatrixWorkspace_sptr
   create_workspace_with_splitting_params(int splitThreshold, int splitInto,
                                          int maxRecursionDepth) {
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, 2, 1);
     ws->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0.0));
@@ -119,9 +121,9 @@ public:
     TS_ASSERT_EQUALS(bc->getMaxDepth(), 34);
   }
 
-  void doTest(BoxController_sptr bc, std::string SplitInto = "",
-              std::string SplitThreshold = "",
-              std::string MaxRecursionDepth = "") {
+  void doTest(const BoxController_sptr &bc, const std::string &SplitInto = "",
+              const std::string &SplitThreshold = "",
+              const std::string &MaxRecursionDepth = "") {
     BoxControllerSettingsAlgorithmImpl alg;
     alg.initBoxControllerProps();
     if (!SplitInto.empty())
@@ -130,7 +132,7 @@ public:
       alg.setPropertyValue("SplitThreshold", SplitThreshold);
     if (!MaxRecursionDepth.empty())
       alg.setPropertyValue("MaxRecursionDepth", MaxRecursionDepth);
-    alg.setBoxController(bc);
+    alg.setBoxController(std::move(bc));
   }
 
   void test_SplitInto() {
@@ -230,7 +232,7 @@ public:
   void test_with_no_instrument_parameters() {
     // Create a workspace with an instrument, but no instrument parameters for
     // box splitting.
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, 2, 1);
     ws->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));

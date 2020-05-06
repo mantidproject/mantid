@@ -85,7 +85,7 @@ public:
   }
 
 private:
-  void checkFRCorrection(std::string wsName, double expectedValuePeak1,
+  void checkFRCorrection(const std::string &wsName, double expectedValuePeak1,
                          double expectedValuePeak2) {
     Mantid::MDAlgorithms::BinMD algBin;
     TS_ASSERT_THROWS_NOTHING(algBin.initialize())
@@ -100,10 +100,9 @@ private:
     TS_ASSERT(algBin.isExecuted());
     Mantid::DataObjects::MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out =
-            boost::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(
-                Mantid::API::AnalysisDataService::Instance().retrieve(wsName +
-                                                                      "bin"));)
+        out = std::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(wsName +
+                                                                  "bin"));)
     TS_ASSERT(out);
     auto sig = out->getSignalDataVector();
     TS_ASSERT_DELTA(out->getSignalAt(0, 0), 100. * expectedValuePeak1, 1e-5);
@@ -156,7 +155,7 @@ private:
     alg.execute();
     // Add log
     Mantid::API::IMDEventWorkspace_sptr out =
-        boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
     Mantid::API::ExperimentInfo_sptr ei(new Mantid::API::ExperimentInfo);
     out->addExperimentInfo(ei);

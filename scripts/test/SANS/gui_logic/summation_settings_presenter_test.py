@@ -8,7 +8,7 @@ import unittest
 
 from assert_called import assert_called
 from fake_signal import FakeSignal
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import BinningType
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter

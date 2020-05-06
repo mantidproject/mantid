@@ -14,7 +14,7 @@
 #include <QGLWidget>
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {

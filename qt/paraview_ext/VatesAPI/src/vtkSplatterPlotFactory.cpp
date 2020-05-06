@@ -416,7 +416,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
     // Slice from >3D down to 3D
     this->slice = true;
     this->sliceMask = std::make_unique<bool[]>(nd);
-    this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
+    this->sliceImplicitFunction = std::make_shared<MDImplicitFunction>();
     // Make the mask of dimensions
     // TODO: Smarter mapping
     for (size_t d = 0; d < nd; d++)
@@ -450,9 +450,9 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
 
   // Check for the workspace type, i.e. if it is MDHisto or MDEvent
   IMDEventWorkspace_sptr eventWorkspace =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
   IMDHistoWorkspace_sptr histoWorkspace =
-      boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
 
   if (eventWorkspace) {
     // Macro to call the right instance of the
@@ -476,7 +476,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
  * @param ws : Workspace to use.
  */
 void vtkSplatterPlotFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
-  this->m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+  this->m_workspace = std::dynamic_pointer_cast<IMDWorkspace>(ws);
   this->validate();
 }
 
@@ -496,9 +496,9 @@ void vtkSplatterPlotFactory::validate() const {
   // Make sure that the workspace is either an MDEvent Workspace or an
   // MDHistoWorkspace
   IMDEventWorkspace_sptr eventWorkspace =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
   IMDHistoWorkspace_sptr histoWorkspace =
-      boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
 
   if (!eventWorkspace && !histoWorkspace) {
     throw std::runtime_error(

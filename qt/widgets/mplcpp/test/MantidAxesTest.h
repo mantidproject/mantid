@@ -33,7 +33,7 @@ public:
 
   void testPlotWithWorkspaceReturnsLineForValidWsIndex() {
     using Mantid::DataObjects::create;
-    const auto ws = boost::shared_ptr<Workspace2D>(
+    const auto ws = std::shared_ptr<Workspace2D>(
         create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
     MantidAxes axes{pyAxes()};
     auto line = axes.plot(ws, 0, "red", "mylabel");
@@ -43,7 +43,7 @@ public:
 
   void testErrorbarWithWorkspaceReturnsLineForValidWsIndex() {
     using Mantid::DataObjects::create;
-    const auto ws = boost::shared_ptr<Workspace2D>(
+    const auto ws = std::shared_ptr<Workspace2D>(
         create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
     MantidAxes axes{pyAxes()};
     auto errbar = axes.errorbar(ws, 0, "red", "mylabel");
@@ -112,7 +112,7 @@ public:
   // ----------------- failure tests ----------------------
   void testPlotWithWorkspaceInvalidWsIndexThrows() {
     using Mantid::DataObjects::create;
-    const auto ws = boost::shared_ptr<Workspace2D>(
+    const auto ws = std::shared_ptr<Workspace2D>(
         create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
     MantidAxes axes{pyAxes()};
     TS_ASSERT_THROWS(axes.plot(ws, 2, "red", "mylabel"),
@@ -136,7 +136,7 @@ private:
   Workspace2D_sptr
   createWorkspaceInADS(const std::string &name,
                        const std::initializer_list<double> &binEdges) {
-    const auto ws = boost::shared_ptr<Workspace2D>(
+    const auto ws = std::shared_ptr<Workspace2D>(
         create<Workspace2D>(2, Histogram(BinEdges{binEdges})).release());
     // replacement is based on names and the only way to set a name is to
     // add the object to the ADS

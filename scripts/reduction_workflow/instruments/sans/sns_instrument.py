@@ -8,8 +8,6 @@
 """
     Instrument-specific utility functions for EQSANS
 """
-from __future__ import (absolute_import, division, print_function)
-
 from .hfir_instrument import _get_pixel_info
 
 

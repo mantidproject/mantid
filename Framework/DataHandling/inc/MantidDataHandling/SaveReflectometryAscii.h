@@ -49,22 +49,22 @@ private:
   /// Algorithm execution for WorkspaceGroups
   bool processGroups() override;
   /// Check file validity
-  void checkFile(const std::string filename);
+  void checkFile(const std::string &filename);
   /// Write the data
   void data();
   /// Print a double value to file
   void outputval(double val);
   /// Write a string value
-  bool writeString(bool write, std::string s);
+  bool writeString(bool write, const std::string &s);
   /// Print a string value to file
-  void outputval(std::string val);
+  void outputval(const std::string &val);
   /// Retrieve sample log value
   std::string sampleLogValue(const std::string &logName);
   /// Retrieve sample log unit
   std::string sampleLogUnit(const std::string &logName);
   /// Write one header line
-  void writeInfo(const std::string logName,
-                 const std::string logNameFixed = "");
+  void writeInfo(const std::string &logName,
+                 const std::string &logNameFixed = "");
   /// Write header
   void header();
   /// Determine the separator

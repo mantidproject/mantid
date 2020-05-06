@@ -98,7 +98,8 @@ BankPulseTimes::~BankPulseTimes() { delete[] this->pulseTimes; }
  * @return true if the pulse times are the same and so don't need to be
  * reloaded.
  */
-bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime) {
+bool BankPulseTimes::equals(size_t otherNumPulse,
+                            const std::string &otherStartTime) {
   return ((this->startTime == otherStartTime) &&
           (this->numPulses == otherNumPulse));
 }

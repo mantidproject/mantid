@@ -19,6 +19,7 @@
 #include <QtCore>
 
 #include <algorithm>
+#include <utility>
 
 /// Logger
 Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
@@ -263,7 +264,7 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
 size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
     const std::string &functionName) const {
   auto fittingFunction = m_fittingModel->getFittingFunction();
-  if (fittingFunction->nFunctions() > 0)
+  if (fittingFunction && fittingFunction->nFunctions() > 0)
     return getNumberOfSpecificFunctionContained(
         functionName, fittingFunction->getFunction(0).get());
   else
@@ -643,7 +644,7 @@ void IndirectFitAnalysisTab::setEditResultVisible(bool visible) {
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
-    IAlgorithm_sptr fitAlgorithm) const {
+    const IAlgorithm_sptr &fitAlgorithm) const {
   fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
   fitAlgorithm->setProperty("MaxIterations",
                             m_fitPropertyBrowser->maxIterations());
@@ -674,14 +675,14 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
 void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateSingleFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 

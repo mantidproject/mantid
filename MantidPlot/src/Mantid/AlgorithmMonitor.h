@@ -34,7 +34,7 @@ public:
   /// Destructor
   ~AlgorithmMonitor() override;
   /// Add algorithm to monitor
-  void add(Mantid::API::IAlgorithm_sptr alg);
+  void add(const Mantid::API::IAlgorithm_sptr &alg);
   /// Removes stopped algorithm
   void remove(const Mantid::API::IAlgorithm *alg);
 
@@ -116,7 +116,7 @@ private:
 class AlgButton : public QPushButton {
   Q_OBJECT
 public:
-  AlgButton(const QString &text, Mantid::API::IAlgorithm_sptr alg)
+  AlgButton(const QString &text, const Mantid::API::IAlgorithm_sptr &alg)
       : QPushButton(text), m_alg(alg->getAlgorithmID()) {
     connect(this, SIGNAL(clicked()), this, SLOT(sendClicked()));
   }

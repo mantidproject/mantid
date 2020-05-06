@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=R0914,R0912,R0913
 # Utility methods for Fullprof
-from __future__ import (absolute_import, division, print_function)
 import os
 import math
 

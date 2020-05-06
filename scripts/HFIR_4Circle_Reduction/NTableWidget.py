@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103,R0904
 # N(DAV)TableWidget
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
 import csv
 from qtpy.QtWidgets import (QCheckBox, QTableWidget, QTableWidgetItem)  # noqa
 from qtpy import QtCore  # noqa

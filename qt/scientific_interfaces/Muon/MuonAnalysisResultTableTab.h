@@ -77,7 +77,7 @@ private:
    * @return Retrieved workspace
    */
   template <typename T>
-  static boost::shared_ptr<T> retrieveWSChecked(const std::string &wsName) {
+  static std::shared_ptr<T> retrieveWSChecked(const std::string &wsName) {
     auto ws =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(wsName);
 
@@ -98,7 +98,8 @@ private:
   void populateLogsAndValues(const QStringList &fittedWsList);
   void populateFittings(
       const QStringList &names,
-      std::function<Mantid::API::Workspace_sptr(const QString &)> wsFromName);
+      const std::function<Mantid::API::Workspace_sptr(const QString &)>
+          &wsFromName);
 
   /// Creates the results table
   void createTable(bool multipleFits);

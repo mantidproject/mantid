@@ -97,9 +97,9 @@ private:
 };
 
 /// shared pointer to the RebinnedOutput class
-using RebinnedOutput_sptr = boost::shared_ptr<RebinnedOutput>;
+using RebinnedOutput_sptr = std::shared_ptr<RebinnedOutput>;
 /// shared pointer to a const RebinnedOutput
-using RebinnedOutput_const_sptr = boost::shared_ptr<const RebinnedOutput>;
+using RebinnedOutput_const_sptr = std::shared_ptr<const RebinnedOutput>;
 
 } // namespace DataObjects
 } // namespace Mantid

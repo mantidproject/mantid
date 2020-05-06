@@ -60,7 +60,7 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
     : QGroupBox(w), m_execDurationlabel(nullptr), m_execDurationEdit(nullptr),
       m_Datelabel(nullptr), m_execDateTimeEdit(nullptr), m_algexecDuration() {}
 
-AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
+AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(const QString &title, QWidget *w)
     : QGroupBox(title, w), m_execDurationlabel(nullptr),
       m_execDurationEdit(nullptr), m_Datelabel(nullptr),
       m_execDateTimeEdit(nullptr), m_algexecDuration() {
@@ -135,7 +135,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QWidget *w)
       m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
       m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {}
 
-AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
+AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(const QString &title, QWidget *w)
     : QGroupBox(title, w), m_osNameLabel(nullptr), m_osNameEdit(nullptr),
       m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
       m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {
@@ -202,7 +202,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
 }
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
-    QWidget *parent, const boost::shared_ptr<const Workspace> wsptr)
+    QWidget *parent, const std::shared_ptr<const Workspace> &wsptr)
     : QDialog(parent), m_algHist(wsptr->getHistory()),
       m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
@@ -464,13 +464,13 @@ void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(
 }
 
 void AlgorithmHistoryWindow::updateAll(
-    Mantid::API::AlgorithmHistory_const_sptr algHistory) {
+    const Mantid::API::AlgorithmHistory_const_sptr &algHistory) {
   updateAlgHistoryProperties(algHistory);
   updateExecSummaryGrpBox(algHistory);
 }
 
 void AlgorithmHistoryWindow::updateAlgHistoryProperties(
-    AlgorithmHistory_const_sptr algHistory) {
+    const AlgorithmHistory_const_sptr &algHistory) {
   PropertyHistories histProp = algHistory->getProperties();
   if (m_histPropWindow) {
     m_histPropWindow->setAlgProperties(histProp);
@@ -480,7 +480,7 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(
 }
 
 void AlgorithmHistoryWindow::updateExecSummaryGrpBox(
-    AlgorithmHistory_const_sptr algHistory) {
+    const AlgorithmHistory_const_sptr &algHistory) {
   // getting the selected algorithm at pos from History vector
   double duration = algHistory->executionDuration();
   Mantid::Types::Core::DateAndTime date = algHistory->executionDate();
@@ -766,7 +766,8 @@ void AlgHistoryTreeWidget::populateAlgHistoryTreeWidget(
 }
 
 void AlgHistoryTreeWidget::populateNestedHistory(
-    AlgHistoryItem *parentWidget, Mantid::API::AlgorithmHistory_sptr history) {
+    AlgHistoryItem *parentWidget,
+    const Mantid::API::AlgorithmHistory_sptr &history) {
   const Mantid::API::AlgorithmHistories &entries = history->getChildHistories();
   if (history->childHistorySize() > 0) {
     parentWidget->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable |

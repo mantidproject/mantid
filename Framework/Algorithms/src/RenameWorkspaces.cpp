@@ -30,7 +30,7 @@ void RenameWorkspaces::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Names of the Input Workspaces");
   // WorkspaceNames - List of new names
   declareProperty(std::make_unique<ArrayProperty<std::string>>(

@@ -36,9 +36,8 @@ namespace MantidWidgets {
 class ColorBarWidget;
 class SafeQwtPlot;
 
-using MWDimension_sptr = boost::shared_ptr<Mantid::API::MWDimension>;
-using MWDimension_const_sptr =
-    boost::shared_ptr<const Mantid::API::MWDimension>;
+using MWDimension_sptr = std::shared_ptr<Mantid::API::MWDimension>;
+using MWDimension_const_sptr = std::shared_ptr<const Mantid::API::MWDimension>;
 
 /** A 2D viewer for a Matrix Workspace.
  *
@@ -58,8 +57,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING MWView
 public:
   MWView(QWidget *parent = nullptr);
   ~MWView() override;
-  void loadColorMap(QString filename = QString());
-  void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  void loadColorMap(const QString &filename = QString());
+  void setWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
   void updateDisplay();
   SafeQwtPlot *getPlot2D();
 
@@ -71,7 +70,7 @@ public slots:
 protected:
   void preDeleteHandle(
       const std::string &workspaceName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 private:
   void initLayout();
@@ -91,7 +90,7 @@ private:
   /// File of the last loaded color map.
   QString m_currentColorMapFile;
   /// Md Settings for color maps
-  boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
+  std::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
   /// Workspace being shown
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   /// Default workspace shown if no data is loaded

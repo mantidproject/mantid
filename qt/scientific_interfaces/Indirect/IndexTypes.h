@@ -25,6 +25,8 @@ namespace IDA {
 template <int Class> struct IndexType {
   using IntImplementationType = int;
   IntImplementationType value = 0;
+  IndexType() noexcept : value(0) {}
+  IndexType(IntImplementationType data) noexcept : value(data) {}
   IndexType operator+(IndexType index) const {
     return IndexType{value + index.value};
   }

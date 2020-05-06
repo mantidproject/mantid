@@ -16,7 +16,7 @@
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ProgressPresenter;
 

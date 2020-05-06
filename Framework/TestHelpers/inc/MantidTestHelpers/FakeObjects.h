@@ -728,8 +728,9 @@ public:
 
     throw std::runtime_error("Not Implemented");
   }
-  MDHistoWorkspaceTester(MDHistoDimension_sptr dimX, MDHistoDimension_sptr dimY,
-                         MDHistoDimension_sptr dimZ) {
+  MDHistoWorkspaceTester(const MDHistoDimension_sptr &dimX,
+                         const MDHistoDimension_sptr &dimY,
+                         const MDHistoDimension_sptr &dimZ) {
     std::vector<IMDDimension_sptr> dimensions{dimX, dimY, dimZ};
     initGeometry(dimensions);
   }

@@ -458,7 +458,7 @@ private:
       xValues = xBins;
       set1DSpectrumEmpty();
       auto space =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
       space->dataY(0).assign(yarray, yarray + ndata);
       space->dataE(0).assign(ndata, 1.0);
       outputName = "out";

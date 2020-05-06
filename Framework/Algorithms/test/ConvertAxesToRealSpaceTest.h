@@ -55,10 +55,10 @@ public:
     do_algorithm_run(baseWSName, "phi", "signed2theta", 100, 200);
   }
 
-  MatrixWorkspace_sptr do_algorithm_run(std::string baseWSName,
-                                        std::string verticalAxis,
-                                        std::string horizontalAxis, int nHBins,
-                                        int nVBins) {
+  MatrixWorkspace_sptr do_algorithm_run(const std::string &baseWSName,
+                                        const std::string &verticalAxis,
+                                        const std::string &horizontalAxis,
+                                        int nHBins, int nVBins) {
     std::string inWSName(baseWSName + "_InputWS");
     std::string outWSName(baseWSName + "_OutputWS");
 

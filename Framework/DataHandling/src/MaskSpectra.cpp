@@ -44,7 +44,7 @@ void MaskSpectra::init() {
 }
 
 void MaskSpectra::exec() {
-  boost::shared_ptr<MatrixWorkspace> inputWS;
+  std::shared_ptr<MatrixWorkspace> inputWS;
   Indexing::SpectrumIndexSet indexSet;
   std::tie(inputWS, indexSet) =
       getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");

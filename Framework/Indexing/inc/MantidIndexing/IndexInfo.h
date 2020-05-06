@@ -87,8 +87,9 @@ public:
 
   void
   setSpectrumDefinitions(std::vector<SpectrumDefinition> spectrumDefinitions);
-  void setSpectrumDefinitions(
-      Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
+  void
+  setSpectrumDefinitions(const Kernel::cow_ptr<std::vector<SpectrumDefinition>>
+                             &spectrumDefinitions);
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
   spectrumDefinitions() const;
 

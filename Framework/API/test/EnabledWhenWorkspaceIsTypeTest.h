@@ -37,10 +37,9 @@ public:
   };
 
   void test_enable_disable() {
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
-    boost::shared_ptr<WorkspaceTesterSubClass> ws2 =
-        boost::make_shared<WorkspaceTesterSubClass>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTesterSubClass> ws2 =
+        std::make_shared<WorkspaceTesterSubClass>();
     AnalysisDataService::Instance().addOrReplace("tester", ws1);
     AnalysisDataService::Instance().addOrReplace("testersub", ws2);
 

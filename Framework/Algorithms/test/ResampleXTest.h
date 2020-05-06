@@ -211,7 +211,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)
@@ -221,7 +221,6 @@ public:
     vector<double> xmins = alg.getProperty("XMin");
     vector<double> xmaxs = alg.getProperty("XMax");
     int nBins = alg.getProperty("NumberBins");
-    double deltaBin;
 
     // Define tolerance for ASSERT_DELTA
     double tolerance = 1.0e-10;
@@ -230,7 +229,8 @@ public:
     for (int yIndex = 0; yIndex < ylen; ++yIndex) {
 
       // The bin width for the current spectrum
-      deltaBin = (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
+      double deltaBin =
+          (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
 
       // Check the axes lengths
       TS_ASSERT_EQUALS(outWS->x(yIndex).size(), nBins + 1);
@@ -334,7 +334,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)
@@ -344,7 +344,6 @@ public:
     vector<double> xmins = alg.getProperty("XMin");
     vector<double> xmaxs = alg.getProperty("XMax");
     int nBins = alg.getProperty("NumberBins");
-    double deltaBin;
 
     // Define tolerance for ASSERT_DELTA
     double tolerance = 1.0e-10;
@@ -354,7 +353,8 @@ public:
     for (int yIndex = 0; yIndex < ylen; ++yIndex) {
 
       // The bin width for the current spectrum
-      deltaBin = (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
+      double deltaBin =
+          (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
 
       // Check the axes lengths
       TS_ASSERT_EQUALS(outWS->x(yIndex).size(), nBins + 1);

@@ -23,7 +23,7 @@ using namespace Mantid::API;
 
 void FunctionModel::setFunction(IFunction_sptr fun) {
   m_globalParameterNames.clear();
-  m_function = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+  m_function = std::dynamic_pointer_cast<MultiDomainFunction>(fun);
   if (m_function) {
     return;
   }
@@ -44,7 +44,7 @@ IFunction_sptr FunctionModel::getFitFunction() const {
   auto const nf = m_function->nFunctions();
   if (nf > 1) {
     auto fun =
-        boost::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
+        std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
     auto const singleFun = m_function->getFunction(0);
     for (auto par = m_globalParameterNames.begin();
          par != m_globalParameterNames.end();) {
@@ -64,7 +64,7 @@ IFunction_sptr FunctionModel::getFitFunction() const {
   }
   if (nf == 1) {
     auto fun = m_function->getFunction(0);
-    auto compFun = boost::dynamic_pointer_cast<CompositeFunction>(fun);
+    auto compFun = std::dynamic_pointer_cast<CompositeFunction>(fun);
     if (compFun && compFun->nFunctions() == 1) {
       return compFun->getFunction(0);
     }
@@ -90,7 +90,7 @@ void FunctionModel::addFunction(const QString &prefix, const QString &funStr) {
   for (int i = 0; i < nf; ++i) {
     auto fun = getSingleFunction(i);
     auto parentFun = getFunctionWithPrefix(prefix, fun);
-    auto cf = boost::dynamic_pointer_cast<CompositeFunction>(parentFun);
+    auto cf = std::dynamic_pointer_cast<CompositeFunction>(parentFun);
     if (cf) {
       cf->addFunction(newFun->clone());
     } else if (i == 0 && prefix.isEmpty()) {
@@ -117,7 +117,7 @@ void FunctionModel::removeFunction(const QString &functionIndex) {
   for (int i = 0; i < nf; ++i) {
     auto fun = getSingleFunction(i);
     auto parentFun = getFunctionWithPrefix(prefix, fun);
-    auto cf = boost::dynamic_pointer_cast<CompositeFunction>(parentFun);
+    auto cf = std::dynamic_pointer_cast<CompositeFunction>(parentFun);
     if (!cf) {
       throw std::runtime_error("Function at " + prefix.toStdString() +
                                " is not composite.");
@@ -178,7 +178,8 @@ void FunctionModel::setParameterFixed(const QString &parName, bool fixed) {
                          fixed);
 }
 
-void FunctionModel::setParameterTie(const QString &parName, QString tie) {
+void FunctionModel::setParameterTie(const QString &parName,
+                                    const QString &tie) {
   setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
 }
 
@@ -461,7 +462,7 @@ QString FunctionModel::setBackgroundA0(double value) {
                ? "A0"
                : "";
   };
-  auto const cf = boost::dynamic_pointer_cast<CompositeFunction>(fun);
+  auto const cf = std::dynamic_pointer_cast<CompositeFunction>(fun);
   if (cf) {
     if (fun->name() != "CompositeFunction")
       return QString();

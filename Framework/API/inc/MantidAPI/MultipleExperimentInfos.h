@@ -27,7 +27,7 @@ public:
 
   ExperimentInfo_const_sptr getExperimentInfo(const uint16_t runIndex) const;
 
-  uint16_t addExperimentInfo(ExperimentInfo_sptr ei);
+  uint16_t addExperimentInfo(const ExperimentInfo_sptr &ei);
 
   void setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei);
 
@@ -47,9 +47,9 @@ private:
   std::vector<ExperimentInfo_sptr> m_expInfos;
 };
 
-using MultipleExperimentInfos_sptr = boost::shared_ptr<MultipleExperimentInfos>;
+using MultipleExperimentInfos_sptr = std::shared_ptr<MultipleExperimentInfos>;
 using MultipleExperimentInfos_const_sptr =
-    boost::shared_ptr<const MultipleExperimentInfos>;
+    std::shared_ptr<const MultipleExperimentInfos>;
 
 } // namespace API
 } // namespace Mantid

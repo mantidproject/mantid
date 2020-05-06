@@ -12,16 +12,12 @@ Unit test for Vesuvio corrections steps
 Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import numpy as np
 
 from mantid.api import *
 import mantid.simpleapi as ms
 from mantid import *
-from six import iteritems
-
-
 # ====================================Helper Functions=======================================
 
 
@@ -58,7 +54,7 @@ def _create_algorithm(**kwargs):
     alg.setProperty("CorrectionWorkspaces", "__Correction")
     alg.setProperty("CorrectedWorkspaces", "__Corrected")
     alg.setProperty("LinearFitResult", "__LinearFit")
-    for key, value in iteritems(kwargs):
+    for key, value in kwargs.items():
         alg.setProperty(key, value)
     return alg
 

@@ -20,34 +20,33 @@ namespace Geometry {
   @param  Edge         Number of edge points for each bank
   @return True if peak is on edge
 */
-bool edgePixel(Mantid::Geometry::Instrument_const_sptr inst,
-               std::string bankName, int col, int row, int Edge) {
+bool edgePixel(const Mantid::Geometry::Instrument_const_sptr &inst,
+               const std::string &bankName, int col, int row, int Edge) {
   if (bankName == "None")
     return false;
-  boost::shared_ptr<const Geometry::IComponent> parent =
+  std::shared_ptr<const Geometry::IComponent> parent =
       inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const Geometry::RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
-            parent);
+    std::shared_ptr<const Geometry::RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(parent);
 
     return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
            row >= (RDet->ypixels() - Edge);
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     int startI = 1;
     if (children[0]->getName() == "sixteenpack") {
       startI = 0;
       parent = children[0];
       children.clear();
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
     }
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     auto NROWS = static_cast<int>(grandchildren.size());

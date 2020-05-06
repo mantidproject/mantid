@@ -60,21 +60,22 @@ public:
 
 private:
   /// Handle logic for RebinnedOutput workspaces
-  void doFractionalSum(API::MatrixWorkspace_sptr outputWorkspace,
+  void doFractionalSum(const API::MatrixWorkspace_sptr &outputWorkspace,
                        API::Progress &progress, size_t &numSpectra,
                        size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
-  void doSimpleSum(API::MatrixWorkspace_sptr outputWorkspace,
+  void doSimpleSum(const API::MatrixWorkspace_sptr &outputWorkspace,
                    API::Progress &progress, size_t &numSpectra,
                    size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void execEvent(API::MatrixWorkspace_sptr outputWorkspace,
+  void execEvent(const API::MatrixWorkspace_sptr &outputWorkspace,
                  API::Progress &progress, size_t &numSpectra, size_t &numMasked,
                  size_t &numZeros);
-  specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
+  specnum_t
+  getOutputSpecNo(const API::MatrixWorkspace_const_sptr &localworkspace);
 
   API::MatrixWorkspace_sptr replaceSpecialValues();
   void determineIndices(const size_t numberOfSpectra);

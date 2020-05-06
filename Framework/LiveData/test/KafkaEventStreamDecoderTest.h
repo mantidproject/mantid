@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
-
+#include "KafkaTestThreadHelper.h"
 #include "KafkaTesting.h"
+
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
@@ -19,17 +19,14 @@
 
 #include <Poco/Path.h>
 #include <condition_variable>
+#include <cxxtest/TestSuite.h>
+#include <iostream>
 #include <thread>
+
+using Mantid::LiveData::KafkaEventStreamDecoder;
 
 class KafkaEventStreamDecoderTest : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static KafkaEventStreamDecoderTest *createSuite() {
-    return new KafkaEventStreamDecoderTest();
-  }
-  static void destroySuite(KafkaEventStreamDecoderTest *suite) { delete suite; }
-
   void setUp() override {
     // Temporarily change the instrument directory to the testing one
     using Mantid::Kernel::ConfigService;
@@ -69,24 +66,26 @@ public:
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    TSM_ASSERT("Decoder should not have create data buffers yet",
-               !decoder->hasData());
-    startCapturing(*decoder, 1);
+    auto testWrapper = createTestInstance(mockBroker);
+    TSM_ASSERT("testInstance should not have create data buffers yet",
+               !testWrapper->hasData());
+
+    testWrapper.runKafkaOneStep(); // Start up
 
     // Checks
     Workspace_sptr workspace;
-    TSM_ASSERT("Decoder's data buffers should be created now",
-               decoder->hasData());
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    TSM_ASSERT("testInstance's data buffers should be created now",
+               testWrapper->hasData());
 
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT_THROWS_NOTHING(testWrapper.stopCapture());
+    TS_ASSERT(!testWrapper->isCapturing());
+
+    TS_ASSERT_THROWS_NOTHING(workspace = testWrapper->extractData());
 
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -112,22 +111,24 @@ public:
         .WillOnce(Return(new FakeISISEventSubscriber(2)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(2)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
+    auto testInstance = createTestInstance(mockBroker);
     // Need 2 full loops to get both periods
     // Note: Only 2 iterations required as FakeISISEventSubscriber does not send
     // start/stop messages
-    startCapturing(*decoder, 2);
+
+    testInstance.runKafkaOneStep();
+    testInstance.runKafkaOneStep();
 
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
 
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
 
     // --- Workspace checks ---
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TSM_ASSERT(
         "Expected a WorkspaceGroup from extractData(). Found something else.",
         group);
@@ -135,7 +136,7 @@ public:
     TS_ASSERT_EQUALS(2, group->size());
     for (size_t i = 0; i < 2; ++i) {
       auto eventWksp =
-          boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
       TSM_ASSERT("Expected an EventWorkspace for each member of the group",
                  eventWksp);
       checkWorkspaceMetadata(*eventWksp);
@@ -156,39 +157,50 @@ public:
     using namespace Mantid::LiveData;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
+
+    constexpr size_t nCallsOne = 3;
+    constexpr size_t nCallsTwo = 2;
+
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(nCallsOne))
         .WillOnce(Return(new FakeVariablePeriodSubscriber(0))) // 1st run
         .WillOnce(Return(new FakeRunInfoStreamSubscriberVaryingNPeriods))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     EXPECT_CALL(*mockBroker, subscribe_(_, _, _))
-        .Times(Exactly(2))
+        .Times(Exactly(nCallsTwo))
         .WillOnce(Return(new FakeVariablePeriodSubscriber(4))) // 2nd run
         .WillOnce(
             Return(new FakeISISSpDetStreamSubscriber)); // det-spec for 2nd run
 
-    auto decoder = createTestDecoder(mockBroker);
-    TSM_ASSERT("Decoder should not have create data buffers yet",
-               !decoder->hasData());
-    // Run start, Event, Run stop, Run start (2 period)
-    startCapturing(*decoder, 4);
+    auto testInstance = createTestInstance(mockBroker);
+    TSM_ASSERT("testInstance should not have create data buffers yet",
+               !testInstance->hasData());
+    // Run start, Event, Run stop, Run start, (2 period)
+    for (size_t i = 0; i < 5; i++) {
+      testInstance.runKafkaOneStep();
+    }
+
     Workspace_sptr workspace;
-    // Extract the data from single period and inform the decoder
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-    TS_ASSERT(decoder->hasReachedEndOfRun());
+    // Extract the data from single period and inform the testWrapper
+    TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
+    TS_ASSERT(testInstance->hasReachedEndOfRun());
     // Continue to capture multi period data
     // (one extra iteration to ensure stop signal is acted on before data
     // extraction)
-    continueCapturing(*decoder, 7);
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-    TS_ASSERT(decoder->hasReachedEndOfRun());
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+
+    for (size_t i = 0; i < 4; i++) {
+      testInstance.runKafkaOneStep();
+    }
+
+    TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
+    TS_ASSERT(testInstance->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
 
     // --- Workspace checks ---
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TSM_ASSERT(
         "Expected a WorkspaceGroup from extractData(). Found something else.",
         group);
@@ -196,7 +208,7 @@ public:
     TS_ASSERT_EQUALS(2, group->size());
     for (size_t i = 0; i < 2; ++i) {
       auto eventWksp =
-          boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
       TSM_ASSERT("Expected an EventWorkspace for each member of the group",
                  eventWksp);
       checkWorkspaceMetadata(*eventWksp);
@@ -217,23 +229,28 @@ public:
         .WillOnce(Return(new FakeDataStreamSubscriber(1)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    TSM_ASSERT("Decoder should not have create data buffers yet",
-               !decoder->hasData());
+    auto testInstance = createTestInstance(mockBroker);
+    TSM_ASSERT("testInstance should not have create data buffers yet",
+               !testInstance->hasData());
     // 3 iterations to get first run, consisting of a run start message, an
     // event message and a run stop message
-    startCapturing(*decoder, 3);
+    for (int i = 0; i < 3; i++) {
+      testInstance.runKafkaOneStep();
+    }
+
+    testInstance.runKafkaOneStep(); // End of run
+
     Workspace_sptr workspace;
     // Extract data should only get data from the first run
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-    TS_ASSERT(decoder->hasReachedEndOfRun());
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
+    TS_ASSERT(testInstance->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
 
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -256,23 +273,26 @@ public:
         .WillOnce(Return(new FakeDataStreamSubscriber(3)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    TSM_ASSERT("Decoder should not have create data buffers yet",
-               !decoder->hasData());
+    auto testInstance = createTestInstance(mockBroker);
+    TSM_ASSERT("testInstance should not have create data buffers yet",
+               !testInstance->hasData());
     // 4 iterations to get first run, consisting of a run start message, an
     // event message, a run stop message, lastly another event message
-    startCapturing(*decoder, 4);
+    for (int i = 0; i < 5; i++) {
+      testInstance.runKafkaOneStep();
+    }
+
     Workspace_sptr workspace;
     // Extract data should only get data from the first run
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-    TS_ASSERT(decoder->hasReachedEndOfRun());
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
+    TS_ASSERT(testInstance->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
 
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -294,19 +314,19 @@ public:
         .WillOnce(Return(new FakeSampleEnvironmentSubscriber))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    TSM_ASSERT("Decoder should not have create data buffers yet",
-               !decoder->hasData());
-    startCapturing(*decoder, 1);
+    auto testInstance = createTestInstance(mockBroker);
+    TSM_ASSERT("testInstance should not have create data buffers yet",
+               !testInstance->hasData());
+    testInstance.runKafkaOneStep();
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
 
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -324,12 +344,12 @@ public:
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    startCapturing(*decoder, 1);
+    auto testInstance = createTestInstance(mockBroker);
+    testInstance.runKafkaOneStep();
 
-    TS_ASSERT_THROWS_NOTHING(decoder->extractData());
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    TS_ASSERT_THROWS_NOTHING(testInstance->extractData());
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
   }
 
   void
@@ -345,17 +365,20 @@ public:
         .WillOnce(Return(new FakeEventSubscriber))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    startCapturing(*decoder, 2);
+    auto testInstance = createTestInstance(mockBroker);
+
+    testInstance.runKafkaOneStep(); // Init
+    testInstance.runKafkaOneStep(); // Process
+
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
+    TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
 
     // Check we did process the event message and extract the events
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -482,12 +505,12 @@ public:
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    startCapturing(*decoder, 1);
+    auto testInstance = createTestInstance(mockBroker);
+    testInstance.runKafkaOneStep();
 
-    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    TS_ASSERT_THROWS(testInstance->extractData(), const std::runtime_error &);
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
   }
 
   void test_Empty_RunInfo_Stream_Throws_Error_On_ExtractData() {
@@ -500,58 +523,22 @@ public:
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    startCapturing(*decoder, 1);
-    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
+    auto testInstance = createTestInstance(mockBroker);
+    testInstance.runKafkaOneStep();
+    TS_ASSERT_THROWS(testInstance->extractData(), const std::runtime_error &);
+    TS_ASSERT_THROWS_NOTHING(testInstance.stopCapture());
+    TS_ASSERT(!testInstance->isCapturing());
   }
 
 private:
-  // Start decoding and wait until we have gathered enough data to test
-  void startCapturing(Mantid::LiveData::KafkaEventStreamDecoder &decoder,
-                      uint8_t maxIterations) {
-    // Register callback to know when a whole loop as been iterated through
-    m_niterations = 0;
-    auto callback = [this, maxIterations]() {
-      this->iterationCallback(maxIterations);
-    };
-    decoder.registerIterationEndCb(callback);
-    decoder.registerErrorCb(callback);
-    TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
-    continueCapturing(decoder, maxIterations);
-  }
-
-  void iterationCallback(uint8_t maxIterations) {
-    std::unique_lock<std::mutex> lock(this->m_callbackMutex);
-    this->m_niterations++;
-    if (this->m_niterations == maxIterations) {
-      lock.unlock();
-      this->m_callbackCondition.notify_one();
-    }
-  }
-
-  void continueCapturing(Mantid::LiveData::KafkaEventStreamDecoder &decoder,
-                         uint8_t maxIterations) {
-    // Re-register callback with the (potentially) new value of maxIterations
-    auto callback = [this, maxIterations]() {
-      this->iterationCallback(maxIterations);
-    };
-    decoder.registerIterationEndCb(callback);
-    decoder.registerErrorCb(callback);
-    {
-      std::unique_lock<std::mutex> lk(m_callbackMutex);
-      this->m_callbackCondition.wait(lk, [this, maxIterations]() {
-        return this->m_niterations == maxIterations;
-      });
-    }
-  }
-
-  std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
-  createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
+  KafkaTesting::KafkaTestThreadHelper<Mantid::LiveData::KafkaEventStreamDecoder>
+  createTestInstance(
+      const std::shared_ptr<Mantid::LiveData::IKafkaBroker> &broker) {
     using namespace Mantid::LiveData;
-    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "", "",
-                                                     "", 0);
+
+    KafkaEventStreamDecoder testInstance(broker, "", "", "", "", "", "", 0);
+    return KafkaTesting::KafkaTestThreadHelper<KafkaEventStreamDecoder>(
+        std::move(testInstance));
   }
 
   void
@@ -574,8 +561,8 @@ private:
 
   void checkWorkspaceEventData(
       const Mantid::DataObjects::EventWorkspace &eventWksp) {
-    // A timer-based test and each message contains 6 events so the total should
-    // be divisible by 6, but not be 0
+    // A timer-based test and each message contains 6 events so the total
+    // should be divisible by 6, but not be 0
     TS_ASSERT(eventWksp.getNumberEvents() % 6 == 0);
     TS_ASSERT(eventWksp.getNumberEvents() != 0);
   }
@@ -592,9 +579,4 @@ private:
       TS_ASSERT_EQUALS(log->firstValue(), 42)
     }
   }
-
-private:
-  std::mutex m_callbackMutex;
-  std::condition_variable m_callbackCondition;
-  uint8_t m_niterations = 0;
 };

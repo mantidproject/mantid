@@ -15,7 +15,7 @@
  * Holds the information for a new tab.
  */
 struct MantidMatrixTabExtension {
-  MantidMatrixTabExtension(QString label, QTableView *tableView,
+  MantidMatrixTabExtension(const QString &&label, QTableView *tableView,
                            MantidMatrixModel *model,
                            MantidMatrixModel::Type type)
       : label(label), tableView(tableView), model(model), type(type) {}

@@ -64,7 +64,7 @@ private:
   /// handy pointer to the fit-range selector
   MantidQt::MantidWidgets::RangeSelector *m_fitRangeSelector;
   /// workspace holding the cropped slice being displayed
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_dataShown;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> m_dataShown;
   /// name of the workspace holding the cropped slice being displayed
   const std::string m_dataShownName;
 

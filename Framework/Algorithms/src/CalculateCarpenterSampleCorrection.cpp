@@ -93,7 +93,7 @@ const std::string CalculateCarpenterSampleCorrection::category() const {
  */
 void CalculateCarpenterSampleCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -151,7 +151,7 @@ void CalculateCarpenterSampleCorrection::exec() {
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, coeff3, 0.0, coeff3, coeff1);
-    auto shape = boost::shared_ptr<IObject>(
+    auto shape = std::shared_ptr<IObject>(
         inputWksp->sample().getShape().cloneWithMaterial(
             Material("SetInMultipleScattering", neutron, coeff2)));
     inputWksp->mutableSample().setShape(shape);
@@ -178,7 +178,7 @@ void CalculateCarpenterSampleCorrection::exec() {
   Progress prog(this, 0.0, 1.0, NUM_HIST);
 
   EventWorkspace_sptr inputWkspEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWksp);
+      std::dynamic_pointer_cast<EventWorkspace>(inputWksp);
 
   // Create the new correction workspaces
   MatrixWorkspace_sptr absWksp =
@@ -230,7 +230,7 @@ void CalculateCarpenterSampleCorrection::exec() {
 
   // Group and output workspaces we calculated
   const std::string group_prefix = getPropertyValue("OutputWorkspaceBaseName");
-  auto outputGroup = boost::make_shared<API::WorkspaceGroup>();
+  auto outputGroup = std::make_shared<API::WorkspaceGroup>();
   if (absOn) {
     absWksp = setUncertainties(absWksp);
     std::string ws_name = group_prefix + std::string("_abs");
@@ -413,7 +413,7 @@ void CalculateCarpenterSampleCorrection::calculate_ms_correction(
 }
 
 MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::createOutputWorkspace(
-    const MatrixWorkspace_sptr &inputWksp, const std::string ylabel) const {
+    const MatrixWorkspace_sptr &inputWksp, const std::string &ylabel) const {
   MatrixWorkspace_sptr outputWS = create<HistoWorkspace>(*inputWksp);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
@@ -424,7 +424,7 @@ MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::createOutputWorkspace(
 }
 
 MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::setUncertainties(
-    MatrixWorkspace_sptr workspace) {
+    const MatrixWorkspace_sptr &workspace) {
   auto alg = this->createChildAlgorithm("SetUncertainties");
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
@@ -433,7 +433,7 @@ MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::setUncertainties(
 }
 
 void CalculateCarpenterSampleCorrection::deleteWorkspace(
-    MatrixWorkspace_sptr workspace) {
+    const MatrixWorkspace_sptr &workspace) {
   auto alg = this->createChildAlgorithm("DeleteWorkspace");
   alg->initialize();
   alg->setChild(true);

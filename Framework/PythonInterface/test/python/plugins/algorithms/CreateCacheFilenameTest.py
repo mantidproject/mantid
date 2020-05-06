@@ -5,14 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
 
 import os, mantid, hashlib
+
 
 class CreateCacheFilename(unittest.TestCase):
 

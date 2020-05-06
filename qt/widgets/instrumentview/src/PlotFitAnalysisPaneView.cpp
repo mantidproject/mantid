@@ -15,6 +15,8 @@
 #include <QSpacerItem>
 #include <QSplitter>
 #include <QVBoxLayout>
+#include <utility>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -86,10 +88,10 @@ void PlotFitAnalysisPaneView::doFit() {
   }
 }
 
-void PlotFitAnalysisPaneView::addSpectrum(std::string wsName) {
+void PlotFitAnalysisPaneView::addSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
 }
-void PlotFitAnalysisPaneView::addFitSpectrum(std::string wsName) {
+void PlotFitAnalysisPaneView::addFitSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
 }
 
@@ -103,12 +105,13 @@ Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() {
   return m_fitBrowser->getFunction();
 }
 
-void PlotFitAnalysisPaneView::updateFunction(Mantid::API::IFunction_sptr func) {
+void PlotFitAnalysisPaneView::updateFunction(
+    const Mantid::API::IFunction_sptr &func) {
   m_fitBrowser->updateMultiDatasetParameters(*func);
 }
 
 void PlotFitAnalysisPaneView::addFunction(Mantid::API::IFunction_sptr func) {
-  m_fitBrowser->setFunction(func);
+  m_fitBrowser->setFunction(std::move(func));
 }
 
 void PlotFitAnalysisPaneView::fitWarning(const std::string &message) {

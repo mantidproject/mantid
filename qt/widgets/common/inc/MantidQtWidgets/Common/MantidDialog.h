@@ -12,7 +12,7 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include <QDialog>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //----------------------------------
 // Qt Forward declarations
@@ -58,8 +58,8 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidDialog : public QDialog {
 public:
   /// DefaultConstructor
   MantidDialog(QWidget *parent = nullptr,
-               Qt::WindowFlags flags = Qt::WindowCloseButtonHint |
-                                       Qt::WindowType::WindowTitleHint);
+               const Qt::WindowFlags &flags = Qt::WindowCloseButtonHint |
+                                              Qt::WindowType::WindowTitleHint);
   /// Destructor
   ~MantidDialog() override;
 

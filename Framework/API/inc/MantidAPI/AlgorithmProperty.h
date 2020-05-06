@@ -34,10 +34,10 @@ API::IAlgorithm interface.
 @date 24/03/2011
 */
 class MANTID_API_DLL AlgorithmProperty
-    : public Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm>> {
+    : public Kernel::PropertyWithValue<std::shared_ptr<IAlgorithm>> {
 public:
   /// Typedef the held type
-  using HeldType = boost::shared_ptr<IAlgorithm>;
+  using HeldType = std::shared_ptr<IAlgorithm>;
 
   /// Constructor
   AlgorithmProperty(const std::string &propName,

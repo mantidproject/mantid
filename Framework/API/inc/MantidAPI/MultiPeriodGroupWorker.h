@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -52,7 +52,7 @@ private:
 
   /// Try ot add a workspace to the group of input workspaces.
   void tryAddInputWorkspaceToInputGroups(
-      Workspace_sptr ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
+      const Workspace_sptr &ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
       VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Copy input workspace properties to spawned algorithm.

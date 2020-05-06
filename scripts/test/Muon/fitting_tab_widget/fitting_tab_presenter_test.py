@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.api import FunctionFactory, MultiDomainFunction
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtWidgets
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
@@ -406,7 +406,6 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.assertEqual([str(item) for item in self.presenter._fit_function_cache],
                          ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
-
 
     def test_undo_fit_resets_fit_in_view(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',

@@ -118,12 +118,12 @@ void Component::setParent(IComponent *comp) { m_parent = comp; }
 /** Get a pointer to the parent.
  *  @return this.parent
  */
-boost::shared_ptr<const IComponent> Component::getParent() const {
+std::shared_ptr<const IComponent> Component::getParent() const {
   if (this->m_map) {
-    boost::shared_ptr<const IComponent> parent = m_base->getParent();
+    std::shared_ptr<const IComponent> parent = m_base->getParent();
     return ParComponentFactory::create(parent, m_map);
   } else
-    return boost::shared_ptr<const IComponent>(m_parent, NoDeleting());
+    return std::shared_ptr<const IComponent>(m_parent, NoDeleting());
 }
 
 //--------------------------------------------------------------------------------------------
@@ -153,11 +153,10 @@ bool Component::isParentNamed(const std::string &expectedName,
  *  starting with the direct parent and moving up
  *  @return An array of pointers to ancestor components
  */
-std::vector<boost::shared_ptr<const IComponent>>
-Component::getAncestors() const {
-  std::vector<boost::shared_ptr<const IComponent>> ancs;
+std::vector<std::shared_ptr<const IComponent>> Component::getAncestors() const {
+  std::vector<std::shared_ptr<const IComponent>> ancs;
 
-  boost::shared_ptr<const IComponent> current = this->getParent();
+  std::shared_ptr<const IComponent> current = this->getParent();
   while (current) {
     ancs.emplace_back(current);
     current = current->getParent();
@@ -192,13 +191,13 @@ std::string Component::getName() const {
  *  @return full path name
  */
 std::string Component::getFullName() const {
-  std::vector<boost::shared_ptr<const IComponent>> ancestors =
+  std::vector<std::shared_ptr<const IComponent>> ancestors =
       this->getAncestors();
   if (ancestors.empty()) {
     return this->getName();
   } else {
     std::ostringstream oss;
-    std::vector<boost::shared_ptr<const IComponent>>::reverse_iterator rit;
+    std::vector<std::shared_ptr<const IComponent>>::reverse_iterator rit;
     for (rit = ancestors.rbegin(); rit < ancestors.rend(); ++rit) {
       oss << (*rit)->getName() << "/";
     }
@@ -367,7 +366,7 @@ Kernel::V3D Component::getPos() const {
               m_map->getCachedRotation(baseParent, parentRot))) {
           // Couldn't get them from the cache, so I have to instantiate the
           // class
-          boost::shared_ptr<const IComponent> parParent = getParent();
+          std::shared_ptr<const IComponent> parParent = getParent();
           if (parParent) {
             parentRot = parParent->getRotation();
             parentPos = parParent->getPos();
@@ -419,7 +418,7 @@ Kernel::Quat Component::getRotation() const {
         Quat parentRot;
         if (!m_map->getCachedRotation(baseParent, parentRot)) {
           // Get the parent's rotation
-          boost::shared_ptr<const IComponent> parParent = getParent();
+          std::shared_ptr<const IComponent> parParent = getParent();
           if (parParent) {
             parentRot = parParent->getRotation();
           }
@@ -467,7 +466,7 @@ std::set<std::string> Component::getParameterNames(bool recursive) const {
   if (recursive) {
     // Walk up the tree and find the parameters attached to the parent
     // components
-    boost::shared_ptr<const IComponent> parent = getParent();
+    std::shared_ptr<const IComponent> parent = getParent();
     if (parent) {
       std::set<std::string> parentNames = parent->getParameterNames(true);
       names.insert(parentNames.begin(), parentNames.end());
@@ -495,7 +494,7 @@ Component::getParameterNamesByComponent() const {
   }
 
   // Walk up the tree and find the parameters attached to the parent components
-  boost::shared_ptr<const IComponent> parent = getParent();
+  std::shared_ptr<const IComponent> parent = getParent();
   if (parent) {
     auto parentNames = parent->getParameterNamesByComponent();
     // this should discard duplicates
@@ -519,7 +518,7 @@ bool Component::hasParameter(const std::string &name, bool recursive) const {
   if (m_map->contains(this, name)) {
     match_found = true;
   } else if (recursive) {
-    boost::shared_ptr<const IComponent> parent = getParent();
+    std::shared_ptr<const IComponent> parent = getParent();
     if (parent) {
       match_found = parent->hasParameter(name, true);
     } else {
@@ -535,7 +534,7 @@ bool Component::hasParameter(const std::string &name, bool recursive) const {
  * @param os :: The output stream to write to
  */
 void Component::printSelf(std::ostream &os) const {
-  boost::shared_ptr<const IComponent> parent = getParent();
+  std::shared_ptr<const IComponent> parent = getParent();
   os << "Name : " << getName() << '\n';
   os << "Type: " << this->type() << '\n';
   if (parent)

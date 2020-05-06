@@ -91,7 +91,7 @@ inline ParamID &operator++(ParamID &id) {
 }
 
 inline void applyToParamIDRange(ParamID from, ParamID to,
-                                std::function<void(ParamID)> fun) {
+                                const std::function<void(ParamID)> &fun) {
   if (from == ParamID::NONE || to == ParamID::NONE)
     return;
   for (auto i = from; i <= to; ++i)

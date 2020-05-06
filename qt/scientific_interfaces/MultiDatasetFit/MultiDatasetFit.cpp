@@ -258,7 +258,7 @@ void MultiDatasetFit::createPlotToolbar() {
 }
 
 /// Create a multi-domain function to fit all the spectra in the data table.
-boost::shared_ptr<Mantid::API::IFunction>
+std::shared_ptr<Mantid::API::IFunction>
 MultiDatasetFit::createFunction() const {
   return m_functionBrowser->getGlobalFunction();
 }
@@ -445,7 +445,7 @@ QString MultiDatasetFit::getOutputWorkspaceName(int i) const {
       Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
     if (auto group =
-            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
       wsName = group->getItem(i)->getName();
     }
   }
@@ -704,7 +704,7 @@ QString MultiDatasetFit::getLocalParameterTie(const QString &parName,
 /// @param i :: Index of the dataset (spectrum).
 /// @param tie :: A tie string to set.
 void MultiDatasetFit::setLocalParameterTie(const QString &parName, int i,
-                                           QString tie) {
+                                           const QString &tie) {
   m_functionBrowser->setLocalParameterTie(parName, i, tie);
 }
 
@@ -779,7 +779,7 @@ void MultiDatasetFit::setParameterNamesForPlotting() {
 void MultiDatasetFit::removeOldOutput() {
   auto outWS = m_outputWorkspaceName.toStdString();
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
-  boost::shared_ptr<Mantid::API::WorkspaceGroup> group;
+  std::shared_ptr<Mantid::API::WorkspaceGroup> group;
   auto nSpectra = static_cast<size_t>(getNumberOfSpectra());
   if (ADS.doesExist(outWS) &&
       (group = ADS.retrieveWS<Mantid::API::WorkspaceGroup>(outWS)) &&
@@ -820,7 +820,7 @@ void MultiDatasetFit::updateGuessFunction(const QString & /*unused*/,
                                           const QString & /*unused*/) {
   auto fun = m_functionBrowser->getFunction();
   auto composite =
-      boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+      std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (composite && composite->nFunctions() == 1) {
     fun = composite->getFunction(0);
   }

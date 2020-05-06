@@ -6,12 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the state of the reduction."""
 
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 import json
-
-from six import (with_metaclass)
 
 from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
@@ -20,7 +16,7 @@ from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateReductionMode(with_metaclass(JsonSerializable)):
+class StateReductionMode(metaclass=JsonSerializable):
     def __init__(self):
         super(StateReductionMode, self).__init__()
         self.reduction_mode = ReductionMode.LAB

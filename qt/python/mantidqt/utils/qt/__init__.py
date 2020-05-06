@@ -9,8 +9,6 @@
 #
 """A selection of utility functions related to Qt functionality
 """
-from __future__ import absolute_import
-
 # stdlib modules
 import os.path as osp
 from contextlib import contextmanager

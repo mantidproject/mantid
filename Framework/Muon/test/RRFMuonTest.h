@@ -45,9 +45,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());
     TS_ASSERT(rrfMuon.isExecuted());
     // Get result
-    MatrixWorkspace_const_sptr ows =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outputWs"));
+    MatrixWorkspace_const_sptr ows = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("outputWs"));
     TS_ASSERT(ows);
 
     // Checks
@@ -79,9 +78,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());
     TS_ASSERT(rrfMuon.isExecuted());
     // Get result
-    MatrixWorkspace_const_sptr ows =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outputWs"));
+    MatrixWorkspace_const_sptr ows = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("outputWs"));
     TS_ASSERT(ows);
 
     // Checks
@@ -145,15 +143,15 @@ public:
     TS_ASSERT(rrfMuon3.isExecuted());
     // Get results
     MatrixWorkspace_const_sptr ows1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outputWs1"));
     TS_ASSERT(ows1);
     MatrixWorkspace_const_sptr ows2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outputWs2"));
     TS_ASSERT(ows2);
     MatrixWorkspace_const_sptr ows3 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outputWs3"));
     TS_ASSERT(ows3);
 

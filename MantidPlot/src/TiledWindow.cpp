@@ -215,7 +215,7 @@ InnerWidget *getInnerWidget(QWidget *w) {
  */
 TiledWindow::TiledWindow(QWidget *parent, const QString &label,
                          const QString &name, int nrows, int ncols,
-                         Qt::WFlags f)
+                         const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f), m_scrollArea(nullptr),
       m_layout(nullptr), m_buttonPressed(false) {
   connect(this, SIGNAL(dropAtPositionQueued(MdiSubWindow *, QPoint, bool)),

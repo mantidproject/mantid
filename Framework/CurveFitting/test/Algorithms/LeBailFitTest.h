@@ -286,7 +286,7 @@ API::MatrixWorkspace_sptr generateSeparateTwoPeaksData2() {
   const size_t size = 127;
 
   // b) Get workspace
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -322,7 +322,7 @@ API::MatrixWorkspace_sptr generateTwinPeakData() {
   const size_t size = 23;
 
   // b) Get workspace
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -380,7 +380,7 @@ API::MatrixWorkspace_sptr generate1PeakDataPlusBackground() {
 
   // b) Get workspace
   const size_t size = 73;
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -415,53 +415,13 @@ API::MatrixWorkspace_sptr generateArgSiPeak220() {
 
   // b) Get workspace
   size_t size = 26;
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
   dataws->setHistogram(0, vecx, vecy, vece);
 
   return dataws;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Import data from a column data file
- */
-void importDataFromColumnFile(std::string filename, std::string wsname) {
-  DataHandling::LoadAscii2 load;
-  load.initialize();
-
-  load.setProperty("FileName", filename);
-  load.setProperty("OutputWorkspace", wsname);
-  load.setProperty("Separator", "Automatic");
-  load.setProperty("Unit", "TOF");
-
-  load.execute();
-  if (!load.isExecuted()) {
-    stringstream errss;
-    errss << "Data file " << filename << " cannot be opened. ";
-    std::cout << errss.str() << '\n';
-    throw std::runtime_error(errss.str());
-  }
-
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(wsname));
-  if (!ws) {
-    stringstream errss;
-    errss << "LoadAscii failed to generate workspace";
-    std::cout << errss.str() << '\n';
-    throw std::runtime_error(errss.str());
-  }
-
-  // Set error
-  const MantidVec &vecY = ws->readY(0);
-  MantidVec &vecE = ws->dataE(0);
-  size_t numpts = vecY.size();
-  for (size_t i = 0; i < numpts; ++i) {
-    vecE[i] = std::max(1.0, sqrt(vecY[i]));
-  }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -499,17 +459,9 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
       break;
     }
 
-  } else if (option == 4) {
+  } else {
     // Load from column file
     throw runtime_error("Using .dat file is not allowed for committing. ");
-    string datafilename("PG3_4862_Bank7.dat");
-    string wsname("Data");
-    importDataFromColumnFile(datafilename, wsname);
-    dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(wsname));
-  } else {
-    // not supported
-    throw std::invalid_argument("Logic error. ");
   }
 
   return dataws;
@@ -698,7 +650,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -800,7 +752,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -901,7 +853,7 @@ public:
 
     // 5. Get output & Test
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
 
@@ -998,7 +950,7 @@ public:
 
     // 4. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FitResultWS"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -1012,7 +964,7 @@ public:
 
     // 5. Check fit result
     DataObjects::TableWorkspace_sptr paramws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParameters"));
     TS_ASSERT(paramws);
     if (!paramws) {
@@ -1139,7 +1091,7 @@ public:
     // 5. Exam
     // Take the output data:
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedData"));
     TS_ASSERT(outws);
     if (!outws)
@@ -1150,7 +1102,7 @@ public:
 
     // Peaks table
     DataObjects::TableWorkspace_sptr peakparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedPeaks"));
     TS_ASSERT(peakparamws);
     if (!peakparamws) {
@@ -1163,7 +1115,7 @@ public:
 
     // Parameters table
     DataObjects::TableWorkspace_sptr instrparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedParameters"));
     TS_ASSERT(instrparamws);
     if (!instrparamws)
@@ -1255,7 +1207,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("RefinedBackground"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -1295,7 +1247,7 @@ public:
    * Parse parameter table workspace to 2 map
    */
   void
-  parseParameterTableWorkspace(DataObjects::TableWorkspace_sptr paramws,
+  parseParameterTableWorkspace(const DataObjects::TableWorkspace_sptr &paramws,
                                std::map<std::string, double> &paramvalues,
                                std::map<std::string, char> &paramfitstatus) {
 

@@ -18,7 +18,7 @@ namespace MantidQt {
 namespace API {
 class BatchAlgorithmRunner;
 class IConfiguredAlgorithm;
-using IConfiguredAlgorithm_sptr = boost::shared_ptr<IConfiguredAlgorithm>;
+using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
 } // namespace API
 
 namespace CustomInterfaces {

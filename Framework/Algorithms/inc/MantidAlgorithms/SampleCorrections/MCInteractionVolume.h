@@ -65,7 +65,7 @@ private:
   void UpdateScatterPointCounts(int componentIndex);
   int m_sampleScatterPoints = 0;
   std::vector<int> m_envScatterPoints;
-  const boost::shared_ptr<Geometry::IObject> m_sample;
+  const std::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;

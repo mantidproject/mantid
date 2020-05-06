@@ -260,8 +260,7 @@ void LoadILLPolarizationFactors::init() {
   declareProperty(std::make_unique<API::FileProperty>(Prop::FILENAME, "",
                                                       API::FileProperty::Load),
                   "Path to the polarization efficiency file.");
-  const auto refWSValidator =
-      boost::make_shared<API::IncreasingAxisValidator>();
+  const auto refWSValidator = std::make_shared<API::IncreasingAxisValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::OUT_WS, "", Direction::Output, refWSValidator),
                   "An output workspace containing the efficiencies at the "

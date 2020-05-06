@@ -45,6 +45,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <cmath>
+#include <utility>
 
 using Mantid::detid_t;
 
@@ -67,7 +68,7 @@ Logger g_log("SANSRunWindow");
 /// static logger for centre finding
 Logger g_centreFinderLog("CentreFinder");
 
-using ReductionSettings_sptr = boost::shared_ptr<Kernel::PropertyManager>;
+using ReductionSettings_sptr = std::shared_ptr<Kernel::PropertyManager>;
 
 /**
  * Returns the PropertyManager object that is used to store the settings
@@ -88,7 +89,7 @@ ReductionSettings_sptr getReductionSettings() {
         << "Creating reduction settings PropertyManager object, with name "
         << SETTINGS_PROP_MAN_NAME << ".";
 
-    const auto propertyManager = boost::make_shared<Kernel::PropertyManager>();
+    const auto propertyManager = std::make_shared<Kernel::PropertyManager>();
     PropertyManagerDataService::Instance().add(SETTINGS_PROP_MAN_NAME,
                                                propertyManager);
 
@@ -159,7 +160,7 @@ QString convertBoolToPythonBoolString(bool input) {
  * @param input: the python string representation
  * @returns a true or false
  */
-bool convertPythonBoolStringToBool(QString input) {
+bool convertPythonBoolStringToBool(const QString &input) {
   bool value = false;
   if (input ==
       MantidQt::CustomInterfaces::SANSConstants::getPythonTrueKeyword()) {
@@ -173,7 +174,8 @@ bool convertPythonBoolStringToBool(QString input) {
 }
 
 void setTransmissionOnSaveCommand(
-    QString &saveCommand, Mantid::API::MatrixWorkspace_sptr matrix_workspace,
+    QString &saveCommand,
+    const Mantid::API::MatrixWorkspace_sptr &matrix_workspace,
     const QString &detectorSelection) {
   if (matrix_workspace->getInstrument()->getName() == "SANS2D")
     saveCommand += "'front-detector, rear-detector'";
@@ -1461,17 +1463,17 @@ void SANSRunWindow::appendRowToMaskTable(const QString &type,
  * @param lsdb :: The result of the sample-detector bank 2 distance
  */
 void SANSRunWindow::componentLOQDistances(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+    const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
     double &lms, double &lsda, double &lsdb) {
   Instrument_const_sptr instr = workspace->getInstrument();
   if (!instr)
     return;
 
   Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
-  if (source == boost::shared_ptr<Mantid::Geometry::IObjComponent>())
+  if (source == std::shared_ptr<Mantid::Geometry::IObjComponent>())
     return;
   Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
-  if (sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>())
+  if (sample == std::shared_ptr<Mantid::Geometry::IObjComponent>())
     return;
 
   lms = source->getPos().distance(sample->getPos()) * 1000.;
@@ -1479,12 +1481,12 @@ void SANSRunWindow::componentLOQDistances(
   // Find the main detector bank
   Mantid::Geometry::IComponent_const_sptr comp =
       instr->getComponentByName("main-detector-bank");
-  if (comp != boost::shared_ptr<Mantid::Geometry::IComponent>()) {
+  if (comp != std::shared_ptr<Mantid::Geometry::IComponent>()) {
     lsda = sample->getPos().distance(comp->getPos()) * 1000.;
   }
 
   comp = instr->getComponentByName("HAB");
-  if (comp != boost::shared_ptr<Mantid::Geometry::IComponent>()) {
+  if (comp != std::shared_ptr<Mantid::Geometry::IComponent>()) {
     lsdb = sample->getPos().distance(comp->getPos()) * 1000.;
   }
 }
@@ -1721,7 +1723,7 @@ void SANSRunWindow::setGeometryDetails() {
   assert(ADS.doesExist(wsName));
   auto ws = ADS.retrieveWS<const Workspace>(wsName);
 
-  if (boost::dynamic_pointer_cast<const WorkspaceGroup>(ws))
+  if (std::dynamic_pointer_cast<const WorkspaceGroup>(ws))
     // Assume all geometry information is in the first member of the group and
     // it is
     // constant for all group members.
@@ -1729,7 +1731,7 @@ void SANSRunWindow::setGeometryDetails() {
 
   MatrixWorkspace_const_sptr monitorWs;
 
-  if (boost::dynamic_pointer_cast<const IEventWorkspace>(ws)) {
+  if (std::dynamic_pointer_cast<const IEventWorkspace>(ws)) {
     // EventWorkspaces have their monitors loaded into a separate workspace.
     const std::string monitorWsName = ws->getName() + "_monitors";
 
@@ -1745,11 +1747,11 @@ void SANSRunWindow::setGeometryDetails() {
     monitorWs = ADS.retrieveWS<const MatrixWorkspace>(monitorWsName);
   } else {
     // MatrixWorkspaces have their monitors loaded in the same workspace.
-    monitorWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    monitorWs = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
     assert(monitorWs);
   }
 
-  const auto sampleWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  const auto sampleWs = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
@@ -1798,7 +1800,7 @@ void SANSRunWindow::setGeometryDetails() {
           Mantid::API::AnalysisDataService::Instance().retrieve(
               can.toStdString());
       MatrixWorkspace_sptr can_workspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
 
       if (!can_workspace) { // assume all geometry information is in the first
                             // member of the group and it is constant for all
@@ -1832,8 +1834,7 @@ void SANSRunWindow::setGeometryDetails() {
     }
 
     Mantid::API::MatrixWorkspace_sptr can_workspace =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            workspace_ptr);
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
     if (!can_workspace) { // assume all geometry information is in the first
                           // member of the group and it is constant for all
                           // group members
@@ -1882,7 +1883,7 @@ void SANSRunWindow::setGeometryDetails() {
  * @param wscode :: 0 for sample, 1 for can, others not defined
  */
 void SANSRunWindow::setSANS2DGeometry(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+    const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
     int wscode) {
   const double unitconv = 1000.;
   const double distance = workspace->spectrumInfo().l1() * unitconv;
@@ -1934,11 +1935,11 @@ void SANSRunWindow::setSANS2DGeometry(
  * @param wscode :: ?????
  */
 void SANSRunWindow::setLOQGeometry(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+    const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
     int wscode) {
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   // Sample
-  componentLOQDistances(workspace, dist_ms, dist_mdb, dist_hab);
+  componentLOQDistances(std::move(workspace), dist_ms, dist_mdb, dist_hab);
 
   QHash<QString, QLabel *> &labels = m_loq_detlabels[wscode];
   QLabel *detlabel = labels.value("moderator-sample");
@@ -2155,7 +2156,7 @@ bool SANSRunWindow::handleLoadButtonClick() {
           m_experWksp.toStdString());
   // Enter information from sample workspace on to analysis and geometry tab
   Mantid::API::MatrixWorkspace_sptr sample_workspace =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
 
   if (sample_workspace && (!sample_workspace->x(0).empty())) {
     m_uiForm.tof_min->setText(QString::number(sample_workspace->x(0).front()));
@@ -3025,7 +3026,7 @@ void SANSRunWindow::handleDefSaveClick() {
       Workspace_sptr workspace_ptr =
           AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
       if (matrix_workspace) {
         auto detectorSelection = m_uiForm.detbank_sel->currentText();
         setTransmissionOnSaveCommand(saveCommand, matrix_workspace,
@@ -3050,7 +3051,7 @@ void SANSRunWindow::handleDefSaveClick() {
       Workspace_sptr workspace_ptr =
           AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
 
       if (matrix_workspace) {
         auto detectorSelection = m_uiForm.detbank_sel->currentText();
@@ -3687,10 +3688,10 @@ void SANSRunWindow::fillDetectNames(QComboBox *output) {
  *  @throw NotFoundError if a workspace can't be returned
  */
 Mantid::API::MatrixWorkspace_sptr
-SANSRunWindow::getGroupMember(Mantid::API::Workspace_const_sptr in,
+SANSRunWindow::getGroupMember(const Mantid::API::Workspace_const_sptr &in,
                               const int member) const {
   Mantid::API::WorkspaceGroup_const_sptr group =
-      boost::dynamic_pointer_cast<const Mantid::API::WorkspaceGroup>(in);
+      std::dynamic_pointer_cast<const Mantid::API::WorkspaceGroup>(in);
   if (!group) {
     throw Mantid::Kernel::Exception::NotFoundError(
         "Problem retrieving workspace ", in->getName());
@@ -3708,7 +3709,7 @@ SANSRunWindow::getGroupMember(Mantid::API::Workspace_const_sptr in,
   Mantid::API::Workspace_sptr base =
       Mantid::API::AnalysisDataService::Instance().retrieve(gNames[member]);
   Mantid::API::MatrixWorkspace_sptr memberWS =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
   if (!memberWS) {
     throw Mantid::Kernel::Exception::NotFoundError(
         "Problem getting period number " +
@@ -3820,7 +3821,7 @@ void SANSRunWindow::cleanup() {
  * @param csv_line :: Add a line of csv text to the grid
  * @param separator :: An optional separator, default = ","
  */
-int SANSRunWindow::addBatchLine(QString csv_line, QString separator) {
+int SANSRunWindow::addBatchLine(const QString &csv_line, QString separator) {
   // Try to detect separator if one is not specified
   if (separator.isEmpty()) {
     if (csv_line.contains(",")) {
@@ -4688,7 +4689,7 @@ bool SANSRunWindow::areSettingsValid(States type) {
 void SANSRunWindow::checkWaveLengthAndQValues(bool &isValid, QString &message,
                                               QLineEdit *min, QLineEdit *max,
                                               QComboBox *selection,
-                                              QString type) {
+                                              const QString &type) {
   auto min_value = min->text().simplified().toDouble();
   auto max_value = max->text().simplified().toDouble();
 
@@ -4834,7 +4835,7 @@ void SANSRunWindow::retrieveQResolutionAperture() {
  * @param command: the python command to execute
  * @returns either a length (string) in mm or an empty string
  */
-QString SANSRunWindow::retrieveQResolutionGeometry(QString command) {
+QString SANSRunWindow::retrieveQResolutionGeometry(const QString &command) {
   QString result(runPythonCode(command, false));
   result = result.simplified();
   if (result == m_constants.getPythonEmptyKeyword()) {
@@ -4864,9 +4865,10 @@ void SANSRunWindow::setupQResolutionCircularAperture() {
  * @param h2: the height of the second aperture
  * @param w2: the width of the second aperture
  */
-void SANSRunWindow::setupQResolutionRectangularAperture(QString h1, QString w1,
-                                                        QString h2,
-                                                        QString w2) {
+void SANSRunWindow::setupQResolutionRectangularAperture(const QString &h1,
+                                                        const QString &w1,
+                                                        const QString &h2,
+                                                        const QString &w2) {
   // Set the QResolution Aperture
   setQResolutionApertureType(QResoluationAperture::RECTANGULAR, "H1 [mm]",
                              "H2 [mm]", h1, h2,
@@ -4914,9 +4916,9 @@ void SANSRunWindow::setupQResolutionRectangularAperture() {
  * @param w1W2Disabled: if the w1W2Inputs should be disabled
  */
 void SANSRunWindow::setQResolutionApertureType(
-    QResoluationAperture apertureType, QString a1H1Label, QString a2H2Label,
-    QString a1H1, QString a2H2, QString toolTipA1H1, QString toolTipA2H2,
-    bool w1W2Disabled) {
+    QResoluationAperture apertureType, const QString &a1H1Label,
+    const QString &a2H2Label, const QString &a1H1, const QString &a2H2,
+    const QString &toolTipA1H1, const QString &toolTipA2H2, bool w1W2Disabled) {
   // Set the labels
   m_uiForm.q_resolution_a1_h1_label->setText(a1H1Label);
   m_uiForm.q_resolution_a2_h2_label->setText(a2H2Label);
@@ -5012,7 +5014,7 @@ void SANSRunWindow::writeQResolutionSettingsToPythonScript(
  * @param py_code: the code segment to which we want to append
  */
 void SANSRunWindow::writeQResolutionSettingsToPythonScriptSingleEntry(
-    QString value, QString code_entry, const QString lineEnding,
+    const QString &value, const QString &code_entry, const QString &lineEnding,
     QString &py_code) const {
   if (!value.isEmpty()) {
     py_code += code_entry + value + lineEnding;
@@ -5125,7 +5127,8 @@ SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
   std::map<QString, QString> commandMap = {
       {"run_number", ""}, {"is_mean", ""}, {"is_mon", ""}, {"mon_number", ""}};
 
-  auto createPythonScript = [](bool isTime, bool isMon, QString component) {
+  auto createPythonScript = [](bool isTime, bool isMon,
+                               const QString &component) {
     return "i.get_background_correction(is_time = " +
            convertBoolToPythonBoolString(isTime) +
            ", is_mon=" + convertBoolToPythonBoolString(isMon) +
@@ -5185,7 +5188,7 @@ void SANSRunWindow::writeBackgroundCorrectionToPythonScript(
  */
 void SANSRunWindow::addBackgroundCorrectionToPythonScript(
     QString &pythonCode,
-    MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings setting,
+    const MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings &setting,
     bool isTimeBased) {
 
   QString newSetting =

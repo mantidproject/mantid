@@ -25,7 +25,7 @@ namespace DataObjects {
  */
 class DLLExport GroupingWorkspace : public SpecialWorkspace2D {
 public:
-  GroupingWorkspace(Geometry::Instrument_const_sptr inst);
+  GroupingWorkspace(const Geometry::Instrument_const_sptr &inst);
   GroupingWorkspace() = default;
   GroupingWorkspace(size_t numvectors);
   GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
@@ -63,10 +63,10 @@ private:
 };
 
 /// shared pointer to the GroupingWorkspace class
-using GroupingWorkspace_sptr = boost::shared_ptr<GroupingWorkspace>;
+using GroupingWorkspace_sptr = std::shared_ptr<GroupingWorkspace>;
 
 /// shared pointer to a const GroupingWorkspace
-using GroupingWorkspace_const_sptr = boost::shared_ptr<const GroupingWorkspace>;
+using GroupingWorkspace_const_sptr = std::shared_ptr<const GroupingWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

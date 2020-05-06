@@ -9,6 +9,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <utility>
+
 #include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid {
@@ -49,22 +51,21 @@ public:
   void declareDatasetProperties(const std::string &suffix = "",
                                 bool addProp = true) override;
   /// Create a domain from the input workspace
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &,
-                    boost::shared_ptr<API::FunctionValues> &,
-                    size_t i0) override;
-  boost::shared_ptr<API::Workspace>
+  void createDomain(std::shared_ptr<API::FunctionDomain> &,
+                    std::shared_ptr<API::FunctionValues> &, size_t i0) override;
+  std::shared_ptr<API::Workspace>
   createOutputWorkspace(const std::string &baseName,
                         API::IFunction_sptr function,
-                        boost::shared_ptr<API::FunctionDomain> domain,
-                        boost::shared_ptr<API::FunctionValues> values,
+                        std::shared_ptr<API::FunctionDomain> domain,
+                        std::shared_ptr<API::FunctionValues> values,
                         const std::string &outputWorkspacePropertyName =
                             "OutputWorkspace") override;
 
   /// Return the size of the domain to be created.
   size_t getDomainSize() const override;
   /// Set the workspace
-  void setWorkspace(boost::shared_ptr<API::IMDWorkspace> IMDWorkspace) {
-    m_IMDWorkspace = IMDWorkspace;
+  void setWorkspace(std::shared_ptr<API::IMDWorkspace> IMDWorkspace) {
+    m_IMDWorkspace = std::move(IMDWorkspace);
   }
   /// Set the range
   void setRange(size_t startIndex, size_t count);
@@ -76,15 +77,15 @@ protected:
   /// Set all parameters
   void setParameters() const;
   /// Create event output workspace
-  boost::shared_ptr<API::Workspace>
+  std::shared_ptr<API::Workspace>
   createEventOutputWorkspace(const std::string &baseName,
                              const API::IMDEventWorkspace &inputWorkspace,
                              const API::FunctionValues &values,
                              const std::string &outputWorkspacePropertyName);
   /// Create histo output workspace
-  boost::shared_ptr<API::Workspace> createHistoOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<const API::IMDHistoWorkspace> inputWorkspace,
+  std::shared_ptr<API::Workspace> createHistoOutputWorkspace(
+      const std::string &baseName, const API::IFunction_sptr &function,
+      const std::shared_ptr<const API::IMDHistoWorkspace> &inputWorkspace,
       const std::string &outputWorkspacePropertyName);
 
   /// Store workspace property name
@@ -92,7 +93,7 @@ protected:
   /// Store maxSize property name
   std::string m_maxSizePropertyName;
   /// The input IMDWorkspace
-  mutable boost::shared_ptr<API::IMDWorkspace> m_IMDWorkspace;
+  mutable std::shared_ptr<API::IMDWorkspace> m_IMDWorkspace;
   /// Max size for seq domain
   mutable size_t m_maxSize;
   /// Starting index

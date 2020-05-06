@@ -21,8 +21,8 @@
 
 #include <Poco/File.h>
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 #include <numeric>
 
 #include <cstdlib>
@@ -187,9 +187,9 @@ int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access,
  * @return error code
  */
 int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
-    Geometry::RectangularDetector_const_sptr det, int x_pixel_slab,
+    const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
     const char *field_name, const char *errors_field_name, bool doErrors,
-    bool doBoth, int is_definition, std::string bank) {
+    bool doBoth, int is_definition, const std::string &bank) {
   int dataRank, dataDimensions[NX_MAXRANK];
   int slabDimensions[NX_MAXRANK], slabStartIndices[NX_MAXRANK];
 
@@ -412,7 +412,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
  * @param is_definition
  * @return error code
  */
-int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
+int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
                                             int is_definition) {
   int dataType, dataRank, dataDimensions[NX_MAXRANK];
   NXname name;
@@ -425,7 +425,7 @@ int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
   IComponent_const_sptr det_comp =
       m_inputWorkspace->getInstrument()->getComponentByName(std::string(bank));
   RectangularDetector_const_sptr det =
-      boost::dynamic_pointer_cast<const RectangularDetector>(det_comp);
+      std::dynamic_pointer_cast<const RectangularDetector>(det_comp);
   if (!det) {
     g_log.information()
         << "Detector '" + bank +
@@ -729,7 +729,7 @@ void SaveToSNSHistogramNexus::exec() {
       this, 0.0, 1.0, m_inputWorkspace->getNumberHistograms() * 3);
 
   EventWorkspace_const_sptr eventWorkspace =
-      boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
+      std::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
   if (eventWorkspace) {
     eventWorkspace->sortAll(TOF_SORT, m_progress.get());
   }

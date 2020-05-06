@@ -755,7 +755,7 @@ void SurfPoint::setKeyN(const int Ky)
   keyN = sign * Ky;
 }
 
-void SurfPoint::setKey(const boost::shared_ptr<Surface> &Spoint)
+void SurfPoint::setKey(const std::shared_ptr<Surface> &Spoint)
 /**
   Sets the key pointer. The class takes ownership.
   @param Spoint :: new key values

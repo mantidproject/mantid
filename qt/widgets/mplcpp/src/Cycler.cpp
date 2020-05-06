@@ -40,7 +40,7 @@ Python::Object cycleIterator(const Python::Object &rawCycler) {
  * that produces an iterable
  * @param obj An existing instance of a Cycler object
  */
-Cycler::Cycler(Python::Object obj)
+Cycler::Cycler(const Python::Object &obj)
     : Python::InstanceHolder(cycleIterator(std::move(obj))) {}
 
 /**

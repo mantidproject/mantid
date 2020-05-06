@@ -32,7 +32,7 @@ void SlitCalculator::processInstrumentHasBeenChanged() {
   on_recalculate_triggered();
 }
 SlitCalculator::~SlitCalculator() {}
-void SlitCalculator::setInstrument(std::string instrumentName) {
+void SlitCalculator::setInstrument(const std::string &instrumentName) {
   // we want to get the most up-to-date definition, so we use the current
   // date/time
   auto date =
@@ -64,7 +64,7 @@ void SlitCalculator::setInstrument(std::string instrumentName) {
 void SlitCalculator::show() { QDialog::show(); }
 
 void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
-    Mantid::Geometry::Instrument_const_sptr instrument) {
+    const Mantid::Geometry::Instrument_const_sptr &instrument) {
   // fetch the components that we need for values from IDF
   auto slit1Component = instrument->getComponentByName("slit1");
   auto slit2Component = instrument->getComponentByName("slit2");

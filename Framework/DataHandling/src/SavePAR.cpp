@@ -34,7 +34,7 @@ using namespace Mantid::Geometry;
 void SavePAR::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "The name of the workspace to save.");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::Save),

@@ -122,7 +122,7 @@ private:
   void readPulseidFile(const std::string &filename, const bool throwError);
 
   void runLoadInstrument(const std::string &eventfilename,
-                         API::MatrixWorkspace_sptr localWorkspace);
+                         const API::MatrixWorkspace_sptr &localWorkspace);
 
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
@@ -133,15 +133,15 @@ private:
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr &workspace);
 
-  void addToWorkspaceLog(std::string logtitle, size_t mindex);
+  void addToWorkspaceLog(const std::string &logtitle, size_t mindex);
 
   void processEventLogs();
 
   /// Pad out empty pixel
-  size_t padOutEmptyPixels(DataObjects::EventWorkspace_sptr eventws);
+  size_t padOutEmptyPixels(const DataObjects::EventWorkspace_sptr &eventws);
 
   /// Set up spectrum/detector ID map inside a workspace
-  void setupPixelSpectrumMap(DataObjects::EventWorkspace_sptr eventws);
+  void setupPixelSpectrumMap(const DataObjects::EventWorkspace_sptr &eventws);
 
   ///
   void filterEvents();

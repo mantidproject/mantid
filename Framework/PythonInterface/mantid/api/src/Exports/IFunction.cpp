@@ -84,7 +84,7 @@ GNU_DIAG_ON("unused-local-typedef")
 
 void export_IFunction() {
 
-  register_ptr_to_python<boost::shared_ptr<IFunction>>();
+  register_ptr_to_python<std::shared_ptr<IFunction>>();
 
   class_<IFunction, IFunctionAdapter, boost::noncopyable>(
       "IFunction", "Base class for all functions", no_init)

@@ -54,7 +54,7 @@ private:
   mutable std::valarray<double> m_b;
 };
 
-using Chebyshev_sptr = boost::shared_ptr<Chebyshev>;
+using Chebyshev_sptr = std::shared_ptr<Chebyshev>;
 
 } // namespace Functions
 } // namespace CurveFitting

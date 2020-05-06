@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QPushButton>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -31,16 +32,14 @@ namespace MantidWidgets {
 /// @param allOthersFixed :: True if all other local parameters are fixed.
 /// @param othersTied :: True if there are other tied parameters.
 /// @param logOptionsEnabled :: True if the log checkbox is ticked.
-LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
-                                           double value, bool fixed,
-                                           QString tie, QString constraint,
-                                           bool othersFixed,
-                                           bool allOthersFixed, bool othersTied,
-                                           bool logOptionsEnabled)
+LocalParameterEditor::LocalParameterEditor(
+    QWidget *parent, int index, double value, bool fixed, const QString &tie,
+    const QString &constraint, bool othersFixed, bool allOthersFixed,
+    bool othersTied, bool logOptionsEnabled)
     : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)),
-      m_fixed(fixed), m_tie(tie), m_constraint(constraint),
-      m_othersFixed(othersFixed), m_allOthersFixed(allOthersFixed),
-      m_othersTied(othersTied) {
+      m_fixed(fixed), m_tie(std::move(tie)),
+      m_constraint(std::move(constraint)), m_othersFixed(othersFixed),
+      m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -312,7 +311,7 @@ void LocalParameterEditor::setEditorState() {
 }
 
 /// Open an input dialog to enter a tie expression.
-QString LocalParameterEditor::setTieDialog(QString tie) {
+QString LocalParameterEditor::setTieDialog(const QString &tie) {
   QInputDialog input;
   input.setWindowTitle("Set a tie.");
   input.setTextValue(tie);
@@ -322,7 +321,7 @@ QString LocalParameterEditor::setTieDialog(QString tie) {
   return "";
 }
 
-QString LocalParameterEditor::setConstraintDialog(QString constraint) {
+QString LocalParameterEditor::setConstraintDialog(const QString &constraint) {
   QInputDialog input;
   input.setWindowTitle("Set a constraint.");
   input.setTextValue(constraint);

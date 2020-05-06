@@ -88,7 +88,7 @@ void PolarizationEfficiencyCor::init() {
   declareProperty(
       std::make_unique<Kernel::ArrayProperty<std::string>>(
           Prop::INPUT_WORKSPACES, "",
-          boost::make_shared<ADSValidator>(allowMultiSelection, isOptional),
+          std::make_shared<ADSValidator>(allowMultiSelection, isOptional),
           Kernel::Direction::Input),
       "A list of names of workspaces to be corrected.");
 
@@ -99,10 +99,9 @@ void PolarizationEfficiencyCor::init() {
 
   const std::vector<std::string> methods{CorrectionMethod::WILDES,
                                          CorrectionMethod::FREDRIKZE};
-  declareProperty(
-      Prop::CORRECTION_METHOD, CorrectionMethod::WILDES,
-      boost::make_shared<Kernel::ListValidator<std::string>>(methods),
-      "Correction method.");
+  declareProperty(Prop::CORRECTION_METHOD, CorrectionMethod::WILDES,
+                  std::make_shared<Kernel::ListValidator<std::string>>(methods),
+                  "Correction method.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::EFFICIENCIES, "", Kernel::Direction::Input),
@@ -123,12 +122,12 @@ void PolarizationEfficiencyCor::init() {
       {"", full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
   declareProperty(
       Prop::FLIPPERS, "",
-      boost::make_shared<Kernel::ListValidator<std::string>>(setups),
+      std::make_shared<Kernel::ListValidator<std::string>>(setups),
       "Flipper configurations of the input workspaces  (Wildes method only)");
 
   std::vector<std::string> propOptions{"", "PA", "PNR"};
   declareProperty("PolarizationAnalysis", "",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "What Polarization mode will be used?\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
                   "PA: Full Polarization Analysis PNR-PA "
@@ -309,8 +308,8 @@ MatrixWorkspace_sptr PolarizationEfficiencyCor::convertToHistogram(
 //----------------------------------------------------------------------------------------------
 /// Convert the efficiencies to histogram
 MatrixWorkspace_sptr
-PolarizationEfficiencyCor::interpolate(MatrixWorkspace_sptr efficiencies,
-                                       MatrixWorkspace_sptr inWS) {
+PolarizationEfficiencyCor::interpolate(const MatrixWorkspace_sptr &efficiencies,
+                                       const MatrixWorkspace_sptr &inWS) {
 
   efficiencies->setDistribution(true);
   auto alg = createChildAlgorithm("RebinToWorkspace");
@@ -334,7 +333,7 @@ API::MatrixWorkspace_sptr PolarizationEfficiencyCor::getEfficiencies() {
         names.front());
   } else {
     WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
-    inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    inWS = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
   }
   MatrixWorkspace_sptr efficiencies = getProperty(Prop::EFFICIENCIES);
 

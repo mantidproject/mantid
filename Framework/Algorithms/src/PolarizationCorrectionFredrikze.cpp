@@ -14,7 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <algorithm>
 
@@ -51,7 +51,7 @@ Instrument_const_sptr fetchInstrument(WorkspaceGroup const *const groupWS) {
   }
   Workspace_sptr firstWS = groupWS->getItem(0);
   MatrixWorkspace_sptr matrixWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(firstWS);
+      std::dynamic_pointer_cast<MatrixWorkspace>(firstWS);
   return matrixWS->getInstrument();
 }
 
@@ -62,7 +62,7 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
     Workspace_sptr item = ws->getItem(i);
 
     if (MatrixWorkspace_sptr ws2d =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(item)) {
+            std::dynamic_pointer_cast<MatrixWorkspace>(item)) {
 
       // X-units check
       auto wsUnit = ws2d->getAxis(0)->unit();
@@ -149,7 +149,7 @@ MatrixWorkspace_sptr
 PolarizationCorrectionFredrikze::multiply(MatrixWorkspace_sptr &lhsWS,
                                           const double &rhs) {
   auto multiply = this->createChildAlgorithm("Multiply");
-  auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
+  auto rhsWS = std::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
   multiply->initialize();
   multiply->setProperty("LHSWorkspace", lhsWS);
   multiply->setProperty("RHSWorkspace", rhsWS);
@@ -168,7 +168,7 @@ MatrixWorkspace_sptr
 PolarizationCorrectionFredrikze::add(MatrixWorkspace_sptr &lhsWS,
                                      const double &rhs) {
   auto plus = this->createChildAlgorithm("Plus");
-  auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
+  auto rhsWS = std::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
   plus->initialize();
   plus->setProperty("LHSWorkspace", lhsWS);
   plus->setProperty("RHSWorkspace", rhsWS);
@@ -188,7 +188,7 @@ void PolarizationCorrectionFredrikze::init() {
 
   auto propOptions = modes();
   declareProperty("PolarizationAnalysis", "PA",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "What Polarization mode will be used?\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
                   "PA: Full Polarization Analysis PNR-PA");
@@ -206,17 +206,17 @@ void PolarizationCorrectionFredrikze::init() {
 }
 
 WorkspaceGroup_sptr
-PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
+PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup_sptr &inWS) {
 
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ipp =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+      std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
   MatrixWorkspace_sptr Ipa =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+      std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
   MatrixWorkspace_sptr Iap =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+      std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
   MatrixWorkspace_sptr Iaa =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+      std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
 
   Ipp->setTitle("Ipp");
   Iaa->setTitle("Iaa");
@@ -250,7 +250,7 @@ PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
   const auto nIpa =
       (A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8 - Ipp - Iaa + Ipa + Iap) / D;
 
-  WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr dataOut = std::make_shared<WorkspaceGroup>();
   dataOut->addWorkspace(nIpp);
   dataOut->addWorkspace(nIpa);
   dataOut->addWorkspace(nIap);
@@ -276,12 +276,12 @@ PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
 }
 
 WorkspaceGroup_sptr
-PolarizationCorrectionFredrikze::execPNR(WorkspaceGroup_sptr inWS) {
+PolarizationCorrectionFredrikze::execPNR(const WorkspaceGroup_sptr &inWS) {
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ip =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+      std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
   MatrixWorkspace_sptr Ia =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+      std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
 
   const auto rho = this->getEfficiencyWorkspace(crhoLabel);
   const auto pp = this->getEfficiencyWorkspace(cppLabel);
@@ -295,7 +295,7 @@ PolarizationCorrectionFredrikze::execPNR(WorkspaceGroup_sptr inWS) {
   nIp->history().addHistory(Ip->getHistory());
   nIa->history().addHistory(Ia->getHistory());
 
-  WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr dataOut = std::make_shared<WorkspaceGroup>();
   dataOut->addWorkspace(nIp);
   dataOut->addWorkspace(nIa);
 
@@ -306,7 +306,7 @@ PolarizationCorrectionFredrikze::execPNR(WorkspaceGroup_sptr inWS) {
  * @param label :: A label of the spectrum to extract.
  * @return :: A workspace with a single spectrum.
  */
-boost::shared_ptr<Mantid::API::MatrixWorkspace>
+std::shared_ptr<Mantid::API::MatrixWorkspace>
 PolarizationCorrectionFredrikze::getEfficiencyWorkspace(
     const std::string &label) {
   MatrixWorkspace_sptr efficiencies = getProperty(efficienciesLabel);

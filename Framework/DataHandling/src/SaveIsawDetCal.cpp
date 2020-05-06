@@ -59,7 +59,7 @@ void SaveIsawDetCal::exec() {
   // MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
 
   Workspace_sptr ws1 = getProperty("InputWorkspace");
-  ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+  ExperimentInfo_sptr ws = std::dynamic_pointer_cast<ExperimentInfo>(ws1);
 
   double T0 = getProperty("TimeOffset");
   const API::Run &run = ws->run();
@@ -163,13 +163,12 @@ void SaveIsawDetCal::exec() {
 
     std::string bankName = mess.str();
     // Retrieve it
-    boost::shared_ptr<const IComponent> det =
-        inst->getComponentByName(bankName);
+    std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
     if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
               inst->getComponentByName(bankName));
       asmb->getChildren(children, false);
       det = children[0];
@@ -227,23 +226,23 @@ void SaveIsawDetCal::exec() {
   out.close();
 }
 
-V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
-  boost::shared_ptr<const IComponent> parent =
-      inst->getComponentByName(bankName);
+V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col,
+                                 int row) {
+  std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+    std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getPos();
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-          children[0]);
+      asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
@@ -251,8 +250,8 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
     // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
@@ -261,15 +260,14 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
   }
 }
 
-void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
-                               double &xsize, double &ysize) {
+void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS,
+                               int &NROWS, double &xsize, double &ysize) {
   if (bankName == "None")
     return;
-  boost::shared_ptr<const IComponent> parent =
-      inst->getComponentByName(bankName);
+  std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     NCOLS = RDet->xpixels();
     NROWS = RDet->ypixels();
@@ -277,17 +275,17 @@ void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     ysize = RDet->ysize();
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-          children[0]);
+      asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     NROWS = static_cast<int>(grandchildren.size());
