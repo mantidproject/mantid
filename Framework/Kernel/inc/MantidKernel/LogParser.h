@@ -44,6 +44,8 @@ public:
   static const std::string currentPeriodLogName() { return "current_period"; }
   /// Returns the name of the log created that defines the status during a run
   static const std::string statusLogName() { return "running"; }
+  /// Returns the name of the log that contains given period filter
+  static const std::string currentPeriodLogName(const int period);
   /// Returns the name of the log that contains all of the periods
   static const std::string periodsLogName() { return "periods"; }
 

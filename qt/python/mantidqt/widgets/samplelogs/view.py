@@ -51,7 +51,6 @@ class SampleLogsView(QSplitter):
         # Create sample log table
         self.table = QTableView()
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table.clicked.connect(self.presenter.clicked)
         self.table.doubleClicked.connect(self.presenter.doubleClicked)
         self.table.contextMenuEvent = self.tableMenu
         layout_left.addWidget(self.table)
@@ -64,10 +63,29 @@ class SampleLogsView(QSplitter):
 
         #Add full_time and experimentinfo options
         layout_options = QHBoxLayout()
+
+        if isMD:
+            layout_options.addWidget(QLabel("Experiment Info #"))
+            self.experimentInfo = QSpinBox()
+            self.experimentInfo.setMaximum(noExp-1)
+            self.experimentInfo.valueChanged.connect(self.presenter.changeExpInfo)
+            layout_options.addWidget(self.experimentInfo)
+
+        #check boxes
         self.full_time = QCheckBox("Relative Time")
+        self.full_time.setToolTip(
+            "Shows relative time in seconds from the start of the run.")
         self.full_time.setChecked(True)
         self.full_time.stateChanged.connect(self.presenter.plot_logs)
         layout_options.addWidget(self.full_time)
+        self.show_filtered = QCheckBox("Filtered Data")
+        self.show_filtered.setToolTip(
+            "Filtered data only shows data while running and in this period.\nInvalid values are also filtered.")
+        self.show_filtered.setChecked(True)
+        self.show_filtered.stateChanged.connect(self.presenter.filtered_changed)
+        layout_options.addWidget(self.show_filtered)
+        self.spaceItem = QSpacerItem(10, 10, QSizePolicy.Expanding)
+        layout_options.addSpacerItem(self.spaceItem)
         layout_right.addLayout(layout_options)
 
         # Sample log plot
@@ -118,6 +136,7 @@ class SampleLogsView(QSplitter):
         self.table.setModel(self.model)
         self.table.resizeColumnsToContents()
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table.selectionModel().selectionChanged.connect(self.presenter.update)
 
     def show_plot_and_stats(self, show_plot_and_stats):
         """sets wether the plot and stats section should be visible"""
@@ -163,11 +182,16 @@ class SampleLogsView(QSplitter):
                     LogName=log_text,
                     label=log_text,
                     FullTime=not self.full_time.isChecked(),
+                    Filtered=self.show_filtered.isChecked(),
                     ExperimentInfo=exp)
 
         ax.set_ylabel('')
         if ax.get_legend_handles_labels()[0]:
             ax.legend()
+
+    def set_log_controls(self,are_logs_filtered):
+        """Sets log specific settings based on the log clicked on"""
+        self.show_filtered.setEnabled(are_logs_filtered)
 
     def get_row_log_name(self, i):
         """Returns the log name of particular row"""

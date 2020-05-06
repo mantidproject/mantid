@@ -43,7 +43,6 @@ class SampleLogsModelTest(unittest.TestCase):
 
         stats = model.get_statistics("w")
         self.assertAlmostEqual(0.00491808, stats.maximum, 6)
-
         self.assertFalse(model.isMD())
 
         itemModel = model.getItemModel()
@@ -74,6 +73,39 @@ class SampleLogsModelTest(unittest.TestCase):
 
         self.assertFalse(model.is_log_plottable("Beam.sample_pressure"))
         self.assertFalse(model.are_any_logs_plottable())
+
+    def test_model_with_filtered_data(self):
+        wsTuple = Load('POLREF00014966.nxs')
+        #get the first child workspace of the group
+        ws = wsTuple[0]
+        model = SampleLogsModel(ws)
+
+        log_names = model.get_log_names()
+        self.assertEqual(len(log_names), 152)
+        self.assertIn("raw_uah_log", log_names)
+        self.assertIn("current_period", log_names)
+        self.assertIn("period", log_names)
+
+        values = model.get_log_display_values("raw_uah_log")
+        self.assertEqual(values[0], "raw_uah_log")
+        self.assertEqual(values[1], "float series")
+        self.assertEqual(values[2], "(429 entries)")
+        self.assertEqual(values[3], "uAh")
+
+        self.assertTrue(model.is_log_plottable("raw_uah_log"))
+        self.assertFalse(model.is_log_plottable("current_period"))
+        self.assertTrue(model.is_log_plottable("period"))
+
+        self.assertTrue(model.get_is_log_filtered("raw_uah_log"))
+        self.assertFalse(model.get_is_log_filtered("period"))
+        self.assertFalse(model.get_is_log_filtered("current_period"))
+
+        stats = model.get_statistics("raw_uah_log", filtered = True)
+        self.assertAlmostEqual(stats.maximum, 193.333,3)
+        stats = model.get_statistics("raw_uah_log", filtered = False)
+        self.assertAlmostEqual(stats.maximum, 194.296,3)
+
+        self.assertFalse(model.isMD())
 
     def test_model_MD(self):
         ws1 = Load("ILL/D22/192068.nxs")

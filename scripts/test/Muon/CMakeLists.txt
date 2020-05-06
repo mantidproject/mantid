@@ -14,12 +14,11 @@ set ( TEST_PY_FILES
    fit_parameters_test.py
    fitting_context_test.py
    home_instrument_widget_test.py
-   plotting_widget_test.py
-   plotting_widget_tiled_test.py
-   plotting_widget_freq_test.py
-   plotting_widget_model_test.py
+   plot_widget/plot_widget_presenter_test.py
+   plot_widget/plot_widget_model_test.py
+   plotting_canvas/plotting_canvas_presenter_test.py
+   plotting_canvas/plotting_canvas_model_test.py
    external_plotting_model_test.py
-   workspace_finder_test.py
    home_runinfo_presenter_test.py
    list_selector/list_selector_view_test.py
    list_selector/list_selector_presenter_test.py
@@ -97,11 +96,11 @@ set ( TEST_PY_FILES_QT4
    fit_parameters_test.py
    fitting_context_test.py
    home_instrument_widget_test.py
-   plotting_widget_test.py
-   plotting_widget_tiled_test.py
-   plotting_widget_freq_test.py
+   plot_widget/plot_widget_presenter_test.py
+   plot_widget/plot_widget_model_test.py
+   plotting_canvas/plotting_canvas_presenter_test.py
+   plotting_canvas/plotting_canvas_model_test.py
    external_plotting_model_test.py
-   workspace_finder_test.py
    home_runinfo_presenter_test.py
    list_selector/list_selector_view_test.py
    list_selector/list_selector_presenter_test.py

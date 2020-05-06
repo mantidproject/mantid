@@ -69,7 +69,7 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEqual(self.model.do_single_fit.call_count, 5)
         self.model.do_single_fit.assert_called_with(
             {'Function': mock.ANY, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
-             'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}, True)
+             'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
 
     def test_do_simultaneous_fit_adds_single_input_workspace_to_fit_context_with_globals(self):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
@@ -212,73 +212,67 @@ class FittingTabModelTest(unittest.TestCase):
     def test_evaluate_single_fit_calls_correctly_for_single_fit(self):
         self.model.fit_type = "Single"
         workspace = ["MUSR:62260;bwd"]
-        plot_fit = True
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_single_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         parameter_dict = {'Test': 0}
         self.model.get_parameters_for_single_fit = mock.MagicMock(return_value=parameter_dict)
 
-        self.model.evaluate_single_fit(workspace, plot_fit)
+        self.model.evaluate_single_fit(workspace)
 
-        self.model.do_single_fit.assert_called_once_with(parameter_dict, plot_fit)
+        self.model.do_single_fit.assert_called_once_with(parameter_dict)
 
     def test_evaluate_single_fit_calls_correct_function_for_simultaneous_fit(self):
         self.model.fit_type = "Simultaneous"
         workspace = ["MUSR:62260;bwd"]
-        plot_fit = True
         self.model.global_parameters = ['A0']
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_simultaneous_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         parameter_dict = {'Test': 0}
         self.model.get_parameters_for_simultaneous_fit = mock.MagicMock(return_value=parameter_dict)
 
-        self.model.evaluate_single_fit(workspace, plot_fit)
+        self.model.evaluate_single_fit(workspace)
 
-        self.model.do_simultaneous_fit.assert_called_once_with(parameter_dict, ['A0'], plot_fit)
+        self.model.do_simultaneous_fit.assert_called_once_with(parameter_dict, ['A0'])
 
     def test_evaluate_single_fit_calls_correctly_for_single_tf_fit(self):
         self.model.fit_type = "Single"
         self.model.tf_asymmetry_mode = True
         workspace = ["MUSR:62260;bwd"]
-        plot_fit = True
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_single_tf_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         parameter_dict = {'Test': 0}
         self.model.get_parameters_for_single_tf_fit = mock.MagicMock(return_value=parameter_dict)
 
-        self.model.evaluate_single_fit(workspace, plot_fit)
+        self.model.evaluate_single_fit(workspace)
 
-        self.model.do_single_tf_fit.assert_called_once_with(parameter_dict, plot_fit)
+        self.model.do_single_tf_fit.assert_called_once_with(parameter_dict)
 
     def test_evaluate_single_fit_calls_correct_function_for_simultaneous_tf_fit(self):
         self.model.fit_type = "Simultaneous"
         self.model.tf_asymmetry_mode = True
         workspace = ["MUSR:62260;bwd"]
-        plot_fit = True
         self.model.global_parameters = ['A0']
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_simultaneous_tf_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         parameter_dict = {'Test': 0}
         self.model.get_parameters_for_simultaneous_tf_fit = mock.MagicMock(return_value=parameter_dict)
 
-        self.model.evaluate_single_fit(workspace, plot_fit)
+        self.model.evaluate_single_fit(workspace)
 
-        self.model.do_simultaneous_tf_fit.assert_called_once_with(parameter_dict, ['A0'], plot_fit)
+        self.model.do_simultaneous_tf_fit.assert_called_once_with(parameter_dict, ['A0'])
 
     def test_do_sequential_fit_calls_fetches_calls_single_fit_correctly(self):
         workspace_list = ["MUSR62260;bwd", "MUSR62260;fwd"]
-        plot_fit = True
         self.model.tf_asymmetry_mode = False
         use_initial_values = True
         self.model.do_single_fit = mock.MagicMock(return_value=("test", 'success', 0.56))
 
-        self.model.do_sequential_fit(workspace_list, plot_fit, use_initial_values)
+        self.model.do_sequential_fit(workspace_list, use_initial_values)
 
         self.assertEqual(self.model.do_single_fit.call_count, 2)
 
     def test_do_sequential_fit_uses_previous_values_if_requested(self):
         workspace_list = ["MUSR62260;bwd", "MUSR62260;fwd"]
-        plot_fit = True
         self.model.tf_asymmetry_mode = False
         use_initial_values = False
         self.model.set_fit_function_parameter_values = mock.MagicMock()
@@ -288,7 +282,7 @@ class FittingTabModelTest(unittest.TestCase):
         parameter_dict = {'Function': trial_function_in}
         self.model.get_parameters_for_single_fit = mock.MagicMock(return_value=parameter_dict)
 
-        self.model.do_sequential_fit(workspace_list, plot_fit, use_initial_values)
+        self.model.do_sequential_fit(workspace_list, use_initial_values)
 
         self.model.set_fit_function_parameter_values.assert_called_once_with(trial_function_in, [5, 5, 5])
 

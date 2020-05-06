@@ -72,7 +72,7 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
         :param name: The name of the workspace.
         :param workspace: A reference to the new workspace (Unused)
         """
-        self.replace_callback(name)
+        self.replace_callback(workspace)
 
     def unsubscribe(self):
         self.observeDelete(False)
