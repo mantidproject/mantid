@@ -42,8 +42,8 @@ CoordTransformDistance::CoordTransformDistance(
   for (size_t d = 0; d < inD; d++) {
     m_center.push_back(center[d]);
     m_dimensionsUsed.push_back(dimensionsUsed[d]);
-    if (inD == 3 && eigenvals.size() == 3 && eigenvects.size() == 3) {
-      // coord transform for ellipsoid specified (only in 3D)
+    if (eigenvals.size() == inD && eigenvects.size() == inD) {
+      // coord transform for n-ellipsoid specified
       m_eigenvals.push_back(eigenvals[d]);
       m_eigenvects.push_back(eigenvects[d]);
       m_maxEigenval = std::max(m_maxEigenval, eigenvals[d]);
@@ -75,12 +75,12 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
     if (m_eigenvals.size() == 3) {
       // ellipsoid transfrom with ratio of axes given by standard deviation
       // i.e. sqrt(eigenvals)
-      // convert 3D coords to V3D for vector algebra
-      V3D inV3D =
-          V3D(inputVector[0] - m_center[0], inputVector[1] - m_center[1],
-              inputVector[2] - m_center[2]);
       for (size_t d = 0; d < inD; d++) {
-        coord_t dist = m_eigenvects[d].scalar_prod(inV3D);
+        // do dot prod with eigenvector
+        coord_t dist = 0.0;
+        for (size_t dd = 0; dd < inD; dd++) {
+          dist += m_eigenvects[d][dd] * (inputVector[dd] - m_center[dd]);
+        }
         distanceSquared += (dist * dist) * m_maxEigenval / m_eigenvals[d];
       }
     } else {
