@@ -454,13 +454,7 @@ void IndirectFittingModel::removeWorkspace(TableDatasetIndex index) {
   m_fitDataModel->removeWorkspace(index);
 }
 
-void IndirectFittingModel::removeFittingData(TableDatasetIndex index) {
-  // if (m_fitOutput)
-  //   m_fitOutput->removeOutput(m_fittingData[index].get());
-  // m_fittingData.remove(index);
-  // if (m_defaultParameters.size() > index)
-  //   m_defaultParameters.remove(index);
-}
+void IndirectFittingModel::removeFittingData() { m_fitOutput->clear(); }
 
 void IndirectFittingModel::clearWorkspaces() {
   m_fitOutput->clear();

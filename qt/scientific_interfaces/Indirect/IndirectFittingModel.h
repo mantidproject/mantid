@@ -62,7 +62,7 @@ public:
   void setSpectra(const std::string &spectra, TableDatasetIndex dataIndex);
   void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex);
   void setSpectra(const Spectra &spectra, TableDatasetIndex dataIndex);
-  void addWorkspace(const std::string &workspaceName);
+  virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
   void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
@@ -134,6 +134,7 @@ public:
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const;
   std::unique_ptr<IIndirectFitData> m_fitDataModel;
+  void removeFittingData();
 
 protected:
   std::string createOutputName(std::string fitMode) const;
@@ -145,7 +146,6 @@ protected:
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const;
-  void removeFittingData(TableDatasetIndex index);
   std::string m_fitType = "FitType";
   std::string m_fitString = "FitString";
 

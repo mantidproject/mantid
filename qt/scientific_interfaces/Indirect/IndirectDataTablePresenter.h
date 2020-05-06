@@ -12,6 +12,7 @@
 #include <QTableWidget>
 
 #include <cstddef>
+#include <memory>
 #include <unordered_map>
 
 namespace MantidQt {
@@ -57,6 +58,7 @@ protected:
   void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row,
                int column);
   void setCellText(const QString &text, FitDomainIndex row, int column);
+  IIndirectFitData *m_model;
 
 private:
   virtual int workspaceIndexColumn() const;
@@ -73,7 +75,6 @@ private:
   void setHorizontalHeaders(const QStringList &headers);
 
   DataPositionType m_dataPositions;
-  IIndirectFitData *m_model;
   QTableWidget *m_dataTable;
   bool m_emitCellChanged = true;
 };

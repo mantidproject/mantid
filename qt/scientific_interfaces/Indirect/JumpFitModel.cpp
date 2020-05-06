@@ -225,9 +225,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                const Spectra & /*spectra*/) {
-  m_fitType = FQFIT_STRING;
+JumpFitModel::JumpFitModel() { m_fitType = FQFIT_STRING; }
+
+void JumpFitModel::addWorkspace(const std::string &workspaceName) {
+  auto workspace =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addJumpFitParameters(workspace.get(), name);
 
@@ -240,12 +243,13 @@ void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
 
   const auto hwhmWorkspace =
       createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  addWorkspace(name, Spectra(createSpectra(spectrum.get())));
+  IndirectFittingModel::addWorkspace(name,
+                                     Spectra(createSpectra(spectrum.get())));
 }
 
 void JumpFitModel::removeWorkspace(TableDatasetIndex index) {
   m_jumpParameters.erase(getWorkspace(index)->getName());
-  IndirectFittingModel::removeFittingData(index);
+  IndirectFittingModel::removeWorkspace(index);
 }
 
 JumpFitParameters &

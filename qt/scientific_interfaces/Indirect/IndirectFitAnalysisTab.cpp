@@ -754,13 +754,14 @@ void IndirectFitAnalysisTab::respondToSingleResolutionLoaded() {
 }
 
 void IndirectFitAnalysisTab::respondToDataChanged() {
-  updateResultOptions();
   updateDataReferences();
+  m_fittingModel->removeFittingData();
   m_spectrumPresenter->updateSpectra();
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
   updateParameterEstimationData();
+  updateResultOptions();
 }
 
 void IndirectFitAnalysisTab::respondToSingleDataViewSelected() {

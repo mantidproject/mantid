@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataTablePresenter.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -50,7 +51,11 @@ void JumpFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
                                               FitDomainIndex row) {
   IndirectDataTablePresenter::addTableEntry(model, row);
 
-  const auto parameter = "";
+  auto subIndices = m_model->getSubIndices(row);
+  const auto workspace = m_model->getWorkspace(subIndices.first);
+  const auto axis =
+      dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+  const auto parameter = axis->label(subIndices.second.value);
   auto cell =
       std::make_unique<QTableWidgetItem>(QString::fromStdString(parameter));
   auto flags = cell->flags();
