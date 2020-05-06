@@ -59,11 +59,11 @@ public:
             Mantid::API::ITableWorkspace_sptr parameterTable,
             const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) = 0;
 
-  virtual void addSingleOutput(
-      const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-      Mantid::API::ITableWorkspace_sptr parameterTable,
-      const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
-      FitDomainIndex fitDomainIndex) = 0;
+  virtual void
+  addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                  Mantid::API::ITableWorkspace_sptr parameterTable,
+                  const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+                  FitDomainIndex fitDomainIndex) = 0;
 };
 
 } // namespace IDA
