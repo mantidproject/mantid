@@ -259,11 +259,16 @@ def _validate_pcolormesh_inputs(workspaces):
 
 
 @manage_workspace_names
-def plot_surface(workspaces):
+def plot_surface(workspaces, fig=None):
     # Imported here to prevent pyplot being imported before matplotlib.use() is called when Workbench is opened.
     import matplotlib.pyplot as plt
     for ws in workspaces:
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        if fig:
+            fig.clf()
+            ax = fig.add_subplot(projection='mantid3d')
+        else:
+            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+
         surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
         ax.set_title(ws.name())
         fig.colorbar(surface)
@@ -271,10 +276,15 @@ def plot_surface(workspaces):
 
 
 @manage_workspace_names
-def plot_wireframe(workspaces):
+def plot_wireframe(workspaces, fig=None):
     import matplotlib.pyplot as plt
     for ws in workspaces:
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        if fig:
+            fig.clf()
+            ax = fig.add_subplot(projection='mantid3d')
+        else:
+            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())
         fig.show()

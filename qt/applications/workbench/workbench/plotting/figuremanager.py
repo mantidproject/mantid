@@ -469,7 +469,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
 
     def set_up_color_selector_toolbar_button(self):
+        # check if the action is already in the toolbar
+        if self.toolbar._actions.get('line_colour'):
+            return
+
         a = self.toolbar.addAction(get_icon('mdi.palette'), "Line Colour", lambda: None)
+        self.toolbar._actions['line_colour'] = a
 
         ax_collections = self.canvas.figure.get_axes()[0].collections
         if any(isinstance(col, Line3DCollection) for col in ax_collections):
