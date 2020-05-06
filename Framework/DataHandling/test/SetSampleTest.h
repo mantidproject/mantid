@@ -856,8 +856,8 @@ private:
       const Mantid::API::MatrixWorkspace_sptr &workspace) {
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::ReferenceFrame;
-    auto inst = boost::make_shared<Instrument>();
-    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+    auto inst = std::make_shared<Instrument>();
+    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(
         Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::Right, ""));
     workspace->setInstrument(inst);
   }
@@ -1026,7 +1026,7 @@ private:
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(
         std::make_unique<StringProperty>("Shape", "FlatPlateHolder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 1.3), "");
@@ -1050,7 +1050,7 @@ private:
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(
         std::make_unique<StringProperty>("Shape", "HollowCylinderHolder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 1.), "");
