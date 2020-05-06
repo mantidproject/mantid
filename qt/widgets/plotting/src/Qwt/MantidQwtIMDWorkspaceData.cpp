@@ -270,7 +270,7 @@ void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview) {
     // Refer to the last workspace = the intermediate in the case of MDHisto
     // binning
     const size_t indexOfWS = nOriginalWorkspaces - 1; // Get the last workspace
-    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(
+    m_originalWorkspace = std::dynamic_pointer_cast<IMDWorkspace>(
         m_workspace->getOriginalWorkspace(indexOfWS));
   }
 
@@ -310,7 +310,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
 
       bool regularBinnedMDWorkspace = false;
       if (auto mdew =
-              boost::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
+              std::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
                   m_workspace)) {
         Mantid::API::BoxController_const_sptr controller =
             mdew->getBoxController();
@@ -324,7 +324,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
       }
 
       if (nullptr !=
-              boost::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(
+              std::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(
                   originalWS) ||
           regularBinnedMDWorkspace) {
         for (size_t d = 0; d < diff.getNumDims(); d++) {

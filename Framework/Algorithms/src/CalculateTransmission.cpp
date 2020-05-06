@@ -64,7 +64,7 @@ size_t getIndexFromDetectorID(const MatrixWorkspace &ws, detid_t detid) {
 DECLARE_ALGORITHM(CalculateTransmission)
 
 void CalculateTransmission::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
@@ -84,7 +84,7 @@ void CalculateTransmission::init() {
       "The name of the workspace in which to store the fitted transmission "
       "fractions.");
 
-  auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();
+  auto zeroOrMore = std::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
 
   declareProperty("IncidentBeamMonitor", EMPTY_INT(), zeroOrMore,
@@ -105,10 +105,10 @@ void CalculateTransmission::init() {
   options[2] = "Polynomial";
 
   declareProperty("FitMethod", "Log",
-                  boost::make_shared<StringListValidator>(options),
+                  std::make_shared<StringListValidator>(options),
                   "Whether to fit directly to the transmission curve using "
                   "Linear, Log or Polynomial.");
-  auto twoOrMore = boost::make_shared<BoundedValidator<int>>();
+  auto twoOrMore = std::make_shared<BoundedValidator<int>>();
   twoOrMore->setLower(2);
   declareProperty("PolynomialOrder", 2, twoOrMore,
                   "Order of the polynomial to "

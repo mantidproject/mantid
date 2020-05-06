@@ -4,14 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import math
 
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
-from six import string_types
-
+from mantid.kernel import logger
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
@@ -83,7 +81,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, output_binning=None, pdf_type="G(r)", freq_params=None):
+                    sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", freq_params=None, bw_order=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -105,30 +103,28 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
                                                          WorkspaceToMatch=focused_ws)
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
-
+    if delta_q:
+        focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
-        fast_fourier_filter(merged_ws, freq_params)
+        fast_fourier_filter(merged_ws, freq_params=freq_params, bw_order=bw_order)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=True)
+                                                Filter=True, DeltaR=delta_r,
+                                                rho0=sample_details.material_object.crystal_density)
     else:
         for ws in focused_ws:
-            fast_fourier_filter(ws, freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
-                                                PDFType=pdf_type, Filter=True)
+            fast_fourier_filter(ws, freq_params=freq_params, bw_order=bw_order)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
+                                                Filter=True, DeltaR=delta_r,
+                                                rho0=sample_details.material_object.crystal_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     common.remove_intermediate_workspace('self_scattering_correction')
-    if output_binning is not None:
-        try:
-            pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
-        except RuntimeError:
-            return pdf_output
     # Rename output ws
     if 'merged_ws' in locals():
-        mantid.RenameWorkspace(InputWorkspace=merged_ws, OutputWorkspace=run_number + '_merged_Q')
+        mantid.RenameWorkspace(InputWorkspace='merged_ws', OutputWorkspace=run_number + '_merged_Q')
     mantid.RenameWorkspace(InputWorkspace='focused_ws', OutputWorkspace=run_number+'_focused_Q')
     if isinstance(focused_ws, WorkspaceGroup):
         for i in range(len(focused_ws)):
@@ -167,7 +163,7 @@ def _obtain_focused_run(run_number, focus_file_path):
 
 
 def _load_qlims(q_lims):
-    if isinstance(q_lims, string_types):
+    if isinstance(q_lims, str):
         q_min = []
         q_max = []
         try:
@@ -203,12 +199,13 @@ def _determine_chopper_mode(ws):
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
 
 
-def fast_fourier_filter(ws, freq_params=None):
+def fast_fourier_filter(ws, freq_params=None, bw_order=None):
     if not freq_params:
+        if bw_order:
+            logger.warning('bw_order set but no freq_params, freq_params must be set for filter to be performed.')
         return
     # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
     # subtracting that from the merged WS
-
     x_range = ws.dataX(0)
     # The param p in FFTSmooth defined such that if the input ws has Nx bins then in the fourier space ws it will cut of
     # all frequencies in bins nk=Nk/p and above, calculated by p = pi/(k_c*dQ) when k_c is the cutoff frequency desired.
@@ -222,10 +219,19 @@ def fast_fourier_filter(ws, freq_params=None):
     lower_freq_param = round(np.pi / (freq_params[0] * (x_range[1] - x_range[0])))
     # This is giving the FFTSmooth the data in the form of S(Q)-1, later we use PDFFourierTransform with Q(S(Q)-1)
     # it does not matter which we use in this case.
-    tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
-                           IgnoreXBins=True)
+    if bw_order:
+        tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Butterworth", Params=str(lower_freq_param)+','+str(bw_order),
+                               StoreInADS=False, IgnoreXBins=True)
+    else:
+        tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
+                               IgnoreXBins=True)
     mantid.Minus(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws)
+
     if len(freq_params) > 1:
         upper_freq_param = round(np.pi / (freq_params[1] * (x_range[1] - x_range[0])))
-        mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
-                         Params=str(upper_freq_param), IgnoreXBins=True)
+        if bw_order:
+            mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Butterworth",
+                             Params=str(upper_freq_param)+','+str(bw_order), IgnoreXBins=True)
+        else:
+            mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
+                             Params=str(upper_freq_param), IgnoreXBins=True)

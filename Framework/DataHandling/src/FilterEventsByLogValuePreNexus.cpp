@@ -285,7 +285,7 @@ void FilterEventsByLogValuePreNexus::init() {
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
                   "If loading the file by sections ('chunks'), this is the "
@@ -302,7 +302,7 @@ void FilterEventsByLogValuePreNexus::init() {
   // Loading option
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
                   "  Auto: Use serial loading for small data sets, parallel "
                   "for large data sets.\n"
@@ -325,7 +325,7 @@ void FilterEventsByLogValuePreNexus::init() {
   //
   std::vector<std::string> vecfunmode{"LoadData", "Filter", "ExamineEventLog"};
   declareProperty("FunctionMode", "LoadData",
-                  boost::make_shared<StringListValidator>(vecfunmode),
+                  std::make_shared<StringListValidator>(vecfunmode),
                   "Function mode for different purpose. ");
 
   declareProperty("PixelIDtoExamine", EMPTY_INT(),
@@ -644,7 +644,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
   std::string evlog = getPropertyValue("EventLogTableWorkspace");
   if (!evlog.empty()) {
     // Initialize table workspace
-    TableWorkspace_sptr evtablews = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr evtablews = std::make_shared<TableWorkspace>();
     evtablews->addColumn("int", "Pixel-ID");
     evtablews->addColumn("int", "NumberOfEvents");
 
@@ -662,7 +662,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
 
     // Set property
     setProperty("EventLogTableWorkspace",
-                boost::dynamic_pointer_cast<ITableWorkspace>(evtablews));
+                std::dynamic_pointer_cast<ITableWorkspace>(evtablews));
   }
 }
 
@@ -1792,7 +1792,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   if (!instrument)
     throw std::runtime_error("Instrument is not setup in m_localWorkspace.");
   IComponent_const_sptr source =
-      boost::dynamic_pointer_cast<const IComponent>(instrument->getSource());
+      std::dynamic_pointer_cast<const IComponent>(instrument->getSource());
   if (!source)
     throw std::runtime_error("Source is not set up in local workspace.");
 

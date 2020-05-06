@@ -77,7 +77,7 @@ public:
 
     ITableWorkspace_sptr tableOut;
     TS_ASSERT_THROWS_NOTHING(
-        tableOut = boost::dynamic_pointer_cast<ITableWorkspace>(
+        tableOut = std::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("stat")));
     TS_ASSERT(tableOut);
     if (!tableOut)
@@ -94,7 +94,7 @@ public:
 
     PeaksWorkspace_sptr wsout;
     TS_ASSERT_THROWS_NOTHING(
-        wsout = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        wsout = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("TOPAZ_peaks")));
     TS_ASSERT(wsout);
     if (!wsout)

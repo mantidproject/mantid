@@ -107,7 +107,7 @@ public:
     }
 
     if (wsType == "Event") {
-      EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+      EventWorkspace_sptr ews = std::dynamic_pointer_cast<EventWorkspace>(ws);
       TS_ASSERT(ews);
     }
 
@@ -123,7 +123,7 @@ public:
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     const auto instrument = outWS->getInstrument();
-    auto bank1 = boost::dynamic_pointer_cast<const RectangularDetector>(
+    auto bank1 = std::dynamic_pointer_cast<const RectangularDetector>(
         instrument->getComponentByName("bank1"));
     TSM_ASSERT_EQUALS(
         "PixelSpacing on the bank is not the same as the expected default in x",
@@ -146,7 +146,7 @@ public:
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     const auto instrument = outWS->getInstrument();
-    auto bank1 = boost::dynamic_pointer_cast<const RectangularDetector>(
+    auto bank1 = std::dynamic_pointer_cast<const RectangularDetector>(
         instrument->getComponentByName("bank1"));
     TSM_ASSERT_EQUALS("Not the specified pixel spacing in x", pixelSpacing,
                       bank1->xstep());
@@ -231,7 +231,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("CreateSampleWorkspaceTest_OutputWS_event");
 
-    auto ws = boost::dynamic_pointer_cast<IEventWorkspace>(
+    auto ws = std::dynamic_pointer_cast<IEventWorkspace>(
         createSampleWorkspace(outWSName, "Event"));
     TS_ASSERT(ws);
     if (!ws)
@@ -502,8 +502,7 @@ public:
     alg.setProperty("NumMonitors", 2);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-    EventWorkspace_sptr ews =
-        boost::dynamic_pointer_cast<EventWorkspace>(outWS);
+    EventWorkspace_sptr ews = std::dynamic_pointer_cast<EventWorkspace>(outWS);
 
     TS_ASSERT_EQUALS(ews->getNumberEvents(), 191900);
 

@@ -10,19 +10,15 @@ The view for the masking table displays all available masks for a SANS reduction
 and masked SANS workspace.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 from qtpy import QtWidgets
-from six import with_metaclass
-
 from mantidqt.utils.qt import load_ui
 
 Ui_MaskingTable, _ = load_ui(__file__, "masking_table.ui")
 
 
 class MaskingTable(QtWidgets.QWidget, Ui_MaskingTable):
-    class MaskingTableListener(with_metaclass(ABCMeta, object)):
+    class MaskingTableListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to for the masking table
         """

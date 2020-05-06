@@ -215,7 +215,7 @@ public:
   }
 
   void test_shared_ptr_constructor() {
-    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
+    auto shared = std::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(shared);
     TS_ASSERT(values);
     TS_ASSERT_EQUALS(values.size(), 2);
@@ -225,7 +225,7 @@ public:
   }
 
   void test_null_shared_ptr_constructor() {
-    boost::shared_ptr<std::vector<double>> shared;
+    std::shared_ptr<std::vector<double>> shared;
     VectorOfTester values(shared);
     TS_ASSERT(!values);
   }
@@ -282,7 +282,7 @@ public:
   }
 
   void test_shared_ptr_assignment() {
-    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
+    auto shared = std::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT(values);
@@ -293,14 +293,14 @@ public:
   }
 
   void test_null_shared_ptr_assignment() {
-    boost::shared_ptr<std::vector<double>> shared;
+    std::shared_ptr<std::vector<double>> shared;
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT(!values);
   }
 
   void test_shared_ptr_self_assignment() {
-    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
+    auto shared = std::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT_THROWS_NOTHING(values = shared);

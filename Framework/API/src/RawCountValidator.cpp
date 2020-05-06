@@ -20,7 +20,7 @@ RawCountValidator::RawCountValidator(const bool &mustNotBeDistribution)
 
 /// Clone the current state
 Kernel::IValidator_sptr RawCountValidator::clone() const {
-  return boost::make_shared<RawCountValidator>(*this);
+  return std::make_shared<RawCountValidator>(*this);
 }
 
 /** Checks if the workspace must be a distribution but isn't and vice-versa

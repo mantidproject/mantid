@@ -72,7 +72,7 @@ public:
       TS_ASSERT(alg.isExecuted());
       TSM_ASSERT("Algorithm methods were called as expected",
                  testing::Mock::VerifyAndClearExpectations(&alg));
-      out = boost::dynamic_pointer_cast<IMDWorkspace>(
+      out = std::dynamic_pointer_cast<IMDWorkspace>(
           AnalysisDataService::Instance().retrieve(outName));
       TS_ASSERT(out);
     } else {

@@ -8,8 +8,6 @@
     and wavelength adjustment.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType)

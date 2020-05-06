@@ -42,7 +42,7 @@ createTestInstrument(const Mantid::detid_t id,
                      V3D samplePosition = V3D(0.0, 0.0, 0.0)) {
 
   // Requires an instrument.
-  auto inst = boost::make_shared<Instrument>();
+  auto inst = std::make_shared<Instrument>();
 
   // Source/sample
   auto *source = new ObjComponent("source");

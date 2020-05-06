@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
 from mantid.plots.mantidaxes import MantidAxes
 
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
@@ -72,6 +70,7 @@ def generate_script(fig, exclude_headers=False):
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
     cmds.append("fig.show()")
+    cmds.append("# Scripting Plots in Mantid: https://docs.mantidproject.org/nightly/plotting/scripting_plots.html")
     return '\n'.join(cmds)
 
 

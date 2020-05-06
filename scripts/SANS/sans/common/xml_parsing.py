@@ -8,8 +8,6 @@
 
 # pylint: disable=invalid-name
 
-from __future__ import (absolute_import, division, print_function)
-
 try:
     import xml.etree.cElementTree as eTree
 except ImportError:

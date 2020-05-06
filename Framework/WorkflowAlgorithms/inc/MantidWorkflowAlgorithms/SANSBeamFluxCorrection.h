@@ -45,7 +45,7 @@ private:
   void exec() override;
   void execEvent();
   API::MatrixWorkspace_sptr loadReference();
-  boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
+  std::shared_ptr<Kernel::PropertyManager> m_reductionManager;
   std::string m_output_message;
 };
 

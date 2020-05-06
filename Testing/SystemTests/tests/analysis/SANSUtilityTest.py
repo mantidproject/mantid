@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-few-public-methods
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import *
 import SANSUtility as su

@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 
 # 3rdparty imports
@@ -17,6 +15,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm, Normalize
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
@@ -191,6 +190,13 @@ class YAxisEditor(AxisEditor):
         self.create_model()
 
 
+class ZAxisEditor(AxisEditor):
+
+    def __init__(self, canvas, axes):
+        super(ZAxisEditor, self).__init__(canvas, axes, 'z')
+        self.create_model()
+
+
 class ColorbarAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):
@@ -198,7 +204,8 @@ class ColorbarAxisEditor(AxisEditor):
 
         self.images = self.canvas.figure.gca().images
         if len(self.images) == 0:
-            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)]
+            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)
+                           or isinstance(col, Poly3DCollection)]
 
         self.create_model()
 

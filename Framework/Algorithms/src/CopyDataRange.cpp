@@ -86,9 +86,9 @@ void CopyDataRange::init() {
                       "DestWorkspace", "", Direction::Input),
                   "The workspace to have range of data replaced.");
 
-  auto const positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto const positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(0);
-  auto const anyDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto const anyDouble = std::make_shared<Kernel::BoundedValidator<double>>();
 
   declareProperty("StartWorkspaceIndex", 0, positiveInt,
                   "The index denoting the start of the spectra range.");

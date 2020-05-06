@@ -33,7 +33,7 @@ const std::string MedianDetectorTest::category() const { return "Diagnostics"; }
 void MedianDetectorTest::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<HistogramValidator>()),
+                      std::make_shared<HistogramValidator>()),
                   "Name of the input workspace");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -41,9 +41,9 @@ void MedianDetectorTest::init() {
       "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
       "a zero is also masked on the output");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "LevelsUp", 0, mustBePosInt,

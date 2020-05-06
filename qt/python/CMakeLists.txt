@@ -97,9 +97,6 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
     mantidqt/widgets/test/test_functionbrowser.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
-    mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
-    mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
-    mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
@@ -133,6 +130,21 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
       mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+      mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
+      mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
+      mantidqt/widgets/sliceviewer/test/test_sliceviewer_sliceinfo.py
+      mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_alpha.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_draw.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_painter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_nonintegrated.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
+      mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_spherical.py
       mantidqt/widgets/test/test_jupyterconsole.py
       mantidqt/widgets/workspacedisplay/test/test_data_copier.py
       mantidqt/widgets/workspacedisplay/test/test_user_notifier.py

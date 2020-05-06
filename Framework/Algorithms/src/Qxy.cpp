@@ -36,7 +36,7 @@ using namespace API;
 using namespace Geometry;
 
 void Qxy::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
@@ -48,7 +48,7 @@ void Qxy::init() {
                                                         Direction::Output),
                   "The name to use for the corrected workspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(1.0e-12);
 
   declareProperty(
@@ -64,7 +64,7 @@ void Qxy::init() {
                   "The scaling to apply to each spectrum e.g. for detector "
                   "efficiency, must have just one bin per spectrum and the "
                   "same number of spectra as DetBankWorkspace.");
-  auto wavVal = boost::make_shared<CompositeValidator>();
+  auto wavVal = std::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -81,7 +81,7 @@ void Qxy::init() {
   declareProperty("SolidAngleWeighting", true,
                   "If true, pixels will be weighted by their solid angle.",
                   Direction::Input);
-  auto mustBePositive2 = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive2 = std::make_shared<BoundedValidator<double>>();
   mustBePositive2->setLower(0.0);
   declareProperty("RadiusCut", 0.0, mustBePositive2,
                   "The minimum distance in mm from the beam center at which "

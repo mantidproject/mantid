@@ -52,7 +52,7 @@ public:
                                   WorkspaceIndex spectrum) const override;
 
 private:
-  std::string constructOutputName() const;
+  std::string constructOutputName(const std::string &batchType) const;
   bool
   allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   JumpFitParameters &

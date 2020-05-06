@@ -16,9 +16,9 @@
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -50,6 +50,8 @@
 #include <vector>
 
 #include <boost/math/constants/constants.hpp>
+
+using Mantid::API::AlgorithmManager;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -611,8 +613,7 @@ void InstrumentWidgetPickTab::initSurface() {
 /**
  * Return current ProjectionSurface.
  */
-boost::shared_ptr<ProjectionSurface>
-InstrumentWidgetPickTab::getSurface() const {
+std::shared_ptr<ProjectionSurface> InstrumentWidgetPickTab::getSurface() const {
   return m_instrWidget->getSurface();
 }
 
@@ -1648,7 +1649,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     if (!detids.empty()) {
       // set up spectra - detector mapping
       Mantid::API::MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
       if (!ws) {
         throw std::runtime_error("Failed to create Curves workspace");
@@ -1791,7 +1792,7 @@ void DetectorPlotController::addPeak(double x, double y) {
         Mantid::API::AnalysisDataService::Instance().add(peakTableName, tw);
         newPeaksWorkspace = true;
       } else {
-        tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
+        tw = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 peakTableName));
         if (!tw) {
@@ -1805,13 +1806,12 @@ void DetectorPlotController::addPeak(double x, double y) {
       auto unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface.get());
       if (unwrappedSurface) {
         unwrappedSurface->setPeaksWorkspace(
-            boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+            std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
       }
     }
 
     // Run the AddPeak algorithm
-    auto alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+    auto alg = AlgorithmManager::Instance().create("AddPeak");
     const auto &detIDs =
         m_instrWidget->getInstrumentActor().detectorInfo().detectorIDs();
     alg->setPropertyValue("RunWorkspace", ws->getName());
@@ -1832,8 +1832,7 @@ void DetectorPlotController::addPeak(double x, double y) {
 
     // if there is a UB available calculate HKL for the new peak
     if (tw->sample().hasOrientedLattice()) {
-      alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-          "CalculatePeaksHKL");
+      alg = AlgorithmManager::Instance().create("CalculatePeaksHKL");
       alg->setPropertyValue("PeaksWorkspace", peakTableName);
       alg->execute();
     }

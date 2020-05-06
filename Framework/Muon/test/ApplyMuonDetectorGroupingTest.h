@@ -29,7 +29,7 @@ namespace {
 // Set sensible default algorithm properties
 IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName,
                                            const std::string &inputGroupName) {
-  auto alg = boost::make_shared<ApplyMuonDetectorGrouping>();
+  auto alg = std::make_shared<ApplyMuonDetectorGrouping>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
   alg->setProperty("InputWorkspaceGroup", inputGroupName);
@@ -52,7 +52,7 @@ class setUpADSWithWorkspace {
 public:
   setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
-    wsGroup = boost::make_shared<WorkspaceGroup>();
+    wsGroup = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace(groupWSName, wsGroup);
   };
 
@@ -104,7 +104,7 @@ public:
     alg->execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("inputGroup"))
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
     // Raw + Rebinned
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
@@ -120,7 +120,7 @@ public:
     alg->execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("inputGroup"))
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
     // Raw + Rebinned + unNorm + unNorm_Raw
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 4);
@@ -133,7 +133,7 @@ public:
     Mantid::API::IAlgorithm_sptr alg =
         algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->execute();
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
     TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
@@ -149,7 +149,7 @@ public:
     alg->setProperty("Grouping", "1");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
     auto wsOut = wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw");
@@ -173,9 +173,9 @@ public:
         algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -202,10 +202,10 @@ public:
     alg->setProperty("Grouping", "1");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
 
     // Check values against calculation by hand.
@@ -233,10 +233,10 @@ public:
     alg->setProperty("Grouping", "1,2,3");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
 
     // Check values against calculation by hand.
@@ -267,10 +267,10 @@ public:
     alg->setProperty("SummedPeriods", "1,2");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
@@ -303,10 +303,10 @@ public:
     alg->setProperty("Grouping", "1");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
@@ -337,10 +337,10 @@ public:
     alg->setProperty("DeadTimeTable", deadTimeTable);
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
@@ -366,10 +366,10 @@ public:
     alg->setProperty("RebinArgs", "0.2");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOutNoRebin = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOutNoRebin = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
@@ -377,7 +377,7 @@ public:
     TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[9], 0.900, 0.001);
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
 
     // Check values against calculation by hand.

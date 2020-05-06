@@ -136,7 +136,7 @@ private:
   QString m_algPropName;
 
   // Algorithm to validate against
-  boost::shared_ptr<Mantid::API::Algorithm> m_algorithm;
+  std::shared_ptr<Mantid::API::Algorithm> m_algorithm;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

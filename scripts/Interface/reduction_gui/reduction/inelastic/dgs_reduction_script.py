@@ -10,7 +10,6 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-from __future__ import (absolute_import, division, print_function)
 import time
 import mantid
 from reduction_gui.reduction.scripter import BaseReductionScripter

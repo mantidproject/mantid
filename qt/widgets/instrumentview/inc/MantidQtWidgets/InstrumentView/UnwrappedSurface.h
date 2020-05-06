@@ -12,7 +12,7 @@
 #include "MantidKernel/V3D.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedDetector.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QImage>
 #include <QList>
@@ -68,7 +68,7 @@ public:
   void getSelectedDetectors(std::vector<size_t> &detIndices) override;
   void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
   void
-  setPeaksWorkspace(const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
+  setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
   QString getInfoText() const override;
   RectF getSurfaceBounds() const override;
   //@}
@@ -108,7 +108,7 @@ public:
   /// Save settings for the unwrapped surface to a project file
   virtual std::string saveToProject() const override;
   /// Get a handle to a peaks workspace from a name
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+  std::shared_ptr<Mantid::API::IPeaksWorkspace>
   retrievePeaksWorkspace(const std::string &name) const;
 
 protected slots:

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Poco {
 namespace XML {
@@ -37,8 +37,8 @@ public:
   virtual void setSuccessor(CoordTransformAffineParser *other);
   virtual ~CoordTransformAffineParser() = default;
   using SuccessorType_sptr =
-      boost::shared_ptr<CoordTransformAffineParser>; ///< successor parser
-                                                     ///< shared ptr typedef
+      std::shared_ptr<CoordTransformAffineParser>; ///< successor parser
+                                                   ///< shared ptr typedef
 protected:
   SuccessorType_sptr m_successor; ///< successor parser
 private:

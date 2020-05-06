@@ -56,7 +56,7 @@ void LevenbergMarquardtMinimizer::initialize(
     API::ICostFunction_sptr costFunction, size_t /*maxIterations*/) {
   // set-up GSL container to be used with GSL simplex algorithm
   auto leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
   if (leastSquares) {
     m_data = std::make_unique<GSL_FitData>(leastSquares);

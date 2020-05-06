@@ -45,7 +45,7 @@ bool isSubscribedNumber(SpaceGroupFactoryImpl &self, size_t number) {
 SpaceGroup_sptr createSpaceGroup(SpaceGroupFactoryImpl &self,
                                  const std::string &symbol) {
   SpaceGroup_const_sptr spaceGroup = self.createSpaceGroup(symbol);
-  return boost::const_pointer_cast<SpaceGroup>(spaceGroup);
+  return std::const_pointer_cast<SpaceGroup>(spaceGroup);
 }
 } // namespace
 

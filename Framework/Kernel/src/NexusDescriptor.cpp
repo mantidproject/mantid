@@ -36,7 +36,7 @@ const unsigned char NexusDescriptor::HDF5Signature[8] = {
 
 namespace {
 //---------------------------------------------------------------------------------------------------------------------------
-// Anonymous helper methods to use isHDF methods to use an open file handle
+// Anonymous helper methods to use isReadable methods to use an open file handle
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -96,8 +96,8 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
  * the required version
  * @return True if the file is considered hierarchical, false otherwise
  */
-bool NexusDescriptor::isHDF(const std::string &filename,
-                            const Version version) {
+bool NexusDescriptor::isReadable(const std::string &filename,
+                                 const Version version) {
   FILE *fd = fopen(filename.c_str(), "rb");
   if (!fd) {
     throw std::invalid_argument(
@@ -120,7 +120,7 @@ bool NexusDescriptor::isHDF(const std::string &filename,
  * involves simply checking for the signature if a HDF file at the start of the
  * file
  */
-NexusDescriptor::NexusDescriptor(const std::string &filename)
+NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
     : m_filename(), m_extension(), m_firstEntryNameType(), m_rootAttrs(),
       m_pathsToTypes(), m_file(nullptr) {
   if (filename.empty()) {
@@ -131,12 +131,16 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
     throw std::invalid_argument("NexusDescriptor() - File '" + filename +
                                 "' does not exist");
   }
-  try {
-    initialize(filename);
-  } catch (::NeXus::Exception &e) {
-    throw std::invalid_argument(
-        "NexusDescriptor::initialize - File '" + filename +
-        "' does not look like a HDF file.\n Error was: " + e.what());
+
+  if (init) {
+    try {
+      // this is very expesive as it walk the entire file
+      initialize(filename);
+    } catch (::NeXus::Exception &e) {
+      throw std::invalid_argument(
+          "NexusDescriptor::initialize - File '" + filename +
+          "' does not look like a HDF file.\n Error was: " + e.what());
+    }
   }
 }
 

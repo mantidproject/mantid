@@ -22,8 +22,8 @@ namespace MDAlgorithms {
 template <size_t nd>
 void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
 
-  boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>
-      ws = boost::shared_ptr<
+  std::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>
+      ws = std::shared_ptr<
           DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>(
           new DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>());
 

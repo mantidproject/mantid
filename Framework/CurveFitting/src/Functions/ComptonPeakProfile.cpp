@@ -88,9 +88,9 @@ void ComptonPeakProfile::setUpForFit() {
   // Voigt & Gaussian
 
   using namespace Mantid::API;
-  m_gauss = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_gauss = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Gaussian"));
-  m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
 }
 
@@ -100,8 +100,8 @@ void ComptonPeakProfile::setUpForFit() {
  * @param ws The workspace set as input
  */
 void ComptonPeakProfile::setWorkspace(
-    boost::shared_ptr<const API::Workspace> ws) {
-  auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+    std::shared_ptr<const API::Workspace> ws) {
+  auto workspace = std::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (!workspace) {
     throw std::invalid_argument(
         "ComptonPeakProfile expected an object of type MatrixWorkspace, type=" +

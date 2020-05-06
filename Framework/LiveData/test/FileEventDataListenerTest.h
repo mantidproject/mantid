@@ -50,7 +50,7 @@ public:
 
     MatrixWorkspace_const_sptr buffer;
     TS_ASSERT_THROWS_NOTHING(
-        buffer = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+        buffer = std::dynamic_pointer_cast<const MatrixWorkspace>(
             listener->extractData()))
     TS_ASSERT(buffer)
     // Check this is the only surviving reference to it
@@ -62,7 +62,7 @@ public:
     MatrixWorkspace_const_sptr buffer2;
     // Call extractData again
     TS_ASSERT_THROWS_NOTHING(
-        buffer2 = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+        buffer2 = std::dynamic_pointer_cast<const MatrixWorkspace>(
             listener->extractData()))
     TS_ASSERT(buffer2)
     // Check this is the only surviving reference to it

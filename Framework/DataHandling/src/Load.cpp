@@ -13,6 +13,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -146,10 +147,10 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
         // fileNames[0].substr(fileNames[0].find_last_of("."));
 
         auto ifl =
-            boost::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(
+            std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(
                 loader);
         auto iflNexus =
-            boost::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(
+            std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(
                 loader);
 
         for (size_t i = 1; i < fileNames.size(); ++i) {
@@ -215,25 +216,37 @@ API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
 }
 
 void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
-  // Use the first file property as the main Filename
-  const auto &props = loader->getProperties();
-  for (auto prop : props) {
-    auto *fp = dynamic_cast<API::MultipleFileProperty *>(prop);
-    auto *fp2 = dynamic_cast<API::FileProperty *>(prop);
-    if (fp) {
-      m_filenamePropName = fp->name();
-      break;
-    }
-    if (fp2) {
-      m_filenamePropName = fp2->name();
-      break;
+  const auto nxsLoader = std::dynamic_pointer_cast<NexusFileLoader>(loader);
+  if (nxsLoader) {
+    // NexusFileLoader has a method for giving back the name directly
+    m_filenamePropName = nxsLoader->getFilenamePropertyName();
+  } else {
+    // Use the first file property as the main Filename
+    const auto &props = loader->getProperties();
+    for (auto prop : props) {
+      auto *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
+      auto *singleprop = dynamic_cast<API::FileProperty *>(prop);
+      if (multiprop) {
+        m_filenamePropName = multiprop->name();
+        break;
+      }
+      if (singleprop) {
+        m_filenamePropName = singleprop->name();
+        break;
+      }
     }
   }
+
+  // throw an exception if somehting nothing was found
   if (m_filenamePropName.empty()) {
+    // unset member variables
     setPropertyValue("LoaderName", "");
     setProperty("LoaderVersion", -1);
-    throw std::runtime_error("Cannot find FileProperty on " + loader->name() +
-                             " algorithm.");
+
+    std::stringstream msg;
+    msg << "Cannot find FileProperty on \"" << loader->name() << "\" v"
+        << loader->version() << " algorithm.";
+    throw std::runtime_error(msg.str());
   }
 }
 
@@ -332,9 +345,9 @@ void Load::exec() {
   // Test for loading as a single file
   IAlgorithm_sptr loader = getFileLoader(fileNames[0][0]);
   auto ifl =
-      boost::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
+      std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
   auto iflNexus =
-      boost::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
+      std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
 
   if (isSingleFile(fileNames) || (ifl && ifl->loadMutipleAsOne()) ||
       (iflNexus && iflNexus->loadMutipleAsOne())) {
@@ -412,7 +425,7 @@ void Load::loadMultipleFiles() {
     }
 
     API::WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
+        std::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
     if (group) {
       std::vector<std::string> childWsNames = group->getNames();
       auto childWsName = childWsNames.begin();
@@ -681,8 +694,8 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
  */
 API::Workspace_sptr Load::plusWs(Workspace_sptr ws1,
                                  const Workspace_sptr &ws2) {
-  WorkspaceGroup_sptr group1 = boost::dynamic_pointer_cast<WorkspaceGroup>(ws1);
-  WorkspaceGroup_sptr group2 = boost::dynamic_pointer_cast<WorkspaceGroup>(ws2);
+  WorkspaceGroup_sptr group1 = std::dynamic_pointer_cast<WorkspaceGroup>(ws1);
+  WorkspaceGroup_sptr group2 = std::dynamic_pointer_cast<WorkspaceGroup>(ws2);
 
   if (group1 && group2) {
     // If we're dealing with groups, then the child workspaces must be added
@@ -732,11 +745,10 @@ API::Workspace_sptr Load::plusWs(Workspace_sptr ws1,
  */
 API::WorkspaceGroup_sptr
 Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
-  auto group = boost::make_shared<WorkspaceGroup>();
+  auto group = std::make_shared<WorkspaceGroup>();
 
   for (const auto &ws : wsList) {
-    WorkspaceGroup_sptr isGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    WorkspaceGroup_sptr isGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     // If the ws to add is already a group, then add its children individually.
     if (isGroup) {
       std::vector<std::string> childrenNames = isGroup->getNames();

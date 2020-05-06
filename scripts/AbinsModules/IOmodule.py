@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import hashlib
 import io
 import json
 import os
-import six
 import subprocess
 import shutil
 import h5py
@@ -301,28 +299,6 @@ class IOmodule(object):
         end = reversed_path.find("/")
         return reversed_path[:end]
 
-    @classmethod
-    def _convert_unicode_to_str(cls, object_to_check):
-        """
-        Converts unicode to Python str, works for nested dicts and lists (recursive algorithm). Only required
-        for Python 2 where a mismatch with unicode/str objects is a problem for dictionary lookup
-
-        :param object_to_check: dictionary, or list with names which should be converted from unicode to string.
-        """
-        if six.PY2:
-            if isinstance(object_to_check, list):
-                object_to_check = list(map(cls._convert_unicode_to_str, object_to_check))
-
-            elif isinstance(object_to_check, dict):
-                return {cls._encode_utf8_if_text(key): cls._convert_unicode_to_str(value)
-                        for key, value in object_to_check.items()}
-
-            # unicode element
-            elif isinstance(object_to_check, six.text_type):
-                object_to_check = cls._encode_utf8_if_text(object_to_check)
-
-        return object_to_check
-
     @staticmethod
     def _encode_utf8_if_text(item):
         """
@@ -332,7 +308,7 @@ class IOmodule(object):
         :param item: item to convert to unicode str if Python 2 str
         :returns: laundered item
         """
-        if isinstance(item, six.text_type):
+        if isinstance(item, str):
             return item.encode('utf-8')
         else:
             return item
@@ -364,11 +340,9 @@ class IOmodule(object):
                 structured_dataset_list.append(
                     self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
                                                                     path=hdf_group.name + "/%s" % item))
-            return self._convert_unicode_to_str(structured_dataset_list)
+            return structured_dataset_list
         else:
-            return self._convert_unicode_to_str(
-                self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
-                                                                path=hdf_group.name + "/"))
+            return self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=hdf_group.name + "/")
 
     @classmethod
     def _recursively_load_dict_contents_from_group(cls, hdf_file=None, path=None):

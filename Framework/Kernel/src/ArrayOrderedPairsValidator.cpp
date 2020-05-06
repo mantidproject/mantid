@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayOrderedPairsValidator.h"
 
-#include <boost/make_shared.hpp>
 #include <cstdint>
+#include <memory>
 #include <sstream>
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace Kernel {
  */
 template <typename TYPE>
 IValidator_sptr ArrayOrderedPairsValidator<TYPE>::clone() const {
-  return boost::make_shared<ArrayOrderedPairsValidator<TYPE>>(*this);
+  return std::make_shared<ArrayOrderedPairsValidator<TYPE>>(*this);
 }
 
 /**

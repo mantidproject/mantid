@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
 import unittest
 
 from matplotlib import use as mpl_use
@@ -19,7 +17,7 @@ from numpy import array_equal
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import datafunctions
 from mantid.plots.utility import MantidAxType
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (

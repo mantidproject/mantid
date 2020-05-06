@@ -14,7 +14,7 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 // 3rd party library headers
 #include <QDialog>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // Class forward declarations
 namespace MantidQt {

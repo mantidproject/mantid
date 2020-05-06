@@ -8,7 +8,6 @@
 """
     Base reduction class. Uses version 2 python API.
 """
-from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time

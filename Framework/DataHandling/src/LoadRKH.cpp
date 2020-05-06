@@ -200,7 +200,7 @@ void LoadRKH::init() {
 
   declareProperty(
       "FirstColumnValue", "Wavelength",
-      boost::make_shared<Kernel::StringListValidator>(propOptions),
+      std::make_shared<Kernel::StringListValidator>(propOptions),
       "Only used for 1D files, the units of the first column in the RKH "
       "file (default Wavelength)");
 }

@@ -245,13 +245,13 @@ void DirectILLTubeBackground::init() {
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           Prop::EPP_WS, "", Kernel::Direction::Input),
       "A table workspace containing results from the FindEPP algorithm.");
-  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLowerExclusive(0.);
   declareProperty(
       Prop::SIGMA_MULTIPLIER, 6., positiveDouble,
       "Half width of the range excluded from background around "
       "the elastic peaks in multiplies of 'Sigma' in the EPP table.'.");
-  auto nonnegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto nonnegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
   declareProperty(Prop::POLYNOMIAL_DEGREE, 0, nonnegativeInt,
                   "The degree of the background polynomial.");

@@ -61,7 +61,7 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
  * Initialise the algorithm
  */
 void SaveSESANS::init() {
-  auto validOrientation = boost::make_shared<Kernel::StringListValidator>(
+  auto validOrientation = std::make_shared<Kernel::StringListValidator>(
       std::set<std::string>{"X", "Y", "Z"});
 
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(

@@ -39,9 +39,9 @@ struct Product {
 /** Initalise generic importing properties.
  */
 void ImportMDHistoWorkspaceBase::initGenericImportProps() {
-  auto validator = boost::make_shared<CompositeValidator>();
-  validator->add(boost::make_shared<BoundedValidator<int>>(1, 9));
-  validator->add(boost::make_shared<MandatoryValidator<int>>());
+  auto validator = std::make_shared<CompositeValidator>();
+  validator->add(std::make_shared<BoundedValidator<int>>(1, 9));
+  validator->add(std::make_shared<MandatoryValidator<int>>());
 
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "Dimensionality", -1, validator, Direction::Input),

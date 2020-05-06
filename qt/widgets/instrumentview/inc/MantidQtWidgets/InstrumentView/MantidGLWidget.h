@@ -11,7 +11,7 @@
 #include <QGLWidget>
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -27,8 +27,8 @@ class MantidGLWidget : public QGLWidget {
 public:
   explicit MantidGLWidget(QWidget *parent = nullptr); ///< Constructor
   ~MantidGLWidget() override;                         ///< Destructor
-  void setSurface(boost::shared_ptr<ProjectionSurface> surface);
-  boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
+  void setSurface(std::shared_ptr<ProjectionSurface> surface);
+  std::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 
   void setBackgroundColor(const QColor & /*input*/);
   QColor currentBackgroundColor() const;
@@ -67,7 +67,7 @@ private:
   bool m_firstFrame;
 
   /// Surface
-  boost::shared_ptr<ProjectionSurface> m_surface;
+  std::shared_ptr<ProjectionSurface> m_surface;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

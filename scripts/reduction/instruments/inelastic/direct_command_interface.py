@@ -8,7 +8,6 @@
 """
     Command set for Direct Geometry reduction
 """
-from __future__ import (absolute_import, division, print_function)
 # Import the specific commands that we need
 from mantid.api import AlgorithmManager
 from reduction.command_interface import *

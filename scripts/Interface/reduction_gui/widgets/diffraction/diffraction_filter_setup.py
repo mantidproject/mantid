@@ -8,7 +8,6 @@
 ################################################################################
 # Event Filtering (and advanced) Setup Widget
 ################################################################################
-from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Logger
 from mantid.simpleapi import ExportTimeSeriesLog, Load
 import matplotlib.pyplot as plt

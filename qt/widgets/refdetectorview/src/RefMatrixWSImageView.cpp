@@ -60,7 +60,7 @@ RefMatrixWSImageView::RefMatrixWSImageView(const QString &wpsName, int peakMin,
       data[px * sz + tof] = static_cast<float>(yAxis[tof]);
   }
 
-  auto source = boost::make_shared<SpectrumView::ArrayDataSource>(
+  auto source = std::make_shared<SpectrumView::ArrayDataSource>(
       totalXMin, totalXMax, totalYMin, static_cast<double>(totalYMax),
       totalRows, totalCols, data);
 

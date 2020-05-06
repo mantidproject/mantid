@@ -344,5 +344,11 @@ void OrientedLattice::recalculate() {
   UnitCell::recalculate();
   UB = U * getB();
 }
+bool OrientedLattice::operator==(const OrientedLattice &other) const {
+  return UB == other.UB;
+}
+bool OrientedLattice::operator!=(const OrientedLattice &other) const {
+  return UB != other.UB;
+}
 } // Namespace Geometry
 } // Namespace Mantid

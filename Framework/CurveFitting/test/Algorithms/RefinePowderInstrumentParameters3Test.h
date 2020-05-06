@@ -55,7 +55,7 @@ Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
        0.390796, 0.997644}};
 
   // 2. Generate workspace
-  Workspace2D_sptr dataws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr dataws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // 3. Put data
@@ -185,7 +185,7 @@ public:
     // 5. Check result
     // a) Profile parameter table
     TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             AnalysisDataService::Instance().retrieve(
                 "Bank1FittedProfileParameters"));
     TS_ASSERT(newgeomparamws);
@@ -205,7 +205,7 @@ public:
     }
 
     // b) Data
-    Workspace2D_sptr outdataws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outdataws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("Bank1FittedPositions"));
     TS_ASSERT(outdataws);
 
@@ -264,7 +264,7 @@ public:
     // 5. Check result
     // a) Profile parameter table
     TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<TableWorkspace>(
+        std::dynamic_pointer_cast<TableWorkspace>(
             AnalysisDataService::Instance().retrieve(
                 "Bank1FittedProfileParameters"));
     TS_ASSERT(newgeomparamws);
@@ -284,7 +284,7 @@ public:
     }
 
     // b) Data
-    Workspace2D_sptr outdataws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outdataws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("Bank1FittedPositions"));
     TS_ASSERT(outdataws);
 

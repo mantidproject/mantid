@@ -83,7 +83,7 @@ void LoadParameterFile::exec() {
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // TODO: Refactor to remove the need for the const cast (ticket #8521)
-  Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(
+  Instrument_sptr instrument = std::const_pointer_cast<Instrument>(
       localWorkspace->getInstrument()->baseInstrument());
 
   // Set up the DOM parser and parse xml file

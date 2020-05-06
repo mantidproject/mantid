@@ -49,7 +49,7 @@ private:
     const std::string summary() const override { return "Test summary"; }
 
     void init() override {
-      auto lower = boost::make_shared<Mantid::Kernel::BoundedValidator<int>>();
+      auto lower = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
       lower->setLower(0);
       declareProperty("OutputValue", -1, lower);
     }

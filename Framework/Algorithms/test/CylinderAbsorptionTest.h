@@ -45,7 +45,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7210, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2052, 0.0001);
@@ -68,7 +68,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.1535, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.0001, 0.0001);
@@ -100,14 +100,14 @@ public:
     using FloatArrayProperty = Mantid::Kernel::ArrayProperty<double>;
 
     // create the material
-    auto material = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
     material->declareProperty(
         std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
     material->declareProperty(
         std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
 
     // create the geometry
-    auto geometry = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(
         std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4), "");
@@ -136,7 +136,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7210, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2052, 0.0001);
@@ -154,14 +154,14 @@ public:
     using FloatArrayProperty = Mantid::Kernel::ArrayProperty<double>;
 
     // create the material
-    auto material = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
     material->declareProperty(
         std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
     material->declareProperty(
         std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
 
     // create the geometry
-    auto geometry = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(
         std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4), "");
@@ -193,7 +193,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.1535, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.0001, 0.0001);
@@ -214,14 +214,14 @@ public:
     using FloatArrayProperty = Mantid::Kernel::ArrayProperty<double>;
 
     // create the material
-    auto material = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
     material->declareProperty(
         std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
     material->declareProperty(
         std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
 
     // create the geometry
-    auto geometry = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(
         std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4), "");
@@ -254,7 +254,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
     // these values are different than testWithSetSample because of the smaller
@@ -281,7 +281,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.4796, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2510, 0.0001);

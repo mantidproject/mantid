@@ -64,7 +64,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT(ws);
     if (!ws)
@@ -134,10 +134,10 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws1, ws2;
     TS_ASSERT_THROWS_NOTHING(
-        ws1 = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws1 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT_THROWS_NOTHING(
-        ws2 = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws2 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "outWS_event_2D")););
     TS_ASSERT(ws1);
@@ -205,7 +205,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT(ws);
     if (!ws)

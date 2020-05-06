@@ -29,7 +29,7 @@ void SelectCellWithForm::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
 
   this->declareProperty(std::make_unique<PropertyWithValue<int>>(

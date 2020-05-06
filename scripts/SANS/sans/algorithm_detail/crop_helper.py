@@ -7,7 +7,6 @@
 # pylint: disable=invalid-name
 
 """ Helpers for CropToComponent for SANS."""
-from __future__ import (absolute_import, division, print_function)
 from sans.common.general_functions import convert_instrument_and_detector_type_to_bank_name
 from sans.common.enums import SANSInstrument
 

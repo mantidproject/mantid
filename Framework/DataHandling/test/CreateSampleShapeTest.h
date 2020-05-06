@@ -101,7 +101,7 @@ public:
 
     // Get the created object
     Mantid::API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "TestWorkspace"));
 

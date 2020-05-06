@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, no-name-in-module
-from __future__ import (absolute_import, division, print_function)
-
 import math
 import numpy as np
 from scipy.stats import chisquare

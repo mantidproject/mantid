@@ -28,6 +28,7 @@ namespace {
 class ConcreteProperty : public Property {
 public:
   ConcreteProperty() : Property("Test", typeid(int)) {}
+  ConcreteProperty(std::string name) : Property(name, typeid(int)) {}
   ConcreteProperty *clone() const override {
     return new ConcreteProperty(*this);
   }
@@ -35,15 +36,21 @@ public:
   std::string getDefault() const override {
     return "getDefault() is not implemented in this class";
   }
-  std::string value() const override { return "Nothing"; }
+  std::string value() const override { return m_value; }
   Json::Value valueAsJson() const override { return Json::Value(); }
-  std::string setValue(const std::string &) override { return ""; }
+  std::string setValue(const std::string &value) override {
+    m_value = value;
+    return m_value;
+  }
   std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
-  std::string setDataItem(const boost::shared_ptr<DataItem>) override {
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override {
     return "";
   }
   Property &operator+=(Property const *) override { return *this; }
+
+private:
+  std::string m_value = "Nothing";
 };
 
 template <typename T>
@@ -185,7 +192,7 @@ public:
     runInfo.addProperty(p);
 
     TS_ASSERT_EQUALS(runInfo.getMemorySize(),
-                     sizeof(ConcreteProperty) + sizeof(void *));
+                     p->getMemorySize() + sizeof(Property *));
   }
 
   void test_GetTimeSeriesProperty_Returns_TSP_When_Log_Exists() {
@@ -528,6 +535,48 @@ public:
     th.file->openGroup("sample", "NXsample");
     LogManager run3;
     run3.loadNexus(th.file.get(), "");
+  }
+
+  void test_operator_equals() {
+    LogManager a;
+    LogManager b;
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    b.addProperty(std::make_unique<ConcreteProperty>());
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equals_when_number_of_entries_differ() {
+    LogManager a;
+    LogManager b;
+    a.addProperty(std::make_unique<ConcreteProperty>("a1"));
+    b.addProperty(std::make_unique<ConcreteProperty>("b1"));
+    b.addProperty(std::make_unique<ConcreteProperty>("b2"));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equals_when_values_differ() {
+    LogManager a;
+    LogManager b;
+    auto prop1 = std::make_unique<ConcreteProperty>();
+    auto prop2 = std::make_unique<ConcreteProperty>();
+    prop2->setValue("another_value");
+    a.addProperty(std::move(prop1));
+    b.addProperty(std::move(prop2));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equals_when_keys_differ() {
+    LogManager a;
+    LogManager b;
+    auto prop1 = std::make_unique<ConcreteProperty>("Temp");
+    auto prop2 = std::make_unique<ConcreteProperty>("Pressure");
+    a.addProperty(std::move(prop1));
+    b.addProperty(std::move(prop2));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
   }
 
 private:

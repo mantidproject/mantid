@@ -8,19 +8,15 @@
 
 """State describing the adjustment workspace creation of the SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 import json
-
-from six import with_metaclass
 
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateAdjustment(with_metaclass(JsonSerializable)):
+class StateAdjustment(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateAdjustment, self).__init__()

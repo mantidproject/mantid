@@ -8,7 +8,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V2D.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace SliceViewer {

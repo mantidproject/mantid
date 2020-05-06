@@ -114,7 +114,7 @@ void LoadSQW2::init() {
                   "MDEventWorkspace");
   std::vector<std::string> allowed = {"Q_sample", "HKL"};
   declareProperty("Q3DFrames", allowed[0],
-                  boost::make_shared<StringListValidator>(allowed),
+                  std::make_shared<StringListValidator>(allowed),
                   "The required frame for the output workspace");
 
   // Outputs
@@ -192,7 +192,7 @@ void LoadSQW2::throwIfUnsupportedFileType(int32_t sqwType) {
 
 /// Create the output workspace object
 void LoadSQW2::createOutputWorkspace() {
-  m_outputWS = boost::make_shared<SQWWorkspace>();
+  m_outputWS = std::make_shared<SQWWorkspace>();
 }
 
 /**
@@ -216,8 +216,8 @@ void LoadSQW2::readAllSPEHeadersToWorkspace() {
  * this section
  * @return A new ExperimentInfo object storing the data
  */
-boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
-  auto experiment = boost::make_shared<ExperimentInfo>();
+std::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
+  auto experiment = std::make_shared<ExperimentInfo>();
   auto &sample = experiment->mutableSample();
   auto &run = experiment->mutableRun();
 
@@ -607,7 +607,7 @@ void LoadSQW2::setupFileBackend(const std::string &filebackPath) {
   // create file-backed box controller
   auto boxControllerMem = m_outputWS->getBoxController();
   auto boxControllerIO =
-      boost::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+      std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
   boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
   m_outputWS->getBox()->setFileBacked();
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);

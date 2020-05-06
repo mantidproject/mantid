@@ -96,8 +96,27 @@ public:
   void disableAll() override;
   void enableAll() override;
 
+  bool getSubtractBackground() const override;
+  void setSubtractBackground(bool enable) override;
+
+  std::string getBackgroundSubtractionMethod() const override;
+  void setBackgroundSubtractionMethod(std::string const &method) override;
+  void enableBackgroundSubtractionMethod() override;
+  void disableBackgroundSubtractionMethod() override;
+
+  int getPolynomialDegree() const override;
+  void setPolynomialDegree(int polynomialDegree) override;
+  void enablePolynomialDegree() override;
+  void disablePolynomialDegree() override;
+
+  std::string getCostFunction() const override;
+  void setCostFunction(std::string const &costFunction) override;
+  void enableCostFunction() override;
+  void disableCostFunction() override;
+
   void enablePolarizationCorrections() override;
   void disablePolarizationCorrections() override;
+
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;
 
@@ -141,16 +160,20 @@ private:
   template <typename Widget>
   void registerSettingWidget(Widget &widget, std::string const &propertyName,
                              const Mantid::API::IAlgorithm_sptr &alg);
+  template <typename Widget>
+  void registerSettingWidget(Widget &widget, std::string const &tooltip);
   void connectSettingsChange(QLineEdit &edit);
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);
   void connectSettingsChange(QTableWidget &edit);
   void connectSettingsChange(QDoubleSpinBox &edit);
+  void connectSettingsChange(QSpinBox &edit);
   void disconnectSettingsChange(QLineEdit &edit);
   void disconnectSettingsChange(QComboBox &edit);
   void disconnectSettingsChange(QCheckBox &edit);
   void disconnectSettingsChange(QTableWidget &edit);
   void disconnectSettingsChange(QDoubleSpinBox &edit);
+  void disconnectSettingsChange(QSpinBox &edit);
   QLineEdit &stitchOptionsLineEdit() const;
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);

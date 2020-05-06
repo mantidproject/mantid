@@ -6,13 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import unittest
 
 from mantid.api import AnalysisDataService as ADS, AnalysisDataServiceObserver
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace, GroupWorkspaces, UnGroupWorkspace, DeleteWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 
 
 class FakeADSObserver(AnalysisDataServiceObserver):

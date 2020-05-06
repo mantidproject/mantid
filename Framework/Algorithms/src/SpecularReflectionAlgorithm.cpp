@@ -15,7 +15,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -79,7 +79,7 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
   propOptions.emplace_back(multiDetectorAnalysis);
 
   declareProperty("AnalysisMode", pointDetectorAnalysis,
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   message.str());
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
@@ -94,7 +94,7 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
 
-  auto boundedArrayValidator = boost::make_shared<ArrayBoundedValidator<int>>();
+  auto boundedArrayValidator = std::make_shared<ArrayBoundedValidator<int>>();
   boundedArrayValidator->setLower(0);
   declareProperty(
       std::make_unique<ArrayProperty<int>>("SpectrumNumbersOfDetectors",
@@ -146,10 +146,10 @@ SpecularReflectionAlgorithm::getSurfaceSampleComponent(
  *name.
  * @return The component : The component object found.
  */
-boost::shared_ptr<const Mantid::Geometry::IComponent>
+std::shared_ptr<const Mantid::Geometry::IComponent>
 SpecularReflectionAlgorithm::getDetectorComponent(
     const MatrixWorkspace_sptr &workspace, const bool isPointDetector) const {
-  boost::shared_ptr<const IComponent> searchResult;
+  std::shared_ptr<const IComponent> searchResult;
   if (!isPropertyDefault("SpectrumNumbersOfDetectors")) {
     const std::vector<int> spectrumNumbers =
         this->getProperty("SpectrumNumbersOfDetectors");
@@ -157,7 +157,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(
         this->getProperty("StrictSpectrumChecking");
     checkSpectrumNumbers(spectrumNumbers, strictSpectrumChecking, g_log);
     auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
-    DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
+    DetectorGroup_sptr allDetectors = std::make_shared<DetectorGroup>();
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (auto index : spectrumNumbers) {
       const size_t spectrumNumber{static_cast<size_t>(index)};
@@ -224,7 +224,7 @@ double SpecularReflectionAlgorithm::calculateTwoTheta() const {
 
   const V3D detSample = detector->getPos() - sample->getPos();
 
-  boost::shared_ptr<const ReferenceFrame> refFrame =
+  std::shared_ptr<const ReferenceFrame> refFrame =
       instrument->getReferenceFrame();
 
   const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);

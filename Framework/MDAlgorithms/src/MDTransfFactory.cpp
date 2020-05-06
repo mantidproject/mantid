@@ -16,10 +16,10 @@ namespace MDAlgorithms {
  *  @param className :: The name of the class to be created
  *  @return A shared pointer to the instance of the requested MDtransformation
  */
-boost::shared_ptr<MDTransfInterface>
+std::shared_ptr<MDTransfInterface>
 MDTransfFactoryImpl::create(const std::string &className) const {
-  std::map<std::string, boost::shared_ptr<MDTransfInterface>>::const_iterator
-      it = m_createdTransf.find(className);
+  std::map<std::string, std::shared_ptr<MDTransfInterface>>::const_iterator it =
+      m_createdTransf.find(className);
   if (it != m_createdTransf.end()) {
     // If an instance has previously been created, just return a pointer to it
     return it->second;

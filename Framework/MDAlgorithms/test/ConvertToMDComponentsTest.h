@@ -7,7 +7,7 @@
 #pragma once
 // tests for different parts of ConvertToMD exec functions
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
@@ -39,7 +39,7 @@ public:
     this->m_InWS2D = std::move(InWS2D);
     // and create the class, which will deal with the target workspace
     if (!this->m_OutWSWrapper)
-      this->m_OutWSWrapper = boost::shared_ptr<MDAlgorithms::MDEventWSWrapper>(
+      this->m_OutWSWrapper = std::shared_ptr<MDAlgorithms::MDEventWSWrapper>(
           new MDAlgorithms::MDEventWSWrapper());
   }
   Convert2MDComponentsTestHelper() { ConvertToMD::initialize(); }
@@ -150,8 +150,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
 
-    auto clVs = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "CloneWorkspace");
+    auto clVs = AlgorithmManager::Instance().create("CloneWorkspace");
     TS_ASSERT(clVs);
     if (!clVs)
       return;
@@ -316,15 +315,13 @@ public:
     ws2D->mutableRun().addProperty("eFixed", 13., "meV", true);
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
-
-    Mantid::API::FrameworkManager::Instance();
   }
   ~ConvertToMDComponentsTest() override {
     AnalysisDataService::Instance().remove("testWSProcessed");
   }
 
   void maskAllDetectors(const std::string &wsName) {
-    auto inputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve(wsName));
     const size_t nRows = inputWS->getNumberHistograms();
     auto &spectrumInfo = inputWS->mutableSpectrumInfo();

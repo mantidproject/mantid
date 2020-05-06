@@ -32,7 +32,7 @@ protected:
     int nperiods = static_cast<int>(ws->size());
     for (size_t i = 0; i < ws->size(); ++i) {
       MatrixWorkspace_sptr currentWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
       PropertyWithValue<int> *nperiodsProp =
           new PropertyWithValue<int>("nperiods", nperiods);
       currentWS->mutableRun().addLogData(nperiodsProp);
@@ -49,7 +49,7 @@ protected:
     MatrixWorkspace_sptr a = MatrixWorkspace_sptr(new WorkspaceTester);
     MatrixWorkspace_sptr b = MatrixWorkspace_sptr(new WorkspaceTester);
 
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     // group->setName(name);
     group->addWorkspace(a);
     group->addWorkspace(b);

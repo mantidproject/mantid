@@ -74,7 +74,7 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
     // boost 1.41 (RHEL6) can't handle registering IAlgorithm_const_sptr so we
     // have to cast to IAlgorithm_sptr and then convert to Python
     // The constness is pretty-irrelevant by this point anyway
-    algs.append(boost::const_pointer_cast<IAlgorithm>(mgrAlg));
+    algs.append(std::const_pointer_cast<IAlgorithm>(mgrAlg));
   }
 
   return algs;
@@ -109,9 +109,6 @@ void export_AlgorithmManager() {
                                      "Creates an unmanaged algorithm."))
       .def("size", &AlgorithmManagerImpl::size, arg("self"),
            "Returns the number of managed algorithms")
-      .def("setMaxAlgorithms", &AlgorithmManagerImpl::setMaxAlgorithms,
-           (arg("self"), arg("n")),
-           "Set the maximum number of allowed managed algorithms")
       .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
            "Return the algorithm instance identified by the given id.")
       .def("removeById", &removeById, (arg("self"), arg("id_holder")),

@@ -11,7 +11,6 @@ All these functions should throw a ValueError exception when, for example:
  - the specified workspaces don't exist
  - the index(es) of spectra, bin or dimension is wrong
 """
-from __future__ import (absolute_import, division, print_function)
 import mantidplottests
 from mantidplottests import *
 import time
@@ -39,6 +38,7 @@ MDWWorkspaceName = 'mdw'
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace=MDWWorkspaceName)
 
 WrongWorkspaceName = 'foo inexistent'
+
 
 class MantidPlotInputArgsCheck(unittest.TestCase):
 

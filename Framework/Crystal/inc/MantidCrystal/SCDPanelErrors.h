@@ -55,7 +55,7 @@ private:
   void loadWorkspace(const std::string &wsName) const;
 
   /// Load the points from a Workspace
-  void loadWorkspace(boost::shared_ptr<API::Workspace> ws) const;
+  void loadWorkspace(std::shared_ptr<API::Workspace> ws) const;
 
   /// Clear all data
   void clear() const;
@@ -73,7 +73,7 @@ private:
   static const int defaultIndexValue;
 
   /// Temporary workspace holder
-  mutable boost::shared_ptr<API::Workspace> m_workspace;
+  mutable std::shared_ptr<API::Workspace> m_workspace;
 
   /// Stores bank
   mutable std::string m_bank;

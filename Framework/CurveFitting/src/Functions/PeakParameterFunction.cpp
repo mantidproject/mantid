@@ -57,8 +57,8 @@ void PeakParameterFunction::functionDeriv(const FunctionDomain &domain,
 /// Make sure the decorated function is IPeakFunction and store it.
 void PeakParameterFunction::beforeDecoratedFunctionSet(
     const IFunction_sptr &fn) {
-  boost::shared_ptr<IPeakFunction> peakFunction =
-      boost::dynamic_pointer_cast<IPeakFunction>(fn);
+  std::shared_ptr<IPeakFunction> peakFunction =
+      std::dynamic_pointer_cast<IPeakFunction>(fn);
 
   if (!peakFunction) {
     throw std::invalid_argument(

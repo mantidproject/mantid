@@ -24,8 +24,8 @@
 #include <QMap>
 #include <QMetaType>
 #include <QMutex>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 
 class QMainWindow;
 class QLabel;

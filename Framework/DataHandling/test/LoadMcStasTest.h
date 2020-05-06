@@ -175,8 +175,8 @@ private:
     return sum;
   }
 
-  boost::shared_ptr<WorkspaceGroup> load_test(const std::string &fileName,
-                                              const std::string &outputName) {
+  std::shared_ptr<WorkspaceGroup> load_test(const std::string &fileName,
+                                            const std::string &outputName) {
 
     // specify name of file to load workspace from
     algToBeTested.setProperty("Filename", fileName);

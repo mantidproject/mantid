@@ -9,7 +9,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/NeutronAtom.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -211,6 +211,27 @@ MaterialBuilder &MaterialBuilder::setAbsorptionXSection(double xsec) {
 }
 
 /**
+ * Set a value for the attenuation profile filename
+ * @param filename Name of the file containing the attenuation profile
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &
+MaterialBuilder::setAttenuationProfileFilename(std::string filename) {
+  if (!filename.empty()) {
+    m_attenuationProfileFileName = filename;
+  }
+  return *this;
+}
+
+/**
+ * Set a value for the attenuation profile search path
+ * @param path Path to search
+ */
+void MaterialBuilder::setAttenuationSearchPath(std::string path) {
+  m_attenuationFileSearchPath = std::move(path);
+}
+
+/**
  * Build the new Material object from the current set of options
  * @return A new Material object
  */
@@ -229,12 +250,20 @@ Material MaterialBuilder::build() const {
   }
 
   const double density = getOrCalculateRho(formula);
+  std::unique_ptr<Material> material;
   if (hasOverrideNeutronProperties()) {
     PhysicalConstants::NeutronAtom neutron = generateCustomNeutron();
-    return Material(m_name, neutron, density);
+    material = std::make_unique<Material>(m_name, neutron, density);
   } else {
-    return Material(m_name, formula, density);
+    material = std::make_unique<Material>(m_name, formula, density);
   }
+  if (m_attenuationProfileFileName) {
+    AttenuationProfile materialAttenuation(m_attenuationProfileFileName.get(),
+                                           m_attenuationFileSearchPath,
+                                           material.get());
+    material->setAttenuationProfile(materialAttenuation);
+  }
+  return *material;
 }
 
 /**
@@ -243,11 +272,10 @@ Material MaterialBuilder::build() const {
  */
 Material::ChemicalFormula
 MaterialBuilder::createCompositionFromAtomicNumber() const {
-  Material::FormulaUnit unit{
-      boost::make_shared<PhysicalConstants::Atom>(
-          getAtom(static_cast<uint16_t>(m_atomicNo.get()),
-                  static_cast<uint16_t>(m_massNo))),
-      1.};
+  Material::FormulaUnit unit{std::make_shared<PhysicalConstants::Atom>(getAtom(
+                                 static_cast<uint16_t>(m_atomicNo.get()),
+                                 static_cast<uint16_t>(m_massNo))),
+                             1.};
   Material::ChemicalFormula formula;
   formula.emplace_back(unit);
 

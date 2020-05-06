@@ -130,7 +130,7 @@ void ConvertCWSDMDtoHKL::exec() {
   m_outputWS =
       createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
   // Experiment info
-  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
   expinfo->mutableRun().setGoniometer(
       inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
@@ -349,7 +349,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
 
   // Creates a new instance of the MDEventInserter to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Go though each spectrum to conver to MDEvent

@@ -176,9 +176,9 @@ void Spectrogram::clearADSHandle() {
  */
 void Spectrogram::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (wsName == d_wsName) {
-    updateData(boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws));
+    updateData(std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws));
   }
 }
 

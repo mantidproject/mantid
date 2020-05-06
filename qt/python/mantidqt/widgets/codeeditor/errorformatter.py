@@ -7,13 +7,10 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 import traceback
 
 # third-party imports
-import six
 
 
 class ErrorFormatter(object):
@@ -34,9 +31,4 @@ class ErrorFormatter(object):
         if stack is not None:
             lines.extend(traceback.format_list(stack))
 
-        if six.PY2:
-            # traceback always returns a list of ascii string objects
-            # encoded as utf-8 we want unicode to be consistent
-            # with using unicode_literals across the codebase
-            lines = map(lambda x: x.decode('utf-8') , lines)
         return ''.join(lines)

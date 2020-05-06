@@ -25,7 +25,7 @@ using namespace API;
 void Transpose::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
+                      std::make_shared<CommonBinsValidator>()),
                   "The input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
@@ -38,10 +38,10 @@ void Transpose::exec() {
 
   // Things to take care of RebinnedOutput workspaces
   DataObjects::RebinnedOutput_const_sptr inRebinWorkspace =
-      boost::dynamic_pointer_cast<const DataObjects::RebinnedOutput>(
+      std::dynamic_pointer_cast<const DataObjects::RebinnedOutput>(
           inputWorkspace);
   DataObjects::RebinnedOutput_sptr outRebinWorkspace =
-      boost::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
+      std::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
 
   size_t newNhist = outputWorkspace->getNumberHistograms();
   size_t newXsize = outputWorkspace->x(0).size();

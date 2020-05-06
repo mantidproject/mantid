@@ -397,7 +397,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
 
   // Creates a new instance of the MDEventInserte to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_outputWS);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Calcualte k_i: it is assumed that all k_i are same for one Pt.
@@ -459,7 +459,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
                       << "\n";
 
   // Add experiment info including instrument, goniometer and run number
-  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   if (usevirtual)
     expinfo->setInstrument(m_virtualInstrument);
   else {

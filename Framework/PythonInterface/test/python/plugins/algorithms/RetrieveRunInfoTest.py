@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.kernel import *
@@ -13,6 +11,7 @@ from mantid.api import *
 from mantid import config
 from mantid.simpleapi import *
 from testhelpers import run_algorithm
+
 
 class RetrieveRunInfoTest(unittest.TestCase):
 

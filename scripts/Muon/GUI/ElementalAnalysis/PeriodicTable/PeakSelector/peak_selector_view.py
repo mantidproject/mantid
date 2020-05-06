@@ -4,10 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
 from qtpy import QtWidgets, QtCore
 
-from six import iteritems
 import numpy as np
 
 from Muon.GUI.Common.checkbox import Checkbox
@@ -120,7 +118,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         return self.new_data
 
     def update_new_data(self, data):
-        for el, values in iteritems(data):
+        for el, values in data.items():
             if values is None:
                 data[el] = {}
         new_data = data["Primary"].copy()
@@ -139,7 +137,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         _heading = QtWidgets.QLabel(heading)
         self.list.addWidget(_heading)
         checkboxes = []
-        for peak_type, value in iteritems(checkbox_data):
+        for peak_type, value in checkbox_data.items():
             checkboxes.append(self._setup_checkbox("{}: {}".format(peak_type, value), checked))
         return checkboxes
 

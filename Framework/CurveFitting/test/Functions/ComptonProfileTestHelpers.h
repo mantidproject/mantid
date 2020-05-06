@@ -150,7 +150,7 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   using namespace Mantid::Geometry;
 
   // Requires an instrument.
-  auto inst = boost::make_shared<Instrument>();
+  auto inst = std::make_shared<Instrument>();
 
   // Source/sample
   auto *source = new ObjComponent("source");

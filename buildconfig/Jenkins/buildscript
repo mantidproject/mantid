@@ -312,8 +312,6 @@ fi
 # Figure out if were doing a sanitizer build and setup any steps we need
 ###############################################################################
 
-SANITIZER_FLAGS=''
-
 if [[ ${JOB_NAME} == *address* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
     
@@ -327,7 +325,7 @@ elif [[ ${JOB_NAME} == *undefined* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=undefined"
 fi
 
-if [[ -v ${SANITIZER_FLAGS} ]]; then
+if [[ -n "${SANITIZER_FLAGS}" ]]; then
     # Force build to RelWithDebInfo
     BUILD_CONFIG="RelWithDebInfo"
 fi

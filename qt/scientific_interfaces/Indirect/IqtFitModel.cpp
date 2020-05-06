@@ -36,7 +36,7 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function,
     return nullptr;
   if (function->category() == category)
     return function;
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     return getFirstInCategory(composite, category);
   return nullptr;
@@ -186,7 +186,7 @@ std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_seq" + m_fitType + "_s%2%",
+  return createOutputName("%1%" + fitString + "_seq_" + m_fitType + "_s%2%",
                           "_to_", TableDatasetIndex{0});
 }
 
@@ -194,7 +194,7 @@ std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_sim" + m_fitType + "_s%2%",
+  return createOutputName("%1%" + fitString + "_sim_" + m_fitType + "_s%2%",
                           "_to_", TableDatasetIndex{0});
 }
 
@@ -233,7 +233,7 @@ IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
 
 MultiDomainFunction_sptr IqtFitModel::createFunctionWithGlobalBeta(
     const IFunction_sptr &function) const {
-  boost::shared_ptr<MultiDomainFunction> multiDomainFunction(
+  std::shared_ptr<MultiDomainFunction> multiDomainFunction(
       new MultiDomainFunction);
   const auto functionString = function->asString();
   for (auto i = TableDatasetIndex{0}; i < numberOfWorkspaces(); ++i) {

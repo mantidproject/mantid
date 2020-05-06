@@ -77,7 +77,7 @@ void CatalogPublishDialog::populateUserInvestigations() {
       // Cast a catalog to a catalogInfoService to access downloading
       // functionality.
       auto catalogInfoService =
-          boost::dynamic_pointer_cast<Mantid::API::ICatalogInfoService>(
+          std::dynamic_pointer_cast<Mantid::API::ICatalogInfoService>(
               Mantid::API::CatalogManager::Instance().getCatalog(
                   session.front()->getSessionId()));
       // Check if the catalog created supports publishing functionality.

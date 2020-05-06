@@ -878,7 +878,7 @@ public:
     alg.setProperty("BackgroundProcessingInstructions", "1");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS,
                           {"ExtractSpectra", "GroupDetectors", "ConvertUnits",
@@ -890,7 +890,7 @@ public:
     setupAlgorithmForBackgroundSubtraction(
         alg, createWorkspaceWithFlatBackground("test_ws"));
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     // Note that ExtractSpectra is not called because the whole workspace is
     // used for the background subtraction
@@ -910,7 +910,7 @@ public:
     alg.setProperty("BackgroundProcessingInstructions", "1, 2, 4, 5");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS, {"ExtractSpectra",
                                      "ReflectometryBackgroundSubtraction",
@@ -930,7 +930,7 @@ public:
     alg.setProperty("BackgroundCalculationMethod", "Polynomial");
     alg.setProperty("DegreeOfPolynomial", "2");
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS, {"ExtractSpectra",
                                      "ReflectometryBackgroundSubtraction",
@@ -1067,7 +1067,7 @@ private:
     alg.setPropertyValue("OutputWorkspace", name);
     alg.execute();
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(name));
     ws->setCounts(0, background);
     ws->setCounts(1, background);
@@ -1099,7 +1099,7 @@ private:
     alg.setProperty("OutputWorkspace", name);
     alg.execute();
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(name));
     for (auto spec = 0; spec < nspec; ++spec)
       ws->setCounts(spec, Counts(1, polynomial[spec] + peak[spec]));

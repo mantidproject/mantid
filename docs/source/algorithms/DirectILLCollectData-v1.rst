@@ -140,7 +140,7 @@ For usage of this algorithm as part of the direct geometry data reduction, check
     # It is recommended to use DirectILLCollectData over the basic Load
     preprocessed = DirectILLCollectData('ILL/IN4/087294+087295.nxs')
     # Compare to simply loading the data
-    raw = Load('ILL/IN4/087294+087295.nxs')
+    raw = Load('ILL/IN4/087294+087295.nxs', ConvertToTOF=True)
     # The workspace loaded by 'Load' includes monitor data which
     # makes 2D plotting difficult
     nRaw = raw.getNumberHistograms()

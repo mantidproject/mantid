@@ -8,12 +8,8 @@
 
 """State for moving workspaces."""
 
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 import json
-
-from six import with_metaclass
 
 from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.JsonSerializable import JsonSerializable
@@ -25,7 +21,7 @@ from sans.state.state_functions import (validation_message, set_detector_names, 
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateMoveDetectors(with_metaclass(JsonSerializable)):
+class StateMoveDetectors(metaclass=JsonSerializable):
     def __init__(self):
         super(StateMoveDetectors, self).__init__()
         # Translation correction
@@ -66,7 +62,7 @@ class StateMoveDetectors(with_metaclass(JsonSerializable)):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-class StateMove(with_metaclass(JsonSerializable)):
+class StateMove(metaclass=JsonSerializable):
     def __init__(self):
         super(StateMove, self).__init__()
 

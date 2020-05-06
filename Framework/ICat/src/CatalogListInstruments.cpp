@@ -19,7 +19,7 @@ void CatalogListInstruments::init() {
                   "The session information of the catalog to use.");
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       "InstrumentList", std::vector<std::string>(),
-                      boost::make_shared<Kernel::NullValidator>(),
+                      std::make_shared<Kernel::NullValidator>(),
                       Kernel::Direction::Output),
                   "A list containing instrument names.");
 }

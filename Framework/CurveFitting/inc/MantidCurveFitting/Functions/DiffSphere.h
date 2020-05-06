@@ -52,9 +52,9 @@ public:
   void init() override;
 
 private:
-  boost::shared_ptr<Mantid::CurveFitting::Functions::ElasticDiffSphere>
+  std::shared_ptr<Mantid::CurveFitting::Functions::ElasticDiffSphere>
       m_elastic; // elastic intensity of the DiffSphere structure factor
-  boost::shared_ptr<Mantid::CurveFitting::Functions::InelasticDiffSphere>
+  std::shared_ptr<Mantid::CurveFitting::Functions::InelasticDiffSphere>
       m_inelastic; // inelastic intensity of the DiffSphere structure factor
 };
 

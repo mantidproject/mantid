@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -102,7 +103,7 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
 void setMonitorWorkspace(MatrixWorkspace &self,
                          const boost::python::object &value) {
 
-  MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr monWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       Mantid::PythonInterface::ExtractWorkspace(value)());
   self.setMonitorWorkspace(monWS);
 }
@@ -111,8 +112,8 @@ void setMonitorWorkspace(MatrixWorkspace &self,
  *
  *@return weak pointer to monitor workspace used by python
  */
-boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
-  return boost::weak_ptr<Workspace>(self.monitorWorkspace());
+std::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
+  return std::weak_ptr<Workspace>(self.monitorWorkspace());
 }
 /**
  * Clear monitor workspace attached to for current workspace.
@@ -295,6 +296,36 @@ boost::python::tuple findY(MatrixWorkspace &self, double value, tuple start) {
   return make_tuple(idx.first, idx.second);
 }
 
+/**
+ * Gets the bin edges from one matrix workspace and applies them to another
+ * workspace.
+ * @param self :: The MatrixWorkspace whose bin edges are being set.
+ * @param ws :: The MatrixWorkspace from which the bin edges are retrieved.
+ * @param getIndex :: The index from which the bin edges are retrieved.
+ * @param setIndex :: The index at which the bin edges are being set.
+ */
+void applyBinEdgesFromAnotherWorkspace(MatrixWorkspace &self,
+                                       const MatrixWorkspace &ws,
+                                       const size_t getIndex,
+                                       const size_t setIndex) {
+  self.setBinEdges(setIndex, ws.binEdges(getIndex));
+}
+
+/**
+ * Gets the points from one matrix workspace and applies them to another
+ * workspace.
+ * @param self :: The MatrixWorkspace whose points are being set.
+ * @param ws :: The MatrixWorkspace from which the points are retrieved.
+ * @param getIndex :: The index from which the points are retrieved.
+ * @param setIndex :: The index at which the points are being set.
+ */
+void applyPointsFromAnotherWorkspace(MatrixWorkspace &self,
+                                     const MatrixWorkspace &ws,
+                                     const size_t getIndex,
+                                     const size_t setIndex) {
+  self.setPoints(setIndex, ws.points(getIndex));
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -410,6 +441,14 @@ void export_MatrixWorkspace() {
       .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
            "Replaces one of the workspace's axes with the new one provided.")
+      .def("applyBinEdgesFromAnotherWorkspace",
+           &applyBinEdgesFromAnotherWorkspace,
+           (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),
+           "Sets the bin edges at setIndex to be the bin edges of ws at "
+           "getIndex.")
+      .def("applyPointsFromAnotherWorkspace", &applyPointsFromAnotherWorkspace,
+           (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),
+           "Sets the points at setIndex to be the points of ws at getIndex.")
 
       //--------------------------------------- Read spectrum data
       //-------------------------

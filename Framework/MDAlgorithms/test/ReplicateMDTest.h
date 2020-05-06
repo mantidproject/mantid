@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -27,8 +27,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
                                          bool transpose = false,
                                          double value = 0.0) {
 
-  IAlgorithm *create =
-      FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
+  auto create = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
   create->setChild(true);
   create->initialize();
 
@@ -86,8 +85,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
       axis = static_cast<int>(op());
     }
 
-    IAlgorithm *transpose =
-        FrameworkManager::Instance().createAlgorithm("TransposeMD");
+    auto transpose = AlgorithmManager::Instance().create("TransposeMD");
     transpose->setChild(true);
     transpose->initialize();
     transpose->setProperty("InputWorkspace", outWs);
@@ -97,7 +95,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
     outWs = transpose->getProperty("OutputWorkspace");
   }
 
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
 }
 } // namespace
 

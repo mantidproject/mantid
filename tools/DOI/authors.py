@@ -45,6 +45,7 @@ _translations = {
     'Doucet, Mathieu'         : 'Doucet, Mathieu',
     'Nick Draper'             : 'Draper, Nick',
     'NickDraper'              : 'Draper, Nick',
+    'Nicholas Draper'         : 'Draper, Nick',
     'Ronald Fowler'           : 'Fowler, Ronald',
     'Martyn Gigg'             : 'Gigg, Martyn A.',
     'Samuel Jackson'          : 'Jackson, Samuel',
@@ -222,16 +223,23 @@ _translations = {
     'Wu'                      : 'Wu, Hank',
     'PhilColebrooke'          : 'Colebrooke, Phil',
     'Phil'                    : 'Colebrooke, Phil',
+    'Phil Colebrooke'         : 'Colebrooke, Phil',
     'DanielMurphy22'          : 'Murphy, Daniel',
     'RichardWaiteSTFC'        : 'Waite, Richard',
     'Richard Waite'           : 'Waite, Richard',
     'Ciara Nightingale'       : 'Nightingale, Ciara',
     'ciaranightingale'        : 'Nightingale, Ciara',
     'Danny Hindson'           : 'Hindson, Danny',
+    'DannyHindson'            : 'Hindson, Dannny',
     'Fahima-Islam'            : 'Islam, Fahima',
     'giovannidisiena'         : 'Di Siena, Giovanni',
     'Giovanni Di Siena'       : 'Di Siena, Giovanni',
-    'Takudzwa Makoni'         : 'Makoni, Takudzwa'
+    'Takudzwa Makoni'         : 'Makoni, Takudzwa',
+    'Daniel Murphy'           : 'Murphy, Daniel',
+    'William F Godoy'         : 'Godoy, William F',
+    'Islam, Fahima F'         : 'Islam, Fahima',
+    'Mathieu Tillet'          : 'Tillet, Mathieu',
+    'StephenSmith'            : 'Smith, Stephen'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

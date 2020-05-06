@@ -34,7 +34,8 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
                                      "no ChemicalFormula or AtomicNumber is "
                                      "given.";
     }
-    if (isEmpty(params.attenuationXSection)) {
+    if (isEmpty(params.attenuationXSection) &&
+        params.attenuationProfileFileName.empty()) {
       result["AttenuationXSection"] = "The cross section must be specified "
                                       "when no ChemicalFormula or AtomicNumber "
                                       "is given.";
@@ -104,7 +105,8 @@ void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
                    params.numberDensityUnit, params.zParameter,
                    params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
-                    params.attenuationXSection, params.scatteringXSection);
+                    params.attenuationXSection, params.scatteringXSection,
+                    params.attenuationProfileFileName);
 }
 
 /**
@@ -146,11 +148,13 @@ void ReadMaterial::setNumberDensity(
 void ReadMaterial::setScatteringInfo(double coherentXSection,
                                      double incoherentXSection,
                                      double attenuationXSection,
-                                     double scatteringXSection) {
+                                     double scatteringXSection,
+                                     std::string attenuationProfileFileName) {
   builder.setCoherentXSection(coherentXSection);       // in barns
   builder.setIncoherentXSection(incoherentXSection);   // in barns
   builder.setAbsorptionXSection(attenuationXSection);  // in barns
   builder.setTotalScatterXSection(scatteringXSection); // in barns
+  builder.setAttenuationProfileFilename(attenuationProfileFileName);
 }
 
 bool ReadMaterial::isEmpty(const double toCheck) {

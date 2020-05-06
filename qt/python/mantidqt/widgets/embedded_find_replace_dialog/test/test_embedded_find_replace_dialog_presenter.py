@@ -5,11 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import (absolute_import, division, print_function)
-
 from unittest import TestCase
 
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog, SearchDirection
 from mantidqt.utils.testing.mocks.mock_codeeditor import MockCodeEditor

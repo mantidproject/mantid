@@ -11,10 +11,10 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 
-#include <boost/shared_ptr.hpp>
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_version.h>
+#include <memory>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -54,10 +54,9 @@ private:
   void getGSLBreakPoints(std::vector<double> &bp) const;
 
   /// structure used by GSL internally
-  boost::shared_ptr<gsl_bspline_workspace> m_bsplineWorkspace;
+  std::shared_ptr<gsl_bspline_workspace> m_bsplineWorkspace;
 #if GSL_MAJOR_VERSION < 2
-  mutable boost::shared_ptr<gsl_bspline_deriv_workspace>
-      m_bsplineDerivWorkspace;
+  mutable std::shared_ptr<gsl_bspline_deriv_workspace> m_bsplineDerivWorkspace;
 #endif
 };
 

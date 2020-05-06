@@ -40,7 +40,7 @@ void MultiPeriodGroupWorker::tryAddInputWorkspaceToInputGroups(
     MultiPeriodGroupWorker::VecWSGroupType &vecMultiPeriodWorkspaceGroups,
     MultiPeriodGroupWorker::VecWSGroupType &vecWorkspaceGroups) const {
   WorkspaceGroup_sptr inputGroup =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      std::dynamic_pointer_cast<WorkspaceGroup>(ws);
   if (inputGroup) {
     if (inputGroup->isMultiperiod()) {
       vecMultiPeriodWorkspaceGroups.emplace_back(inputGroup);
@@ -91,7 +91,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
                                         vecWorkspaceGroups);
     }
   } else {
-    using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
+    using WorkspaceVector = std::vector<std::shared_ptr<Workspace>>;
     WorkspaceVector inWorkspaces;
     sourceAlg->findWorkspaces(inWorkspaces, Direction::Input);
     for (auto &inWorkspace : inWorkspaces) {
@@ -169,7 +169,7 @@ void MultiPeriodGroupWorker::copyInputWorkspaceProperties(
         if (const IWorkspaceProperty *wsProp =
                 dynamic_cast<IWorkspaceProperty *>(prop)) {
           if (WorkspaceGroup_sptr inputws =
-                  boost::dynamic_pointer_cast<WorkspaceGroup>(
+                  std::dynamic_pointer_cast<WorkspaceGroup>(
                       wsProp->getWorkspace())) {
             if (inputws->isMultiperiod()) {
               targetAlg->setProperty(prop->name(),
@@ -209,7 +209,7 @@ bool MultiPeriodGroupWorker::processGroups(
   const std::string outName = outputWorkspaceProperty->value();
 
   const size_t nPeriods = vecMultiPeriodGroups[0]->size();
-  WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr outputWS = std::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(outName, outputWS);
 
   double progress_proportion = 1.0 / static_cast<double>(nPeriods);
@@ -278,7 +278,7 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(
       }
       for (size_t j = 0; j < currentGroup->size(); ++j) {
         MatrixWorkspace_const_sptr currentNestedWS =
-            boost::dynamic_pointer_cast<const MatrixWorkspace>(
+            std::dynamic_pointer_cast<const MatrixWorkspace>(
                 currentGroup->getItem(j));
         Property *nPeriodsProperty =
             currentNestedWS->run().getLogData("nperiods");

@@ -389,7 +389,7 @@ std::map<std::string, std::string> SetSample::validateInputs() {
   using API::ExperimentInfo_sptr;
   using API::Workspace_sptr;
   Workspace_sptr inputWS = getProperty(PropertyNames::INPUT_WORKSPACE);
-  if (!boost::dynamic_pointer_cast<ExperimentInfo>(inputWS)) {
+  if (!std::dynamic_pointer_cast<ExperimentInfo>(inputWS)) {
     errors[PropertyNames::INPUT_WORKSPACE] = "InputWorkspace type invalid. "
                                              "Expected MatrixWorkspace, "
                                              "PeaksWorkspace.";
@@ -507,7 +507,7 @@ void SetSample::exec() {
       getProperty(PropertyNames::CONTAINER_MATERIAL);
 
   // validateInputs guarantees this will be an ExperimentInfo object
-  auto experiment = boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
+  auto experiment = std::dynamic_pointer_cast<ExperimentInfo>(workspace);
   // The order here is important. Set the environment first. If this
   // defines a sample geometry then we can process the Geometry flags
   // combined with this
@@ -739,7 +739,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
       // material.
       const auto mat = experiment.sample().getMaterial();
       if (auto csgObj =
-              boost::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
+              std::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
         csgObj->setMaterial(mat);
       }
       experiment.mutableSample().setShape(shapeObject);
@@ -749,10 +749,10 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
       // apply Goniometer rotation
       // Rotate only implemented on mesh objects so far
       if (typeid(shapeObject) ==
-          typeid(boost::shared_ptr<Geometry::MeshObject>)) {
+          typeid(std::shared_ptr<Geometry::MeshObject>)) {
         const std::vector<double> rotationMatrix =
             experiment.run().getGoniometer().getR();
-        boost::dynamic_pointer_cast<Geometry::MeshObject>(shapeObject)
+        std::dynamic_pointer_cast<Geometry::MeshObject>(shapeObject)
             ->rotate(rotationMatrix);
       }
 

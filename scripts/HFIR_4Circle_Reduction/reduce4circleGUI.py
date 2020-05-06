@@ -10,9 +10,6 @@
 # MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
-import six
 import os
 import sys
 import csv
@@ -63,8 +60,7 @@ if PYQT4:
         SCROLL_AVAILABLE = True
     except ImportError:
         SCROLL_AVAILABLE = False
-if six.PY3:
-    unicode = str
+unicode = str
 
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'

@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from __future__ import (absolute_import, division, print_function)
-
 ABSOLUTE_UNITS_OFF = 'Absolute Units OFF'
 ABSOLUTE_UNITS_ON = 'Absolute Units ON'
 

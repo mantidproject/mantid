@@ -9,6 +9,7 @@ if(CXXTEST_FOUND)
   # file so doesn't need un-setting
   set(TESTHELPER_SRCS
       KafkaTesting.h
+      KafkaTestThreadHelper.h
       TestDataListener.cpp
       TestGroupDataListener.cpp
       ../../TestHelpers/src/TearDownWorld.cpp

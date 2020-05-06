@@ -40,7 +40,7 @@ void DeleteTableRows::init() {
 void DeleteTableRows::exec() {
   API::ITableWorkspace_sptr tw = getProperty("TableWorkspace");
   API::IPeaksWorkspace_sptr pw =
-      boost::dynamic_pointer_cast<API::IPeaksWorkspace>(tw);
+      std::dynamic_pointer_cast<API::IPeaksWorkspace>(tw);
   std::vector<size_t> rows = getProperty("Rows");
   // sort the row indices in reverse order
   std::set<size_t, std::greater<size_t>> sortedRows(rows.begin(), rows.end());

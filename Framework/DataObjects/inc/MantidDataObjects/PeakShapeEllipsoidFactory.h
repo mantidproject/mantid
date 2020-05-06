@@ -20,7 +20,7 @@ public:
 
   Mantid::Geometry::PeakShape *create(const std::string &source) const override;
   void setSuccessor(
-      boost::shared_ptr<const PeakShapeFactory> successorFactory) override;
+      std::shared_ptr<const PeakShapeFactory> successorFactory) override;
 
 private:
   /// Successor factory

@@ -187,11 +187,10 @@ public:
 
 class PeakRepresentationCrossTestPerformance : public CxxTest::TestSuite {
 private:
-  using VecPeakRepCross =
-      std::vector<boost::shared_ptr<PeakRepresentationCross>>;
+  using VecPeakRepCross = std::vector<std::shared_ptr<PeakRepresentationCross>>;
 
   using VecPeakRepCrossWrapped = std::vector<
-      boost::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
+      std::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
 
   /// Collection to store a large number of PeakRepresentationCross.
   VecPeakRepCross m_peaks;
@@ -214,9 +213,9 @@ public:
       for (int y = 0; y < sizeInAxis; ++y) {
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
-          m_peaks.emplace_back(boost::make_shared<
-                               MantidQt::SliceViewer::PeakRepresentationCross>(
-              peakOrigin, maxZ, minZ));
+          m_peaks.emplace_back(
+              std::make_shared<MantidQt::SliceViewer::PeakRepresentationCross>(
+                  peakOrigin, maxZ, minZ));
         }
       }
     }

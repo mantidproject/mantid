@@ -702,7 +702,7 @@ public:
 
   void test_validateArgs_Gives_Errors_For_Incorrect_WorkspaceType() {
     using Mantid::DataObjects::TableWorkspace;
-    auto alg = createAlgorithm(boost::make_shared<TableWorkspace>(0));
+    auto alg = createAlgorithm(std::make_shared<TableWorkspace>(0));
 
     auto helpMessages = alg->validateInputs();
     TS_ASSERT(helpMessages.find("InputWorkspace") != helpMessages.cend());
@@ -715,7 +715,7 @@ public:
 
     auto alg = createAlgorithm(inputWS);
 
-    auto args = boost::make_shared<PropertyManager>();
+    auto args = std::make_shared<PropertyManager>();
     args->declareProperty(std::make_unique<StringProperty>("Container", "8mm"),
                           "");
     alg->setProperty("Environment", args);
@@ -729,7 +729,7 @@ public:
 
     auto alg = createAlgorithm(inputWS);
 
-    auto args = boost::make_shared<PropertyManager>();
+    auto args = std::make_shared<PropertyManager>();
     args->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
                           "");
     alg->setProperty("Environment", args);
@@ -743,7 +743,7 @@ public:
 
     auto alg = createAlgorithm(inputWS);
 
-    auto args = boost::make_shared<PropertyManager>();
+    auto args = std::make_shared<PropertyManager>();
     args->declareProperty(std::make_unique<StringProperty>("Name", ""), "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
@@ -761,7 +761,7 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto alg = createAlgorithm();
-    auto args = boost::make_shared<PropertyManager>();
+    auto args = std::make_shared<PropertyManager>();
     args->declareProperty(
         std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
     std::array<const std::string, 3> dimensions = {
@@ -781,7 +781,7 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto alg = createAlgorithm();
-    auto args = boost::make_shared<PropertyManager>();
+    auto args = std::make_shared<PropertyManager>();
     args->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"),
                           "");
     std::array<const std::string, 2> dimensions = {{"Radius", "Height"}};
@@ -801,7 +801,7 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto alg = createAlgorithm();
-    auto args = boost::make_shared<PropertyManager>();
+    auto args = std::make_shared<PropertyManager>();
     args->declareProperty(
         std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
     std::array<const std::string, 3> dimensions = {
@@ -846,8 +846,8 @@ private:
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::ReferenceFrame;
     // Use Z=up,Y=across,X=beam so we test it listens to the reference frame
-    auto inst = boost::make_shared<Instrument>();
-    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+    auto inst = std::make_shared<Instrument>();
+    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(
         Mantid::Geometry::Z, Mantid::Geometry::X, Mantid::Geometry::Right, ""));
     workspace->setInstrument(inst);
   }
@@ -867,7 +867,7 @@ private:
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(
         std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
     if (volume > 0.) // <mass> = <standard mass density for vanadium> x <volume>
@@ -882,7 +882,7 @@ private:
     using Mantid::Kernel::V3D;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(std::make_unique<StringProperty>("Shape", "CSG"),
                            "");
     props->declareProperty(
@@ -896,7 +896,7 @@ private:
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
                            "");
     props->declareProperty(
@@ -908,7 +908,7 @@ private:
     using Mantid::Kernel::PropertyManager;
     using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(std::make_unique<DoubleProperty>("Radius", 40), "");
     return props;
   }
@@ -920,7 +920,7 @@ private:
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(
         std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Width", 5), "");
@@ -942,7 +942,7 @@ private:
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(
         std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
@@ -982,7 +982,7 @@ private:
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
 
-    auto props = boost::make_shared<PropertyManager>();
+    auto props = std::make_shared<PropertyManager>();
     props->declareProperty(
         std::make_unique<StringProperty>("Shape", "HollowCylinder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");

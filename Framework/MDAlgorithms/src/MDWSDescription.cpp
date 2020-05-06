@@ -399,13 +399,12 @@ void MDWSDescription::checkMinMaxNdimConsistent(
 }
 
 /** function retrieves copy of the oriented lattice from the workspace */
-boost::shared_ptr<Geometry::OrientedLattice>
-MDWSDescription::getOrientedLattice(
+std::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice(
     const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) {
   // try to get the WS oriented lattice
-  boost::shared_ptr<Geometry::OrientedLattice> orl;
+  std::shared_ptr<Geometry::OrientedLattice> orl;
   if (inWS2D->sample().hasOrientedLattice())
-    orl = boost::shared_ptr<Geometry::OrientedLattice>(
+    orl = std::shared_ptr<Geometry::OrientedLattice>(
         new Geometry::OrientedLattice(inWS2D->sample().getOrientedLattice()));
 
   return orl;

@@ -22,7 +22,7 @@ using namespace API;
 using namespace Geometry;
 
 void EQSANSQ2D::init() {
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Workspace to calculate I(qx,qy) from");

@@ -53,8 +53,8 @@ SeqDomainSpectrumCreator::SeqDomainSpectrumCreator(
  * @param i0 :: Size offset for values object if it already contains data.
  */
 void SeqDomainSpectrumCreator::createDomain(
-    boost::shared_ptr<FunctionDomain> &domain,
-    boost::shared_ptr<FunctionValues> &values, size_t i0) {
+    std::shared_ptr<FunctionDomain> &domain,
+    std::shared_ptr<FunctionValues> &values, size_t i0) {
   setParametersFromPropertyManager();
 
   if (!m_matrixWorkspace) {
@@ -106,15 +106,15 @@ void SeqDomainSpectrumCreator::createDomain(
 
 Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
     const std::string &baseName, IFunction_sptr function,
-    boost::shared_ptr<FunctionDomain> domain,
-    boost::shared_ptr<FunctionValues> values,
+    std::shared_ptr<FunctionDomain> domain,
+    std::shared_ptr<FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
   // don't need values, since the values need to be calculated spectrum by
   // spectrum (see loop below).
   UNUSED_ARG(values);
 
-  boost::shared_ptr<SeqDomain> seqDomain =
-      boost::dynamic_pointer_cast<SeqDomain>(domain);
+  std::shared_ptr<SeqDomain> seqDomain =
+      std::dynamic_pointer_cast<SeqDomain>(domain);
 
   if (!seqDomain) {
     throw std::invalid_argument("CreateOutputWorkspace requires SeqDomain.");
@@ -125,7 +125,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
                                 "proper output workspace.");
   }
 
-  MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create(m_matrixWorkspace));
 
   // Assign y-values, taking into account masked detectors
@@ -136,8 +136,8 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
     seqDomain->getDomainAndValues(i, localDomain, localValues);
     function->function(*localDomain, *localValues);
 
-    boost::shared_ptr<FunctionDomain1DSpectrum> spectrumDomain =
-        boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
+    std::shared_ptr<FunctionDomain1DSpectrum> spectrumDomain =
+        std::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
 
     if (spectrumDomain) {
       size_t wsIndex = spectrumDomain->getWorkspaceIndex();
@@ -167,7 +167,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
 
   // If the input is a not an EventWorkspace and is a distrubution, then convert
   // the output also to a distribution
-  if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
+  if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
           m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
       outputWs->setDistribution(true);
@@ -202,7 +202,7 @@ void SeqDomainSpectrumCreator::setParametersFromPropertyManager() {
   if (m_manager) {
     Workspace_sptr workspace = m_manager->getProperty(m_workspacePropertyName);
 
-    setMatrixWorkspace(boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+    setMatrixWorkspace(std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
   }
 }
 

@@ -59,10 +59,9 @@ void MoveInstrumentComponent::init() {
 void MoveInstrumentComponent::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   DataObjects::PeaksWorkspace_sptr inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_const_sptr inst;

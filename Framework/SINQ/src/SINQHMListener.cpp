@@ -99,7 +99,7 @@ ILiveListener::RunStatus SINQHMListener::runStatus() {
   }
 }
 
-boost::shared_ptr<Workspace> SINQHMListener::extractData() {
+std::shared_ptr<Workspace> SINQHMListener::extractData() {
   static const char *dimNames[] = {"x", "y", "z", "t"};
 
   if (dimDirty) {
@@ -113,7 +113,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
     dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
-  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto ws = std::make_shared<MDHistoWorkspace>(dimensions);
   ws->setTo(.0, .0, .0);
 
   readHMData(ws);
@@ -215,7 +215,7 @@ void SINQHMListener::recurseDim(int *data, const IMDHistoWorkspace_sptr &ws,
     int Cindex = calculateCAddress(idx);
     int val = data[Cindex];
     MDHistoWorkspace_sptr mdws =
-        boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+        std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
     size_t F77index = mdws->getLinearIndexAtCoord(idx);
     mdws->setSignalAt(F77index, signal_t(val));
     mdws->setErrorSquaredAt(F77index, signal_t(val));

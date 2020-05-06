@@ -8,16 +8,13 @@
 """
     Base class for instrument-specific user interface
 """
-from __future__ import (absolute_import, division, print_function)
-import six
 from qtpy.QtWidgets import (QMessageBox)  # noqa
 import sys
 import os
 import traceback
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class InstrumentInterface(object):

@@ -11,8 +11,7 @@ qti-based MantidPlot Python plotting interface
 As with other MantidPlot modules, this has to run from within MantidPlot
 
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 # Require MantidPlot
 try:
@@ -25,6 +24,8 @@ from PyQt4 import QtCore
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
+
+
 def plot(source, *args, **kwargs):
     """Create a new plot given a workspace, table or matrix.
 

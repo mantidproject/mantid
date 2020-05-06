@@ -171,7 +171,7 @@ public:
   ChangeTimeZeroTest()
       : m_startTime("2010-01-01T00:00:00"),
         m_stringPropertyTime(stringPropertyTime),
-        m_dateTimeValidator(boost::make_shared<DateTimeValidator>()),
+        m_dateTimeValidator(std::make_shared<DateTimeValidator>()),
         m_length(10) {}
 
   void test_Init() {
@@ -421,7 +421,7 @@ public:
                                   m_length);
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().add("group", group);
     group->add("workspace1");
     group->add("workspace2");
@@ -439,7 +439,7 @@ public:
 private:
   DateAndTime m_startTime;
   DateAndTime m_stringPropertyTime;
-  boost::shared_ptr<Mantid::Kernel::DateTimeValidator> m_dateTimeValidator;
+  std::shared_ptr<Mantid::Kernel::DateTimeValidator> m_dateTimeValidator;
   int m_length;
 
   // act and assert
@@ -449,7 +449,7 @@ private:
                       bool inputEqualsOutputWorkspace) {
     // Create a duplicate workspace
     EventWorkspace_sptr duplicate_ws;
-    if (auto in_event = boost::dynamic_pointer_cast<EventWorkspace>(in_ws)) {
+    if (auto in_event = std::dynamic_pointer_cast<EventWorkspace>(in_ws)) {
       duplicate_ws = createComparisonWorkspace(in_event);
     }
 
@@ -503,7 +503,7 @@ private:
     }
 
     // Check the neutrons
-    if (auto outWs = boost::dynamic_pointer_cast<EventWorkspace>(ws)) {
+    if (auto outWs = std::dynamic_pointer_cast<EventWorkspace>(ws)) {
       do_check_workspace(outWs, timeShift, std::move(duplicate));
     }
   }
@@ -542,7 +542,7 @@ private:
   void do_check_workspace(const EventWorkspace_sptr &ws, double timeShift,
                           const MatrixWorkspace_sptr &duplicate) const {
     // Get the duplicate input workspace for comparison reasons
-    auto duplicateWs = boost::dynamic_pointer_cast<EventWorkspace>(duplicate);
+    auto duplicateWs = std::dynamic_pointer_cast<EventWorkspace>(duplicate);
 
     // For each workspace index
     for (size_t workspaceIndex = 0; workspaceIndex < ws->getNumberHistograms();
@@ -571,14 +571,13 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     alg.setProperty<Workspace_sptr>(
-        "InputWorkspace",
-        boost::dynamic_pointer_cast<Workspace>(inputWorkspace));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWorkspace));
     alg.setProperty("OutputWorkspace", "outWs");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     Workspace_sptr temp = alg.getProperty("OutputWorkspace");
-    auto output = boost::dynamic_pointer_cast<EventWorkspace>(temp);
+    auto output = std::dynamic_pointer_cast<EventWorkspace>(temp);
     return output;
   }
 

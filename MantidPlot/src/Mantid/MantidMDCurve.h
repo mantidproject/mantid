@@ -9,7 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCurve.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // Forward definitions
 class MantidUI;
@@ -89,7 +89,7 @@ private:
   /// Handles afterReplace notification
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }

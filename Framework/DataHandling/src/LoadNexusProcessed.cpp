@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
@@ -34,12 +35,11 @@
 #include "MantidNexus/NexusFileIO.h"
 
 #include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <nexus/NeXusException.hpp>
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -60,7 +60,7 @@ using Types::Core::DateAndTime;
 namespace {
 
 // Helper typedef
-using IntArray_shared = boost::shared_array<int>;
+using IntArray = std::vector<int>;
 
 // Struct to contain spectrum information.
 struct SpectraInfo {
@@ -69,13 +69,13 @@ struct SpectraInfo {
   // Do we have any spectra
   bool hasSpectra{false};
   // Contains spectrum numbers for each workspace index
-  IntArray_shared spectraNumbers;
+  IntArray spectraNumbers;
   // Index of the detector in the workspace.
-  IntArray_shared detectorIndex;
+  IntArray detectorIndex;
   // Number of detectors associated with each spectra
-  IntArray_shared detectorCount;
+  IntArray detectorCount;
   // Detector list contains a list of all of the detector numbers
-  IntArray_shared detectorList;
+  IntArray detectorList;
 };
 
 // Helper typdef.
@@ -114,7 +114,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
   try {
     NXInt spectra_block = detgroup.openNXInt("spectra");
     spectra_block.load();
-    spectraInfo.spectraNumbers = spectra_block.sharedBuffer();
+    spectraInfo.spectraNumbers = spectra_block.vecBuffer();
     spectraInfo.nSpectra = spectra_block.dim0();
     spectraInfo.hasSpectra = true;
   } catch (std::runtime_error &) {
@@ -128,7 +128,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
   try {
     NXInt detlist_group = detgroup.openNXInt("detector_list");
     detlist_group.load();
-    spectraInfo.detectorList = detlist_group.sharedBuffer();
+    spectraInfo.detectorList = detlist_group.vecBuffer();
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
                             "not contain any detector information.\n";
@@ -139,12 +139,12 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
   // spectra
   NXInt det_count = detgroup.openNXInt("detector_count");
   det_count.load();
-  spectraInfo.detectorCount = det_count.sharedBuffer();
+  spectraInfo.detectorCount = det_count.vecBuffer();
   // Detector index - contains the index of the detector in the workspace
   NXInt det_index = detgroup.openNXInt("detector_index");
   det_index.load();
   spectraInfo.nSpectra = det_index.dim0();
-  spectraInfo.detectorIndex = det_index.sharedBuffer();
+  spectraInfo.detectorIndex = det_index.vecBuffer();
 
   return spectraInfo;
 }
@@ -160,7 +160,7 @@ bool isMultiPeriodFile(int nWorkspaceEntries, const Workspace_sptr &sampleWS,
                        Logger &log) {
   bool isMultiPeriod = false;
   if (ExperimentInfo_sptr expInfo =
-          boost::dynamic_pointer_cast<ExperimentInfo>(sampleWS)) {
+          std::dynamic_pointer_cast<ExperimentInfo>(sampleWS)) {
     const std::string nPeriodsLogEntryName = "nperiods";
     const Run &run = expInfo->run();
     if (run.hasProperty(nPeriodsLogEntryName)) {
@@ -224,7 +224,7 @@ void LoadNexusProcessed::init() {
                   "multiperiod Mantid files are not generated.");
 
   // optional
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
   // Use a static cast as MSVC sometimes gets confused and casts as int64
@@ -431,6 +431,7 @@ void LoadNexusProcessed::exec() {
 
     if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
       // We have what we need.
+      applyLogFiltering(tempWS);
       setProperty("OutputWorkspace", tempWS);
     } else {
       // We already know that this is a group workspace. Is it a true
@@ -442,7 +443,7 @@ void LoadNexusProcessed::exec() {
       m_list = !specListProp->isDefault();
 
       // Load all first level entries
-      auto wksp_group = boost::make_shared<WorkspaceGroup>();
+      auto wksp_group = std::make_shared<WorkspaceGroup>();
       // This forms the name of the group
       std::string base_name = getPropertyValue("OutputWorkspace");
       // First member of group should be the group itself, for some reason!
@@ -467,7 +468,7 @@ void LoadNexusProcessed::exec() {
       const std::string prop_name = "OutputWorkspace_";
 
       MatrixWorkspace_sptr tempMatrixWorkspace =
-          boost::dynamic_pointer_cast<Workspace2D>(tempWS);
+          std::dynamic_pointer_cast<Workspace2D>(tempWS);
       bool bAccelleratedMultiPeriodLoading = false;
       if (tempMatrixWorkspace) {
         // We only accelerate for simple scenarios for now. Spectrum lists are
@@ -513,16 +514,16 @@ void LoadNexusProcessed::exec() {
                         1. / nWorkspaceEntries_d);
         }
 
+        applyLogFiltering(local_workspace);
         declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
             prop_name + indexStr, wsName, Direction::Output));
-
         wksp_group->addWorkspace(local_workspace);
         setProperty(prop_name + indexStr, local_workspace);
       }
 
       // The group is the root property value
       setProperty("OutputWorkspace",
-                  boost::static_pointer_cast<Workspace>(wksp_group));
+                  std::static_pointer_cast<Workspace>(wksp_group));
     }
 
     root.close();
@@ -674,7 +675,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   }
   if (num_xbins < 2)
     num_xbins = 2;
-  EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(
+  EventWorkspace_sptr ws = std::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", numspec, num_xbins,
                                           num_xbins - 1));
 
@@ -687,48 +688,49 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
   // Handle optional fields.
   // TODO: Handle inconsistent sizes
-  boost::shared_array<int64_t> pulsetimes;
+  std::vector<int64_t> pulsetimes;
   if (wksp_cls.isValid("pulsetime")) {
     NXDataSetTyped<int64_t> pulsetime =
         wksp_cls.openNXDataSet<int64_t>("pulsetime");
     pulsetime.load();
-    pulsetimes = pulsetime.sharedBuffer();
+    pulsetimes = pulsetime.vecBuffer();
   }
 
-  boost::shared_array<double> tofs;
+  std::vector<double> tofs;
   if (wksp_cls.isValid("tof")) {
     NXDouble tof = wksp_cls.openNXDouble("tof");
     tof.load();
-    tofs = tof.sharedBuffer();
+    tofs = tof.vecBuffer();
   }
 
-  boost::shared_array<float> error_squareds;
+  std::vector<float> error_squareds;
   if (wksp_cls.isValid("error_squared")) {
     NXFloat error_squared = wksp_cls.openNXFloat("error_squared");
     error_squared.load();
-    error_squareds = error_squared.sharedBuffer();
+    error_squareds = error_squared.vecBuffer();
   }
 
-  boost::shared_array<float> weights;
+  std::vector<float> weights;
   if (wksp_cls.isValid("weight")) {
     NXFloat weight = wksp_cls.openNXFloat("weight");
     weight.load();
-    weights = weight.sharedBuffer();
+    weights = weight.vecBuffer();
   }
 
   // What type of event lists?
   EventType type = TOF;
-  if (tofs && pulsetimes && weights && error_squareds)
+  if (!tofs.empty() && !pulsetimes.empty() && !weights.empty() &&
+      !error_squareds.empty())
     type = WEIGHTED;
-  else if ((tofs && weights && error_squareds))
+  else if ((!tofs.empty() && !weights.empty() && !error_squareds.empty()))
     type = WEIGHTED_NOTIME;
-  else if (pulsetimes && tofs)
+  else if (!pulsetimes.empty() && !tofs.empty())
     type = TOF;
   else
     throw std::runtime_error("Could not figure out the type of event list!");
 
   // indices of events
-  boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
+  std::vector<int64_t> indices = indices_data.vecBuffer();
   // Create all the event lists
   auto max = static_cast<int64_t>(m_filtered_spec_idxs.size());
   Progress progress(this, progressStart, progressStart + progressRange, max);
@@ -896,7 +898,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 
   } while (true);
 
-  return boost::static_pointer_cast<API::Workspace>(workspace);
+  return std::static_pointer_cast<API::Workspace>(workspace);
 }
 
 /**
@@ -984,7 +986,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       Mantid::API::WorkspaceFactory::Instance().createTable("PeaksWorkspace");
 
   PeaksWorkspace_sptr peakWS =
-      boost::dynamic_pointer_cast<PeaksWorkspace>(tWorkspace);
+      std::dynamic_pointer_cast<PeaksWorkspace>(tWorkspace);
 
   NXData nx_tw = entry.openNXData("peaks_workspace");
 
@@ -1201,11 +1203,11 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       using namespace Mantid::DataObjects;
 
       PeakShapeFactory_sptr peakFactoryEllipsoid =
-          boost::make_shared<PeakShapeEllipsoidFactory>();
+          std::make_shared<PeakShapeEllipsoidFactory>();
       PeakShapeFactory_sptr peakFactorySphere =
-          boost::make_shared<PeakShapeSphericalFactory>();
+          std::make_shared<PeakShapeSphericalFactory>();
       PeakShapeFactory_sptr peakFactoryNone =
-          boost::make_shared<PeakNoShapeFactory>();
+          std::make_shared<PeakNoShapeFactory>();
 
       peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
       peakFactorySphere->setSuccessor(peakFactoryNone);
@@ -1238,7 +1240,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
   }
 
-  return boost::static_pointer_cast<API::Workspace>(peakWS);
+  return std::static_pointer_cast<API::Workspace>(peakWS);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1280,7 +1282,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   }
 
   API::MatrixWorkspace_sptr local_workspace =
-      boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<API::MatrixWorkspace>(
           WorkspaceFactory::Instance().create(workspaceType, total_specs,
                                               xlength, nchannels));
   try {
@@ -1305,7 +1307,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
 
     // Set the fractional area attributes, default values consistent with
     // previous assumptions: finalized = true, sqrdErrs = false
-    auto rbWS = boost::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
+    auto rbWS = std::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
     auto finalizedValue = fracarea.attributes("finalized");
     auto finalized = (finalizedValue.empty() ? true : finalizedValue == "1");
     rbWS->setFinalized(finalized);
@@ -1550,7 +1552,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   try {
     local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create(unit1);
     if (unit1 == "Label") {
-      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+      auto label = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
           local_workspace->getAxis(0)->unit());
       auto ax = wksp_cls.openNXDouble("axis1");
       label->setLabel(ax.attributes("caption"), ax.attributes("label"));
@@ -1581,7 +1583,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
       local_workspace->replaceAxis(1, std::move(newAxis));
       newAxisRaw->unit() = UnitFactory::Instance().create(unit2);
       if (unit2 == "Label") {
-        auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+        auto label = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
             newAxisRaw->unit());
         auto ax = wksp_cls.openNXDouble("axis2");
         label->setLabel(ax.attributes("caption"), ax.attributes("label"));
@@ -1652,7 +1654,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   progress(progressStart + 0.2 * progressRange,
            "Reading the workspace history...");
 
-  return boost::static_pointer_cast<API::Workspace>(local_workspace);
+  return std::static_pointer_cast<API::Workspace>(local_workspace);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1694,12 +1696,12 @@ void LoadNexusProcessed::readInstrumentGroup(
       spec.setSpectrumNo(spectrum);
       ++index;
 
-      if (spectraInfo.detectorIndex) {
+      if (!spectraInfo.detectorIndex.empty()) {
         const int start = spectraInfo.detectorIndex[i - 1];
         const int end = start + spectraInfo.detectorCount[i - 1];
         spec.setDetectorIDs(
-            std::set<detid_t>(spectraInfo.detectorList.get() + start,
-                              spectraInfo.detectorList.get() + end));
+            std::set<detid_t>(spectraInfo.detectorList.data() + start,
+                              spectraInfo.detectorList.data() + end));
       }
     }
   }
@@ -1923,7 +1925,7 @@ void LoadNexusProcessed::loadBlock(
     farea.load(blocksize, hist);
     farea_start = farea();
     farea_end = farea_start + nchannels;
-    rb_workspace = boost::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
+    rb_workspace = std::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
   }
   if (hasXErrors) {
     xErrors.load(blocksize, hist);
@@ -2004,7 +2006,7 @@ void LoadNexusProcessed::loadBlock(
     farea.load(blocksize, hist);
     farea_start = farea();
     farea_end = farea_start + nchannels;
-    rb_workspace = boost::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
+    rb_workspace = std::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
   }
   if (hasXErrors) {
     xErrors.load(blocksize, hist);
@@ -2085,7 +2087,7 @@ void LoadNexusProcessed::loadBlock(
     farea.load(blocksize, hist);
     farea_start = farea();
     farea_end = farea_start + nchannels;
-    rb_workspace = boost::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
+    rb_workspace = std::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
   }
   xbins.load(blocksize, hist);
   const int nxbins(xbins.dim1());
@@ -2245,6 +2247,24 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
     }
   }
   return total_specs;
+}
+
+/**
+ * Applies log filtering to workspaces that require it
+ *
+ * @param local_workspace :: the workspace containing logs to be filtered
+ */
+void LoadNexusProcessed::applyLogFiltering(
+    Mantid::API::Workspace_sptr local_workspace) {
+  auto mWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(local_workspace);
+  if (mWorkspace) {
+    auto run = mWorkspace->run();
+    // check for presence of filterable logs that suggest this is ISIS data
+    if (run.hasProperty(LogParser::statusLogName()) ||
+        run.hasProperty(LogParser::periodsLogName())) {
+      ISISRunLogs::applyLogFiltering(mWorkspace->mutableRun());
+    }
+  }
 }
 
 } // namespace DataHandling

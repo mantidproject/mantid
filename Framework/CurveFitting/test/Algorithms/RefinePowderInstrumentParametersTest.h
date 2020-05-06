@@ -105,7 +105,7 @@ public:
 
     // 3. Check result
     DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve(
                 "InstrumentParameterTable"));
 
@@ -181,17 +181,17 @@ public:
 
     // 4. Check result
     DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedParameters"));
 
     DataObjects::Workspace2D_sptr dataws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 21);
 
     DataObjects::TableWorkspace_sptr mcresultws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("BestMCResults"));
     TS_ASSERT_EQUALS(mcresultws->rowCount(), 10);
 
@@ -257,11 +257,11 @@ public:
 
     // 4. Check result
     DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedParameters"));
 
     DataObjects::Workspace2D_sptr dataws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 3);

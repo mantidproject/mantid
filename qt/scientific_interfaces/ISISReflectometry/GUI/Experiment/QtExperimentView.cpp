@@ -191,6 +191,11 @@ void QtExperimentView::connectSettingsChange(QLineEdit &edit) {
           SLOT(onSettingsChanged()));
 }
 
+void QtExperimentView::connectSettingsChange(QSpinBox &edit) {
+  connect(&edit, SIGNAL(valueChanged(QString const &)), this,
+          SLOT(onSettingsChanged()));
+}
+
 void QtExperimentView::connectSettingsChange(QDoubleSpinBox &edit) {
   connect(&edit, SIGNAL(valueChanged(QString const &)), this,
           SLOT(onSettingsChanged()));
@@ -212,6 +217,10 @@ void QtExperimentView::connectSettingsChange(QTableWidget &edit) {
 
 void QtExperimentView::disconnectSettingsChange(QLineEdit &edit) {
   disconnect(&edit, SIGNAL(textChanged(QString const &)), 0, 0);
+}
+
+void QtExperimentView::disconnectSettingsChange(QSpinBox &edit) {
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
 }
 
 void QtExperimentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
@@ -249,6 +258,10 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.floodCorComboBox->setEnabled(enabled);
   m_ui.floodWorkspaceWsSelector->setEnabled(enabled);
   m_ui.debugCheckBox->setEnabled(enabled);
+  m_ui.subtractBackgroundCheckBox->setEnabled(enabled);
+  m_ui.backgroundMethodComboBox->setEnabled(enabled);
+  m_ui.polynomialDegreeSpinBox->setEnabled(enabled);
+  m_ui.costFunctionComboBox->setEnabled(enabled);
 }
 
 void QtExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
@@ -269,7 +282,6 @@ void QtExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
   registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
   registerSettingWidget(*m_ui.polCorrCheckBox, "PolarizationAnalysis", alg);
-  registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
@@ -277,6 +289,19 @@ void QtExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
   registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
+  registerSettingWidget(*m_ui.subtractBackgroundCheckBox, "SubtractBackground",
+                        alg);
+  registerSettingWidget(*m_ui.backgroundMethodComboBox,
+                        "BackgroundCalculationMethod", alg);
+  registerSettingWidget(*m_ui.polynomialDegreeSpinBox, "DegreeOfPolynomial",
+                        alg);
+  registerSettingWidget(*m_ui.costFunctionComboBox, "CostFunction", alg);
+
+  registerSettingWidget(stitchOptionsLineEdit(),
+                        "Properties to use for stitching the output workspaces "
+                        "in Q. Only required for groups containing multiple "
+                        "rows. Start typing to see property hints or see "
+                        "Stitch1DMany for details.");
 }
 
 void QtExperimentView::connectExperimentSettingsWidgets() {
@@ -295,6 +320,10 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.floodCorComboBox);
   connectSettingsChange(*m_ui.floodWorkspaceWsSelector);
   connectSettingsChange(*m_ui.debugCheckBox);
+  connectSettingsChange(*m_ui.subtractBackgroundCheckBox);
+  connectSettingsChange(*m_ui.backgroundMethodComboBox);
+  connectSettingsChange(*m_ui.polynomialDegreeSpinBox);
+  connectSettingsChange(*m_ui.costFunctionComboBox);
 }
 
 void QtExperimentView::disconnectExperimentSettingsWidgets() {
@@ -312,6 +341,10 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.floodCorComboBox);
   disconnectSettingsChange(*m_ui.floodWorkspaceWsSelector);
   disconnectSettingsChange(*m_ui.debugCheckBox);
+  disconnectSettingsChange(*m_ui.subtractBackgroundCheckBox);
+  disconnectSettingsChange(*m_ui.backgroundMethodComboBox);
+  disconnectSettingsChange(*m_ui.polynomialDegreeSpinBox);
+  disconnectSettingsChange(*m_ui.costFunctionComboBox);
 }
 
 void QtExperimentView::onRestoreDefaultsRequested() {
@@ -347,6 +380,12 @@ void QtExperimentView::registerSettingWidget(
     Widget &widget, std::string const &propertyName,
     const Mantid::API::IAlgorithm_sptr &alg) {
   setToolTipAsPropertyDocumentation(widget, propertyName, alg);
+}
+
+template <typename Widget>
+void QtExperimentView::registerSettingWidget(Widget &widget,
+                                             std::string const &tooltip) {
+  widget.setToolTip(QString::fromStdString(tooltip));
 }
 
 void QtExperimentView::setToolTipAsPropertyDocumentation(
@@ -449,6 +488,63 @@ void QtExperimentView::setText(QLineEdit &lineEdit, std::string const &text) {
 void QtExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
   auto checkedAsCheckState = checked ? Qt::Checked : Qt::Unchecked;
   checkBox.setCheckState(checkedAsCheckState);
+}
+
+bool QtExperimentView::getSubtractBackground() const {
+  return m_ui.subtractBackgroundCheckBox->isChecked();
+}
+
+void QtExperimentView::setSubtractBackground(bool enable) {
+  setChecked(*m_ui.subtractBackgroundCheckBox, enable);
+}
+
+std::string QtExperimentView::getBackgroundSubtractionMethod() const {
+  return getText(*m_ui.backgroundMethodComboBox);
+}
+
+void QtExperimentView::setBackgroundSubtractionMethod(
+    std::string const &method) {
+  return setSelected(*m_ui.backgroundMethodComboBox, method);
+}
+
+void QtExperimentView::enableBackgroundSubtractionMethod() {
+  m_ui.backgroundMethodComboBox->setEnabled(true);
+}
+
+void QtExperimentView::disableBackgroundSubtractionMethod() {
+  m_ui.backgroundMethodComboBox->setEnabled(false);
+}
+
+int QtExperimentView::getPolynomialDegree() const {
+  return m_ui.polynomialDegreeSpinBox->value();
+}
+
+void QtExperimentView::setPolynomialDegree(int polynomialDegree) {
+  m_ui.polynomialDegreeSpinBox->setValue(polynomialDegree);
+}
+
+void QtExperimentView::enablePolynomialDegree() {
+  m_ui.polynomialDegreeSpinBox->setEnabled(true);
+}
+
+void QtExperimentView::disablePolynomialDegree() {
+  m_ui.polynomialDegreeSpinBox->setEnabled(false);
+}
+
+std::string QtExperimentView::getCostFunction() const {
+  return getText(*m_ui.costFunctionComboBox);
+}
+
+void QtExperimentView::setCostFunction(std::string const &costFunction) {
+  setSelected(*m_ui.costFunctionComboBox, costFunction);
+}
+
+void QtExperimentView::enableCostFunction() {
+  m_ui.costFunctionComboBox->setEnabled(true);
+}
+
+void QtExperimentView::disableCostFunction() {
+  m_ui.costFunctionComboBox->setEnabled(false);
 }
 
 void QtExperimentView::enablePolarizationCorrections() {
@@ -648,7 +744,7 @@ QtExperimentView::getPerAngleOptions() const {
         textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
         textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
         textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
-        textFromCell(table.item(row, 8))});
+        textFromCell(table.item(row, 8)), textFromCell(table.item(row, 9))});
   }
   return rows;
 }

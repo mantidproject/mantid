@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-from six import iteritems
 from isis_powder.routines import common
 import math
 from mantid import logger
@@ -52,6 +49,7 @@ class SampleDetails(object):
                                                         exception_msg="The following argument is required but was not"
                                                                       " passed: chemical_formula")
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
+        crystal_density = common.dictionary_key_helper(dictionary=kwargs, key="crystal_density", throws=False)
 
         if self.material_object is not None:
             self.print_sample_details()
@@ -59,7 +57,8 @@ class SampleDetails(object):
                                " have not been set they can be modified with 'set_material_properties()'. Otherwise"
                                " to change the material call 'reset_sample_material()'")
 
-        self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density)
+        self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
+                                         crystal_density=crystal_density)
 
     def set_material_properties(self, **kwargs):
         err_msg = "The following argument is required but was not set or passed: "
@@ -95,7 +94,7 @@ class SampleDetails(object):
 
         # Attempt to convert them all to floating point relying on the fact on
         # the way Python has aliases to an object
-        for key, value in iteritems(values_to_check):
+        for key, value in values_to_check.items():
             _check_value_is_physical(property_name=key, value=value)
             _check_can_convert_to_float(property_name=key, value=value)
 
@@ -149,7 +148,7 @@ class SampleDetails(object):
 
 
 class _Material(object):
-    def __init__(self, chemical_formula, number_density=None):
+    def __init__(self, chemical_formula, number_density=None, crystal_density=None):
         self.chemical_formula = chemical_formula
 
         # If it is not an element Mantid requires us to provide the number density
@@ -161,8 +160,14 @@ class _Material(object):
         if number_density:
             # Always check value is sane if user has given one
             _check_value_is_physical(property_name="number_density", value=number_density)
-
         self.number_density = number_density
+
+        if crystal_density:
+            # Always check value is sane if user has given one
+            _check_value_is_physical(property_name="crystal_density", value=crystal_density)
+        else:
+            crystal_density = number_density
+        self.crystal_density = crystal_density
 
         # Advanced material properties
         self.absorption_cross_section = None
@@ -226,7 +231,7 @@ class _Cylinder(object):
 
         # Attempt to convert them all to floating point relying on the fact on
         # the way Python has aliases to an object
-        for key, value in iteritems(values_to_check):
+        for key, value in values_to_check.items():
             _check_value_is_physical(property_name=key, value=value)
             _check_can_convert_to_float(property_name=key, value=value)
 

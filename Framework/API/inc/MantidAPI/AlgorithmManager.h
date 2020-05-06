@@ -42,14 +42,12 @@ private:
 class MANTID_API_DLL AlgorithmManagerImpl {
 public:
   /// Creates a managed algorithm with the option of choosing a version
-  IAlgorithm_sptr create(const std::string &algName, const int &version = -1,
-                         bool makeProxy = true);
+  IAlgorithm_sptr create(const std::string &algName, const int &version = -1);
   /// Creates an unmanaged algorithm with the option of choosing a version
-  boost::shared_ptr<Algorithm> createUnmanaged(const std::string &algName,
-                                               const int &version = -1) const;
+  std::shared_ptr<Algorithm> createUnmanaged(const std::string &algName,
+                                             const int &version = -1) const;
 
   std::size_t size() const;
-  void setMaxAlgorithms(int n);
 
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
   void removeById(AlgorithmID id);
@@ -79,8 +77,9 @@ private:
   /// Unimplemented assignment operator
   AlgorithmManagerImpl &operator=(const AlgorithmManagerImpl &);
 
-  /// The maximum size of the algorithm store
-  int m_max_no_algs;
+  /// Removes any finished algorithms from the list of managed algorithms
+  size_t removeFinishedAlgorithms();
+
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr>
       m_managed_algs; ///<  pointers to managed algorithms [policy???]

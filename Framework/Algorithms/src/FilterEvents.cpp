@@ -117,7 +117,7 @@ void FilterEvents::init() {
   vector<string> corrtypes{"None", "Customized", "Direct", "Elastic",
                            "Indirect"};
   declareProperty("CorrectionToSample", "None",
-                  boost::make_shared<StringListValidator>(corrtypes),
+                  std::make_shared<StringListValidator>(corrtypes),
                   "Type of correction on neutron events to sample time from "
                   "detector time. ");
 
@@ -130,7 +130,7 @@ void FilterEvents::init() {
                       std::make_unique<VisibleWhenProperty>(
                           "CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
                   "Value of incident energy (Ei) in meV in direct mode.");
@@ -141,7 +141,7 @@ void FilterEvents::init() {
   // Algorithm to spectra without detectors
   vector<string> spec_no_det{"Skip", "Skip only if TOF correction"};
   declareProperty("SpectrumWithoutDetector", "Skip",
-                  boost::make_shared<StringListValidator>(spec_no_det),
+                  std::make_shared<StringListValidator>(spec_no_det),
                   "Approach to deal with spectrum without detectors. ");
 
   declareProperty("SplitSampleLogs", true,
@@ -195,15 +195,15 @@ std::map<std::string, std::string> FilterEvents::validateInputs() {
   // check the splitters workspace for special behavior
   API::Workspace_const_sptr splitter = this->getProperty(SPLITER_PROP_NAME);
   // SplittersWorkspace is a special type that needs no further checking
-  if (bool(boost::dynamic_pointer_cast<const SplittersWorkspace>(splitter))) {
-    if (boost::dynamic_pointer_cast<const SplittersWorkspace>(splitter)
+  if (bool(std::dynamic_pointer_cast<const SplittersWorkspace>(splitter))) {
+    if (std::dynamic_pointer_cast<const SplittersWorkspace>(splitter)
             ->rowCount() == 0)
       result[SPLITER_PROP_NAME] = "SplittersWorkspace must have rows defined";
   } else {
     const auto table =
-        boost::dynamic_pointer_cast<const TableWorkspace>(splitter);
+        std::dynamic_pointer_cast<const TableWorkspace>(splitter);
     const auto matrix =
-        boost::dynamic_pointer_cast<const MatrixWorkspace>(splitter);
+        std::dynamic_pointer_cast<const MatrixWorkspace>(splitter);
     if (bool(table)) {
       if (table->columnCount() != 3)
         result[SPLITER_PROP_NAME] = "TableWorkspace must have 3 columns";
@@ -416,16 +416,14 @@ void FilterEvents::processAlgorithmProperties() {
   // Process splitting workspace (table or data)
   API::Workspace_sptr tempws = this->getProperty("SplitterWorkspace");
 
-  m_splittersWorkspace =
-      boost::dynamic_pointer_cast<SplittersWorkspace>(tempws);
-  m_splitterTableWorkspace =
-      boost::dynamic_pointer_cast<TableWorkspace>(tempws);
+  m_splittersWorkspace = std::dynamic_pointer_cast<SplittersWorkspace>(tempws);
+  m_splitterTableWorkspace = std::dynamic_pointer_cast<TableWorkspace>(tempws);
   if (m_splittersWorkspace) {
     m_useSplittersWorkspace = true;
   } else if (m_splitterTableWorkspace)
     m_useArbTableSplitters = true;
   else {
-    m_matrixSplitterWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tempws);
+    m_matrixSplitterWS = std::dynamic_pointer_cast<MatrixWorkspace>(tempws);
     if (m_matrixSplitterWS) {
       m_useSplittersWorkspace = false;
     } else {
@@ -559,7 +557,7 @@ void FilterEvents::groupOutputWorkspace() {
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   API::WorkspaceGroup_sptr workspace_group =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve(groupname));
+      std::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve(groupname));
   if (!workspace_group) {
     g_log.error(
         "Unable to retrieve output workspace from algorithm GroupWorkspaces");
@@ -1185,8 +1183,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
         add2output = false;
     }
 
-    boost::shared_ptr<EventWorkspace> optws =
-        create<EventWorkspace>(*m_eventWS);
+    std::shared_ptr<EventWorkspace> optws = create<EventWorkspace>(*m_eventWS);
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
@@ -1305,8 +1302,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // create new workspace from input EventWorkspace and all the sample logs
     // are copied to the new one
-    boost::shared_ptr<EventWorkspace> optws =
-        create<EventWorkspace>(*m_eventWS);
+    std::shared_ptr<EventWorkspace> optws = create<EventWorkspace>(*m_eventWS);
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
@@ -1412,8 +1408,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     }
 
     // create new workspace
-    boost::shared_ptr<EventWorkspace> optws =
-        create<EventWorkspace>(*m_eventWS);
+    std::shared_ptr<EventWorkspace> optws = create<EventWorkspace>(*m_eventWS);
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);

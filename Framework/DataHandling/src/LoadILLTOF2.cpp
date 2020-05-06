@@ -72,6 +72,8 @@ void LoadILLTOF2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
+  declareProperty("ConvertToTOF", false,
+                  "Convert the bin edges to time-of-flight", Direction::Input);
 }
 
 /**
@@ -80,6 +82,7 @@ void LoadILLTOF2::init() {
 void LoadILLTOF2::exec() {
   // Retrieve filename
   const std::string filenameData = getPropertyValue("Filename");
+  bool convertToTOF = getProperty("convertToTOF");
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -97,7 +100,7 @@ void LoadILLTOF2::exec() {
 
   runLoadInstrument(); // just to get IDF contents
 
-  loadDataIntoTheWorkSpace(dataFirstEntry, monitors);
+  loadDataIntoTheWorkSpace(dataFirstEntry, monitors, convertToTOF);
 
   addEnergyToRun();
   addPulseInterval();
@@ -353,9 +356,12 @@ void LoadILLTOF2::addPulseInterval() {
  *
  * @param entry The Nexus entry
  * @param monitors List of monitor data
+ * @param convertToTOF Should the bin edges be converted to time of flight or
+ * keep the channel indexes
  */
 void LoadILLTOF2::loadDataIntoTheWorkSpace(
-    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors) {
+    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors,
+    bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
   // read in the data
@@ -369,9 +375,15 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
   if (monitor.containsDataSet("time_of_flight")) {
-    for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-      X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
-              m_channelWidth / 2; // to make sure the bin centre is correct
+    if (convertToTOF) {
+      for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
+                m_channelWidth / 2; // to make sure the bin centre is correct
+      }
+    } else {
+      for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+        X0[i] = static_cast<double>(i); // just take the channel index
+      }
     }
   } else {
     // Diffraction PANTHER
@@ -437,7 +449,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes,
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       const size_t currentSpectrum = spec + i * m_numberOfPixelsPerTube + j;
       m_localWorkspace->setHistogram(
           currentSpectrum, m_localWorkspace->binEdges(0),

@@ -9,7 +9,7 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -37,8 +37,8 @@ std::string getUnitsAsStr(IMDDimension &self) {
  * @param self : A reference to the calling object
  * @return cloned MDFrame wrapped as a shared pointer.
  */
-boost::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
-  return boost::shared_ptr<MDFrame>(self.getMDFrame().clone());
+std::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
+  return std::shared_ptr<MDFrame>(self.getMDFrame().clone());
 }
 } // namespace
 
@@ -56,7 +56,7 @@ std::string getName(IMDDimension &self) {
 }
 
 void export_IMDDimension() {
-  register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
+  register_ptr_to_python<std::shared_ptr<IMDDimension>>();
 
   class_<IMDDimension, boost::noncopyable>("IMDDimension", no_init)
       .def("getName", &getName, arg("self"),

@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-//#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
@@ -397,8 +395,8 @@ constructXMLForMDEvHelperData(const std::string &xDimensionIdMapping,
 Mantid::API::Workspace_sptr createSimple3DWorkspace() {
   using namespace Mantid::API;
 
-  IAlgorithm *create =
-      FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+  auto create =
+      AlgorithmManager::Instance().createUnmanaged("CreateMDWorkspace");
   create->setChild(true);
   create->initialize();
   create->setProperty("Dimensions", 4);

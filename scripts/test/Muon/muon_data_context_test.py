@@ -9,7 +9,7 @@ import unittest
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData

@@ -8,8 +8,6 @@
 
 """ SANSSave algorithm performs saving of SANS reduction data."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         FileProperty, FileAction, Progress)
 from mantid.kernel import (Direction)

@@ -273,7 +273,7 @@ public:
 };
 
 // shared pointer type for the IRemoteJobManager
-using IRemoteJobManager_sptr = boost::shared_ptr<IRemoteJobManager>;
+using IRemoteJobManager_sptr = std::shared_ptr<IRemoteJobManager>;
 
 } // namespace API
 } // namespace Mantid

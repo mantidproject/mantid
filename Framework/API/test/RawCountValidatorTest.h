@@ -23,14 +23,14 @@ public:
   static void destroySuite(RawCountValidatorTest *suite) { delete suite; }
 
   void test_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 1, 1);
     RawCountValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_fail() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 1, 1);
     ws->setDistribution(true);
     RawCountValidator validator;

@@ -58,7 +58,7 @@ void PoldiPeakSummary::init() {
 void PoldiPeakSummary::exec() {
   TableWorkspace_sptr poldiPeakTableWorkspace = getProperty("InputWorkspace");
   PoldiPeakCollection_sptr peaks =
-      boost::make_shared<PoldiPeakCollection>(poldiPeakTableWorkspace);
+      std::make_shared<PoldiPeakCollection>(poldiPeakTableWorkspace);
 
   TableWorkspace_sptr resultTable = getSummaryTable(peaks);
 
@@ -83,7 +83,7 @@ TableWorkspace_sptr PoldiPeakSummary::getSummaryTable(
 
 TableWorkspace_sptr PoldiPeakSummary::getInitializedResultWorkspace() const {
   TableWorkspace_sptr peakResultWorkspace =
-      boost::dynamic_pointer_cast<TableWorkspace>(
+      std::dynamic_pointer_cast<TableWorkspace>(
           WorkspaceFactory::Instance().createTable());
 
   peakResultWorkspace->addColumn("str", "hkl");

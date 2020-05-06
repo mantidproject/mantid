@@ -55,7 +55,7 @@ public:
   virtual void keepAlive() = 0;
 };
 
-using ICatalog_sptr = boost::shared_ptr<ICatalog>;
-using ICatalog_const_sptr = boost::shared_ptr<const ICatalog>;
+using ICatalog_sptr = std::shared_ptr<ICatalog>;
+using ICatalog_const_sptr = std::shared_ptr<const ICatalog>;
 } // namespace API
 } // namespace Mantid

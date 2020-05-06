@@ -15,8 +15,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 #include <sstream>
 #include <utility>
 

@@ -19,7 +19,7 @@
 // standard library headers (n/a)
 #include <limits>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 using Mantid::CurveFitting::Functions::ElasticIsoRotDiff;
 using BConstraint = Mantid::CurveFitting::Constraints::BoundaryConstraint;
 
@@ -76,8 +76,8 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableElasticIsoRotDiff> createTestElasticIsoRotDiff() {
-    auto func = boost::make_shared<TestableElasticIsoRotDiff>();
+  std::shared_ptr<TestableElasticIsoRotDiff> createTestElasticIsoRotDiff() {
+    auto func = std::make_shared<TestableElasticIsoRotDiff>();
     func->initialize();
     func->setParameter("Height", 0.88);
     func->setParameter("Radius", 1.06); // 1Angstrom

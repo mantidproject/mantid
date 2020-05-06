@@ -49,7 +49,7 @@ public:
 
 private:
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    auto alg = boost::make_shared<FitResolutionConvolvedModel>();
+    auto alg = std::make_shared<FitResolutionConvolvedModel>();
     alg->initialize();
     return alg;
   }

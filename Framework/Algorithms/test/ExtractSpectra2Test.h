@@ -43,7 +43,7 @@ void run_parallel(const Parallel::Communicator &comm) {
   }
 }
 
-boost::shared_ptr<Workspace2D> createWorkspace() {
+std::shared_ptr<Workspace2D> createWorkspace() {
   auto ws = create<Workspace2D>(5, Points(1));
   ws->setHistogram(0, Points{0.0}, Counts{1.0});
   ws->setHistogram(1, Points{1.0}, Counts{1.0});

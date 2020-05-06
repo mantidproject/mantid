@@ -28,7 +28,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <cmath>

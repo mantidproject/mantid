@@ -12,7 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <set>
 #include <string>
@@ -52,6 +52,6 @@ public:
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch
-using IArchiveSearch_sptr = boost::shared_ptr<IArchiveSearch>;
+using IArchiveSearch_sptr = std::shared_ptr<IArchiveSearch>;
 } // namespace API
 } // namespace Mantid

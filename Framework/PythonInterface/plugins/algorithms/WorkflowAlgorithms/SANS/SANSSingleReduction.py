@@ -8,8 +8,6 @@
 
 """ SANSSingleReduction algorithm performs a single reduction."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from SANSSingleReductionBase import SANSSingleReductionBase
 
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)

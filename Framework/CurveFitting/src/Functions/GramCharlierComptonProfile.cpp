@@ -358,7 +358,7 @@ void GramCharlierComptonProfile::convoluteVoigt(
  * @param endX Ending x-vaue (unused).
  */
 void GramCharlierComptonProfile::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
     double startX, double endX) {
   ComptonProfile::setMatrixWorkspace(workspace, wi, startX,
                                      endX); // Do base-class calculation first

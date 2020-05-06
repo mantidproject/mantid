@@ -51,9 +51,9 @@ private:
    single detector.
    */
   MatrixWorkspace_sptr create_workspace(const int nBins) {
-    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    Instrument_sptr instrument = std::make_shared<Instrument>();
     instrument->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+        std::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
 
     ObjComponent *source = new ObjComponent("source");
     source->setPos(V3D(0, 0, 0));

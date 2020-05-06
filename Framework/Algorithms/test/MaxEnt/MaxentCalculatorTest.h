@@ -35,7 +35,7 @@ public:
   MOCK_METHOD1(dataToImage, std::vector<double>(const std::vector<double> &));
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-using MockEntropy_sptr = boost::shared_ptr<MockEntropy>;
+using MockEntropy_sptr = std::shared_ptr<MockEntropy>;
 
 class MaxentCalculatorTest : public CxxTest::TestSuite {
 
@@ -52,8 +52,8 @@ public:
     MockEntropy *entropy = new NiceMock<MockEntropy>();
     MockTransform *transform = new NiceMock<MockTransform>();
     MaxentCalculator calculator =
-        MaxentCalculator(boost::shared_ptr<MockEntropy>(entropy),
-                         boost::shared_ptr<MockTransform>(transform));
+        MaxentCalculator(std::shared_ptr<MockEntropy>(entropy),
+                         std::shared_ptr<MockTransform>(transform));
 
     std::vector<double> vec = {0, 1};
     std::vector<double> emptyVec = {};
@@ -91,8 +91,8 @@ public:
     MockEntropy *entropy = new NiceMock<MockEntropy>();
     MockTransform *transform = new NiceMock<MockTransform>();
     MaxentCalculator calculator =
-        MaxentCalculator(boost::shared_ptr<MaxentEntropy>(entropy),
-                         boost::shared_ptr<MaxentTransform>(transform));
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
 
     // Input data
     // Vector in image space
@@ -129,8 +129,8 @@ public:
     MockEntropy *entropy = new NiceMock<MockEntropy>();
     MockTransform *transform = new NiceMock<MockTransform>();
     MaxentCalculator calculator =
-        MaxentCalculator(boost::shared_ptr<MaxentEntropy>(entropy),
-                         boost::shared_ptr<MaxentTransform>(transform));
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
 
     // Input data
     // Vector in data space
@@ -172,8 +172,8 @@ public:
     MockEntropy *entropy = new NiceMock<MockEntropy>();
     MockTransform *transform = new NiceMock<MockTransform>();
     MaxentCalculator calculator =
-        MaxentCalculator(boost::shared_ptr<MaxentEntropy>(entropy),
-                         boost::shared_ptr<MaxentTransform>(transform));
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
 
     // Input data
     // Vector in data space
@@ -223,8 +223,8 @@ public:
     MockEntropy *entropy = new NiceMock<MockEntropy>();
     MockTransform *transform = new NiceMock<MockTransform>();
     MaxentCalculator calculator =
-        MaxentCalculator(boost::shared_ptr<MockEntropy>(entropy),
-                         boost::shared_ptr<MockTransform>(transform));
+        MaxentCalculator(std::shared_ptr<MockEntropy>(entropy),
+                         std::shared_ptr<MockTransform>(transform));
 
     // When data were not loaded public methods should throw an exception
     TS_ASSERT_THROWS(calculator.getReconstructedData(),
@@ -243,8 +243,8 @@ public:
     MockEntropy *entropy = new NiceMock<MockEntropy>();
     MockTransform *transform = new NiceMock<MockTransform>();
     MaxentCalculator calculator =
-        MaxentCalculator(boost::shared_ptr<MaxentEntropy>(entropy),
-                         boost::shared_ptr<MaxentTransform>(transform));
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
 
     // Input data
     std::vector<double> dat = {1, 1};
@@ -282,8 +282,8 @@ public:
     MockEntropy *entropy = new NiceMock<MockEntropy>();
     MockTransform *transform = new NiceMock<MockTransform>();
     MaxentCalculator calculator =
-        MaxentCalculator(boost::shared_ptr<MaxentEntropy>(entropy),
-                         boost::shared_ptr<MaxentTransform>(transform));
+        MaxentCalculator(std::shared_ptr<MaxentEntropy>(entropy),
+                         std::shared_ptr<MaxentTransform>(transform));
 
     // Input data
     std::vector<double> dat = {1, 1};
