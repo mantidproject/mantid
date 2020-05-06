@@ -21,9 +21,9 @@ class DrillTableWidget(QTableWidget):
     rowAdded = Signal(int)
     rowDeleted = Signal(int)
 
-    OK_COLOR = "#3f008744"
-    ERROR_COLOR = "#3fd62d20"
-    PROCESSING_COLOR = "#3fffa700"
+    OK_COLOR = "#3f00ff00"
+    ERROR_COLOR = "#3fff0000"
+    PROCESSING_COLOR = "#3fffff00"
 
     def __init__(self, parent=None):
         super(DrillTableWidget, self).__init__(parent)
