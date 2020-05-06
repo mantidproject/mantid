@@ -52,22 +52,23 @@ public:
         "0.0003163", "Energy", "8.178e+08", "d-Spacing", "0.003963",
         "|Q|",       "1585"};
 
-    for (auto i = 0; i < list.size(); ++i) {
+    for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
     }
   }
 
   void test_getInfoList_with_matrix_with_no_instrument() {
-    auto workspace =
+    Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, false);
     workspace->getAxis(0)->setUnit("TOF");
-    ImageInfoModel model(std::dynamic_pointer_cast<Workspace>(workspace));
+    Workspace_sptr ws = std::dynamic_pointer_cast<Workspace>(workspace);
+    ImageInfoModel model(ws);
 
     auto list = model.getInfoList(2, 4, 7);
 
     const std::string expectList[]{"Value",          "7", "Spec Num", "5",
                                    "Time-of-flight", "2", "Det ID",   "5"};
-    for (auto i = 0; i < list.size(); ++i) {
+    for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
     }
   }
@@ -80,7 +81,7 @@ public:
     auto list = model.getInfoList(2, 4, 7);
 
     const std::string expectList[]{"x", "2", "y", "4", "Value", "7"};
-    for (auto i = 0; i < list.size(); ++i) {
+    for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
     }
   }
