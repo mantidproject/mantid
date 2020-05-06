@@ -479,11 +479,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         line_collection = next(col for col in ax_collections if isinstance(col, LineCollection))
         initial_colour = convert_color_to_hex(line_collection.get_color()[0])
-        initial_q_colour = QColor(initial_colour)
 
-        colour_dialog = QColorDialog()
+        colour_dialog = QColorDialog(QColor(initial_colour))
         colour_dialog.setOption(QColorDialog.NoButtons)
-        colour_dialog.setCurrentColor(initial_q_colour)
+        colour_dialog.setOption(QColorDialog.DontUseNativeDialog)
         colour_dialog.currentColorChanged.connect(self.change_line_collection_colour)
 
         button = [child for child in self.toolbar.children() if isinstance(child, QToolButton)][-1]
