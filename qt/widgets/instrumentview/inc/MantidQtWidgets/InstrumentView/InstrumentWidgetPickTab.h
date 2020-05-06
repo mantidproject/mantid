@@ -88,7 +88,7 @@ public:
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
   void selectTool(const ToolType tool);
-  boost::shared_ptr<ProjectionSurface> getSurface() const;
+  std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;

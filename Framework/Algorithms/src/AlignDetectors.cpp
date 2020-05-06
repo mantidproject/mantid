@@ -114,7 +114,7 @@ const std::string AlignDetectors::summary() const {
 AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
 
 void AlignDetectors::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   // Workspace unit must be TOF.
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<RawCountValidator>();
@@ -262,7 +262,7 @@ void AlignDetectors::exec() {
 
   Progress progress(this, 0.0, 1.0, m_numberOfSpectra);
 
-  auto eventW = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+  auto eventW = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   if (eventW) {
     align(converter, progress, *eventW);
   } else {

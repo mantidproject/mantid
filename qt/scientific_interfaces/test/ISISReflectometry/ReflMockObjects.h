@@ -39,8 +39,8 @@
 #include <QMap>
 #include <QString>
 #include <QVariant>
-#include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
+#include <memory>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace Mantid::API;

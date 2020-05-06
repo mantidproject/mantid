@@ -180,7 +180,7 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
 void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
   checkValidity();
   size_t np = m_function->nParams();
-  auto covarMatrix = boost::shared_ptr<Kernel::Matrix<double>>(
+  auto covarMatrix = std::shared_ptr<Kernel::Matrix<double>>(
       new Kernel::Matrix<double>(np, np));
   m_function->setCovarianceMatrix(covarMatrix);
   size_t ia = 0;
@@ -294,7 +294,7 @@ double CostFuncFitting::val() const {
 
   m_value = 0.0;
 
-  auto seqDomain = boost::dynamic_pointer_cast<SeqDomain>(m_domain);
+  auto seqDomain = std::dynamic_pointer_cast<SeqDomain>(m_domain);
 
   if (seqDomain) {
     seqDomain->additiveCostFunctionVal(*this);
@@ -381,7 +381,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
     m_hessian.zero();
   }
 
-  auto seqDomain = boost::dynamic_pointer_cast<SeqDomain>(m_domain);
+  auto seqDomain = std::dynamic_pointer_cast<SeqDomain>(m_domain);
 
   if (seqDomain) {
     seqDomain->additiveCostFunctionValDerivHessian(*this, evalDeriv,

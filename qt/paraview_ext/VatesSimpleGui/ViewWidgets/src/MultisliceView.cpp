@@ -320,7 +320,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 
-  rks.setImplicitFunction(boost::make_shared<MDPlaneImplicitFunction>(
+  rks.setImplicitFunction(std::make_shared<MDPlaneImplicitFunction>(
       3, sliceNormalsInBasis[axisIndex].GetData(), origin));
   QString titleAddition = "";
 

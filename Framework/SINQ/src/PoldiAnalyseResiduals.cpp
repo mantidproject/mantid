@@ -112,7 +112,7 @@ DataObjects::Workspace2D_sptr PoldiAnalyseResiduals::calculateResidualWorkspace(
 
   MatrixWorkspace_sptr fg = minus->getProperty("OutputWorkspace");
   DataObjects::Workspace2D_sptr residuals =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(fg);
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(fg);
 
   return residuals;
 }
@@ -139,7 +139,7 @@ PoldiAnalyseResiduals::addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
   plus->execute();
 
   MatrixWorkspace_sptr plusResult = plus->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(plusResult);
+  return std::dynamic_pointer_cast<DataObjects::Workspace2D>(plusResult);
 }
 
 /// Output iteration information to log, report progress.
@@ -198,11 +198,11 @@ void PoldiAnalyseResiduals::exec() {
   DataObjects::Workspace2D_sptr calculated = getProperty("FittedCountData");
 
   PoldiInstrumentAdapter_sptr poldiInstrument =
-      boost::make_shared<PoldiInstrumentAdapter>(measured);
+      std::make_shared<PoldiInstrumentAdapter>(measured);
   // Dead wires need to be taken into account
   PoldiAbstractDetector_sptr deadWireDetector =
-      boost::make_shared<PoldiDeadWireDecorator>(measured->detectorInfo(),
-                                                 poldiInstrument->detector());
+      std::make_shared<PoldiDeadWireDecorator>(measured->detectorInfo(),
+                                               poldiInstrument->detector());
 
   // Since the valid workspace indices are required for some calculations, we
   // extract and keep them
@@ -252,7 +252,7 @@ void PoldiAnalyseResiduals::exec() {
                  << " iterations, final change=" << relativeChange << '\n';
 
   // Return final correlation spectrum.
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(sum));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(sum));
 }
 
 } // namespace Poldi

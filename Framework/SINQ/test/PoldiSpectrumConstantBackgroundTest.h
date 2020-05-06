@@ -72,8 +72,8 @@ public:
     // workspace has 20 spectra, value does not matter for function
     std::vector<int> indices(20, 1);
 
-    boost::shared_ptr<IPoldiFunction1D> poldiFunction =
-        boost::dynamic_pointer_cast<IPoldiFunction1D>(function);
+    std::shared_ptr<IPoldiFunction1D> poldiFunction =
+        std::dynamic_pointer_cast<IPoldiFunction1D>(function);
     TS_ASSERT(poldiFunction);
     poldiFunction->poldiFunction1D(indices, domain, values);
 

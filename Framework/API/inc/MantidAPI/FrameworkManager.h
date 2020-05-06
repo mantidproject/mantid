@@ -15,7 +15,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/SingletonHolder.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 
@@ -60,8 +60,8 @@ public:
   void clearPropertyManagers();
 
   /// Creates an algorithm and runs it, with variadic arguments
-  boost::shared_ptr<IAlgorithm> exec(const std::string &algorithmName,
-                                     int count, ...);
+  std::shared_ptr<IAlgorithm> exec(const std::string &algorithmName, int count,
+                                   ...);
 
   /// Returns a shared pointer to the workspace requested
   Workspace *getWorkspace(const std::string &wsName);

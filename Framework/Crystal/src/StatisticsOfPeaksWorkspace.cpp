@@ -57,7 +57,7 @@ void StatisticsOfPeaksWorkspace::init() {
   propOptions.emplace_back("m2m (Orthorombic)");
   propOptions.emplace_back("mmm (Orthorombic)");
   declareProperty("PointGroup", propOptions[0],
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
@@ -71,7 +71,7 @@ void StatisticsOfPeaksWorkspace::init() {
                  std::back_inserter(centeringOptions),
                  [](const auto &condition) { return condition->getName(); });
   declareProperty("LatticeCentering", centeringOptions[0],
-                  boost::make_shared<StringListValidator>(centeringOptions),
+                  std::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -83,12 +83,12 @@ void StatisticsOfPeaksWorkspace::init() {
   const std::vector<std::string> sortTypes{"ResolutionShell", "Bank",
                                            "RunNumber", "Overall"};
   declareProperty("SortBy", sortTypes[0],
-                  boost::make_shared<StringListValidator>(sortTypes),
+                  std::make_shared<StringListValidator>(sortTypes),
                   "Sort the peaks by resolution shell in d-Spacing(default), "
                   "bank, run number, or only overall statistics.");
   const std::vector<std::string> equivTypes{"Mean", "Median"};
   declareProperty("EquivalentIntensities", equivTypes[0],
-                  boost::make_shared<StringListValidator>(equivTypes),
+                  std::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
   declareProperty(std::make_unique<PropertyWithValue<double>>(

@@ -53,7 +53,7 @@ and the overwriting the old one at the end.)
 */
 template <typename TYPE = MatrixWorkspace>
 class WorkspaceProperty
-    : public Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>,
+    : public Kernel::PropertyWithValue<std::shared_ptr<TYPE>>,
       public IWorkspaceProperty {
 public:
   explicit WorkspaceProperty(
@@ -79,7 +79,7 @@ public:
 
   WorkspaceProperty &operator=(const WorkspaceProperty &right);
 
-  WorkspaceProperty &operator=(const boost::shared_ptr<TYPE> &value) override;
+  WorkspaceProperty &operator=(const std::shared_ptr<TYPE> &value) override;
 
   WorkspaceProperty &operator+=(Kernel::Property const *) override;
 
@@ -98,7 +98,7 @@ public:
   std::string setValueFromJson(const Json::Value &value) override;
 
   std::string
-  setDataItem(const boost::shared_ptr<Kernel::DataItem> value) override;
+  setDataItem(const std::shared_ptr<Kernel::DataItem> &value) override;
 
   std::string isValid() const override;
 
@@ -119,7 +119,7 @@ public:
 
 private:
   std::string
-  isValidGroup(const boost::shared_ptr<WorkspaceGroup> &wsGroup) const;
+  isValidGroup(const std::shared_ptr<WorkspaceGroup> &wsGroup) const;
 
   std::string isValidOutputWs() const;
 

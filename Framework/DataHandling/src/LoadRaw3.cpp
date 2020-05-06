@@ -20,9 +20,9 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -40,7 +40,7 @@ LoadRaw3::LoadRaw3()
 /// Initialization method.
 void LoadRaw3::init() {
   LoadRawHelper::init();
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
       "SpectrumMin", 1, mustBePositive,
@@ -67,8 +67,8 @@ void LoadRaw3::init() {
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";
   declareProperty("LoadMonitors", "Include",
-                  boost::make_shared<StringListValidator>(
-                      monitorOptions, monitorOptionsAliases),
+                  std::make_shared<StringListValidator>(monitorOptions,
+                                                        monitorOptionsAliases),
                   "Option to control the loading of monitors.\n"
                   "Allowed options are Include,Exclude, Separate.\n"
                   "Include:The default is Include option which loads the "

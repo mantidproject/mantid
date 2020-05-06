@@ -29,7 +29,7 @@ void PoldiTimeTransformer::initializeFromPoldiInstrument(
   PoldiAbstractDetector_sptr detector = poldiInstrument->detector();
   PoldiAbstractChopper_sptr chopper = poldiInstrument->chopper();
 
-  m_spectrum = boost::const_pointer_cast<const PoldiSourceSpectrum>(
+  m_spectrum = std::const_pointer_cast<const PoldiSourceSpectrum>(
       poldiInstrument->spectrum());
 
   m_detectorCenter = getDetectorCenterCharacteristics(detector, chopper);
@@ -80,7 +80,7 @@ PoldiTimeTransformer::getDetectorElementData(
 
   for (int i = 0; i < static_cast<int>(detector->elementCount()); ++i) {
     data[i] =
-        boost::make_shared<DetectorElementData>(i, center, detector, chopper);
+        std::make_shared<DetectorElementData>(i, center, detector, chopper);
   }
 
   return data;

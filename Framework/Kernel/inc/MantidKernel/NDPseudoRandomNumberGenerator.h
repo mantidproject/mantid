@@ -12,7 +12,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NDRandomNumberGenerator.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 namespace Mantid {

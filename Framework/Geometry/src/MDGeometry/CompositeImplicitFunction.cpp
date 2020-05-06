@@ -73,8 +73,8 @@ int CompositeImplicitFunction::getNFunctions() const {
 
 bool CompositeImplicitFunction::isPointContained(const coord_t *coords) {
   bool evalResult = false;
-  std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::
-      const_iterator it;
+  std::vector<
+      std::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::const_iterator it;
   for (it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it) {
     evalResult = (*it)->isPointContained(coords);
     if (!evalResult) {
@@ -87,8 +87,8 @@ bool CompositeImplicitFunction::isPointContained(const coord_t *coords) {
 bool CompositeImplicitFunction::isPointContained(
     const std::vector<coord_t> &coords) {
   bool evalResult = false;
-  std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::
-      const_iterator it;
+  std::vector<
+      std::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::const_iterator it;
   for (it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it) {
     evalResult = (*it)->isPointContained(coords);
     if (!evalResult) {

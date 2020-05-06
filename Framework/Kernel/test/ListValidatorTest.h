@@ -76,7 +76,7 @@ public:
     IValidator_sptr v(new StringListValidator);
     IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS(v, vv);
-    TS_ASSERT(boost::dynamic_pointer_cast<StringListValidator>(vv));
+    TS_ASSERT(std::dynamic_pointer_cast<StringListValidator>(vv));
   }
 
   void testAliasString() {

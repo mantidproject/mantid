@@ -9,7 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <string>
@@ -173,7 +173,7 @@ public:
 };
 
 /// Shared pointer to a ReflectionCondition
-using ReflectionCondition_sptr = boost::shared_ptr<ReflectionCondition>;
+using ReflectionCondition_sptr = std::shared_ptr<ReflectionCondition>;
 /// A collection of reflections
 using ReflectionConditions = std::vector<ReflectionCondition_sptr>;
 

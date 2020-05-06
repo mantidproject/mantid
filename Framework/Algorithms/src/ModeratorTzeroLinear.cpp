@@ -54,7 +54,7 @@ const std::string ModeratorTzeroLinear::category() const {
 void ModeratorTzeroLinear::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "The name of the input workspace, containing events and/or "
                   "histogram data, in units of time-of-flight");
   declareProperty("Gradient", EMPTY_DBL(),
@@ -145,7 +145,7 @@ void ModeratorTzeroLinear::exec() {
 
   // Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventWS != nullptr) {
     execEvent();
     return;
@@ -212,7 +212,7 @@ void ModeratorTzeroLinear::execEvent() {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  auto outputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Loop over the spectra
   const auto &spectrumInfo = matrixOutputWS->spectrumInfo();

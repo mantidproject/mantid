@@ -26,9 +26,9 @@ public:
   static void destroySuite(InstrumentValidatorTest *suite) { delete suite; }
 
   void test_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     auto instr =
-        boost::make_shared<Mantid::Geometry::Instrument>("TestInstrument");
+        std::make_shared<Mantid::Geometry::Instrument>("TestInstrument");
     ws->setInstrument(instr);
     // Define a sample as a simple sphere
     auto sample = new Mantid::Geometry::ObjComponent(
@@ -44,7 +44,7 @@ public:
   }
 
   void test_fail() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     InstrumentValidator validator;
     TS_ASSERT_EQUALS(
         validator.checkValidity(ws),

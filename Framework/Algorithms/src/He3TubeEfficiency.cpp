@@ -54,7 +54,7 @@ He3TubeEfficiency::He3TubeEfficiency()
 void He3TubeEfficiency::init() {
   using namespace Mantid::Kernel;
 
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<API::WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<API::HistogramValidator>();
   wsValidator->add<API::InstrumentValidator>();
@@ -66,7 +66,7 @@ void He3TubeEfficiency::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output workspace, can be the same as the input");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   this->declareProperty(
       std::make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0,
@@ -74,8 +74,7 @@ void He3TubeEfficiency::init() {
       "Constant factor with which to scale the calculated"
       "detector efficiency. Same factor applies to all efficiencies.");
 
-  auto mustBePosArr =
-      boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
+  auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   this->declareProperty(
       std::make_unique<Kernel::ArrayProperty<double>>("TubePressure",
@@ -114,7 +113,7 @@ void He3TubeEfficiency::exec() {
 
   // Check if it is an event workspace
   DataObjects::EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_inputWS);
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_inputWS);
   if (eventW != nullptr) {
     this->execEvent();
     return;
@@ -257,7 +256,7 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
 void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
                                             double &detRadius,
                                             Kernel::V3D &detAxis) {
-  boost::shared_ptr<const Geometry::IObject> shape_sptr = det.shape();
+  std::shared_ptr<const Geometry::IObject> shape_sptr = det.shape();
   if (!shape_sptr) {
     throw std::runtime_error(
         "Detector geometry error: detector with id: " +
@@ -414,7 +413,7 @@ void He3TubeEfficiency::execEvent() {
     setProperty("OutputWorkspace", matrixOutputWS);
   }
   auto m_outputWS =
-      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
+      std::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
 
   std::size_t numHistograms = m_outputWS->getNumberHistograms();
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();

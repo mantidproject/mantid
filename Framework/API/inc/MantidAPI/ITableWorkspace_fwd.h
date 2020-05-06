@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace Mantid {
@@ -18,9 +17,9 @@ namespace API {
 /// forward declare of Mantid::API::ITableWorkspace
 class ITableWorkspace;
 /// shared pointer to Mantid::API::ITableWorkspace
-using ITableWorkspace_sptr = boost::shared_ptr<ITableWorkspace>;
+using ITableWorkspace_sptr = std::shared_ptr<ITableWorkspace>;
 /// shared pointer to Mantid::API::ITableWorkspace (const version)
-using ITableWorkspace_const_sptr = boost::shared_ptr<const ITableWorkspace>;
+using ITableWorkspace_const_sptr = std::shared_ptr<const ITableWorkspace>;
 /// unique pointer to Mantid::API::ITableWorkspace
 using ITableWorkspace_uptr = std::unique_ptr<ITableWorkspace>;
 /// unique pointer to Mantid::API::ITableWorkspace (const version)

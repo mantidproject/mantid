@@ -42,7 +42,7 @@ void PeakIntegration::init() {
                   "Name of the peaks workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "A 2D workspace with X values of time of flight");
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -92,7 +92,7 @@ void PeakIntegration::exec() {
 
   // Sort events if EventWorkspace so it will run in parallel
   EventWorkspace_const_sptr inWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (inWS) {
     inWS->sortAll(TOF_SORT, nullptr);
   }
@@ -152,7 +152,7 @@ void PeakIntegration::exec() {
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();
 
-    boost::shared_ptr<const IComponent> parent =
+    std::shared_ptr<const IComponent> parent =
         inputW->getInstrument()->getComponentByName(bankName);
 
     if (!parent)
@@ -293,9 +293,9 @@ void PeakIntegration::retrieveProperties() {
     throw std::runtime_error("Must Rebin data with more than 1 bin");
   // Check if detectors are RectangularDetectors
   Instrument_const_sptr inst = inputW->getInstrument();
-  boost::shared_ptr<RectangularDetector> det;
+  std::shared_ptr<RectangularDetector> det;
   for (int i = 0; i < inst->nelements(); i++) {
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det)
       break;
   }

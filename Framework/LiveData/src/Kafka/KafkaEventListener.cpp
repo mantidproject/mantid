@@ -118,7 +118,7 @@ void KafkaEventListener::start(Types::Core::DateAndTime startTime) {
 }
 
 /// @copydoc ILiveListener::extractData
-boost::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
+std::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
   assert(m_decoder);
   // The first call to extract is very early in the start live data process
   // and we may not be completely ready yet, wait upto a maximum of 5 seconds

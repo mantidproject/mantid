@@ -74,6 +74,37 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
 }
 
 /**
+ * @param input :: An input string which defines the function and initial values
+ * for the parameters.
+ * Parameters of different functions are separated by ';'. Parameters of the
+ * same function
+ * are separated by ','. parameterName=value pairs are used to set a parameter
+ * value. For each function
+ * "name" parameter must be set to a function name. E.g.
+ * input = "name=LinearBackground,A0=0,A1=1; name = Gaussian,
+ * PeakCentre=10.,Sigma=1"
+ * @param domainNumber :: The number of domains to add to the function.
+ * @return A pointer to the created function.
+ */
+std::shared_ptr<MultiDomainFunction>
+FunctionFactoryImpl::createInitializedMultiDomainFunction(
+    const std::string &input, size_t domainNumber) {
+  auto singleFunction = createInitialized(input);
+  auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
+
+  if (!singleFunction) {
+    return multiDomainFunction;
+  }
+
+  for (size_t i = 0; i < domainNumber; ++i) {
+    multiDomainFunction->addFunction(singleFunction->clone());
+    multiDomainFunction->setDomainIndex(i, i);
+  }
+
+  return multiDomainFunction;
+}
+
+/**
  * Create a function from an expression.
  * @param expr :: The input expression
  * @param parentAttributes :: An output map filled with the attribute name &
@@ -170,13 +201,13 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
   CompositeFunction_sptr cfun;
   if (term.name() == "=") {
     if (term.terms()[0].name() == "composite") {
-      cfun = boost::dynamic_pointer_cast<CompositeFunction>(
+      cfun = std::dynamic_pointer_cast<CompositeFunction>(
           createFunction(term.terms()[1].name()));
       if (!cfun)
         inputError(expr.str());
       ++it;
     } else if (term.terms()[0].name() == "name") {
-      cfun = boost::dynamic_pointer_cast<CompositeFunction>(
+      cfun = std::dynamic_pointer_cast<CompositeFunction>(
           createFunction("CompositeFunction"));
       if (!cfun)
         inputError(expr.str());
@@ -187,13 +218,13 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     auto firstTerm = term.terms().cbegin();
     if (firstTerm->name() == "=") {
       if (firstTerm->terms()[0].name() == "composite") {
-        cfun = boost::dynamic_pointer_cast<CompositeFunction>(
+        cfun = std::dynamic_pointer_cast<CompositeFunction>(
             createSimple(term, parentAttributes));
         if (!cfun)
           inputError(expr.str());
         ++it;
       } else if (firstTerm->terms()[0].name() == "name") {
-        cfun = boost::dynamic_pointer_cast<CompositeFunction>(
+        cfun = std::dynamic_pointer_cast<CompositeFunction>(
             createFunction("CompositeFunction"));
         if (!cfun)
           inputError(expr.str());
@@ -202,7 +233,7 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
       }
     }
   } else if (term.name() == ";") {
-    cfun = boost::dynamic_pointer_cast<CompositeFunction>(
+    cfun = std::dynamic_pointer_cast<CompositeFunction>(
         createFunction("CompositeFunction"));
     if (!cfun)
       inputError(expr.str());
@@ -305,7 +336,7 @@ void FunctionFactoryImpl::addConstraints(const IFunction_sptr &fun,
  * @param fun :: The function
  * @param expr :: The constraint expression.
  */
-void FunctionFactoryImpl::addConstraint(const boost::shared_ptr<IFunction> &fun,
+void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun,
                                         const Expression &expr) const {
   auto c = std::unique_ptr<IConstraint>(
       ConstraintFactory::Instance().createInitialized(fun.get(), expr));
@@ -319,7 +350,7 @@ void FunctionFactoryImpl::addConstraint(const boost::shared_ptr<IFunction> &fun,
  * @param constraint_expr :: The constraint expression.
  * @param penalty_expr :: The penalty expression.
  */
-void FunctionFactoryImpl::addConstraint(const boost::shared_ptr<IFunction> &fun,
+void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun,
                                         const Expression &constraint_expr,
                                         const Expression &penalty_expr) const {
   auto c = std::unique_ptr<IConstraint>(

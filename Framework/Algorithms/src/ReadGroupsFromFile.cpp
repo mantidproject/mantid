@@ -51,7 +51,7 @@ void ReadGroupsFromFile::init() {
   // The name of the instrument
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InstrumentWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "A workspace that refers to the instrument of interest. You "
                   "can use [[LoadEmptyInstrument]] to create such a "
                   "workspace.");
@@ -66,7 +66,7 @@ void ReadGroupsFromFile::init() {
   // Flag to consider unselected detectors in the cal file
   std::vector<std::string> select{"True", "False"};
   declareProperty("ShowUnselected", "True",
-                  boost::make_shared<StringListValidator>(select),
+                  std::make_shared<StringListValidator>(select),
                   "Whether to show detectors that are not in any group");
   // The output workspace (2D) that will contain the group information
   declareProperty(
@@ -90,7 +90,7 @@ void ReadGroupsFromFile::exec() {
   Instrument_const_sptr inst = ws->getInstrument();
 
   // Create a copy (without the data) of the workspace - it will contain the
-  Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr localWorkspace = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create(ws, ws->getNumberHistograms(), 2, 1));
   if (!localWorkspace)
     throw std::runtime_error(

@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {

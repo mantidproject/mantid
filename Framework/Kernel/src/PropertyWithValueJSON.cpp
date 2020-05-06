@@ -146,7 +146,7 @@ std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
  * @throws std::invalid_argument if the Json::Value can't be interpreted
  */
 PropertyManager_sptr createPropertyManager(const Json::Value &keyValues) {
-  auto propMgr = boost::make_shared<PropertyManager>();
+  auto propMgr = std::make_shared<PropertyManager>();
   auto members = keyValues.getMemberNames();
   for (const auto &key : members) {
     const auto &value = keyValues[key];

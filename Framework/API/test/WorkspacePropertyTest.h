@@ -11,8 +11,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include <boost/shared_ptr.hpp>
 #include <json/value.h>
+#include <memory>
 
 // Property implementations
 #include "MantidAPI/WorkspaceProperty.tcc"

@@ -35,7 +35,7 @@ public:
   getProperty(const std::string &name) const override;
 
 protected:
-  boost::shared_ptr<Algorithm> createChildAlgorithm(
+  std::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1) override;
@@ -52,7 +52,7 @@ protected:
                       const bool loadQuiet = false);
   std::vector<std::string> splitInput(const std::string &input);
   void forwardProperties();
-  boost::shared_ptr<Kernel::PropertyManager> getProcessProperties(
+  std::shared_ptr<Kernel::PropertyManager> getProcessProperties(
       const std::string &propertyManager = std::string()) const;
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;

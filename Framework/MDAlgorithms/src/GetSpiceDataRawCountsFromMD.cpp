@@ -48,7 +48,7 @@ void GetSpiceDataRawCountsFromMD::init() {
       "Name of the output MatrixWorkspace containing the raw data required.");
 
   std::array<std::string, 3> vecmode = {{"Pt.", "Detector", "Sample Log"}};
-  auto modevalidator = boost::make_shared<ListValidator<std::string>>(vecmode);
+  auto modevalidator = std::make_shared<ListValidator<std::string>>(vecmode);
   declareProperty(
       "Mode", "Detector", modevalidator,
       "Mode selector.  (1) Pt.: get the raw detectors' signal of the "
@@ -498,7 +498,7 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
   if (sizex != sizey || sizex == 0)
     throw std::runtime_error("Unable to create output matrix workspace.");
 
-  MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
   if (!outws)
     throw std::runtime_error("Failed to create output matrix workspace.");

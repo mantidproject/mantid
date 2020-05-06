@@ -41,7 +41,7 @@ void SaveVTK::init() {
       std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
       "The name to use when writing the file");
   // Declare optional properties
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "Xminimum", 0.0, mustBePositive,
@@ -87,7 +87,7 @@ void SaveVTK::exec() {
   const std::string workspaceID = inputWorkspace->id();
   if (workspaceID.find("Workspace2D") != std::string::npos) {
     const Workspace2D_sptr localWorkspace =
-        boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
+        std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Write out whole range
     bool xMin(m_Xmin > 0.0), xMax(m_Xmax > 0.0);

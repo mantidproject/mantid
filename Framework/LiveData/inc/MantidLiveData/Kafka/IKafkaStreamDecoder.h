@@ -36,7 +36,15 @@ public:
     using FnType = std::function<void()>;
 
     Callback(const Callback::FnType &callback) : m_mutex(), m_callback() {
-      setFunction(std::move(callback));
+      setFunction(callback);
+    }
+
+    Callback(Callback &&other) {
+      {
+        // We must lock the other obj - not ourself
+        std::lock_guard lck(other.m_mutex);
+        m_callback = std::move(other.m_callback);
+      }
     }
 
     inline void operator()() {
@@ -64,6 +72,8 @@ public:
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
+
+  IKafkaStreamDecoder(IKafkaStreamDecoder &&) noexcept;
 
 public:
   ///@name Start/stop
@@ -169,7 +179,7 @@ protected:
   /// Flag indicating that the decoder is capturing
   std::atomic<bool> m_capturing;
   /// Exception object indicating there was an error
-  boost::shared_ptr<std::runtime_error> m_exception;
+  std::shared_ptr<std::runtime_error> m_exception;
 
   /// For notifying other threads of changes to conditions (the following bools)
   std::condition_variable m_cv;
@@ -194,17 +204,17 @@ protected:
                              uint32_t length);
 
   template <typename T>
-  boost::shared_ptr<T>
+  std::shared_ptr<T>
   createBufferWorkspace(const std::string &workspaceClassName, size_t nspectra,
                         const int32_t *spec, const int32_t *udet,
                         uint32_t length);
   template <typename T>
-  boost::shared_ptr<T>
+  std::shared_ptr<T>
   createBufferWorkspace(const std::string &workspaceClassName,
-                        const boost::shared_ptr<T> &parent);
+                        const std::shared_ptr<T> &parent);
 
   template <typename T>
-  bool loadInstrument(const std::string &name, boost::shared_ptr<T> workspace,
+  bool loadInstrument(const std::string &name, std::shared_ptr<T> workspace,
                       const std::string &jsonGeometry = "");
 
   void checkRunMessage(

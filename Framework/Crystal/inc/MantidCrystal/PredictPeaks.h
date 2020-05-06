@@ -95,7 +95,7 @@ private:
   /// Instrument reference
   Geometry::Instrument_const_sptr m_inst;
   /// Reference frame for the instrument
-  boost::shared_ptr<const Geometry::ReferenceFrame> m_refFrame;
+  std::shared_ptr<const Geometry::ReferenceFrame> m_refFrame;
   /// Direction of the beam for this instrument
   Kernel::V3D m_refBeamDir;
   /// Output peaks workspace

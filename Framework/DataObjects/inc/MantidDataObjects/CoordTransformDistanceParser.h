@@ -8,7 +8,7 @@
 
 #include "MantidDataObjects/CoordTransformAffineParser.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace DataObjects {

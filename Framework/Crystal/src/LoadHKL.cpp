@@ -177,12 +177,11 @@ void LoadHKL::exec() {
   mrun.addProperty<double>("Radius", radius, true);
   NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
   auto shape =
-      boost::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(
+      std::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(
           Material("SetInLoadHKL", neutron, 1.0)));
   ws->mutableSample().setShape(shape);
 
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<PeaksWorkspace>(ws));
 }
 
 } // namespace Crystal

@@ -15,11 +15,6 @@
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/RegistrationHelper.h"
 
-// Boost
-#ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#endif
-
 // Poco
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -27,6 +22,7 @@
 // std
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -91,7 +87,7 @@ public:
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className :: the name of the class you wish to create
   /// @return a shared pointer ot the base class
-  virtual boost::shared_ptr<Base> create(const std::string &className) const {
+  virtual std::shared_ptr<Base> create(const std::string &className) const {
     auto it = _map.find(className);
     if (it != _map.end())
       return it->second->createInstance();

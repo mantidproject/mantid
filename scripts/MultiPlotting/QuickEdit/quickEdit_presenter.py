@@ -66,6 +66,12 @@ class QuickEditPresenter(object):
     def get_errors(self):
         return self._view.get_errors()
 
+    def get_selection(self):
+        name = self.widget.current_selection()
+        if name == "All":
+            return self.all()
+        return [name]
+
     def rm_subplot(self, name):
         current = self._view.current_selection()
         if current == name:

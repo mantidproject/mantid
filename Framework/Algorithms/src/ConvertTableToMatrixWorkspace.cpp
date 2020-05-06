@@ -36,10 +36,10 @@ void ConvertTableToMatrixWorkspace::init() {
                                                         Direction::Output),
                   "An output Workspace2D.");
   declareProperty("ColumnX", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The column name for the X vector.");
   declareProperty("ColumnY", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The column name for the Y vector.");
   declareProperty("ColumnE", "",
                   "The column name for the E vector (optional).");
@@ -69,7 +69,7 @@ void ConvertTableToMatrixWorkspace::exec() {
         inputWorkspace->getColumn(columnE)->numeric_fill<>();
   }
 
-  auto labelX = boost::dynamic_pointer_cast<Units::Label>(
+  auto labelX = std::dynamic_pointer_cast<Units::Label>(
       UnitFactory::Instance().create("Label"));
   labelX->setLabel(columnX);
   outputWorkspace->getAxis(0)->unit() = labelX;

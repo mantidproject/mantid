@@ -99,7 +99,7 @@ public:
 
 private:
   TableWorkspace_sptr createDetectorGroupingTable() {
-    auto t = boost::make_shared<TableWorkspace>();
+    auto t = std::make_shared<TableWorkspace>();
 
     t->addColumn("vector_int", "Detectors");
 

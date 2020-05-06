@@ -36,7 +36,7 @@ Mantid::Kernel::V3D applyToCoordinates(SymmetryOperation &self,
 } // namespace
 
 void export_SymmetryOperation() {
-  register_ptr_to_python<boost::shared_ptr<SymmetryOperation>>();
+  register_ptr_to_python<std::shared_ptr<SymmetryOperation>>();
 
   class_<SymmetryOperation>("SymmetryOperation")
       .def("getOrder", &SymmetryOperation::order, arg("self"),

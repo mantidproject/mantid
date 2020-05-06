@@ -43,7 +43,7 @@ public:
         m_instrument(makeEmptyInstrument()),
         m_runsTable(m_instruments, 0.1, ReductionJobs()),
         m_slicing(), m_mockAlgorithmsList{
-                         boost::make_shared<MockBatchJobAlgorithm>()} {
+                         std::make_shared<MockBatchJobAlgorithm>()} {
     Mantid::API::FrameworkManager::Instance();
   }
 
@@ -371,7 +371,7 @@ public:
   void testNotifyAlgorithmStarted() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
     EXPECT_CALL(*m_jobRunner, algorithmStarted(algorithm))
         .Times(1)
@@ -385,7 +385,7 @@ public:
   void testNotifyAlgorithmComplete() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
     EXPECT_CALL(*m_jobRunner, algorithmComplete(algorithm))
         .Times(1)
@@ -399,7 +399,7 @@ public:
   void testOutputWorkspacesSavedOnAlgorithmComplete() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_savePresenter, shouldAutosave())
         .Times(1)
         .WillOnce(Return(true));
@@ -419,7 +419,7 @@ public:
   void testOutputWorkspacesNotSavedIfAutosaveDisabled() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_savePresenter, shouldAutosave())
         .Times(1)
         .WillOnce(Return(false));
@@ -436,7 +436,7 @@ public:
   void testNotifyAlgorithmError() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     auto const errorMessage = std::string("test error");
     auto row = makeRow();
     EXPECT_CALL(*m_jobRunner, algorithmError(algorithm, errorMessage))

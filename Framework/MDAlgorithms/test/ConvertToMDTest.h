@@ -511,7 +511,7 @@ public:
       TS_ASSERT(out_ws);
       TS_ASSERT(reference_out_ws);
       auto ws_cast =
-          boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
+          std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
               reference_out_ws);
 
       // Compare the loaded and original workspace
@@ -577,13 +577,13 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
 
   WorkspaceCreationHelper::MockAlgorithm reporter;
 
-  boost::shared_ptr<ConvToMDBase> pConvMethods;
+  std::shared_ptr<ConvToMDBase> pConvMethods;
   DataObjects::TableWorkspace_sptr pDetLoc_events;
   DataObjects::TableWorkspace_sptr pDetLoc_histo;
   // pointer to mock algorithm to work with progress bar
   std::unique_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
-  boost::shared_ptr<MDEventWSWrapper> pTargWS;
+  std::shared_ptr<MDEventWSWrapper> pTargWS;
 
 public:
   static ConvertToMDTestPerformance *createSuite() {
@@ -767,7 +767,7 @@ public:
   ConvertToMDTestPerformance() : Rot(3, 3) {
     numHist = 100 * 100;
     size_t nEvents = 1000;
-    inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    inWsEv = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceCreationHelper::createRandomEventWorkspace(nEvents, numHist,
                                                             0.1));
     inWsEv->setInstrument(
@@ -775,7 +775,7 @@ public:
     inWsEv->mutableRun().addProperty("Ei", 12., "meV", true);
     API::AnalysisDataService::Instance().addOrReplace("TestEventWS", inWsEv);
 
-    inWs2D = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    inWs2D = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             int(numHist), int(nEvents)));
     // add workspace energy
@@ -794,8 +794,7 @@ public:
 
     API::Workspace_sptr tWs = API::AnalysisDataService::Instance().retrieve(
         "PreprocessedDetectorsTable");
-    pDetLoc_histo =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
+    pDetLoc_histo = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
     if (!pDetLoc_histo)
       throw(std::runtime_error(
           "Can not obtain preprocessed histogram detectors "));
@@ -808,12 +807,12 @@ public:
     tWs = API::AnalysisDataService::Instance().retrieve(
         "PreprocessedDetectorsTable");
     pDetLoc_events =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
     if (!pDetLoc_events)
       throw(
           std::runtime_error("Can not obtain preprocessed events detectors "));
 
-    pTargWS = boost::make_shared<MDEventWSWrapper>();
+    pTargWS = std::make_shared<MDEventWSWrapper>();
 
     Rot.setRandom(100);
     Rot.toRotation();

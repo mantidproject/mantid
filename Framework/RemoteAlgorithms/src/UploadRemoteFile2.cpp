@@ -25,14 +25,14 @@ using namespace Mantid::API;
 void UploadRemoteFile2::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to upload the file to",
                   Direction::Input);
 

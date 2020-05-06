@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <boost/algorithm/string.hpp>
 

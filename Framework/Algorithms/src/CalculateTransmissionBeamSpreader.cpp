@@ -34,7 +34,7 @@ using namespace HistogramData;
 using std::size_t;
 
 void CalculateTransmissionBeamSpreader::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
@@ -59,13 +59,13 @@ void CalculateTransmissionBeamSpreader::init() {
                                                         Direction::Output),
                   "The fitted transmission correction");
 
-  auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();
+  auto zeroOrMore = std::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
   declareProperty("IncidentBeamMonitor", 2, zeroOrMore,
                   "The UDET of the incident beam monitor");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty("SpreaderTransmissionValue", 1.0, mustBePositive,
@@ -83,7 +83,7 @@ void CalculateTransmissionBeamSpreader::init() {
   options[0] = "Linear";
   options[1] = "Log";
   declareProperty("FitMethod", "Log",
-                  boost::make_shared<StringListValidator>(options),
+                  std::make_shared<StringListValidator>(options),
                   "Whether to fit directly to the transmission curve (Linear) "
                   "or to the log of it (Log)");
 

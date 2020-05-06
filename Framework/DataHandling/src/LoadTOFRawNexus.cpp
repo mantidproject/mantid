@@ -53,7 +53,7 @@ void LoadTOFRawNexus::init() {
                   "Some NXS files have multiple data fields giving binning in "
                   "other units (e.g. d-spacing or momentum).\n"
                   "Enter the right signal number for your desired field.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
       std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
@@ -519,8 +519,10 @@ void LoadTOFRawNexus::exec() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
+  Kernel::NexusHDF5Descriptor descriptor(filename);
+
   try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
+    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }

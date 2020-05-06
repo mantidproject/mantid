@@ -18,6 +18,9 @@ The following types of input file are supported:
   The file may be in ASCII or Binary format, and all the faces must be triangular. 
   The normals are ignored, but the vertices must be in the order required by the standard 
   (counter-clockwise when viewed from outside).
+* ``*.3mf`` `https://3mf.io <https://3mf.io>`_
+  This is a 3D printing format that allows multiple objects to be stored in a single file,
+  each with a representation similar to the .stl format ie a list of faces and vertices
 
 
 .. categories::

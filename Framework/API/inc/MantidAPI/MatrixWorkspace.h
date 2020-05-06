@@ -39,9 +39,9 @@ class SpectrumDetectorMapping;
 /// typedef for the image type
 using MantidImage = std::vector<std::vector<double>>;
 /// shared pointer to MantidImage
-using MantidImage_sptr = boost::shared_ptr<MantidImage>;
+using MantidImage_sptr = std::shared_ptr<MantidImage>;
 /// shared pointer to const MantidImage
-using MantidImage_const_sptr = boost::shared_ptr<const MantidImage>;
+using MantidImage_const_sptr = std::shared_ptr<const MantidImage>;
 
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
@@ -88,7 +88,7 @@ public:
 
   /**@name Instrument queries */
   //@{
-  boost::shared_ptr<const Geometry::IDetector>
+  std::shared_ptr<const Geometry::IDetector>
   getDetector(const size_t workspaceIndex) const;
   double detectorTwoTheta(const Geometry::IDetector &det) const;
   double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
@@ -381,7 +381,7 @@ public:
   /// Deprecated, use setSharedX() instead. Set the specified X array to point
   /// to the given existing array
   virtual void setX(const std::size_t index,
-                    const boost::shared_ptr<HistogramData::HistogramX> &X) {
+                    const std::shared_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setX(X);
   }
 
@@ -454,8 +454,8 @@ public:
 
   // Methods handling the internal monitor workspace
   virtual void
-  setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
-  boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
+  setMonitorWorkspace(const std::shared_ptr<MatrixWorkspace> &monitorWS);
+  std::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
   void loadInstrumentNexus(::NeXus::File *file);
 
@@ -463,9 +463,9 @@ public:
   // MD Geometry methods
   //=====================================================================================
   size_t getNumDims() const override;
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  std::shared_ptr<const Mantid::Geometry::IMDDimension>
   getDimension(size_t index) const override;
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  std::shared_ptr<const Mantid::Geometry::IMDDimension>
   getDimensionWithId(std::string id) const override;
   //=====================================================================================
   // End MD Geometry methods
@@ -623,7 +623,7 @@ private:
 
   /// A workspace holding monitor data relating to the main data in the
   /// containing workspace (null if none).
-  boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
+  std::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
 
   mutable std::atomic<bool> m_indexInfoNeedsUpdate{true};
   mutable std::mutex m_indexInfoMutex;
@@ -634,9 +634,9 @@ protected:
 };
 
 /// shared pointer to the matrix workspace base class
-using MatrixWorkspace_sptr = boost::shared_ptr<MatrixWorkspace>;
+using MatrixWorkspace_sptr = std::shared_ptr<MatrixWorkspace>;
 /// shared pointer to the matrix workspace base class (const version)
-using MatrixWorkspace_const_sptr = boost::shared_ptr<const MatrixWorkspace>;
+using MatrixWorkspace_const_sptr = std::shared_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid

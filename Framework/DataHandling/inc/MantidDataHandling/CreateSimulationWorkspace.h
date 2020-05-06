@@ -57,7 +57,7 @@ private:
   void setStartDate(const API::MatrixWorkspace_sptr &workspace);
 
   /// Pointer to a progress object
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
   /// Pointer to the new instrument
   Geometry::Instrument_const_sptr m_instrument;
   /// Pointer to the new workspace

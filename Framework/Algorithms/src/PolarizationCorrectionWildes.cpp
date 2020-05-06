@@ -407,8 +407,7 @@ size_t PolarizationCorrectionWildes::WorkspaceMap::size() const noexcept {
  */
 void PolarizationCorrectionWildes::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      Prop::INPUT_WS, "",
-                      boost::make_shared<API::ADSValidator>(),
+                      Prop::INPUT_WS, "", std::make_shared<API::ADSValidator>(),
                       Kernel::Direction::Input),
                   "A list of workspaces to be corrected corresponding to the "
                   "flipper configurations.");
@@ -426,10 +425,9 @@ void PolarizationCorrectionWildes::init() {
   const std::string directBeam = Flippers::Off;
   const std::vector<std::string> setups{
       {full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(
-      Prop::FLIPPERS, full,
-      boost::make_shared<Kernel::ListValidator<std::string>>(setups),
-      "Flipper configurations of the input workspaces.");
+  declareProperty(Prop::FLIPPERS, full,
+                  std::make_shared<Kernel::ListValidator<std::string>>(setups),
+                  "Flipper configurations of the input workspaces.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::EFFICIENCIES, "", Kernel::Direction::Input),

@@ -65,11 +65,11 @@ void MultiDomainFunctionTest_Function::functionDeriv1D(
   }
 }
 
-boost::shared_ptr<Mantid::API::MultiDomainFunction> makeMultiDomainFunction3() {
-  auto multi = boost::make_shared<Mantid::API::MultiDomainFunction>();
-  multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
-  multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
-  multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
+std::shared_ptr<Mantid::API::MultiDomainFunction> makeMultiDomainFunction3() {
+  auto multi = std::make_shared<Mantid::API::MultiDomainFunction>();
+  multi->addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
+  multi->addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
+  multi->addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
 
   multi->getFunction(0)->setParameter("A", 0);
   multi->getFunction(0)->setParameter("B", 0);
@@ -87,14 +87,14 @@ boost::shared_ptr<Mantid::API::MultiDomainFunction> makeMultiDomainFunction3() {
   return multi;
 }
 
-boost::shared_ptr<Mantid::API::JointDomain> makeMultiDomainDomain3() {
-  auto domain = boost::make_shared<Mantid::API::JointDomain>();
+std::shared_ptr<Mantid::API::JointDomain> makeMultiDomainDomain3() {
+  auto domain = std::make_shared<Mantid::API::JointDomain>();
   domain->addDomain(
-      boost::make_shared<Mantid::API::FunctionDomain1DVector>(0, 1, 9));
+      std::make_shared<Mantid::API::FunctionDomain1DVector>(0, 1, 9));
   domain->addDomain(
-      boost::make_shared<Mantid::API::FunctionDomain1DVector>(1, 2, 10));
+      std::make_shared<Mantid::API::FunctionDomain1DVector>(1, 2, 10));
   domain->addDomain(
-      boost::make_shared<Mantid::API::FunctionDomain1DVector>(2, 3, 11));
+      std::make_shared<Mantid::API::FunctionDomain1DVector>(2, 3, 11));
 
   return domain;
 }
@@ -105,7 +105,7 @@ const size_t nbins = 10;
 const double dX = 0.2;
 
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace1() {
-  Mantid::API::MatrixWorkspace_sptr ws1 = boost::make_shared<WorkspaceTester>();
+  Mantid::API::MatrixWorkspace_sptr ws1 = std::make_shared<WorkspaceTester>();
   ws1->initialize(1, nbins, nbins);
   auto &x = ws1->mutableX(0);
   auto &y = ws1->mutableY(0);
@@ -121,7 +121,7 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace1() {
 }
 
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace2() {
-  Mantid::API::MatrixWorkspace_sptr ws2 = boost::make_shared<WorkspaceTester>();
+  Mantid::API::MatrixWorkspace_sptr ws2 = std::make_shared<WorkspaceTester>();
   ws2->initialize(1, nbins, nbins);
 
   auto &x = ws2->mutableX(0);
@@ -137,7 +137,7 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace2() {
 }
 
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3() {
-  Mantid::API::MatrixWorkspace_sptr ws3 = boost::make_shared<WorkspaceTester>();
+  Mantid::API::MatrixWorkspace_sptr ws3 = std::make_shared<WorkspaceTester>();
   ws3->initialize(1, nbins, nbins);
   auto &x = ws3->mutableX(0);
   auto &y = ws3->mutableY(0);

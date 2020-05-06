@@ -242,7 +242,7 @@ private:
 
 public:
   /// Typedef for a shared pointer to a MDBox
-  using sptr = boost::shared_ptr<MDBox<MDE, nd>>;
+  using sptr = std::shared_ptr<MDBox<MDE, nd>>;
 
   /// Typedef for a vector of the conatined events
   using vec_t = std::vector<MDE>;

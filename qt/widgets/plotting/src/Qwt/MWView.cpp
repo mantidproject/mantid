@@ -14,7 +14,7 @@
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtWidgets/Plotting/Qwt/SignalRange.h"
 #include <boost/pointer_cast.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 // includes for interface development
 #include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 #include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMD.h"
@@ -37,7 +37,7 @@ namespace MantidWidgets {
 
 MWView::MWView(QWidget *parent)
     : QWidget(parent), MantidQt::API::WorkspaceObserver(),
-      m_mdSettings(boost::make_shared<MantidQt::API::MdSettings>()),
+      m_mdSettings(std::make_shared<MantidQt::API::MdSettings>()),
       m_workspace(),
       m_wellcomeWorkspace(), m_wellcomeName{"__MWViewWellcomeWorkspace"},
       m_dimensions() {
@@ -149,10 +149,10 @@ void MWView::setTransparentZerosSlot(bool transparent) {
  */
 void MWView::preDeleteHandle(
     const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) {
+    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   UNUSED_ARG(workspaceName);
   Mantid::API::MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
   if (ws && ws == m_workspace) {
     this->showWellcomeWorkspace();
   }

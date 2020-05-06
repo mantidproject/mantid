@@ -15,7 +15,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -168,7 +168,7 @@ private:
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
   Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  std::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
   int m_minSpectrum;
   int m_maxSpectrum;

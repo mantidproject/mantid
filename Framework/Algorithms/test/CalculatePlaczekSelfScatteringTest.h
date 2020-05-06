@@ -179,8 +179,8 @@ public:
   }
 
 private:
-  static boost::shared_ptr<CalculatePlaczekSelfScattering> makeAlgorithm() {
-    auto a = boost::make_shared<CalculatePlaczekSelfScattering>();
+  static std::shared_ptr<CalculatePlaczekSelfScattering> makeAlgorithm() {
+    auto a = std::make_shared<CalculatePlaczekSelfScattering>();
     a->initialize();
     a->setChild(true);
     a->setRethrows(true);

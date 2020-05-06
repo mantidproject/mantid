@@ -19,9 +19,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <Poco/File.h>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -54,7 +54,7 @@ public:
     double smu = 0.357;
     double amu = 0.011;
     NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
-    auto sampleShape = boost::make_shared<CSGObject>();
+    auto sampleShape = std::make_shared<CSGObject>();
     sampleShape->setMaterial(Material("SetInSaveHKLTest", neutron, 1.0));
     ws->mutableSample().setShape(sampleShape);
 
@@ -88,7 +88,7 @@ public:
 
     PeaksWorkspace_sptr wsout;
     TS_ASSERT_THROWS_NOTHING(
-        wsout = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        wsout = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("TOPAZ_peaks")));
     TS_ASSERT(wsout);
     if (!wsout)

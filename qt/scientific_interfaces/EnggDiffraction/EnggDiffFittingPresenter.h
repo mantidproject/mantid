@@ -39,8 +39,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingPresenter
 public:
   EnggDiffFittingPresenter(
       IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
-      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-      boost::shared_ptr<IEnggDiffractionParam> mainParam);
+      std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      std::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
 
   void notify(IEnggDiffFittingPresenter::Notification notif) override;
@@ -120,10 +120,10 @@ private:
   QThread *m_workerThread;
 
   /// interface for the 'current' calibration
-  boost::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
+  std::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
 
   /// interface for the 'current' calibration
-  boost::shared_ptr<IEnggDiffractionParam> m_mainParam;
+  std::shared_ptr<IEnggDiffractionParam> m_mainParam;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;

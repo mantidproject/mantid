@@ -1065,9 +1065,9 @@ private:
                              updateInterval);
   }
 
-  boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
+  std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
-    auto algRunner = boost::make_shared<NiceMock<MockAlgorithmRunner>>();
+    auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
     ON_CALL(m_view, getMonitorAlgorithmRunner())
         .WillByDefault(Return(algRunner));
     return algRunner;
@@ -1082,7 +1082,7 @@ private:
 
   void assertAlgorithmPropertiesContainOptions(
       AlgorithmRuntimeProps const &expected,
-      boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+      std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     for (auto const &kvp : expected) {
       TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
@@ -1091,7 +1091,7 @@ private:
 
   void assertPostProcessingPropertiesContainOptions(
       AlgorithmRuntimeProps &expected,
-      boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+      std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     auto resultString = alg->getPropertyValue("PostProcessingProperties");
     auto result = parseKeyValueString(resultString, ";");

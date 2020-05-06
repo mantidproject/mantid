@@ -35,7 +35,7 @@ public:
   }
 
   LoadEventNexusIndexSetupTest() {
-    auto instrument = boost::make_shared<Instrument>();
+    auto instrument = std::make_shared<Instrument>();
     // Create instrument with gap in detector ID range
     for (auto detID : {1, 2, 11, 12}) {
       auto *det = new Detector("det-" + std::to_string(detID), detID, nullptr);

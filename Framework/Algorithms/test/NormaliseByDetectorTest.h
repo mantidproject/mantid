@@ -230,8 +230,7 @@ private:
  */
   MatrixWorkspace_sptr
   create_workspace_with_incomplete_detector_level_only_fit_functions(
-      const MatrixWorkspace_sptr &original =
-          boost::shared_ptr<MatrixWorkspace>()) {
+      MatrixWorkspace_sptr original = std::shared_ptr<MatrixWorkspace>()) {
     MatrixWorkspace_sptr ws = original;
     if (original == nullptr) {
       // Create a default workspace with no-fitting functions.
@@ -603,7 +602,7 @@ public:
       WorkspaceGroup_sptr wsGroup =
           API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
               "testws");
-      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
+      ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
 
       const std::string instrumentName = ws->getInstrument()->getName();
 

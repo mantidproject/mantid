@@ -141,7 +141,7 @@ void LoadMcStasNexus::exec() {
       Axis *axis1 = ws->getAxis(0);
       axis1->title() = axis1Name;
       // Set caption
-      auto lblUnit = boost::make_shared<Units::Label>();
+      auto lblUnit = std::make_shared<Units::Label>();
       lblUnit->setLabel(axis1Name, "");
       axis1->unit() = lblUnit;
 
@@ -149,7 +149,7 @@ void LoadMcStasNexus::exec() {
       auto axis2Raw = axis2.get();
       axis2->title() = axis2Name;
       // Set caption
-      lblUnit = boost::make_shared<Units::Label>();
+      lblUnit = std::make_shared<Units::Label>();
       lblUnit->setLabel(axis2Name, "");
       axis2->unit() = lblUnit;
 

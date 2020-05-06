@@ -26,7 +26,7 @@ void StartRemoteTransaction2::init() {
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer where the new transaction "
                   "will be created",
                   Direction::Input);

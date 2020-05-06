@@ -17,8 +17,8 @@
 #include <boost/scoped_array.hpp>
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <climits>
+#include <memory>
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -114,7 +114,7 @@ public:
 private:
   /// C++ API file handle
   // clang-format off
-  boost::shared_ptr< ::NeXus::File> m_filehandle;
+  std::shared_ptr< ::NeXus::File> m_filehandle;
   // clang-format on
   /// Nexus compression method
   int m_nexuscompression;
@@ -412,7 +412,7 @@ void NexusFileIO::writeNumericTimeLog(
 }
 
 /// Helper typedef for a shared pointer of a NexusFileIO.
-using NexusFileIO_sptr = boost::shared_ptr<NexusFileIO>;
+using NexusFileIO_sptr = std::shared_ptr<NexusFileIO>;
 
 } // namespace NeXus
 } // namespace Mantid

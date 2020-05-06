@@ -485,7 +485,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
 std::string MuonAnalysisFitDataPresenter::getRebinParams(
     const Mantid::API::Workspace_sptr &ws) const {
   // First check for workspace group. If it is, use first entry
-  if (const auto &group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+  if (const auto &group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     if (group->size() > 0) {
       return getRebinParams(group->getItem(0));
     } else {
@@ -498,7 +498,7 @@ std::string MuonAnalysisFitDataPresenter::getRebinParams(
   if (m_rebinArgs.first == RebinType::FixedRebin) {
     try {
       const double step = std::stod(m_rebinArgs.second);
-      const auto &mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      const auto &mws = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
       if (mws) {
         const double binSize = mws->x(0)[1] - mws->x(0)[0];
         params = boost::lexical_cast<std::string>(step * binSize);

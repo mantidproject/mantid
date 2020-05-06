@@ -52,7 +52,7 @@ public:
 
     // add some oriented lattices to the multiple experiment info
     for (uint16_t i = 0; i < nExperimentInfosToAdd; ++i) {
-      ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
+      ExperimentInfo_sptr experimentInfo = std::make_shared<ExperimentInfo>();
       mei.addExperimentInfo(experimentInfo);
       mei.getExperimentInfo(i)->mutableSample().setOrientedLattice(
           std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));

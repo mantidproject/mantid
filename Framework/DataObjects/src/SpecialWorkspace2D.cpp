@@ -216,7 +216,7 @@ SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
  * @ return
  */
 void SpecialWorkspace2D::binaryOperation(
-    boost::shared_ptr<const SpecialWorkspace2D> &ws,
+    std::shared_ptr<const SpecialWorkspace2D> &ws,
     const unsigned int operatortype) {
 
   // 1. Check compatibility between this and input workspace
@@ -264,7 +264,7 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
  *
  */
 void SpecialWorkspace2D::binaryAND(
-    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
+    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -282,7 +282,7 @@ void SpecialWorkspace2D::binaryAND(
  *
  */
 void SpecialWorkspace2D::binaryOR(
-    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
+    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -308,7 +308,7 @@ if (y1 < 1.0E-10 && y2 < 1.0E-10){
  *
  */
 void SpecialWorkspace2D::binaryXOR(
-    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
+    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -344,7 +344,7 @@ void SpecialWorkspace2D::binaryNOT() {
  * @ return
  */
 bool SpecialWorkspace2D::isCompatible(
-    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
+    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   // 1. Check number of histogram
   size_t numhist1 = this->getNumberHistograms();
@@ -384,7 +384,7 @@ bool SpecialWorkspace2D::isCompatible(
 /** Duplicate SpecialWorkspace2D
  */
 void SpecialWorkspace2D::copyFrom(
-    boost::shared_ptr<const SpecialWorkspace2D> sourcews) {
+    std::shared_ptr<const SpecialWorkspace2D> sourcews) {
   // Check
   if (this->getNumberHistograms() != sourcews->getNumberHistograms()) {
     throw std::invalid_argument("Incompatible number of histograms");

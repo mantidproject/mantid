@@ -208,7 +208,7 @@ public:
                                "_"); // Not really required for child algorithm
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    auto slice = std::dynamic_pointer_cast<IMDWorkspace>(temp);
 
     ConvertMDHistoToMatrixWorkspace convert_alg;
     convert_alg.setRethrows(true);
@@ -288,7 +288,7 @@ public:
                                "_"); // Not really required for child algorithm
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    auto slice = std::dynamic_pointer_cast<IMDWorkspace>(temp);
 
     ConvertMDHistoToMatrixWorkspace convert_alg;
     convert_alg.setRethrows(true);
@@ -370,7 +370,7 @@ public:
                                "_"); // Not really required for child algorithm
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    auto slice = std::dynamic_pointer_cast<IMDWorkspace>(temp);
 
     ConvertMDHistoToMatrixWorkspace convert_alg;
     convert_alg.setRethrows(true);

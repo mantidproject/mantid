@@ -48,7 +48,7 @@ makeFileBackedMDEW(const std::string &wsName, bool fileBacked, long numEvents,
   ws1->getBoxController()->setSplitThreshold(100);
   ws1->setCoordinateSystem(coord);
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
-      wsName, boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
+      wsName, std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
   FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace",
                                     wsName.c_str(), "UniformParams",
                                     snEvents.c_str(), "RandomizeSignal", "1");
@@ -62,7 +62,7 @@ makeFileBackedMDEW(const std::string &wsName, bool fileBacked, long numEvents,
         saver->getPropertyValue("Filename").c_str(), "FileBackEnd", "1",
         "Memory", "0");
   }
-  return boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(
+  return std::dynamic_pointer_cast<MDEventWorkspace3Lean>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
 }
 
@@ -92,7 +92,7 @@ makeFileBackedMDEWwithMDFrame(const std::string &wsName, bool fileBacked,
   ws1->getBoxController()->setSplitThreshold(100);
   ws1->setCoordinateSystem(coord);
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
-      wsName, boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
+      wsName, std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
   FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace",
                                     wsName.c_str(), "UniformParams",
                                     snEvents.c_str(), "RandomizeSignal", "1");
@@ -106,7 +106,7 @@ makeFileBackedMDEWwithMDFrame(const std::string &wsName, bool fileBacked,
         saver->getPropertyValue("Filename").c_str(), "FileBackEnd", "1",
         "Memory", "0");
   }
-  return boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(
+  return std::dynamic_pointer_cast<MDEventWorkspace3Lean>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
 }
 

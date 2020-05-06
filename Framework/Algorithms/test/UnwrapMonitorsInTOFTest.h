@@ -234,7 +234,7 @@ private:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             numberOfHistograms, numberOfBins, includeMonitors, false, true,
             "TestInstrument");
-    auto workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         intialWorkspace);
 
     // Set the monitor bins to the expected values

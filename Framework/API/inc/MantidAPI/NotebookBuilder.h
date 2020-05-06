@@ -26,7 +26,7 @@ namespace API {
 
 class MANTID_API_DLL NotebookBuilder {
 public:
-  NotebookBuilder(const boost::shared_ptr<HistoryView> &view,
+  NotebookBuilder(const std::shared_ptr<HistoryView> &view,
                   std::string versionSpecificity = "old");
   virtual ~NotebookBuilder() = default;
   /// build an ipython notebook from the history view

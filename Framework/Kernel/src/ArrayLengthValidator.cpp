@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayLengthValidator.h"
 
-#include <boost/make_shared.hpp>
 #include <cstdint>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -167,7 +167,7 @@ template <typename TYPE> void ArrayLengthValidator<TYPE>::clearLengthMax() {
   */
 template <typename TYPE>
 IValidator_sptr ArrayLengthValidator<TYPE>::clone() const {
-  return boost::make_shared<ArrayLengthValidator>(*this);
+  return std::make_shared<ArrayLengthValidator>(*this);
 }
 
 /**

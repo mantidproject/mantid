@@ -39,7 +39,7 @@ void ExponentialCorrection::defineProperties() {
   operations[0] = "Multiply";
   operations[1] = "Divide";
   declareProperty("Operation", "Divide",
-                  boost::make_shared<Kernel::StringListValidator>(operations),
+                  std::make_shared<Kernel::StringListValidator>(operations),
                   "Whether to divide (the default) or multiply the data by the "
                   "correction function.");
 }

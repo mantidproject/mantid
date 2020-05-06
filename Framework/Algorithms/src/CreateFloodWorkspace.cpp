@@ -98,7 +98,7 @@ void CreateFloodWorkspace::init() {
   for (const auto &i : funMap)
     allowedValues.emplace_back(i.first);
   auto backgroundValidator =
-      boost::make_shared<ListValidator<std::string>>(allowedValues);
+      std::make_shared<ListValidator<std::string>>(allowedValues);
   declareProperty(Prop::BACKGROUND, "Linear", backgroundValidator,
                   "Background function.");
 
@@ -117,7 +117,7 @@ MatrixWorkspace_sptr CreateFloodWorkspace::getInputWorkspace() {
   alg->setProperty("OutputWorkspace", "dummy");
   alg->execute();
   Workspace_sptr ws = alg->getProperty("OutputWorkspace");
-  auto input = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  auto input = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   if (!input) {
     throw std::invalid_argument(
         "Loaded files do not produce a single MatrixWorkspace as expected.");

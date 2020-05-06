@@ -78,12 +78,12 @@ void parseValueRange(const std::string &index, double &start, double &end,
 
 void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start,
                        double end, int wi, int spec, int period,
-                       const boost::shared_ptr<API::WorkspaceGroup> &wsg);
+                       const std::shared_ptr<API::WorkspaceGroup> &wsg);
 void addMatrixworkspace(
     std::vector<InputSpectraToFit> &nameList, double start, double end,
     std::string &name, int wi, int spec, int period,
     const boost::optional<API::Workspace_sptr> &workspaceOptional,
-    const boost::shared_ptr<API::MatrixWorkspace> &wsMatrix);
+    const std::shared_ptr<API::MatrixWorkspace> &wsMatrix);
 /// Create a list of input workspace names
 std::vector<InputSpectraToFit> makeNames(const std::string &inputList,
                                          int default_wi, int default_spec) {
@@ -125,9 +125,9 @@ std::vector<InputSpectraToFit> makeNames(const std::string &inputList,
     if (!workspaceOptional)
       continue;
 
-    auto wsg = boost::dynamic_pointer_cast<API::WorkspaceGroup>(
+    auto wsg = std::dynamic_pointer_cast<API::WorkspaceGroup>(
         workspaceOptional.value());
-    auto wsMatrix = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    auto wsMatrix = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         workspaceOptional.value());
     if (wsg) {
       addGroupWorkspace(nameList, start, end, wi, spec, period, wsg);
@@ -143,7 +143,7 @@ void addMatrixworkspace(
     std::vector<InputSpectraToFit> &nameList, double start, double end,
     std::string &name, int wi, int spec, int period,
     const boost::optional<API::Workspace_sptr> &workspaceOptional,
-    const boost::shared_ptr<API::MatrixWorkspace> &wsMatrix) {
+    const std::shared_ptr<API::MatrixWorkspace> &wsMatrix) {
   auto workspaceIndices =
       getWorkspaceIndicesFromAxes(*wsMatrix, wi, spec, start, end);
 
@@ -156,11 +156,11 @@ void addMatrixworkspace(
 }
 void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start,
                        double end, int wi, int spec, int period,
-                       const boost::shared_ptr<API::WorkspaceGroup> &wsg) {
+                       const std::shared_ptr<API::WorkspaceGroup> &wsg) {
   const std::vector<std::string> wsNames = wsg->getNames();
 
   for (const auto &wsName : wsNames) {
-    auto workspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    auto workspace = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve(wsName));
     if (!workspace)
       continue;
@@ -252,11 +252,11 @@ getWorkspace(const std::string &workspaceName, int period) {
     if (load->isExecuted()) {
       API::Workspace_sptr rws = load->getProperty("OutputWorkspace");
       if (rws) {
-        if (boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws)) {
+        if (std::dynamic_pointer_cast<DataObjects::Workspace2D>(rws)) {
           return rws;
         } else {
           API::WorkspaceGroup_sptr gws =
-              boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
+              std::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
           if (gws) {
             std::string propName = "OUTPUTWORKSPACE_" + std::to_string(period);
             if (load->existsProperty(propName)) {

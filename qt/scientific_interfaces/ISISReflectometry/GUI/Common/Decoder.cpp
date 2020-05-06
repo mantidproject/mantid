@@ -112,6 +112,14 @@ void Decoder::decodeExperiment(const QtExperimentView *gui,
       map[QString("transStitchParamsEdit")].toString());
   gui->m_ui.transScaleRHSCheckBox->setChecked(
       map[QString("transScaleRHSCheckBox")].toBool());
+  gui->m_ui.subtractBackgroundCheckBox->setChecked(
+      map[QString("subtractBackgroundCheckBox")].toBool());
+  gui->m_ui.backgroundMethodComboBox->setCurrentIndex(
+      map[QString("backgroundMethodComboBox")].toInt());
+  gui->m_ui.polynomialDegreeSpinBox->setValue(
+      map[QString("polynomialDegreeSpinBox")].toInt());
+  gui->m_ui.costFunctionComboBox->setCurrentIndex(
+      map[QString("costFunctionComboBox")].toInt());
   gui->m_ui.polCorrCheckBox->setChecked(
       map[QString("polCorrCheckBox")].toBool());
   gui->m_ui.floodCorComboBox->setCurrentIndex(

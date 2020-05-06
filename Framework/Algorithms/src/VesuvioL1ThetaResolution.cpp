@@ -20,7 +20,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <fstream>
 #include <random>
@@ -61,9 +61,9 @@ const std::string VesuvioL1ThetaResolution::summary() const {
 /** Initialize the algorithm's properties.
  */
 void VesuvioL1ThetaResolution::init() {
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
-  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(DBL_EPSILON);
 
   const std::vector<std::string> exts{".par", ".dat"};
@@ -131,7 +131,7 @@ void VesuvioL1ThetaResolution::exec() {
 
   // Set X axis to spectrum numbers
   m_outputWorkspace->getAxis(0)->setUnit("Label");
-  auto xAxis = boost::dynamic_pointer_cast<Units::Label>(
+  auto xAxis = std::dynamic_pointer_cast<Units::Label>(
       m_outputWorkspace->getAxis(0)->unit());
   if (xAxis)
     xAxis->setLabel("Spectrum Number");
@@ -148,7 +148,7 @@ void VesuvioL1ThetaResolution::exec() {
     auto distributionXAxis = m_l1DistributionWs->getAxis(0);
     distributionXAxis->setUnit("Label");
     auto labelUnit =
-        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
+        std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("l1");
   }
@@ -164,7 +164,7 @@ void VesuvioL1ThetaResolution::exec() {
     auto distributionXAxis = m_thetaDistributionWs->getAxis(0);
     distributionXAxis->setUnit("Label");
     auto labelUnit =
-        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
+        std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("theta");
   }

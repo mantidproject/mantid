@@ -49,7 +49,7 @@ GetEi::GetEi() : Algorithm(), m_tempWS(), m_fracCompl(0.0) {}
 
 void GetEi::init() {
   // Declare required input parameters for algorithm and do some validation here
-  auto val = boost::make_shared<CompositeValidator>();
+  auto val = std::make_shared<CompositeValidator>();
   val->add<WorkspaceUnitValidator>("TOF");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
@@ -58,7 +58,7 @@ void GetEi::init() {
                                             Direction::Input, val),
       "The X units of this workspace must be time of flight with times in\n"
       "micro-seconds");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "Monitor1Spec", -1, mustBePositive,
@@ -68,7 +68,7 @@ void GetEi::init() {
       "Monitor2Spec", -1, mustBePositive,
       "The spectrum number of the output of the second monitor e.g. MAPS\n"
       "41475, MARI 3, MERLIN 69638");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(
       "EnergyEstimate", -1.0, positiveDouble,

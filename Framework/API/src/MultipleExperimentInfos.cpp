@@ -9,7 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/System.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -102,7 +102,7 @@ void MultipleExperimentInfos::copyExperimentInfos(
   m_expInfos.reserve(other.m_expInfos.size());
   // Do a deep copy of ExperimentInfo's
   for (const auto &expInfo : other.m_expInfos) {
-    auto copy(boost::make_shared<ExperimentInfo>(*expInfo));
+    auto copy(std::make_shared<ExperimentInfo>(*expInfo));
     m_expInfos.emplace_back(copy);
   }
 }

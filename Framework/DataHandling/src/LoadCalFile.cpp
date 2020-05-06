@@ -106,7 +106,7 @@ LoadCalFile::getInstrument3Ways(Algorithm *alg) {
   } else {
     Algorithm_sptr childAlg =
         alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
+    MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);

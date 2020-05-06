@@ -21,8 +21,9 @@ procedure in a sensible manner to code generated automatically.
    MantidStandards
    CPPModernization
    CPPStandards
-   UnitTestStandards
+   GUIStandards
    PythonStandards
+   UnitTestStandards
 
 Documentation Standards
 -----------------------

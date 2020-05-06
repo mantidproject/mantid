@@ -69,7 +69,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
 
         // Clone the monitor workspace, if there is one
         auto originalMatrix =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(original);
+            std::dynamic_pointer_cast<MatrixWorkspace>(original);
         MatrixWorkspace_sptr monitorWS, newMonitorWS;
         if (originalMatrix &&
             (monitorWS = originalMatrix->monitorWorkspace())) {
@@ -79,7 +79,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
           monitorsCloner->executeAsChildAlg();
           Workspace_sptr outputWS =
               monitorsCloner->getProperty("OutputWorkspace");
-          newMonitorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+          newMonitorWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
         }
 
         Algorithm_sptr cloner =

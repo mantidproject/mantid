@@ -76,6 +76,7 @@ private:
   IBatchPresenter *m_mainPresenter;
 
   ExperimentValidationResult validateExperimentFromView();
+  BackgroundSubtraction backgroundSubtractionFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();
   boost::optional<RangeInLambda> transmissionRunRangeFromView();
@@ -93,6 +94,7 @@ private:
 
   void updateWidgetEnabledState();
   void updateSummationTypeEnabledState();
+  void updateBackgroundSubtractionEnabledState();
   void updatePolarizationCorrectionEnabledState();
   void updateFloodCorrectionEnabledState();
 

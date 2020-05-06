@@ -51,7 +51,7 @@ void SaveFocusedXYE::init() {
   header[1] = "MAUD";
   header[2] = "TOPAS";
   declareProperty("Format", "XYE",
-                  boost::make_shared<Kernel::StringListValidator>(header),
+                  std::make_shared<Kernel::StringListValidator>(header),
                   "A type of the header: XYE (default) or MAUD.");
 }
 

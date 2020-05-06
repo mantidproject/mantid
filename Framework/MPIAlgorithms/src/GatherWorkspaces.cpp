@@ -112,7 +112,7 @@ void GatherWorkspaces::init() {
   propOptions.push_back("Append");
   declareProperty(
       "AccumulationMethod", "Append",
-      boost::make_shared<StringListValidator>(propOptions),
+      std::make_shared<StringListValidator>(propOptions),
       "Method to use for accumulating each chunk from mpi processorss.\n"
       " - Add: the processed chunk will be summed to the previous output "
       "(default).\n"
@@ -176,7 +176,7 @@ void GatherWorkspaces::exec() {
     // included.barrier();
   }
 
-  eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
+  eventW = std::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
   if (eventW != NULL) {
     if (getProperty("PreserveEvents")) {
       // Input workspace is an event workspace. Use the other exec method
@@ -264,7 +264,7 @@ void GatherWorkspaces::execEvent() {
   if (included.rank() == 0) {
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
-    outputWorkspace = boost::dynamic_pointer_cast<EventWorkspace>(
+    outputWorkspace = std::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", sumSpec,
                                                  numBins + hist, numBins));
     // Copy geometry over.

@@ -19,7 +19,7 @@ using namespace boost::python;
 
 void export_MaterialBuilder() {
   register_ptr_to_python<MaterialBuilder *>();
-  register_ptr_to_python<boost::shared_ptr<MaterialBuilder>>();
+  register_ptr_to_python<std::shared_ptr<MaterialBuilder>>();
 
   enum_<MaterialBuilder::NumberDensityUnit>("NumberDensityUnit")
       .value("Atoms", MaterialBuilder::NumberDensityUnit::Atoms)

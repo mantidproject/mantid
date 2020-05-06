@@ -105,7 +105,7 @@ IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const {
     IComponent_const_sptr component =
         m_instrument->getComponentByID(resultItr->componentID);
     IDetector_const_sptr det =
-        boost::dynamic_pointer_cast<const IDetector>(component);
+        std::dynamic_pointer_cast<const IDetector>(component);
     if (det) {
       if (!m_instrument->isMonitor(det->getID())) {
         return det;
@@ -151,7 +151,7 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
     // Quick test. If this suceeds moved on to test the children
     if (bbox.doesLineIntersect(testRay)) {
       if (ICompAssembly_const_sptr assembly =
-              boost::dynamic_pointer_cast<const ICompAssembly>(node)) {
+              std::dynamic_pointer_cast<const ICompAssembly>(node)) {
         assembly->testIntersectionWithChildren(testRay, nodeQueue);
       } else {
         throw Kernel::Exception::NotImplementedError(
@@ -165,7 +165,7 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 // * Perform a quick check as to whether the ray passes through the component
 // * @param component :: The test component
 // */
-// bool InstrumentRayTracer::quickIntersectCheck(boost::shared_ptr<IComponent>
+// bool InstrumentRayTracer::quickIntersectCheck(std::shared_ptr<IComponent>
 // component, const Track & testRay) const
 // {
 //
@@ -178,7 +178,7 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 //  accumulates the
 //  * intersection results
 //  */
-// void slowIntersectCheck(boost::shared_ptr<IComponent> component, Track &
+// void slowIntersectCheck(std::shared_ptr<IComponent> component, Track &
 // testRay) const;
 } // namespace Geometry
 } // namespace Mantid

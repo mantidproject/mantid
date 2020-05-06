@@ -11,7 +11,7 @@ namespace Mantid {
 namespace DataObjects {
 
 void PeakNoShapeFactory::setSuccessor(
-    boost::shared_ptr<const PeakShapeFactory> /*successorFactory*/) {}
+    std::shared_ptr<const PeakShapeFactory> /*successorFactory*/) {}
 
 /**
  * @brief Creational method

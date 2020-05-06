@@ -141,7 +141,7 @@ private:
     if (workspace) {
       // output should be a MaskWorkspace
       MaskWorkspace_sptr outputWS =
-          boost::dynamic_pointer_cast<MaskWorkspace>(workspace);
+          std::dynamic_pointer_cast<MaskWorkspace>(workspace);
       return outputWS;
     } else {
       return MaskWorkspace_sptr();

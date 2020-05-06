@@ -404,7 +404,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
             m_pythonExportWsName);
     for (size_t i = 0; i < corrections->size(); i++) {
       MatrixWorkspace_sptr factorWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
       if (!factorWs || !sampleWs)
         continue;
 
@@ -452,7 +452,7 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
             m_pythonExportWsName);
     for (auto const &workspace : *group) {
       auto correctionsWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
       correctionsWorkspace->setYUnit("");
       correctionsWorkspace->setYUnitLabel("Attenuation Factor");
     }

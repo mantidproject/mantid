@@ -176,8 +176,7 @@ public:
     // ---- Did we keep the event workspace ----
     EventWorkspace_const_sptr outputEvent;
     TS_ASSERT_THROWS_NOTHING(
-        outputEvent =
-            boost::dynamic_pointer_cast<const EventWorkspace>(output));
+        outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(output));
     if (preserveEvents) {
       TS_ASSERT(outputEvent);
       if (!outputEvent)

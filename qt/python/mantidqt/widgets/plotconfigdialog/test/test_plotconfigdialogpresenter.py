@@ -146,6 +146,21 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         self.assert_called_x_times_with(3, expected_call_args,
                                         mock_view.add_tab_widget)
 
+    def test_correct_tabs_present_axes_and_curve_legend_has_no_text(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        ax.plot([0], [0])
+        ax.legend()
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+        expected_presenter_list = [None, self.axes_mock.return_value,
+                                   self.curves_mock.return_value, None]
+        self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
+        expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
+                              (self.curves_mock.return_value.view, 'Curves')]
+        self.assert_called_x_times_with(2, expected_call_args,
+                                        mock_view.add_tab_widget)
+
 
 if __name__ == '__main__':
     unittest.main()

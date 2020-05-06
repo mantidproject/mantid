@@ -34,8 +34,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<StopRemoteTransaction> a;
-    TS_ASSERT(a = boost::make_shared<StopRemoteTransaction>());
+    std::shared_ptr<StopRemoteTransaction> a;
+    TS_ASSERT(a = std::make_shared<StopRemoteTransaction>());
 
     // can cast to inherited interfaces and base classes
     TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::StopRemoteTransaction *>(

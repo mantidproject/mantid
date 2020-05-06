@@ -9,7 +9,7 @@
 #include "MantidKernel/LibraryManager.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {

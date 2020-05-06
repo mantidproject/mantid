@@ -26,9 +26,9 @@ AnalysisDataServiceImpl::GroupUpdatedNotification::GroupUpdatedNotification(
 /**
  * Returns the workspace pointer cast to WorkspaceGroup
  */
-boost::shared_ptr<const WorkspaceGroup>
+std::shared_ptr<const WorkspaceGroup>
 AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const {
-  return boost::dynamic_pointer_cast<const WorkspaceGroup>(this->object());
+  return std::dynamic_pointer_cast<const WorkspaceGroup>(this->object());
 }
 
 //-------------------------------------------------------------------------
@@ -71,9 +71,8 @@ AnalysisDataServiceImpl::isValid(const std::string &name) const {
  * @param workspace The shared pointer to the workspace to store
  */
 void AnalysisDataServiceImpl::add(
-    const std::string &name,
-    const boost::shared_ptr<API::Workspace> &workspace) {
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    const std::string &name, const std::shared_ptr<API::Workspace> &workspace) {
+  auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   verifyName(name, group);
 
   // Attach the name to the workspace
@@ -111,9 +110,8 @@ void AnalysisDataServiceImpl::add(
  * @param workspace The shared pointer to the workspace to store
  */
 void AnalysisDataServiceImpl::addOrReplace(
-    const std::string &name,
-    const boost::shared_ptr<API::Workspace> &workspace) {
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    const std::string &name, const std::shared_ptr<API::Workspace> &workspace) {
+  auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   verifyName(name, group);
 
   // Attach the name to the workspace
@@ -150,7 +148,7 @@ void AnalysisDataServiceImpl::rename(const std::string &oldName,
                                      const std::string &newName) {
 
   auto oldWorkspace = retrieve(oldName);
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(oldWorkspace);
+  auto group = std::dynamic_pointer_cast<WorkspaceGroup>(oldWorkspace);
   if (group && group->containsInChildren(newName)) {
     throw std::invalid_argument(
         "Unable to rename group as the new name matches its members");
@@ -207,7 +205,7 @@ std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
     size_t i{0};
     while (!done) {
       if (auto group =
-              boost::dynamic_pointer_cast<WorkspaceGroup>(workspaces.at(i))) {
+              std::dynamic_pointer_cast<WorkspaceGroup>(workspaces.at(i))) {
         const auto groupLength(group->size());
         workspaces.erase(std::next(std::begin(workspaces),
                                    static_cast<IteratorDifference>(i)));
@@ -278,7 +276,7 @@ void AnalysisDataServiceImpl::deepRemoveGroup(const std::string &name) {
   group->observeADSNotifications(false);
   for (size_t i = 0; i < group->size(); ++i) {
     auto ws = group->getItem(i);
-    WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    WorkspaceGroup_sptr gws = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (gws) {
       // if a member is a group remove its items as well
       deepRemoveGroup(gws->getName());
@@ -326,7 +324,7 @@ AnalysisDataServiceImpl::topLevelItems() const {
       const std::string &name = topLevelName;
       auto ws = this->retrieve(topLevelName);
       topLevel.emplace(name, ws);
-      if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+      if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
         group->reportMembers(groupMembers);
       }
     } catch (const std::exception &) {
@@ -393,7 +391,7 @@ void AnalysisDataServiceImpl::setIllegalCharacterList(
 
 void AnalysisDataServiceImpl::verifyName(
     const std::string &name,
-    const boost::shared_ptr<API::WorkspaceGroup> &group) {
+    const std::shared_ptr<API::WorkspaceGroup> &group) {
   const std::string error = isValid(name);
   if (!error.empty()) {
     throw std::invalid_argument(error);

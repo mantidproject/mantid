@@ -136,7 +136,7 @@ void MaskNonOverlappingBins::init() {
   std::vector<std::string> const options{Raggedness::CHECK, Raggedness::RAGGED,
                                          Raggedness::NONRAGGED};
   auto raggednessOptions =
-      boost::make_shared<Kernel::ListValidator<std::string>>(options);
+      std::make_shared<Kernel::ListValidator<std::string>>(options);
   declareProperty(Prop::RAGGEDNESS, Raggedness::CHECK, raggednessOptions,
                   "Choose whether the input workspaces have common bins, are "
                   "ragged, or if the algorithm should check.");

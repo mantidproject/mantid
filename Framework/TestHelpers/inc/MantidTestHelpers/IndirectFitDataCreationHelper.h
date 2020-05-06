@@ -92,7 +92,7 @@ struct SetUpADSWithWorkspace {
 
   Mantid::API::MatrixWorkspace_sptr
   retrieveWorkspace(std::string const &workspaceName) {
-    return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName));
   }
 };

@@ -38,7 +38,7 @@ public:
 IAlgorithm_sptr
 algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 
-  auto alg = boost::make_shared<MuonGroupingCounts>();
+  auto alg = std::make_shared<MuonGroupingCounts>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
   alg->setProperty("OutputWorkspace", "__notUsed");
@@ -85,7 +85,7 @@ setUpAlgorithmWithGroupNameAndDetectors(const WorkspaceGroup_sptr &ws,
 // Retrieve the output workspace from an executed algorithm
 MatrixWorkspace_sptr getOutputWorkspace(const IAlgorithm_sptr &alg) {
   Workspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-  auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
   return wsOut;
 }
 
@@ -126,7 +126,7 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonGroupingCounts>();
+    auto alg = std::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
     TS_ASSERT_THROWS_ANYTHING(
@@ -137,7 +137,7 @@ public:
 
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
     setUpADSWithWorkspace setup(ws);
-    auto alg = boost::make_shared<MuonGroupingCounts>();
+    auto alg = std::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
     TSM_ASSERT_THROWS_NOTHING(

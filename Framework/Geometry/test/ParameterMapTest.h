@@ -17,7 +17,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <boost/function.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IComponent_sptr;
@@ -744,7 +744,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
-    m_testInst = boost::make_shared<Instrument>(("basic"));
+    m_testInst = std::make_shared<Instrument>(("basic"));
 
     // One object
     const double cylRadius(0.004), cylHeight(0.0002);

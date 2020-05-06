@@ -26,7 +26,7 @@ public:
 };
 
 /// Typedef for a shared pointer to \c SearchModel
-using ISearchModel_sptr = boost::shared_ptr<ISearchModel>;
+using ISearchModel_sptr = std::shared_ptr<ISearchModel>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

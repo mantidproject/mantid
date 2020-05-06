@@ -12,7 +12,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -61,9 +61,9 @@ void IntegrateFlux::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input,
-          boost::make_shared<API::WorkspaceUnitValidator>("Momentum")),
+          std::make_shared<API::WorkspaceUnitValidator>("Momentum")),
       "An input workspace. Must have units of Momentum");
-  auto validator = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto validator = std::make_shared<Kernel::BoundedValidator<int>>();
   validator->setLower(2);
   declareProperty("NPoints", 1000, validator,
                   "Number of points per output spectrum.");
@@ -93,7 +93,7 @@ void IntegrateFlux::exec() {
  * @param nX :: Suggested size of the output spectra. It can change in the
  * actual output.
  */
-boost::shared_ptr<API::MatrixWorkspace>
+std::shared_ptr<API::MatrixWorkspace>
 IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
                                      size_t nX) const {
   size_t nSpec = inputWS.getNumberHistograms();
@@ -116,8 +116,8 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
 
   // crate empty output workspace
   API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      boost::shared_ptr<const API::MatrixWorkspace>(&inputWS,
-                                                    NoEventWorkspaceDeleting()),
+      std::shared_ptr<const API::MatrixWorkspace>(&inputWS,
+                                                  NoEventWorkspaceDeleting()),
       nSpec, nX, nX);
 
   // claculate the integration points and save them in the x-vactors of

@@ -582,7 +582,7 @@ private:
   std::string setupInstrument(MainWindowPresenterFriend &presenter,
                               std::string const &instrumentName) {
     presenter.m_instrument =
-        boost::make_shared<Mantid::Geometry::Instrument>(instrumentName);
+        std::make_shared<Mantid::Geometry::Instrument>(instrumentName);
     return presenter.instrumentName();
   }
 

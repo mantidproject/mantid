@@ -73,7 +73,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
     TS_ASSERT(outws);
 
@@ -161,7 +161,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
@@ -312,7 +312,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
@@ -404,7 +404,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Exp0335_S0038D"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
@@ -508,7 +508,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
@@ -621,7 +621,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
@@ -704,7 +704,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1024 * 1024);
@@ -727,8 +727,8 @@ public:
    */
   ITableWorkspace_sptr createSpiceScanTable() {
     ITableWorkspace_sptr datatablews =
-        boost::dynamic_pointer_cast<ITableWorkspace>(
-            boost::make_shared<DataObjects::TableWorkspace>());
+        std::dynamic_pointer_cast<ITableWorkspace>(
+            std::make_shared<DataObjects::TableWorkspace>());
     datatablews->addColumn("int", "Pt.");
     datatablews->addColumn("double", "2theta");
     datatablews->addColumn("double", "m1");

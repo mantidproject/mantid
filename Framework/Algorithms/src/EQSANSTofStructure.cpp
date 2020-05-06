@@ -35,7 +35,7 @@ EQSANSTofStructure::EQSANSTofStructure()
 void EQSANSTofStructure::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
   declareProperty("FlightPathCorrection", false,
                   "If True, the neutron flight path correction will be applied",

@@ -55,10 +55,10 @@ const std::string IntegrateEllipsoidsTwoStep::category() const {
 }
 
 void IntegrateEllipsoidsTwoStep::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<InstrumentValidator>();
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -125,9 +125,9 @@ void IntegrateEllipsoidsTwoStep::exec() {
   PeaksWorkspace_sptr input_peak_ws = getProperty("PeaksWorkspace");
   MatrixWorkspace_sptr input_ws = getProperty("InputWorkspace");
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(input_ws);
+      std::dynamic_pointer_cast<EventWorkspace>(input_ws);
 
-  Workspace2D_sptr histoWS = boost::dynamic_pointer_cast<Workspace2D>(input_ws);
+  Workspace2D_sptr histoWS = std::dynamic_pointer_cast<Workspace2D>(input_ws);
   if (!eventWS && !histoWS) {
     throw std::runtime_error("IntegrateEllipsoids needs either a "
                              "EventWorkspace or Workspace2D as input.");
@@ -245,7 +245,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
     }
   }
 
-  std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>,
+  std::vector<std::pair<std::shared_ptr<const Geometry::PeakShape>,
                         std::tuple<double, double, double>>>
       shapeLibrary;
 
@@ -296,7 +296,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
     const auto libShape = shapeLibrary[static_cast<int>(strongIndex)];
     const auto shape =
-        boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(libShape.first);
+        std::dynamic_pointer_cast<const PeakShapeEllipsoid>(libShape.first);
     const auto frac = std::get<0>(libShape.second);
 
     g_log.notice() << "Weak peak will be adjusted by " << frac << "\n";

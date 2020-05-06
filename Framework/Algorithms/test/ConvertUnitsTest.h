@@ -139,7 +139,7 @@ public:
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve(inputSpace));
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+    Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
 
     // make sure input WS is not changed, i.e. still not Histogram
     TS_ASSERT(!input2D->isHistogramData());
@@ -148,8 +148,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Test that X data is still Points (it was converted back)
     TS_ASSERT(!output2D->isHistogramData());
@@ -227,15 +226,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         pointsWS = AnalysisDataService::Instance().retrieve(inputSpace));
     Workspace2D_sptr pointsWS2D =
-        boost::dynamic_pointer_cast<Workspace2D>(pointsWS);
+        std::dynamic_pointer_cast<Workspace2D>(pointsWS);
 
     // This is the WS with units converted back to TOF
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS"));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Test that X data is still Points (it was converted back)
     TS_ASSERT(!output2D->isHistogramData());
@@ -355,9 +353,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve(inputSpace));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
 
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Wavelength");
@@ -729,7 +726,7 @@ public:
     ConvertUnits conv;
     conv.initialize();
     conv.setProperty("InputWorkspace",
-                     boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+                     std::dynamic_pointer_cast<MatrixWorkspace>(ws));
     conv.setPropertyValue("OutputWorkspace", "out");
     conv.setPropertyValue("Target", targetUnit);
     conv.execute();

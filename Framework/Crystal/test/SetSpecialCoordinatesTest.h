@@ -35,7 +35,7 @@ public:
 
   void test_CannotUseAnyWorkspaceType() {
     Workspace_sptr tableWS =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>(1);
+        std::make_shared<Mantid::DataObjects::TableWorkspace>(1);
 
     SetSpecialCoordinates alg;
     alg.setRethrows(true);

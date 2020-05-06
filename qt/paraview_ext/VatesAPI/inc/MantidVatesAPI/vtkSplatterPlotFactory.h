@@ -16,7 +16,7 @@
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vtkPoints.h>
 
 namespace Mantid {
@@ -120,7 +120,7 @@ private:
   mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
+  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction>
       sliceImplicitFunction;
 
   /// Variable to hold sorted list, so sort doesn't have to be repeated

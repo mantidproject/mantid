@@ -652,7 +652,7 @@ void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler *h) const {
       formulas[1] = QString::fromStdString(h->ifun()->asString());
       fc->setFormulas(formulas);
       // fc->loadData();
-      auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           m_fitPropertyBrowser->getWorkspace());
       fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex(),
                          m_fitPropertyBrowser->getPeakRadius());
@@ -890,7 +890,7 @@ void PeakPickerTool::plotFitFunction(
           m_fitPropertyBrowser->workspaceIndex(), h->functionName());
       fc->setRange(m_fitPropertyBrowser->startX(),
                    m_fitPropertyBrowser->endX());
-      auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           m_fitPropertyBrowser->getWorkspace());
       fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex(),
                          m_fitPropertyBrowser->getPeakRadius());

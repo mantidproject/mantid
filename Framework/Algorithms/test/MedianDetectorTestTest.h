@@ -19,7 +19,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -70,7 +70,7 @@ public:
     TS_ASSERT(input);
 
     MatrixWorkspace_sptr outputMat =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     ;
     TS_ASSERT(outputMat);
     TS_ASSERT_EQUALS(outputMat->YUnit(), "");
@@ -178,7 +178,7 @@ public:
     const short specLength = 22;
     Workspace_sptr space = WorkspaceFactory::Instance().create(
         "Workspace2D", Nhist, specLength, specLength - 1);
-    m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
+    m_2DWS = std::dynamic_pointer_cast<Workspace2D>(space);
     BinEdges x(specLength, HistogramData::LinearGenerator(0.0, 1000.0));
     // the data will be 21 random numbers
     double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0,     0,

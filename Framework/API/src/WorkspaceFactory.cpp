@@ -173,7 +173,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string &className,
                                                   const size_t &XLength,
                                                   const size_t &YLength) const {
   MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
+      std::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
 
   if (!ws) {
     g_log.error("Workspace was not created");
@@ -189,7 +189,7 @@ ITableWorkspace_sptr
 WorkspaceFactoryImpl::createTable(const std::string &className) const {
   ITableWorkspace_sptr ws;
   try {
-    ws = boost::dynamic_pointer_cast<ITableWorkspace>(this->create(className));
+    ws = std::dynamic_pointer_cast<ITableWorkspace>(this->create(className));
     if (!ws) {
       throw std::runtime_error("Class " + className +
                                " cannot be cast to ITableWorkspace");
@@ -205,7 +205,7 @@ IPeaksWorkspace_sptr
 WorkspaceFactoryImpl::createPeaks(const std::string &className) const {
   IPeaksWorkspace_sptr ws;
   try {
-    ws = boost::dynamic_pointer_cast<IPeaksWorkspace>(this->create(className));
+    ws = std::dynamic_pointer_cast<IPeaksWorkspace>(this->create(className));
     if (!ws) {
       throw std::runtime_error("Class " + className +
                                " cannot be cast to IPeaksWorkspace");

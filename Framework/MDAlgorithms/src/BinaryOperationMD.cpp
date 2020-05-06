@@ -74,7 +74,7 @@ void BinaryOperationMD::exec() {
   //  possible)
   if (this->commutative() &&
       ((m_out == m_rhs) ||
-       boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs))) {
+       std::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs))) {
     // So we flip RHS/LHS
     Mantid::API::IMDWorkspace_sptr temp = m_lhs;
     m_lhs = m_rhs;
@@ -82,7 +82,7 @@ void BinaryOperationMD::exec() {
   }
 
   // Do not compare conventions if one is single value
-  if (!boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs)) {
+  if (!std::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs)) {
     if (m_lhs->getConvention() != m_rhs->getConvention()) {
       throw std::runtime_error(
           "Workspaces have different conventions for Q. "
@@ -91,19 +91,19 @@ void BinaryOperationMD::exec() {
   }
 
   // Can't do A = 1 / B
-  if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_lhs))
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(m_lhs))
     throw std::invalid_argument("BinaryOperationMD: can't have a "
                                 "MatrixWorkspace (e.g. WorkspaceSingleValue) "
                                 "as the LHS argument of " +
                                 this->name() + ".");
 
   // Check the inputs. First cast to everything
-  m_lhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_lhs);
-  m_lhs_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_lhs);
-  m_lhs_scalar = boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs);
-  m_rhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
-  m_rhs_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_rhs);
-  m_rhs_scalar = boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs);
+  m_lhs_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_lhs);
+  m_lhs_histo = std::dynamic_pointer_cast<MDHistoWorkspace>(m_lhs);
+  m_lhs_scalar = std::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs);
+  m_rhs_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
+  m_rhs_histo = std::dynamic_pointer_cast<MDHistoWorkspace>(m_rhs);
+  m_rhs_scalar = std::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs);
 
   // MDEventWorkspaces only:
   // If you have to clone any WS, and the operation is commutative, and is NOT
@@ -114,8 +114,8 @@ void BinaryOperationMD::exec() {
       Mantid::API::IMDWorkspace_sptr temp = m_lhs;
       m_lhs = m_rhs;
       m_rhs = temp;
-      m_lhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_lhs);
-      m_rhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
+      m_lhs_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_lhs);
+      m_rhs_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
     }
   }
 
@@ -139,12 +139,12 @@ void BinaryOperationMD::exec() {
   if (!m_rhs)
     throw std::runtime_error("No RHS workspace specified!");
 
-  m_operand_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
-  m_operand_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_rhs);
-  m_operand_scalar = boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs);
+  m_operand_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
+  m_operand_histo = std::dynamic_pointer_cast<MDHistoWorkspace>(m_rhs);
+  m_operand_scalar = std::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs);
 
-  m_out_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_out);
-  m_out_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_out);
+  m_out_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_out);
+  m_out_histo = std::dynamic_pointer_cast<MDHistoWorkspace>(m_out);
 
   if (m_out_event) {
     // Call the templated virtual function for this type of MDEventWorkspace

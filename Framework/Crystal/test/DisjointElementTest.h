@@ -7,9 +7,8 @@
 #pragma once
 
 #include "MantidCrystal/DisjointElement.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using Mantid::Crystal::DisjointElement;
 
@@ -144,13 +143,13 @@ public:
   }
 
   void test_complex() {
-    using DisjointElement_sptr = boost::shared_ptr<DisjointElement>;
+    using DisjointElement_sptr = std::shared_ptr<DisjointElement>;
     using VecDisjointElement = std::vector<DisjointElement_sptr>;
 
     // Create elements from 0-9
     VecDisjointElement vecElements;
     for (int i = 0; i < 10; ++i) {
-      vecElements.emplace_back(boost::make_shared<DisjointElement>(i));
+      vecElements.emplace_back(std::make_shared<DisjointElement>(i));
     }
 
     // Merge selected sets.

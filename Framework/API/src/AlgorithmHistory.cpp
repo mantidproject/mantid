@@ -101,7 +101,7 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   const std::vector<Property *> &properties = alg->getProperties();
   for (const auto &property : properties) {
     m_properties.emplace_back(
-        boost::make_shared<PropertyHistory>(property->createHistory()));
+        std::make_shared<PropertyHistory>(property->createHistory()));
   }
 }
 
@@ -156,8 +156,8 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
 void AlgorithmHistory::addProperty(const std::string &name,
                                    const std::string &value, bool isdefault,
                                    const unsigned int &direction) {
-  m_properties.emplace_back(boost::make_shared<PropertyHistory>(
-      name, value, "", isdefault, direction));
+  m_properties.emplace_back(
+      std::make_shared<PropertyHistory>(name, value, "", isdefault, direction));
 }
 
 /** Add a child algorithm history to history
@@ -227,7 +227,7 @@ AlgorithmHistory::getPropertyValue(const std::string &name) const {
  * @param index :: An index within the workspace history
  * @returns A shared pointer to an algorithm object
  */
-boost::shared_ptr<IAlgorithm>
+std::shared_ptr<IAlgorithm>
 AlgorithmHistory::getChildAlgorithm(const size_t index) const {
   return Algorithm::fromHistory(*(this->getChildAlgorithmHistory(index)));
 }
@@ -261,7 +261,7 @@ void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
  * Create a concrete algorithm based on a history record
  * @returns An algorithm object constructed from this history record
  */
-boost::shared_ptr<IAlgorithm> AlgorithmHistory::createAlgorithm() const {
+std::shared_ptr<IAlgorithm> AlgorithmHistory::createAlgorithm() const {
   return Algorithm::fromHistory(*this);
 }
 

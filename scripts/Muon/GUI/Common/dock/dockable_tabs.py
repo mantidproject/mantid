@@ -54,6 +54,9 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         self.attached_tab_names.append(name)
         super(DetachableTabWidget, self).addTab(tab, name)
 
+    def set_slot_for_tab_changed(self, slot):
+        self.currentChanged.connect(slot)
+
     @Slot(int, int)
     def move_tab(self, from_index, to_index):
         """

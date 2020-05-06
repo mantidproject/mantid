@@ -28,9 +28,9 @@ namespace MDAlgorithms {
  */
 void BoxControllerSettingsAlgorithm::initBoxControllerProps(
     const std::string &SplitInto, int SplitThreshold, int MaxRecursionDepth) {
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  auto mustBeMoreThen1 = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeMoreThen1 = std::make_shared<BoundedValidator<int>>();
   mustBeMoreThen1->setLower(1);
 
   // Split up comma-separated properties

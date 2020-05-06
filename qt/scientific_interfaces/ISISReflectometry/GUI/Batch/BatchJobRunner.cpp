@@ -230,8 +230,7 @@ AlgorithmRuntimeProps BatchJobRunner::rowProcessingProperties() const {
 
 Item const &
 BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
-  auto jobAlgorithm =
-      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   jobAlgorithm->item()->resetOutputs();
   jobAlgorithm->item()->setRunning();
   return *jobAlgorithm->item();
@@ -239,8 +238,7 @@ BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
 
 Item const &
 BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
-  auto jobAlgorithm =
-      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
 
   jobAlgorithm->updateItem();
   jobAlgorithm->item()->setSuccess();
@@ -249,8 +247,7 @@ BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
 
 Item const &BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
                                            std::string const &message) {
-  auto jobAlgorithm =
-      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto *item = jobAlgorithm->item();
   item->resetOutputs();
   item->setError(message);
@@ -262,8 +259,7 @@ Item const &BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
 
 std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
     IConfiguredAlgorithm_sptr algorithm) const {
-  auto jobAlgorithm =
-      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto item = jobAlgorithm->item();
 
   if (item->isGroup())

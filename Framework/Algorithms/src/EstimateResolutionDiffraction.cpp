@@ -78,13 +78,13 @@ void EstimateResolutionDiffraction::init() {
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum");
 
-  auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDeltaTOF = std::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
   positiveDeltaTOF->setLowerExclusive(true);
   declareProperty("DeltaTOF", 0., positiveDeltaTOF,
                   "DeltaT as the resolution of TOF with unit microsecond");
 
-  auto positiveWavelength = boost::make_shared<BoundedValidator<double>>();
+  auto positiveWavelength = std::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);
   positiveWavelength->setLowerExclusive(true);
   declareProperty("Wavelength", EMPTY_DBL(), positiveWavelength,
@@ -117,7 +117,7 @@ void EstimateResolutionDiffraction::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 
   // put together the output group
-  auto partialsGroup = boost::make_shared<WorkspaceGroup>();
+  auto partialsGroup = std::make_shared<WorkspaceGroup>();
   API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_tof",
                                                     m_resTof);
   API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_length",

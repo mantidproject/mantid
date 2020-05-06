@@ -36,7 +36,7 @@ void CropWorkspace::init() {
                   "An X value that is in the highest X "
                   "value bin to be retained (default: max "
                   "X)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "The index number of the first entry in the Workspace that "

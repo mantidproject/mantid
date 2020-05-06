@@ -15,8 +15,8 @@
 #include "MantidKernel/BoundedValidator.h"
 
 #include <Poco/File.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -56,10 +56,10 @@ void SaveNexus::init() {
   // spectrum_min, spectrum_max - range of "spectra" numbers to write
   // spectrum_list            list of spectra values to write
   //
-  declareProperty("Title", "", boost::make_shared<NullValidator>(),
+  declareProperty("Title", "", std::make_shared<NullValidator>(),
                   "A title to describe the saved workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   // declareProperty("EntryNumber", Mantid::EMPTY_INT(), mustBePositive,
   //  "(Not implemented yet) The index number of the workspace within the Nexus

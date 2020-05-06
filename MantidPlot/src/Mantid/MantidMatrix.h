@@ -159,10 +159,10 @@ public:
 
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void clearADSHandle() override;
 
 signals:

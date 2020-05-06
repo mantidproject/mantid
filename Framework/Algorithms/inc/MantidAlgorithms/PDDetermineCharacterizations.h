@@ -20,7 +20,7 @@ namespace Kernel {
 /// forward declaration
 class PropertyMantager;
 /// Typedef for a shared pointer to a PropertyManager
-using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+using PropertyManager_sptr = std::shared_ptr<PropertyManager>;
 } // namespace Kernel
 
 namespace Algorithms {

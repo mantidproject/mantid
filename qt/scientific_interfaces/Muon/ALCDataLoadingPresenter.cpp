@@ -327,7 +327,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
   if (m_loadedData)
-    return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
+    return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
   return MatrixWorkspace_sptr();
 }
 
