@@ -82,33 +82,8 @@ private:
   void isEntryMultiPeriod(const NeXus::NXEntry &entry);
   // Run child algorithm LoadISISNexus3
   void runLoadISISNexus();
-  // Add the good frames
-  void addGoodFrames(DataObjects::Workspace2D_sptr &localWorkspace,
-                     const NeXus::NXEntry &entry);
-  void addGoodFrames(API::WorkspaceGroup_sptr &workspaceGroup,
-                     const NeXus::NXEntry &entry);
-
-  // Load Muon log data
-  void loadMuonLogData(const NeXus::NXEntry &entry,
-                       DataObjects::Workspace2D_sptr &localWorkspace);
-  /// Loads dead time table for the detector
-  void loadDeadTimes(NeXus::NXRoot &root) const;
-  // create the dead time table
-  DataObjects::TableWorkspace_sptr
-  createDeadTimeTable(const std::vector<int> &specToLoad,
-                      const std::vector<double> &deadTimes);
-  // Load the detector grouping
-  void loadDetectorGrouping(NeXus::NXRoot &root,
-                            DataObjects::Workspace2D_sptr &localWorkspace);
-  // Load the default dectory grouping
-  API::Workspace_sptr loadDefaultDetectorGrouping(
-      NeXus::NXRoot &root, DataObjects::Workspace2D_sptr &localWorkspace) const;
-
-  /// Creates Detector Grouping Table using all the data from the range
-  DataObjects::TableWorkspace_sptr
-  createDetectorGroupingTable(std::vector<detid_t> specToLoad,
-                              std::vector<detid_t> grouping) const;
-
+  // Load Muon specific properties
+  void loadMuonProperties(const NeXus::NXEntry &entry);
   /// The name and path of the input file
   std::string m_filename;
   /// The sample name read from Nexus

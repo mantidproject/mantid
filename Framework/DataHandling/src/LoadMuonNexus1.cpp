@@ -413,8 +413,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         setProperty("DeadTimeTable", table);
       } else {
         // More complex case - different dead times for different periods
-
-        WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
+        WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
 
         for (int64_t i = 0; i < m_numberOfPeriods; i++) {
 

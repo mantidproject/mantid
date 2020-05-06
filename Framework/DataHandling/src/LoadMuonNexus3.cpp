@@ -22,6 +22,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 
 // clang-format off
@@ -88,6 +89,21 @@ void LoadMuonNexus3::init() {
                   "A positive number identifies one entry to be loaded, into "
                   "one worskspace");
 
+  std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
+  declareProperty("MainFieldDirection", "Transverse",
+                  boost::make_shared<StringListValidator>(FieldOptions),
+                  "Output the main field direction if specified in Nexus file "
+                  "(run/instrument/detector/orientation, default "
+                  "longitudinal). Version 1 only.",
+                  Direction::Output);
+
+  declareProperty("TimeZero", 0.0,
+                  "Time zero in units of micro-seconds (default to 0.0)",
+                  Direction::Output);
+  declareProperty("FirstGoodData", 0.0,
+                  "First good data in units of micro-seconds (default to 0.0)",
+                  Direction::Output);
+
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>(
           "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
@@ -117,6 +133,8 @@ void LoadMuonNexus3::exec() {
   NXEntry entry = root.openEntry("raw_data_1");
   // Check if multi period file
   isEntryMultiPeriod(entry);
+  // Load Muon specific properties
+  loadMuonProperties(entry);
   // DO lots of stuff to this workspace
   if (m_multiPeriodsLoaded) {
     WorkspaceGroup_sptr wksp_grp =
@@ -129,23 +147,19 @@ void LoadMuonNexus3::exec() {
         g_log, m_filename, entry, workspace2D, m_entrynumber,
         m_isFileMultiPeriod);
   }
-  // Load log data
   m_loadMuonStrategy->loadMuonLogData();
-  // Load good frames
   m_loadMuonStrategy->loadGoodFrames();
-  // Load grouping information
   auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
   setProperty("DetectorGroupingTable", loadedGrouping);
   // Load dead time table
-  m_loadMuonStrategy->loadDeadTimeTable();
-
-  // // Load good frames
-  // addGoodFrames(workspace2D, entry);
-  // // Load detector grouping
-  // loadDetectorGrouping(root, workspace2D);
+  auto deadtimeTable = m_loadMuonStrategy->loadDeadTimeTable();
+  setProperty("DeadTimeTable", deadtimeTable);
 }
-// Determine whether file is multi period, and whether we have more than 1
-// period loaded
+
+/**
+ * Determines whether the file is multi period
+ * If multi period the function determines whether multi periods are loaded
+ */
 void LoadMuonNexus3::isEntryMultiPeriod(const NXEntry &entry) {
   NXClass periodClass = entry.openNXGroup("periods");
   int numberOfPeriods = periodClass.getInt("number");
@@ -172,83 +186,20 @@ void LoadMuonNexus3::runLoadISISNexus() {
   ISISLoader->executeAsChildAlg();
   this->copyPropertiesFrom(*ISISLoader);
 }
-// Loads MuonLogData for a single period file
-void LoadMuonNexus3::loadMuonLogData(
-    const NXEntry &entry, DataObjects::Workspace2D_sptr &localWorkspace) {
-  IAlgorithm_sptr loadLog = createChildAlgorithm("LoadMuonLog");
-  // Pass through the same input filename
-  loadLog->setPropertyValue("Filename", m_filename);
-  // Set the workspace property to be the same one filled above
-  loadLog->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
-    loadLog->execute();
-  } catch (std::runtime_error &) {
-    g_log.error("Unable to successfully run LoadMuonLog Child Algorithm");
-  }
+void LoadMuonNexus3::loadMuonProperties(const NXEntry &entry) {
 
   std::string mainFieldDirection =
       LoadMuonNexus3Helper::loadMainFieldDirectionFromNexus(entry);
-  // set output property and add to workspace logs
-  auto &run = localWorkspace->mutableRun();
-  run.addProperty("main_field_direction", mainFieldDirection);
-}
+  setProperty("MainFieldDirection", mainFieldDirection);
 
-// Overload #2 Takes in a workspace_group if we have loaded multiple periods
-void LoadMuonNexus3::addGoodFrames(WorkspaceGroup_sptr &workspaceGroup,
-                                   const NXEntry &entry) {
-
-  NXInt goodframes = LoadMuonNexus3Helper::loadGoodFramesDataFromNexus(
-      entry, m_isFileMultiPeriod);
-
-  // check there is a good frames entry for each period
-  if (goodframes.dim0() < workspaceGroup->getNumberOfEntries()) {
-    g_log.warning("Good frames data is not available for each period loaded\n");
-    return;
-  }
-
-  auto workspaceList = workspaceGroup->getAllItems();
-  for (auto it = workspaceList.begin(); it != workspaceList.end(); ++it) {
-    auto index = std::distance(workspaceList.begin(), it);
-    Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(*it);
-    auto &run = ws->mutableRun();
-    run.removeProperty("goodfrm");
-    run.addProperty("goodfrm", goodframes[static_cast<int>(index)]);
-  }
-}
-
-/**
- * Loads default detector grouping, if this isn't present
- * return dummy grouping
- * If no entry in NeXus file for grouping, load it from the IDF.
- * @param root :: Root entry of the Nexus file to read from
- * @param localWorkspace :: A pointer to the workspace in which the data is
- * @returns :: Grouping table
- */
-Workspace_sptr LoadMuonNexus3::loadDefaultDetectorGrouping(
-    NXRoot &root, DataObjects::Workspace2D_sptr &localWorkspace) const {
-  auto instrument = localWorkspace->getInstrument();
-  auto &run = localWorkspace->mutableRun();
-  std::string mainFieldDirection =
-      run.getLogData("main_field_direction")->value();
-  API::GroupingLoader groupLoader(instrument, mainFieldDirection);
   try {
-    const auto idfGrouping = groupLoader.getGroupingFromIDF();
-    return idfGrouping->toTable();
-  } catch (const std::runtime_error &) {
-    auto dummyGrouping = boost::make_shared<Grouping>();
-    if (instrument->getNumberDetectors() != 0) {
-      dummyGrouping = groupLoader.getDummyGrouping();
-    } else {
-      // Make sure it uses the right number of detectors
-      std::ostringstream oss;
-      oss << "1-" << localWorkspace->getNumberHistograms();
-      dummyGrouping->groups.emplace_back(oss.str());
-      dummyGrouping->groupNames.emplace_back("all");
-    }
-    return dummyGrouping->toTable();
-  }
+    auto firstGoodData =
+        LoadMuonNexus3Helper::loadFirstGoodDataFromNexus(entry);
+    setProperty("FirstGoodData", firstGoodData);
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading the FirstGoodData value: "
+                    << e.what() << "\n";
+  } 
 }
-
 } // namespace DataHandling
 } // namespace Mantid

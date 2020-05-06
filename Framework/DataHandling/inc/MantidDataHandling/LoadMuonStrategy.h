@@ -31,10 +31,18 @@ public:
   // Load detector grouping
   virtual API::Workspace_sptr loadDetectorGrouping() = 0;
   // Load dead time table
-  virtual void loadDeadTimeTable() const = 0;
+  virtual API::Workspace_sptr loadDeadTimeTable() const = 0;
 
 protected:
-  /// Logger
+  // Create grouping table
+  DataObjects::TableWorkspace_sptr
+  createDetectorGroupingTable(std::vector<detid_t> specToLoad,
+                              std::vector<detid_t> grouping);
+  // Create deadtimes table
+  DataObjects::TableWorkspace_sptr
+  createDeadTimeTable(std::vector<detid_t> detectorsLoaded,
+                              std::vector<double> deadTimes) const;
+  // Logger
   Kernel::Logger &m_logger;
   // File name, used for running child algorithms
   std::string m_filename;

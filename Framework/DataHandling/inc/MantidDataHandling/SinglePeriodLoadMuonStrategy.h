@@ -18,7 +18,7 @@
 #include <vector>
 namespace Mantid {
 namespace DataHandling {
-class DLLExport SinglePeriodLoadMuonStrategy : public LoadMuonStrategy {
+class SinglePeriodLoadMuonStrategy : public LoadMuonStrategy {
 public:
   // Constructor
   SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log,
@@ -35,7 +35,7 @@ public:
   // Load default grouping from ID
   API::Workspace_sptr loadDefaultDetectorGrouping() const;
   // Load dead time table
-  void loadDeadTimeTable() const override;
+  API::Workspace_sptr loadDeadTimeTable() const override;
 
 private:
   NeXus::NXEntry m_entry;

@@ -25,17 +25,19 @@ namespace LoadMuonNexus3Helper {
 NeXus::NXInt loadGoodFramesDataFromNexus(const NeXus::NXEntry &entry,
                                          bool isFileMultiPeriod);
 // Loads the grouping data from the nexus file
-DataObjects::TableWorkspace_sptr
+std::tuple<std::vector<detid_t>, std::vector<detid_t>>
 loadDetectorGroupingFromNexus(NeXus::NXEntry &entry,
                               DataObjects::Workspace2D_sptr &localWorkspace,
                               bool isFileMultiPeriod);
-
-/// Creates Detector Grouping Table using all the data from the range
-DataObjects::TableWorkspace_sptr
-createDetectorGroupingTable(std::vector<detid_t> specToLoad,
-                            std::vector<detid_t> grouping);
-
+// Load the orientation from the nexus entry
 std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry);
+//Load deadtime i
+std::tuple<std::vector<detid_t>, std::vector<double>>
+loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
+                       const DataObjects::Workspace2D_sptr &localWorkspace,
+                       const bool isFileMultiPeriod);
+// Load first good data from the nexus entry
+double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry);
 } // namespace LoadMuonNexus3Helper
 } // namespace DataHandling
 } // namespace Mantid

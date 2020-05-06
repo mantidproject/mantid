@@ -49,7 +49,7 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
   }
 }
 // Loads the detector grouping from the Muon Nexus V2 entry
-DataObjects::TableWorkspace_sptr
+std::tuple<std::vector<detid_t>, std::vector<detid_t>>
 loadDetectorGroupingFromNexus(NXEntry &entry,
                               DataObjects::Workspace2D_sptr &localWorkspace,
                               bool isFileMultiPeriod) {
@@ -83,43 +83,10 @@ loadDetectorGroupingFromNexus(NXEntry &entry,
         grouping.emplace_back(groupingData[detectorNumber - 1]);
       }
     }
-    DataObjects::TableWorkspace_sptr table =
-        createDetectorGroupingTable(detectorsLoaded, grouping);
 
-    return table;
+    return std::make_tuple(detectorsLoaded, grouping);
   }
 }
-/**
- * Creates Detector Grouping Table .
- * @param detectorsLoaded :: Vector containing the list of detectorsLoaded
- * @param grouping :: Vector containing corresponding grouping
- * @return Detector Grouping Table create using the data
- */
-DataObjects::TableWorkspace_sptr
-createDetectorGroupingTable(std::vector<detid_t> detectorsLoaded,
-                            std::vector<detid_t> grouping) {
-  auto detectorGroupingTable =
-      boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-          WorkspaceFactory::Instance().createTable("TableWorkspace"));
-
-  detectorGroupingTable->addColumn("vector_int", "Detectors");
-
-  std::map<detid_t, std::vector<detid_t>> groupingMap;
-
-  for (size_t i = 0; i < detectorsLoaded.size(); ++i) {
-    // Add detector ID to the list of group detectors. Detector ID is always
-    groupingMap[grouping[i]].emplace_back(detectorsLoaded[i]);
-  }
-
-  for (auto &group : groupingMap) {
-    if (group.first != 0) { // Skip 0 group
-      TableRow newRow = detectorGroupingTable->appendRow();
-      newRow << group.second;
-    }
-  }
-  return detectorGroupingTable;
-}
-
 std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   std::string mainFieldDirection = "Longitudinal"; // default
   try {
@@ -136,7 +103,70 @@ std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
 
   return mainFieldDirection;
 }
+std::tuple<std::vector<detid_t>, std::vector<double>>
+loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
+                       const DataObjects::Workspace2D_sptr &localWorkspace,
+                       const bool isFileMultiPeriod) {
 
+  int64_t numberOfSpectra =
+      static_cast<int64_t>(localWorkspace->getNumberHistograms());
+
+  std::vector<detid_t> loadedDetectors;
+  std::vector<double> deadTimes;
+  // Open detector nexus entry
+  NXClass detectorGroup = entry.openNXGroup("instrument/detector_1");
+
+  if (detectorGroup.containsDataSet("dead_time")) {
+    NXFloat deadTimesData = detectorGroup.openNXFloat("dead_time");
+    deadTimesData.load();
+    int numGroupingEntries = deadTimesData.dim0();
+
+    // Return the detectors which are loaded
+    // then find the grouping ID for each detector
+    for (int64_t spectraIndex = 0; spectraIndex < numberOfSpectra;
+         spectraIndex++) {
+      const auto detIdSet =
+          localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
+      for (auto detector : detIdSet) {
+        loadedDetectors.emplace_back(detector);
+      }
+    }
+    if (!isFileMultiPeriod) {
+      // Simplest case - one grouping entry per detector
+      for (const auto &detectorNumber : loadedDetectors) {
+        deadTimes.emplace_back(deadTimesData[detectorNumber - 1]);
+      }
+    }
+  }
+  return std::make_tuple(loadedDetectors, deadTimes);
+}
+
+double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry) {
+  try {
+    NXClass detectorEntry = entry.openNXGroup("instrument/detector_1");
+    NXInfo infoResolution = detectorEntry.getDataSetInfo("resolution");
+    NXInt counts = detectorEntry.openNXInt("counts");
+    std::string firstGoodBin = counts.attributes("first_good_bin");
+    if (!firstGoodBin.empty()) {
+      double resolution;
+      switch (infoResolution.type) {
+      case NX_FLOAT32:
+        resolution = static_cast<double>(detectorEntry.getFloat("resolution"));
+        break;
+      case NX_INT32:
+        resolution = static_cast<double>(detectorEntry.getInt("resolution"));
+        break;
+      default:
+        throw std::runtime_error("Unsupported data type for resolution");
+      }
+      double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
+      double bin_size = resolution / 1000000.0;
+      return bin * bin_size;
+    }
+  } catch (std::exception &e) {
+    throw e;
+  }
+}
 } // namespace LoadMuonNexus3Helper
 } // namespace DataHandling
 } // namespace Mantid

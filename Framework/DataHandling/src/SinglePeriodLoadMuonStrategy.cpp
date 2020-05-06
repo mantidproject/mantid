@@ -82,9 +82,11 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() {
 
-  TableWorkspace_sptr table =
+  auto [detectorsLoaded, grouping] =
       LoadMuonNexus3Helper::loadDetectorGroupingFromNexus(m_entry, m_workspace,
                                                           m_isFileMultiPeriod);
+  DataObjects::TableWorkspace_sptr table = createDetectorGroupingTable(detectorsLoaded, grouping);
+
   Workspace_sptr table_workspace;
   if (table->rowCount() != 0) {
     table_workspace = boost::dynamic_pointer_cast<Workspace>(table);
@@ -129,11 +131,19 @@ SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
  * Loads dead time table, if this isn't present
  * @returns :: Dead time table
  */
-void SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
+Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
 
-  int b = 3;
-  int c = 3;
-  std::cout << "LOADING DEAD TIME TABLE" << std::endl;
+  m_logger.notice("Loading deadtime table");
+  auto [detectorsLoaded, deadTimes] =
+      LoadMuonNexus3Helper::loadDeadTimesFromNexus(m_entry, m_workspace,
+                                                   m_isFileMultiPeriod);
+  auto deadTimeTable = createDeadTimeTable(detectorsLoaded, deadTimes);
+
+
+  Workspace_sptr deadtimeWorkspace =
+     boost::dynamic_pointer_cast<Workspace>(deadTimeTable);
+
+  return deadtimeWorkspace;
 }
 
 } // namespace DataHandling
