@@ -21,7 +21,8 @@ using Mantid::API::CoordTransform;
 class CoordTransformDistanceTest : public CxxTest::TestSuite {
 public:
   /** Helper to compare two "vectors" (bare float arrays) */
-  void compare(size_t numdims, coord_t *value, const coord_t *expected) {
+  void compare(size_t numdims, coord_t *value,
+               const std::vector<coord_t> expected) {
     for (size_t i = 0; i < numdims; i++)
       TS_ASSERT_DELTA(value[i], expected[i], 1e-5);
   }
@@ -31,10 +32,8 @@ public:
     bool used[4] = {true, false, true, true};
     CoordTransformDistance ct(4, center, used);
     // A copy was made
-    const coord_t *transformCentres = ct.getCenter();
-    TS_ASSERT_DIFFERS(transformCentres, center);
-    const bool *usedDims = ct.getDimensionsUsed();
-    TS_ASSERT_DIFFERS(ct.getDimensionsUsed(), used);
+    const std::vector<coord_t> transformCentres = ct.getCenter();
+    const std::vector<bool> usedDims = ct.getDimensionsUsed();
     // Contents are good
     compare(4, center, ct.getCenter());
     for (size_t i = 0; i < 4; i++)

@@ -31,12 +31,13 @@ public:
 
     const std::vector<double> peakParams;
     const std::vector<double> uniformParams;
+    const std::vector<double> ellipsoidParams;
     const int randomSeed(0);
     const bool randomizeSignal(false);
 
-    TS_ASSERT_THROWS(
-        FakeMD(uniformParams, peakParams, randomSeed, randomizeSignal),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(FakeMD(uniformParams, peakParams, ellipsoidParams,
+                            randomSeed, randomizeSignal),
+                     const std::invalid_argument &);
   }
 
   //---------------------------------------------------------------------------
@@ -54,13 +55,43 @@ public:
 
     const std::vector<double> peakParams = {1000.0, 5.0, 5.0, 5.0, 1.0};
     const std::vector<double> uniformParams = {10000.0};
+    const std::vector<double> ellipsoidParams = {500.0, 5.0, 5.0, 5.0, 1.0, 0.0,
+                                                 0.0,   0.0, 1.0, 0.0, 0.0, 0.0,
+                                                 1.0,   0.5, 0.5, 0.5, -1.0};
     const int randomSeed(0);
     const bool randomizeSignal(false);
 
-    FakeMD faker(uniformParams, peakParams, randomSeed, randomizeSignal);
+    FakeMD faker(uniformParams, peakParams, ellipsoidParams, randomSeed,
+                 randomizeSignal);
     faker.fill(fakeData);
     // Now there are 11000 more points.
-    TS_ASSERT_EQUALS(fakeData->getNPoints(), 12000);
+    TS_ASSERT_EQUALS(fakeData->getNPoints(), 12500);
+  }
+
+  void test_ellipsoid_counts() {
+    using Mantid::DataObjects::FakeMD;
+    using Mantid::DataObjects::MDEventsTestHelper::makeMDEW;
+
+    // Destination workspace
+    auto fakeData = makeMDEW<3>(10, 0.0, 10.0, 0);
+
+    const std::vector<double> peakParams;
+    const std::vector<double> uniformParams;
+    const std::vector<double> ellipsoidParams = {
+        2000.0, 5.0, 5.0, 5.0, 1.0, 0.0, 0.0, 0.0, 1.0,
+        0.0,    0.0, 0.0, 1.0, 0.5, 0.5, 0.5, 1.0};
+    const int randomSeed(0);
+    const bool randomizeSignal(false);
+
+    FakeMD faker(uniformParams, peakParams, ellipsoidParams, randomSeed,
+                 randomizeSignal);
+    faker.fill(fakeData);
+
+    auto Npts = fakeData->getNPoints();
+    TS_ASSERT_EQUALS(fakeData->getNPoints(), Npts);
+    // avg of counts converges to 0.2175 for 3D multivariate gaussian
+    TS_ASSERT_DELTA(fakeData->getBox()->getSignal(), Npts * 0.2175,
+                    Npts * 0.0015);
   }
 
   void test_exec_randomizeSignal() {
@@ -73,10 +104,12 @@ public:
 
     const std::vector<double> peakParams = {100.0, 5.0, 5.0, 5.0, 1.0};
     const std::vector<double> uniformParams = {100.0};
+    const std::vector<double> ellipsoidParams;
     const int randomSeed(0);
     const bool randomizeSignal(true);
 
-    FakeMD faker(uniformParams, peakParams, randomSeed, randomizeSignal);
+    FakeMD faker(uniformParams, peakParams, ellipsoidParams, randomSeed,
+                 randomizeSignal);
     faker.fill(fakeData);
 
     // Now there are 200 more points.
@@ -104,10 +137,12 @@ public:
 
     const std::vector<double> peakParams;
     const std::vector<double> uniformParams = {-1000.0};
+    const std::vector<double> ellipsoidParams;
     const int randomSeed(0);
     const bool randomizeSignal(false);
 
-    FakeMD faker(uniformParams, peakParams, randomSeed, randomizeSignal);
+    FakeMD faker(uniformParams, peakParams, ellipsoidParams, randomSeed,
+                 randomizeSignal);
     faker.fill(fakeData);
 
     // Now there are 1000 more points.
@@ -137,10 +172,12 @@ public:
 
     const std::vector<double> peakParams;
     const std::vector<double> uniformParams = {-1000.0};
+    const std::vector<double> ellipsoidParams;
     const int randomSeed(0);
     const bool randomizeSignal(false);
 
-    FakeMD faker(uniformParams, peakParams, randomSeed, randomizeSignal);
+    FakeMD faker(uniformParams, peakParams, ellipsoidParams, randomSeed,
+                 randomizeSignal);
     faker.fill(fakeData);
 
     TS_ASSERT_EQUALS(1000, fakeData->getNEvents());
