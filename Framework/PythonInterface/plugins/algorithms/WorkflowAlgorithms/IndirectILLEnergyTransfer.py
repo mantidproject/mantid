@@ -49,6 +49,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _reduction_type = None
     _mirror_sense = None
     _doppler_energy = None
+    _doppler_speed = None
     _velocity_profile = None
     _instrument_name = None
     _instrument = None
@@ -260,33 +261,25 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             logger.debug('Mask bins larger than {0}'.format(xend))
             MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[xend + 1], XMax=x_values[-1])
 
-    @staticmethod
-    def _velocity(e):
-        """
-        Returns neutrons velocity in m/s from energy in mev
-        """
-        return 437.695 * math.sqrt(e)
-
     def _convert_to_energy(self, ws):
         """
         Converts the x-axis from raw channel number to energy transfer for Doppler mode
         @param ws :: input workspace name
         """
+        from scipy.constants import physical_constants
+        c = physical_constants['speed of light in vacuum'][0]
+        nm = physical_constants['neutron mass energy equivalent in MeV'][0]
+
         bsize = mtd[ws].blocksize()
         if self._doppler_energy != 0:
             # the doppler channels are linear in velocity (not time, neither deltaE)
             # so we perform 2-step conversion, first linear to v, then quadratic to deltaE
             efixed = mtd[ws].getInstrument().getNumberParameter('Efixed')[0]
-            vfixed = self._velocity(efixed)
-            vmax = self._velocity(efixed + self._doppler_energy * 1E-3)
-            vformula = '2/({0}-1)*({1}-{2})*(x-{0}/2)+{2}'.format(bsize, vmax, vfixed)
+            vfixed = math.sqrt(2 * efixed * c**2 / (nm * 1E+9))
+            vformula = '-2/({0}-1)*{1}*(x-{0}/2)+{2}'.format(bsize, self._doppler_speed, vfixed)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=vformula)
-
-            # minus sign is needed, this had been discovered from a measurement at low T, where
-            # the QENS peak was asymmetric the 'wrong' way in terms of deltaE, if there is no -
-            # this means that the acquisition channel 0 is not vmin, but vmax
-            nmass = 1.04397 * 1E-5  # mev / (m/s)**2
-            eformula = '-{0}*x*x/2 + {1}'.format(nmass, efixed)
+            nmass = nm * 1E+9 / c**2 # mev / (m/s)**2
+            eformula = '{0}*x*x/2 - {1}'.format(nmass, efixed)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=eformula, AxisUnits='DeltaE')
         else:
             # Center the data for elastic fixed window scan, for integration over the elastic peak
@@ -341,6 +334,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         if run.hasProperty('Doppler.maximum_delta_energy'):
             self._doppler_energy = run.getLogData('Doppler.maximum_delta_energy').value
+        else:
+            raise RuntimeError('Maximum delta energy '+ message)
+
+        if run.hasProperty('Doppler.doppler_speed'):
+            self._doppler_speed = run.getLogData('Doppler.doppler_speed').value
         else:
             raise RuntimeError('Maximum delta energy '+ message)
 
