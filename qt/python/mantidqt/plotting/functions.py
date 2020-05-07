@@ -265,7 +265,7 @@ def plot_surface(workspaces, fig=None):
     for ws in workspaces:
         if fig:
             fig.clf()
-            ax = fig.add_subplot(projection='mantid3d')
+            ax = fig.add_subplot(111, projection='mantid3d')
         else:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
 
@@ -281,7 +281,7 @@ def plot_wireframe(workspaces, fig=None):
     for ws in workspaces:
         if fig:
             fig.clf()
-            ax = fig.add_subplot(projection='mantid3d')
+            ax = fig.add_subplot(111, projection='mantid3d')
         else:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
 
