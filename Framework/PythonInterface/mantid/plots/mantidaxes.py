@@ -394,19 +394,19 @@ class MantidAxes(Axes):
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
 
         #check if it is a sample log plot
-        sample_log_plot_details = None
         if spec_num is None:
+            #error bars never make sense for sample log plots
             sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
             kwargs['LogName'] = sample_log_plot_details[0]
             if sample_log_plot_details[1] is not None:
                 kwargs['Filtered'] = sample_log_plot_details[1]
             if sample_log_plot_details[2] is not None:
                 kwargs['ExperimentInfo'] = sample_log_plot_details[2]
-            #error bars never make sense for sample log plots
+            # error bar plots do not make sense for log plots
             errorbars=False
-            #neither does distribution
+            # neither does distribution
             if 'distribution' in kwargs.keys():
-                del kwargs['distribution']
+                    del kwargs['distribution']
         else:
             if kwargs.get('axis', None) == MantidAxType.BIN:
                 workspace_index = spec_num
@@ -420,7 +420,14 @@ class MantidAxes(Axes):
         if errorbars:
             new_artist = self.errorbar(workspace, **kwargs)
         else:
-            new_artist = self.plot(workspace, **kwargs)
+            # if it is a sample log plot
+            if spec_num is None:
+                new_artist = self.plot(workspace, **kwargs)[0]
+                self.track_workspace_artist(workspace, new_artist, log_name=kwargs['LogName'],
+                                            filtered=kwargs.get('Filtered', None),
+                                            expt_info_index=kwargs.get('ExperimentInfo', None))
+            else:
+                new_artist = self.plot(workspace, **kwargs)[0]
         return new_artist
 
     def relim(self, visible_only=True):
