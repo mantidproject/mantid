@@ -719,7 +719,7 @@ void IndirectFittingModel::cleanFailedRun(
     const IAlgorithm_sptr &fittingAlgorithm) {
   const auto prefix = "__" + fittingAlgorithm->name() + "_ws";
   for (TableDatasetIndex datasetIndex = 0;
-       datasetIndex < m_fitDataModel->numberOfWorkspaces(); datasetIndex++) {
+       datasetIndex < m_fitDataModel->numberOfWorkspaces(); ++datasetIndex) {
     const auto base = prefix + std::to_string(datasetIndex.value + 1);
     removeFromADSIfExists(base);
     for (int index = 0;

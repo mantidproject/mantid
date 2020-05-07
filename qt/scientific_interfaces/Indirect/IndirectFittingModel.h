@@ -46,7 +46,8 @@ public:
 
   // IIndirectFitData
   bool hasWorkspace(std::string const &workspaceName) const;
-  Mantid::API::MatrixWorkspace_sptr getWorkspace(TableDatasetIndex index) const;
+  virtual Mantid::API::MatrixWorkspace_sptr
+  getWorkspace(TableDatasetIndex index) const;
   Spectra getSpectra(TableDatasetIndex index) const;
   virtual bool isMultiFit() const;
   TableDatasetIndex numberOfWorkspaces() const;
