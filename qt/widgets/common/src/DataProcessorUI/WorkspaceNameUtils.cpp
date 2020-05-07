@@ -27,7 +27,7 @@ namespace { // unnamed namespace
              * @param allowInsertions : if true, allow new keys to be inserted;
              * otherwise, only allow updating of keys that already exist
              */
-void updateRowOptions(OptionsMap &options, const RowData_sptr data,
+void updateRowOptions(OptionsMap &options, const RowData_sptr &data,
                       const WhiteList &whitelist, const bool allowInsertions) {
   // Loop through all columns (excluding the Options and Hidden options
   // columns)
@@ -55,7 +55,7 @@ void updateRowOptions(OptionsMap &options, const RowData_sptr data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateUserOptions(OptionsMap &options, const RowData_sptr data,
+void updateUserOptions(OptionsMap &options, const RowData_sptr &data,
                        const WhiteList &whitelist, const bool allowInsertions) {
   auto userOptions =
       parseKeyValueQString(data->value(static_cast<int>(whitelist.size()) - 2));
@@ -72,7 +72,7 @@ void updateUserOptions(OptionsMap &options, const RowData_sptr data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateHiddenOptions(OptionsMap &options, const RowData_sptr data,
+void updateHiddenOptions(OptionsMap &options, const RowData_sptr &data,
                          const bool allowInsertions) {
   const auto hiddenOptions = parseKeyValueQString(data->back());
   for (auto &kvp : hiddenOptions) {
@@ -86,7 +86,7 @@ void updateHiddenOptions(OptionsMap &options, const RowData_sptr data,
  * @param options : a map of property name to option value to update
  * @param data : the data for this row
  */
-void updateOutputOptions(OptionsMap &options, const RowData_sptr data,
+void updateOutputOptions(OptionsMap &options, const RowData_sptr &data,
                          const bool allowInsertions,
                          const std::vector<QString> &outputPropertyNames,
                          const std::vector<QString> &outputNamePrefixes) {
@@ -141,7 +141,7 @@ algorithm for that column
 @returns : The name of the workspace
 */
 QString getReducedWorkspaceName(
-    const RowData_sptr data, const WhiteList &whitelist,
+    const RowData_sptr &data, const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap) {
   if (data->size() != static_cast<int>(whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
@@ -206,7 +206,7 @@ QString getReducedWorkspaceName(
  * names
  * @return : a map of property names to value
  */
-OptionsMap getCanonicalOptions(const RowData_sptr data,
+OptionsMap getCanonicalOptions(const RowData_sptr &data,
                                const OptionsMap &globalOptions,
                                const WhiteList &whitelist,
                                const bool allowInsertions,

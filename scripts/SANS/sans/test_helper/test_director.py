@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ A Test director """
-from __future__ import (absolute_import, division, print_function)
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateReductionMode import get_reduction_mode_builder

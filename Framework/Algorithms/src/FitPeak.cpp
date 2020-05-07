@@ -7,7 +7,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/FitPeak.h"
+#include <utility>
+
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -17,6 +18,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/FitPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -62,7 +64,7 @@ FitOneSinglePeak::FitOneSinglePeak()
 //----------------------------------------------------------------------------------------------
 /** Set workspaces
  */
-void FitOneSinglePeak::setWorskpace(API::MatrixWorkspace_sptr dataws,
+void FitOneSinglePeak::setWorskpace(const API::MatrixWorkspace_sptr &dataws,
                                     size_t wsindex) {
   if (dataws) {
     m_dataWS = dataws;
@@ -80,8 +82,8 @@ void FitOneSinglePeak::setWorskpace(API::MatrixWorkspace_sptr dataws,
 //----------------------------------------------------------------------------------------------
 /** Set peaks
  */
-void FitOneSinglePeak::setFunctions(IPeakFunction_sptr peakfunc,
-                                    IBackgroundFunction_sptr bkgdfunc) {
+void FitOneSinglePeak::setFunctions(const IPeakFunction_sptr &peakfunc,
+                                    const IBackgroundFunction_sptr &bkgdfunc) {
   if (peakfunc)
     m_peakFunc = peakfunc;
 
@@ -129,8 +131,8 @@ void FitOneSinglePeak::setPeakRange(double xpeakleft, double xpeakright) {
  * @param costfunction :: string of the name of the cost function
  */
 void FitOneSinglePeak::setFittingMethod(std::string minimizer,
-                                        std::string costfunction) {
-  m_minimizer = minimizer;
+                                        const std::string &costfunction) {
+  m_minimizer = std::move(minimizer);
   if (costfunction == "Chi-Square") {
     m_costFunction = "Least squares";
   } else if (costfunction == "Rwp") {
@@ -300,7 +302,7 @@ bool FitOneSinglePeak::simpleFit() {
   m_bestRwp = DBL_MAX;
 
   // Set up a composite function
-  CompositeFunction_sptr compfunc = boost::make_shared<CompositeFunction>();
+  CompositeFunction_sptr compfunc = std::make_shared<CompositeFunction>();
   compfunc->addFunction(m_peakFunc);
   compfunc->addFunction(m_bkgdFunc);
 
@@ -387,8 +389,9 @@ API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
 /** Estimate the peak height from a set of data containing pure peaks
  */
 double FitOneSinglePeak::estimatePeakHeight(
-    API::IPeakFunction_const_sptr peakfunc, MatrixWorkspace_sptr dataws,
-    size_t wsindex, size_t ixmin, size_t ixmax) {
+    const API::IPeakFunction_const_sptr &peakfunc,
+    const MatrixWorkspace_sptr &dataws, size_t wsindex, size_t ixmin,
+    size_t ixmax) {
   // Get current peak height: from current peak centre (previously setup)
   double peakcentre = peakfunc->centre();
   vector<double> svvec(1, peakcentre);
@@ -424,7 +427,8 @@ double FitOneSinglePeak::estimatePeakHeight(
 /** Make a pure peak WS in the fit window region from m_background_function
  * @param purePeakWS :: workspace containing pure peak (w/ background removed)
  */
-void FitOneSinglePeak::removeBackground(MatrixWorkspace_sptr purePeakWS) {
+void FitOneSinglePeak::removeBackground(
+    const MatrixWorkspace_sptr &purePeakWS) {
   // Calculate background
   // FIXME - This can be costly to use FunctionDomain and FunctionValue
   auto &vecX = purePeakWS->x(0);
@@ -449,10 +453,10 @@ void FitOneSinglePeak::removeBackground(MatrixWorkspace_sptr purePeakWS) {
  * some fit with unphysical result.
  * @return :: chi-square/Rwp
  */
-double FitOneSinglePeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc,
-                                         MatrixWorkspace_sptr dataws,
-                                         size_t wsindex, double startx,
-                                         double endx) {
+double
+FitOneSinglePeak::fitPeakFunction(const API::IPeakFunction_sptr &peakfunc,
+                                  const MatrixWorkspace_sptr &dataws,
+                                  size_t wsindex, double startx, double endx) {
   // Check validity and debug output
   if (!peakfunc)
     throw std::runtime_error(
@@ -461,7 +465,8 @@ double FitOneSinglePeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc,
   m_sstream << "Function (to fit): " << peakfunc->asString() << "  From "
             << startx << "  to " << endx << ".\n";
 
-  double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx);
+  double goodness =
+      fitFunctionSD(peakfunc, std::move(dataws), wsindex, startx, endx);
 
   return goodness;
 }
@@ -574,7 +579,7 @@ void FitOneSinglePeak::highBkgdFit() {
  * @returns :: map to store function parameter's names and value
  */
 std::map<std::string, double>
-FitOneSinglePeak::backup(IFunction_const_sptr func) {
+FitOneSinglePeak::backup(const IFunction_const_sptr &func) {
   std::map<std::string, double> funcparammap;
 
   // Set up
@@ -614,7 +619,7 @@ FitOneSinglePeak::storeFunctionError(const IFunction_const_sptr &func) {
 /** Restore the parameters value to a function from a string/double map
  */
 void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
-                           API::IFunction_sptr func) {
+                           const API::IFunction_sptr &func) {
   std::map<std::string, double>::const_iterator miter;
   for (miter = funcparammap.begin(); miter != funcparammap.end(); ++miter) {
     string parname = miter->first;
@@ -633,8 +638,8 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
  * @param xmax
  * @return
  */
-double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
-                                        MatrixWorkspace_sptr dataws,
+double FitOneSinglePeak::calChiSquareSD(const IFunction_sptr &fitfunc,
+                                        const MatrixWorkspace_sptr &dataws,
                                         size_t wsindex, double xmin,
                                         double xmax) {
   // Set up sub algorithm fit
@@ -675,7 +680,7 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
  * return DBL_MAX
  */
 double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
-                                       MatrixWorkspace_sptr dataws,
+                                       const MatrixWorkspace_sptr &dataws,
                                        size_t wsindex, double xmin,
                                        double xmax) {
   // Set up sub algorithm fit
@@ -733,8 +738,8 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
  * @param vec_xmin :: minimin values of domains
  * @param vec_xmax :: maximim values of domains
  */
-double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc,
-                                       MatrixWorkspace_sptr dataws,
+double FitOneSinglePeak::fitFunctionMD(const IFunction_sptr &fitfunc,
+                                       const MatrixWorkspace_sptr &dataws,
                                        size_t wsindex, vector<double> vec_xmin,
                                        vector<double> vec_xmax) {
   // Validate
@@ -753,8 +758,8 @@ double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc,
   }
 
   // This use multi-domain; but does not know how to set up
-  boost::shared_ptr<MultiDomainFunction> funcmd =
-      boost::make_shared<MultiDomainFunction>();
+  std::shared_ptr<MultiDomainFunction> funcmd =
+      std::make_shared<MultiDomainFunction>();
 
   // After a change of the default value of NumDeriv in MultiDomainFunction
   // this needs to be set to false to preserve the original behaviour.
@@ -773,7 +778,7 @@ double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc,
   funcmd->setDomainIndices(0, ii);
 
   // Set the properties
-  fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(funcmd));
+  fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(funcmd));
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
   fit->setProperty("StartX", vec_xmin[0]);
@@ -823,12 +828,13 @@ double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc,
  * @return :: Rwp/chi2
  */
 double FitOneSinglePeak::fitCompositeFunction(
-    API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
-    API::MatrixWorkspace_sptr dataws, size_t wsindex, double startx,
+    const API::IPeakFunction_sptr &peakfunc,
+    const API::IBackgroundFunction_sptr &bkgdfunc,
+    const API::MatrixWorkspace_sptr &dataws, size_t wsindex, double startx,
     double endx) {
   // Construct composit function
-  boost::shared_ptr<CompositeFunction> compfunc =
-      boost::make_shared<CompositeFunction>();
+  std::shared_ptr<CompositeFunction> compfunc =
+      std::make_shared<CompositeFunction>();
   compfunc->addFunction(peakfunc);
   compfunc->addFunction(bkgdfunc);
 
@@ -883,7 +889,7 @@ double FitOneSinglePeak::fitCompositeFunction(
 /** Check the fitted peak value to see whether it is valid
  * @return :: Rwp/chi2
  */
-double FitOneSinglePeak::checkFittedPeak(IPeakFunction_sptr peakfunc,
+double FitOneSinglePeak::checkFittedPeak(const IPeakFunction_sptr &peakfunc,
                                          double costfuncvalue,
                                          std::string &errorreason) {
   if (costfuncvalue < DBL_MAX) {
@@ -933,7 +939,7 @@ FitOneSinglePeak::fitBackground(API::IBackgroundFunction_sptr bkgdfunc) {
   vec_xmin[1] = m_maxPeakX;
   vec_xmax[0] = m_minPeakX;
   vec_xmax[1] = m_maxFitX;
-  double chi2 = fitFunctionMD(boost::dynamic_pointer_cast<IFunction>(bkgdfunc),
+  double chi2 = fitFunctionMD(std::dynamic_pointer_cast<IFunction>(bkgdfunc),
                               m_dataWS, m_wsIndex, vec_xmin, vec_xmax);
 
   // Process fit result
@@ -1080,8 +1086,8 @@ void FitPeak::init() {
           "ParameterTableWorkspace", "", Direction::Output),
       "Name of the table workspace containing the fitted parameters. ");
 
-  boost::shared_ptr<BoundedValidator<int>> mustBeNonNegative =
-      boost::make_shared<BoundedValidator<int>>();
+  std::shared_ptr<BoundedValidator<int>> mustBeNonNegative =
+      std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
   declareProperty("WorkspaceIndex", 0, mustBeNonNegative, "Workspace index ");
 
@@ -1089,7 +1095,7 @@ void FitPeak::init() {
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
   vector<string> peakFullNames = addFunctionParameterNames(peakNames);
   declareProperty("PeakFunctionType", "",
-                  boost::make_shared<StringListValidator>(peakFullNames),
+                  std::make_shared<StringListValidator>(peakFullNames),
                   "Peak function type. ");
 
   declareProperty(std::make_unique<ArrayProperty<string>>("PeakParameterNames"),
@@ -1108,7 +1114,7 @@ void FitPeak::init() {
                            "Linear",    "Linear (A0, A1)",
                            "Quadratic", "Quadratic (A0, A1, A2)"};
   declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
   declareProperty(
@@ -1143,7 +1149,7 @@ void FitPeak::init() {
                   "profile parameter. "
                   "Otherwise, the effective parameters will be written. ");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
       "MinGuessedPeakWidth", 2, mustBePositive,
@@ -1157,7 +1163,7 @@ void FitPeak::init() {
       "GuessedPeakWidthStep", EMPTY_INT(), mustBePositive,
       "Step of guessed peak width. It is in unit of number of pixels.");
 
-  auto mustBePostiveDbl = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePostiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePostiveDbl->setLower(DBL_MIN);
   declareProperty("PeakPositionTolerance", EMPTY_DBL(), mustBePostiveDbl,
                   "Peak position tolerance.  If fitted peak's position differs "
@@ -1234,7 +1240,7 @@ void FitPeak::exec() {
 /** Add function's parameter names after peak function name
  */
 std::vector<std::string>
-FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames) {
+FitPeak::addFunctionParameterNames(const std::vector<std::string> &funcnames) {
   vector<string> vec_funcparnames;
 
   for (auto &funcname : funcnames) {
@@ -1388,7 +1394,7 @@ void FitPeak::createFunctions() {
     bkgdtype += "Background";
 
   // Generate background function
-  m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
+  m_bkgdFunc = std::dynamic_pointer_cast<IBackgroundFunction>(
       FunctionFactory::Instance().createFunction(bkgdtype));
 
   // Set background function parameter values
@@ -1422,7 +1428,7 @@ void FitPeak::createFunctions() {
   string peaktypeprev = getPropertyValue("PeakFunctionType");
   bool defaultparorder = true;
   string peaktype = parseFunctionTypeFull(peaktypeprev, defaultparorder);
-  m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_peakFunc = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(peaktype));
 
   // Peak parameters' names
@@ -1525,7 +1531,7 @@ void FitPeak::setupOutput(
   FunctionDomain1DVector domain(vecoutx);
   FunctionValues values(domain);
 
-  CompositeFunction_sptr compfunc = boost::make_shared<CompositeFunction>();
+  CompositeFunction_sptr compfunc = std::make_shared<CompositeFunction>();
   compfunc->addFunction(m_peakFunc);
   compfunc->addFunction(m_bkgdFunc);
   compfunc->function(domain, values);
@@ -1599,11 +1605,13 @@ size_t getIndex(const HistogramX &vecx, double x) {
 //----------------------------------------------------------------------------------------------
 /** Generate table workspace
  */
-TableWorkspace_sptr FitPeak::genOutputTableWS(
-    IPeakFunction_sptr peakfunc, map<string, double> peakerrormap,
-    IBackgroundFunction_sptr bkgdfunc, map<string, double> bkgderrormap) {
+TableWorkspace_sptr
+FitPeak::genOutputTableWS(const IPeakFunction_sptr &peakfunc,
+                          map<string, double> peakerrormap,
+                          const IBackgroundFunction_sptr &bkgdfunc,
+                          map<string, double> bkgderrormap) {
   // Empty table
-  TableWorkspace_sptr outtablews = boost::make_shared<TableWorkspace>();
+  TableWorkspace_sptr outtablews = std::make_shared<TableWorkspace>();
   outtablews->addColumn("str", "Name");
   outtablews->addColumn("double", "Value");
   outtablews->addColumn("double", "Error");

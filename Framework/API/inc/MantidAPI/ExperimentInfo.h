@@ -107,8 +107,8 @@ public:
   /// Easy access to the efixed value for this run & detector ID
   double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
-  double getEFixed(const boost::shared_ptr<const Geometry::IDetector> detector =
-                       boost::shared_ptr<const Geometry::IDetector>{
+  double getEFixed(const std::shared_ptr<const Geometry::IDetector> &detector =
+                       std::shared_ptr<const Geometry::IDetector>{
                            nullptr}) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
@@ -180,7 +180,7 @@ protected:
 
   virtual void updateCachedDetectorGrouping(const size_t index) const;
   /// Parameters modifying the base instrument
-  boost::shared_ptr<Geometry::ParameterMap> m_parmap;
+  std::shared_ptr<Geometry::ParameterMap> m_parmap;
   /// The base (unparametrized) instrument
   Geometry::Instrument_const_sptr sptr_instrument;
 
@@ -227,10 +227,10 @@ private:
 };
 
 /// Shared pointer to ExperimentInfo
-using ExperimentInfo_sptr = boost::shared_ptr<ExperimentInfo>;
+using ExperimentInfo_sptr = std::shared_ptr<ExperimentInfo>;
 
 /// Shared pointer to const ExperimentInfo
-using ExperimentInfo_const_sptr = boost::shared_ptr<const ExperimentInfo>;
+using ExperimentInfo_const_sptr = std::shared_ptr<const ExperimentInfo>;
 
 } // namespace API
 } // namespace Mantid

@@ -9,13 +9,13 @@
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/IsNone.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/default_call_policies.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/overloads.hpp>
+#include <memory>
 
 using Mantid::API::FileProperty;
 using Mantid::Kernel::PropertyWithValue;

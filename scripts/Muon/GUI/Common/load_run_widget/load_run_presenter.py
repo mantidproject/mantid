@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 
 from Muon.GUI.Common import thread_model
@@ -238,7 +236,8 @@ class LoadRunWidgetPresenter(object):
         self._view.warning_popup(error_message)
 
     def handle_load_thread_finished(self):
-        self._load_thread.deleteLater()
+        if self._load_thread is not None:
+            self._load_thread.deleteLater()
         self._load_thread = None
 
         if not self.thread_success:

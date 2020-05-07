@@ -85,7 +85,7 @@ PyObject *getDescription(ScriptRepository &self, const std::string &path) {
 
 void export_ScriptRepository() {
 
-  register_ptr_to_python<boost::shared_ptr<ScriptRepository>>();
+  register_ptr_to_python<std::shared_ptr<ScriptRepository>>();
 
   // reset the option to
   docstring_options local_docstring_options(true, true, false);

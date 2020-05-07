@@ -39,9 +39,22 @@ Settings
 Close
     Close the interface.
 
+Other Information
+^^^^^^^^^^^^^^^^^
+
 Red Stars
     Red stars next to browse boxes and other fields indicate that the file
     could not be found. Hover over the star to see more information.
+
+Status Bar
+    The status bar shows the calibration run numbers the GUI is currently using.
+
+Saved File Outputs
+    The location of files saved by the GUI during processing will be shown in the mantid
+    messages log.
+
+    *Note*: The locations are shown at "Notice" level, so may not appear if the messages log
+    is on the incorrect setting.
 
 Calibration
 -----------
@@ -121,7 +134,8 @@ a plot for each bank and cropped focusing generates a plot for the single bank o
 Clicking the focus button will begin the focusing algorithm for the selected run files. The button and plotting checkbox
 will be disabled until the fitting algorithm is complete.
 
-The focused output files are saved in NeXus, GSS, and raw XYE format to:
+The focused output files are saved in NeXus, GSS, and TOPAS format. The process will also output a CSV file containing
+all numerical sample logs. All of these files are saved to:
 
 `<CHOSEN_OUTPUT_DIRECTORY>/Focus/`
 

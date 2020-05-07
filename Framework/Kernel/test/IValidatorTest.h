@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidKernel/IValidator.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 namespace {
 /**
@@ -22,7 +22,7 @@ public:
   DataNotCopiedValidator() : Mantid::Kernel::IValidator(), m_head(nullptr) {}
 
   Mantid::Kernel::IValidator_sptr clone() const override {
-    return boost::make_shared<DataNotCopiedValidator>();
+    return std::make_shared<DataNotCopiedValidator>();
   }
 
   /// Return the stored head pointer

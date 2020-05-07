@@ -14,22 +14,23 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-void observeFinish(AlgorithmObserver &self, boost::python::object alg) {
+void observeFinish(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeFinish(calg);
 }
 
-void observeError(AlgorithmObserver &self, boost::python::object alg) {
+void observeError(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeError(calg);
 }
 
-void observeProgress(AlgorithmObserver &self, boost::python::object alg) {
+void observeProgress(AlgorithmObserver &self,
+                     const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeProgress(calg);
 }
 
-void stopObserving(AlgorithmObserver &self, boost::python::object alg) {
+void stopObserving(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.stopObserving(calg);
 }
@@ -38,10 +39,10 @@ GET_POINTER_SPECIALIZATION(AlgorithmObserver)
 
 void export_algorithm_observer() {
 
-  register_ptr_to_python<boost::shared_ptr<AlgorithmObserver>>();
+  register_ptr_to_python<std::shared_ptr<AlgorithmObserver>>();
 
-  class_<AlgorithmObserver, bases<>,
-         boost::shared_ptr<AlgorithmObserverAdapter>, boost::noncopyable>(
+  class_<AlgorithmObserver, bases<>, std::shared_ptr<AlgorithmObserverAdapter>,
+         boost::noncopyable>(
       "AlgorithmObserver",
       "Observes Algorithm notifications: start,progress,finish,error.")
       .def("observeStarting", &AlgorithmObserver::observeStarting, arg("self"),

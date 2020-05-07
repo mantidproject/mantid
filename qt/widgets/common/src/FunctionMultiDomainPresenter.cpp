@@ -17,6 +17,7 @@
 #include <QClipboard>
 #include <QMessageBox>
 #include <QWidget>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -51,7 +52,7 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun) {
-  m_model->setFunction(fun);
+  m_model->setFunction(std::move(fun));
   m_view->setFunction(m_model->getCurrentFunction());
   emit functionStructureChanged();
 }
@@ -106,13 +107,8 @@ FunctionMultiDomainPresenter::getParameterTie(const QString &parName) const {
 }
 
 void FunctionMultiDomainPresenter::updateParameters(const IFunction &fun) {
-  const auto paramNames = fun.getParameterNames();
-  for (const auto &parameter : paramNames) {
-    const QString qName = QString::fromStdString(parameter);
-    setParameter(qName, fun.getParameter(parameter));
-    const size_t index = fun.parameterIndex(parameter);
-    setParameterError(qName, fun.getError(index));
-  }
+  m_model->updateParameters(fun);
+  updateViewFromModel();
 }
 
 void FunctionMultiDomainPresenter::updateMultiDatasetParameters(
@@ -224,7 +220,8 @@ void FunctionMultiDomainPresenter::setLocalParameterFixed(
 }
 
 void FunctionMultiDomainPresenter::setLocalParameterTie(const QString &parName,
-                                                        int i, QString tie) {
+                                                        int i,
+                                                        const QString &tie) {
   m_model->setLocalParameterTie(parName, i, tie);
   if (m_model->currentDomainIndex() == i) {
     m_view->setParameterTie(parName, tie);
@@ -232,7 +229,7 @@ void FunctionMultiDomainPresenter::setLocalParameterTie(const QString &parName,
 }
 
 void FunctionMultiDomainPresenter::setLocalParameterConstraint(
-    const QString &parName, int i, QString constraint) {
+    const QString &parName, int i, const QString &constraint) {
   m_model->setLocalParameterConstraint(parName, i, constraint);
   if (m_model->currentDomainIndex() == i) {
     m_view->setParameterConstraint(parName, constraint);

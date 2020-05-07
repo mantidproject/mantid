@@ -19,8 +19,8 @@ using namespace Mantid::HistogramData::detail;
 
 class ConvertSpectrumAxisTest : public CxxTest::TestSuite {
 private:
-  void do_algorithm_run(std::string target, std::string inputWS,
-                        std::string outputWS) {
+  void do_algorithm_run(const std::string &target, const std::string &inputWS,
+                        const std::string &outputWS) {
     Mantid::Algorithms::ConvertSpectrumAxis conv;
     conv.initialize();
 

@@ -78,8 +78,7 @@ mtd_add_qt_tests(
   LINK_LIBS
     ${TARGET_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
   MTD_QT_LINK_LIBS MantidQtIcons
   PARENT_DEPENDENCIES GUITests
 )

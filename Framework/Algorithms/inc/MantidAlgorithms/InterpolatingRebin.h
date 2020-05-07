@@ -78,9 +78,9 @@ protected:
   void init() override;
   void exec() override;
 
-  void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
+  void outputYandEValues(const API::MatrixWorkspace_const_sptr &inputW,
                          const HistogramData::BinEdges &XValues_new,
-                         API::MatrixWorkspace_sptr outputW);
+                         const API::MatrixWorkspace_sptr &outputW);
   HistogramData::Histogram
   cubicInterpolation(const HistogramData::Histogram &oldHistogram,
                      const HistogramData::BinEdges &xNew) const;

@@ -160,7 +160,7 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
   m_errorColumnPropertyName = "ErrColumn" + suffix;
 
   if (addProp) {
-    auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+    auto mustBePositive = std::make_shared<BoundedValidator<int>>();
     mustBePositive->setLower(0);
     declareProperty(
         new PropertyWithValue<double>(m_startXPropertyName, EMPTY_DBL()),
@@ -174,15 +174,14 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
         "(default the highest value of x)");
     if (m_domainType != Simple &&
         !m_manager->existsProperty(m_maxSizePropertyName)) {
-      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
-      mustBePositive->setLower(0);
+      auto mustBePositive = std::make_shared<BoundedValidator<int>>();
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
           "The maximum number of values per a simple domain.");
     }
     if (!m_manager->existsProperty(m_excludePropertyName)) {
       auto mustBeOrderedPairs =
-          boost::make_shared<ArrayOrderedPairsValidator<double>>();
+          std::make_shared<ArrayOrderedPairsValidator<double>>();
       declareProperty(
           new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
           "A list of pairs of doubles that specify ranges that must be "
@@ -202,8 +201,8 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
 
 /// Create a domain from the input workspace
 void TableWorkspaceDomainCreator::createDomain(
-    boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> &values, size_t i0) {
+    std::shared_ptr<API::FunctionDomain> &domain,
+    std::shared_ptr<API::FunctionValues> &values, size_t i0) {
 
   setParameters();
 
@@ -305,7 +304,7 @@ void TableWorkspaceDomainCreator::createDomain(
     values->setFitData(j, y);
     values->setFitWeight(j, weight);
   }
-  m_domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
+  m_domain = std::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
   m_values = values;
 }
 
@@ -317,11 +316,11 @@ void TableWorkspaceDomainCreator::createDomain(
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-boost::shared_ptr<API::Workspace>
+std::shared_ptr<API::Workspace>
 TableWorkspaceDomainCreator::createOutputWorkspace(
     const std::string &baseName, API::IFunction_sptr function,
-    boost::shared_ptr<API::FunctionDomain> domain,
-    boost::shared_ptr<API::FunctionValues> values,
+    std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
 
   if (!values) {
@@ -392,11 +391,11 @@ void TableWorkspaceDomainCreator::appendCompositeFunctionMembers(
   // if function is a Convolution then output of convolved model's members may
   // be required
   if (m_convolutionCompositeMembers &&
-      boost::dynamic_pointer_cast<Functions::Convolution>(function)) {
+      std::dynamic_pointer_cast<Functions::Convolution>(function)) {
     appendConvolvedCompositeFunctionMembers(functionList, function);
   } else {
     const auto compositeFn =
-        boost::dynamic_pointer_cast<API::CompositeFunction>(function);
+        std::dynamic_pointer_cast<API::CompositeFunction>(function);
     if (!compositeFn)
       return;
 
@@ -404,7 +403,7 @@ void TableWorkspaceDomainCreator::appendCompositeFunctionMembers(
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
       auto localComposite =
-          boost::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
+          std::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
       if (localComposite)
         appendCompositeFunctionMembers(functionList, localComposite);
       else
@@ -429,10 +428,10 @@ void TableWorkspaceDomainCreator::appendCompositeFunctionMembers(
 void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(
     std::list<API::IFunction_sptr> &functionList,
     const API::IFunction_sptr &function) const {
-  boost::shared_ptr<Functions::Convolution> convolution =
-      boost::dynamic_pointer_cast<Functions::Convolution>(function);
+  std::shared_ptr<Functions::Convolution> convolution =
+      std::dynamic_pointer_cast<Functions::Convolution>(function);
 
-  const auto compositeFn = boost::dynamic_pointer_cast<API::CompositeFunction>(
+  const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(
       convolution->getFunction(1));
   if (!compositeFn) {
     functionList.insert(functionList.end(), convolution);
@@ -441,8 +440,8 @@ void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(
     const size_t nlocals = compositeFn->nFunctions();
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
-      boost::shared_ptr<Functions::Convolution> localConvolution =
-          boost::make_shared<Functions::Convolution>();
+      std::shared_ptr<Functions::Convolution> localConvolution =
+          std::make_shared<Functions::Convolution>();
       localConvolution->addFunction(resolution);
       localConvolution->addFunction(localFunction);
       functionList.insert(functionList.end(), localConvolution);
@@ -461,9 +460,9 @@ void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(
  */
 void TableWorkspaceDomainCreator::addFunctionValuesToWS(
     const API::IFunction_sptr &function,
-    boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-    const boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> resultValues) const {
+    std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+    const std::shared_ptr<API::FunctionDomain> &domain,
+    const std::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
   resultValues->zeroCalculated();
 
@@ -728,7 +727,7 @@ void TableWorkspaceDomainCreator::setParameters() const {
  */
 
 void TableWorkspaceDomainCreator::setXYEColumnNames(
-    API::ITableWorkspace_sptr ws) const {
+    const API::ITableWorkspace_sptr &ws) const {
 
   auto columnNames = ws->getColumnNames();
 
@@ -784,8 +783,8 @@ void TableWorkspaceDomainCreator::setXYEColumnNames(
  * entries.
  */
 void TableWorkspaceDomainCreator::setAndValidateWorkspace(
-    API::Workspace_sptr ws) const {
-  auto tableWorkspace = boost::dynamic_pointer_cast<API::ITableWorkspace>(ws);
+    const API::Workspace_sptr &ws) const {
+  auto tableWorkspace = std::dynamic_pointer_cast<API::ITableWorkspace>(ws);
   if (!tableWorkspace) {
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");
   }

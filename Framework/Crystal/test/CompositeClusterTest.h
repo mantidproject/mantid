@@ -9,8 +9,8 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidCrystal/CompositeCluster.h"
 #include "MockObjects.h"
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -35,7 +35,7 @@ public:
     MockICluster *pMockCluster = new MockICluster();
     EXPECT_CALL(*pMockCluster, size())
         .WillRepeatedly(Return(0)); // Size==0, empty child cluster.
-    boost::shared_ptr<ICluster> mockCluster(pMockCluster);
+    std::shared_ptr<ICluster> mockCluster(pMockCluster);
 
     CompositeCluster composite;
     composite.add(mockCluster);
@@ -48,8 +48,8 @@ public:
 
     MockICluster *pMockCluster = new MockICluster();
     EXPECT_CALL(*pMockCluster, size()).WillRepeatedly(Return(1));
-    boost::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
-    boost::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
+    std::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
+    std::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
 
     CompositeCluster composite;
     composite.add(mockCluster1);
@@ -81,8 +81,8 @@ public:
     EXPECT_CALL(*pMockCluster, size())
         .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
                                     // not be added to composite cluster
-    boost::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
-    boost::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
+    std::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
+    std::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
 
     CompositeCluster composite;
     composite.add(mockCluster1);
@@ -102,8 +102,8 @@ public:
                                     // not be added to composite cluster
     EXPECT_CALL(*pMockCluster, integrate(_))
         .WillRepeatedly(Return(ICluster::ClusterIntegratedValues(1, 2)));
-    boost::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
-    boost::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
+    std::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
+    std::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
 
     CompositeCluster composite;
     composite.add(mockCluster1);
@@ -122,8 +122,8 @@ public:
 
     MockICluster *pMockClusterA = new MockICluster();
     MockICluster *pMockClusterB = new MockICluster();
-    boost::shared_ptr<ICluster> mockClusterA(pMockClusterA);
-    boost::shared_ptr<ICluster> mockClusterB(pMockClusterB);
+    std::shared_ptr<ICluster> mockClusterA(pMockClusterA);
+    std::shared_ptr<ICluster> mockClusterB(pMockClusterB);
 
     EXPECT_CALL(*pMockClusterA, size())
         .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
@@ -159,8 +159,8 @@ public:
   void test_isLabelInSet() {
     MockICluster *pMockClusterA = new MockICluster();
     MockICluster *pMockClusterB = new MockICluster();
-    boost::shared_ptr<ICluster> mockClusterA(pMockClusterA);
-    boost::shared_ptr<ICluster> mockClusterB(pMockClusterB);
+    std::shared_ptr<ICluster> mockClusterA(pMockClusterA);
+    std::shared_ptr<ICluster> mockClusterB(pMockClusterB);
 
     EXPECT_CALL(*pMockClusterA, size())
         .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will

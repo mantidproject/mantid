@@ -7,8 +7,6 @@
 """
    Test construction of the WorkspaceValidators
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 from mantid.kernel import IValidator
@@ -17,6 +15,7 @@ from mantid.api import (WorkspaceUnitValidator, HistogramValidator,
                         SpectraAxisValidator, NumericAxisValidator,
                         InstrumentValidator, MDFrameValidator,
                         OrientedLatticeValidator)
+
 
 class WorkspaceValidatorsTest(unittest.TestCase):
 

@@ -17,6 +17,8 @@
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/TCPServer.h>
 
+#include <utility>
+
 namespace Mantid {
 namespace LiveData {
 // Register the algorithm into the algorithm factory
@@ -36,7 +38,7 @@ class TestServerConnection : public Poco::Net::TCPServerConnection {
   int m_nSpectra;
   int m_Rate;
   int m_nEvents;
-  boost::shared_ptr<Progress> m_prog;
+  std::shared_ptr<Progress> m_prog;
 
 public:
   /**
@@ -44,7 +46,8 @@ public:
    * @param soc :: A socket that provides communication with the client.
    */
   TestServerConnection(const Poco::Net::StreamSocket &soc, int nper, int nspec,
-                       int rate, int nevents, boost::shared_ptr<Progress> prog)
+                       int rate, int nevents,
+                       const std::shared_ptr<Progress> &prog)
       : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper),
         m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {
     m_prog->report(0, "Client Connected");
@@ -126,14 +129,14 @@ class TestServerConnectionFactory
   int m_nSpectra; ///< Number of spectra in the fake dataset
   int m_Rate;
   int m_nEvents;
-  boost::shared_ptr<Progress> m_prog;
+  std::shared_ptr<Progress> m_prog;
 
 public:
   /**
    * Constructor.
    */
   TestServerConnectionFactory(int nper, int nspec, int rate, int nevents,
-                              boost::shared_ptr<Progress> prog)
+                              const std::shared_ptr<Progress> &prog)
       : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper),
         m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {}
   /**
@@ -190,7 +193,7 @@ void FakeISISEventDAE::exec() {
   histoDAE->setProperty("Port", port + 1);
   auto histoDAEHandle = histoDAE->executeAsync();
 
-  auto prog = boost::make_shared<Progress>(this, 0.0, 1.0, 100);
+  auto prog = std::make_shared<Progress>(this, 0.0, 1.0, 100);
   prog->setNotifyStep(0);
   prog->report(0, "Waiting for client");
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));

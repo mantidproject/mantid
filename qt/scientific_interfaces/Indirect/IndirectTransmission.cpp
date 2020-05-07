@@ -165,8 +165,8 @@ void IndirectTransmission::setSaveEnabled(bool enabled) {
 }
 
 void IndirectTransmission::updateRunButton(
-    bool enabled, std::string const &enableOutputButtons, QString const message,
-    QString const tooltip) {
+    bool enabled, std::string const &enableOutputButtons,
+    QString const &message, QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

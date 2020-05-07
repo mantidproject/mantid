@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   # This is required to pick up ComponentCreationHelper, which is the only
   # TestHelpers class that may be used by Geometry tests (as it does not depend
@@ -30,8 +29,8 @@ if(CXXTEST_FOUND)
                         ${GSL_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
 
   add_dependencies(FrameworkTests GeometryTest)
   # Add to the 'FrameworkTests' group in VS

@@ -10,7 +10,7 @@
 
 #include "ui_DataProcessorOptionsDialog.h"
 #include <QDialog>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {

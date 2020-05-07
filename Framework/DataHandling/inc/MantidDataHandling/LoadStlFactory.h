@@ -15,7 +15,7 @@ namespace DataHandling {
 
 class MANTID_DATAHANDLING_DLL LoadStlFactory {
 public:
-  static std::unique_ptr<LoadStl> createReader(std::string filename,
+  static std::unique_ptr<LoadStl> createReader(const std::string &filename,
                                                ScaleUnits scaleType) {
     std::unique_ptr<LoadStl> reader = nullptr;
     if (LoadBinaryStl::isBinarySTL(filename)) {

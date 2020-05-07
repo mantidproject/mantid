@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "gsl/gsl_errno.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -74,7 +74,7 @@ public:
 class PeakFunctionIntegratorTest : public CxxTest::TestSuite {
 private:
   IPeakFunction_sptr getGaussian(double center, double fwhm, double height) {
-    IPeakFunction_sptr gaussian = boost::make_shared<LocalGaussian>();
+    IPeakFunction_sptr gaussian = std::make_shared<LocalGaussian>();
     gaussian->initialize();
 
     gaussian->setCentre(center);
@@ -84,7 +84,8 @@ private:
     return gaussian;
   }
 
-  double getGaussianAnalyticalInfiniteIntegral(IPeakFunction_sptr gaussian) {
+  double
+  getGaussianAnalyticalInfiniteIntegral(const IPeakFunction_sptr &gaussian) {
     return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) *
            sqrt(M_PI);
   }

@@ -64,9 +64,10 @@ protected: // for testing
   void updateMasksState(const API::MatrixWorkspace_const_sptr &inputWS,
                         DataObjects::TableWorkspace_sptr &targWS);
   // build a table workspace corresponding to the input matrix workspace
-  boost::shared_ptr<DataObjects::TableWorkspace>
+  std::shared_ptr<DataObjects::TableWorkspace>
   createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
-  bool isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D) const;
+  bool
+  isDetInfoLost(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) const;
   // helper function to get efixed if it is there or not;
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };

@@ -7,6 +7,8 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
+#include <utility>
+
 #include "MantidQtWidgets/Common/Message.h"
 
 namespace MantidQt {
@@ -28,8 +30,10 @@ Message::Message()
  * @param scriptPath The path of the script the message originated from. Empty
  * string if no script applicable
  */
-Message::Message(const QString &text, Priority priority, QString scriptPath)
-    : QObject(), m_text(text), m_priority(priority), m_scriptPath(scriptPath) {}
+Message::Message(const QString &text, Priority priority,
+                 const QString &scriptPath)
+    : QObject(), m_text(text), m_priority(priority),
+      m_scriptPath(std::move(scriptPath)) {}
 
 /**
  * @param text A std::string containing the message text
@@ -37,9 +41,10 @@ Message::Message(const QString &text, Priority priority, QString scriptPath)
  * @param scriptPath The path of the script the message originated from. Empty
  * string if no script applicable
  */
-Message::Message(const std::string &text, Priority priority, QString scriptPath)
+Message::Message(const std::string &text, Priority priority,
+                 const QString &scriptPath)
     : QObject(), m_text(QString::fromStdString(text)), m_priority(priority),
-      m_scriptPath(scriptPath) {}
+      m_scriptPath(std::move(scriptPath)) {}
 
 /**
  * @param text A c-style string containing the message text
@@ -47,8 +52,9 @@ Message::Message(const std::string &text, Priority priority, QString scriptPath)
  * @param scriptPath The path of the script the message originated from. Empty
  * string if no script applicable
  */
-Message::Message(const char *text, Priority priority, QString scriptPath)
-    : QObject(), m_text(text), m_priority(priority), m_scriptPath(scriptPath) {}
+Message::Message(const char *text, Priority priority, const QString &scriptPath)
+    : QObject(), m_text(text), m_priority(priority),
+      m_scriptPath(std::move(scriptPath)) {}
 
 /**
  * Construct a message from another object

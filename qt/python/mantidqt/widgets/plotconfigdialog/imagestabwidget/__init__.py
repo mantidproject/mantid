@@ -6,10 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 class ImageProperties(dict):
@@ -32,7 +31,7 @@ class ImageProperties(dict):
             props['reverse_colormap'] = True
         props['vmin'], props['vmax'] = image.get_clim()
 
-        if isinstance(image, QuadMesh):
+        if isinstance(image, QuadMesh) or isinstance(image, Poly3DCollection):
             props['interpolation'] = None
         else:
             props['interpolation'] = image.get_interpolation()

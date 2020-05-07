@@ -11,6 +11,7 @@
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <fstream>
@@ -73,7 +74,7 @@ private:
                              MantidVec &axis0Data);
   const std::string readUnit(const std::string &line);
   void readNumEntrys(const int nEntries, MantidVec &output);
-  void binCenter(const MantidVec oldBoundaries, MantidVec &toCenter) const;
+  void binCenter(const MantidVec &oldBoundaries, MantidVec &toCenter) const;
 
   // Remove lines from an input stream
   void skipLines(std::istream &strm, int nlines);

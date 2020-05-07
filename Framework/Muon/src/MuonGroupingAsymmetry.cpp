@@ -66,7 +66,7 @@ estimateAsymmetry(const Workspace_sptr &inputWS, const int index,
 }
 
 std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> estimateMuonAsymmetry(
-    WorkspaceGroup_sptr inputWS, const std::vector<int> &summedPeriods,
+    const WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
     const std::vector<int> &subtractedPeriods, int groupIndex,
     const double startX, const double endX, const double normalizationIn) {
   MatrixWorkspace_sptr tempWS;
@@ -118,7 +118,7 @@ std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> estimateMuonAsymmetry(
   return outputPair;
 }
 
-MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
+MatrixWorkspace_sptr groupDetectors(const MatrixWorkspace_sptr &workspace,
                                     const std::vector<int> &detectorIDs) {
 
   auto outputWS = WorkspaceFactory::Instance().create(workspace, 1);
@@ -284,14 +284,14 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
   return errors;
 }
 
-WorkspaceGroup_sptr
-MuonGroupingAsymmetry::createGroupWorkspace(WorkspaceGroup_sptr inputWS) {
+WorkspaceGroup_sptr MuonGroupingAsymmetry::createGroupWorkspace(
+    const WorkspaceGroup_sptr &inputWS) {
   const std::vector<int> group = this->getProperty("Grouping");
-  auto groupedPeriods = boost::make_shared<WorkspaceGroup>();
+  auto groupedPeriods = std::make_shared<WorkspaceGroup>();
   // for each period
   for (auto &&workspace : *inputWS) {
     auto groupWS = groupDetectors(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), group);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace), group);
     groupedPeriods->addWorkspace(groupWS);
   }
   return groupedPeriods;
@@ -320,7 +320,7 @@ void MuonGroupingAsymmetry::exec() {
 }
 
 void MuonGroupingAsymmetry::addGroupingAsymmetrySampleLogs(
-    MatrixWorkspace_sptr workspace) {
+    const MatrixWorkspace_sptr &workspace) {
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_asymmetry_group_name",
                                     getPropertyValue("GroupName"));
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_asymmetry_group",

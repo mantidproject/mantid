@@ -46,7 +46,7 @@ MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
   return ws2;
 }
 
-void doTestExpDecay(MatrixWorkspace_sptr ws2) {
+void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
 
   Mantid::API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 8.);
@@ -85,7 +85,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
           PDF_GROUP_NAME);
   TS_ASSERT(pdfGroup);
   auto const wsPDF =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(pdfGroup->getItem(0));
+      std::dynamic_pointer_cast<MatrixWorkspace>(pdfGroup->getItem(0));
   TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(), n + 1);
 
   const auto &X = wsPDF->mutableX(0);
@@ -95,7 +95,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("CostFunction"));
   ITableWorkspace_sptr CostFunctionTable =
-      boost::dynamic_pointer_cast<ITableWorkspace>(
+      std::dynamic_pointer_cast<ITableWorkspace>(
           AnalysisDataService::Instance().retrieve("CostFunction"));
 
   TS_ASSERT(CostFunctionTable);
@@ -119,7 +119,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0), 0.0, 1.0);
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("ConvergedChain"));
-  MatrixWorkspace_sptr wsConv = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr wsConv = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve("ConvergedChain"));
   TS_ASSERT(wsConv);
   TS_ASSERT_EQUALS(wsConv->getNumberHistograms(), n + 1);
@@ -129,7 +129,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT_EQUALS(Xconv[437], 437);
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("Chain"));
-  MatrixWorkspace_sptr wsChain = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr wsChain = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve("Chain"));
   TS_ASSERT(wsChain);
   TS_ASSERT_EQUALS(wsChain->getNumberHistograms(), n + 1);
@@ -140,7 +140,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT(Xconv.size() < Xchain.size());
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("Parameters"));
-  ITableWorkspace_sptr Ptable = boost::dynamic_pointer_cast<ITableWorkspace>(
+  ITableWorkspace_sptr Ptable = std::dynamic_pointer_cast<ITableWorkspace>(
       AnalysisDataService::Instance().retrieve("Parameters"));
 
   TS_ASSERT(Ptable);
@@ -205,7 +205,7 @@ public:
             PDF_GROUP_NAME);
     TS_ASSERT(PDFGroup);
     auto const PDF =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(PDFGroup->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(PDFGroup->getItem(0));
     TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);
     TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
     TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
@@ -421,11 +421,11 @@ private:
     return ws2;
   }
 
-  boost::shared_ptr<CostFuncLeastSquares>
-  createCostFunc(bool constraint = false, bool tie = false) {
+  std::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
+                                                       bool tie = false) {
 
     // Domain
-    auto domain = boost::make_shared<Mantid::API::FunctionDomain1DVector>(
+    auto domain = std::make_shared<Mantid::API::FunctionDomain1DVector>(
         Mantid::API::FunctionDomain1DVector(0.1, 2.0, 20));
 
     Mantid::API::FunctionValues mockData(*domain);
@@ -435,13 +435,13 @@ private:
     dataMaker.function(*domain, mockData);
 
     // Values
-    auto values = boost::make_shared<FunctionValues>(
-        Mantid::API::FunctionValues(*domain));
+    auto values =
+        std::make_shared<FunctionValues>(Mantid::API::FunctionValues(*domain));
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
     // Function
-    boost::shared_ptr<ExpDecay> func = boost::make_shared<ExpDecay>();
+    std::shared_ptr<ExpDecay> func = std::make_shared<ExpDecay>();
     func->setParameter("Height", 1.);
     func->setParameter("Lifetime", 1.);
 
@@ -460,8 +460,8 @@ private:
     }
 
     // Cost function
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(func, domain, values);
 
     return costFun;

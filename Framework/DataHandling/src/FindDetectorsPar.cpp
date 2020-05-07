@@ -35,7 +35,7 @@ using namespace Kernel;
 using namespace API;
 
 void FindDetectorsPar::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<API::InstrumentValidator>();
   wsValidator->add<API::CommonBinsValidator>();
   // input workspace

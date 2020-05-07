@@ -51,7 +51,7 @@ BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
  *  a tie or a constraint.
  */
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
-                                       const std::string paramName,
+                                       const std::string &paramName,
                                        const double lowerBound,
                                        const double upperBound, bool isDefault)
     : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
@@ -61,7 +61,7 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
 }
 
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
-                                       const std::string paramName,
+                                       const std::string &paramName,
                                        const double lowerBound, bool isDefault)
     : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
       m_hasUpperBound(false), m_lowerBound(lowerBound), m_upperBound(-DBL_MAX) {

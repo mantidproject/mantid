@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from six import iterkeys
-
 from sans.common.enums import RowState
 from sans.gui_logic.models.RowEntries import RowEntries, _UserEntries
 
@@ -16,7 +14,7 @@ class RowEntriesTest(unittest.TestCase):
     def test_settings_attr_resets_state(self):
         observed_attrs = vars(_UserEntries())
 
-        for observed_attr in iterkeys(observed_attrs):
+        for observed_attr in observed_attrs.keys():
             obj = RowEntries()
             obj.state = RowState.PROCESSED
             setattr(obj, observed_attr, "")
@@ -47,7 +45,7 @@ class RowEntriesTest(unittest.TestCase):
         blank_obj = RowEntries()
         self.assertTrue(blank_obj.is_empty(), "Default Row Entries is not blank")
 
-        for attr in iterkeys(vars(_UserEntries())):
+        for attr in vars(_UserEntries()).keys():
             obj = RowEntries()
             setattr(obj, attr, 1.0)
             self.assertFalse(obj.is_empty())

@@ -16,8 +16,6 @@ should import the CONF object as
 
 and use it to access the settings
 """
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 from collections import namedtuple
 import os

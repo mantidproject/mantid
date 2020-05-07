@@ -103,7 +103,7 @@ public:
     TS_ASSERT(output);
 
     MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numHist);
     TS_ASSERT_EQUALS(output2D->blocksize(), numChannels);
 

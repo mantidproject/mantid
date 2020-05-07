@@ -386,8 +386,8 @@ void ILLEnergyTransfer::setRunEnabled(bool enabled) {
 
 void ILLEnergyTransfer::updateRunButton(bool enabled,
                                         std::string const &enableOutputButtons,
-                                        QString const message,
-                                        QString const tooltip) {
+                                        QString const &message,
+                                        QString const &tooltip) {
   UNUSED_ARG(enableOutputButtons);
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);

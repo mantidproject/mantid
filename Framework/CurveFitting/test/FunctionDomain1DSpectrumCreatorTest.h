@@ -118,8 +118,8 @@ public:
     TS_ASSERT(domain);
     TS_ASSERT(values);
 
-    boost::shared_ptr<FunctionDomain1DSpectrum> spectrum =
-        boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(domain);
+    std::shared_ptr<FunctionDomain1DSpectrum> spectrum =
+        std::dynamic_pointer_cast<FunctionDomain1DSpectrum>(domain);
 
     TS_ASSERT(spectrum);
     TS_ASSERT_EQUALS(spectrum->getWorkspaceIndex(), 0);

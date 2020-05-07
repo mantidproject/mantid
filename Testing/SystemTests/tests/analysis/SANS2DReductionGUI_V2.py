@@ -10,7 +10,6 @@ The tests here are ports from the original SANS2DReductionGUI.py test suite. Not
 include details about the ReductionSingleton
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.kernel import (config)
 from mantid.api import (FileFinder)

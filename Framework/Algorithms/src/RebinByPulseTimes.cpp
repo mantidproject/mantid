@@ -9,7 +9,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

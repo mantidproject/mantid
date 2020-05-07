@@ -8,6 +8,7 @@
 Holds some common constants across all tabs.
 """
 from qtpy.QtWidgets import QMessageBox
+from mantidqt.utils.observer_pattern import Observer
 
 # Dictionary of indexes for instruments.
 INSTRUMENT_DICT = {0: "ENGINX", 1: "IMAT"}
@@ -15,3 +16,12 @@ INSTRUMENT_DICT = {0: "ENGINX", 1: "IMAT"}
 
 def create_error_message(parent, message):
     QMessageBox.warning(parent, "Engineering Diffraction - Error", str(message))
+
+
+class CalibrationObserver(Observer):
+    def __init__(self, outer):
+        Observer.__init__(self)
+        self.outer = outer
+
+    def update(self, observable, calibration):
+        self.outer.update_calibration(calibration)

@@ -21,7 +21,7 @@ DECLARE_ALGORITHM(ConvertToDistribution)
 using namespace API;
 
 void ConvertToDistribution::init() {
-  auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+  auto wsValidator = std::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(

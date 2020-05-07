@@ -59,13 +59,13 @@ void IntegratePeaksUsingClusters::init() {
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
-  auto positiveValidator = boost::make_shared<BoundedValidator<double>>();
+  auto positiveValidator = std::make_shared<BoundedValidator<double>>();
   positiveValidator->setExclusive(true);
   positiveValidator->setLower(0);
 
-  auto compositeValidator = boost::make_shared<CompositeValidator>();
+  auto compositeValidator = std::make_shared<CompositeValidator>();
   compositeValidator->add(positiveValidator);
-  compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
+  compositeValidator->add(std::make_shared<MandatoryValidator<double>>());
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "Threshold", 0, compositeValidator, Direction::Input),

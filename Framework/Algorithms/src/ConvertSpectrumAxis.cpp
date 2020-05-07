@@ -37,7 +37,7 @@ constexpr double rad2deg = 180. / M_PI;
 
 void ConvertSpectrumAxis::init() {
   // Validator for Input Workspace
-  auto wsVal = boost::make_shared<CompositeValidator>();
+  auto wsVal = std::make_shared<CompositeValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
@@ -52,7 +52,7 @@ void ConvertSpectrumAxis::init() {
   targetOptions.emplace_back("theta");
   targetOptions.emplace_back("signed_theta");
   declareProperty("Target", "",
-                  boost::make_shared<StringListValidator>(targetOptions),
+                  std::make_shared<StringListValidator>(targetOptions),
                   "The unit to which the spectrum axis should be converted. "
                   "This can be either \"theta\" (for <math>\\theta</math> "
                   "degrees), or any of the IDs known to the [[Unit Factory]].");
@@ -60,10 +60,10 @@ void ConvertSpectrumAxis::init() {
   eModeOptions.emplace_back("Direct");
   eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
-                  boost::make_shared<StringListValidator>(eModeOptions),
+                  std::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "
                   "(\"Direct\" or \"Indirect\")");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
@@ -165,7 +165,7 @@ void ConvertSpectrumAxis::exec() {
   outputWS->replaceAxis(1, std::move(newAxis));
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {
-    newAxisRaw->unit() = boost::make_shared<Units::Degrees>();
+    newAxisRaw->unit() = std::make_shared<Units::Degrees>();
   } else {
     newAxisRaw->unit() = UnitFactory::Instance().create(unitTarget);
   }
@@ -186,7 +186,7 @@ void ConvertSpectrumAxis::exec() {
 
 double
 ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
-                               MatrixWorkspace_const_sptr inputWS,
+                               const MatrixWorkspace_const_sptr &inputWS,
                                int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");

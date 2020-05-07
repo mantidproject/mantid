@@ -46,7 +46,7 @@ namespace SpectrumView {
  *
  * @param matWs  Shared pointer to the matrix workspace being "wrapped"
  */
-MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
+MatrixWSDataSource::MatrixWSDataSource(const MatrixWorkspace_const_sptr &matWs)
     : SpectrumDataSource(0.0, 1.0, 0.0, 1.0, 0, 0), m_matWs(matWs),
       m_emodeHandler(nullptr), m_spectrumInfo(m_matWs->spectrumInfo()) {
   m_totalXMin = matWs->getXMin();
@@ -78,12 +78,12 @@ MatrixWSDataSource::~MatrixWSDataSource() {}
 
 bool MatrixWSDataSource::hasData(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (m_matWs->getName() == wsName)
     return true;
 
   Mantid::API::MatrixWorkspace_const_sptr other =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!other)
     return false;
 

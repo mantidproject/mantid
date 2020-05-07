@@ -22,7 +22,7 @@
 #include <QLatin1String>
 #include <QResource>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QStandardPaths>
 #endif
@@ -65,7 +65,8 @@ const QString COLLECTION_FILE("MantidProject.qhc");
 /**
  * Default constructor shows the @link DEFAULT_URL @endlink.
  */
-MantidHelpWindow::MantidHelpWindow(QWidget *parent, Qt::WindowFlags flags)
+MantidHelpWindow::MantidHelpWindow(QWidget *parent,
+                                   const Qt::WindowFlags &flags)
     : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""),
       m_firstRun(true) {
   // find the collection and delete the cache file if this is the first run
@@ -487,7 +488,7 @@ void MantidHelpWindow::determineFileLocs() {
   }
 }
 
-void MantidHelpWindow::warning(QString msg) {
+void MantidHelpWindow::warning(const QString &msg) {
   g_log.warning(msg.toStdString());
 }
 

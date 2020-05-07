@@ -10,6 +10,7 @@
 #include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <map>
 #include <string>
 #include <utility>
@@ -92,7 +93,7 @@ private:
                       const std::string &fileName);
   /// Run LoadInstrument Child Algorithm
   void runLoadInstrument(const std::string &inst_name,
-                         DataObjects::Workspace2D_sptr localWorkspace);
+                         const DataObjects::Workspace2D_sptr &localWorkspace);
 
   void setInputPropertiesAsMemberProperties();
 

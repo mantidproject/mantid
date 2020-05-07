@@ -88,7 +88,8 @@ private:
   API::Workspace_sptr loadFileToWs(const std::string &fileName,
                                    const std::string &wsName);
   /// Plus two workspaces together, "in place".
-  API::Workspace_sptr plusWs(API::Workspace_sptr ws1, API::Workspace_sptr ws2);
+  API::Workspace_sptr plusWs(API::Workspace_sptr ws1,
+                             const API::Workspace_sptr &ws2);
   /// Manually group workspaces.
   API::WorkspaceGroup_sptr
   groupWsList(const std::vector<API::Workspace_sptr> &wsList);

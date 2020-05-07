@@ -52,7 +52,7 @@ BoxController::BoxController(const BoxController &other)
       m_numMDBoxes(other.m_numMDBoxes),
       m_numMDGridBoxes(other.m_numMDGridBoxes),
       m_maxNumMDBoxes(other.m_maxNumMDBoxes),
-      m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {}
+      m_fileIO(std::shared_ptr<API::IBoxControllerIO>()) {}
 
 bool BoxController::operator==(const BoxController &other) const {
   if (nd != other.nd || m_maxId != other.m_maxId ||
@@ -287,7 +287,7 @@ void BoxController::clearFileBacked() {
     // close underlying file
     m_fileIO->closeFile();
     // decrease the sp counter by one and nullify this instance of sp.
-    m_fileIO.reset(); // = boost::shared_ptr<API::IBoxControllerIO>();
+    m_fileIO.reset(); // = std::shared_ptr<API::IBoxControllerIO>();
   }
 }
 /** makes box controller file based by providing class, responsible for fileIO.
@@ -296,8 +296,9 @@ void BoxController::clearFileBacked() {
  *@param fileName  -- if newFileIO comes without opened file, this is the file
  *name to open for the file based IO operations
  */
-void BoxController::setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
-                                  const std::string &fileName) {
+void BoxController::setFileBacked(
+    const std::shared_ptr<IBoxControllerIO> &newFileIO,
+    const std::string &fileName) {
   if (!newFileIO->isOpened())
     newFileIO->openFile(fileName, "w");
 

@@ -17,7 +17,7 @@ if(MSVC)
   set(THIRD_PARTY_GIT_URL
       "https://github.com/mantidproject/thirdparty-msvc2015.git"
   )
-  set(THIRD_PARTY_GIT_SHA1 b996c8e248a00fd5b388e603aca888f6dd53d985)
+  set(THIRD_PARTY_GIT_SHA1 51ae2facb5bd9267dee7369478446f689c1be13b)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -113,6 +113,7 @@ if(MSVC)
         "The location of the pythonw executable. This suppresses the new terminal window on startup"
         FORCE
   )
+
   set(THIRD_PARTY_BIN
       "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )

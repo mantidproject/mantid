@@ -55,7 +55,7 @@ tuple quickConversionWrapper(Unit &self, const T &destUnitName) {
 
 void export_Unit() {
 
-  register_ptr_to_python<boost::shared_ptr<Unit>>();
+  register_ptr_to_python<std::shared_ptr<Unit>>();
 
   class_<Unit, boost::noncopyable>("Unit", no_init)
       .def("name", &deprecatedName, arg("self"),

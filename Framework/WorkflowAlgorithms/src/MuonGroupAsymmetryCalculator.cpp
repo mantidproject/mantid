@@ -33,10 +33,10 @@ namespace WorkflowAlgorithms {
  * @param wsName :: the name of the workspace (for normalization table)
  */
 MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
-    const Mantid::API::WorkspaceGroup_sptr inputWS,
-    const std::vector<int> summedPeriods,
-    const std::vector<int> subtractedPeriods, const int groupIndex,
-    const double start, const double end, const std::string wsName)
+    const Mantid::API::WorkspaceGroup_sptr &inputWS,
+    const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods, const int groupIndex,
+    const double start, const double end, const std::string &wsName)
     : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
                           groupIndex) {
   MuonGroupCalculator::setStartEnd(start, end);
@@ -179,7 +179,7 @@ double getStoredNorm() {
     return 0.0;
   } else {
     API::ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+        std::dynamic_pointer_cast<API::ITableWorkspace>(
             API::AnalysisDataService::Instance().retrieve("__keepNorm__"));
     auto colNorm = table->getColumn("norm");
     return (*colNorm)[0];

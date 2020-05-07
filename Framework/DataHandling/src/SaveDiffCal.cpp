@@ -107,6 +107,7 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
 void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
                                             const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
+  // cppcheck-suppress compareBoolExpressionWithInt
   auto data = column->numeric_fill<>(m_numValues);
   H5Util::writeArray1D(group, name, data);
 }
@@ -121,7 +122,7 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
 // TODO should flip for mask
 void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
-    DataObjects::SpecialWorkspace2D_const_sptr ws) {
+    const DataObjects::SpecialWorkspace2D_const_sptr &ws) {
   const bool isMask = (name == "use");
 
   // output array defaults to all one (one group, use the pixel)

@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <utility>
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DataService.h"
@@ -35,7 +37,7 @@ public:
    */
   EnabledWhenWorkspaceIsType(std::string otherPropName,
                              bool enabledSetting = true)
-      : IPropertySettings(), m_otherPropName(otherPropName),
+      : IPropertySettings(), m_otherPropName(std::move(otherPropName)),
         m_enabledSetting(enabledSetting) {}
 
   //--------------------------------------------------------------------------------------------
@@ -69,7 +71,7 @@ public:
       return true;
     }
     // Does it cast to the desired type?
-    boost::shared_ptr<T> castWS = boost::dynamic_pointer_cast<T>(ws);
+    std::shared_ptr<T> castWS = std::dynamic_pointer_cast<T>(ws);
     if (castWS)
       return m_enabledSetting;
     else

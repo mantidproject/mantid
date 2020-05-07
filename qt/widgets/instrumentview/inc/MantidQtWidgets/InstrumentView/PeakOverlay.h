@@ -57,14 +57,14 @@ private:
 class AbstractIntensityScale {
 public:
   explicit AbstractIntensityScale(
-      const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
+      const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
     setPeaksWorkspace(pws);
   }
 
   virtual ~AbstractIntensityScale() {}
 
   void
-  setPeaksWorkspace(const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
+  setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
 
   virtual PeakMarker2D::Style
   getScaledMarker(double intensity,
@@ -79,7 +79,7 @@ protected:
 class DefaultIntensityScale : public AbstractIntensityScale {
 public:
   explicit DefaultIntensityScale(
-      const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
+      const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
       : AbstractIntensityScale(pws) {}
 
 protected:
@@ -98,7 +98,7 @@ protected:
 class QualitativeIntensityScale : public AbstractIntensityScale {
 public:
   explicit QualitativeIntensityScale(
-      const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
+      const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
       : AbstractIntensityScale(pws) {}
 
 protected:
@@ -122,7 +122,7 @@ class PeakOverlay : public Shape2DCollection,
   Q_OBJECT
 public:
   PeakOverlay(UnwrappedSurface *surface,
-              boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+              const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
   ~PeakOverlay() override {}
   /// Override the drawing method
   void draw(QPainter &painter) const override;
@@ -137,7 +137,7 @@ public:
   Mantid::Geometry::IPeak &getPeak(int /*i*/);
   QList<PeakMarker2D *> getSelectedPeakMarkers();
   /// Return PeaksWorkspace associated with this overlay.
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {
+  std::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {
     return m_peaksWorkspace;
   }
   /// set HKL precision
@@ -146,7 +146,7 @@ public:
   void setShowLabelsFlag(bool yes) { m_showLabels = yes; }
   void setShowRelativeIntensityFlag(bool yes);
   static PeakMarker2D::Style getDefaultStyle(int index);
-  void setPeakVisibility(double xmin, double xmax, QString units);
+  void setPeakVisibility(double xmin, double xmax, const QString &units);
 
 signals:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*_t1*/);
@@ -154,7 +154,7 @@ signals:
 private:
   /// A WorkspaceObserver handle implemented.
   void afterReplaceHandle(const std::string &wsName,
-                          const Mantid::API::Workspace_sptr ws) override;
+                          const Mantid::API::Workspace_sptr &ws) override;
 
   PeakMarker2D::Style getCurrentStyle() const;
   void recreateMarkers(const PeakMarker2D::Style &style);
@@ -162,7 +162,7 @@ private:
   QMultiHash<int, PeakMarker2D *>
       m_det2marker; ///< detector ID to PeakMarker2D map
   mutable QList<PeakHKL> m_labels;
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+  std::shared_ptr<Mantid::API::IPeaksWorkspace>
       m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
   UnwrappedSurface
       *m_surface; ///< pointer to the surface this overlay is applied to

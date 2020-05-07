@@ -17,6 +17,7 @@
 #include <QCoreApplication>
 #include <QSharedPointer>
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -63,7 +64,7 @@ FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
  * worker objects
  */
 void FindFilesThreadPoolManager::setAllocator(ThreadAllocator allocator) {
-  m_workerAllocator = allocator;
+  m_workerAllocator = std::move(allocator);
 }
 
 void FindFilesThreadPoolManager::createWorker(

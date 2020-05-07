@@ -107,4 +107,17 @@ public:
                        (std::pair<size_t, size_t>(i, 0)));
     }
   }
+
+  void test_detectorCount() {
+    SpectrumDefinition def1;
+    def1.add(1);
+    def1.add(2);
+    SpectrumDefinition def2;
+    def2.add(1);
+    SpectrumInfo info{2};
+    info.setSpectrumDefinition(0, def1);
+    info.setSpectrumDefinition(1, def2);
+    TS_ASSERT_EQUALS(info.size(), 2);
+    TS_ASSERT_EQUALS(info.detectorCount(), 3);
+  }
 };

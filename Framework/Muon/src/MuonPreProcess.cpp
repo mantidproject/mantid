@@ -96,7 +96,7 @@ std::map<std::string, std::string> MuonPreProcess::validateInputs() {
 
   // Checks for dead time table
   Workspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     TableWorkspace_sptr deadTimeTable = this->getProperty("DeadTimeTable");
     if (deadTimeTable) {
       if (deadTimeTable->rowCount() > ws->getNumberHistograms()) {
@@ -106,15 +106,14 @@ std::map<std::string, std::string> MuonPreProcess::validateInputs() {
     }
   }
 
-  if (auto ws = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+  if (auto ws = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     if (ws->getNumberOfEntries() == 0) {
       errors["InputWorkspace"] = "Input WorkspaceGroup is empty.";
     } else {
-      auto nSpectra =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0))
-              ->getNumberHistograms();
+      auto nSpectra = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0))
+                          ->getNumberHistograms();
       for (int index = 1; index < ws->getNumberOfEntries(); index++) {
-        if (boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(index))
+        if (std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(index))
                 ->getNumberHistograms() != nSpectra) {
           errors["InputWorkspace"] =
               "Numbers of spectra should be identical across all workspaces in "
@@ -133,11 +132,10 @@ void MuonPreProcess::exec() {
   Workspace_sptr inputWS = getProperty("InputWorkspace");
 
   // If single period, add workspace to a group
-  auto allPeriodsWS = boost::make_shared<WorkspaceGroup>();
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  auto allPeriodsWS = std::make_shared<WorkspaceGroup>();
+  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     allPeriodsWS->addWorkspace(ws);
-  } else if (auto group =
-                 boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+  } else if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     allPeriodsWS = group;
   }
 
@@ -155,10 +153,10 @@ void MuonPreProcess::exec() {
  * @return Corrected workspaces
  */
 WorkspaceGroup_sptr
-MuonPreProcess::correctWorkspaces(WorkspaceGroup_sptr wsGroup) {
-  WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
+MuonPreProcess::correctWorkspaces(const WorkspaceGroup_sptr &wsGroup) {
+  WorkspaceGroup_sptr outWS = std::make_shared<WorkspaceGroup>();
   for (auto &&workspace : *wsGroup) {
-    if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+    if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       outWS->addWorkspace(correctWorkspace(ws));
     }
   }
@@ -191,7 +189,7 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
 }
 
 MatrixWorkspace_sptr MuonPreProcess::applyDTC(MatrixWorkspace_sptr ws,
-                                              TableWorkspace_sptr dt) {
+                                              const TableWorkspace_sptr &dt) {
   if (dt != nullptr) {
     IAlgorithm_sptr dtc = this->createChildAlgorithm("ApplyDeadTimeCorr");
     dtc->setProperty("InputWorkspace", ws);
@@ -248,64 +246,65 @@ MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws,
   }
 }
 
-MatrixWorkspace_sptr MuonPreProcess::cloneWorkspace(MatrixWorkspace_sptr ws) {
+MatrixWorkspace_sptr
+MuonPreProcess::cloneWorkspace(const MatrixWorkspace_sptr &ws) {
   IAlgorithm_sptr cloneWorkspace = this->createChildAlgorithm("CloneWorkspace");
   cloneWorkspace->setProperty("InputWorkspace", ws);
   cloneWorkspace->execute();
   Workspace_sptr wsClone = cloneWorkspace->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(wsClone);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(wsClone);
 }
 
-void MuonPreProcess::addPreProcessSampleLogs(WorkspaceGroup_sptr group) {
+void MuonPreProcess::addPreProcessSampleLogs(const WorkspaceGroup_sptr &group) {
   const std::string numPeriods = std::to_string(group->getNumberOfEntries());
 
   for (auto &&workspace : *group) {
 
     MuonAlgorithmHelper::addSampleLog(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
         "analysis_periods", numPeriods);
 
     std::vector<double> rebinArgs = getProperty("RebinArgs");
     if (rebinArgs.empty()) {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_rebin_args", "");
     } else {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_rebin_args", getPropertyValue("RebinArgs"));
     }
 
     double xmin = getProperty("TimeMin");
     if (xmin == EMPTY_DBL()) {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_crop_x_min", "");
     } else {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_crop_x_min", getPropertyValue("TimeMin"));
     }
 
     double xmax = getProperty("TimeMax");
     if (xmax == EMPTY_DBL()) {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_crop_x_max", "");
     } else {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_crop_x_max", getPropertyValue("TimeMax"));
     }
 
     double offset = getProperty("TimeOffset");
     if (offset == EMPTY_DBL()) {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_time_offset", "");
     } else {
       MuonAlgorithmHelper::addSampleLog(
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
+          std::dynamic_pointer_cast<MatrixWorkspace>(workspace),
           "analysis_time_offset", getPropertyValue("TimeOffset"));
     }
   }

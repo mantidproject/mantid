@@ -17,10 +17,10 @@
 #include "MantidKernel/System.h"
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <string>
 

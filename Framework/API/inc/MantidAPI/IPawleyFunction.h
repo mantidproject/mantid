@@ -55,7 +55,7 @@ public:
   virtual Kernel::V3D getPeakHKL(size_t i) const = 0;
 };
 
-using IPawleyFunction_sptr = boost::shared_ptr<IPawleyFunction>;
+using IPawleyFunction_sptr = std::shared_ptr<IPawleyFunction>;
 
 } // namespace API
 } // namespace Mantid

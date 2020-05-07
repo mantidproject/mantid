@@ -123,7 +123,7 @@ public:
                      const std::runtime_error &);
 
     StructureFactorCalculator_sptr mock =
-        boost::make_shared<MockStructureFactorCalculator>();
+        std::make_shared<MockStructureFactorCalculator>();
     TS_ASSERT_THROWS_NOTHING(HKLFilterStructureFactor sfFilter(mock));
     TS_ASSERT_THROWS_NOTHING(HKLFilterStructureFactor sfFilter(mock, 12.0));
   }
@@ -133,14 +133,14 @@ public:
     reference << "(F^2 > " << 1.0 << ")";
 
     StructureFactorCalculator_sptr mock =
-        boost::make_shared<MockStructureFactorCalculator>();
+        std::make_shared<MockStructureFactorCalculator>();
     HKLFilterStructureFactor sfFilter(mock, 1.0);
     TS_ASSERT_EQUALS(sfFilter.getDescription(), reference.str());
   }
 
   void testHKLFilterStructureFactorIsAllowed() {
-    boost::shared_ptr<MockStructureFactorCalculator> mock =
-        boost::make_shared<MockStructureFactorCalculator>();
+    std::shared_ptr<MockStructureFactorCalculator> mock =
+        std::make_shared<MockStructureFactorCalculator>();
 
     EXPECT_CALL(*mock, getFSquared(_))
         .WillOnce(Return(2.0))

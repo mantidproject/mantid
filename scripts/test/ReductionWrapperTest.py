@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import os,sys
 
 from mantid.simpleapi import *
@@ -17,6 +16,7 @@ import MariReduction as mr
 #
 import unittest
 import imp
+
 
 class test_helper(ReductionWrapper):
     def __init__(self,web_var=None):
@@ -81,6 +81,8 @@ class test_helper(ReductionWrapper):
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
+
+
 class ReductionWrapperTest(unittest.TestCase):
 
     def __init__(self, methodName):
@@ -306,4 +308,3 @@ class ReductionWrapperTest(unittest.TestCase):
 
 if __name__=="__main__":
     unittest.main()
-

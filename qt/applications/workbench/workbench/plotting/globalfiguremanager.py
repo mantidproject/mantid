@@ -7,14 +7,11 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 # std imports
 import atexit
 import gc
 
 # 3rd party imports
-import six
 
 from enum import Enum
 from .observabledictionary import DictionaryAction, ObservableDictionary
@@ -131,7 +128,7 @@ class GlobalFigureManager(object):
     def destroy_fig(cls, fig):
         "*fig* is a Figure instance"
         num = None
-        for manager in six.itervalues(cls.figs):
+        for manager in cls.figs.values():
             if manager.canvas.figure == fig:
                 num = manager.num
                 break

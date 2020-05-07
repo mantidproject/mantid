@@ -79,8 +79,8 @@ public:
   }
 
 private:
-  std::string runConvolutionFit(MatrixWorkspace_sptr inputWorkspace,
-                                MatrixWorkspace_sptr resolution) {
+  std::string runConvolutionFit(const MatrixWorkspace_sptr &inputWorkspace,
+                                const MatrixWorkspace_sptr &resolution) {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
@@ -207,7 +207,7 @@ private:
     return resolution;
   }
 
-  void addBinsAndCountsToWorkspace(Workspace2D_sptr workspace,
+  void addBinsAndCountsToWorkspace(const Workspace2D_sptr &workspace,
                                    std::size_t totalBinEdges,
                                    std::size_t totalCounts, double binValue,
                                    double countValue) const {

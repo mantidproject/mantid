@@ -34,8 +34,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<DownloadRemoteFile2> a;
-    TS_ASSERT(a = boost::make_shared<DownloadRemoteFile2>());
+    std::shared_ptr<DownloadRemoteFile2> a;
+    TS_ASSERT(a = std::make_shared<DownloadRemoteFile2>());
 
     // can cast to inherited interfaces and base classes
     TS_ASSERT(

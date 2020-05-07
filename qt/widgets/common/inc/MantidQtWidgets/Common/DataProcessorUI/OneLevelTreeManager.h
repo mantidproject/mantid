@@ -27,7 +27,7 @@ class EXPORT_OPT_MANTIDQT_COMMON OneLevelTreeManager : public TreeManager {
 public:
   /// Constructor
   OneLevelTreeManager(DataProcessorPresenter *presenter,
-                      Mantid::API::ITableWorkspace_sptr table,
+                      const Mantid::API::ITableWorkspace_sptr &table,
                       const WhiteList &whitelist);
   /// Constructor (no table ws given)
   OneLevelTreeManager(DataProcessorPresenter *presenter,
@@ -100,7 +100,7 @@ public:
                     size_t whitelistColumns) const override;
 
   /// Return the model
-  boost::shared_ptr<AbstractTreeModel> getModel() override;
+  std::shared_ptr<AbstractTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
@@ -115,7 +115,7 @@ private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
-  boost::shared_ptr<QOneLevelTreeModel> m_model;
+  std::shared_ptr<QOneLevelTreeModel> m_model;
 
   /// Insert an empty row in the model
   void insertRow(int rowIndex);
@@ -123,9 +123,9 @@ private:
   Mantid::API::ITableWorkspace_sptr
   createDefaultWorkspace(const WhiteList &whitelist);
   /// Validate a table workspace
-  void validateModel(Mantid::API::ITableWorkspace_sptr ws,
+  void validateModel(const Mantid::API::ITableWorkspace_sptr &ws,
                      size_t whitelistColumns) const;
-  TreeData constructTreeData(std::set<int> rows);
+  TreeData constructTreeData(const std::set<int> &rows);
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets

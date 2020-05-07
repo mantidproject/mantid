@@ -1496,7 +1496,7 @@ Mantid::Kernel::Logger g_log("AxisDialog");
  *  @param g :: the graph the dialog is settign the options for
  *  @param fl :: The QT flags for this window
  */
-AxesDialog::AxesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl)
+AxesDialog::AxesDialog(ApplicationWindow *app, Graph *g, const Qt::WFlags &fl)
     : QDialog(g, fl), m_app(app), m_graph(g) {
   QPixmap image4((const char **)image4_data);
   QPixmap image5((const char **)image5_data);

@@ -27,7 +27,7 @@ namespace Algorithms {
 /** Constructor
  */
 TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
-    MatrixWorkspace_const_sptr ws, double ei)
+    const MatrixWorkspace_const_sptr &ws, double ei)
     : m_constShift(0) {
 
   // A constant among all spectra

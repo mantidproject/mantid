@@ -241,7 +241,7 @@ void DiffractionFocussing::calculateRebinParams(
  * @throws FileError if can't read the file
  */
 std::multimap<int64_t, int64_t>
-DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
+DiffractionFocussing::readGroupingFile(const std::string &groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName

@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentOptionDefaults.h"
+
+#include <utility>
+
 #include "Common/OptionDefaults.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "PerThetaDefaultsTableValidator.h"
@@ -24,7 +27,7 @@ std::string stringValueOrEmpty(boost::optional<double> value) {
 
 Experiment
 getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
-  auto defaults = OptionDefaults(instrument);
+  auto defaults = OptionDefaults(std::move(instrument));
 
   auto analysisMode = analysisModeFromString(defaults.getStringOrDefault(
       "AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));
@@ -35,6 +38,21 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto includePartialBins =
       defaults.getBoolOrFalse("IncludePartialBins", "IncludePartialBins");
   auto debug = defaults.getBoolOrFalse("Debug", "Debug");
+
+  auto backgroundSubtractionMethod = defaults.getStringOrEmpty(
+      "BackgroundCalculationMethod", "BackgroundCalculationMethod");
+  auto subtractBackground = !backgroundSubtractionMethod.empty();
+  auto backgroundSubtractionType =
+      subtractBackground
+          ? backgroundSubtractionTypeFromString(backgroundSubtractionMethod)
+          : BackgroundSubtractionType::PerDetectorAverage;
+  auto degreeOfPolynomial =
+      defaults.getIntOrZero("DegreeOfPolynomial", "DegreeOfPolynomial");
+  auto costFunction = costFunctionTypeFromString(defaults.getStringOrDefault(
+      "CostFunction", "CostFunction", "Least squares"));
+  auto backgroundSubtraction =
+      BackgroundSubtraction(subtractBackground, backgroundSubtractionType,
+                            degreeOfPolynomial, costFunction);
 
   auto polarizationCorrectionType =
       polarizationCorrectionTypeFromString(defaults.getStringOrDefault(
@@ -86,10 +104,12 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto const scaleFactor = stringValueOrEmpty(maybeScaleFactor);
   auto const processingInstructions = defaults.getStringOrEmpty(
       "ProcessingInstructions", "ProcessingInstructions");
+  auto const backgroundProcessingInstructions = defaults.getStringOrEmpty(
+      "BackgroundProcessingInstructions", "BackgroundProcessingInstructions");
   auto perThetaDefaultsRow = PerThetaDefaults::ValueArray{
       {theta, firstTransmissionRun, secondTransmissionRun,
        transmissionProcessingInstructions, qMin, qMax, qStep, scaleFactor,
-       processingInstructions}};
+       processingInstructions, backgroundProcessingInstructions}};
   auto perThetaDefaults =
       std::vector<PerThetaDefaults::ValueArray>{perThetaDefaultsRow};
   auto validate = PerThetaDefaultsTableValidator();
@@ -101,8 +121,9 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
 
   return Experiment(
       analysisMode, reductionType, summationType, includePartialBins, debug,
-      std::move(polarizationCorrections), std::move(floodCorrections),
-      std::move(transmissionStitchOptions), std::move(stitchParameters),
+      std::move(backgroundSubtraction), std::move(polarizationCorrections),
+      std::move(floodCorrections), std::move(transmissionStitchOptions),
+      std::move(stitchParameters),
       std::move(perThetaValidationResult.assertValid()));
 }
 } // unnamed namespace

@@ -11,6 +11,7 @@
 #include "MantidKernel/Task.h"
 #include <deque>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Mantid {

@@ -57,7 +57,7 @@ def build_macro(padding,min_dimension=1, max_dimensions=4,const=""):
 """
 
 
-    macro = """%s%sMDEventWorkspace<%s, %d>::sptr %s = boost::dynamic_pointer_cast<%sMDEventWorkspace<%s, %d> >(workspace); \\
+    macro = """%s%sMDEventWorkspace<%s, %d>::sptr %s = std::dynamic_pointer_cast<%sMDEventWorkspace<%s, %d> >(workspace); \\
 if (%s) funcname<%s, %d>(%s); \\
     """
 

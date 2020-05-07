@@ -95,28 +95,30 @@ private:
   bool processGroups() override;
 
   /// Process the two groups
-  void processGroups(boost::shared_ptr<const API::WorkspaceGroup> groupOne,
-                     boost::shared_ptr<const API::WorkspaceGroup> groupTwo);
+  void
+  processGroups(const std::shared_ptr<const API::WorkspaceGroup> &groupOne,
+                const std::shared_ptr<const API::WorkspaceGroup> &groupTwo);
 
   void doComparison();
 
   void doPeaksComparison(DataObjects::PeaksWorkspace_sptr tws1,
                          DataObjects::PeaksWorkspace_sptr tws2);
-  void doTableComparison(API::ITableWorkspace_const_sptr tws1,
-                         API::ITableWorkspace_const_sptr tws2);
-  void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
+  void doTableComparison(const API::ITableWorkspace_const_sptr &tws1,
+                         const API::ITableWorkspace_const_sptr &tws2);
+  void doMDComparison(const API::Workspace_sptr &w1,
+                      const API::Workspace_sptr &w2);
   bool compareEventWorkspaces(const DataObjects::EventWorkspace &ews1,
                               const DataObjects::EventWorkspace &ews2);
-  bool checkData(API::MatrixWorkspace_const_sptr ws1,
-                 API::MatrixWorkspace_const_sptr ws2);
-  bool checkAxes(API::MatrixWorkspace_const_sptr ws1,
-                 API::MatrixWorkspace_const_sptr ws2);
-  bool checkSpectraMap(API::MatrixWorkspace_const_sptr ws1,
-                       API::MatrixWorkspace_const_sptr ws2);
-  bool checkInstrument(API::MatrixWorkspace_const_sptr ws1,
-                       API::MatrixWorkspace_const_sptr ws2);
-  bool checkMasking(API::MatrixWorkspace_const_sptr ws1,
-                    API::MatrixWorkspace_const_sptr ws2);
+  bool checkData(const API::MatrixWorkspace_const_sptr &ws1,
+                 const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkAxes(const API::MatrixWorkspace_const_sptr &ws1,
+                 const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkSpectraMap(const API::MatrixWorkspace_const_sptr &ws1,
+                       const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkInstrument(const API::MatrixWorkspace_const_sptr &ws1,
+                       const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkMasking(const API::MatrixWorkspace_const_sptr &ws1,
+                    const API::MatrixWorkspace_const_sptr &ws2);
   bool checkSample(const API::Sample &sample1, const API::Sample &sample2);
   bool checkRunProperties(const API::Run &run1, const API::Run &run2);
 
@@ -130,7 +132,7 @@ private:
                                  size_t &numdiffweight) const;
 
   /// Records a mismatch in the Messages workspace and sets Result to false
-  void recordMismatch(std::string msg, std::string ws1 = "",
+  void recordMismatch(const std::string &msg, std::string ws1 = "",
                       std::string ws2 = "");
 
   bool relErr(double x1, double x2, double errorVal) const;

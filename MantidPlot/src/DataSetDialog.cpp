@@ -40,7 +40,7 @@
 #include <QVBoxLayout>
 
 DataSetDialog::DataSetDialog(const QString &text, ApplicationWindow *app,
-                             Graph *g, Qt::WFlags fl)
+                             Graph *g, const Qt::WFlags &fl)
     : QDialog(g, fl), d_app(app), d_graph(g) {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("MantidPlot - Select data set"));

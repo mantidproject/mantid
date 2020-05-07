@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   include_directories(../../ScriptRepository/inc)
   include_directories(../)
@@ -17,8 +16,8 @@ if(CXXTEST_FOUND)
                         ScriptRepository
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
 
   add_dependencies(FrameworkTests ScriptRepositoryTest)
   # Add to the 'FrameworkTests' group in VS

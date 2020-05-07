@@ -40,7 +40,7 @@ void UnaryOperation::exec() {
 
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const EventWorkspace>(in_work);
+      std::dynamic_pointer_cast<const EventWorkspace>(in_work);
   if ((eventW != nullptr) && !(this->useHistogram)) {
     this->execEvent();
     return;
@@ -106,7 +106,7 @@ void UnaryOperation::execEvent() {
     matrixOutputWS = matrixInputWS->clone();
     setProperty(outputPropName(), matrixOutputWS);
   }
-  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  auto outputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Now fetch any properties defined by concrete algorithm
   retrieveProperties();
@@ -141,7 +141,7 @@ void UnaryOperation::execEvent() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->clearMRU();
-  auto inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  auto inputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
     g_log.information() << "Number of events has changed!!!\n";
   }

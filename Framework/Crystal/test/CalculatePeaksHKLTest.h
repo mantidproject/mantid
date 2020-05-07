@@ -28,7 +28,7 @@ public:
   void test_Constructor() { TS_ASSERT_THROWS_NOTHING(CalculatePeaksHKL alg); }
 
   void test_Init() {
-    PeaksWorkspace_sptr ws = boost::make_shared<PeaksWorkspace>();
+    PeaksWorkspace_sptr ws = std::make_shared<PeaksWorkspace>();
 
     CalculatePeaksHKL alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

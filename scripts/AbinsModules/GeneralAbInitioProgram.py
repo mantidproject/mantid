@@ -4,10 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
 import AbinsModules
-import six
 from mantid.kernel import Atom
 
 
@@ -17,8 +15,7 @@ class GeneralAbInitioProgramName(type):
 
 
 # noinspection PyMethodMayBeStatic
-@six.add_metaclass(GeneralAbInitioProgramName)
-class GeneralAbInitioProgram(object):
+class GeneralAbInitioProgram(object, metaclass=GeneralAbInitioProgramName):
     """
     A general class which groups all methods which should be inherited or implemented by an ab initio program used
     in INS analysis.

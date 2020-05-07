@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from __future__ import (absolute_import, division, print_function)
-
 import DirectILL_common as common
 import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, InstrumentValidator,
@@ -729,7 +727,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             mainWS = LoadAndMerge(Filename=inputFiles, OutputWorkspace=mergedWSName,
-                                  LoaderName='LoadILLTOF', EnableLogging=self._subalgLogging)
+                                  LoaderName='LoadILLTOF', LoaderOptions={"ConvertToTOF": True}, EnableLogging=self._subalgLogging)
         else:
             mainWS = self.getProperty(common.PROP_INPUT_WS).value
             self._cleanup.protect(mainWS)

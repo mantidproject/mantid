@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/HKLFilter.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -86,7 +86,7 @@ bool HKLFilterOr::isAllowed(const Kernel::V3D &hkl) const noexcept {
  * @return HKLFilterNot with the wrapped filter.
  */
 const HKLFilter_const_sptr operator~(const HKLFilter_const_sptr &filter) {
-  return boost::make_shared<const HKLFilterNot>(filter);
+  return std::make_shared<const HKLFilterNot>(filter);
 }
 
 /**
@@ -101,7 +101,7 @@ const HKLFilter_const_sptr operator~(const HKLFilter_const_sptr &filter) {
  */
 const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
                                      const HKLFilter_const_sptr &rhs) {
-  return boost::make_shared<const HKLFilterAnd>(lhs, rhs);
+  return std::make_shared<const HKLFilterAnd>(lhs, rhs);
 }
 
 /**
@@ -116,7 +116,7 @@ const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
  */
 const HKLFilter_const_sptr operator|(const HKLFilter_const_sptr &lhs,
                                      const HKLFilter_const_sptr &rhs) {
-  return boost::make_shared<HKLFilterOr>(lhs, rhs);
+  return std::make_shared<HKLFilterOr>(lhs, rhs);
 }
 
 } // namespace Geometry

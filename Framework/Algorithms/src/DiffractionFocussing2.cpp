@@ -43,7 +43,7 @@ DECLARE_ALGORITHM(DiffractionFocussing2)
  */
 void DiffractionFocussing2::init() {
 
-  auto wsValidator = boost::make_shared<API::RawCountValidator>();
+  auto wsValidator = std::make_shared<API::RawCountValidator>();
   declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing/Q-spacing");
@@ -121,7 +121,7 @@ void DiffractionFocussing2::exec() {
     IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
     childAlg->setProperty(
         "InputWorkspace",
-        boost::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
+        std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsChildAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
@@ -146,7 +146,7 @@ void DiffractionFocussing2::exec() {
   double eventXMin = 0.;
   double eventXMax = 0.;
 
-  m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
+  m_eventW = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
   if (m_eventW != nullptr) {
     if (getProperty("PreserveEvents")) {
       // Input workspace is an event workspace. Use the other exec method
@@ -441,7 +441,7 @@ void DiffractionFocussing2::execEvent() {
         // When focussing in place, you can clear out old memory from the input
         // one!
         if (inPlace) {
-          boost::const_pointer_cast<EventWorkspace>(m_eventW)
+          std::const_pointer_cast<EventWorkspace>(m_eventW)
               ->getSpectrum(wi)
               .clear();
         }
@@ -590,11 +590,10 @@ void DiffractionFocussing2::determineRebinParameters() {
 
   nGroups = group2minmax.size(); // Number of unique groups
 
-  double Xmin, Xmax, step;
   const int64_t xPoints = nPoints + 1;
-
   // Iterator over all groups to create the new X vectors
-  for (gpit = group2minmax.begin(); gpit != group2minmax.end(); gpit++) {
+  for (gpit = group2minmax.begin(); gpit != group2minmax.end(); ++gpit) {
+    double Xmin, Xmax, step;
     Xmin = (gpit->second).first;
     Xmax = (gpit->second).second;
 

@@ -67,6 +67,9 @@ public:
   static bool GetABC(const Kernel::DblMatrix &UB, Kernel::V3D &a_dir,
                      Kernel::V3D &b_dir, Kernel::V3D &c_dir);
 
+  bool operator==(const OrientedLattice &other) const;
+  bool operator!=(const OrientedLattice &other) const;
+
 private:
   Kernel::DblMatrix U;
   Kernel::DblMatrix UB;

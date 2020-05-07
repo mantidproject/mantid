@@ -71,13 +71,13 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
                                  const double detWScale,
                                  const double detHtScale,
                                  ComponentInfo &componentInfo) {
-  boost::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
+  std::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
 
   for (const auto &bankName : bankNames) {
-    boost::shared_ptr<const IComponent> bank1 =
+    std::shared_ptr<const IComponent> bank1 =
         newInstrument.getComponentByName(bankName);
-    boost::shared_ptr<const Geometry::RectangularDetector> bank =
-        boost::dynamic_pointer_cast<const RectangularDetector>(bank1);
+    std::shared_ptr<const Geometry::RectangularDetector> bank =
+        std::dynamic_pointer_cast<const RectangularDetector>(bank1);
 
     Quat relRot = bank->getRelativeRot();
     Quat parentRot = bank->getParent()->getRotation();

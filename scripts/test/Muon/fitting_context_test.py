@@ -4,15 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, unicode_literals)
-
 from collections import OrderedDict
 import unittest
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import iteritems, mock
+from unittest import mock
 
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation, FitParameters
 
@@ -76,7 +74,7 @@ def create_test_fit_parameters(test_parameters, global_parameters=None):
         'Name': name,
         'Value': value,
         'Error': error
-    } for name, (value, error) in iteritems(test_parameters)]
+    } for name, (value, error) in test_parameters.items()]
 
     parameter_workspace = mock.MagicMock()
     parameter_workspace.workspace.__iter__.return_value = fit_table

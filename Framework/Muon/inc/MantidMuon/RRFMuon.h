@@ -43,7 +43,7 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Get conversion factor from frequency units to input workspace units
-  double unitConversionFactor(std::string uin, std::string uuser);
+  double unitConversionFactor(const std::string &uin, const std::string &uuser);
 };
 
 } // namespace Algorithms

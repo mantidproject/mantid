@@ -46,21 +46,22 @@ public:
   const std::string category() const override;
 
 private:
-  void saveIsawDetCal(boost::shared_ptr<Geometry::Instrument> &instrument,
+  void saveIsawDetCal(std::shared_ptr<Geometry::Instrument> &instrument,
                       boost::container::flat_set<std::string> &AllBankName,
-                      double T0, std::string filename);
+                      double T0, const std::string &filename);
 
   /// Function to calculate U
-  void findU(DataObjects::PeaksWorkspace_sptr peaksWs);
+  void findU(const DataObjects::PeaksWorkspace_sptr &peaksWs);
   /// save workspaces
-  void saveNexus(std::string outputFile, API::MatrixWorkspace_sptr outputWS);
+  void saveNexus(const std::string &outputFile,
+                 const API::MatrixWorkspace_sptr &outputWS);
   /// Function to optimize L1
-  void findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
+  void findL1(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs);
   /// Function to optimize L2
   void findL2(boost::container::flat_set<std::string> MyBankNames,
-              DataObjects::PeaksWorkspace_sptr peaksWs);
+              const DataObjects::PeaksWorkspace_sptr &peaksWs);
   /// Function to optimize T0
-  void findT0(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
+  void findT0(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs);
 
   void exec() override;
 

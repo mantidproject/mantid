@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroupProperty,
                         Progress, mtd, SpectraAxis, WorkspaceGroup, WorkspaceProperty)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
@@ -23,6 +21,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     _general_kwargs = None
     _shape = None
     _height = None
+    _isis_instrument = None
 
     # Sample variables
     _sample_angle = None
@@ -398,11 +397,13 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             elif self._shape == 'Annulus':
                 ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_1)
                 ss_monte_carlo_alg.setProperty("InnerRadius", self._container_inner_radius)
-                ss_monte_carlo_alg.setProperty("OuterRadius", self._container_outer_radius)
+                ss_monte_carlo_alg.setProperty("OuterRadius", self._sample_inner_radius)
                 ss_monte_carlo_alg.execute()
                 acc_1 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
 
                 ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_2)
+                ss_monte_carlo_alg.setProperty("InnerRadius", self._sample_outer_radius)
+                ss_monte_carlo_alg.setProperty("OuterRadius", self._container_outer_radius)
                 ss_monte_carlo_alg.execute()
                 acc_2 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
 
@@ -613,7 +614,11 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         if self._transposed:
             workspace = self._tranpose_ws(workspace)
 
-        if self._indirect_elastic:
+        if self._sample_unit == 'Label' and not self._isis_instrument:
+            # This happens for E/I Fixed Window Scans for IN16B at ILL
+            # In this case we want to keep the correction workspace in wavelength and the vertical axis as in the input
+            return workspace
+        elif self._indirect_elastic:
             return self._convert_units(workspace, "MomentumTransfer", self._emode, self._efixed)
         elif self._emode == "Indirect":
             return self._convert_units(workspace, self._sample_unit, self._emode, self._efixed)
@@ -636,11 +641,11 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._indirect_elastic = True
         self._q_values = workspace.getAxis(1).extractValues()
         instrument_name = workspace.getInstrument().getName()
-        isis_instrument = instrument_name == "IRIS" or instrument_name == "OSIRIS"
+        self._isis_instrument = instrument_name == "IRIS" or instrument_name == "OSIRIS"
 
         # ---------- Load Elastic Instrument Definition File ----------
 
-        if isis_instrument:
+        if self._isis_instrument:
             idf_name = instrument_name + '_elastic_Definition.xml'
 
             idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
@@ -652,10 +657,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             load_alg.setProperty("RewriteSpectraMap", True)
             load_alg.execute()
 
-        # ---------- Create Spectra Axis -----------
-
-        # Replace y-axis with spectra axis
-        workspace.replaceAxis(1, SpectraAxis.create(workspace))
         e_fixed = float(self._efixed)
         logger.information('Efixed = %f' % e_fixed)
 
@@ -685,12 +686,13 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # --------- Set wavelengths as X-values in Output Workspace ----------
 
         waves = (0.01 * np.arange(-1, workspace.blocksize())) + wave
-        logger.information('Waves : ' + str(waves))
+        logger.information('Waves for the dummy workspace: ' + str(waves))
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
             workspace.setX(idx, waves)
 
-        if isis_instrument:
+        if self._isis_instrument:
+            workspace.replaceAxis(1, SpectraAxis.create(workspace))
             self._update_instrument_angles(workspace, self._q_values, wave)
 
         return workspace
@@ -699,7 +701,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         """
         Updates the instrument angles in the specified workspace, using the specified wavelength
         and the specified Q-Values. This is required when calculating absorption corrections for
-        indirect elastic.
+        indirect elastic. This is used only for ISIS instruments.
 
         :param workspace:   The workspace whose instrument angles to update.
         :param q_values:    The extracted Q-Values (MomentumTransfer)

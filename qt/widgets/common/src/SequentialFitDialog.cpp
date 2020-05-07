@@ -88,7 +88,7 @@ void SequentialFitDialog::addWorkspace() {
   }
 }
 
-bool SequentialFitDialog::addWorkspaces(const QStringList wsNames) {
+bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
   if (wsNames.isEmpty())
     return false;
   int row = ui.tWorkspaces->rowCount();
@@ -113,7 +113,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList wsNames) {
     if (ui.ckbLogPlot->isChecked()) {
       // set spectrum number corresponding to the workspace index
       Mantid::API::MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
                   name.toStdString()));
       int spec = -1;
@@ -191,9 +191,9 @@ void SequentialFitDialog::removeItem() {
   }
 }
 
-bool SequentialFitDialog::validateLogs(const QString wsName) {
+bool SequentialFitDialog::validateLogs(const QString &wsName) {
   Mantid::API::MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               wsName.toStdString()));
   if (ws) {
@@ -272,7 +272,7 @@ QString SequentialFitDialog::getIndex(int row) const {
     }
   } else {
     Mantid::API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 name(row).toStdString()));
     Mantid::API::Axis *y = ws->getAxis(1);
@@ -387,7 +387,7 @@ void SequentialFitDialog::getFitResults() {
     return;
   }
   Mantid::API::ITableWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   if (!ws) {
     return;
@@ -458,7 +458,7 @@ void SequentialFitDialog::spectraChanged(int row, int col) {
                        .toString();
     Mantid::API::MatrixWorkspace_sptr ws;
     try {
-      ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               name.toStdString()));
     } catch (...) { //
@@ -564,7 +564,7 @@ void SequentialFitDialog::plotAgainstLog(bool yes) {
   //    ui.tWorkspaces->hideColumn(3);
   //    ui.tWorkspaces->horizontalHeaderItem(2)->setData(Qt::DisplayRole,"Range");
   //    Mantid::API::MatrixWorkspace_sptr ws =
-  //    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  //    std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
   //      Mantid::API::AnalysisDataService::Instance().retrieve(name(0).toStdString())
   //      );
   //    Mantid::API::Axis* y = ws->getAxis(1);

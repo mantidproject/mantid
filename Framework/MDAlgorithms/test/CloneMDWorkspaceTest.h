@@ -45,7 +45,7 @@ public:
     do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name2.nxs", true);
   }
 
-  void do_test(bool fileBacked, std::string Filename = "",
+  void do_test(bool fileBacked, const std::string &Filename = "",
                bool file_needs_updating = false) {
     // Name of the output workspace.
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
@@ -117,7 +117,7 @@ public:
   }
 
   /** Clone a workspace and check that the clone matches */
-  void do_test_MDHisto(MDHistoWorkspace_sptr ws1) {
+  void do_test_MDHisto(const MDHistoWorkspace_sptr &ws1) {
     // Name of the output workspace.
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
     // Add the input workspace

@@ -22,8 +22,9 @@
  * New peak types will need to have a color entry registered here.
  */
 struct PeakViewColor {
-  PeakViewColor(QColor colorCross = QColor(), QColor colorSphere = QColor(),
-                QColor colorEllipsoid = QColor())
+  PeakViewColor(const QColor &colorCross = QColor(),
+                const QColor &colorSphere = QColor(),
+                const QColor &colorEllipsoid = QColor())
       : colorCross(colorCross), colorSphere(colorSphere),
         colorEllipsoid(colorEllipsoid) {}
 

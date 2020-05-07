@@ -54,8 +54,8 @@ Mantid::API::MatrixWorkspace_sptr setUpResolutionWorkspace() {
   return createWorkspace->getProperty("OutputWorkspace");
 }
 
-IAlgorithm_sptr calculateIqtAlgorithm(MatrixWorkspace_sptr sample,
-                                      MatrixWorkspace_sptr resolution,
+IAlgorithm_sptr calculateIqtAlgorithm(const MatrixWorkspace_sptr &sample,
+                                      const MatrixWorkspace_sptr &resolution,
                                       const double EnergyMin = -0.5,
                                       const double EnergyMax = 0.5,
                                       const double EnergyWidth = 0.1,

@@ -19,7 +19,6 @@
 # The run numbers themselves may be specified as a comma separated list of
 # individual run numbers, or ranges specified with a colon separator.
 #
-from __future__ import (absolute_import, division, print_function)
 
 
 def LoadDictionary( *filenames, **kwargs ):

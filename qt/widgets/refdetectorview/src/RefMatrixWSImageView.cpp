@@ -21,7 +21,8 @@ using namespace Mantid::API;
 /**
  * Construct an ImageView for the specified matrix workspace
  */
-RefMatrixWSImageView::RefMatrixWSImageView(MatrixWorkspace_sptr /*mat_ws*/)
+RefMatrixWSImageView::RefMatrixWSImageView(
+    const MatrixWorkspace_sptr & /*mat_ws*/)
     : m_imageView(nullptr) {
   return;
   //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
@@ -31,7 +32,7 @@ RefMatrixWSImageView::RefMatrixWSImageView(MatrixWorkspace_sptr /*mat_ws*/)
   //                                         // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView(QString wpsName, int peakMin,
+RefMatrixWSImageView::RefMatrixWSImageView(const QString &wpsName, int peakMin,
                                            int peakMax, int backMin,
                                            int backMax, int tofMin,
                                            int tofMax) {
@@ -59,7 +60,7 @@ RefMatrixWSImageView::RefMatrixWSImageView(QString wpsName, int peakMin,
       data[px * sz + tof] = static_cast<float>(yAxis[tof]);
   }
 
-  auto source = boost::make_shared<SpectrumView::ArrayDataSource>(
+  auto source = std::make_shared<SpectrumView::ArrayDataSource>(
       totalXMin, totalXMax, totalYMin, static_cast<double>(totalYMax),
       totalRows, totalCols, data);
 

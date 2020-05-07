@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -101,7 +102,7 @@ private:
    *
    * @param workspace handle to the workspace to to load data into
    */
-  void getData(API::MatrixWorkspace_sptr workspace);
+  void getData(const API::MatrixWorkspace_sptr &workspace);
 
   /**
    * Function to setup the workspace ready for data to be loaded into it
@@ -117,7 +118,7 @@ private:
    * @param xAxis the x axis data
    * @param yAxis the y axis data
    */
-  void setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
+  void setWorkspaceAxes(const API::MatrixWorkspace_sptr &workspace,
                         const std::vector<double> &xAxis,
                         const std::vector<double> &yAxis) const;
 

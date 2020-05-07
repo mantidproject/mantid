@@ -36,20 +36,20 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
-  void saveFITSImage(const API::MatrixWorkspace_sptr img,
+  void saveFITSImage(const API::MatrixWorkspace_sptr &img,
                      const std::string &filename);
 
-  void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
+  void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img,
                             std::ofstream &file);
 
-  void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
+  void writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img,
                             std::ofstream &file);
 
   void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file);
 
   std::string makeBitDepthHeader(size_t depth) const;
 
-  void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
+  void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr &img,
                                 std::ofstream &file);
 
   void writePaddingFITSHeaders(size_t count, std::ofstream &file);

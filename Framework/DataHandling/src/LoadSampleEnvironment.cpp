@@ -7,8 +7,12 @@
 #include "MantidDataHandling/LoadSampleEnvironment.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
+#ifdef ENABLE_LIB3MF
+#include "MantidDataHandling/Mantid3MFFileIO.h"
+#endif
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
@@ -24,6 +28,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
@@ -42,7 +47,7 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleEnvironment::init() {
-  auto wsValidator = boost::make_shared<InstrumentValidator>();
+  auto wsValidator = std::make_shared<InstrumentValidator>();
   // input workspace
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -50,7 +55,7 @@ void LoadSampleEnvironment::init() {
                   "the Environment");
 
   // Environment file
-  const std::vector<std::string> extensions{".stl"};
+  const std::vector<std::string> extensions{".stl", ".3mf"};
   declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load, extensions),
                   "The path name of the file containing the Environment");
@@ -90,7 +95,7 @@ void LoadSampleEnvironment::init() {
   declareProperty("AtomicNumber", 0, "The atomic number");
   declareProperty("MassNumber", 0,
                   "Mass number if ion (use 0 for default mass sensity)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
                   "This number density of the sample in number of "
@@ -114,12 +119,17 @@ void LoadSampleEnvironment::init() {
                   "Optional:  This total scattering cross-section (coherent + "
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
+  const std::vector<std::string> attExtensions{".DAT"};
+  declareProperty(
+      std::make_unique<FileProperty>("AttenuationProfile", "",
+                                     FileProperty::OptionalLoad, attExtensions),
+      "The path name of the file containing the attenuation profile");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
   declareProperty("NumberDensityUnit", units.front(),
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
@@ -159,6 +169,7 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
+  setPropertyGroup("AttenuationProfile", specificValuesGrp);
   setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>(
                                               "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
@@ -169,6 +180,9 @@ void LoadSampleEnvironment::init() {
       std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
       "ScatteringXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "AttenuationProfile",
       std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 }
 
@@ -188,28 +202,26 @@ std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
   return result;
 }
 
-void LoadSampleEnvironment::exec() {
-
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-
-  if (inputWS != outputWS) {
-    outputWS = inputWS->clone();
-  }
-
-  const std::string filename = getProperty("Filename");
-  const std::ifstream file(filename.c_str());
-  if (!file) {
-    g_log.error("Unable to open file: " + filename);
-    throw Exception::FileError("Unable to open file: ", filename);
-  }
-
-  boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+/**
+ * Load a sample environment definition from a .stl file
+ * @param filename Name of the .stl file
+ * @param sample The sample object that any sample geometry present will be
+ * loaded into
+ * @param add Flag to control whether the component in the .stl file will
+ * be added to any pre-existing components already in the environment
+ * @param debugString Debug string that can be appended to by this function
+ */
+void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
+                                                   Sample &sample,
+                                                   const bool add,
+                                                   std::string debugString) {
+  std::unique_ptr<SampleEnvironment> environment = nullptr;
+  std::shared_ptr<MeshObject> environmentMesh = nullptr;
 
   std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
   const std::string scaleProperty = getPropertyValue("Scale");
-  const ScaleUnits scaleType = getScaleType(scaleProperty);
+  const ScaleUnits scaleType = getScaleTypeFromStr(scaleProperty);
 
   bool isBinary;
   if (LoadBinaryStl::isBinarySTL(filename)) {
@@ -235,6 +247,7 @@ void LoadSampleEnvironment::exec() {
     params.incoherentXSection = getProperty("IncoherentXSection");
     params.attenuationXSection = getProperty("AttenuationXSection");
     params.scatteringXSection = getProperty("ScatteringXSection");
+    params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
     const std::string numberDensityUnit = getProperty("NumberDensityUnit");
     if (numberDensityUnit == "Atoms") {
       params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
@@ -267,22 +280,19 @@ void LoadSampleEnvironment::exec() {
   environmentMesh = reader->translate(environmentMesh, translationVector);
 
   std::string name = getProperty("EnvironmentName");
-  const bool add = getProperty("Add");
-  Sample &sample = outputWS->mutableSample();
-  std::unique_ptr<SampleEnvironment> environment = nullptr;
   if (add) {
     environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
-    auto can = boost::make_shared<Container>(environmentMesh);
+    auto can = std::make_shared<Container>(environmentMesh);
     environment = std::make_unique<SampleEnvironment>(name, can);
   }
-  // Put Environment into sample.
 
-  std::string debugString =
+  debugString +=
       "Environment has: " + std::to_string(environment->nelements()) +
       " elements.";
 
+  // Put Environment into sample.
   sample.setEnvironment(std::move(environment));
 
   auto translatedVertices = environmentMesh->getVertices();
@@ -296,6 +306,100 @@ void LoadSampleEnvironment::exec() {
       }
     }
   }
+}
+
+/**
+ * Load a sample environment definition from a .3mf file
+ * @param inputWS Workspace containing optional goniometer info
+ * @param filename Name of the .3mf file
+ * @param sample The sample object that any sample geometry present will be
+ * loaded into
+ * @param add Flag to control whether the components in the .3mf file will
+ * be added to any pre-existing components already in the environment
+ * @param debugString Debug string that can be appended to by this function
+ */
+void LoadSampleEnvironment::loadEnvironmentFrom3MF(
+    MatrixWorkspace_const_sptr inputWS, const std::string filename,
+    Sample &sample, const bool add, std::string debugString) {
+#ifdef ENABLE_LIB3MF
+  std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
+  Mantid3MFFileIO MeshLoader;
+  MeshLoader.LoadFile(filename);
+  boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+  std::string name = getProperty("EnvironmentName");
+  std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+  std::shared_ptr<Geometry::MeshObject> sampleMesh;
+
+  MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
+
+  if (sampleMesh) {
+    sampleMesh->rotate(inputWS->run().getGoniometer().getR());
+    sample.setShape(sampleMesh);
+  }
+
+  for (auto environmentMesh : environmentMeshes) {
+    if (!environment) {
+      if (add) {
+        environment =
+            std::make_unique<SampleEnvironment>(sample.getEnvironment());
+        environment->add(environmentMesh);
+      } else {
+        auto can = std::make_shared<Container>(environmentMesh);
+        environment = std::make_unique<SampleEnvironment>(name, can);
+      }
+    } else {
+      environment->add(environmentMesh);
+    }
+
+    debugString +=
+        "Environment has: " + std::to_string(environment->nelements()) +
+        " elements.";
+  }
+
+  // Put Environment into sample.
+  sample.setEnvironment(std::move(environment));
+#else
+  UNUSED_ARG(inputWS)
+  UNUSED_ARG(filename)
+  UNUSED_ARG(sample)
+  UNUSED_ARG(add)
+  UNUSED_ARG(debugString)
+  throw std::runtime_error("3MF format not supported on this platform");
+#endif
+}
+
+void LoadSampleEnvironment::exec() {
+
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+
+  if (inputWS != outputWS) {
+    outputWS = inputWS->clone();
+  }
+
+  const std::string filename = getProperty("Filename");
+  const std::ifstream file(filename.c_str());
+  if (!file) {
+    g_log.error("Unable to open file: " + filename);
+    throw Exception::FileError("Unable to open file: ", filename);
+  }
+
+  const bool add = getProperty("Add");
+  std::string debugString;
+  Sample &sample = outputWS->mutableSample();
+
+  std::string fileExt = Poco::Path(filename).getExtension();
+
+  std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
+
+  if (fileExt == "STL") {
+    loadEnvironmentFromSTL(filename, sample, add, debugString);
+  } else if (fileExt == "3MF") {
+    loadEnvironmentFrom3MF(inputWS, filename, sample, add, debugString);
+  } else {
+    throw "Invalid file extension";
+  }
+
   // get the material name and number density for debug
   const auto outMaterial =
       outputWS->sample().getEnvironment().getContainer().material();
@@ -308,7 +412,7 @@ void LoadSampleEnvironment::exec() {
   // Set output workspace
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
-} // namespace DataHandling
+}
 
 } // namespace DataHandling
 } // namespace Mantid

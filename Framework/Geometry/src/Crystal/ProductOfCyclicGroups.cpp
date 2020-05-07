@@ -49,7 +49,7 @@ std::vector<Group_const_sptr> ProductOfCyclicGroups::getFactorGroups(
 Group_const_sptr ProductOfCyclicGroups::getProductOfCyclicGroups(
     const std::vector<Group_const_sptr> &factorGroups) const {
   Group_const_sptr productGroup =
-      boost::make_shared<const Group>(*(factorGroups.front()));
+      std::make_shared<const Group>(*(factorGroups.front()));
 
   for (size_t i = 1; i < factorGroups.size(); ++i) {
     productGroup = productGroup * factorGroups[i];

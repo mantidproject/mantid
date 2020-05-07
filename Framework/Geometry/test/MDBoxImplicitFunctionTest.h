@@ -106,7 +106,6 @@ public:
     // The box to test.
     const coord_t boxMin = 1.1f;
     const coord_t boxMax = 1.9f;
-    std::vector<coord_t> boxVertexes;
     std::vector<Extent> extents;
     // extent
     extents.emplace_back(Extent(boxMin, boxMax));

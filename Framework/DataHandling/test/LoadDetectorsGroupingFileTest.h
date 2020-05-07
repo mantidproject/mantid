@@ -79,7 +79,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+    GroupingWorkspace_sptr gws = std::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
@@ -112,7 +112,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+    GroupingWorkspace_sptr gws = std::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
@@ -124,7 +124,7 @@ public:
     API::AnalysisDataService::Instance().remove(ws);
   }
 
-  ScopedFile generateAutoGroupIDGroupXMLFile(std::string xmlfilename) {
+  ScopedFile generateAutoGroupIDGroupXMLFile(const std::string &xmlfilename) {
     std::ostringstream os;
 
     os << "<?xml version=\"1.0\"?>\n";
@@ -161,7 +161,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+    GroupingWorkspace_sptr gws = std::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
@@ -173,7 +173,7 @@ public:
     API::AnalysisDataService::Instance().remove(ws);
   }
 
-  ScopedFile generateSpectrumIDXMLFile(std::string xmlfilename) {
+  ScopedFile generateSpectrumIDXMLFile(const std::string &xmlfilename) {
     std::ostringstream os;
 
     os << "<?xml version=\"1.0\"?>\n";
@@ -210,7 +210,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+    GroupingWorkspace_sptr gws = std::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
@@ -222,7 +222,7 @@ public:
     API::AnalysisDataService::Instance().remove(ws);
   }
 
-  ScopedFile generateOldSpectrumIDXMLFile(std::string xmlfilename) {
+  ScopedFile generateOldSpectrumIDXMLFile(const std::string &xmlfilename) {
     std::ostringstream os;
 
     os << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
@@ -249,7 +249,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+    auto gws = std::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
     // Check that description was loaded
@@ -295,7 +295,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+    auto gws = std::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
@@ -338,7 +338,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+    auto gws = std::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);

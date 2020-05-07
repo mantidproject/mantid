@@ -5,14 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=R0913,W0403,R0903,C0103
-from __future__ import (absolute_import, division, print_function)
 import HFIR_4Circle_Reduction.fourcircle_utility as util4
 import math
 from mantid.api import AnalysisDataService
 import numpy
 import numpy.linalg
-from six.moves import range
-
 # This module does absorption correction
 
 

@@ -11,8 +11,6 @@
 # Here we run the calibration of WISH panel03 using a simple CalibrateWish function.
 #
 
-from __future__ import absolute_import, division, print_function
-
 import numpy
 import tube
 import mantid.simpleapi as mantid

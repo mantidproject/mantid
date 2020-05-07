@@ -56,9 +56,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    IMDEventWorkspace_sptr hklws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("HKLMD"));
+    IMDEventWorkspace_sptr hklws = std::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve("HKLMD"));
     TS_ASSERT(hklws);
 
     size_t numevents = hklws->getNEvents();

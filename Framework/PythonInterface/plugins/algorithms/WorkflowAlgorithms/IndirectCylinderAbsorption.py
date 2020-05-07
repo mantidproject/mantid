@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, too-many-instance-attributes
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, PropertyMode, Progress
 from mantid.kernel import (StringMandatoryValidator, Direction, logger, FloatBoundedValidator,

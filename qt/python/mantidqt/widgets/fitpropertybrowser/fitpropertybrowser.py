@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (print_function, absolute_import, unicode_literals)
-
 from qtpy.QtCore import Qt, Signal, Slot
 
 import matplotlib.pyplot
@@ -38,7 +36,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
-        self.init()
         self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
         # The toolbar state manager to be passed to the peak editing tool

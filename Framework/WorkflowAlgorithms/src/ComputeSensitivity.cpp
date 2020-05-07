@@ -48,7 +48,7 @@ void ComputeSensitivity::exec() {
   progress(0.1, "Setting up sensitivity calculation");
 
   // Reduction property manager
-  boost::shared_ptr<PropertyManager> reductionManager = getProcessProperties();
+  std::shared_ptr<PropertyManager> reductionManager = getProcessProperties();
 
   const std::string outputWS = getPropertyValue("OutputWorkspace");
 

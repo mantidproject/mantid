@@ -24,10 +24,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
@@ -43,6 +41,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -114,7 +113,7 @@ void LoadHFIRSANS::init() {
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite the value in the data file (used when the data file is not
   // populated)
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
                   "Optional wavelength value to use when loading the data file "
@@ -384,7 +383,7 @@ void LoadHFIRSANS::createWorkspace() {
 
   int numSpectra = static_cast<int>(data.size()) + m_nMonitors;
 
-  m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+  m_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, 2,
                                                1));
   m_workspace->setTitle(m_metadata["Header/Scan_Title"]);

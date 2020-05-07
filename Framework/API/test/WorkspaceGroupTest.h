@@ -17,10 +17,10 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -50,10 +50,10 @@ public:
 class WorkspaceGroupTest : public CxxTest::TestSuite {
 private:
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
-  void add_periods_logs(WorkspaceGroup_sptr ws, int nperiods = -1) {
+  void add_periods_logs(const WorkspaceGroup_sptr &ws, int nperiods = -1) {
     for (size_t i = 0; i < ws->size(); ++i) {
       MatrixWorkspace_sptr currentWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
 
       PropertyWithValue<int> *nperiodsProp =
           new PropertyWithValue<int>("nperiods", nperiods);
@@ -82,8 +82,7 @@ private:
   /// Make a simple group
   WorkspaceGroup_sptr makeGroup() {
     for (size_t i = 0; i < 3; i++) {
-      boost::shared_ptr<WorkspaceTester> ws =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
       ws->initialize(2, 4, 3);
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
                                                    ws);
@@ -282,8 +281,7 @@ public:
     AnalysisDataService::Instance().add("name", group);
     TSM_ASSERT("Empty group is not similar", !group->areNamesSimilar());
 
-    boost::shared_ptr<WorkspaceTester> ws =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 4, 3);
     AnalysisDataService::Instance().addOrReplace("name_0", ws);
 
@@ -317,7 +315,7 @@ public:
   }
 
   void test_not_multiperiod_without_matrix_workspaces() {
-    Workspace_sptr a = boost::make_shared<MockWorkspace>();
+    Workspace_sptr a = std::make_shared<MockWorkspace>();
     WorkspaceGroup group;
     group.addWorkspace(a);
     TSM_ASSERT(
@@ -326,9 +324,9 @@ public:
   }
 
   void test_not_multiperiod_if_missing_nperiods_log() {
-    Workspace_sptr a = boost::make_shared<WorkspaceTester>(); // workspace has
-                                                              // no nperiods
-                                                              // entry.
+    Workspace_sptr a = std::make_shared<WorkspaceTester>(); // workspace has
+                                                            // no nperiods
+                                                            // entry.
     WorkspaceGroup group;
     group.addWorkspace(a);
     TSM_ASSERT("Cannot be multiperiod without nperiods log.",
@@ -336,8 +334,8 @@ public:
   }
 
   void test_not_multiperiod_if_nperiods_log_less_than_one() {
-    Workspace_sptr a = boost::make_shared<WorkspaceTester>();
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    Workspace_sptr a = std::make_shared<WorkspaceTester>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
     add_periods_logs(group, 0); // nperiods set to 0.
     TSM_ASSERT("Cannot be multiperiod without nperiods log.",
@@ -345,8 +343,8 @@ public:
   }
 
   void test_positive_identification_of_multiperiod_data() {
-    Workspace_sptr a = boost::make_shared<WorkspaceTester>();
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    Workspace_sptr a = std::make_shared<WorkspaceTester>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
     add_periods_logs(group, 1);
     TS_ASSERT(group->isMultiperiod());
@@ -361,17 +359,17 @@ public:
     WorkspaceGroup_sptr group = makeGroup();
     auto ws1 = group->getItem(1);
     TS_ASSERT(group->isInGroup(*ws1));
-    Workspace_sptr a = boost::make_shared<WorkspaceTester>();
+    Workspace_sptr a = std::make_shared<WorkspaceTester>();
     TS_ASSERT(!group->isInGroup(*a));
 
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group1 = std::make_shared<WorkspaceGroup>();
     group1->addWorkspace(a);
     group->addWorkspace(group1);
     TS_ASSERT(group->isInGroup(*a));
 
     // catch a cycle
     group1->addWorkspace(group);
-    Workspace_sptr b = boost::make_shared<WorkspaceTester>();
+    Workspace_sptr b = std::make_shared<WorkspaceTester>();
     TS_ASSERT_THROWS(group->isInGroup(*b), const std::runtime_error &);
     group1->removeAll();
   }

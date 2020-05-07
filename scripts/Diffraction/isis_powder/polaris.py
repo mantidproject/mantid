@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import os
 
 from isis_powder.routines import absorb_corrections, common, instrument_settings
@@ -64,9 +63,12 @@ class Polaris(AbstractInst):
                                                   q_lims=self._inst_settings.q_lims,
                                                   cal_file_name=cal_file_name,
                                                   sample_details=self._sample_details,
-                                                  output_binning=self._inst_settings.output_binning,
+                                                  delta_r=self._inst_settings.delta_r,
+                                                  delta_q=self._inst_settings.delta_q,
                                                   pdf_type=self._inst_settings.pdf_type,
-                                                  freq_params=self._inst_settings.freq_params)
+                                                  lorch_filter=self._inst_settings.lorch_filter,
+                                                  freq_params=self._inst_settings.freq_params,
+                                                  bw_order=self._inst_settings.bw_order)
         return pdf_output
 
     def set_sample_details(self, **kwargs):

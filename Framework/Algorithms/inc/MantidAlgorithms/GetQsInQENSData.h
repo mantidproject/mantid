@@ -53,7 +53,7 @@ private:
   void exec() override;
 
   /// Extracts Q-values from the specified matrix workspace
-  MantidVec extractQValues(const Mantid::API::MatrixWorkspace_sptr workspace);
+  MantidVec extractQValues(const Mantid::API::MatrixWorkspace_sptr &workspace);
 };
 } // namespace Algorithms
 } // namespace Mantid

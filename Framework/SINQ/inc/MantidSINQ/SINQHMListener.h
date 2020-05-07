@@ -36,7 +36,7 @@ public:
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(Mantid::Types::Core::DateAndTime startTime =
                  Mantid::Types::Core::DateAndTime()) override;
-  boost::shared_ptr<Mantid::API::Workspace> extractData() override;
+  std::shared_ptr<Mantid::API::Workspace> extractData() override;
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override { return 0; }
@@ -52,11 +52,11 @@ private:
   int dim[3]; // @SINQ we only do 3D HM's, change when more dimensions
   std::string hmhost;
 
-  std::istream &httpRequest(std::string path);
+  std::istream &httpRequest(const std::string &path);
   void loadDimensions();
   void doSpecialDim();
-  void readHMData(Mantid::API::IMDHistoWorkspace_sptr ws);
-  void recurseDim(int *data, Mantid::API::IMDHistoWorkspace_sptr ws,
+  void readHMData(const Mantid::API::IMDHistoWorkspace_sptr &ws);
+  void recurseDim(int *data, const Mantid::API::IMDHistoWorkspace_sptr &ws,
                   int currentDim, Mantid::coord_t *idx);
   int calculateCAddress(Mantid::coord_t *pos);
 

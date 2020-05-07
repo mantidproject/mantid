@@ -7,8 +7,8 @@
 #include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
-#include <boost/make_shared.hpp>
 #include <boost/python.hpp>
+#include <memory>
 
 #define PY_ARRAY_UNIQUE_SYMBOL CORE_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -51,7 +51,7 @@ PyObject *to_datetime64(const DateAndTime &dateandtime) {
 PyArray_Descr *descr_ns() { return func_PyArray_Descr("M8[ns]"); }
 
 // internal function that handles raw pointer
-boost::shared_ptr<Types::Core::DateAndTime>
+std::shared_ptr<Types::Core::DateAndTime>
 to_dateandtime(const PyObject *datetime) {
   GNU_DIAG_OFF("cast-qual")
   if (!PyArray_IsScalar(datetime, Datetime)) {
@@ -82,35 +82,34 @@ to_dateandtime(const PyObject *datetime) {
   default:
     throw std::runtime_error("Not implemented time unit");
   } // units
-  return boost::make_shared<DateAndTime>(UNIX_EPOCH_NS + value);
+  return std::make_shared<DateAndTime>(UNIX_EPOCH_NS + value);
 }
 
-boost::shared_ptr<Types::Core::DateAndTime>
+std::shared_ptr<Types::Core::DateAndTime>
 to_dateandtime(const boost::python::api::object &value) {
   boost::python::extract<Types::Core::DateAndTime> converter_dt(value);
   if (converter_dt.check()) {
-    return boost::make_shared<DateAndTime>(converter_dt());
+    return std::make_shared<DateAndTime>(converter_dt());
   }
 
   boost::python::extract<std::string> converter_str(value);
   if (converter_str.check()) {
-    return boost::make_shared<DateAndTime>(converter_str());
+    return std::make_shared<DateAndTime>(converter_str());
   }
 
   boost::python::extract<double> converter_dbl(value);
   if (converter_dbl.check()) {
-    return boost::make_shared<DateAndTime>(
-        static_cast<int64_t>(converter_dbl()));
+    return std::make_shared<DateAndTime>(static_cast<int64_t>(converter_dbl()));
   }
 
   boost::python::extract<int64_t> converter_int64(value);
   if (converter_int64.check()) {
-    return boost::make_shared<DateAndTime>(converter_int64());
+    return std::make_shared<DateAndTime>(converter_int64());
   }
 
   boost::python::extract<int64_t> converter_int32(value);
   if (converter_int32.check()) {
-    return boost::make_shared<DateAndTime>(converter_int32());
+    return std::make_shared<DateAndTime>(converter_int32());
   }
 
   // assume it is a numpy.datetime64

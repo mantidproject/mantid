@@ -55,8 +55,8 @@ private:
   /// Text for tooltip for save event data
   QString m_saveEventDataToolTip;
   /// Set the bin field
-  void setHistogramUiLogic(QString label, QString toolTip, QString lineEditText,
-                           bool enabled);
+  void setHistogramUiLogic(const QString &label, const QString &toolTip,
+                           const QString &lineEditText, bool enabled);
   /// Set the histo gram input enabled or disabled
   void setInputEnabled(bool enabled);
   /// Create Python string list
@@ -69,7 +69,7 @@ private:
   QListWidgetItem *insertListFront(const QString &text);
   void
   changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
-  void setOutDir(std::string dir);
+  void setOutDir(const std::string &dir);
   bool checkValidityTimeShiftsForAddedEventFiles();
 
 private slots:

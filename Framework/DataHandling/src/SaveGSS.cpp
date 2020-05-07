@@ -145,13 +145,13 @@ void SaveGSS::init() {
 
   const std::vector<std::string> formats{RALF, SLOG};
   declareProperty("Format", RALF,
-                  boost::make_shared<Kernel::StringListValidator>(formats),
+                  std::make_shared<Kernel::StringListValidator>(formats),
                   "GSAS format to save as");
 
   const std::vector<std::string> ralfDataFormats{FXYE, ALT};
   declareProperty(
       "DataFormat", FXYE,
-      boost::make_shared<Kernel::StringListValidator>(ralfDataFormats),
+      std::make_shared<Kernel::StringListValidator>(ralfDataFormats),
       "Saves RALF data as either FXYE or alternative format");
   setPropertySettings(
       "DataFormat",
@@ -188,11 +188,11 @@ void SaveGSS::init() {
       "Number of strings in the give array must be same as number of banks."
       "And the order is preserved.");
 
-  auto must_be_3 = boost::make_shared<Kernel::ArrayLengthValidator<int>>(3);
+  auto must_be_3 = std::make_shared<Kernel::ArrayLengthValidator<int>>(3);
   auto precision_range =
-      boost::make_shared<Kernel::ArrayBoundedValidator<int>>(0, 10);
+      std::make_shared<Kernel::ArrayBoundedValidator<int>>(0, 10);
 
-  auto precision_validator = boost::make_shared<Kernel::CompositeValidator>();
+  auto precision_validator = std::make_shared<Kernel::CompositeValidator>();
   precision_validator->add(must_be_3);
   precision_validator->add(precision_range);
 

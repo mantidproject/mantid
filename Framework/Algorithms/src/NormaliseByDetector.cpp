@@ -57,10 +57,10 @@ const std::string NormaliseByDetector::category() const {
 /** Initialize the algorithm's properties.
  */
 void NormaliseByDetector::init() {
-  auto compositeValidator = boost::make_shared<CompositeValidator>();
+  auto compositeValidator = std::make_shared<CompositeValidator>();
   compositeValidator->add(
-      boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
-  compositeValidator->add(boost::make_shared<API::HistogramValidator>());
+      std::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
+  compositeValidator->add(std::make_shared<API::HistogramValidator>());
 
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -73,7 +73,7 @@ void NormaliseByDetector::init() {
 }
 
 const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
-    Geometry::Parameter_sptr parameter, const Geometry::IDetector &det) {
+    const Geometry::Parameter_sptr &parameter, const Geometry::IDetector &det) {
   if (parameter == nullptr) {
     std::stringstream stream;
     stream << det.getName()
@@ -99,10 +99,9 @@ normalisation routine.
 use.
 @param prog: progress reporting object.
 */
-void NormaliseByDetector::processHistogram(size_t wsIndex,
-                                           MatrixWorkspace_const_sptr inWS,
-                                           MatrixWorkspace_sptr denominatorWS,
-                                           Progress &prog) {
+void NormaliseByDetector::processHistogram(
+    size_t wsIndex, const MatrixWorkspace_const_sptr &inWS,
+    const MatrixWorkspace_sptr &denominatorWS, Progress &prog) {
   const auto &paramMap = inWS->constInstrumentParameters();
   const auto &spectrumInfo = inWS->spectrumInfo();
   const auto &det = spectrumInfo.detector(wsIndex);
@@ -164,7 +163,7 @@ sequentially.
 use.
 */
 MatrixWorkspace_sptr
-NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
+NormaliseByDetector::processHistograms(const MatrixWorkspace_sptr &inWS) {
   const size_t nHistograms = inWS->getNumberHistograms();
   const auto progress_items = static_cast<size_t>(double(nHistograms) * 1.2);
   Progress prog(this, 0.0, 1.0, progress_items);
@@ -177,7 +176,7 @@ NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
   cloneAlg->executeAsChildAlg();
   Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr denominatorWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
   // Choose between parallel execution and sequential execution then, process
   // histograms accordingly.

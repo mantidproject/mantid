@@ -59,7 +59,7 @@ public:
   /// Load the parameters from Nexus file if possible, else from parameter file,
   /// into workspace
   void LoadParameters(::NeXus::File *nxfile,
-                      const API::MatrixWorkspace_sptr localWorkspace);
+                      const API::MatrixWorkspace_sptr &localWorkspace);
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
@@ -77,7 +77,7 @@ private:
   /// Load Parameter File specified by full pathname into given workspace,
   /// return success
   bool loadParameterFile(const std::string &fullPathName,
-                         const API::MatrixWorkspace_sptr localWorkspace);
+                         const API::MatrixWorkspace_sptr &localWorkspace);
 };
 
 } // namespace DataHandling

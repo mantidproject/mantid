@@ -16,9 +16,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -98,7 +98,7 @@ void LoadRawSpectrum0::exec() {
   // separate workspace
   for (int period = 0; period < m_numberOfPeriods; ++period) {
     if (period > 0) {
-      localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
 
       if (bLoadlogFiles) {

@@ -29,7 +29,7 @@ using namespace Mantid::Kernel::Strings;
  * them.
  * @param workspace workspace possibly containing Q values.
  */
-std::vector<double> extractQValues(const MatrixWorkspace_sptr workspace,
+std::vector<double> extractQValues(const MatrixWorkspace_sptr &workspace,
                                    const Spectra &spectra) {
   std::vector<double> qs;
   // Check if the vertical axis has units of momentum transfer, then extract Q
@@ -37,7 +37,7 @@ std::vector<double> extractQValues(const MatrixWorkspace_sptr workspace,
   auto axis_ptr =
       dynamic_cast<Mantid::API::NumericAxis *>(workspace->getAxis(1));
   if (axis_ptr) {
-    const boost::shared_ptr<Mantid::Kernel::Unit> &unit_ptr = axis_ptr->unit();
+    const std::shared_ptr<Mantid::Kernel::Unit> &unit_ptr = axis_ptr->unit();
     if (unit_ptr->unitID() == "MomentumTransfer") {
       for (auto spectrum : spectra) {
         qs.emplace_back(axis_ptr->operator()(spectrum.value));
@@ -143,7 +143,7 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
   }
 }
 
-std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
+std::pair<double, double> getBinRange(const MatrixWorkspace_sptr &workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
 
@@ -212,6 +212,7 @@ Spectra::Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   }
   m_vec.resize(maximum.value - minimum.value + 1);
   std::iota(m_vec.begin(), m_vec.end(), minimum);
+  m_isContinuous = true;
 }
 
 Spectra::Spectra(const Spectra &vec)
@@ -296,7 +297,7 @@ void Spectra::checkContinuous() {
   }
 }
 
-IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
+IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace,
                                  const Spectra &spectra)
     : m_workspace(workspace), m_spectra(Spectra("")) {
   setSpectra(spectra);

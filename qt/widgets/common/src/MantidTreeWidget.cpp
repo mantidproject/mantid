@@ -37,7 +37,7 @@ MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
   setSortOrder(Qt::AscendingOrder);
   setAcceptDrops(true);
 
-  m_doubleClickAction = [&](QString wsName) {
+  m_doubleClickAction = [&](const QString &wsName) {
     m_mantidUI->importWorkspace(wsName, false);
   };
 }
@@ -137,7 +137,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
     }
     auto wsName = wsNames.front();
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
-    grpWSPstr = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    grpWSPstr = std::dynamic_pointer_cast<WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (!grpWSPstr) {
       if (!wsName.isEmpty()) {
@@ -182,7 +182,7 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   std::set<QString> selectedWsNameSet;
   std::vector<QString> selectedWsNameList;
   foreach (const QString wsName, this->getSelectedWorkspaceNames()) {
-    const auto groupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+    const auto groupWs = std::dynamic_pointer_cast<const WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
@@ -205,7 +205,7 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto selectedWsName, selectedWsNameList) {
-    const auto matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+    const auto matrixWs = std::dynamic_pointer_cast<const MatrixWorkspace>(
         m_ads.retrieve(selectedWsName.toStdString()));
     if (matrixWs) {
       selectedMatrixWsList.append(matrixWs);

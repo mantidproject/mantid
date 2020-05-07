@@ -86,7 +86,7 @@ protected:
   friend class CurveFitting::Algorithms::Fit;
 };
 
-using IFunction1D_sptr = boost::shared_ptr<IFunction1D>;
+using IFunction1D_sptr = std::shared_ptr<IFunction1D>;
 
 } // namespace API
 } // namespace Mantid

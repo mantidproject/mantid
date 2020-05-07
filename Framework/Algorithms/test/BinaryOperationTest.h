@@ -7,6 +7,8 @@
 #pragma once
 
 #include <cmath>
+#include <utility>
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -42,8 +44,8 @@ public:
   /// is provided.
   const std::string summary() const override { return "Summary of this test."; }
 
-  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,
-                                     const MatrixWorkspace_const_sptr ws2) {
+  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr &ws1,
+                                     const MatrixWorkspace_const_sptr &ws2) {
     m_lhs = ws1;
     m_rhs = ws2;
     m_lhsBlocksize = ws1->blocksize();
@@ -297,9 +299,11 @@ public:
                                     std::vector<std::vector<int>> rhs,
                                     bool expect_throw = false) {
     EventWorkspace_sptr lhsWS =
-        WorkspaceCreationHelper::createGroupedEventWorkspace(lhs, 50, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(std::move(lhs), 50,
+                                                             1.0);
     EventWorkspace_sptr rhsWS =
-        WorkspaceCreationHelper::createGroupedEventWorkspace(rhs, 50, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(std::move(rhs), 50,
+                                                             1.0);
     BinaryOperation::BinaryOperationTable_sptr table;
     Mantid::Kernel::Timer timer1;
     if (expect_throw) {

@@ -36,6 +36,8 @@
 #include <fstream>
 
 #include <cmath>
+#include <utility>
+
 #include <gsl/gsl_sf_erf.h>
 
 /// Factor on FWHM for fitting a peak
@@ -135,7 +137,7 @@ void FitPowderDiffPeaks::init() {
   vector<string> fitmodes(2);
   fitmodes[0] = "Robust";
   fitmodes[1] = "Confident";
-  auto fitvalidator = boost::make_shared<StringListValidator>(fitmodes);
+  auto fitvalidator = std::make_shared<StringListValidator>(fitmodes);
   declareProperty("FittingMode", "Robust", fitvalidator,
                   "Fitting mode such that user can determine"
                   "whether the input parameters are trustful or not.");
@@ -147,7 +149,7 @@ void FitPowderDiffPeaks::init() {
                   "Otherwise, calculate each peak's centre from d-spacing.");
 
   vector<string> genpeakoptions{"(HKL) & Calculation", "From Bragg Peak Table"};
-  auto propvalidator = boost::make_shared<StringListValidator>(genpeakoptions);
+  auto propvalidator = std::make_shared<StringListValidator>(genpeakoptions);
   declareProperty("PeakParametersStartingValueFrom", "(HKL) & Calculation",
                   propvalidator,
                   "Choice of how to generate starting values of "
@@ -376,7 +378,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
       m_vecPeakFunctions[0].second.second->getParameterNames();
 
   // II. Create local background function.
-  Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>();
+  Polynomial_sptr backgroundfunction = std::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -415,7 +417,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
       map<string, double> rightpeakparameters;
       goodfit = fitSinglePeakRobust(
           thispeak,
-          boost::dynamic_pointer_cast<BackgroundFunction>(backgroundfunction),
+          std::dynamic_pointer_cast<BackgroundFunction>(backgroundfunction),
           peakleftbound, peakrightbound, rightpeakparameters, chi2);
 
       m_peakFitChi2[peakindex] = chi2;
@@ -476,7 +478,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
       storeFunctionParameters(rightpeak, rightpeakparameters);
       goodfit = fitSinglePeakRobust(
           thispeak,
-          boost::dynamic_pointer_cast<BackgroundFunction>(backgroundfunction),
+          std::dynamic_pointer_cast<BackgroundFunction>(backgroundfunction),
           peakleftbound, peakrightbound, rightpeakparameters, chi2);
 
       if (goodfit) {
@@ -520,11 +522,10 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
 /** Observe peak range with hint from right peak's properties
  * Assumption: the background is reasonably flat within peak range
  */
-void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
-                                          BackToBackExponential_sptr rightpeak,
-                                          double refpeakshift,
-                                          double &peakleftbound,
-                                          double &peakrightbound) {
+void FitPowderDiffPeaks::observePeakRange(
+    const BackToBackExponential_sptr &thispeak,
+    const BackToBackExponential_sptr &rightpeak, double refpeakshift,
+    double &peakleftbound, double &peakrightbound) {
   double predictcentre = thispeak->centre();
   double rightfwhm = rightpeak->fwhm();
 
@@ -607,9 +608,10 @@ void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
  * Return: chi2 ... all the other parameter should be just in peak
  */
 bool FitPowderDiffPeaks::fitSinglePeakRobust(
-    BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
-    double peakleftbound, double peakrightbound,
-    map<string, double> rightpeakparammap, double &finalchi2) {
+    const BackToBackExponential_sptr &peak,
+    const BackgroundFunction_sptr &backgroundfunction, double peakleftbound,
+    double peakrightbound, const map<string, double> &rightpeakparammap,
+    double &finalchi2) {
   // 1. Build partial workspace
   Workspace2D_sptr peakws =
       buildPartialWorkspace(m_dataWS, m_wsIndex, peakleftbound, peakrightbound);
@@ -688,7 +690,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
 
   // a) Fit by using input peak parameters
   string peakinfoa0 =
-      getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+      getFunctionInfo(std::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice()
       << "[DBx533A] Approach A: Starting Peak Function Information: \n"
       << peakinfoa0 << '\n';
@@ -704,7 +706,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   solutions.emplace_back(solutiona);
 
   string peakinfoa1 =
-      getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+      getFunctionInfo(std::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533A] Approach A:  Fit Successful = " << fitgooda
                  << ", Chi2 = " << chi2a << ", Peak Function Information: \n"
                  << peakinfoa1 << '\n';
@@ -714,7 +716,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   peak->setParameter("S", sigma);
 
   string peakinfob0 =
-      getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+      getFunctionInfo(std::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice()
       << "[DBx533B] Approach B: Starting Peak Function Information: \n"
       << peakinfob0 << '\n';
@@ -731,7 +733,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   solutions.emplace_back(solutionb);
 
   string peakinfob1 =
-      getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+      getFunctionInfo(std::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533B] Approach 2: Fit Successful = " << fitgoodb
                  << ", Chi2 = " << chi2b << ", Peak Function Information: \n"
                  << peakinfob1 << '\n';
@@ -743,7 +745,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     peak->setParameter("I", height * fwhm);
 
     string peakinfoc0 =
-        getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+        getFunctionInfo(std::dynamic_pointer_cast<IFunction>(peak));
     g_log.notice()
         << "[DBx533C] Approach C: Starting Peak Function Information: \n"
         << peakinfoc0 << '\n';
@@ -759,7 +761,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     solutions.emplace_back(solutionc);
 
     string peakinfoc1 =
-        getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+        getFunctionInfo(std::dynamic_pointer_cast<IFunction>(peak));
     g_log.notice() << "[DBx533C] Approach C:  Fit Successful = " << fitgoodc
                    << ", Chi2 = " << chi2c << ", Peak Function Information: \n"
                    << peakinfoc1 << '\n';
@@ -836,8 +838,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
  * Note 1: in a limited range (4*FWHM)
  */
 bool FitPowderDiffPeaks::doFit1PeakBackground(
-    Workspace2D_sptr dataws, size_t wsindex, BackToBackExponential_sptr peak,
-    BackgroundFunction_sptr backgroundfunction, double &chi2) {
+    const Workspace2D_sptr &dataws, size_t wsindex,
+    const BackToBackExponential_sptr &peak,
+    const BackgroundFunction_sptr &backgroundfunction, double &chi2) {
   // 0. Set fit parameters
   string minimzername("Levenberg-MarquardtMD");
   double startx = peak->centre() - 3.0 * peak->fwhm();
@@ -864,7 +867,7 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(
   fitalg->initialize();
 
   fitalg->setProperty("Function",
-                      boost::dynamic_pointer_cast<API::IFunction>(compfunc));
+                      std::dynamic_pointer_cast<API::IFunction>(compfunc));
   fitalg->setProperty("InputWorkspace", dataws);
   fitalg->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
   fitalg->setProperty("Minimizer", minimzername);
@@ -904,7 +907,7 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(
 /** Fit signle peak by Monte Carlo/simulated annealing
  */
 bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
-    BackToBackExponential_sptr peak, vector<string> paramtodomc) {
+    const BackToBackExponential_sptr &peak, const vector<string> &paramtodomc) {
   UNUSED_ARG(peak);
   UNUSED_ARG(paramtodomc);
   throw runtime_error("To Be Implemented Soon!");
@@ -1109,7 +1112,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
  */
 void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
   // 1. Initialize (local) background function
-  Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>();
+  Polynomial_sptr backgroundfunction = std::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -1218,8 +1221,9 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
  * @param annhilatedpeak :: (output) annhilatedpeak
  */
 bool FitPowderDiffPeaks::fitSinglePeakConfident(
-    BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
-    double leftbound, double rightbound, double &chi2, bool &annhilatedpeak) {
+    const BackToBackExponential_sptr &peak,
+    const BackgroundFunction_sptr &backgroundfunction, double leftbound,
+    double rightbound, double &chi2, bool &annhilatedpeak) {
   // 1. Build the partial workspace
   // a) Determine boundary if necessary
   if (leftbound < 0 || leftbound >= peak->centre())
@@ -1518,8 +1522,8 @@ void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak,
  *negative, then no constraint
  */
 std::pair<bool, double>
-FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
-                              BackToBackExponential_sptr peakfunction,
+FitPowderDiffPeaks::doFitPeak(const Workspace2D_sptr &dataws,
+                              const BackToBackExponential_sptr &peakfunction,
                               double guessedfwhm) {
   // 1. Set up boundary
   if (guessedfwhm > 0) {
@@ -1624,7 +1628,7 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
 /** Store the function's parameter values to a map
  */
 void FitPowderDiffPeaks::storeFunctionParameters(
-    IFunction_sptr function, std::map<string, double> &parammaps) {
+    const IFunction_sptr &function, std::map<string, double> &parammaps) {
   vector<string> paramnames = function->getParameterNames();
   parammaps.clear();
   for (auto &paramname : paramnames)
@@ -1635,7 +1639,7 @@ void FitPowderDiffPeaks::storeFunctionParameters(
 /** Restore the function's parameter values from a map
  */
 void FitPowderDiffPeaks::restoreFunctionParameters(
-    IFunction_sptr function, map<string, double> parammap) {
+    const IFunction_sptr &function, map<string, double> parammap) {
   vector<string> paramnames = function->getParameterNames();
   for (auto &parname : paramnames) {
     auto miter = parammap.find(parname);
@@ -1658,8 +1662,8 @@ void FitPowderDiffPeaks::restoreFunctionParameters(
  * 2. chi2
  */
 bool FitPowderDiffPeaks::doFit1PeakSimple(
-    Workspace2D_sptr dataws, size_t workspaceindex,
-    BackToBackExponential_sptr peakfunction, string minimzername,
+    const Workspace2D_sptr &dataws, size_t workspaceindex,
+    const BackToBackExponential_sptr &peakfunction, const string &minimzername,
     size_t maxiteration, double &chi2) {
   stringstream dbss;
   dbss << peakfunction->asString() << '\n';
@@ -1682,8 +1686,8 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
   fitalg->initialize();
 
   // 3. Set
-  fitalg->setProperty(
-      "Function", boost::dynamic_pointer_cast<API::IFunction>(peakfunction));
+  fitalg->setProperty("Function",
+                      std::dynamic_pointer_cast<API::IFunction>(peakfunction));
   fitalg->setProperty("InputWorkspace", dataws);
   fitalg->setProperty("WorkspaceIndex", static_cast<int>(workspaceindex));
   fitalg->setProperty("Minimizer", minimzername);
@@ -1728,9 +1732,10 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
  * @param chi2 :: The chi squared value (output)
  */
 bool FitPowderDiffPeaks::doFit1PeakSequential(
-    Workspace2D_sptr dataws, size_t workspaceindex,
-    BackToBackExponential_sptr peakfunction, vector<string> minimzernames,
-    vector<size_t> maxiterations, vector<double> dampfactors, double &chi2) {
+    const Workspace2D_sptr &dataws, size_t workspaceindex,
+    const BackToBackExponential_sptr &peakfunction,
+    vector<string> minimzernames, vector<size_t> maxiterations,
+    const vector<double> &dampfactors, double &chi2) {
   // 1. Check
   if (minimzernames.size() != maxiterations.size() &&
       minimzernames.size() != dampfactors.size()) {
@@ -1789,11 +1794,10 @@ bool FitPowderDiffPeaks::doFit1PeakSequential(
 //----------------------------------------------------------------------------
 /** Fit background-removed peak by Gaussian
  */
-bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
-                                           size_t workspaceindex,
-                                           double in_center, double leftfwhm,
-                                           double rightfwhm, double &center,
-                                           double &sigma, double &height) {
+bool FitPowderDiffPeaks::doFitGaussianPeak(
+    const DataObjects::Workspace2D_sptr &dataws, size_t workspaceindex,
+    double in_center, double leftfwhm, double rightfwhm, double &center,
+    double &sigma, double &height) {
   // 1. Estimate
   const auto &X = dataws->x(workspaceindex);
   const auto &Y = dataws->y(workspaceindex);
@@ -1806,7 +1810,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
 
   // 2. Use factory to generate Gaussian
   auto temppeak = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussianpeak = boost::dynamic_pointer_cast<API::IPeakFunction>(temppeak);
+  auto gaussianpeak = std::dynamic_pointer_cast<API::IPeakFunction>(temppeak);
   gaussianpeak->setHeight(height);
   gaussianpeak->setCentre(in_center);
   gaussianpeak->setFwhm(sigma);
@@ -1822,8 +1826,8 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
-  fitalg->setProperty(
-      "Function", boost::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
+  fitalg->setProperty("Function",
+                      std::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
   fitalg->setProperty("InputWorkspace", dataws);
   fitalg->setProperty("WorkspaceIndex", 1);
   fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
@@ -1873,7 +1877,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
  */
 bool FitPowderDiffPeaks::fitOverlappedPeaks(
     vector<BackToBackExponential_sptr> peaks,
-    BackgroundFunction_sptr backgroundfunction, double gfwhm) {
+    const BackgroundFunction_sptr &backgroundfunction, double gfwhm) {
   // 1. Sort peak if necessary
   vector<pair<double, BackToBackExponential_sptr>> tofpeakpairs(peaks.size());
   for (size_t i = 0; i < peaks.size(); ++i)
@@ -1951,7 +1955,8 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(
 /** Fit multiple (overlapped) peaks
  */
 bool FitPowderDiffPeaks::doFitMultiplePeaks(
-    Workspace2D_sptr dataws, size_t wsindex, CompositeFunction_sptr peaksfunc,
+    const Workspace2D_sptr &dataws, size_t wsindex,
+    const CompositeFunction_sptr &peaksfunc,
     vector<BackToBackExponential_sptr> peakfuncs, vector<bool> &vecfitgood,
     vector<double> &vecchi2s) {
   // 0. Pre-debug output
@@ -2062,7 +2067,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
  * @param peaks :: A vector of instances of BackToBackExponential function
  */
 void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
-    Workspace2D_sptr dataws, size_t wsindex,
+    const Workspace2D_sptr &dataws, size_t wsindex,
     vector<BackToBackExponential_sptr> peaks) {
   // 1. Build data structures
   FunctionDomain1DVector domain(dataws->x(wsindex).rawData());
@@ -2110,7 +2115,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
 /** Set constraints on a group of overlapped peaks for fitting
  */
 void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
-    vector<BackToBackExponential_sptr> peaks) {
+    const vector<BackToBackExponential_sptr> &peaks) {
   for (const auto &thispeak : peaks) {
     // 1. Set constraint on X.
     double fwhm = thispeak->fwhm();
@@ -2128,9 +2133,10 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
 /** Fit N overlapped peaks in a simple manner
  */
 bool FitPowderDiffPeaks::doFitNPeaksSimple(
-    Workspace2D_sptr dataws, size_t wsindex, CompositeFunction_sptr peaksfunc,
-    vector<BackToBackExponential_sptr> peakfuncs, string minimizername,
-    size_t maxiteration, double &chi2) {
+    const Workspace2D_sptr &dataws, size_t wsindex,
+    const CompositeFunction_sptr &peaksfunc,
+    const vector<BackToBackExponential_sptr> &peakfuncs,
+    const string &minimizername, size_t maxiteration, double &chi2) {
   // 1. Debug output
   stringstream dbss0;
   dbss0 << "Starting Value: ";
@@ -2145,7 +2151,7 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
 
   // 3. Set
   fitalg->setProperty("Function",
-                      boost::dynamic_pointer_cast<API::IFunction>(peaksfunc));
+                      std::dynamic_pointer_cast<API::IFunction>(peaksfunc));
   fitalg->setProperty("InputWorkspace", dataws);
   fitalg->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
   fitalg->setProperty("Minimizer", minimizername);
@@ -2190,8 +2196,9 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
 //----------------------------------------------------------------------------------------------
 /** Parse fit result
  */
-std::string FitPowderDiffPeaks::parseFitResult(API::IAlgorithm_sptr fitalg,
-                                               double &chi2, bool &fitsuccess) {
+std::string
+FitPowderDiffPeaks::parseFitResult(const API::IAlgorithm_sptr &fitalg,
+                                   double &chi2, bool &fitsuccess) {
   stringstream rss;
 
   chi2 = fitalg->getProperty("OutputChi2overDoF");
@@ -2209,7 +2216,7 @@ std::string FitPowderDiffPeaks::parseFitResult(API::IAlgorithm_sptr fitalg,
 /** Parse parameter workspace returned from Fit()
  */
 std::string FitPowderDiffPeaks::parseFitParameterWorkspace(
-    API::ITableWorkspace_sptr paramws) {
+    const API::ITableWorkspace_sptr &paramws) {
   // 1. Check
   if (!paramws) {
     g_log.warning() << "Input table workspace is NULL.  \n";
@@ -2239,7 +2246,7 @@ std::string FitPowderDiffPeaks::parseFitParameterWorkspace(
  * the diffrotometer geometry parameters
  */
 void FitPowderDiffPeaks::importInstrumentParameterFromTable(
-    DataObjects::TableWorkspace_sptr parameterWS) {
+    const DataObjects::TableWorkspace_sptr &parameterWS) {
   // 1. Check column orders
   std::vector<std::string> colnames = parameterWS->getColumnNames();
   if (colnames.size() < 2) {
@@ -2284,7 +2291,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
 /** Import Bragg peak table workspace
  */
 void FitPowderDiffPeaks::parseBraggPeakTable(
-    TableWorkspace_sptr peakws, vector<map<string, double>> &parammaps,
+    const TableWorkspace_sptr &peakws, vector<map<string, double>> &parammaps,
     vector<map<string, int>> &hklmaps) {
   // 1. Get columns' types and names
   vector<string> paramnames = peakws->getColumnNames();
@@ -2352,7 +2359,7 @@ FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
   size_t numpts = X.size();
 
   // 2. Create data workspace
-  Workspace2D_sptr dataws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr dataws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 5, pattern.size(),
                                           pattern.size()));
 
@@ -2416,7 +2423,7 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
 
   // 3. Create workspace2D
   size_t numgoodpeaks = vecdh.size();
-  Workspace2D_sptr paramws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr paramws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 4, numgoodpeaks,
                                           numgoodpeaks));
   for (size_t j = 0; j < 4; ++j) {
@@ -2584,7 +2591,8 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
  * Each peak within requirement will put into both (1) m_peaks and (2)
  * m_peaksmap
  */
-void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
+void FitPowderDiffPeaks::genPeaksFromTable(
+    const TableWorkspace_sptr &peakparamws) {
   // Check and clear input and output
   if (!peakparamws) {
     stringstream errss;
@@ -2725,11 +2733,11 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
                             vector<int> &hkl, double &d_h) {
   // Generate a peak function
   BackToBackExponential_sptr newpeakptr =
-      boost::make_shared<BackToBackExponential>();
+      std::make_shared<BackToBackExponential>();
   newpeakptr->initialize();
 
   // Check miller index (HKL) is a valid value in a miller indexes pool (hklmap)
-  good = getHKLFromMap(hklmap, hkl);
+  good = getHKLFromMap(std::move(hklmap), hkl);
   if (!good) {
     // Ignore and return
     return newpeakptr;
@@ -2889,7 +2897,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
   // Debug output
   stringstream infoss;
   string peakinfo =
-      getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(newpeakptr));
+      getFunctionInfo(std::dynamic_pointer_cast<IFunction>(newpeakptr));
 
   infoss << "Generate Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
          << ") Of Mode " << peakcalmode << ".\n";
@@ -2909,9 +2917,9 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
  * @param peakfunction: function to plot
  * @param background:   background of the peak
  */
-void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
-                                      BackgroundFunction_sptr background,
-                                      FunctionDomain1DVector domain) {
+void FitPowderDiffPeaks::plotFunction(const IFunction_sptr &peakfunction,
+                                      const BackgroundFunction_sptr &background,
+                                      const FunctionDomain1DVector &domain) {
   // 1. Determine range
   const auto &vecX = m_dataWS->x(m_wsIndex);
   double x0 = domain[0];
@@ -3010,7 +3018,7 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
  * Exception: throw runtime error if there is no such parameter
  * @param parname:  parameter name to get from m_instrumentParameters
  */
-double FitPowderDiffPeaks::getParameter(string parname) {
+double FitPowderDiffPeaks::getParameter(const string &parname) {
   map<string, double>::iterator mapiter;
   mapiter = m_instrumentParmaeters.find(parname);
 
@@ -3033,10 +3041,9 @@ double FitPowderDiffPeaks::getParameter(string parname) {
  * @param leftbound:  lower boundary of the source data
  * @param rightbound: upper boundary of the source data
  */
-Workspace2D_sptr
-FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
-                                          size_t workspaceindex,
-                                          double leftbound, double rightbound) {
+Workspace2D_sptr FitPowderDiffPeaks::buildPartialWorkspace(
+    const API::MatrixWorkspace_sptr &sourcews, size_t workspaceindex,
+    double leftbound, double rightbound) {
   // 1. Check
   const auto &X = sourcews->x(workspaceindex);
   const auto &Y = sourcews->y(workspaceindex);
@@ -3067,7 +3074,7 @@ FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
 
   // 3. Build the partial workspace
   size_t nspec = 6;
-  Workspace2D_sptr partws = boost::dynamic_pointer_cast<Workspace2D>(
+  Workspace2D_sptr partws = std::dynamic_pointer_cast<Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", nspec, wssize,
                                                wssize));
 
@@ -3093,7 +3100,7 @@ FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
 /** Get function parameter values information and returned as a string
  * @param function:  function to have information written out
  */
-string getFunctionInfo(IFunction_sptr function) {
+string getFunctionInfo(const IFunction_sptr &function) {
   stringstream outss;
   vector<string> parnames = function->getParameterNames();
   size_t numpars = parnames.size();
@@ -3117,8 +3124,8 @@ string getFunctionInfo(IFunction_sptr function) {
  * @param wsindexpeak: workspace index of spectrum holding pure peak data (with
  * background removed)
  */
-void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
-                              BackgroundFunction_sptr background,
+void estimateBackgroundCoarse(const DataObjects::Workspace2D_sptr &dataws,
+                              const BackgroundFunction_sptr &background,
                               size_t wsindexraw, size_t wsindexbkgd,
                               size_t wsindexpeak) {
   // 1. Get prepared
@@ -3192,7 +3199,7 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
  * @param fwhm :: (output) peak FWHM
  * @param errmsg :: (output) error message
  */
-bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex,
+bool observePeakParameters(const Workspace2D_sptr &dataws, size_t wsindex,
                            double &centre, double &height, double &fwhm,
                            string &errmsg) {
   // 1. Get the value of the Max Height
@@ -3306,7 +3313,7 @@ size_t findMaxValue(const std::vector<double> &Y) {
  * @param rightbound :: upper constraint for check
  * @return the index of the maximum value
  */
-size_t findMaxValue(MatrixWorkspace_sptr dataws, size_t wsindex,
+size_t findMaxValue(const MatrixWorkspace_sptr &dataws, size_t wsindex,
                     double leftbound, double rightbound) {
   const auto &X = dataws->x(wsindex);
   const auto &Y = dataws->y(wsindex);

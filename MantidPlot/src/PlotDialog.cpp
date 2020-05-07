@@ -75,7 +75,7 @@ using Mantid::Kernel::ConfigService;
 using namespace MantidQt::API;
 
 PlotDialog::PlotDialog(bool showExtended, ApplicationWindow *app,
-                       MultiLayer *ml, Qt::WFlags fl)
+                       MultiLayer *ml, const Qt::WFlags &fl)
     : QDialog(ml, fl), d_app(app), d_ml(nullptr) {
   setObjectName("PlotDialog");
   setWindowTitle(tr("MantidPlot - Plot details"));

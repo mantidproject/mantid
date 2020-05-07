@@ -8,6 +8,7 @@
 
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 
 #include <list>
 

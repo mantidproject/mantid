@@ -8,7 +8,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/IValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::Kernel::IValidator_sptr;
 
@@ -19,7 +19,7 @@ namespace API {
  * Clone the current state
  */
 Kernel::IValidator_sptr OrientedLatticeValidator::clone() const {
-  return boost::make_shared<OrientedLatticeValidator>(*this);
+  return std::make_shared<OrientedLatticeValidator>(*this);
 }
 
 /** Checks that workspace has an oriented lattice.

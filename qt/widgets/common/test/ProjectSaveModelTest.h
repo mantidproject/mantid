@@ -17,6 +17,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include <utility>
+
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
@@ -28,17 +30,18 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockProjectSaveModel : public ProjectSaveModel {
 public:
   MockProjectSaveModel(
-      std::vector<MantidQt::API::IProjectSerialisable *> windows,
+      const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
       std::vector<std::string> activePythonInterfaces =
           std::vector<std::string>())
-      : ProjectSaveModel(windows, activePythonInterfaces) {}
+      : ProjectSaveModel(std::move(windows),
+                         std::move(activePythonInterfaces)) {}
   MOCK_METHOD1(getProjectSize, size_t(const std::vector<std::string> &wsNames));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 namespace {
-size_t calculateSize(std::vector<Workspace_sptr> workspaces) {
+size_t calculateSize(const std::vector<Workspace_sptr> &workspaces) {
   size_t result = 0;
   for (const auto &ws : workspaces) {
     result += ws->getMemorySize();

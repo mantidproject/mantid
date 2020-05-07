@@ -52,7 +52,7 @@ private:
   int m_n;
 };
 
-using Polynomial_sptr = boost::shared_ptr<Polynomial>;
+using Polynomial_sptr = std::shared_ptr<Polynomial>;
 
 } // namespace Functions
 } // namespace CurveFitting

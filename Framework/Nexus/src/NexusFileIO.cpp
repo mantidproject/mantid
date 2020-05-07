@@ -125,7 +125,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
     }
     auto file = new ::NeXus::File(fileID, true);
     // clang-format off
-    m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
+    m_filehandle = std::shared_ptr< ::NeXus::File>(file);
     // clang-format on
   }
 
@@ -393,7 +393,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     // Fractional area for RebinnedOutput
     if (localworkspace->id() == "RebinnedOutput") {
       RebinnedOutput_const_sptr rebin_workspace =
-          boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+          std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
       name = "frac_area";
       NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,
                      m_nexuscompression, asize);
@@ -460,7 +460,7 @@ int NexusFileIO::writeNexusProcessedData2D(
             NX_CHAR);
 
   auto label =
-      boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
+      std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
   if (label) {
     NXputattr(fileID, "caption", label->caption().c_str(),
               static_cast<int>(label->caption().size()), NX_CHAR);
@@ -480,8 +480,8 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputattr(fileID, "units", sLabel.c_str(), static_cast<int>(sLabel.size()),
               NX_CHAR);
 
-    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-        sAxis->unit());
+    auto unitLabel =
+        std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
       NXputattr(fileID, "caption", unitLabel->caption().c_str(),
                 static_cast<int>(unitLabel->caption().size()), NX_CHAR);
@@ -502,8 +502,8 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputdata(fileID, textAxis.c_str());
     NXputattr(fileID, "units", "TextAxis", 8, NX_CHAR);
 
-    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-        sAxis->unit());
+    auto unitLabel =
+        std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
       NXputattr(fileID, "caption", unitLabel->caption().c_str(),
                 static_cast<int>(unitLabel->caption().size()), NX_CHAR);
@@ -574,7 +574,7 @@ size_t getSizeOf(const Kernel::V3D & /*unused*/) { return 3; }
  */
 template <typename VecType, typename ElemType>
 void NexusFileIO::writeNexusVectorColumn(
-    Column_const_sptr col, const std::string &columnName, int nexusType,
+    const Column_const_sptr &col, const std::string &columnName, int nexusType,
     const std::string &interpret_as) const {
   ConstColumnVector<VecType> column(col);
   size_t rowCount = column.size();
@@ -641,10 +641,10 @@ int NexusFileIO::writeNexusTableWorkspace(
     const char *group_name) const {
   NXstatus status = NX_ERROR;
 
-  boost::shared_ptr<const TableWorkspace> tableworkspace =
-      boost::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
-  boost::shared_ptr<const PeaksWorkspace> peakworkspace =
-      boost::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
+  std::shared_ptr<const TableWorkspace> tableworkspace =
+      std::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
+  std::shared_ptr<const PeaksWorkspace> peakworkspace =
+      std::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
 
   if (!tableworkspace && !peakworkspace)
     return 3;
@@ -893,7 +893,7 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
  * @param group_name :: group_name to create.
  * */
 int NexusFileIO::writeEventList(const DataObjects::EventList &el,
-                                std::string group_name) const {
+                                const std::string &group_name) const {
   // write data entry
   NXstatus status = NXmakegroup(fileID, group_name.c_str(), "NXdata");
   if (status == NX_ERROR)
@@ -1162,7 +1162,7 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
  * @return true for OK, false for error
  */
 bool NexusFileIO::writeNexusBinMasking(
-    API::MatrixWorkspace_const_sptr ws) const {
+    const API::MatrixWorkspace_const_sptr &ws) const {
   std::vector<int> spectra;
   std::vector<std::size_t> bins;
   std::vector<double> weights;

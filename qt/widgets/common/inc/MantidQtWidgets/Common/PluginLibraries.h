@@ -13,12 +13,13 @@
 namespace MantidQt {
 namespace API {
 
-EXPORT_OPT_MANTIDQT_COMMON std::string qtPluginPathFromCfg(std::string key);
+EXPORT_OPT_MANTIDQT_COMMON std::string
+qtPluginPathFromCfg(const std::string &key);
 
 /// Load plugins from a path given by the key in the config service
-EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromCfgPath(std::string key);
+EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromCfgPath(const std::string &key);
 
 /// Load plugins from a path
-EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromPath(std::string path);
+EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromPath(const std::string &path);
 } // namespace API
 } // namespace MantidQt

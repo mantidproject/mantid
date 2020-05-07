@@ -109,7 +109,7 @@ public:
     m_mockInheritingClass = std::make_unique<FakeAnalysisDataServiceObserver>();
   }
 
-  void addWorkspaceToADS(std::string name = "dummy") {
+  void addWorkspaceToADS(const std::string &name = "dummy") {
     IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(
             "CreateSampleWorkspace");

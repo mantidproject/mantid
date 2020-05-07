@@ -14,6 +14,7 @@ Mantid::Kernel::Logger g_log("PeakRepresentation");
 }
 
 #include <QPainter>
+#include <utility>
 
 namespace {
 
@@ -62,10 +63,10 @@ namespace SliceViewer {
 const double PeakRepresentationEllipsoid::zeroRadius = 0.0;
 
 PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(
-    const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,
-    const std::vector<double> backgroundInnerRadii,
-    const std::vector<double> backgroundOuterRadii,
-    const std::vector<Mantid::Kernel::V3D> directions,
+    const Mantid::Kernel::V3D &origin, const std::vector<double> &peakRadii,
+    const std::vector<double> &backgroundInnerRadii,
+    const std::vector<double> &backgroundOuterRadii,
+    const std::vector<Mantid::Kernel::V3D> &directions,
     std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
         calculator)
     : m_originalOrigin(origin), m_originalDirections(directions),
@@ -73,7 +74,7 @@ PeakRepresentationEllipsoid::PeakRepresentationEllipsoid(
       m_backgroundInnerRadii(backgroundInnerRadii),
       m_backgroundOuterRadii(backgroundOuterRadii), m_opacityMax(0.8),
       m_opacityMin(0.0), m_cachedOpacityAtDistance(0.0), m_angleEllipse(-1.0),
-      m_showBackgroundRadii(false), m_calculator(calculator) {
+      m_showBackgroundRadii(false), m_calculator(std::move(calculator)) {
   // Get projection lengths onto the xyz axes of the ellipsoid axes
   auto projections = Mantid::SliceViewer::getProjectionLengths(
       directions, backgroundOuterRadii);

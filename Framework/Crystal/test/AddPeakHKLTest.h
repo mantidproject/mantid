@@ -76,7 +76,7 @@ public:
                                  // hkl.
 
     // Now create a peaks workspace around the simple fictional instrument
-    PeaksWorkspace_sptr ws = boost::make_shared<PeaksWorkspace>();
+    PeaksWorkspace_sptr ws = std::make_shared<PeaksWorkspace>();
     ws->setInstrument(minimalInstrument);
     ws->mutableSample().setOrientedLattice(
         std::make_unique<Mantid::Geometry::OrientedLattice>(1, 1, 1, 90, 90,

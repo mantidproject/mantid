@@ -18,7 +18,7 @@ DECLARE_ALGORITHM(CatalogGetDataSets)
 /// Initialisation methods
 void CatalogGetDataSets::init() {
   declareProperty("InvestigationId", "",
-                  boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
+                  std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "ID of the selected investigation");
   declareProperty("Session", "",
                   "The session information of the catalog to use.");

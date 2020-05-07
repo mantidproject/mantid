@@ -24,8 +24,8 @@ class MANTID_API_DLL NotebookWriter {
 public:
   NotebookWriter();
   virtual ~NotebookWriter() = default;
-  std::string markdownCell(std::string string_text);
-  std::string codeCell(std::string string_code);
+  std::string markdownCell(const std::string &string_text);
+  std::string codeCell(const std::string &string_code);
   std::string writeNotebook();
 
 private:

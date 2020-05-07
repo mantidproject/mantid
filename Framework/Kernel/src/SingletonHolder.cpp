@@ -36,7 +36,7 @@ void cleanupSingletons() {
 /// functions are added to the start of the list so on deletion it is last in,
 /// first out
 /// @param func :: Exit function to call - the singleton destructor function
-void deleteOnExit(SingletonDeleterFn func) {
+void deleteOnExit(const SingletonDeleterFn &func) {
   auto &deleters = cleanupList();
   if (deleters.empty()) {
     atexit(&cleanupSingletons);

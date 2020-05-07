@@ -27,7 +27,7 @@ private:
 Helper function. Creates a peaksworkspace with a single peak
 */
   PeaksWorkspace_sptr
-  createPeaksWorkspace(const std::string coordFrame,
+  createPeaksWorkspace(const std::string &coordFrame,
                        const Mantid::Kernel::V3D &peakPosition) {
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto detectorIds = ws->getInstrument()->getDetectorIDs();
@@ -371,7 +371,7 @@ public:
 
   PeaksOnSurfaceTestPerformance() {
     int numPeaks = 4000;
-    inputWS = boost::make_shared<PeaksWorkspace>();
+    inputWS = std::make_shared<PeaksWorkspace>();
     Mantid::Geometry::Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
     inputWS->setInstrument(inst);

@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable = no-init, invalid-name, line-too-long, eval-used, unused-argument, too-many-locals, too-many-branches, too-many-statements
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 from scipy import constants
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator

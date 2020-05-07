@@ -7,7 +7,7 @@
 import os
 
 from mantid.kernel import ConfigService
-from mantid.py3compat import Enum
+from enum import Enum
 from sans.common.enums import BinningType
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import SANSGuiPropertiesHandler

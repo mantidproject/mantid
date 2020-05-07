@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package.
-from __future__ import (absolute_import, division, print_function)
-
 import sys
 from functools import partial
 
@@ -38,7 +36,7 @@ class PreciseDoubleFactory(QItemEditorFactory):
 class TableWorkspaceDisplayView(QTableWidget):
     repaint_signal = Signal()
 
-    def __init__(self, presenter, parent=None):
+    def __init__(self, presenter=None, parent=None):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
@@ -55,6 +53,12 @@ class TableWorkspaceDisplayView(QTableWidget):
 
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
+
+    def subscribe(self, presenter):
+        """
+        :param presenter: A reference to the controlling presenter
+        """
+        self.presenter = presenter
 
     def resizeEvent(self, event):
         QTableWidget.resizeEvent(self, event)

@@ -7,7 +7,6 @@
 # pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import *
-from six import PY2
 
 
 def rel_err_less_delta(val, ref, epsilon):
@@ -239,8 +238,6 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
         for idx in [0, 12, 516, 789, 891, 1112]:
             cell_val = self.peaks_info.cell(idx, 1)
             self.assertTrue(isinstance(cell_val, str))
-            if PY2:  # This test depends on consistent ordering of a dict which is not guaranteed for python 3
-                self.assertEqual(cell_val[0:11], '{"1": {"A":')
             self.assertEqual(cell_val[-2:], '}}')
 
         # this will be used as a comparison delta in relative terms (percentage)

@@ -40,7 +40,7 @@ public:
 
     SymmetryElement_sptr cloned = identity.clone();
     SymmetryElementIdentity_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementIdentity>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementIdentity>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "1");
@@ -54,7 +54,7 @@ public:
 
     SymmetryElement_sptr cloned = translation.clone();
     SymmetryElementTranslation_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementTranslation>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementTranslation>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "t");
@@ -69,7 +69,7 @@ public:
 
     SymmetryElement_sptr cloned = inversion.clone();
     SymmetryElementInversion_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementInversion>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementInversion>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "-1");
@@ -126,7 +126,7 @@ public:
 
     SymmetryElement_sptr cloned = rotationElement.clone();
     SymmetryElementRotation_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementRotation>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementRotation>(cloned);
     TS_ASSERT(castedClone);
 
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), symbolScrew);
@@ -153,7 +153,7 @@ public:
 
     SymmetryElement_sptr cloned = mirrorElement.clone();
     SymmetryElementMirror_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementMirror>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementMirror>(cloned);
     TS_ASSERT(castedClone);
 
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), symbolGlide);

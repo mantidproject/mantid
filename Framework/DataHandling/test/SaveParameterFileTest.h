@@ -77,21 +77,23 @@ public:
                   "linear ; TOF ; TOF");
   }
 
-  void setParam(std::string cName, std::string pName, std::string value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addString(comp->getComponentID(), pName, value);
   }
 
-  void setParam(std::string cName, std::string pName, double value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
-  void setParamByDetID(int id, std::string pName, double value) {
+  void setParamByDetID(int id, const std::string &pName, double value) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
     const auto &detectorInfo = m_ws->detectorInfo();
     const auto detectorIndex = detectorInfo.indexOf(id);
@@ -99,32 +101,35 @@ public:
     paramMap.addDouble(detector.getComponentID(), pName, value);
   }
 
-  void setFitParam(std::string cName, std::string pName, std::string value) {
+  void setFitParam(const std::string &cName, const std::string &pName,
+                   const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     auto param = ParameterFactory::create("fitting", pName);
     param->fromString(value);
     paramMap.add(comp.get(), param);
   }
 
-  void checkParam(std::string cName, std::string pName, std::string value) {
+  void checkParam(const std::string &cName, const std::string &pName,
+                  std::string value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     std::string param = paramMap.getString(comp.get(), pName);
     TS_ASSERT_EQUALS(value, param);
   }
 
-  void checkParam(std::string cName, std::string pName, double value) {
+  void checkParam(const std::string &cName, const std::string &pName,
+                  double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     std::vector<double> values = paramMap.getDouble(cName, pName);
     TS_ASSERT_DELTA(value, values.front(), 0.0001);
   }
 
-  void checkParamByDetID(int id, std::string pName, double value) {
+  void checkParamByDetID(int id, const std::string &pName, double value) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
     const auto &detectorInfo = m_ws->detectorInfo();
     const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
@@ -133,10 +138,11 @@ public:
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
 
-  void checkFitParam(std::string cName, std::string pName, std::string value) {
+  void checkFitParam(const std::string &cName, const std::string &pName,
+                     const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     auto param = paramMap.get(comp.get(), pName, "fitting");
     const Mantid::Geometry::FitParameter &fitParam =
         param->value<FitParameter>();
@@ -150,7 +156,7 @@ public:
     TS_ASSERT_EQUALS(fitParam.getFormulaUnit(), values[8]);
   }
 
-  void loadParams(std::string filename) {
+  void loadParams(const std::string &filename) {
     LoadParameterFile loaderPF;
     TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
     loaderPF.setPropertyValue("Filename", filename);
@@ -159,7 +165,7 @@ public:
     TS_ASSERT(loaderPF.isExecuted());
   }
 
-  void saveParams(std::string filename) {
+  void saveParams(const std::string &filename) {
     SaveParameterFile saverPF;
     TS_ASSERT_THROWS_NOTHING(saverPF.initialize());
     saverPF.setPropertyValue("Filename", filename);
@@ -176,7 +182,7 @@ public:
     std::string wsName = "SaveParameterFileTestIDF2";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
@@ -188,7 +194,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 
-    m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D);
+    m_ws = std::dynamic_pointer_cast<MatrixWorkspace>(ws2D);
   }
 
 private:

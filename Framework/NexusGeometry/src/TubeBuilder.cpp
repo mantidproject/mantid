@@ -17,7 +17,7 @@ namespace NexusGeometry {
 namespace detail {
 
 TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
-                         Eigen::Vector3d firstDetectorPosition,
+                         const Eigen::Vector3d &firstDetectorPosition,
                          int firstDetectorId)
     : m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()),
       m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius()) {
@@ -51,7 +51,7 @@ const std::vector<Eigen::Vector3d> &TubeBuilder::detPositions() const {
 
 const std::vector<int> &TubeBuilder::detIDs() const { return m_detIDs; }
 
-boost::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
+std::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
   using namespace Eigen;
   Matrix<double, 3, 3> points;
   // calcualte height vector;

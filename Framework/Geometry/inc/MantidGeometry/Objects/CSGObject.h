@@ -93,12 +93,12 @@ public:
                           std::string &Ln); ///< Process a complementary object
   int hasComplement() const;
 
-  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
+  int populate(const std::map<int, std::shared_ptr<Surface>> &);
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
   int removeSurface(const int SurfN);
   int substituteSurf(const int SurfN, const int NsurfN,
-                     const boost::shared_ptr<Surface> &SPtr);
+                     const std::shared_ptr<Surface> &SPtr);
   void makeComplement();
   void convertComplement(const std::map<int, CSGObject> &);
 
@@ -177,14 +177,14 @@ public:
   // Initialize Drawing
   void initDraw() const override;
   // Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
+  std::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
-  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+  void setGeometryHandler(const std::shared_ptr<GeometryHandler> &h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
+  void setVtkGeometryCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+  void setVtkGeometryCacheReader(std::shared_ptr<vtkGeometryCacheReader>);
   detail::ShapeInfo::GeometryShape shape() const override;
   const detail::ShapeInfo &shapeInfo() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
@@ -231,15 +231,15 @@ private:
   /// Creation number
   int ObjNum;
   /// Geometry Handle for rendering
-  boost::shared_ptr<GeometryHandler> m_handler;
+  std::shared_ptr<GeometryHandler> m_handler;
   friend class GeometryHandler;
   friend class GeometryRenderer;
   /// Is geometry caching enabled?
   bool bGeometryCaching;
   /// a pointer to a class for reading from the geometry cache
-  boost::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
+  std::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
   /// a pointer to a class for writing to the geometry cache
-  boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
+  std::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
   void updateGeometryHandler();
   size_t numberOfTriangles() const;
   size_t numberOfVertices() const;

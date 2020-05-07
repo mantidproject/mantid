@@ -7,8 +7,9 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <utility>
 
-#include "IndirectFittingModelLegacy.h"
+#include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,27 +23,29 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace MantidQt::CustomInterfaces;
 
 using ConvolutionFitSequential =
     Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 namespace {
 
-IFunction_sptr getFunction(std::string const &functionString) {
-  return FunctionFactory::Instance().createInitialized(functionString);
+MultiDomainFunction_sptr getFunction(std::string const &functionString) {
+  return FunctionFactory::Instance().createInitializedMultiDomainFunction(
+      functionString, 1);
 }
 
 /// A dummy model used to inherit the methods which need testing
 class DummyModel
-    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModelLegacy {
+    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
 public:
   ~DummyModel(){};
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override {
+  std::string singleFitOutputName(TableDatasetIndex index,
+                                  IDA::WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -106,9 +109,9 @@ void setFittingFunction(std::unique_ptr<DummyModel> &model,
   model->setFitFunction(getFunction(functionString));
 }
 
-IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
+IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
                                   std::string const &functionString) {
-  auto alg = boost::make_shared<ConvolutionFitSequential>();
+  auto alg = std::make_shared<ConvolutionFitSequential>();
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);
@@ -125,7 +128,7 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
 }
 
 IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<DummyModel> &model,
-                                     MatrixWorkspace_sptr workspace,
+                                     const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
   std::string const function =
       "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
@@ -136,14 +139,15 @@ IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<DummyModel> &model,
       "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
       "0175)))";
   setFittingFunction(model, function);
-  auto alg = setupFitAlgorithm(workspace, function);
+  auto alg = setupFitAlgorithm(std::move(workspace), function);
   return alg;
 }
 
 IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<DummyModel> &model,
                                         MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
-  auto const alg = getSetupFitAlgorithm(model, workspace, workspaceName);
+  auto const alg =
+      getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
   alg->execute();
   return alg;
 }
@@ -254,21 +258,21 @@ public:
   test_that_getSpectra_returns_a_correct_spectra_when_the_index_provided_is_valid() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    SpectraLegacy const inputSpectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const inputSpectra = Spectra("0-1");
     model->setSpectra(inputSpectra, 0);
-    SpectraLegacy const spectra = model->getSpectra(0);
+    Spectra const spectra = model->getSpectra(0);
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
+    TS_ASSERT_EQUALS(spectra, inputSpectra);
   }
 
   void
   test_that_getSpectra_returns_an_empty_DiscontinuousSpectra_when_provided_an_out_of_range_index() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    SpectraLegacy const emptySpectra(DiscontinuousSpectra<std::size_t>(""));
-    SpectraLegacy const spectra = model->getSpectra(3);
+    Spectra const emptySpectra(Spectra(""));
+    Spectra const spectra = model->getSpectra(3);
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, emptySpectra));
+    TS_ASSERT_EQUALS(spectra, emptySpectra);
   }
 
   void
@@ -299,7 +303,7 @@ public:
 
     model->setStartX(1.2, 0, 0);
     model->setEndX(5.6, 0, 0);
-    DiscontinuousSpectra<std::size_t> const emptySpec("");
+    Spectra const emptySpec("");
     model->setSpectra(emptySpec, 0);
 
     TS_ASSERT_EQUALS(model->getFittingRange(0, 0).first, 0.0);
@@ -329,7 +333,7 @@ public:
     auto model = createModelWithSingleWorkspace("WorkspaceName", 1);
 
     model->setExcludeRegion("0,1,3,4", 0, 0);
-    DiscontinuousSpectra<std::size_t> const emptySpec("");
+    Spectra const emptySpec("");
     model->setSpectra(emptySpec, 0);
 
     TS_ASSERT_EQUALS(model->getExcludeRegion(1, 0), "");
@@ -454,29 +458,24 @@ public:
   void
   test_that_isPreviouslyFit_returns_true_if_the_spectrum_has_been_fitted_previously() {
     auto const model = getModelWithFitOutputData();
-    TS_ASSERT(model->isPreviouslyFit(0, 0));
+    TS_ASSERT(
+        model->isPreviouslyFit(TableDatasetIndex(0), IDA::WorkspaceIndex(0)));
   }
 
-  void test_that_hasZeroSpectra_returns_true_if_workspace_has_zero_spectra() {
+  void test_that_number_of_spectra_is_zero_if_workspace_has_zero_spectra() {
     auto model = getEmptyModel();
-    auto const workspace = boost::make_shared<Workspace2D>();
+    auto const workspace = std::make_shared<Workspace2D>();
     SetUpADSWithWorkspace ads("WorkspaceEmpty", workspace);
 
-    model->addWorkspace("WorkspaceEmpty");
+    model->addWorkspace("WorkspaceEmpty", Spectra(""));
 
-    TS_ASSERT(model->hasZeroSpectra(0));
+    TS_ASSERT_EQUALS(model->getSpectra(TableDatasetIndex(0)).size(), 0);
   }
 
   void
-  test_that_hasZeroSpectra_returns_true_if_the_dataIndex_provided_is_out_of_range() {
+  test_that_number_of_spectra_is_not_zero_if_workspace_contains_one_or_more_spectra() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
-    TS_ASSERT(model->hasZeroSpectra(1));
-  }
-
-  void
-  test_that_hasZeroSpectra_returns_false_if_workspace_contains_one_or_more_spectra() {
-    auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
-    TS_ASSERT(!model->hasZeroSpectra(0));
+    TS_ASSERT_DIFFERS(model->getSpectra(TableDatasetIndex(0)).size(), 0);
   }
 
   void
@@ -555,23 +554,23 @@ public:
   test_that_setSpectra_will_set_the_spectra_to_the_provided_inputSpectra() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    SpectraLegacy const inputSpectra =
-        DiscontinuousSpectra<std::size_t>("2,4,6-8");
+    Spectra const inputSpectra = Spectra("2,4,6-8");
     model->setSpectra(inputSpectra, 0);
-    SpectraLegacy const spectra = model->getSpectra(0);
+    Spectra const spectra = model->getSpectra(0);
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
+    TS_ASSERT_EQUALS(spectra, inputSpectra);
   }
 
   void
   test_that_setSpectra_will_set_the_spectra_when_provided_a_spectra_pair() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    SpectraLegacy const inputSpectra = std::make_pair(0u, 5u);
+    Spectra const inputSpectra =
+        Spectra(IDA::WorkspaceIndex(0), IDA::WorkspaceIndex(5));
     model->setSpectra(inputSpectra, 0);
-    SpectraLegacy const spectra = model->getSpectra(0);
+    Spectra const spectra = model->getSpectra(0);
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
+    TS_ASSERT_EQUALS(spectra, inputSpectra);
   }
 
   void
@@ -584,7 +583,7 @@ public:
   test_that_setStartX_will_set_the_startX_at_the_first_dataIndex_when_the_fit_is_sequential() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
-    model->setStartX(4.0, 3, 0);
+    model->setStartX(4.0, 0, 0);
 
     TS_ASSERT_EQUALS(model->getFittingRange(0, 0).first, 4.0);
   }
@@ -593,7 +592,7 @@ public:
   test_that_setEndX_will_set_the_endX_at_the_first_dataIndex_when_the_fit_is_sequential() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
-    model->setEndX(4.0, 3, 0);
+    model->setEndX(4.0, 0, 0);
 
     TS_ASSERT_EQUALS(model->getFittingRange(0, 0).second, 4.0);
   }
@@ -602,7 +601,7 @@ public:
   test_that_setExcludeRegion_set_the_excludeRegion_at_the_first_dataIndex_when_the_fit_is_sequential() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
-    model->setExcludeRegion("0,1,3,4", 3, 0);
+    model->setExcludeRegion("0,1,3,4", 0, 0);
 
     TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
@@ -643,7 +642,7 @@ public:
     model->setDefaultParameterValue("Amplitude", 1.5, 0);
 
     auto const parameters = model->getDefaultParameters(0);
-    TS_ASSERT_EQUALS(parameters.at("f1.f1.f0.Amplitude").value, 1.5);
+    TS_ASSERT_EQUALS(parameters.at("f0.f1.f1.f0.Amplitude").value, 1.5);
   }
 
   void
@@ -661,7 +660,7 @@ public:
     model->setDefaultParameterValue("Amplitude", 1.5, 0);
 
     auto const parameters = model->getParameterValues(0, 0);
-    TS_ASSERT_EQUALS(parameters.at("f1.f1.f0.Amplitude").value, 1.5);
+    TS_ASSERT_EQUALS(parameters.at("f0.f1.f1.f0.Amplitude").value, 1.5);
   }
 
   void
@@ -706,7 +705,7 @@ public:
 
     auto const parameters = model->getDefaultParameters(0);
     TS_ASSERT(!parameters.empty());
-    TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.5, 0.0001);
+    TS_ASSERT_DELTA(parameters.at("f0.f1.f1.f0.Amplitude").value, 1.5, 0.0001);
   }
 
   void test_that_getResultLocation_returns_a_location_for_the_output_data() {

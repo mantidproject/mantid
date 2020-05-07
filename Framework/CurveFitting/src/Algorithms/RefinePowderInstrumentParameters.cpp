@@ -34,6 +34,7 @@
 
 #include <fstream>
 #include <iomanip>
+#include <utility>
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -106,7 +107,7 @@ void RefinePowderInstrumentParameters::init() {
 
   // Refinement algorithm
   vector<string> algoptions{"DirectFit", "MonteCarlo"};
-  auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
+  auto validator = std::make_shared<Kernel::StringListValidator>(algoptions);
   declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                   "Algorithm to refine the instrument parameters.");
 
@@ -126,7 +127,7 @@ void RefinePowderInstrumentParameters::init() {
   // Method to calcualte the standard error of peaks
   vector<string> stdoptions{"ConstantValue", "InvertedPeakHeight"};
   auto listvalidator =
-      boost::make_shared<Kernel::StringListValidator>(stdoptions);
+      std::make_shared<Kernel::StringListValidator>(stdoptions);
   declareProperty(
       "StandardError", "ConstantValue", listvalidator,
       "Algorithm to calculate the standard error of peak positions.");
@@ -230,7 +231,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
       << "=========== Method [FitInstrumentParameters] ===============\n";
 
   // 1. Initialize the fitting function
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
+  m_Function = std::make_shared<ThermalNeutronDtoTOFFunction>();
   m_Function->initialize();
 
   API::FunctionDomain1DVector domain(m_dataWS->x(1).rawData());
@@ -303,7 +304,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   fitalg->initialize();
 
   fitalg->setProperty("Function",
-                      boost::dynamic_pointer_cast<API::IFunction>(m_Function));
+                      std::dynamic_pointer_cast<API::IFunction>(m_Function));
   fitalg->setProperty("InputWorkspace", m_dataWS);
   fitalg->setProperty("WorkspaceIndex", 0);
   fitalg->setProperty("Minimizer", minimizer);
@@ -383,13 +384,13 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 
 /** Fit function to data
  */
-bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
+bool RefinePowderInstrumentParameters::fitFunction(const IFunction_sptr &func,
                                                    double &gslchi2) {
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function",
-                      boost::dynamic_pointer_cast<API::IFunction>(func));
+                      std::dynamic_pointer_cast<API::IFunction>(func));
   fitalg->setProperty("InputWorkspace", m_dataWS);
   fitalg->setProperty("WorkspaceIndex", 0);
   fitalg->setProperty("Minimizer", "Simplex");
@@ -417,7 +418,8 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
 /** Calculate function's statistic
  */
 double RefinePowderInstrumentParameters::calculateFunctionStatistic(
-    IFunction_sptr func, MatrixWorkspace_sptr dataws, size_t workspaceindex) {
+    const IFunction_sptr &func, const MatrixWorkspace_sptr &dataws,
+    size_t workspaceindex) {
   // 1. Fix all parameters of the function
   vector<string> funcparameters = func->getParameterNames();
   size_t numparams = funcparameters.size();
@@ -430,7 +432,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
   fitalg->initialize();
 
   fitalg->setProperty("Function",
-                      boost::dynamic_pointer_cast<API::IFunction>(func));
+                      std::dynamic_pointer_cast<API::IFunction>(func));
   fitalg->setProperty("InputWorkspace", dataws);
   fitalg->setProperty("WorkspaceIndex", static_cast<int>(workspaceindex));
   fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
@@ -456,14 +458,15 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
 /** Refine instrument parameters by Monte Carlo method
  */
 void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
-    TableWorkspace_sptr parameterWS, bool fit2) {
+    const TableWorkspace_sptr &parameterWS, bool fit2) {
   // 1. Get function's parameter names
   getD2TOFFuncParamNames(m_PeakFunctionParameterNames);
 
   // 2. Parse parameter (table) workspace
   vector<double> stepsizes, lowerbounds, upperbounds;
-  importMonteCarloParametersFromTable(parameterWS, m_PeakFunctionParameterNames,
-                                      stepsizes, lowerbounds, upperbounds);
+  importMonteCarloParametersFromTable(std::move(parameterWS),
+                                      m_PeakFunctionParameterNames, stepsizes,
+                                      lowerbounds, upperbounds);
 
   stringstream dbss;
   for (size_t i = 0; i < m_PeakFunctionParameterNames.size(); ++i) {
@@ -582,7 +585,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
 
   // 3. Create a local function for fit and set the parameters unfixed
   ThermalNeutronDtoTOFFunction_sptr func4fit =
-      boost::shared_ptr<ThermalNeutronDtoTOFFunction>(
+      std::shared_ptr<ThermalNeutronDtoTOFFunction>(
           new ThermalNeutronDtoTOFFunction());
   func4fit->initialize();
   for (size_t i = 0; i < numparameters; ++i) {
@@ -769,7 +772,7 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
   parnames.clear();
 
   // 2. Get the parameter names from function
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
+  m_Function = std::make_shared<ThermalNeutronDtoTOFFunction>();
   std::vector<std::string> funparamnames = m_Function->getParameterNames();
 
   // 3. Copy
@@ -779,7 +782,7 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
 /** Calculate the function
  */
 double RefinePowderInstrumentParameters::calculateD2TOFFunction(
-    API::IFunction_sptr func, API::FunctionDomain1DVector domain,
+    const API::IFunction_sptr &func, const API::FunctionDomain1DVector &domain,
     API::FunctionValues &values, const Mantid::HistogramData::HistogramY &rawY,
     const Mantid::HistogramData::HistogramE &rawE) {
   // 1. Check validity
@@ -814,7 +817,7 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(
  * m_Peaks are stored in a map.  (HKL) is the key
  */
 void RefinePowderInstrumentParameters::genPeaksFromTable(
-    DataObjects::TableWorkspace_sptr peakparamws) {
+    const DataObjects::TableWorkspace_sptr &peakparamws) {
   // 1. Check and clear input and output
   if (!peakparamws) {
     g_log.error() << "Input tableworkspace for peak parameters is invalid!\n";
@@ -831,7 +834,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
   for (size_t ir = 0; ir < numrows; ++ir) {
     // a) Generate peak
     BackToBackExponential_sptr newpeakptr =
-        boost::make_shared<BackToBackExponential>();
+        std::make_shared<BackToBackExponential>();
     newpeakptr->initialize();
 
     // b) Parse parameters
@@ -902,7 +905,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
  * the diffrotometer geometry parameters
  */
 void RefinePowderInstrumentParameters::importParametersFromTable(
-    DataObjects::TableWorkspace_sptr parameterWS,
+    const DataObjects::TableWorkspace_sptr &parameterWS,
     std::map<std::string, double> &parameters) {
   // 1. Check column orders
   std::vector<std::string> colnames = parameterWS->getColumnNames();
@@ -945,7 +948,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
  * Arguments
  */
 void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
-    TableWorkspace_sptr tablews, vector<string> parameternames,
+    const TableWorkspace_sptr &tablews, const vector<string> &parameternames,
     vector<double> &stepsizes, vector<double> &lowerbounds,
     vector<double> &upperbounds) {
   // 1. Get column information
@@ -1054,7 +1057,8 @@ hkl, double lattice)
 /** Calculate value n for thermal neutron peak profile
  */
 void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
-    IFunction_sptr m_Function, const HistogramX &xVals, vector<double> &vec_n) {
+    const IFunction_sptr &m_Function, const HistogramX &xVals,
+    vector<double> &vec_n) {
   if (m_Function->name() != "ThermalNeutronDtoTOFFunction") {
     g_log.warning() << "Function (" << m_Function->name()
                     << " is not ThermalNeutronDtoTOFFunction.  And it is not "
@@ -1155,7 +1159,7 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
     nspec = 1 + 3;
   }
 
-  m_dataWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+  m_dataWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", nspec, size,
                                                size));
   m_dataWS->getAxis(0)->setUnit("dSpacing");
@@ -1176,8 +1180,7 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
 DataObjects::TableWorkspace_sptr
 RefinePowderInstrumentParameters::genMCResultTable() {
   // 1. Create table workspace
-  DataObjects::TableWorkspace_sptr tablews =
-      boost::make_shared<TableWorkspace>();
+  DataObjects::TableWorkspace_sptr tablews = std::make_shared<TableWorkspace>();
 
   tablews->addColumn("double", "Chi2");
   tablews->addColumn("double", "GSLChi2");
@@ -1210,7 +1213,7 @@ RefinePowderInstrumentParameters::genOutputInstrumentParameterTable() {
   //  TableWorkspace is not copyable (default CC is incorrect and no point in
   //  writing a non-default one)
   DataObjects::TableWorkspace_sptr newtablews =
-      boost::shared_ptr<DataObjects::TableWorkspace>(
+      std::shared_ptr<DataObjects::TableWorkspace>(
           new DataObjects::TableWorkspace());
   newtablews->addColumn("str", "Name");
   newtablews->addColumn("double", "Value");

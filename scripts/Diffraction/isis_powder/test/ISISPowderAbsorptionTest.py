@@ -4,12 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import mantid.simpleapi as mantid
 import unittest
-
-from six import iterkeys,  assertRaisesRegex
 
 from isis_powder.routines import absorb_corrections, SampleDetails
 
@@ -37,17 +33,17 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
         }
 
         # Test each key one at a time
-        for blacklisted_key in iterkeys(sample_properties):
+        for blacklisted_key in sample_properties.keys():
             # Force python to make a shallow copy
             modified_dict = sample_properties.copy()
             modified_dict.pop(blacklisted_key)
 
             # Check that is raises an error
-            with assertRaisesRegex(self, KeyError, "The following key was not found in the advanced configuration"):
+            with self.assertRaisesRegex(KeyError, "The following key was not found in the advanced configuration"):
                 absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
 
             # Then check the error actually has the key name in it
-            with assertRaisesRegex(self, KeyError, blacklisted_key):
+            with self.assertRaisesRegex(KeyError, blacklisted_key):
                 absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
 
 

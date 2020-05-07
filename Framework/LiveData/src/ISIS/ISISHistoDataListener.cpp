@@ -31,7 +31,7 @@ GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <numeric>
@@ -59,7 +59,7 @@ ISISHistoDataListener::ISISHistoDataListener()
       "An optional list of spectra to load. If blank, all "
       "available spectra will be loaded.");
 
-  auto validator = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
+  auto validator = std::make_shared<Kernel::ArrayBoundedValidator<int>>();
   validator->setLower(1);
   declareProperty(
       std::make_unique<Kernel::ArrayProperty<int>>("PeriodList", validator),
@@ -169,7 +169,7 @@ void ISISHistoDataListener::start(
  * Read the data from the DAE.
  * @return :: A workspace with the data.
  */
-boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
+std::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
 
   if (m_timeRegime < 0) {
     m_timeRegime = getTimeRegimeToLoad();
@@ -422,7 +422,7 @@ void ISISHistoDataListener::calculateIndicesForReading(
  * @param workspaceIndex :: index in workspace to store data
  */
 void ISISHistoDataListener::getData(int period, int index, int count,
-                                    API::MatrixWorkspace_sptr workspace,
+                                    const API::MatrixWorkspace_sptr &workspace,
                                     size_t workspaceIndex) {
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const size_t bufferSize = count * (numberOfBins + 1) * sizeof(int);
@@ -466,7 +466,7 @@ void ISISHistoDataListener::loadSpectraMap() {
  *  @param iName :: The instrument name
  */
 void ISISHistoDataListener::runLoadInstrument(
-    MatrixWorkspace_sptr localWorkspace, const std::string &iName) {
+    const MatrixWorkspace_sptr &localWorkspace, const std::string &iName) {
   auto loadInst =
       API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
   if (!loadInst)

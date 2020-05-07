@@ -35,7 +35,7 @@ const std::string ConvertToMDParent::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToMDParent::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   //
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units
@@ -53,7 +53,7 @@ void ConvertToMDParent::init() {
 
   /// this variable describes default possible ID-s for Q-dimensions
   declareProperty("QDimensions", Q_modes[0],
-                  boost::make_shared<StringListValidator>(Q_modes),
+                  std::make_shared<StringListValidator>(Q_modes),
                   "String, describing available analysis modes, registered "
                   "with MD Transformation factory."
                   "There are 3 modes currently available and described in "
@@ -63,7 +63,7 @@ void ConvertToMDParent::init() {
   /// temporary, until dEMode is not properly defined on Workspace
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Direct],
-                  boost::make_shared<StringListValidator>(dE_modes),
+                  std::make_shared<StringListValidator>(dE_modes),
                   "You can analyze neutron energy transfer in **Direct**, "
                   "**Indirect** or **Elastic** mode."
                   "The analysis mode has to correspond to experimental set up. "
@@ -76,7 +76,7 @@ void ConvertToMDParent::init() {
   std::vector<std::string> TargFrames = QSclAndFrames.getTargetFrames();
   declareProperty(
       "Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],
-      boost::make_shared<StringListValidator>(TargFrames),
+      std::make_shared<StringListValidator>(TargFrames),
       "Selects Q-dimensions of the output workspace in **Q3D** case. "
       " **AutoSelect**: Choose the target coordinate frame as the function of "
       "goniometer and UB matrix values set on the input workspace."
@@ -91,7 +91,7 @@ void ConvertToMDParent::init() {
   std::vector<std::string> QScales = QSclAndFrames.getQScalings();
   declareProperty(
       "QConversionScales", QScales[CnvrtToMD::NoScaling],
-      boost::make_shared<StringListValidator>(QScales),
+      std::make_shared<StringListValidator>(QScales),
       "This property to normalize three momentums obtained in **Q3D** mode."
       " See *MD Transformation factory* "
       "for description and available scaling modes. The value can be modified "
@@ -357,7 +357,7 @@ ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(
   // const-ness
   // so, const cast is localized here despite input workspace is and should be
   // const in this case.
-  *pTargWSProp = boost::const_pointer_cast<MatrixWorkspace>(InWS2D);
+  *pTargWSProp = std::const_pointer_cast<MatrixWorkspace>(InWS2D);
 
   childAlg->setProperty("OutputWorkspace", OutWSName);
   childAlg->setProperty("GetMaskState", true);

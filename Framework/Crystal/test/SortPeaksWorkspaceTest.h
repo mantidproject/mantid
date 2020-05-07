@@ -25,7 +25,8 @@ private:
    * @param inWS : Input workspace to sort
    * @param columnName : Column name to sort by
    */
-  void doExecute(IPeaksWorkspace_sptr inWS, const std::string &columnName,
+  void doExecute(const IPeaksWorkspace_sptr &inWS,
+                 const std::string &columnName,
                  const bool sortAscending = true) {
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 

@@ -56,17 +56,17 @@ private:
       const std::map<unsigned int, std::map<std::string, double>> &profmap);
 
   /// Set up chopper/instrument constant parameters from profile map
-  boost::shared_ptr<ChopperConfiguration> setupInstrumentConstants(
+  std::shared_ptr<ChopperConfiguration> setupInstrumentConstants(
       const std::map<unsigned int, std::map<std::string, double>> &profmap);
 
   /// Set up for PG3 chopper constants
-  boost::shared_ptr<ChopperConfiguration> setupPG3Constants(int intfrequency);
+  std::shared_ptr<ChopperConfiguration> setupPG3Constants(int intfrequency);
   /// Set up for NOM chopper constants
-  boost::shared_ptr<ChopperConfiguration> setupNOMConstants(int intfrequency);
+  std::shared_ptr<ChopperConfiguration> setupNOMConstants(int intfrequency);
 
   /// Parse profile table workspace to a map
   void parseProfileTableWorkspace(
-      API::ITableWorkspace_sptr ws,
+      const API::ITableWorkspace_sptr &ws,
       std::map<unsigned int, std::map<std::string, double>> &profilemap);
 
   /// Convert to GSAS instrument file
@@ -113,7 +113,7 @@ private:
                            const std::string &paramname);
 
   /// Load fullprof resolution file.
-  void loadFullprofResolutionFile(std::string irffilename);
+  void loadFullprofResolutionFile(const std::string &irffilename);
 
   /// Calcualte d-space value.
   double calDspRange(double dtt1, double zero, double tof);
@@ -147,7 +147,7 @@ private:
   std::string m_gsasFileName;
 
   /// Chopper configuration
-  boost::shared_ptr<ChopperConfiguration> m_configuration;
+  std::shared_ptr<ChopperConfiguration> m_configuration;
 
   /// Profile parameter map
   std::map<unsigned int, std::map<std::string, double>> m_profileMap;

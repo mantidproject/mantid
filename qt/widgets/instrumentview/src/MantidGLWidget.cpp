@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QApplication>
 #include <QSpinBox>
@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <typeinfo>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -56,8 +57,8 @@ MantidGLWidget::MantidGLWidget(QWidget *parent)
 
 MantidGLWidget::~MantidGLWidget() {}
 
-void MantidGLWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface) {
-  m_surface = surface;
+void MantidGLWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
+  m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()),
           Qt::QueuedConnection);
   m_firstFrame = true;
@@ -227,7 +228,7 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event) {
 /**
  * This method set the background color.
  */
-void MantidGLWidget::setBackgroundColor(QColor input) {
+void MantidGLWidget::setBackgroundColor(const QColor &input) {
   makeCurrent();
   glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0),
                GLclampf(input.blue() / 255.0), 1.0);
@@ -262,7 +263,7 @@ void MantidGLWidget::saveToFile(const QString &filename) {
  * Resets the widget for new instrument definition
  */
 void MantidGLWidget::resetWidget() {
-  // setActorCollection(boost::shared_ptr<GLActorCollection>(new
+  // setActorCollection(std::shared_ptr<GLActorCollection>(new
   // GLActorCollection()));
 }
 

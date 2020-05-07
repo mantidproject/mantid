@@ -31,9 +31,9 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void doTest(std::string ws1, std::string ws2,
-              std::string resultExpected = "Success!", bool CheckEvents = true,
-              bool IgnoreDifferentID = false) {
+  void doTest(const std::string &ws1, const std::string &ws2,
+              const std::string &resultExpected = "Success!",
+              bool CheckEvents = true, bool IgnoreDifferentID = false) {
 
     CompareMDWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -43,7 +44,7 @@ private:
   void initWorkSpace();
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
-  void loadNexusEntriesIntoProperties(std::string nexusfilename);
+  void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
   void runLoadInstrument();
   void moveComponent(const std::string &, double);

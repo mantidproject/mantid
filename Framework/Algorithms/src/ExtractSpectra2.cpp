@@ -53,7 +53,7 @@ void ExtractSpectra2::init() {
 
 /// Executes the algorithm
 void ExtractSpectra2::exec() {
-  boost::shared_ptr<MatrixWorkspace> inputWS;
+  std::shared_ptr<MatrixWorkspace> inputWS;
   Indexing::SpectrumIndexSet indexSet;
   std::tie(inputWS, indexSet) =
       getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");

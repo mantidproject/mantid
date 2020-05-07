@@ -13,9 +13,6 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 
 # This file should be left free of PyQt imports to allow quick importing
 # of the main package.
-from __future__ import (absolute_import, division, print_function)
-
-
 try:
    from collections.abc import Iterable
 except ImportError:

@@ -7,9 +7,9 @@
 #pragma once
 
 #include <boost/numeric/conversion/cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -534,14 +534,14 @@ inline void TableColumn<API::Boolean>::fromDouble(size_t i, double value) {
 /// Shared pointer to a column with automatic type cast and data type check.
 /// Can be created with TableWorkspace::getColumn(...)
 template <class T>
-class TableColumn_ptr : public boost::shared_ptr<TableColumn<T>> {
+class TableColumn_ptr : public std::shared_ptr<TableColumn<T>> {
 public:
   /** Constructor
       @param c :: Shared pointer to a column
     */
-  TableColumn_ptr(boost::shared_ptr<API::Column> c)
-      : boost::shared_ptr<TableColumn<T>>(
-            boost::dynamic_pointer_cast<TableColumn<T>>(c)) {
+  TableColumn_ptr(std::shared_ptr<API::Column> c)
+      : std::shared_ptr<TableColumn<T>>(
+            std::dynamic_pointer_cast<TableColumn<T>>(c)) {
     if (!this->get()) {
       std::string str = "Data type of column " + c->name() +
                         " does not match " + typeid(T).name();
@@ -556,7 +556,7 @@ public:
   /** Constructor
       @param c :: Shared pointer to a column
     */
-  TableColumn_ptr(boost::shared_ptr<API::Column> c)
+  TableColumn_ptr(const std::shared_ptr<API::Column> &c)
       : TableColumn_ptr<API::Boolean>(c) {
     if (!this->get()) {
       std::string str = "Data type of column " + c->name() +

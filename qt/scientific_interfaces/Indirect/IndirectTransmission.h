@@ -44,8 +44,8 @@ private slots:
   void setSaveEnabled(bool enabled);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
-                       QString const message = "Run",
-                       QString const tooltip = "");
+                       QString const &message = "Run",
+                       QString const &tooltip = "");
 
 private:
   void setInstrument(QString const &instrumentName);

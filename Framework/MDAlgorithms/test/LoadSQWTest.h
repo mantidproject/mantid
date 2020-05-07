@@ -218,7 +218,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MDEventWorkspace4::sptr ws = boost::dynamic_pointer_cast<MDEventWorkspace4>(
+    MDEventWorkspace4::sptr ws = std::dynamic_pointer_cast<MDEventWorkspace4>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "wsWithoutEvents"));
 
@@ -235,7 +235,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
-    MDEventWorkspace4::sptr ws = boost::dynamic_pointer_cast<MDEventWorkspace4>(
+    MDEventWorkspace4::sptr ws = std::dynamic_pointer_cast<MDEventWorkspace4>(
         Mantid::API::AnalysisDataService::Instance().retrieve("createdWs"));
 
     // Check the product
@@ -352,7 +352,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
-    MDEventWorkspace4::sptr ws = boost::dynamic_pointer_cast<MDEventWorkspace4>(
+    MDEventWorkspace4::sptr ws = std::dynamic_pointer_cast<MDEventWorkspace4>(
         Mantid::API::AnalysisDataService::Instance().retrieve("benchmarkWS"));
 
     // Check the product

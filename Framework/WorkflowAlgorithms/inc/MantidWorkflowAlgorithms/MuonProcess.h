@@ -39,12 +39,12 @@ private:
   /// Groups specified workspace group according to specified
   /// DetectorGroupingTable.
   API::WorkspaceGroup_sptr
-  groupWorkspaces(API::WorkspaceGroup_sptr wsGroup,
-                  DataObjects::TableWorkspace_sptr grouping);
+  groupWorkspaces(const API::WorkspaceGroup_sptr &wsGroup,
+                  const DataObjects::TableWorkspace_sptr &grouping);
 
   /// Applies dead time correction to the workspace group.
-  API::WorkspaceGroup_sptr applyDTC(API::WorkspaceGroup_sptr wsGroup,
-                                    DataObjects::TableWorkspace_sptr dt);
+  API::WorkspaceGroup_sptr applyDTC(const API::WorkspaceGroup_sptr &wsGroup,
+                                    const DataObjects::TableWorkspace_sptr &dt);
 
   /// Applies offset, crops and rebin the workspace according to specified
   /// params
@@ -52,8 +52,9 @@ private:
                                              double loadedTimeZero);
 
   /// Applies offset, crops and rebins all workspaces in the group
-  API::WorkspaceGroup_sptr correctWorkspaces(API::WorkspaceGroup_sptr wsGroup,
-                                             double loadedTimeZero);
+  API::WorkspaceGroup_sptr
+  correctWorkspaces(const API::WorkspaceGroup_sptr &wsGroup,
+                    double loadedTimeZero);
 
   /// Builds an error message from a list of invalid periods
   std::string buildErrorString(const std::vector<int> &invalidPeriods) const;

@@ -31,7 +31,7 @@ namespace API {
 class MANTID_API_DLL ScriptBuilder {
 public:
   ScriptBuilder(
-      boost::shared_ptr<HistoryView> view,
+      const std::shared_ptr<HistoryView> &view,
       std::string versionSpecificity = "old", bool appendTimestamp = false,
       std::vector<std::string> ignoreTheseAlgs = {},
       std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {},
@@ -54,7 +54,7 @@ private:
                       const std::string &algName);
   void createStringForAlg(
       std::ostringstream &os,
-      boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
+      std::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
 
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;

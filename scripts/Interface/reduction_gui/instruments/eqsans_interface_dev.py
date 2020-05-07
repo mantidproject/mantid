@@ -10,7 +10,6 @@
     The actual view/layout is define in .ui files. The state of the reduction
     process is kept elsewhere (SNSReduction object)
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget
 from reduction_gui.widgets.sans.eqsans_instrument import SANSInstrumentWidget

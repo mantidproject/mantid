@@ -32,14 +32,14 @@ initiated)
 
 *@returns shared pointer to new solver, which corresponds to the workspace
 */
-boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
-    API::MatrixWorkspace_sptr inputWS,
-    boost::shared_ptr<ConvToMDBase> &currentSolver) const {
+std::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
+    const API::MatrixWorkspace_sptr &inputWS,
+    std::shared_ptr<ConvToMDBase> &currentSolver) const {
   // identify what kind of workspace we expect to process
   wsType inputWSType = Undefined;
-  if (boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(inputWS))
+  if (std::dynamic_pointer_cast<DataObjects::EventWorkspace>(inputWS))
     inputWSType = EventWS;
-  if (boost::dynamic_pointer_cast<DataObjects::Workspace2D>(inputWS))
+  if (std::dynamic_pointer_cast<DataObjects::Workspace2D>(inputWS))
     inputWSType = Matrix2DWS;
 
   if (inputWSType == Undefined)
@@ -58,7 +58,7 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
       existingWsConvType = Matrix2DWS;
   }
 
-  boost::shared_ptr<ConvToMDBase> res;
+  std::shared_ptr<ConvToMDBase> res;
   // select a converter, which corresponds to the workspace type
   if ((existingWsConvType == Undefined) ||
       (existingWsConvType != inputWSType)) {
@@ -66,12 +66,12 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     case (EventWS):
       // check if user set a property to use indexing
       if (converterType == ConvToMDSelector::DEFAULT)
-        res = boost::make_shared<ConvToMDEventsWS>();
+        res = std::make_shared<ConvToMDEventsWS>();
       else
-        res = boost::make_shared<ConvToMDEventsWSIndexing>();
+        res = std::make_shared<ConvToMDEventsWSIndexing>();
       break;
     case (Matrix2DWS):
-      res = boost::make_shared<ConvToMDHistoWS>();
+      res = std::make_shared<ConvToMDHistoWS>();
       break;
     default:
       throw(std::logic_error("ConvToDataObjectsSelector: requested converter "
@@ -82,11 +82,11 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     // in case of Event workspace check if user set a property to use indexing
     if (inputWSType == EventWS) {
       if (converterType == ConvToMDSelector::DEFAULT)
-        res = boost::make_shared<ConvToMDEventsWS>();
+        res = std::make_shared<ConvToMDEventsWS>();
       else
-        res = boost::make_shared<ConvToMDEventsWSIndexing>();
+        res = std::make_shared<ConvToMDEventsWSIndexing>();
     } else {
-      res = boost::make_shared<ConvToMDHistoWS>();
+      res = std::make_shared<ConvToMDHistoWS>();
     }
   }
 

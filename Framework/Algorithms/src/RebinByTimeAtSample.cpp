@@ -11,7 +11,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <cmath>

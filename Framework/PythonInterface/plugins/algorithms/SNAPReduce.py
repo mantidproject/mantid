@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,too-many-lines
-from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, Property, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
@@ -88,7 +87,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                     win_array = temp[i - w:i + w + 1].copy()
                     win_array_reversed = win_array[::-1]
                     average = (win_array + win_array_reversed) / 2
-                    temp[i] = np.min(average[:len(average) / 2])
+                    temp[i] = np.min(average[:int(len(average) / 2)])
 
         if LLS:
             temp = self.Inv_LLS_transformation(temp)

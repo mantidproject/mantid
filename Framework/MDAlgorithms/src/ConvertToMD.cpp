@@ -84,7 +84,7 @@ void ConvertToMD::init() {
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
   // additional box controller settings property.
-  auto mustBeMoreThan1 = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeMoreThan1 = std::make_shared<BoundedValidator<int>>();
   mustBeMoreThan1->setLower(1);
 
   declareProperty(
@@ -122,8 +122,7 @@ void ConvertToMD::init() {
 
   std::vector<std::string> converterType{"Default", "Indexed"};
 
-  auto loadTypeValidator =
-      boost::make_shared<StringListValidator>(converterType);
+  auto loadTypeValidator = std::make_shared<StringListValidator>(converterType);
   declareProperty("ConverterType", "Default", loadTypeValidator,
                   "[Default, Indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
@@ -205,7 +204,7 @@ void ConvertToMD::exec() {
   // initiate class which would deal with any dimension workspaces requested by
   // algorithm parameters
   if (!m_OutWSWrapper)
-    m_OutWSWrapper = boost::make_shared<MDEventWSWrapper>();
+    m_OutWSWrapper = std::make_shared<MDEventWSWrapper>();
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
@@ -317,7 +316,7 @@ void ConvertToMD::exec() {
 
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
+              std::dynamic_pointer_cast<IMDEventWorkspace>(spws));
   // free the algorithm from the responsibility for the target workspace to
   // allow it to be deleted if necessary
   m_OutWSWrapper->releaseWorkspace();
@@ -445,7 +444,7 @@ is ignored in any other case
 together and used to describe selected transformation.
 */
 bool ConvertToMD::buildTargetWSDescription(
-    API::IMDEventWorkspace_sptr spws, const std::string &QModReq,
+    const API::IMDEventWorkspace_sptr &spws, const std::string &QModReq,
     const std::string &dEModReq, const std::vector<std::string> &otherDimNames,
     std::vector<double> &dimMin, std::vector<double> &dimMax,
     const std::string &QFrame, const std::string &convertTo_,
@@ -604,7 +603,8 @@ ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
  * the first level.
  * @param bc A pointer to the box controller.
  */
-void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
+void ConvertToMD::setupTopLevelSplitting(
+    const Mantid::API::BoxController_sptr &bc) {
   const size_t topLevelSplitSetting = 50;
   const size_t dimCutoff = 4;
 
@@ -625,7 +625,8 @@ void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
  *
  *@returns true if one needs to create new workspace and false otherwise
  */
-bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
+bool ConvertToMD::doWeNeedNewTargetWorkspace(
+    const API::IMDEventWorkspace_sptr &spws) {
 
   bool createNewWs(false);
   if (!spws) {
@@ -762,7 +763,8 @@ void ConvertToMD::findMinMax(
  * @param outputWS :: Workspace on which to set the file back end
  */
 void ConvertToMD::setupFileBackend(
-    std::string filebackPath, Mantid::API::IMDEventWorkspace_sptr outputWS) {
+    const std::string &filebackPath,
+    const Mantid::API::IMDEventWorkspace_sptr &outputWS) {
   using DataObjects::BoxControllerNeXusIO;
   auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
   savemd->setProperty("InputWorkspace", outputWS);
@@ -774,7 +776,7 @@ void ConvertToMD::setupFileBackend(
   // create file-backed box controller
   auto boxControllerMem = outputWS->getBoxController();
   auto boxControllerIO =
-      boost::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+      std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
   boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
   outputWS->setFileBacked();
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);

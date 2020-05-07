@@ -8,7 +8,6 @@
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
 from qtpy.QtCore import (QRegExp)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)  # noqa

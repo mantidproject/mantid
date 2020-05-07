@@ -129,8 +129,8 @@ void CalMuonDetectorPhases::exec() {
   double freq = getFrequency(tempWS);
 
   // Create the output workspaces
-  TableWorkspace_sptr tab = boost::make_shared<TableWorkspace>();
-  auto group = boost::make_shared<API::WorkspaceGroup>();
+  TableWorkspace_sptr tab = std::make_shared<TableWorkspace>();
+  auto group = std::make_shared<API::WorkspaceGroup>();
 
   // Get the name of 'DataFitted'
   std::string groupName = getPropertyValue("DataFitted");
@@ -152,10 +152,10 @@ void CalMuonDetectorPhases::exec() {
  * @param resTab :: [output] Table workspace storing the asymmetries and phases
  * @param resGroup :: [output] Workspace group storing the fitting results
  */
-void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
-                                         double freq, std::string groupName,
-                                         API::ITableWorkspace_sptr resTab,
-                                         API::WorkspaceGroup_sptr &resGroup) {
+void CalMuonDetectorPhases::fitWorkspace(
+    const API::MatrixWorkspace_sptr &ws, double freq,
+    const std::string &groupName, const API::ITableWorkspace_sptr &resTab,
+    API::WorkspaceGroup_sptr &resGroup) {
 
   auto nhist = static_cast<int>(ws->getNumberHistograms());
 
@@ -179,7 +179,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
                                      [](double value) { return value == 0.; });
     if (emptySpectrum) {
       g_log.warning("Spectrum " + std::to_string(wsIndex) + " is empty");
-      TableWorkspace_sptr tab = boost::make_shared<TableWorkspace>();
+      TableWorkspace_sptr tab = std::make_shared<TableWorkspace>();
       tab->addColumn("str", "Name");
       tab->addColumn("double", "Value");
       tab->addColumn("double", "Error");
@@ -302,7 +302,7 @@ CalMuonDetectorPhases::extractDataFromWorkspace(double startTime,
   crop->setProperty("XMin", startTime);
   crop->setProperty("XMax", endTime);
   crop->executeAsChildAlg();
-  boost::shared_ptr<API::MatrixWorkspace> wsCrop =
+  std::shared_ptr<API::MatrixWorkspace> wsCrop =
       crop->getProperty("OutputWorkspace");
   return wsCrop;
 }

@@ -59,14 +59,14 @@ protected:
   void exec() override;
 
   void logConfigurationInformation(
-      boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector,
-      PoldiAbstractChopper_sptr chopper);
+      const std::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
+      const PoldiAbstractChopper_sptr &chopper);
 
 private:
   /// Overwrites Algorithm method.
   void init() override;
 
-  boost::shared_ptr<PoldiAutoCorrelationCore> m_core;
+  std::shared_ptr<PoldiAutoCorrelationCore> m_core;
 };
 
 } // namespace Poldi

@@ -31,14 +31,14 @@ AbortRemoteJob::AbortRemoteJob() { this->useAlgorithm("AbortRemoteJob", 2); }
 void AbortRemoteJob::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty(
-      "ComputeResource", "", boost::make_shared<StringListValidator>(computes),
+      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
       "The remote computer where the job is running", Direction::Input);
 
   // The ID of the job we want to Abort
@@ -47,12 +47,12 @@ void AbortRemoteJob::init() {
 }
 
 void AbortRemoteJob::exec() {
-  boost::shared_ptr<RemoteJobManager> jobManager =
+  std::shared_ptr<RemoteJobManager> jobManager =
       Mantid::Kernel::ConfigService::Instance()
           .getFacility()
           .getRemoteJobManager(getPropertyValue("ComputeResource"));
 
-  // jobManager is a boost::shared_ptr...
+  // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??

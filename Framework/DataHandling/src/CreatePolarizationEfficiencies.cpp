@@ -15,7 +15,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <algorithm>
 

@@ -50,9 +50,9 @@ protected:
   }
 
   // Add a fake peak to an MDEventWorkspace
-  void add_fake_md_peak(IMDEventWorkspace_sptr mdws, const size_t &nEvents,
-                        const double &h, const double &k, const double &l,
-                        const double &radius) {
+  void add_fake_md_peak(const IMDEventWorkspace_sptr &mdws,
+                        const size_t &nEvents, const double &h, const double &k,
+                        const double &l, const double &radius) {
     auto fakeMDEventDataAlg =
         AlgorithmManager::Instance().createUnmanaged("FakeMDEventData");
     fakeMDEventDataAlg->setChild(true);
@@ -95,7 +95,7 @@ protected:
     mdworkspaceAlg->execute();
     Workspace_sptr temp = mdworkspaceAlg->getProperty("OutputWorkspace");
     IMDEventWorkspace_sptr mdws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
+        std::dynamic_pointer_cast<IMDEventWorkspace>(temp);
 
     // --- Set speical coordinates on fake mdworkspace --
     auto coordsAlg =
@@ -162,7 +162,7 @@ protected:
 
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
     IMDHistoWorkspace_sptr outMDWS =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
     return MDHistoPeaksWSTuple(outMDWS, mdew_peak.get<1>());
   }
 

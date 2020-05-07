@@ -86,7 +86,7 @@ void LoadDaveGrp::init() {
 
   // Extract the current contents of the UnitFactory to be the allowed values
   // of the X-Axis property
-  auto allowedUnits = boost::make_shared<Kernel::StringListValidator>(
+  auto allowedUnits = std::make_shared<Kernel::StringListValidator>(
       Kernel::UnitFactory::Instance().getKeys());
   declareProperty("XAxisUnits", "DeltaE", allowedUnits,
                   "The name of the units for the X-Axis (must be one of "
@@ -158,7 +158,7 @@ void LoadDaveGrp::exec() {
 API::MatrixWorkspace_sptr LoadDaveGrp::setupWorkspace() const {
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<API::MatrixWorkspace>(
           API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
                                                    xLength, xLength));
   // Force the workspace to be a distribution
@@ -176,7 +176,7 @@ API::MatrixWorkspace_sptr LoadDaveGrp::setupWorkspace() const {
   return outputWorkspace;
 }
 
-void LoadDaveGrp::setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
+void LoadDaveGrp::setWorkspaceAxes(const API::MatrixWorkspace_sptr &workspace,
                                    const std::vector<double> &xAxis,
                                    const std::vector<double> &yAxis) const {
 
@@ -231,7 +231,7 @@ void LoadDaveGrp::getAxisValues(std::vector<double> &axis,
   }
 }
 
-void LoadDaveGrp::getData(API::MatrixWorkspace_sptr workspace) {
+void LoadDaveGrp::getData(const API::MatrixWorkspace_sptr &workspace) {
   double data_val = 0.0;
   double err_val = 0.0;
 

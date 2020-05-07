@@ -43,7 +43,7 @@ public:
   using DetectorSearchResult = std::tuple<bool, size_t>;
 
   /// Create a new DetectorSearcher with the given instrument & detectors
-  DetectorSearcher(Geometry::Instrument_const_sptr instrument,
+  DetectorSearcher(const Geometry::Instrument_const_sptr &instrument,
                    const Geometry::DetectorInfo &detInfo);
   /// Find a detector that intsects with the given Qlab vector
   DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);

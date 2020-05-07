@@ -22,7 +22,7 @@ using namespace API;
 using namespace Geometry;
 
 void EQSANSQ2D::init() {
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Workspace to calculate I(qx,qy) from");
@@ -39,7 +39,8 @@ void EQSANSQ2D::init() {
 /// Returns the value of a run property from a given workspace
 /// @param inputWS :: input workspace
 /// @param pname :: name of the property to retrieve
-double getRunProperty(MatrixWorkspace_sptr inputWS, const std::string &pname) {
+double getRunProperty(const MatrixWorkspace_sptr &inputWS,
+                      const std::string &pname) {
   return inputWS->run().getPropertyValueAsType<double>(pname);
 }
 

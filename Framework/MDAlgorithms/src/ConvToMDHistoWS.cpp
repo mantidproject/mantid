@@ -30,14 +30,14 @@ workspaces
 */
 size_t
 ConvToMDHistoWS::initialize(const MDWSDescription &WSD,
-                            boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                            std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                             bool ignoreZeros) {
 
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
 
   // check if we indeed have matrix workspace as input.
   DataObjects::Workspace2D_const_sptr pWS2D =
-      boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_InWS2D);
+      std::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_InWS2D);
   if (!pWS2D)
     throw(std::logic_error("ConvToDataObjectsHisto should work with defined "
                            "histrogram workspace"));

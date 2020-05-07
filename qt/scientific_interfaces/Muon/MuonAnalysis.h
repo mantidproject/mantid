@@ -43,7 +43,7 @@ class MuonAnalysisResultTableTab;
 
 struct GroupResult {
   bool usedExistGrouping;
-  boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
+  std::shared_ptr<Mantid::API::Grouping> groupingUsed;
 };
 } // namespace Muon
 
@@ -241,7 +241,7 @@ private slots:
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
   // update the displayed normalization
-  void updateNormalization(QString name);
+  void updateNormalization(const QString &name);
 
 private:
   void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames,
@@ -269,8 +269,8 @@ private:
   void inputFileChanged(const QStringList &filenames);
 
   /// Get grouping for the loaded workspace
-  boost::shared_ptr<Muon::GroupResult>
-  getGrouping(boost::shared_ptr<Muon::LoadResult> loadResult) const;
+  std::shared_ptr<Muon::GroupResult>
+  getGrouping(const std::shared_ptr<Muon::LoadResult> &loadResult) const;
 
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
@@ -413,7 +413,7 @@ private:
 
   /// Returns params string which can be passed to Rebin, according to what user
   /// specified
-  std::string rebinParams(Mantid::API::Workspace_sptr wsForRebin);
+  std::string rebinParams(const Mantid::API::Workspace_sptr &wsForRebin);
 
   /// Updates rebin params in the fit data presenter
   void updateRebinParams();

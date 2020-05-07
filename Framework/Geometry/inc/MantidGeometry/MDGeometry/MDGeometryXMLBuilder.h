@@ -41,19 +41,19 @@ public:
   bool addOrdinaryDimension(IMDDimension_const_sptr dimensionToAdd) const;
 
   /// Add many ordinary dimensions.
-  void addManyOrdinaryDimensions(VecIMDDimension_sptr manyDims) const;
+  void addManyOrdinaryDimensions(const VecIMDDimension_sptr &manyDims) const;
 
   /// Add x dimension.
-  bool addXDimension(IMDDimension_const_sptr dimension) const;
+  bool addXDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Add y dimension.
-  bool addYDimension(IMDDimension_const_sptr dimension) const;
+  bool addYDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Add z dimension.
-  bool addZDimension(IMDDimension_const_sptr dimension) const;
+  bool addZDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Add t dimension.
-  bool addTDimension(IMDDimension_const_sptr dimension) const;
+  bool addTDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Copy constructor
   MDGeometryBuilderXML(const MDGeometryBuilderXML &);

@@ -78,7 +78,7 @@ private:
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &workspace,
                             double &min, double &max, double &step);
   std::multimap<int64_t, int64_t>
-  readGroupingFile(std::string groupingFileName);
+  readGroupingFile(const std::string &groupingFileName);
 };
 
 } // namespace Algorithms

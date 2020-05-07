@@ -9,7 +9,6 @@
 
 ## Dan Nixon
 
-from __future__ import (absolute_import, division, print_function)
 import sys
 
 with open(sys.argv[2]) as f:

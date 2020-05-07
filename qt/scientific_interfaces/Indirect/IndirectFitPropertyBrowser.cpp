@@ -106,11 +106,11 @@ MultiDomainFunction_sptr IndirectFitPropertyBrowser::getGlobalFunction() const {
   auto fun = isFullFunctionBrowserActive()
                  ? m_functionBrowser->getGlobalFunction()
                  : m_templateBrowser->getGlobalFunction();
-  if (auto temp = boost::dynamic_pointer_cast<MultiDomainFunction>(fun)) {
+  if (auto temp = std::dynamic_pointer_cast<MultiDomainFunction>(fun)) {
     return temp;
   } else if (fun) {
     MultiDomainFunction_sptr multiFunction =
-        boost::make_shared<MultiDomainFunction>();
+        std::make_shared<MultiDomainFunction>();
     multiFunction->addFunction(fun);
     multiFunction->setDomainIndex(0, 0);
     return multiFunction;
@@ -212,7 +212,7 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
     if (getNumberOfDatasets() > 0) {
       return getGlobalFunction();
     } else {
-      auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+      auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
       auto singleFunction = getSingleFunction();
       if (singleFunction) {
         multiDomainFunction->addFunction(singleFunction);
@@ -221,7 +221,7 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
       return multiDomainFunction;
     }
   } catch (const std::invalid_argument &) {
-    return boost::make_shared<MultiDomainFunction>();
+    return std::make_shared<MultiDomainFunction>();
   }
 }
 
@@ -318,7 +318,8 @@ void IndirectFitPropertyBrowser::clear() {
  * Updates the plot guess feature in this indirect fit property browser.
  * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(MatrixWorkspace_const_sptr) {}
+void IndirectFitPropertyBrowser::updatePlotGuess(
+    const MatrixWorkspace_const_sptr &) {}
 
 void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
   m_functionBrowser->setErrorsEnabled(enabled);

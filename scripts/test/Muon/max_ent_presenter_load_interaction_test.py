@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.api import FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtCore
 
@@ -106,7 +104,7 @@ class MaxEntPresenterTest(unittest.TestCase):
 
         self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', 'maxent_workspace', mock.MagicMock())
 
-        workspace_wrapper_mock.assert_called_once_with('MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
+        workspace_wrapper_mock.assert_called_once_with('MUSR22725 MaxEnt MA/MUSR22725_MaxEnt; MaxEnt')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_get_output_options_defaults_returns_correctly(self):

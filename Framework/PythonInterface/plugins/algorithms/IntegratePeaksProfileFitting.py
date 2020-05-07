@@ -11,7 +11,6 @@ fitting for integrating peaks.
 """
 
 # This __future__ import is for Python 2/3 compatibility
-from __future__ import (absolute_import, division, print_function)
 import sys
 from mantid.kernel import *
 from mantid.api import *

@@ -36,7 +36,7 @@ public:
 
 private:
   BraggScatterer_sptr getDefaultScatterer() {
-    return boost::make_shared<MockBraggScatterer>();
+    return std::make_shared<MockBraggScatterer>();
   }
 
   BraggScatterer_sptr getInitializedScatterer() {

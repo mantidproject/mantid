@@ -45,10 +45,10 @@ void FindUBUsingMinMaxD::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  auto atLeast3Int = boost::make_shared<BoundedValidator<int>>();
+  auto atLeast3Int = std::make_shared<BoundedValidator<int>>();
   atLeast3Int->setLower(3);
 
   // use negative values, force user to input all parameters

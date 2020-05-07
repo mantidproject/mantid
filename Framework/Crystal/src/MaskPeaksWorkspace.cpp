@@ -39,7 +39,7 @@ void MaskPeaksWorkspace::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "A workspace containing one or more rectangular area "
                   "detectors. Each spectrum needs to correspond to only one "
                   "pixelID (e.g. no grouping or previous calls to "
@@ -88,7 +88,7 @@ void MaskPeaksWorkspace::exec() {
 
   // Init a table workspace
   DataObjects::TableWorkspace_sptr tablews =
-      boost::make_shared<DataObjects::TableWorkspace>();
+      std::make_shared<DataObjects::TableWorkspace>();
   tablews->addColumn("double", "XMin");
   tablews->addColumn("double", "XMax");
   tablews->addColumn("str", "SpectraList");
@@ -200,11 +200,12 @@ void MaskPeaksWorkspace::retrieveProperties() {
   }
 }
 
-size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
-                                        Geometry::IComponent_const_sptr comp,
-                                        const int x, const int y) {
+size_t
+MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
+                                 const Geometry::IComponent_const_sptr &comp,
+                                 const int x, const int y) {
   Geometry::RectangularDetector_const_sptr det =
-      boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
   if (det) {
     if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0)
       return EMPTY_INT();
@@ -231,11 +232,11 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
     return wiEntry->second;
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
     asmb->getChildren(children, false);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     auto NROWS = static_cast<int>(grandchildren.size());
@@ -270,15 +271,15 @@ void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax,
     tofMax = tofPeak + m_tofMax;
   }
 }
-int MaskPeaksWorkspace::findPixelID(std::string bankName, int col, int row) {
+int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col,
+                                    int row) {
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
-  boost::shared_ptr<const IComponent> parent =
-      Iptr->getComponentByName(bankName);
+  std::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+    std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getID();
   } else {
     std::string bankName0 = bankName;
@@ -288,10 +289,10 @@ int MaskPeaksWorkspace::findPixelID(std::string bankName, int col, int row) {
     pixelString << Iptr->getName() << "/" << bankName0 << "/" << bankName
                 << "/tube" << std::setw(3) << std::setfill('0') << col
                 << "/pixel" << std::setw(4) << std::setfill('0') << row;
-    boost::shared_ptr<const Geometry::IComponent> component =
+    std::shared_ptr<const Geometry::IComponent> component =
         Iptr->getComponentByName(pixelString.str());
-    boost::shared_ptr<const Detector> pixel =
-        boost::dynamic_pointer_cast<const Detector>(component);
+    std::shared_ptr<const Detector> pixel =
+        std::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
   }
 }

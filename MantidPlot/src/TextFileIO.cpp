@@ -16,7 +16,8 @@
 /**
  * Construct an object with a list of file filters
  */
-TextFileIO::TextFileIO(QStringList fileFilters) : m_filters(fileFilters) {}
+TextFileIO::TextFileIO(const QStringList &fileFilters)
+    : m_filters(fileFilters) {}
 
 /**
  * Save to a file

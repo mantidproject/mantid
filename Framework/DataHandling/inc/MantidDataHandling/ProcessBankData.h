@@ -8,10 +8,11 @@
 
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
 
-#include <boost/shared_array.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -43,12 +44,14 @@ public:
    * @return
    */ // API::IFileLoader<Kernel::NexusDescriptor>
   ProcessBankData(DefaultEventLoader &loader, std::string entry_name,
-                  API::Progress *prog, boost::shared_array<uint32_t> event_id,
-                  boost::shared_array<float> event_time_of_flight,
+                  API::Progress *prog,
+                  std::shared_ptr<std::vector<uint32_t>> event_id,
+                  std::shared_ptr<std::vector<float>> event_time_of_flight,
                   size_t numEvents, size_t startAt,
-                  boost::shared_ptr<std::vector<uint64_t>> event_index,
-                  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes,
-                  bool have_weight, boost::shared_array<float> event_weight,
+                  std::shared_ptr<std::vector<uint64_t>> event_index,
+                  std::shared_ptr<BankPulseTimes> thisBankPulseTimes,
+                  bool have_weight,
+                  std::shared_ptr<std::vector<float>> event_weight,
                   detid_t min_event_id, detid_t max_event_id);
 
   void run() override;
@@ -71,21 +74,21 @@ private:
   /// Progress reporting
   API::Progress *prog;
   /// event pixel ID array
-  boost::shared_array<uint32_t> event_id;
+  std::shared_ptr<std::vector<uint32_t>> event_id;
   /// event TOF array
-  boost::shared_array<float> event_time_of_flight;
+  std::shared_ptr<std::vector<float>> event_time_of_flight;
   /// # of events in arrays
   size_t numEvents;
   /// index of the first event from event_index
   size_t startAt;
   /// vector of event index (length of # of pulses)
-  boost::shared_ptr<std::vector<uint64_t>> event_index;
+  std::shared_ptr<std::vector<uint64_t>> event_index;
   /// Pulse times for this bank
-  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
+  std::shared_ptr<BankPulseTimes> thisBankPulseTimes;
   /// Flag for simulated data
   bool have_weight;
   /// event weights array
-  boost::shared_array<float> event_weight;
+  std::shared_ptr<std::vector<float>> event_weight;
   /// Minimum pixel id
   detid_t m_min_id;
   /// Maximum pixel id

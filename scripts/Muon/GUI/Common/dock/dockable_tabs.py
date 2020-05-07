@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
-
 from qtpy import QtWidgets, QtCore, QtGui, PYQT4
 from qtpy.QtCore import Slot
 
@@ -56,6 +53,9 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         self.tab_order.append(name)
         self.attached_tab_names.append(name)
         super(DetachableTabWidget, self).addTab(tab, name)
+
+    def set_slot_for_tab_changed(self, slot):
+        self.currentChanged.connect(slot)
 
     @Slot(int, int)
     def move_tab(self, from_index, to_index):

@@ -125,7 +125,7 @@ private:
       alg->initialize();
       alg->setProperty(
           "Workspace",
-          boost::dynamic_pointer_cast<Mantid::API::Workspace>(workspace));
+          std::dynamic_pointer_cast<Mantid::API::Workspace>(workspace));
       alg->setProperty("WorkspaceIndexList", indices);
       alg->execute();
     }
@@ -133,7 +133,7 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_sptr
-  createMask(Mantid::API::MatrixWorkspace_sptr inputWS) {
+  createMask(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
     auto maskWS = Mantid::DataObjects::MaskWorkspace_sptr(
         new Mantid::DataObjects::MaskWorkspace(inputWS));
     size_t n = inputWS->getNumberHistograms();
@@ -146,8 +146,8 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_sptr
-  runAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
-               Mantid::API::MatrixWorkspace_sptr maskedWS =
+  runAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+               const Mantid::API::MatrixWorkspace_sptr &maskedWS =
                    Mantid::API::MatrixWorkspace_sptr()) {
     ExtractUnmaskedSpectra alg;
     alg.setChild(true);

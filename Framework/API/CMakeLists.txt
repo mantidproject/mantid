@@ -8,7 +8,6 @@ set(SRC_FILES
     src/AlgorithmManager.cpp
     src/AlgorithmObserver.cpp
     src/AlgorithmProperty.cpp
-    src/AlgorithmProxy.cpp
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
@@ -106,6 +105,7 @@ set(SRC_FILES
     src/MultiPeriodGroupWorker.cpp
     src/MultipleExperimentInfos.cpp
     src/MultipleFileProperty.cpp
+    src/NexusFileLoader.cpp
     src/NotebookBuilder.cpp
     src/NotebookWriter.cpp
     src/NullCoordTransform.cpp
@@ -172,7 +172,6 @@ set(INC_FILES
     inc/MantidAPI/AlgorithmManager.h
     inc/MantidAPI/AlgorithmObserver.h
     inc/MantidAPI/AlgorithmProperty.h
-    inc/MantidAPI/AlgorithmProxy.h
     inc/MantidAPI/AnalysisDataService.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
@@ -305,6 +304,7 @@ set(INC_FILES
     inc/MantidAPI/MultiPeriodGroupWorker.h
     inc/MantidAPI/MultipleExperimentInfos.h
     inc/MantidAPI/MultipleFileProperty.h
+    inc/MantidAPI/NexusFileLoader.h
     inc/MantidAPI/NotebookBuilder.h
     inc/MantidAPI/NotebookWriter.h
     inc/MantidAPI/NullCoordTransform.h
@@ -379,7 +379,6 @@ set(TEST_FILES
     AlgorithmMPITest.h
     AlgorithmManagerTest.h
     AlgorithmPropertyTest.h
-    AlgorithmProxyTest.h
     AlgorithmTest.h
     AnalysisDataServiceTest.h
     AnalysisDataServiceObserverTest.h
@@ -528,7 +527,7 @@ endif()
 set_property(TARGET API PROPERTY FOLDER "MantidFramework")
 
 
-target_include_directories (API SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+target_include_directories (API SYSTEM PUBLIC ${NEXUS_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 target_link_libraries(API
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}

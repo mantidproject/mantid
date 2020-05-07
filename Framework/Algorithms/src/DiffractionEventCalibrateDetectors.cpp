@@ -84,7 +84,7 @@ static double gsl_costFunction(const gsl_vector *v, void *params) {
 
 void DiffractionEventCalibrateDetectors::movedetector(
     double x, double y, double z, double rotx, double roty, double rotz,
-    std::string detname, EventWorkspace_sptr inputW) {
+    const std::string &detname, const EventWorkspace_sptr &inputW) {
 
   IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
   alg1->setProperty<EventWorkspace_sptr>("Workspace", inputW);
@@ -145,10 +145,11 @@ void DiffractionEventCalibrateDetectors::movedetector(
 
 double DiffractionEventCalibrateDetectors::intensity(
     double x, double y, double z, double rotx, double roty, double rotz,
-    std::string detname, std::string inname, std::string outname,
-    std::string peakOpt, std::string rb_param, std::string groupWSName) {
+    const std::string &detname, const std::string &inname,
+    const std::string &outname, const std::string &peakOpt,
+    const std::string &rb_param, const std::string &groupWSName) {
 
-  EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>(
+  EventWorkspace_sptr inputW = std::dynamic_pointer_cast<EventWorkspace>(
       AnalysisDataService::Instance().retrieve(inname));
 
   CPUTimer tim;
@@ -230,7 +231,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   // Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of
   // events
   EventWorkspace_const_sptr inputE =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputW);
   return (static_cast<int>(inputE->getNumberEvents()) / 1.e6) / peakHeight +
          std::fabs(peakLoc - boost::lexical_cast<double>(peakOpt));
 }
@@ -240,7 +241,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 void DiffractionEventCalibrateDetectors::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   declareProperty("Params", "",
@@ -251,12 +252,12 @@ void DiffractionEventCalibrateDetectors::init() {
                   "Use bin boundaries close to peak you wish to maximize. "
                   "Negative width values indicate logarithmic binning.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   declareProperty(
       "MaxIterations", 10, mustBePositive,
       "Stop after this number of iterations if a good fit is not found");
 
-  auto dblmustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto dblmustBePositive = std::make_shared<BoundedValidator<double>>();
   declareProperty("LocationOfPeakToOptimize", 2.0308, dblmustBePositive,
                   "Optimize this location of peak by moving detectors");
 
@@ -296,16 +297,16 @@ void DiffractionEventCalibrateDetectors::exec() {
   Instrument_const_sptr inst = dummyW->getInstrument();
 
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector>> detList;
+  std::vector<std::shared_ptr<RectangularDetector>> detList;
   // --------- Loading only one bank ----------------------------------
   std::string onebank = getProperty("BankName");
   bool doOneBank = (!onebank.empty());
   for (int i = 0; i < inst->nelements(); i++) {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
+    std::shared_ptr<RectangularDetector> det;
+    std::shared_ptr<ICompAssembly> assem;
+    std::shared_ptr<ICompAssembly> assem2;
 
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
       if (det->getName() == onebank)
         detList.emplace_back(det);
@@ -315,10 +316,10 @@ void DiffractionEventCalibrateDetectors::exec() {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
       // for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
+      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
-          det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
+          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             if (det->getName() == onebank)
               detList.emplace_back(det);
@@ -330,10 +331,10 @@ void DiffractionEventCalibrateDetectors::exec() {
             // PG3).
             // We are not doing a full recursive search since that will be very
             // long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
+            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = boost::dynamic_pointer_cast<RectangularDetector>(
+                det = std::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
                   if (det->getName() == onebank)

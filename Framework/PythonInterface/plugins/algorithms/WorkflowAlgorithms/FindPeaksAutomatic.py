@@ -4,16 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, DeleteWorkspace,
                               CreateEmptyTableWorkspace, FitGaussianPeaks)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, Progress, ITableWorkspaceProperty)
 from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
 from mantid import mtd, logger
-
 import numpy as np
-import scipy.signal
 
 
 class FindPeaksAutomatic(DataProcessorAlgorithm):
@@ -374,8 +370,9 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
 
         # Find all the peaks. find_peaks was introduced in scipy 1.1.0, if using an older version use find_peaks_cwt
         # however this will not do an equally good job as it cannot sort by prominence (also added in 1.1.0)
-        major, minor, _ = scipy.__version__.split('.')
-        if int(major) >= 1 and int(minor) >= 1:
+        from distutils.version import LooseVersion
+        import scipy
+        if LooseVersion(scipy.__version__) >= LooseVersion('1.1.0'):
             raw_peaks, _ = scipy.signal.find_peaks(raw_yvals)
             flat_peaks, params = scipy.signal.find_peaks(flat_yvals, prominence=(None, None))
             prominence = params['prominences']

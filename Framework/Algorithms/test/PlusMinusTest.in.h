@@ -265,7 +265,7 @@ public:
     }
 
     checkData(work_in1, work_in2, work_out1);
-    checkData(work_in1, boost::make_shared<WorkspaceSingleValue>(value), work_out2);
+    checkData(work_in1, std::make_shared<WorkspaceSingleValue>(value), work_out2);
   }
 
   void test_1D_SingleValue()
@@ -392,7 +392,7 @@ public:
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     // You have to specify the expected output value because in1 gets changed.
     performTest(work_in1,work_in2, true, false /*not event out*/,
-        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+        DO_PLUS ? 4.0 : 0.0, 2.0);
   }
 
   void test_Event_2D()
@@ -468,7 +468,7 @@ public:
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, false /*inPlace*/, true /*outputIsEvent*/,
-        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+        DO_PLUS ? 4.0 : 0.0, 2.0);
   }
 
   void test_Event_Event_inPlace()
@@ -477,7 +477,7 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, true, true /*outputIsEvent*/,
-        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+        DO_PLUS ? 4.0 : 0.0, 2.0);
   }
 
   void test_Event_EventSingleSpectrum_fails()
@@ -502,7 +502,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -514,7 +514,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,1,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -525,7 +525,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(5,1,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -537,7 +537,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -567,7 +567,7 @@ public:
       TS_ASSERT( work_in2->getSpectrum(0).hasDetectorID(100) );
 
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 3.0 : -1.0,   DO_PLUS ? 1.7320 : 1.7320);
+          DO_PLUS ? 3.0 : -1.0, 1.7320);
 
       //Ya, its an event workspace
       TS_ASSERT(work_out);
@@ -592,7 +592,7 @@ public:
   std::string describe_workspace(const MatrixWorkspace_sptr ws)
   {
     std::ostringstream mess;
-    EventWorkspace_const_sptr ews = boost::dynamic_pointer_cast<const EventWorkspace>(ws);
+    EventWorkspace_const_sptr ews = std::dynamic_pointer_cast<const EventWorkspace>(ws);
     if (ews)
       mess << "Event";
     else
@@ -654,9 +654,9 @@ public:
     // ------ Original number of events ----------------
     size_t numEvents1=0;
     size_t numEvents2=0;
-    EventWorkspace_const_sptr ews_1 = boost::dynamic_pointer_cast<const EventWorkspace>(work_in1) ;
+    EventWorkspace_const_sptr ews_1 = std::dynamic_pointer_cast<const EventWorkspace>(work_in1) ;
     if (ews_1) numEvents1 = ews_1->getNumberEvents();
-    EventWorkspace_const_sptr ews_2 = boost::dynamic_pointer_cast<const EventWorkspace>(work_in2) ;
+    EventWorkspace_const_sptr ews_2 = std::dynamic_pointer_cast<const EventWorkspace>(work_in2) ;
     if (ews_2) numEvents2 = ews_2->getNumberEvents();
 
     std::string base = DO_PLUS ? "PlusTest_" : "MinusTest";
@@ -700,7 +700,7 @@ public:
       //Check that the output is an event workspace?
       if (outputIsEvent)
       {
-        EventWorkspace_sptr ews_out = boost::dynamic_pointer_cast<EventWorkspace>(work_out1) ;
+        EventWorkspace_sptr ews_out = std::dynamic_pointer_cast<EventWorkspace>(work_out1) ;
         TSM_ASSERT( message, ews_out);
         // The # of events is equal to the sum of the original amount
         TSM_ASSERT_EQUALS( message, ews_out->getNumberEvents(), numEvents1 + numEvents2 );
@@ -708,7 +708,7 @@ public:
       else
       {
         // Check that it is NOT event
-        TSM_ASSERT( message, !(boost::dynamic_pointer_cast<EventWorkspace>(work_out1)) );
+        TSM_ASSERT( message, !(std::dynamic_pointer_cast<EventWorkspace>(work_out1)) );
       }
 
       if (algorithmWillCommute)
@@ -943,7 +943,7 @@ public:
       return;
 
     // The output is an EventWorkspace ?
-    EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
+    EventWorkspace_const_sptr eventOut = std::dynamic_pointer_cast<const EventWorkspace>(work_out1);
     if (expectEventOutput)
     {
       TS_ASSERT(eventOut);

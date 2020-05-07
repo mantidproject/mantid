@@ -47,7 +47,7 @@ public:
   bool checkForRecovery() const noexcept;
 
   /// Clears all checkpoints in the existing folder at the given path
-  bool clearAllCheckpoints(Poco::Path path) const noexcept;
+  bool clearAllCheckpoints(const Poco::Path &path) const noexcept;
 
   /// Clears all checkpoints in the existing folder at the given path
   bool clearAllUnusedCheckpoints() const noexcept;

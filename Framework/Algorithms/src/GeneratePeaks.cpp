@@ -59,7 +59,7 @@ void GeneratePeaks::init() {
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
   std::vector<std::string> peakFullNames = addFunctionParameterNames(peakNames);
   declareProperty("PeakType", "",
-                  boost::make_shared<StringListValidator>(peakFullNames),
+                  std::make_shared<StringListValidator>(peakFullNames),
                   "Peak function type. ");
 
   for (size_t i = 0; i < peakFullNames.size(); ++i)
@@ -79,7 +79,7 @@ void GeneratePeaks::init() {
                                      "Linear",
                                      "Quadratic"};
   declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
   declareProperty(
@@ -100,7 +100,7 @@ void GeneratePeaks::init() {
 
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "BinningParameters",
-                      boost::make_shared<Kernel::RebinParamsValidator>(true)),
+                      std::make_shared<Kernel::RebinParamsValidator>(true)),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
@@ -314,7 +314,7 @@ void GeneratePeaks::importPeaksFromTable(
 
     // Generate function to plot
     API::CompositeFunction_sptr plotfunc =
-        boost::make_shared<CompositeFunction>();
+        std::make_shared<CompositeFunction>();
     plotfunc->addFunction(m_peakFunction);
     if (m_genBackground)
       plotfunc->addFunction(m_bkgdFunction);
@@ -357,7 +357,7 @@ void GeneratePeaks::importPeaksFromTable(
 void GeneratePeaks::importPeakFromVector(
     std::vector<std::pair<double, API::IFunction_sptr>> &functionmap) {
   API::CompositeFunction_sptr compfunc =
-      boost::make_shared<API::CompositeFunction>();
+      std::make_shared<API::CompositeFunction>();
 
   // Set up and clone peak function
   if (m_useRawParameter) {
@@ -429,7 +429,7 @@ void GeneratePeaks::generatePeaks(
     const std::map<specnum_t,
                    std::vector<std::pair<double, API::IFunction_sptr>>>
         &functionmap,
-    API::MatrixWorkspace_sptr dataWS) {
+    const API::MatrixWorkspace_sptr &dataWS) {
   // Calcualte function
   std::map<specnum_t,
            std::vector<std::pair<double, API::IFunction_sptr>>>::const_iterator
@@ -511,12 +511,12 @@ void GeneratePeaks::generatePeaks(
 void GeneratePeaks::createFunction(std::string &peaktype,
                                    std::string &bkgdtype) {
   // Create peak function
-  m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_peakFunction = std::dynamic_pointer_cast<IPeakFunction>(
       API::FunctionFactory::Instance().createFunction(peaktype));
 
   // create the background
   if (m_genBackground)
-    m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
+    m_bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
         API::FunctionFactory::Instance().createFunction(bkgdtype));
 }
 
@@ -627,7 +627,7 @@ void GeneratePeaks::processTableColumnNames() {
  * Algorithm supports multiple peaks in multiple spectra
  */
 void GeneratePeaks::getSpectraSet(
-    DataObjects::TableWorkspace_const_sptr peakParmsWS) {
+    const DataObjects::TableWorkspace_const_sptr &peakParmsWS) {
   size_t numpeaks = peakParmsWS->rowCount();
   API::Column_const_sptr col = peakParmsWS->getColumn("spectrum");
 
@@ -652,17 +652,17 @@ void GeneratePeaks::getSpectraSet(
 /** Get the IPeakFunction part in the input function
  */
 API::IPeakFunction_sptr
-GeneratePeaks::getPeakFunction(API::IFunction_sptr infunction) {
+GeneratePeaks::getPeakFunction(const API::IFunction_sptr &infunction) {
   // Not a composite function
   API::CompositeFunction_sptr compfunc =
-      boost::dynamic_pointer_cast<API::CompositeFunction>(infunction);
+      std::dynamic_pointer_cast<API::CompositeFunction>(infunction);
 
   // If it is a composite function (complete part for return)
   if (compfunc) {
     for (size_t i = 0; i < compfunc->nFunctions(); ++i) {
       API::IFunction_sptr subfunc = compfunc->getFunction(i);
       API::IPeakFunction_sptr peakfunc =
-          boost::dynamic_pointer_cast<API::IPeakFunction>(subfunc);
+          std::dynamic_pointer_cast<API::IPeakFunction>(subfunc);
       if (peakfunc)
         return peakfunc;
     }
@@ -670,7 +670,7 @@ GeneratePeaks::getPeakFunction(API::IFunction_sptr infunction) {
 
   // Return if not a composite function
   API::IPeakFunction_sptr peakfunc =
-      boost::dynamic_pointer_cast<API::IPeakFunction>(infunction);
+      std::dynamic_pointer_cast<API::IPeakFunction>(infunction);
 
   return peakfunc;
 }
@@ -678,8 +678,8 @@ GeneratePeaks::getPeakFunction(API::IFunction_sptr infunction) {
 //----------------------------------------------------------------------------------------------
 /** Find out whether a function has a certain parameter
  */
-bool GeneratePeaks::hasParameter(API::IFunction_sptr function,
-                                 std::string paramname) {
+bool GeneratePeaks::hasParameter(const API::IFunction_sptr &function,
+                                 const std::string &paramname) {
   std::vector<std::string> parnames = function->getParameterNames();
   std::vector<std::string>::iterator piter;
   piter = std::find(parnames.begin(), parnames.end(), paramname);
@@ -793,8 +793,8 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
 
 /** Add function's parameter names after peak function name
  */
-std::vector<std::string>
-GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
+std::vector<std::string> GeneratePeaks::addFunctionParameterNames(
+    const std::vector<std::string> &funcnames) {
   std::vector<std::string> vec_funcparnames;
 
   for (auto &funcname : funcnames) {

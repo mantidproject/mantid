@@ -5,10 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
-from __future__ import (absolute_import, division, print_function)
-
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-import six
 
 
 class MuonGroup(object):
@@ -65,7 +62,7 @@ class MuonGroup(object):
 
     @detectors.setter
     def detectors(self, detector_ids):
-        if isinstance(detector_ids, six.string_types):
+        if isinstance(detector_ids, str):
             raise AttributeError("MuonGroup : detectors must be a list of ints.")
         elif isinstance(detector_ids, list):
             if sum([not isinstance(item, int) for item in detector_ids]) == 0:

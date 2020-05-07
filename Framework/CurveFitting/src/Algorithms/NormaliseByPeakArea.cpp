@@ -20,7 +20,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -67,7 +67,7 @@ const std::string NormaliseByPeakArea::category() const {
 /** Initialize the algorithm's properties.
  */
 void NormaliseByPeakArea::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
@@ -75,7 +75,7 @@ void NormaliseByPeakArea::init() {
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   mustBePositive->setLowerExclusive(true); // strictly greater than 0.0
   declareProperty("Mass", -1.0, mustBePositive,
@@ -189,7 +189,7 @@ void NormaliseByPeakArea::createOutputWorkspaces(
 void NormaliseByPeakArea::setUnitsToMomentum(
     const API::MatrixWorkspace_sptr &workspace) {
   // Units
-  auto xLabel = boost::make_shared<Units::Label>("Momentum", "A^-1");
+  auto xLabel = std::make_shared<Units::Label>("Momentum", "A^-1");
   workspace->getAxis(0)->unit() = xLabel;
   workspace->setYUnit("");
   workspace->setYUnitLabel("");
@@ -263,7 +263,7 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
   }
   alg->setProperty("Function", func);
   alg->setProperty("InputWorkspace",
-                   boost::static_pointer_cast<Workspace>(yspace));
+                   std::static_pointer_cast<Workspace>(yspace));
   alg->setProperty("WorkspaceIndex", static_cast<int>(index));
   alg->setProperty("CreateOutput", true);
   alg->execute();

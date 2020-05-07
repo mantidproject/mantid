@@ -298,7 +298,7 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
  * @returns line number that file was read to
  */
 int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
-                                           const std::string filename) {
+                                           const std::string &filename) {
   // end early if already at the end of the file
   if (file.eof())
     return 0;

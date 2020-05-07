@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
+#include <utility>
 
 using Mantid::Geometry::PeakTransform_sptr;
 
@@ -19,7 +20,8 @@ CompositePeaksPresenter::CompositePeaksPresenter(
     ZoomablePeaksView *const zoomablePlottingWidget,
     PeaksPresenter_sptr defaultPresenter)
     : m_zoomablePlottingWidget(zoomablePlottingWidget),
-      m_default(defaultPresenter), m_owner(nullptr), m_zoomedPeakIndex(-1) {
+      m_default(std::move(defaultPresenter)), m_owner(nullptr),
+      m_zoomedPeakIndex(-1) {
   if (m_zoomablePlottingWidget == nullptr) {
     throw std::runtime_error("Zoomable Plotting Widget is NULL");
   }
@@ -146,7 +148,8 @@ bool CompositePeaksPresenter::contentsDifferent(
 Add peaks presenter
 @param presenter : Subject peaks presenter
 */
-void CompositePeaksPresenter::addPeaksPresenter(PeaksPresenter_sptr presenter) {
+void CompositePeaksPresenter::addPeaksPresenter(
+    const PeaksPresenter_sptr &presenter) {
   if (this->size() == 10) {
     throw std::invalid_argument("Maximum number of PeaksWorkspaces that can be "
                                 "simultaneously displayed is 10.");
@@ -186,7 +189,7 @@ SetPeaksWorkspaces CompositePeaksPresenter::presentedWorkspaces() const {
 */
 CompositePeaksPresenter::SubjectContainer::iterator
 CompositePeaksPresenter::getPresenterIteratorFromWorkspace(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) {
   SubjectContainer::iterator presenterFound = m_subjects.end();
   for (auto presenterIterator = m_subjects.begin();
        presenterIterator != m_subjects.end(); ++presenterIterator) {
@@ -206,7 +209,7 @@ CompositePeaksPresenter::getPresenterIteratorFromWorkspace(
 */
 CompositePeaksPresenter::SubjectContainer::const_iterator
 CompositePeaksPresenter::getPresenterIteratorFromWorkspace(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   SubjectContainer::const_iterator presenterFound = m_subjects.end();
   for (auto presenterIterator = m_subjects.begin();
        presenterIterator != m_subjects.end(); ++presenterIterator) {
@@ -226,9 +229,10 @@ Set the foreground colour of the peaks.
 @ colour to use for re-colouring
 */
 void CompositePeaksPresenter::setForegroundColor(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-    const PeakViewColor color) {
-  SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
+    const PeakViewColor &color) {
+  SubjectContainer::iterator iterator =
+      getPresenterIteratorFromWorkspace(std::move(ws));
 
   // Update the palette the foreground colour
   const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
@@ -244,9 +248,10 @@ Set the background colour of the peaks.
 @ colour to use for re-colouring
 */
 void CompositePeaksPresenter::setBackgroundColor(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-    const PeakViewColor color) {
-  SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
+    const PeakViewColor &color) {
+  SubjectContainer::iterator iterator =
+      getPresenterIteratorFromWorkspace(std::move(ws));
 
   // Update the palette background colour.
   const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
@@ -279,13 +284,13 @@ PeakPalette<PeakViewColor> CompositePeaksPresenter::getPalette() const {
 @return the foreground colour corresponding to the peaks workspace.
 */
 PeakViewColor CompositePeaksPresenter::getForegroundPeakViewColor(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   if (useDefault()) {
     throw std::runtime_error("Foreground colours from palette cannot be "
                              "fetched until nested presenters are added.");
   }
   SubjectContainer::const_iterator iterator =
-      getPresenterIteratorFromWorkspace(ws);
+      getPresenterIteratorFromWorkspace(std::move(ws));
   const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
   return m_palettePeakViewColor.foregroundIndexToColour(pos);
 }
@@ -295,13 +300,13 @@ PeakViewColor CompositePeaksPresenter::getForegroundPeakViewColor(
 @return the background colour corresponding to the peaks workspace.
 */
 PeakViewColor CompositePeaksPresenter::getBackgroundPeakViewColor(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   if (useDefault()) {
     throw std::runtime_error("Background colours from palette cannot be "
                              "fetched until nested presenters are added.");
   }
   SubjectContainer::const_iterator iterator =
-      getPresenterIteratorFromWorkspace(ws);
+      getPresenterIteratorFromWorkspace(std::move(ws));
   const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
   return m_palettePeakViewColor.backgroundIndexToColour(pos);
 }
@@ -313,12 +318,12 @@ PeakViewColor CompositePeaksPresenter::getBackgroundPeakViewColor(
  * @param shown : True to show.
  */
 void CompositePeaksPresenter::setBackgroundRadiusShown(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws,
     const bool shown) {
   if (useDefault()) {
     return m_default->showBackgroundRadius(shown);
   }
-  auto iterator = getPresenterIteratorFromWorkspace(ws);
+  auto iterator = getPresenterIteratorFromWorkspace(std::move(ws));
   (*iterator)->showBackgroundRadius(shown);
 }
 
@@ -327,11 +332,11 @@ void CompositePeaksPresenter::setBackgroundRadiusShown(
  * @param peaksWS : Peaks list to remove.
  */
 void CompositePeaksPresenter::remove(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS) {
   if (useDefault()) {
     return;
   }
-  auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+  auto iterator = getPresenterIteratorFromWorkspace(std::move(peaksWS));
   if (iterator != m_subjects.end()) {
     m_subjects.erase(iterator);
   }
@@ -346,12 +351,12 @@ void CompositePeaksPresenter::remove(
  * @param shown : True to show.
  */
 void CompositePeaksPresenter::setShown(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS,
     const bool shown) {
   if (useDefault()) {
     return m_default->setShown(shown);
   }
-  auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+  auto iterator = getPresenterIteratorFromWorkspace(std::move(peaksWS));
   if (iterator == m_subjects.end())
     return;
 
@@ -367,9 +372,9 @@ void CompositePeaksPresenter::setShown(
  * @param peakIndex : Index of the peak in the peaks list to zoom into.
  */
 void CompositePeaksPresenter::zoomToPeak(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS,
     const int peakIndex) {
-  auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+  auto iterator = getPresenterIteratorFromWorkspace(std::move(peaksWS));
   auto subjectPresenter = *iterator;
   auto boundingBox = subjectPresenter->getBoundingBox(peakIndex);
   m_zoomablePlottingWidget->zoomToRectangle(boundingBox);
@@ -460,13 +465,13 @@ double CompositePeaksPresenter::getPeakSizeIntoProjection() const {
  * @return
  */
 bool CompositePeaksPresenter::getShowBackground(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &ws) const {
   if (useDefault()) {
     throw std::runtime_error("Get show background cannot be fetched until "
                              "nested presenters are added.");
   }
   SubjectContainer::const_iterator iterator =
-      getPresenterIteratorFromWorkspace(ws);
+      getPresenterIteratorFromWorkspace(std::move(ws));
   return (*iterator)->getShowBackground();
 }
 
@@ -478,7 +483,7 @@ private:
 
 public:
   explicit MatchWorkspaceName(const QString &name) : m_wsName(name) {}
-  bool operator()(SetPeaksWorkspaces::value_type ws) {
+  bool operator()(const SetPeaksWorkspaces::value_type &ws) {
     const std::string &wsName = ws->getName();
     const std::string toMatch = m_wsName.toStdString();
     const bool result = (wsName == toMatch);
@@ -557,7 +562,7 @@ private:
 
 public:
   explicit MatchPointer(PeaksPresenter *toFind) : m_toFind(toFind) {}
-  bool operator()(PeaksPresenter_sptr candidate) {
+  bool operator()(const PeaksPresenter_sptr &candidate) {
     return candidate.get() == m_toFind;
   }
 };
@@ -594,8 +599,8 @@ void CompositePeaksPresenter::zoomToPeak(PeaksPresenter *const presenter,
  * @return True if hidden.
  */
 bool CompositePeaksPresenter::getIsHidden(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const {
-  auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &peaksWS) const {
+  auto iterator = getPresenterIteratorFromWorkspace(std::move(peaksWS));
   auto subjectPresenter = *iterator;
   return subjectPresenter->isHidden();
 }
@@ -630,7 +635,7 @@ int CompositePeaksPresenter::getZoomedPeakIndex() const {
 
 void CompositePeaksPresenter::editCommand(
     EditMode editMode,
-    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+    const std::weak_ptr<const Mantid::API::IPeaksWorkspace> &target) {
   if (auto ws = target.lock()) {
 
     // Change the right subject to the desired edit mode.
@@ -650,7 +655,7 @@ void CompositePeaksPresenter::editCommand(
 
 void CompositePeaksPresenter::updatePeaksWorkspace(
     const std::string &toName,
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) {
+    std::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) {
   if (m_owner) {
     m_owner->updatePeaksWorkspace(toName, toWorkspace);
   }

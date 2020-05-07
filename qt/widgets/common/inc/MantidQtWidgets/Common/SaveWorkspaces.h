@@ -16,8 +16,6 @@
 #include <QSignalMapper>
 #include <QString>
 
-#include "MantidAPI/FrameworkManager.h"
-
 namespace MantidQt {
 namespace MantidWidgets {
 /**
@@ -77,7 +75,7 @@ private:
                    QHash<QString, QString> workspaceMap);
   QHash<QString, QString>
   provideZeroFreeWorkspaces(const QListWidget *workspaces);
-  void removeZeroFreeWorkspaces(QHash<QString, QString> workspaces);
+  void removeZeroFreeWorkspaces(const QHash<QString, QString> &workspaces);
   bool isValid();
 private slots:
   void saveSel();

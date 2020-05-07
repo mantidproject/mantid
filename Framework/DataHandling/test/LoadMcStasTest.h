@@ -164,7 +164,7 @@ public:
   }
 
 private:
-  double extractSumAndTest(MatrixWorkspace_sptr workspace,
+  double extractSumAndTest(const MatrixWorkspace_sptr &workspace,
                            const double &expectedSum) {
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 8192);
     auto sum = 0.0;
@@ -175,8 +175,8 @@ private:
     return sum;
   }
 
-  boost::shared_ptr<WorkspaceGroup> load_test(std::string fileName,
-                                              std::string outputName) {
+  std::shared_ptr<WorkspaceGroup> load_test(const std::string &fileName,
+                                            const std::string &outputName) {
 
     // specify name of file to load workspace from
     algToBeTested.setProperty("Filename", fileName);

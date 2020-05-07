@@ -8,7 +8,6 @@
 """
     Data stitching for SANS and reflectometry
 """
-from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger

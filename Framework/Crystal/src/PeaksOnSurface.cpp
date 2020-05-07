@@ -40,7 +40,7 @@ const std::string PeaksOnSurface::category() const { return "Crystal\\Peaks"; }
 void PeaksOnSurface::init() {
   this->initBaseProperties();
 
-  auto manditoryExtents = boost::make_shared<
+  auto manditoryExtents = std::make_shared<
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   declareProperty(

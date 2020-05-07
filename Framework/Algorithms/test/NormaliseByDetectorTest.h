@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -28,8 +29,8 @@ using ScopedFileHelper::ScopedFile;
 Helper function. Runs LoadParameterAlg, to get an instrument parameter
 definition from a file onto a workspace.
 */
-void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws,
-                                                  const ScopedFile &file) {
+void apply_instrument_parameter_file_to_workspace(
+    const MatrixWorkspace_sptr &ws, const ScopedFile &file) {
   // Load the Instrument Parameter file over the existing test workspace +
   // instrument.
   using DataHandling::LoadParameterFile;
@@ -46,8 +47,10 @@ Helper method for running the algorithm and simply verifying that it runs
 without exception producing an output workspace..
 */
 MatrixWorkspace_sptr
-do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS,
+do_test_doesnt_throw_on_execution(const MatrixWorkspace_sptr &inputWS,
                                   bool parallel = true) {
+  // Needs other algorithms and functions to be registered
+  FrameworkManager::Instance();
   NormaliseByDetector alg(parallel);
   alg.setRethrows(true);
   alg.initialize();
@@ -75,8 +78,7 @@ private:
   */
   MatrixWorkspace_sptr create_workspace_with_no_fitting_functions() {
     const std::string outWSName = "test_ws";
-    IAlgorithm *workspaceAlg =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto workspaceAlg = AlgorithmManager::Instance().create("CreateWorkspace");
     workspaceAlg->initialize();
     workspaceAlg->setPropertyValue("DataX", "1, 2, 3, 4"); // 4 bins.
     workspaceAlg->setPropertyValue(
@@ -102,7 +104,7 @@ private:
    The fit function is set at the instrument level.
   */
   MatrixWorkspace_sptr create_workspace_with_fitting_functions(
-      const std::string result_unit = "Wavelength") {
+      const std::string &result_unit = "Wavelength") {
     // Create a default workspace with no-fitting functions.
     MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
     const std::string instrumentName = ws->getInstrument()->getName();
@@ -228,7 +230,7 @@ private:
  */
   MatrixWorkspace_sptr
   create_workspace_with_incomplete_detector_level_only_fit_functions(
-      MatrixWorkspace_sptr original = boost::shared_ptr<MatrixWorkspace>()) {
+      MatrixWorkspace_sptr original = std::shared_ptr<MatrixWorkspace>()) {
     MatrixWorkspace_sptr ws = original;
     if (original == nullptr) {
       // Create a default workspace with no-fitting functions.
@@ -274,9 +276,8 @@ private:
   Helper method for running the algorithm and testing for invalid argument on
   execution.
   */
-  void
-  do_test_throws_invalid_argument_on_execution(MatrixWorkspace_sptr inputWS,
-                                               bool parallel = false) {
+  void do_test_throws_invalid_argument_on_execution(
+      const MatrixWorkspace_sptr &inputWS, bool parallel = false) {
     NormaliseByDetector alg(parallel);
     alg.setRethrows(true);
     alg.initialize();
@@ -400,10 +401,11 @@ public:
     MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
     // Extract the output workspace so that we can verify the normalisation.
     const bool parallel = true;
+    const bool sequential = false;
     MatrixWorkspace_sptr outWS_parallel = do_test_doesnt_throw_on_execution(
         inputWS, parallel); // EXECUTES THE ALG IN PARALLEL.
     MatrixWorkspace_sptr outWS_sequential = do_test_doesnt_throw_on_execution(
-        inputWS, !parallel); // EXECUTES THE ALG SEQUENTIALLY.
+        inputWS, sequential); // EXECUTES THE ALG SEQUENTIALLY.
 
     // Output workspaces should have same number of histograms.
     TS_ASSERT_EQUALS(2, outWS_parallel->getNumberHistograms());
@@ -573,8 +575,7 @@ public:
   void setUp() override {
     if (!ws) {
       // Load some data
-      IAlgorithm *loadalg =
-          FrameworkManager::Instance().createAlgorithm("Load");
+      auto loadalg = AlgorithmManager::Instance().create("Load");
       loadalg->setRethrows(true);
       loadalg->initialize();
       loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
@@ -582,8 +583,7 @@ public:
       loadalg->execute();
 
       // Convert units to wavelength
-      IAlgorithm *unitsalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+      auto unitsalg = AlgorithmManager::Instance().create("ConvertUnits");
       unitsalg->initialize();
       unitsalg->setPropertyValue("InputWorkspace", "testws");
       unitsalg->setPropertyValue("OutputWorkspace", "testws");
@@ -591,8 +591,8 @@ public:
       unitsalg->execute();
 
       // Convert the specturm axis ot signed_theta
-      IAlgorithm *specaxisalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
+      auto specaxisalg =
+          AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       specaxisalg->initialize();
       specaxisalg->setPropertyValue("InputWorkspace", "testws");
       specaxisalg->setPropertyValue("OutputWorkspace", "testws");
@@ -602,7 +602,7 @@ public:
       WorkspaceGroup_sptr wsGroup =
           API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
               "testws");
-      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
+      ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
 
       const std::string instrumentName = ws->getInstrument()->getName();
 
@@ -651,7 +651,7 @@ public:
 
 private:
   /// Helper method to run common sanity checks.
-  void do_basic_checks(MatrixWorkspace_sptr normalisedWS) {
+  void do_basic_checks(const MatrixWorkspace_sptr &normalisedWS) {
     TS_ASSERT(normalisedWS != nullptr);
     TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
     TS_ASSERT(ws->x(0).size() == normalisedWS->x(0).size());

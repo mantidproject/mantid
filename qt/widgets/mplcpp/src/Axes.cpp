@@ -85,7 +85,7 @@ void Axes::forEachArtist(const char *containerAttr, const ArtistOperation &op) {
  * @param containerAttr The name of the container attribute
  * @param label The label of the artists to remove
  */
-void Axes::removeArtists(const char *containerAttr, const QString label) {
+void Axes::removeArtists(const char *containerAttr, const QString &label) {
   GlobalInterpreterLock lock;
   const auto lineNameAsUnicode =
       Python::NewRef(PyUnicode_FromString(label.toLatin1().constData()));
@@ -166,7 +166,7 @@ Artist Axes::legendInstance() const {
  * the canvas as the vector data will be destroyed.
  */
 Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
-                  const QString format, const QString label) {
+                  const QString &format, const QString &label) {
   GlobalInterpreterLock lock;
   auto line2d =
       plot(std::move(xdata), std::move(ydata), format.toLatin1().constData());
@@ -221,7 +221,7 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
  * @param horizontalAlignment A string indicating the horizontal
  * alignment of the string
  */
-Artist Axes::text(double x, double y, QString text,
+Artist Axes::text(double x, double y, const QString &text,
                   const char *horizontalAlignment) {
   GlobalInterpreterLock lock;
   auto args =

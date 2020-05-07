@@ -57,8 +57,8 @@ public:
         spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
     TSM_ASSERT(" Worskpace should be retrieved", spws.get());
 
-    boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>
-        ws = boost::dynamic_pointer_cast<
+    std::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>
+        ws = std::dynamic_pointer_cast<
             DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>(spws);
     TSM_ASSERT("It should be 3D MD workspace", ws.get());
 
@@ -78,7 +78,7 @@ public:
 
     int numHist = 10;
     Mantid::API::MatrixWorkspace_sptr wsEv =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             WorkspaceCreationHelper::createRandomEventWorkspace(100, numHist,
                                                                 0.1));
     wsEv->setInstrument(

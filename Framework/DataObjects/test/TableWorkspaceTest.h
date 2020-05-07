@@ -17,8 +17,8 @@
 
 #include <algorithm>
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <limits>
+#include <memory>
 #include <vector>
 
 using namespace Mantid::API;
@@ -323,7 +323,7 @@ public:
   }
 
   void testCloneClearsWorkspaceName() {
-    auto ws = boost::make_shared<TableWorkspace>();
+    auto ws = std::make_shared<TableWorkspace>();
     const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
     AnalysisDataService::Instance().add(name, ws);
     TS_ASSERT_EQUALS(ws->getName(), name)
@@ -690,7 +690,7 @@ public:
    */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    auto wsInput = boost::make_shared<TableWorkspace>();
+    auto wsInput = std::make_shared<TableWorkspace>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
 
@@ -722,7 +722,7 @@ public:
    */
   void testGetProperty_ITableWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    ITableWorkspace_sptr wsInput = boost::make_shared<TableWorkspace>();
+    ITableWorkspace_sptr wsInput = std::make_shared<TableWorkspace>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
 

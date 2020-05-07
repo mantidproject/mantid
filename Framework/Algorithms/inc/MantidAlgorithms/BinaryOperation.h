@@ -50,7 +50,7 @@ public:
    * lhs. -1 if not found.
    */
   using BinaryOperationTable = std::vector<int64_t>;
-  using BinaryOperationTable_sptr = boost::shared_ptr<BinaryOperationTable>;
+  using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
 
   static BinaryOperationTable_sptr
   buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,
@@ -193,7 +193,7 @@ protected:
     (void)ans;
   };
 
-  OperandType getOperandType(const API::MatrixWorkspace_const_sptr ws);
+  OperandType getOperandType(const API::MatrixWorkspace_const_sptr &ws);
 
   virtual void checkRequirements();
 
@@ -255,8 +255,8 @@ private:
   void doSingleColumn();
   void do2D(bool mismatchedSpectra);
 
-  void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs,
-                         API::MatrixWorkspace_sptr out);
+  void propagateBinMasks(const API::MatrixWorkspace_const_sptr &rhs,
+                         const API::MatrixWorkspace_sptr &out);
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress = nullptr;
 };

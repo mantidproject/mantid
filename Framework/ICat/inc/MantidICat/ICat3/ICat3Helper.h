@@ -30,7 +30,7 @@ public:
 
   /// search method
   int doSearch(ICat3::ICATPortBindingProxy &icat,
-               boost::shared_ptr<ICat3::ns1__searchByAdvanced> &request,
+               std::shared_ptr<ICat3::ns1__searchByAdvanced> &request,
                ICat3::ns1__searchByAdvancedResponse &response);
 
   /// calls getInvestigationIncludes api's

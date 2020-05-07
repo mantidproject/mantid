@@ -200,7 +200,7 @@ void LoadRKH::init() {
 
   declareProperty(
       "FirstColumnValue", "Wavelength",
-      boost::make_shared<Kernel::StringListValidator>(propOptions),
+      std::make_shared<Kernel::StringListValidator>(propOptions),
       "Only used for 1D files, the units of the first column in the RKH "
       "file (default Wavelength)");
 }
@@ -585,7 +585,7 @@ void LoadRKH::skipLines(std::istream &strm, int nlines) {
  *  @param[out] toCenter an array that is one shorter than oldBoundaries, the
  * values of the means of pairs of values from the input
  */
-void LoadRKH::binCenter(const MantidVec oldBoundaries,
+void LoadRKH::binCenter(const MantidVec &oldBoundaries,
                         MantidVec &toCenter) const {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }

@@ -149,10 +149,10 @@ bool InputDataControl::isSliceSelectedForFitting() {
  */
 void InputDataControl::preDeleteHandle(
     const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) {
+    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   UNUSED_ARG(workspaceName);
   Mantid::API::MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
   if (!ws || (ws != m_workspace)) {
     return;
   }

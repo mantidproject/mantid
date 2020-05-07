@@ -15,6 +15,7 @@
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 
@@ -128,7 +129,7 @@ private:
   void createPeriodLogs(int64_t period,
                         DataObjects::Workspace2D_sptr &local_workspace);
   // Validate multi-period logs
-  void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
+  void validateMultiPeriodLogs(const Mantid::API::MatrixWorkspace_sptr &);
 
   // build the list of spectra numbers to load and include in the spectra list
   void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
@@ -174,11 +175,11 @@ private:
   std::vector<SpectraBlock> m_spectraBlocks;
 
   /// Time channels
-  boost::shared_ptr<HistogramData::HistogramX> m_tof_data;
+  std::shared_ptr<HistogramData::HistogramX> m_tof_data;
   /// Proton charge
   double m_proton_charge;
   /// Spectra numbers
-  boost::shared_array<int> m_spec;
+  std::vector<int> m_spec;
   /// Pointer to one-past-the-end of spectrum number array (m_spec)
   const int *m_spec_end;
   /// Monitors, map spectrum index to monitor group name
@@ -188,7 +189,7 @@ private:
   boost::scoped_ptr<ISISRunLogs> m_logCreator;
 
   /// Progress reporting object
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
 
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
@@ -199,7 +200,7 @@ private:
   // clang-format on
 
   bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,
-                                 boost::shared_array<int> &spectrum_index,
+                                 std::vector<int> &spectrum_index,
                                  int64_t ndets, int64_t n_vms_compat_spectra,
                                  std::map<int64_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);

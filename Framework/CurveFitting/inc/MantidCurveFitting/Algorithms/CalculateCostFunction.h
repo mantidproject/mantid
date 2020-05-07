@@ -35,7 +35,7 @@ private:
   void execConcrete() override;
 
   /// Cache for the cost function
-  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
+  std::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
 };
 
 } // namespace Algorithms

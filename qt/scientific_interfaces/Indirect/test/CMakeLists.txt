@@ -47,8 +47,7 @@ mtd_add_qt_tests(
     ${CORE_MANTIDLIBS}
     CurveFitting
     DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
   QT4_LINK_LIBS

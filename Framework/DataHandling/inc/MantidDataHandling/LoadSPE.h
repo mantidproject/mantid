@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -52,7 +53,7 @@ private:
   // Execution code
   void exec() override;
 
-  void readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
+  void readHistogram(FILE *speFile, const API::MatrixWorkspace_sptr &workspace,
                      size_t index);
   void reportFormatError(const std::string &what);
 

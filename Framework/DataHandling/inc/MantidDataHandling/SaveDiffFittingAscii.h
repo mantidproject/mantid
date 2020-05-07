@@ -57,7 +57,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Main exec routine, called for group or individual workspace processing.
-  void processAll(const std::vector<API::ITableWorkspace_sptr> input_ws);
+  void processAll(const std::vector<API::ITableWorkspace_sptr> &input_ws);
 
   std::vector<std::string> splitList(std::string strList);
 
@@ -67,8 +67,8 @@ private:
   void writeHeader(const std::vector<std::string> &columnHeadings,
                    std::ofstream &file);
 
-  void writeData(const API::ITableWorkspace_sptr workspace, std::ofstream &file,
-                 const size_t columnSize);
+  void writeData(const API::ITableWorkspace_sptr &workspace,
+                 std::ofstream &file, const size_t columnSize);
 
   void writeVal(const std::string &val, std::ofstream &file,
                 const bool endline);

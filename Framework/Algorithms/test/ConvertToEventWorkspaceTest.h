@@ -92,9 +92,9 @@ public:
     CompareWorkspaces matcher;
     matcher.initialize();
     matcher.setProperty("Workspace1",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(inWS));
+                        std::dynamic_pointer_cast<MatrixWorkspace>(inWS));
     matcher.setProperty("Workspace2",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
+                        std::dynamic_pointer_cast<MatrixWorkspace>(outWS));
     matcher.setProperty("CheckType", false);
     matcher.setProperty("Tolerance", 1e-6);
     matcher.execute();

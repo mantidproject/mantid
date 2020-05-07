@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from isis_powder.hrpd_routines.hrpd_enums import HRPD_MODES, HRPD_TOF_WINDOWS
 from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
 from isis_powder.routines.param_map_entry import ParamMapEntry

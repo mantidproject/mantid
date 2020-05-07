@@ -15,9 +15,10 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -30,7 +31,7 @@ namespace Algorithms {
  */
 TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(
     MatrixWorkspace_const_sptr ws)
-    : m_ws(ws), m_spectrumInfo(m_ws->spectrumInfo()) {}
+    : m_ws(std::move(ws)), m_spectrumInfo(m_ws->spectrumInfo()) {}
 
 Correction
 TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {

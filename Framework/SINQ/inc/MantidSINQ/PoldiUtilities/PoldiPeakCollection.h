@@ -27,7 +27,7 @@ namespace Poldi {
 
 class PoldiPeakCollection;
 
-using PoldiPeakCollection_sptr = boost::shared_ptr<PoldiPeakCollection>;
+using PoldiPeakCollection_sptr = std::shared_ptr<PoldiPeakCollection>;
 
 class MANTID_SINQ_DLL PoldiPeakCollection {
 public:
@@ -84,7 +84,7 @@ protected:
   std::string getUnitCellStringFromLog(const API::LogManager_sptr &tableLog);
 
   std::string getStringValueFromLog(const API::LogManager_sptr &logManager,
-                                    std::string valueName);
+                                    const std::string &valueName);
 
   std::string intensityTypeToString(IntensityType type) const;
   IntensityType intensityTypeFromString(std::string typeString) const;

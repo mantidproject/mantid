@@ -9,8 +9,6 @@
 @author Spencer Howells, ISIS
 @date December 05, 2013
 '''
-from __future__ import (absolute_import, division, print_function)
-
 import math
 import numpy as np
 
@@ -29,7 +27,7 @@ class HallRoss(IFunction1D):
     def init(self):
         # Active fitting parameters
         self.declareParameter("Tau", 1.0, 'Residence time')
-        self.declareParameter("L", 0.2, 'Jump length')
+        self.declareParameter("L", 0.2, 'Standard deviation of jump lengths')
 
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")

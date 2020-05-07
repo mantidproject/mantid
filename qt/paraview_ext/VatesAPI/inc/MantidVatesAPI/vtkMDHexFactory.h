@@ -13,7 +13,7 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 #include <vtkNew.h>
 
@@ -93,7 +93,7 @@ private:
   mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
+  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction>
       sliceImplicitFunction;
 
   /// Time value.

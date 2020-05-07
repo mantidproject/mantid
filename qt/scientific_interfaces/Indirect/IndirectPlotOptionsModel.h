@@ -61,9 +61,9 @@ public:
   std::map<std::string, std::string> availableActions() const;
 
 private:
-  bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,
+  bool validateSpectra(const Mantid::API::MatrixWorkspace_sptr &workspace,
                        std::string const &spectra) const;
-  bool validateBins(Mantid::API::MatrixWorkspace_sptr workspace,
+  bool validateBins(const Mantid::API::MatrixWorkspace_sptr &workspace,
                     std::string const &bins) const;
 
   boost::optional<std::string>

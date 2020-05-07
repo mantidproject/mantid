@@ -11,8 +11,8 @@
 #include "MantidKernel/Matrix.h"
 #include "PropertyManager_fwd.h"
 
-#include <boost/shared_ptr.hpp>
 #include <json/value.h>
+#include <memory>
 
 #include <memory>
 #include <vector>
@@ -149,7 +149,7 @@ Json::Value encodeAsJson(const std::vector<ValueType> &vectorValue) {
  * @throws std::runtime_error for all inputs
  */
 template <typename ValueType>
-Json::Value encodeAsJson(const boost::shared_ptr<ValueType> &) {
+Json::Value encodeAsJson(const std::shared_ptr<ValueType> &) {
   throw std::runtime_error("Unable to encode shared_ptr<T> as Json::Value.");
 }
 

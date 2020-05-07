@@ -54,7 +54,7 @@ public:
 
   void test_GetInstrument_default() {
     ExperimentInfo ws;
-    boost::shared_ptr<const Instrument> i = ws.getInstrument();
+    std::shared_ptr<const Instrument> i = ws.getInstrument();
     TSM_ASSERT("ExperimentInfo gets a default, empty Instrument.", i);
     TS_ASSERT(i->isEmptyInstrument());
     TS_ASSERT_EQUALS(ws.getInstrument()->type(), "Instrument");
@@ -65,17 +65,17 @@ public:
 
   void test_GetSetInstrument_default() {
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
     // Instruments don't point to the same base place since you get back a
     // parameterized one
-    boost::shared_ptr<const Instrument> inst2 = ws.getInstrument();
+    std::shared_ptr<const Instrument> inst2 = ws.getInstrument();
     TS_ASSERT_EQUALS(inst2->getName(), "MyTestInst");
 
     // But the base instrument does!
-    boost::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
+    std::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
     TS_ASSERT_EQUALS(inst3.get(), inst1.get());
     TS_ASSERT_EQUALS(inst3->getName(), "MyTestInst");
   }
@@ -211,7 +211,7 @@ public:
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -226,7 +226,7 @@ public:
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -241,7 +241,7 @@ public:
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -493,7 +493,7 @@ public:
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("GEM");
     inst1->setFilename("GEM_Definition.xml");
     inst1->setXmlText("");
@@ -519,7 +519,7 @@ public:
     NexusTestHelper th(true);
     th.createFile(filename);
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("");
     inst1->setFilename("");
     inst1->setXmlText("");
@@ -721,7 +721,7 @@ public:
 
     // Test one of the bank rows
     auto bankRowID =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
+        std::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
             ->getChild(0)
             ->getComponentID();
     auto allRowDetectorIndexes =
@@ -880,14 +880,14 @@ private:
   }
 
   Instrument_sptr
-  addInstrumentWithIndirectEmodeParameter(ExperimentInfo_sptr exptInfo) {
+  addInstrumentWithIndirectEmodeParameter(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst = addInstrument(exptInfo);
     exptInfo->instrumentParameters().addString(inst.get(), "deltaE-mode",
                                                "indirect");
     return inst;
   }
 
-  Instrument_sptr addInstrument(ExperimentInfo_sptr exptInfo) {
+  Instrument_sptr addInstrument(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(1);
     exptInfo->setInstrument(inst);
@@ -897,8 +897,8 @@ private:
 
 class ExperimentInfoTestPerformance : public CxxTest::TestSuite {
 private:
-  boost::shared_ptr<Mantid::Geometry::Instrument> m_bareInstrument;
-  boost::shared_ptr<const Mantid::Geometry::Instrument> m_provisionedInstrument;
+  std::shared_ptr<Mantid::Geometry::Instrument> m_bareInstrument;
+  std::shared_ptr<const Mantid::Geometry::Instrument> m_provisionedInstrument;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

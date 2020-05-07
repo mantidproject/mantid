@@ -37,7 +37,7 @@ public:
   ColumnFactoryImpl(const ColumnFactoryImpl &) = delete;
   ColumnFactoryImpl &operator=(const ColumnFactoryImpl &) = delete;
   /// Creates an instance of a column
-  boost::shared_ptr<Column> create(const std::string &type) const override;
+  std::shared_ptr<Column> create(const std::string &type) const override;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;

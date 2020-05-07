@@ -105,7 +105,7 @@ template <typename Map> size_t mapIndex(const int index, const Map &indexMap) {
  *  @return A workspace index corresponding to index.
  */
 size_t toWorkspaceIndex(const int index, const std::string &indexType,
-                        API::MatrixWorkspace_const_sptr ws) {
+                        const API::MatrixWorkspace_const_sptr &ws) {
   if (indexType == IndexTypes::DETECTOR_ID) {
     const auto indexMap = ws->getDetectorIDToWorkspaceIndexMap();
     return mapIndex(index, indexMap);
@@ -164,13 +164,13 @@ const std::string CorrectTOFAxis::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CorrectTOFAxis::init() {
-  auto tofWorkspace = boost::make_shared<Kernel::CompositeValidator>();
+  auto tofWorkspace = std::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
   auto mustBePositiveDouble =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+      std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveDouble->setLower(0);
-  auto mustBePositiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositiveInt->setLower(0);
 
   declareProperty(
@@ -193,7 +193,7 @@ void CorrectTOFAxis::init() {
                                             IndexTypes::SPECTRUM_NUMBER,
                                             IndexTypes::WORKSPACE_INDEX};
   declareProperty(PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
-                  boost::make_shared<Kernel::StringListValidator>(indexTypes),
+                  std::make_shared<Kernel::StringListValidator>(indexTypes),
                   "The type of indices used in " +
                       PropertyNames::REFERENCE_SPECTRA + " or " +
                       PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +
@@ -345,7 +345,8 @@ void CorrectTOFAxis::exec() {
  *  corrected workspace.
  *  @param outputWs The corrected workspace
  */
-void CorrectTOFAxis::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs) {
+void CorrectTOFAxis::useReferenceWorkspace(
+    const API::MatrixWorkspace_sptr &outputWs) {
   const auto histogramCount =
       static_cast<int64_t>(m_referenceWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_referenceWs, *outputWs))
@@ -377,7 +378,8 @@ void CorrectTOFAxis::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs) {
  *  specifically, also adjusts the 'Ei' and 'wavelength' sample logs.
  *  @param outputWs The corrected workspace
  */
-void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
+void CorrectTOFAxis::correctManually(
+    const API::MatrixWorkspace_sptr &outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
   double l2 = 0;

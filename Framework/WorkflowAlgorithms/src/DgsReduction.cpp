@@ -68,9 +68,9 @@ void DgsReduction::init() {
                         "A detector calibration file.");
   this->declareProperty("RelocateDetectors", false,
                         "Move detectors to position specified in cal file.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(), mustBePositive,
                         "Set the value of the incident energy guess in meV.");
@@ -82,7 +82,7 @@ void DgsReduction::init() {
   this->setPropertySettings("TimeZeroGuess",
                             std::make_unique<VisibleWhenProperty>(
                                 "UseIncidentEnergyGuess", IS_EQUAL_TO, "1"));
-  auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositiveInt = std::make_shared<BoundedValidator<int>>();
   mustBePositiveInt->setLower(0);
   this->declareProperty(
       "Monitor1SpecId", EMPTY_INT(), mustBePositiveInt,
@@ -92,8 +92,7 @@ void DgsReduction::init() {
       "Spectrum No for the second monitor to use in Ei calculation.");
   this->declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "EnergyTransferRange",
-          boost::make_shared<RebinParamsValidator>(true)),
+          "EnergyTransferRange", std::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin "
       "boundary.\n"
       "Negative width value indicates logarithmic binning.");
@@ -139,7 +138,7 @@ void DgsReduction::init() {
   incidentBeamNormOptions.emplace_back("ToMonitor");
   this->declareProperty(
       "IncidentBeamNormalisation", "None",
-      boost::make_shared<StringListValidator>(incidentBeamNormOptions),
+      std::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for incident beam normalisation on data.");
   this->declareProperty("MonitorIntRangeLow", EMPTY_DBL(),
                         "Set the lower bound for monitor integration.");
@@ -218,7 +217,7 @@ void DgsReduction::init() {
   detvanIntRangeUnits.emplace_back("TOF");
   this->declareProperty(
       "DetVanIntRangeUnits", "Energy",
-      boost::make_shared<StringListValidator>(detvanIntRangeUnits),
+      std::make_shared<StringListValidator>(detvanIntRangeUnits),
       "Options for the units on the detector vanadium integration.");
   this->setPropertySettings("DetVanIntRangeUnits",
                             std::make_unique<VisibleWhenProperty>(
@@ -527,7 +526,7 @@ void DgsReduction::init() {
   this->declareProperty(
       std::make_unique<ArrayProperty<double>>(
           "PowderMomTransferRange",
-          boost::make_shared<RebinParamsValidator>(true)),
+          std::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin "
       "boundary.\n"
       "Negative width value indicates logarithmic binning.");
@@ -566,7 +565,7 @@ void DgsReduction::init() {
  * Create a workspace by either loading a file or using an existing
  * workspace.
  */
-Workspace_sptr DgsReduction::loadInputData(const std::string prop,
+Workspace_sptr DgsReduction::loadInputData(const std::string &prop,
                                            const bool mustLoad) {
   g_log.debug() << "MustLoad = " << mustLoad << '\n';
   Workspace_sptr inputWS;
@@ -583,7 +582,7 @@ Workspace_sptr DgsReduction::loadInputData(const std::string prop,
       mess << inWsProp << " property must be provided, NOT BOTH!";
       throw std::runtime_error(mess.str());
     } else {
-      return boost::shared_ptr<Workspace>();
+      return std::shared_ptr<Workspace>();
     }
   } else if (!inputWSName.empty()) {
     inputWS = this->load(inputWSName);
@@ -614,7 +613,7 @@ Workspace_sptr DgsReduction::loadInputData(const std::string prop,
       mess << inWsProp << " property must be provided!";
       throw std::runtime_error(mess.str());
     } else {
-      return boost::shared_ptr<Workspace>();
+      return std::shared_ptr<Workspace>();
     }
   }
 
@@ -624,7 +623,7 @@ Workspace_sptr DgsReduction::loadInputData(const std::string prop,
 MatrixWorkspace_sptr DgsReduction::loadHardMask() {
   const std::string hardMask = this->getProperty("HardMaskFile");
   if (hardMask.empty()) {
-    return boost::shared_ptr<MatrixWorkspace>();
+    return std::shared_ptr<MatrixWorkspace>();
   } else {
     IAlgorithm_sptr loadMask;
     bool castWorkspace = false;
@@ -642,17 +641,17 @@ MatrixWorkspace_sptr DgsReduction::loadHardMask() {
     loadMask->execute();
     if (castWorkspace) {
       MaskWorkspace_sptr tmp = loadMask->getProperty("OutputWorkspace");
-      return boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+      return std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
     }
     return loadMask->getProperty("OutputWorkspace");
   }
 }
 
-MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop) {
+MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string &prop) {
   const std::string propName = prop + "GroupingFile";
   const std::string groupFile = this->getProperty(propName);
   if (groupFile.empty()) {
-    return boost::shared_ptr<MatrixWorkspace>();
+    return std::shared_ptr<MatrixWorkspace>();
   } else {
     try {
       IAlgorithm_sptr loadGrpFile =
@@ -667,13 +666,14 @@ MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop) {
       this->reductionManager->declareProperty(
           std::make_unique<PropertyWithValue<std::string>>(
               prop + "OldGroupingFilename", groupFile));
-      return boost::shared_ptr<MatrixWorkspace>();
+      return std::shared_ptr<MatrixWorkspace>();
     }
   }
 }
 
-double DgsReduction::getParameter(std::string algParam, MatrixWorkspace_sptr ws,
-                                  std::string altParam) {
+double DgsReduction::getParameter(const std::string &algParam,
+                                  const MatrixWorkspace_sptr &ws,
+                                  const std::string &altParam) {
   double param = this->getProperty(algParam);
   if (EMPTY_DBL() == param) {
     param = ws->getInstrument()->getNumberParameter(altParam)[0];
@@ -693,7 +693,7 @@ void DgsReduction::exec() {
     g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
-  this->reductionManager = boost::make_shared<PropertyManager>();
+  this->reductionManager = std::make_shared<PropertyManager>();
   PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                       this->reductionManager);
 
@@ -716,7 +716,7 @@ void DgsReduction::exec() {
   // Need to load data to get certain bits of information.
   Workspace_sptr sampleWS = this->loadInputData("Sample");
   MatrixWorkspace_sptr WS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
+      std::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
   this->reductionManager->declareProperty(
       std::make_unique<PropertyWithValue<std::string>>(
           "InstrumentName", WS->getInstrument()->getName()));
@@ -808,7 +808,7 @@ void DgsReduction::exec() {
                         getPropertyValue("ReductionProperties"));
     detVan->executeAsChildAlg();
     MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
-    idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
+    idetVanWS = std::dynamic_pointer_cast<Workspace>(oWS);
 
     if (showIntermedWS) {
       this->declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -817,7 +817,7 @@ void DgsReduction::exec() {
     }
   } else {
     idetVanWS = detVanWS;
-    maskWS = boost::dynamic_pointer_cast<MatrixWorkspace>(idetVanWS);
+    maskWS = std::dynamic_pointer_cast<MatrixWorkspace>(idetVanWS);
     detVanWS.reset();
   }
 

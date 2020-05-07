@@ -80,7 +80,7 @@ void extractColumnValues(Column const &column, std::size_t startRow,
 
 template <typename T, typename OutputIterator>
 void extractValuesFromColumns(std::size_t startRow, std::size_t endRow,
-                              std::vector<Column_const_sptr> columns,
+                              const std::vector<Column_const_sptr> &columns,
                               OutputIterator outputIt) {
   for (auto &&column : columns)
     extractColumnValues<T>(*column, startRow, endRow, outputIt);
@@ -104,7 +104,9 @@ std::vector<double> getNumericColumnValuesOrIndices(Column const &column,
   return getIncrementingSequence(0.0, length);
 }
 
-std::string getColumnName(Column_const_sptr column) { return column->name(); }
+std::string getColumnName(const Column_const_sptr &column) {
+  return column->name();
+}
 
 std::vector<std::string>
 extractColumnNames(std::vector<Column_const_sptr> const &columns) {
@@ -243,23 +245,23 @@ void ProcessIndirectFitParameters::init() {
                   "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
-      "ColumnX", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "ColumnX", "", std::make_shared<MandatoryValidator<std::string>>(),
       "The column in the table to use for the x values.", Direction::Input);
 
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "ParameterNames",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "List of the parameter names to add to the workspace.");
 
   declareProperty("IncludeChiSquared", false,
                   "Add Chi-squared to the output workspace.");
 
   declareProperty("XAxisUnit", "",
-                  boost::make_shared<StringListValidator>(unitOptions),
+                  std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis");
 
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(0);
   declareProperty(
       "StartRowIndex", EMPTY_INT(), positiveInt,

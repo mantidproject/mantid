@@ -7,6 +7,7 @@
 #pragma once
 
 #include "AnalysisMode.h"
+#include "BackgroundSubtraction.h"
 #include "Common/DllConfig.h"
 #include "FloodCorrections.h"
 #include "PerThetaDefaults.h"
@@ -32,6 +33,7 @@ public:
   Experiment();
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
              SummationType summationType, bool includePartialBins, bool debug,
+             BackgroundSubtraction backgroundSubtraction,
              PolarizationCorrections polarizationCorrections,
              FloodCorrections floodCorrections,
              TransmissionStitchOptions transmissionStitchOptions,
@@ -43,6 +45,7 @@ public:
   SummationType summationType() const;
   bool includePartialBins() const;
   bool debug() const;
+  BackgroundSubtraction const &backgroundSubtraction() const;
   PolarizationCorrections const &polarizationCorrections() const;
   FloodCorrections const &floodCorrections() const;
   TransmissionStitchOptions transmissionStitchOptions() const;
@@ -62,6 +65,7 @@ private:
   bool m_includePartialBins;
   bool m_debug;
 
+  BackgroundSubtraction m_backgroundSubtraction;
   PolarizationCorrections m_polarizationCorrections;
   FloodCorrections m_floodCorrections;
   TransmissionStitchOptions m_transmissionStitchOptions;

@@ -24,7 +24,7 @@ const Qt::CursorShape PeakPicker::DEFAULT_CURSOR = Qt::PointingHandCursor;
  * @param plot :: A plot this peak picker should operate on
  * @param color :: Peak picker color
  */
-PeakPicker::PeakPicker(QwtPlot *plot, QColor color)
+PeakPicker::PeakPicker(QwtPlot *plot, const QColor &color)
     : QwtPlotPicker(plot->canvas()), QwtPlotItem(), m_plot(plot),
       m_basePen(color, 0, Qt::SolidLine), m_widthPen(color, 0, Qt::DashLine),
       m_isMoving(false), m_isResizing(false), m_peak() {
@@ -32,7 +32,7 @@ PeakPicker::PeakPicker(QwtPlot *plot, QColor color)
   plot->canvas()->setCursor(DEFAULT_CURSOR);
 }
 
-PeakPicker::PeakPicker(PreviewPlot *plot, QColor color)
+PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &color)
     : QwtPlotPicker(plot->canvas()), QwtPlotItem(), m_plot(plot->getPlot()),
       m_basePen(color, 0, Qt::SolidLine), m_widthPen(color, 0, Qt::DashLine),
       m_isMoving(false), m_isResizing(false), m_peak() {
@@ -132,7 +132,7 @@ Mantid::API::IPeakFunction_const_sptr PeakPicker::peak() const {
 
 void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
   // Copy the function
-  m_peak = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
+  m_peak = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
       Mantid::API::FunctionFactory::Instance().createInitialized(
           peak->asString()));
 }

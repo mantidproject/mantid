@@ -180,7 +180,7 @@ void AlgorithmDialog::saveInput() {
  * Set the algorithm pointer
  * @param alg :: A pointer to the algorithm
  */
-void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void AlgorithmDialog::setAlgorithm(const Mantid::API::IAlgorithm_sptr &alg) {
   m_algorithm = alg;
   m_algName = QString::fromStdString(alg->name());
   m_algProperties.clear();
@@ -330,7 +330,7 @@ void AlgorithmDialog::showValidators() {
  * end.
  * @return true if the property is valid.
  */
-bool AlgorithmDialog::setPropertyValue(const QString pName,
+bool AlgorithmDialog::setPropertyValue(const QString &pName,
                                        bool validateOthers) {
   // Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
   QString value = getInputValue(pName);

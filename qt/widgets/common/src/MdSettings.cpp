@@ -47,7 +47,7 @@ QString MdSettings::getUserSettingColorMap() {
   return userSettingColorMap;
 }
 
-void MdSettings::setUserSettingColorMap(QString colorMap) {
+void MdSettings::setUserSettingColorMap(const QString &colorMap) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -66,7 +66,7 @@ QString MdSettings::getLastSessionColorMap() {
   return colormap;
 }
 
-void MdSettings::setLastSessionColorMap(QString colorMap) {
+void MdSettings::setLastSessionColorMap(const QString &colorMap) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -87,7 +87,7 @@ QColor MdSettings::getUserSettingBackgroundColor() {
   return backgroundColor;
 }
 
-void MdSettings::setUserSettingBackgroundColor(QColor backgroundColor) {
+void MdSettings::setUserSettingBackgroundColor(const QColor &backgroundColor) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -112,7 +112,7 @@ QColor MdSettings::getDefaultBackgroundColor() {
   return m_mdConstants.getDefaultBackgroundColor();
 }
 
-void MdSettings::setLastSessionBackgroundColor(QColor backgroundColor) {
+void MdSettings::setLastSessionBackgroundColor(const QColor &backgroundColor) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
@@ -120,8 +120,8 @@ void MdSettings::setLastSessionBackgroundColor(QColor backgroundColor) {
   settings.endGroup();
 }
 
-void MdSettings::setGeneralMdColorMap(QString colorMapName,
-                                      QString colorMapFile) {
+void MdSettings::setGeneralMdColorMap(const QString &colorMapName,
+                                      const QString &colorMapFile) {
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
@@ -221,7 +221,7 @@ bool MdSettings::getLastSessionLogScale() {
   return logScale;
 }
 
-void MdSettings::setUserSettingIntialView(QString initialView) {
+void MdSettings::setUserSettingIntialView(const QString &initialView) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);

@@ -43,7 +43,7 @@ using OptionalLabelPeakIndexMap = boost::optional<LabelMap>;
  */
 OptionalLabelPeakIndexMap
 createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
-                          IPeaksWorkspace_sptr filterWorkspace,
+                          const IPeaksWorkspace_sptr &filterWorkspace,
                           IMDHistoWorkspace_sptr &clusterImage) {
   OptionalLabelPeakIndexMap optionalAllowedLabels;
 
@@ -286,7 +286,7 @@ void FindClusterFaces::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "MaximumRows", 100000,
-                      boost::make_shared<BoundedValidator<int>>(),
+                      std::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
   setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(

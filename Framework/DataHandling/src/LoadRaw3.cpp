@@ -20,9 +20,9 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -40,7 +40,7 @@ LoadRaw3::LoadRaw3()
 /// Initialization method.
 void LoadRaw3::init() {
   LoadRawHelper::init();
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
       "SpectrumMin", 1, mustBePositive,
@@ -67,8 +67,8 @@ void LoadRaw3::init() {
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";
   declareProperty("LoadMonitors", "Include",
-                  boost::make_shared<StringListValidator>(
-                      monitorOptions, monitorOptionsAliases),
+                  std::make_shared<StringListValidator>(monitorOptions,
+                                                        monitorOptionsAliases),
                   "Option to control the loading of monitors.\n"
                   "Allowed options are Include,Exclude, Separate.\n"
                   "Include:The default is Include option which loads the "
@@ -311,7 +311,7 @@ void LoadRaw3::exec() {
  */
 void LoadRaw3::excludeMonitors(FILE *file, const int &period,
                                const std::vector<specnum_t> &monitorList,
-                               DataObjects::Workspace2D_sptr ws_sptr) {
+                               const DataObjects::Workspace2D_sptr &ws_sptr) {
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
   auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
@@ -358,7 +358,7 @@ void LoadRaw3::excludeMonitors(FILE *file, const int &period,
  *@param ws_sptr :: shared pointer to workspace
  */
 void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
-                               DataObjects::Workspace2D_sptr ws_sptr) {
+                               const DataObjects::Workspace2D_sptr &ws_sptr) {
 
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
@@ -404,8 +404,8 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
 
 void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
                                 const std::vector<specnum_t> &monitorList,
-                                DataObjects::Workspace2D_sptr ws_sptr,
-                                DataObjects::Workspace2D_sptr mws_sptr) {
+                                const DataObjects::Workspace2D_sptr &ws_sptr,
+                                const DataObjects::Workspace2D_sptr &mws_sptr) {
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
   int64_t mwsIndex = 0;

@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CarpenterSampleCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -78,8 +78,7 @@ public:
 
     // convert to wavelength
     auto convertUnitsAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "ConvertUnits");
+        Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
     convertUnitsAlg->setProperty("Target", "Wavelength");
@@ -164,7 +163,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outName));
-    wksp = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+    wksp = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
     TS_ASSERT(wksp);
     TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);
 

@@ -14,8 +14,6 @@
 This module contains a class to create a graphical user interface for PyChop.
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six import string_types
 import sys
 import re
 import numpy as np
@@ -162,7 +160,7 @@ class PyChopGui(QMainWindow):
             freq_in = [freq_in, freqpr]
         if not self.widgets['Chopper2Phase']['Label'].isHidden():
             chop2phase = self.widgets['Chopper2Phase']['Edit'].text()
-            if isinstance(self.engine.chopper_system.defaultPhase[0], string_types):
+            if isinstance(self.engine.chopper_system.defaultPhase[0], str):
                 chop2phase = str(chop2phase)
             else:
                 chop2phase = float(chop2phase) % (1e6 / self.engine.moderator.source_rep)

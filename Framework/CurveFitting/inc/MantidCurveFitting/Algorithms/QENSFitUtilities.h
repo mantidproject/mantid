@@ -16,7 +16,7 @@ namespace API {
 
 void renameWorkspacesInQENSFit(
     Algorithm *qensFit, IAlgorithm_sptr renameAlgorithm,
-    WorkspaceGroup_sptr outputGroup, std::string const &outputBaseName,
+    const WorkspaceGroup_sptr &outputGroup, std::string const &outputBaseName,
     std::string const &groupSuffix,
     std::function<std::string(std::size_t)> const &getNameSuffix);
 

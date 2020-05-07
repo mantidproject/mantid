@@ -34,7 +34,7 @@ public:
                                   const bool ascending) = 0;
 };
 
-using PeaksPresenterVsi_sptr = boost::shared_ptr<PeaksPresenterVsi>;
-using PeaksPresenterVsi_const_sptr = boost::shared_ptr<const PeaksPresenterVsi>;
+using PeaksPresenterVsi_sptr = std::shared_ptr<PeaksPresenterVsi>;
+using PeaksPresenterVsi_const_sptr = std::shared_ptr<const PeaksPresenterVsi>;
 } // namespace VATES
 } // namespace Mantid

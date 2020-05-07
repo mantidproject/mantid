@@ -31,7 +31,7 @@ using namespace MantidQt::API;
 /**
  * Constructor when adding a new program to the send to list
  */
-SendToProgramDialog::SendToProgramDialog(QWidget *parent, Qt::WFlags fl)
+SendToProgramDialog::SendToProgramDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), validName(false), validTarget(false),
       validSaveUsing(false) {
   m_uiform.setupUi(this);
@@ -61,8 +61,9 @@ SendToProgramDialog::SendToProgramDialog(QWidget *parent, Qt::WFlags fl)
  * Constructor when editing a program settings
  */
 SendToProgramDialog::SendToProgramDialog(
-    QWidget *parent, QString programName,
-    std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl)
+    QWidget *parent, const QString &programName,
+    std::map<std::string, std::string> programKeysAndDetails,
+    const Qt::WFlags &fl)
     : QDialog(parent, fl), validName(true), validTarget(true),
       validSaveUsing(true) {
   m_uiform.setupUi(this);

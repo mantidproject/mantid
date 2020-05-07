@@ -116,7 +116,7 @@ protected:
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
   std::unordered_map<std::string, size_t>
-  extractAxisLabels(Mantid::API::MatrixWorkspace_const_sptr workspace,
+  extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                     const size_t &axisIndex) const;
 
   /// Function to set the range limits of the plot
@@ -138,10 +138,10 @@ protected:
                            double newValue);
 
   /// Function to get energy mode from a workspace
-  std::string getEMode(Mantid::API::MatrixWorkspace_sptr ws);
+  std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   /// Function to get eFixed from a workspace
-  double getEFixed(Mantid::API::MatrixWorkspace_sptr ws);
+  double getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   /// Function to read an instrument's resolution from the IPF using a string
   bool getResolutionRangeFromWs(const QString &filename,
@@ -149,25 +149,26 @@ protected:
 
   /// Function to read an instrument's resolution from the IPF using a workspace
   /// pointer
-  bool getResolutionRangeFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
-                                QPair<double, double> &res);
+  bool
+  getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &ws,
+                           QPair<double, double> &res);
 
   /// Gets the x range from a workspace
   QPair<double, double>
   getXRangeFromWorkspace(std::string const &workspaceName,
                          double precision = 0.000001) const;
-  QPair<double, double>
-  getXRangeFromWorkspace(Mantid::API::MatrixWorkspace_const_sptr workspace,
-                         double precision = 0.000001) const;
+  QPair<double, double> getXRangeFromWorkspace(
+      const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+      double precision = 0.000001) const;
 
   /// Converts a standard vector of standard strings to a QVector of QStrings.
   QVector<QString>
   convertStdStringVector(const std::vector<std::string> &stringVec) const;
 
   /// Function to run an algorithm on a seperate thread
-  void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
+  void runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm);
 
-  QString runPythonCode(QString vode, bool no_output = false);
+  QString runPythonCode(const QString &vode, bool no_output = false);
 
   /// Checks the ADS for a workspace named `workspaceName`,
   /// opens a warning box for plotting/saving if none found

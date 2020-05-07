@@ -22,7 +22,7 @@ using namespace Mantid::Geometry;
 
 class PointGroupTest : public CxxTest::TestSuite {
 public:
-  void check_point_group(std::string name, V3D hkl, size_t numEquiv,
+  void check_point_group(const std::string &name, V3D hkl, size_t numEquiv,
                          V3D *equiv) {
     PointGroup_sptr testedPointGroup =
         PointGroupFactory::Instance().createPointGroup(name);

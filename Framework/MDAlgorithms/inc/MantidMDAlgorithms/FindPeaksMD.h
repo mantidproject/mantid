@@ -66,7 +66,7 @@ private:
                const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
-  boost::shared_ptr<DataObjects::Peak>
+  std::shared_ptr<DataObjects::Peak>
   createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
              const Geometry::InstrumentRayTracer &tracer);
 
@@ -74,7 +74,7 @@ private:
   template <typename MDE, size_t nd>
   void findPeaks(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
   /// Run find peaks on a histo workspace
-  void findPeaksHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws);
+  void findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
   /// Output PeaksWorkspace
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS;

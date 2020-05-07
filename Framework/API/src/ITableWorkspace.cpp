@@ -79,7 +79,7 @@ void ITableWorkspace::modified() {
   Workspace_sptr ws = AnalysisDataService::Instance().retrieve(this->getName());
   if (!ws)
     return;
-  ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+  ITableWorkspace_sptr tws = std::dynamic_pointer_cast<ITableWorkspace>(ws);
   if (!tws)
     return;
   AnalysisDataService::Instance().notificationCenter.postNotification(

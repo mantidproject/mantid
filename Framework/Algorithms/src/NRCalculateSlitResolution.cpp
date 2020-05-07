@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
@@ -50,7 +50,7 @@ const std::string NRCalculateSlitResolution::summary() const {
 void NRCalculateSlitResolution::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "Workspace to calculate the instrument resolution of.");
 
   declareProperty("TwoTheta", Mantid::EMPTY_DBL(),

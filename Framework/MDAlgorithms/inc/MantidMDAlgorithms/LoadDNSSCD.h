@@ -10,6 +10,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
@@ -88,13 +89,13 @@ private:
   Mantid::API::IMDEventWorkspace_sptr m_OutWS;
 
   int splitIntoColumns(std::list<std::string> &columns, std::string &str);
-  void read_data(const std::string fname,
+  void read_data(const std::string &fname,
                  std::map<std::string, std::string> &str_metadata,
                  std::map<std::string, double> &num_metadata);
   void fillOutputWorkspace(double wavelength);
   void fillOutputWorkspaceRaw(double wavelength);
   API::ITableWorkspace_sptr saveHuber();
-  void loadHuber(API::ITableWorkspace_sptr tws);
+  void loadHuber(const API::ITableWorkspace_sptr &tws);
   template <class T>
   void updateProperties(API::Run &run, std::map<std::string, T> &metadata,
                         std::string time);

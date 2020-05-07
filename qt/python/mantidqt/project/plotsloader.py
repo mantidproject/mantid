@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import copy
 import matplotlib.axes
 import matplotlib.cm as cm
@@ -225,7 +223,9 @@ class PlotsLoader(object):
         if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
-        LegendProperties.create_legend(legend, ax)
+
+        if legend["exists"]:
+            LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
         ax.set_position(properties["bounds"])

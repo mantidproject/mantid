@@ -78,15 +78,15 @@ signals:
 protected:
   void
   addHandle(const std::string &workspaceName,
-            const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+            const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace>) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &) override;
 
   void afterReplaceHandle(
       const std::string &workspaceName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 private slots:
   void onRebinnedSourceDestroyed();

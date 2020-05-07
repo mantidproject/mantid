@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 #include <mutex>
@@ -78,7 +79,8 @@ protected:
                       Mantid::NeXus::NXEntry &entry);
 
   void loadBank(const std::string &nexusfilename, const std::string &entry_name,
-                const std::string &bankName, API::MatrixWorkspace_sptr WS,
+                const std::string &bankName,
+                const API::MatrixWorkspace_sptr &WS,
                 const detid2index_map &id_to_wi);
 
   /// List of the absolute time of each pulse

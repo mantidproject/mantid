@@ -51,13 +51,13 @@ private:
 
   size_t m_rank;
   size_t m_currentSpectra;
-  size_t calculateNSpectra(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void recurseData(Mantid::API::IMDHistoWorkspace_sptr inWS,
-                   Mantid::DataObjects::Workspace2D_sptr outWS,
+  size_t calculateNSpectra(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void recurseData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+                   const Mantid::DataObjects::Workspace2D_sptr &outWS,
                    size_t currentDim, Mantid::coord_t *pos);
 
-  void checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS);
+  void checkW2D(const Mantid::DataObjects::Workspace2D_sptr &outWS);
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS,
-                    Mantid::DataObjects::Workspace2D_sptr outWS);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+                    const Mantid::DataObjects::Workspace2D_sptr &outWS);
 };

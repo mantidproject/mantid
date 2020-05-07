@@ -42,6 +42,9 @@ public:
   MaterialBuilder &setCoherentXSection(double xsec);
   MaterialBuilder &setIncoherentXSection(double xsec);
   MaterialBuilder &setAbsorptionXSection(double xsec);
+  MaterialBuilder &setAttenuationProfileFilename(std::string filename);
+
+  void setAttenuationSearchPath(std::string path);
 
   Material build() const;
 
@@ -64,6 +67,8 @@ private:
   boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
       m_absSection;
   NumberDensityUnit m_numberDensityUnit;
+  boost::optional<std::string> m_attenuationProfileFileName;
+  std::string m_attenuationFileSearchPath;
 };
 
 } // namespace Kernel

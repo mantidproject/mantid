@@ -54,7 +54,7 @@ void FindPeakBackground::init() {
 
   std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
   // The found peak in a table
@@ -374,7 +374,7 @@ void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
  */
 void FindPeakBackground::createOutputWorkspaces() {
   // Set up output table workspace
-  m_outPeakTableWS = boost::make_shared<TableWorkspace>();
+  m_outPeakTableWS = std::make_shared<TableWorkspace>();
   m_outPeakTableWS->addColumn("int", "wksp_index");
   m_outPeakTableWS->addColumn("int", "peak_min_index");
   m_outPeakTableWS->addColumn("int", "peak_max_index");

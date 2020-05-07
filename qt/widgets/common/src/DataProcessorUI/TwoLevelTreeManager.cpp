@@ -39,6 +39,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -55,10 +56,10 @@ namespace DataProcessor {
  * @param whitelist :: a whitelist
  */
 TwoLevelTreeManager::TwoLevelTreeManager(
-    DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
-    const WhiteList &whitelist)
+    DataProcessorPresenter *presenter,
+    const Mantid::API::ITableWorkspace_sptr &table, const WhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QTwoLevelTreeModel(table, whitelist)) {}
+      m_model(new QTwoLevelTreeModel(std::move(table), whitelist)) {}
 
 /**
  * Constructor (no table workspace given)
@@ -446,7 +447,7 @@ int TwoLevelTreeManager::numRowsInGroup(int group) const {
  * @return :: All data as a map where keys are units of post-processing (i.e.
  * group indices) and values are a map of row index in the group to row data
  */
-TreeData TwoLevelTreeManager::constructTreeData(ChildItems rows) {
+TreeData TwoLevelTreeManager::constructTreeData(const ChildItems &rows) {
   TreeData tree;
   const int columnNotUsed = 0; // dummy value required to create index
   // Return row data in the format: map<int, set<vector<string>>>, where:
@@ -684,7 +685,7 @@ void TwoLevelTreeManager::setError(const std::string &error, int position,
 /** Return a shared ptr to the model
  * @return :: A shared ptr to the model
  */
-boost::shared_ptr<AbstractTreeModel> TwoLevelTreeManager::getModel() {
+std::shared_ptr<AbstractTreeModel> TwoLevelTreeManager::getModel() {
   return m_model;
 }
 
@@ -722,7 +723,7 @@ TwoLevelTreeManager::createDefaultWorkspace(const WhiteList &whitelist) {
  * @param ws :: the table workspace
  * @param whitelistColumns :: the number of columns as specified in a whitelist
  */
-void TwoLevelTreeManager::validateModel(ITableWorkspace_sptr ws,
+void TwoLevelTreeManager::validateModel(const ITableWorkspace_sptr &ws,
                                         size_t whitelistColumns) const {
 
   if (!ws)
@@ -754,7 +755,7 @@ bool TwoLevelTreeManager::isValidModel(Workspace_sptr ws,
                                        size_t whitelistColumns) const {
 
   try {
-    validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(ws),
+    validateModel(std::dynamic_pointer_cast<ITableWorkspace>(ws),
                   whitelistColumns);
   } catch (...) {
     return false;

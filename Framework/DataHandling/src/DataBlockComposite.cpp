@@ -208,9 +208,12 @@ std::vector<std::pair<int64_t, int64_t>> spectrumIDIntervals(
     const std::vector<Mantid::DataHandling::DataBlock> &blocks) {
   std::vector<std::pair<int64_t, int64_t>> intervals;
   intervals.reserve(blocks.size());
-  for (const auto &block : blocks) {
-    intervals.emplace_back(block.getMinSpectrumID(), block.getMaxSpectrumID());
-  }
+
+  std::transform(blocks.begin(), blocks.end(), std::back_inserter(intervals),
+                 [](const auto &block) {
+                   return std::make_pair(block.getMinSpectrumID(),
+                                         block.getMaxSpectrumID());
+                 });
   return intervals;
 }
 } // namespace
@@ -253,7 +256,7 @@ std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() const {
   return std::make_unique<DataBlockGenerator>(intervals);
 }
 
-void DataBlockComposite::addDataBlock(DataBlock dataBlock) {
+void DataBlockComposite::addDataBlock(const DataBlock &dataBlock) {
   // Set the number of periods, number of spectra and number of channel
   m_numberOfPeriods = dataBlock.getNumberOfPeriods();
   m_numberOfChannels = dataBlock.getNumberOfChannels();

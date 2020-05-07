@@ -61,7 +61,7 @@ void SaveDiffFittingAscii::init() {
   formats.emplace_back("AppendToExistingFile");
   formats.emplace_back("OverwriteFile");
   declareProperty("OutMode", "AppendToExistingFile",
-                  boost::make_shared<Kernel::StringListValidator>(formats),
+                  std::make_shared<Kernel::StringListValidator>(formats),
                   "Over write the file or append data to existing file");
 }
 
@@ -79,7 +79,7 @@ void SaveDiffFittingAscii::exec() {
 
   std::vector<API::ITableWorkspace_sptr> input_ws;
   input_ws.emplace_back(
-      boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tbl_ws));
+      std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tbl_ws));
 
   processAll(input_ws);
 }
@@ -97,7 +97,7 @@ bool SaveDiffFittingAscii::processGroups() {
     input_ws.reserve(inputGroup->getNumberOfEntries());
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
       input_ws.emplace_back(
-          boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
+          std::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
     }
 
     processAll(input_ws);
@@ -111,7 +111,7 @@ bool SaveDiffFittingAscii::processGroups() {
 }
 
 void SaveDiffFittingAscii::processAll(
-    const std::vector<API::ITableWorkspace_sptr> input_ws) {
+    const std::vector<API::ITableWorkspace_sptr> &input_ws) {
 
   const std::string filename = getProperty("Filename");
   const std::string outMode = getProperty("OutMode");
@@ -208,7 +208,7 @@ void SaveDiffFittingAscii::writeHeader(
   }
 }
 
-void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr workspace,
+void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr &workspace,
                                      std::ofstream &file,
                                      const size_t columnSize) {
 
@@ -259,7 +259,7 @@ std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
   WorkspaceGroup_sptr inWks =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputWS);
   API::WorkspaceGroup_const_sptr inGrp =
-      boost::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
+      std::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
 
   const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
   if (tbl_ws) {

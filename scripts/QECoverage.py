@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
 # pylint: disable= too-many-branches, no-self-use
-from __future__ import (absolute_import, division, print_function)
 from mantidqt.gui_helper import get_qapplication, show_interface_help
 import numpy as np
 import os

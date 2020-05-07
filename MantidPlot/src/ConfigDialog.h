@@ -178,7 +178,7 @@ private:
   void updateMdPlottingSettings();
   void setupMdPlottingConnections();
 
-  QTreeWidgetItem *createCheckedTreeItem(QString name,
+  QTreeWidgetItem *createCheckedTreeItem(const QString &name,
                                          Qt::CheckState checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = nullptr);
 

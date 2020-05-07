@@ -63,13 +63,13 @@ private:
   // these are the steps that are run on each individual spectrum
   void
   calculateNormalization(const size_t wavStart, const size_t wsIndex,
-                         API::MatrixWorkspace_const_sptr pixelAdj,
-                         API::MatrixWorkspace_const_sptr wavePixelAdj,
+                         const API::MatrixWorkspace_const_sptr &pixelAdj,
+                         const API::MatrixWorkspace_const_sptr &wavePixelAdj,
                          double const *const binNorms,
                          double const *const binNormEs,
                          HistogramData::HistogramY::iterator norm,
                          HistogramData::HistogramY::iterator normETo2) const;
-  void pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
+  void pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj,
                    const size_t wsIndex, double &weight, double &error) const;
   void addWaveAdj(const double *c, const double *Dc,
                   HistogramData::HistogramY::iterator bInOut,

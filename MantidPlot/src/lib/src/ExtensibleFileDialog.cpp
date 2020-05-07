@@ -35,7 +35,7 @@
 #include <QUrl>
 
 ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended,
-                                           Qt::WFlags flags)
+                                           const Qt::WFlags &flags)
     : QFileDialog(parent, flags) {
   d_extension = nullptr;
   d_extension_row = 0;
