@@ -283,7 +283,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=eformula, AxisUnits='DeltaE')
         else:
             # Center the data for elastic fixed window scan, for integration over the elastic peak
-            # Here all that matters it that the center is at 0 deltaE, but there is no real meaning of the axis extent
+            # Here all that matters is that the center is at 0 deltaE, but there is no real meaning of the axis extent
             formula = '-(x-{0})*{1}'.format(bsize / 2 - 0.5, 1E+3)
             self.log().debug('The only energy value is 0 meV. Ignore the x-axis.')
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits='DeltaE')
@@ -340,7 +340,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if run.hasProperty('Doppler.doppler_speed'):
             self._doppler_speed = run.getLogData('Doppler.doppler_speed').value
         else:
-            raise RuntimeError('Maximum delta energy '+ message)
+            raise RuntimeError('Doppler speed '+ message)
 
         if run.hasProperty('Doppler.velocity_profile'):
             self._velocity_profile = run.getLogData('Doppler.velocity_profile').value
