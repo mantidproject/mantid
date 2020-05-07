@@ -97,7 +97,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=2),
                              doc='Number of detector columns in the detector grid of the sparse instrument.')
 
-        sparse_condition = EnabledWhenProperty('SpareInstrument', PropertyCriterion.IsNotDefault)
+        sparse_condition = EnabledWhenProperty('SparseInstrument', PropertyCriterion.IsNotDefault)
         self.setPropertySettings('NumberOfDetectorRows', sparse_condition)
         self.setPropertySettings('NumberOfDetectorColumns', sparse_condition)
 
