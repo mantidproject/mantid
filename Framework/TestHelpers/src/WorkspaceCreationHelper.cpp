@@ -1332,6 +1332,12 @@ createPeaksWorkspace(const int numPeaks, const bool createOrientedLattice) {
       ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
   peaksWS->setInstrument(inst);
 
+  // workspace->sample only gets set if workspace is filebacked so force it here
+  auto sampleShapeComponent =
+      std::dynamic_pointer_cast<const IObjComponent>(inst->getSample());
+  auto shape = std::shared_ptr<IObject>(sampleShapeComponent->shape()->clone());
+  peaksWS->mutableSample().setShape(shape);
+
   for (int i = 0; i < numPeaks; ++i) {
     Peak peak(inst, i, i + 0.5);
     peaksWS->addPeak(peak);

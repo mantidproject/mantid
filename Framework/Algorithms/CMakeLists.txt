@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AbsorptionCorrection.cpp
+    src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
     src/AddNote.cpp
     src/AddPeak.cpp
@@ -345,6 +346,7 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
+    inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
     inc/MantidAlgorithms/AddNote.h
     inc/MantidAlgorithms/AddPeak.h
@@ -707,6 +709,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set(TEST_FILES
+    AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
     AddNoteTest.h
     AddPeakTest.h

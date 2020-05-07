@@ -657,6 +657,7 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("QLab");
   addPeakColumn("QSample");
   addPeakColumn("PeakNumber");
+  addPeakColumn("TBar");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -722,6 +723,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
   std::vector<int> peakNumber(np);
+  std::vector<double> tbar(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 
@@ -744,6 +746,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
     TOF[i] = p.getTOF();
     runNumber[i] = p.getRunNumber();
     peakNumber[i] = p.getPeakNumber();
+    tbar[i] = p.getAbsorptionWeightedPathLength();
     {
       Matrix<double> gm = p.getGoniometerMatrix();
       goniometerMatrix[9 * i] = gm[0][0];
@@ -895,6 +898,14 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->openData("column_17");
   file->putAttr("name", "Peak Number");
   file->putAttr("interpret_as", specifyInteger);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // TBar column
+  file->writeData("column_18", tbar);
+  file->openData("column_18");
+  file->putAttr("name", "TBar");
+  file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 

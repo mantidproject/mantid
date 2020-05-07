@@ -186,6 +186,9 @@ public:
   /// Get the approximate position of a peak that falls off the detectors
   Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
+  void setAbsorptionWeightedPathLength(double pathLength) override;
+  double getAbsorptionWeightedPathLength() const override;
+
 private:
   bool findDetector(const Mantid::Kernel::V3D &beam,
                     const Geometry::InstrumentRayTracer &tracer);
@@ -225,6 +228,9 @@ private:
 
   /// Final energy of the neutrons at peak (normally same as m_InitialEnergy)
   double m_finalEnergy;
+
+  /// absorption weighted path length (aka t bar)
+  double m_absorptionWeightedPathLength;
 
   /// Orientation matrix of the goniometer angles.
   Mantid::Kernel::Matrix<double> m_GoniometerMatrix;
