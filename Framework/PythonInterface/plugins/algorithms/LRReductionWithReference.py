@@ -13,8 +13,45 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from functools import reduce #pylint: disable=redefined-builtin
 
+# Unable to generate this props list in PyInit using AlgorithmManager
+# from LiquidsReflectometryReduction to copy properties here
+LR_ALG_FOR_PROPS = "LiquidsReflectometryReduction"
+PROPS_TO_COPY = [
+    'RunNumbers',
+    'InputWorkspace',
+    'NormalizationRunNumber',
+    'SignalPeakPixelRange',
+    'SubtractSignalBackground',
+    'SignalBackgroundPixelRange',
+    'NormFlag',
+    'NormPeakPixelRange',
+    'SubtractNormBackground',
+    'NormBackgroundPixelRange',
+    'LowResDataAxisPixelRangeFlag',
+    'LowResDataAxisPixelRange',
+    'LowResNormAxisPixelRangeFlag',
+    'LowResNormAxisPixelRange',
+    'TOFRange',
+    'TOFRangeFlag',
+    'QMin',
+    'QStep',
+    'AngleOffset',
+    'AngleOffsetError',
+    'OutputWorkspace',
+    'ApplyScalingFactor',
+    'ScalingFactorFile',
+    'SlitTolerance',
+    'SlitsWidthFlag',
+    'IncidentMediumSelected',
+    'GeometryCorrectionFlag',
+    'FrontSlitName',
+    'BackSlitName',
+    'TOFSteps',
+    'CropFirstAndLastPoints',
+    'ApplyPrimaryFraction',
+    'PrimaryFractionRange']
 
-class LRReductionWithReference(PythonAlgorithm):
+class LRReductionWithReference(DataProcessorAlgorithm):
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -28,10 +65,10 @@ class LRReductionWithReference(PythonAlgorithm):
         return "REFL reduction using a reference measurement for normalization"
 
     def PyInit(self):
-        alg = AlgorithmManager.create("LiquidsReflectometryReduction")
-        props_to_copy = [prop.name for prop in alg.getProperties()]
+        self.copyProperties(LR_ALG_FOR_PROPS, PROPS_TO_COPY)
 
     def PyExec(self):
-            pass
+        wksp = self.getProperty("InputWorkspace").value
+        self.setProperty('OutputWorkspace', wksp)
 
 AlgorithmFactory.subscribe(LRReductionWithReference)
