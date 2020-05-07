@@ -66,6 +66,7 @@ class Polaris(AbstractInst):
                                                   delta_r=self._inst_settings.delta_r,
                                                   delta_q=self._inst_settings.delta_q,
                                                   pdf_type=self._inst_settings.pdf_type,
+                                                  lorch_filter=self._inst_settings.lorch_filter,
                                                   freq_params=self._inst_settings.freq_params)
         return pdf_output
 

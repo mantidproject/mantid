@@ -43,12 +43,13 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.parameter_display_combo.addItems(data_list)
 
         index = self.parameter_display_combo.findText(name)
-        self.parameter_display_combo.blockSignals(False)
 
         if index != -1:
             self.parameter_display_combo.setCurrentIndex(index)
         else:
             self.parameter_display_combo.setCurrentIndex(0)
+
+        self.parameter_display_combo.blockSignals(False)
 
     def increment_display_combo_box(self):
         index = self.parameter_display_combo.currentIndex()

@@ -14,7 +14,7 @@ else:
         NavigationToolbar2QT as NavigationToolbar)
 
 
-class DockablePlotToolbar(NavigationToolbar):
+class PlotToolbar(NavigationToolbar):
     def __init__(self, figure_canvas, parent=None):
         self.toolitems = (('Home', 'Reset original view', 'home', 'home'),
                           ('Back', 'Back to previous view', 'back', 'back'),

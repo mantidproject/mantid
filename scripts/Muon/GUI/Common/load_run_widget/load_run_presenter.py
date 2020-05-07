@@ -236,7 +236,8 @@ class LoadRunWidgetPresenter(object):
         self._view.warning_popup(error_message)
 
     def handle_load_thread_finished(self):
-        self._load_thread.deleteLater()
+        if self._load_thread is not None:
+            self._load_thread.deleteLater()
         self._load_thread = None
 
         if not self.thread_success:

@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
@@ -198,6 +199,8 @@ class FittingTabPresenter(object):
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(True)
         self.view.plot_guess_checkbox.setChecked(False)
+        # Send the workspaces to be plotted
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_error(self, error):
         self.thread_success = False
@@ -232,6 +235,8 @@ class FittingTabPresenter(object):
                 self._fit_function = [None]
             else:
                 self._fit_function = [None] * len(self.selected_data)
+            self.model.clear_fit_information()
+            self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
         else:
             self._fit_function = [func.clone() for func in self._get_fit_function()]
 
@@ -324,8 +329,9 @@ class FittingTabPresenter(object):
         self.clear_fit_information()
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(False)
-        self.context.fitting_context.remove_latest_fit(self._number_of_fits_cached)
+        self.context.fitting_context.remove_latest_fit()
         self._number_of_fits_cached = 0
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_by_changed(self):
         self.manual_selection_made = False  # reset manual selection flag
@@ -336,12 +342,12 @@ class FittingTabPresenter(object):
         self.update_model_from_view()
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
-        # Send the workpsaces to be plotted
+        # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_specifier_changed(self):
         self.selected_data = self.get_workspace_selected_list()
-        # Send the workpsaces to be plotted
+        # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def perform_standard_fit(self):
@@ -646,14 +652,17 @@ class FittingTabPresenter(object):
         return fit_type
 
     def get_selected_fit_workspaces(self):
-        # only ever going to return one fit
         if self.selected_data:
             if self._get_fit_type() == "Single":
-                return {0: [self.view.display_workspace]}
+                fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(
+                    [self.view.display_workspace], self.model.function_name)
+                return [FitPlotInformation(input_workspaces=[self.view.display_workspace], fit=fit)]
             else:
-                return {0: self.selected_data}
+                fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(
+                    self.selected_data, self.model.function_name)
+                return [FitPlotInformation(input_workspaces=self.selected_data, fit=fit)]
         else:
-            return {}
+            return []
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs

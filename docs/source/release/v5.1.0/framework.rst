@@ -23,14 +23,16 @@ Algorithms
 Data Handling
 -------------
 
-The material definition has been extended to include an optional filename containing a profile of attenuation factor versus wavelength. This new filename has been added as a parameter to these algorithms:
+- The material definition has been extended to include an optional filename containing a profile of attenuation factor versus wavelength. This new filename has been added as a parameter to these algorithms:
 
-- :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
-- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>`
+  - :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>`
 
-The attenuation profile filename can also be specified in the materials section of the sample environment xml file
+- The attenuation profile filename can also be specified in the materials section of the sample environment xml file
+- Fixed a long standing bug where log filtering was not being applied after loading a Mantid processed NeXus file.  This now works correctly so
+  run status and period filtering will now work as expected, as it did when you first load the file from a raw or NeXus file.
+- The sample environment xml file now supports the geometry being supplied in the form of a .3mf format file (so far on the Windows platform only). Previously it only supported .stl files. The .3mf format is a 3D printing format that allows multiple mesh objects to be stored in a single file that can be generated from many popular CAD applications. As part of this change the algorithms :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` and :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` have been updated to also support the .3mf format
 
-The sample environment xml file now supports the geometry being supplied in the form of a .3mf format file (so far on the Windows platform only). Previously it only supported .stl files. The .3mf format is a 3D printing format that allows multiple mesh objects to be stored in a single file that can be generated from many popular CAD applications. As part of this change the algorithms :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` and :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` have been updated to also support the .3mf format
 
 Data Objects
 ------------
@@ -41,6 +43,8 @@ Python
 ------
 - A list of spectrum numbers can be got by calling getSpectrumNumbers on a
   workspace. For example: spec_nums = ws.getSpectrumNumbers()
+
+- Documentation for manipulating :ref:`workspaces <scripting_workspaces>` and :ref:`plots <scripting_plots>` within a script have been produced.
 - Property.units now attempts to encode with windows-1252 if utf-8 fails.
 - Property.unitsAsBytes has been added to retrieve the raw bytes from the units string.
 

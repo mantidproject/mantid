@@ -80,7 +80,8 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", freq_params=None):
+                    sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
+                    freq_params=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -109,14 +110,14 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
         fast_fourier_filter(merged_ws, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", SofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=True, DeltaR=delta_r,
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
+                                                Filter=lorch_filter, DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
     else:
         for ws in focused_ws:
             fast_fourier_filter(ws, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', SofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=True, DeltaR=delta_r,
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
+                                                Filter=lorch_filter, DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)

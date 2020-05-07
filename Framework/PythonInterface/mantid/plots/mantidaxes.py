@@ -10,6 +10,8 @@ try:
 except ImportError:
    # check Python 2 location
    from collections import Iterable
+import copy
+import numpy as np
 
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
@@ -1132,6 +1134,35 @@ class MantidAxes3D(Axes3D):
         # it interfering with double-clicking on the axes.
         self.figure.canvas.mpl_disconnect(self._cids[1])
 
+    def set_xlim3d(self, *args):
+        min, max = super().set_xlim3d(*args)
+
+        self._set_overflowing_data_to_nan(min, max, 0)
+
+    def set_ylim3d(self, *args):
+        min, max = super().set_ylim3d(*args)
+
+        self._set_overflowing_data_to_nan(min, max, 1)
+
+    def set_zlim3d(self, *args):
+        min, max = super().set_zlim3d(*args)
+
+        self._set_overflowing_data_to_nan(min, max, 2)
+
+    def _set_overflowing_data_to_nan(self, min, max, axis_index):
+        """
+        Sets any data for the given axis that is less than min or greater than max to nan so only the parts of the plot
+        that are within the axes are visible.
+        :param min: the lower axis limit.
+        :param max: the upper axis limit.
+        :param axis_index: the index of the axis being edited, 0 for x, 1 for y, 2 for z.
+        """
+        if hasattr(self, 'original_data'):
+            axis_data = self.original_data[axis_index].copy()
+            axis_data[np.less(axis_data, min, where=~np.isnan(axis_data))] = np.nan
+            axis_data[np.greater(axis_data, max, where=~np.isnan(axis_data))] = np.nan
+            self.collections[0]._vec[axis_index] = axis_data
+
     def plot(self, *args, **kwargs):
         """
         If the **mantid3d** projection is chosen, it can be
@@ -1228,9 +1259,14 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return axesfunctions3D.plot_surface(self, *args, **kwargs)
+            polyc = axesfunctions3D.plot_surface(self, *args, **kwargs)
         else:
-            return Axes3D.plot_surface(self, *args, **kwargs)
+            polyc = Axes3D.plot_surface(self, *args, **kwargs)
+
+        # Create a copy of the original data points because data are set to nan when the axis limits are changed.
+        self.original_data = copy.deepcopy(polyc._vec)
+
+        return polyc
 
     def contour(self, *args, **kwargs):
         """
