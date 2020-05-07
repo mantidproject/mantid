@@ -238,13 +238,13 @@ private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,
                             Workspaces const &... workspaces) {
-    m_model->addWorkspace(workspace->getName(), spectra);
+    m_model->addWorkspace(workspace->getName());
     addWorkspacesToModel(spectra, workspaces...);
   }
 
   void addWorkspacesToModel(Spectra const &spectra,
                             MatrixWorkspace_sptr const &workspace) {
-    m_model->addWorkspace(workspace->getName(), spectra);
+    m_model->addWorkspace(workspace->getName());
   }
 
   MatrixWorkspace_sptr m_workspace;

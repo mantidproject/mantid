@@ -22,7 +22,7 @@ struct JumpFitParameters {
 class DLLExport JumpFitModel : public IndirectFittingModel {
 public:
   JumpFitModel();
-  using IndirectFittingModel::addWorkspace;
+  // using IndirectFittingModel::addWorkspace;
 
   void addWorkspace(const std::string &workspaceName) override;
   void removeWorkspace(TableDatasetIndex index) override;

@@ -243,7 +243,7 @@ void JumpFitModel::addWorkspace(const std::string &workspaceName) {
 
   const auto hwhmWorkspace =
       createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  IndirectFittingModel::addWorkspace(name,
+  IndirectFittingModel::addWorkspace(hwhmWorkspace->getName(),
                                      Spectra(createSpectra(spectrum.get())));
 }
 
