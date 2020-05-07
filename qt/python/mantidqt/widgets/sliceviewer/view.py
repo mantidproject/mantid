@@ -396,7 +396,7 @@ class SliceViewerDataView(QWidget):
     def mouse_move(self, event):
         if event.inaxes == self.ax:
             data = self.image.get_cursor_data(event)
-            if data and self.image_info_widget.track_cursor.checkState() == Qt.Checked:
+            if data is not None and self.image_info_widget.track_cursor.checkState() == Qt.Checked:
                 self.image_info_widget.table_widget.updateTable(event.xdata, event.ydata, data)
             if self.line_plots:
                 self.update_line_plots(event.xdata, event.ydata)
@@ -411,9 +411,10 @@ class SliceViewerDataView(QWidget):
             self.canvas.draw_idle()
 
     def mouse_click(self, event):
-        if event.inaxes == self.ax and event.button == MouseButton.LEFT:
+        if self.image_info_widget.track_cursor.checkState() == Qt.Unchecked \
+                and event.inaxes == self.ax and event.button == MouseButton.LEFT:
             data = self.image.get_cursor_data(event)
-            if data and self.image_info_widget.track_cursor.checkState() == Qt.Unchecked:
+            if data is not None and self.image_info_widget.track_cursor.checkState() == Qt.Unchecked:
                 self.image_info_widget.table_widget.updateTable(event.xdata, event.ydata, data)
 
     def plot_x_line(self, x, y):

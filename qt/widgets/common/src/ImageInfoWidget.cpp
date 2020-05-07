@@ -4,7 +4,6 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#pragma once
 
 #include "MantidQtWidgets/Common/ImageInfoWidget.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -64,7 +63,7 @@ void ImageInfoWidget::updateTable(const double x, const double y,
 
     resizeColumnsToContents();
     int table_width = 2;
-    for (int i = 0; i < info.size() / 2; i++)
+    for (int i = 0; i < static_cast<int>(info.size()) / 2; i++)
       table_width += columnWidth(i);
     setMaximumWidth(table_width);
   }
