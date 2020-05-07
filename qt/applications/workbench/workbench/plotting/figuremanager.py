@@ -501,7 +501,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         button.setPopupMode(QToolButton.InstantPopup)
 
     def change_line_collection_colour(self, colour):
-        from matplotlib.collections import LineCollection
         for col in self.canvas.figure.get_axes()[0].collections:
             if isinstance(col, LineCollection):
                 col.set_color(colour.name())
