@@ -33,6 +33,7 @@ public:
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const override;
 
   void clear() override;
+  bool isEmpty() const override;
   void
   addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
             Mantid::API::ITableWorkspace_sptr parameterTable,

@@ -386,7 +386,7 @@ IndirectFittingModel::getDomainIndex(TableDatasetIndex dataIndex,
 }
 
 std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
-  if (m_fitOutput)
+  if (!m_fitOutput->isEmpty())
     return m_fitOutput->getResultParameterNames();
   return std::vector<std::string>();
 }
@@ -438,20 +438,27 @@ void IndirectFittingModel::setExcludeRegion(const std::string &exclude,
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
   m_fitDataModel->addWorkspace(workspaceName);
+  m_defaultParameters.emplace_back(
+      createDefaultParameters(TableDatasetIndex{0}));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
                                         const std::string &spectra) {
   m_fitDataModel->addWorkspace(workspaceName, spectra);
+  m_defaultParameters.emplace_back(
+      createDefaultParameters(TableDatasetIndex{0}));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
                                         const Spectra &spectra) {
   m_fitDataModel->addWorkspace(workspaceName, spectra);
+  m_defaultParameters.emplace_back(
+      createDefaultParameters(TableDatasetIndex{0}));
 }
 
 void IndirectFittingModel::removeWorkspace(TableDatasetIndex index) {
   m_fitDataModel->removeWorkspace(index);
+  m_defaultParameters.remove(index);
 }
 
 void IndirectFittingModel::removeFittingData() { m_fitOutput->clear(); }
@@ -533,7 +540,7 @@ std::unordered_map<std::string, ParameterValue>
 IndirectFittingModel::getFitParameters(TableDatasetIndex index,
                                        WorkspaceIndex spectrum) const {
   auto fitDomainIndex = m_fitDataModel->getDomainIndex(index, spectrum);
-  if (m_fitOutput)
+  if (!m_fitOutput->isEmpty())
     return m_fitOutput->getParameters(fitDomainIndex);
   return std::unordered_map<std::string, ParameterValue>();
 }
@@ -553,8 +560,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(
-    TableDatasetIndex /*unused*/) const {
+IndirectFittingModel::createDefaultParameters(TableDatasetIndex) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -568,7 +574,7 @@ boost::optional<ResultLocationNew>
 IndirectFittingModel::getResultLocation(TableDatasetIndex index,
                                         WorkspaceIndex spectrum) const {
   auto fitDomainIndex = m_fitDataModel->getDomainIndex(index, spectrum);
-  if (m_fitOutput && m_fitDataModel->numberOfWorkspaces() > index)
+  if (!m_fitOutput->isEmpty() && m_fitDataModel->numberOfWorkspaces() > index)
     return m_fitOutput->getResultLocation(fitDomainIndex);
   return boost::none;
 }
@@ -704,13 +710,16 @@ std::string IndirectFittingModel::getOutputBasename() const {
 
 void IndirectFittingModel::cleanFailedRun(
     const IAlgorithm_sptr &fittingAlgorithm) {
-  auto group = getOutputGroup(fittingAlgorithm);
-  auto parameters = getOutputParameters(fittingAlgorithm);
-  auto result = getOutputResult(fittingAlgorithm);
-
-  removeFromADSIfExists(group->getName());
-  removeFromADSIfExists(parameters->getName());
-  removeFromADSIfExists(result->getName());
+  const auto prefix = "__" + fittingAlgorithm->name() + "_ws";
+  for (TableDatasetIndex datasetIndex = 0;
+       datasetIndex < m_fitDataModel->numberOfWorkspaces(); datasetIndex++) {
+    const auto base = prefix + std::to_string(datasetIndex.value + 1);
+    removeFromADSIfExists(base);
+    for (int index = 0;
+         index < m_fitDataModel->getNumberOfSpectra(datasetIndex); index++) {
+      cleanTemporaries(base + "_" + std::to_string(index));
+    }
+  }
 }
 
 void IndirectFittingModel::cleanFailedSingleRun(

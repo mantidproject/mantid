@@ -90,6 +90,8 @@ namespace IDA {
 
 IndirectFitOutputModel::IndirectFitOutputModel(){};
 
+bool IndirectFitOutputModel::isEmpty() const { return m_parameters.empty(); }
+
 bool IndirectFitOutputModel::isSpectrumFit(FitDomainIndex index) const {
   return index.value < m_parameters.size();
 }

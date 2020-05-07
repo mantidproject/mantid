@@ -291,7 +291,12 @@ void IndirectFitDataModel::addNewWorkspace(
 }
 
 void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {
-  m_fittingData->erase(m_fittingData->begin() + index.value);
+  if (index < m_fittingData->size()) {
+    m_fittingData->erase(m_fittingData->begin() + index.value);
+  } else {
+    throw std::runtime_error(
+        "Attempting to remove non-existent workspace.");
+  }
 }
 
 void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {

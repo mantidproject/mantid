@@ -53,11 +53,12 @@ public:
   virtual Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const = 0;
 
   virtual void clear() = 0;
+  virtual bool isEmpty() const = 0;
 
-  virtual void
-  addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-            Mantid::API::ITableWorkspace_sptr parameterTable,
-            const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) = 0;
+      virtual void addOutput(
+          const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+          Mantid::API::ITableWorkspace_sptr parameterTable,
+          const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) = 0;
 
   virtual void
   addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
