@@ -16,6 +16,7 @@ from mantidqt.utils.qt import load_ui
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm, Normalize
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
@@ -121,7 +122,12 @@ class AxisEditor(PropertiesEditorBase):
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
-        self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
+        if isinstance(axes, Axes3D):
+            self.lim_setter = getattr(axes, 'set_{}lim3d'.format(axis_id))
+        else:
+            self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.nonposkw = 'nonpos' + axis_id
         # Grid has no direct accessor from the axes

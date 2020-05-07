@@ -29,6 +29,8 @@ Improvements
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 
+- Surface plots no longer spill over the axes when their limits are reduced.
+
 Bugfixes
 ########
 
