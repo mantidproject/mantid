@@ -13,8 +13,6 @@ except ImportError:
 import copy
 import numpy as np
 
-from copy import copy
-
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PolyCollection
 from matplotlib.colors import Colormap
@@ -309,8 +307,8 @@ class MantidAxes(Axes):
         :param predicate: A unary predicate used to select artists.
         :return: The output of the inner function.
         """
-        waterfall_x_offset = copy(self.waterfall_x_offset)
-        waterfall_y_offset = copy(self.waterfall_y_offset)
+        waterfall_x_offset = copy.copy(self.waterfall_x_offset)
+        waterfall_y_offset = copy.copy(self.waterfall_y_offset)
         has_fills = self.waterfall_has_fill()
 
         self.update_waterfall(0, 0)
