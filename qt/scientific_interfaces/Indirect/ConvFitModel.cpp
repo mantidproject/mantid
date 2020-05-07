@@ -25,10 +25,6 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
 IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
                                            std::string const &filename) {
   auto loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
@@ -101,70 +97,6 @@ instrumentResolution(const MatrixWorkspace_sptr &workspace) {
   } catch (std::exception const &) {
     return boost::none;
   }
-}
-
-MatrixWorkspace_sptr cloneWorkspace(const MatrixWorkspace_sptr &inputWS,
-                                    std::string const &outputName) {
-  auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
-  cloneAlg->setLogging(false);
-  cloneAlg->initialize();
-  cloneAlg->setProperty("InputWorkspace", inputWS);
-  cloneAlg->setProperty("OutputWorkspace", outputName);
-  cloneAlg->execute();
-  return getADSMatrixWorkspace(outputName);
-}
-
-MatrixWorkspace_sptr appendWorkspace(const MatrixWorkspace_sptr &leftWS,
-                                     const MatrixWorkspace_sptr &rightWS,
-                                     int numHistograms,
-                                     std::string const &outputName) {
-  auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
-  appendAlg->setLogging(true);
-  appendAlg->initialize();
-  appendAlg->setProperty("InputWorkspace1", leftWS);
-  appendAlg->setProperty("InputWorkspace2", rightWS);
-  appendAlg->setProperty("Number", numHistograms);
-  appendAlg->setProperty("OutputWorkspace", outputName);
-  appendAlg->execute();
-  return getADSMatrixWorkspace(outputName);
-}
-
-void renameWorkspace(std::string const &name, std::string const &newName) {
-  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
-  renamer->setLogging(false);
-  renamer->setProperty("InputWorkspace", name);
-  renamer->setProperty("OutputWorkspace", newName);
-  renamer->execute();
-}
-
-void deleteWorkspace(std::string const &workspaceName) {
-  if (!AnalysisDataService::Instance().doesExist(workspaceName))
-    return;
-  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleter->setLogging(false);
-  deleter->setProperty("Workspace", workspaceName);
-  deleter->execute();
-}
-
-void extendResolutionWorkspace(const MatrixWorkspace_sptr &resolution,
-                               std::size_t numberOfHistograms,
-                               std::string const &outputName) {
-  const auto resolutionNumHist = resolution->getNumberHistograms();
-  if (resolutionNumHist != 1 && resolutionNumHist != numberOfHistograms) {
-    std::string msg(
-        "Resolution must have either one or as many spectra as the sample");
-    throw std::runtime_error(msg);
-  }
-
-  auto resolutionWS = cloneWorkspace(resolution, "__cloned");
-
-  // Append to cloned workspace if necessary
-  if (resolutionNumHist == 1 && numberOfHistograms > 1) {
-    appendWorkspace(resolutionWS, resolution,
-                    static_cast<int>(numberOfHistograms - 1), outputName);
-    deleteWorkspace("__cloned");
-  } else
-    renameWorkspace("__cloned", outputName);
 }
 
 void getParameterNameChanges(

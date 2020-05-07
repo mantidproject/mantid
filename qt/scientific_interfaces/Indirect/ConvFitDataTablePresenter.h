@@ -27,7 +27,7 @@ public:
   ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);
 
 protected:
-  void addTableEntry(IIndirectFitData *model, FitDomainIndex row) override;
+  void addTableEntry(FitDomainIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;

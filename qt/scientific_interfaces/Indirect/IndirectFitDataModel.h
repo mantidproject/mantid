@@ -10,7 +10,7 @@
 #include "DllConfig.h"
 #include "IIndirectFitData.h"
 #include "IndexTypes.h"
-#include "IndirectFitdata.h"
+#include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt {
@@ -35,7 +35,7 @@ public:
   int getNumberOfDomains() const override;
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) const override;
-  std::vector<double> getQValuesForData() const;
+  std::vector<double> getQValuesForData() const override;
   std::vector<std::pair<std::string, int>>
   getResolutionsForFit() const override;
   std::vector<std::string> getWorkspaceNames() const override;
@@ -50,7 +50,7 @@ public:
   void addWorkspace(const std::string &workspaceName,
                     const Spectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra);
+                    const Spectra &spectra) override;
   void removeWorkspace(TableDatasetIndex index) override;
   void removeDataByIndex(FitDomainIndex fitDomainIndex) override;
 
@@ -90,9 +90,8 @@ public:
   void switchToMultipleInputMode() override;
 
 private:
-  void IndirectFitDataModel::addNewWorkspace(
-      const Mantid::API::MatrixWorkspace_sptr &workspace,
-      const Spectra &spectra);
+  void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                       const Spectra &spectra);
 
   std::vector<IndirectFitData> *m_fittingData;
   std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>> *m_resolutions;

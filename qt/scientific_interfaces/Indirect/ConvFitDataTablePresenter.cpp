@@ -52,11 +52,10 @@ ConvFitDataTablePresenter::getResolutionName(FitDomainIndex row) const {
   return getString(row, 1);
 }
 
-void ConvFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
-                                              FitDomainIndex row) {
-  IndirectDataTablePresenter::addTableEntry(model, row);
+void ConvFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
+  IndirectDataTablePresenter::addTableEntry(row);
 
-  auto resolutionVector = model->getResolutionsForFit();
+  auto resolutionVector = m_model->getResolutionsForFit();
   const auto name = resolutionVector.at(row.value).first;
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();

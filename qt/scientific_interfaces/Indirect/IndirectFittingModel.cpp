@@ -34,24 +34,11 @@ std::string getFitDataName(const std::string &baseWorkspaceName,
   return baseWorkspaceName + " (" + workspaceIndexes.getString() + ")";
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
 std::string cutLastOf(std::string const &str, std::string const &delimiter) {
   auto const cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
     return str.substr(0, cutIndex);
   return str;
-}
-
-bool equivalentWorkspaces(const MatrixWorkspace_const_sptr &lhs,
-                          const MatrixWorkspace_const_sptr &rhs) {
-  if (!lhs || !rhs)
-    return false;
-  else if (lhs->getName() == "" && rhs->getName() == "")
-    return lhs == rhs;
-  return lhs->getName() == rhs->getName();
 }
 
 /**
@@ -272,8 +259,8 @@ std::unordered_map<FittingMode, std::string> fitModeToName =
         {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 IndirectFittingModel::IndirectFittingModel()
-    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
-      m_fitDataModel(std::make_unique<IndirectFitDataModel>()),
+    : m_fitDataModel(std::make_unique<IndirectFitDataModel>()),
+      m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
       m_fitOutput(std::make_unique<IndirectFitOutputModel>()) {}
 
 bool IndirectFittingModel::hasWorkspace(
@@ -485,7 +472,7 @@ void IndirectFittingModel::switchToMultipleInputMode() {
   m_fitDataModel->switchToMultipleInputMode();
 }
 
-void IndirectFittingModel::clear(){};
+void IndirectFittingModel::clear() {}
 
 void IndirectFittingModel::setFittingMode(FittingMode mode) {
   m_fittingMode = mode;

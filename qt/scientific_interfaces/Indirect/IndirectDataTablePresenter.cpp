@@ -71,32 +71,6 @@ QStringList defaultHeaders() {
 
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
 
-std::string pairsToString(
-    const std::vector<std::pair<WorkspaceIndex, WorkspaceIndex>> &pairs) {
-  std::vector<std::string> pairStrings;
-  for (auto const &value : pairs) {
-    if (value.first == value.second)
-      pairStrings.emplace_back(std::to_string(value.first.value));
-    else
-      pairStrings.emplace_back(std::to_string(value.first.value) + "-" +
-                               std::to_string(value.second.value));
-  }
-  return boost::algorithm::join(pairStrings, ",");
-}
-
-boost::optional<Spectra> pairsToSpectra(
-    const std::vector<std::pair<WorkspaceIndex, WorkspaceIndex>> &pairs) {
-  if (pairs.empty())
-    return boost::none;
-  else if (pairs.size() == 1)
-    return Spectra(pairs[0].first, pairs[0].second);
-  return Spectra(pairsToString(pairs));
-}
-
-QVariant getVariant(std::size_t i) {
-  return QVariant::fromValue<qulonglong>(i);
-}
-
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;
@@ -176,9 +150,9 @@ void IndirectDataTablePresenter::updateTableFromModel() {
 
   for (auto domainIndex = FitDomainIndex{0};
        domainIndex < m_model->getNumberOfDomains(); domainIndex++) {
-    addTableEntry(m_model, domainIndex);
+    addTableEntry(domainIndex);
   }
-};
+}
 
 void IndirectDataTablePresenter::handleCellChanged(int irow, int column) {
   if (!m_emitCellChanged) {
@@ -238,8 +212,7 @@ void IndirectDataTablePresenter::setHorizontalHeaders(
 #endif
 }
 
-void IndirectDataTablePresenter::addTableEntry(IIndirectFitData *model,
-                                               FitDomainIndex row) {
+void IndirectDataTablePresenter::addTableEntry(FitDomainIndex row) {
   m_dataTable->insertRow(row.value);
   const auto &name = m_model->getWorkspace(row)->getName();
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));

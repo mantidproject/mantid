@@ -10,7 +10,7 @@
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
-#include "IndirectFitdata.h"
+#include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt {

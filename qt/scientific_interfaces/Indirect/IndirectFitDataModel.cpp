@@ -4,13 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#pragma once
 #include <string>
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
-#include "IndirectFitdata.h"
-#include "IndirectFitdataModel.h"
+#include "IndirectFitData.h"
+#include "IndirectFitDataModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -34,13 +33,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitDataModel::IndirectFitDataModel() {
-  m_fittingDataSingle = std::make_unique<std::vector<IndirectFitData>>();
-  m_resolutionsSingle = std::make_unique<
-      std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>();
-  m_fittingDataMultiple = std::make_unique<std::vector<IndirectFitData>>();
-  m_resolutionsMultiple = std::make_unique<
-      std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>();
+IndirectFitDataModel::IndirectFitDataModel()
+    : m_fittingDataSingle(std::make_unique<std::vector<IndirectFitData>>()),
+      m_resolutionsSingle(
+          std::make_unique<
+              std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()),
+      m_fittingDataMultiple(std::make_unique<std::vector<IndirectFitData>>()),
+      m_resolutionsMultiple(
+          std::make_unique<
+              std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()) {
 
   m_fittingData = m_fittingDataSingle.get();
   m_resolutions = m_resolutionsSingle.get();

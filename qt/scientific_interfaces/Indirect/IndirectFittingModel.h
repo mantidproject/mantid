@@ -112,8 +112,8 @@ public:
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   // Generic
-  void IndirectFittingModel::switchToSingleInputMode();
-  void IndirectFittingModel::switchToMultipleInputMode();
+  void switchToSingleInputMode();
+  void switchToMultipleInputMode();
   void setFittingMode(FittingMode mode);
   FittingMode getFittingMode() const;
 
@@ -176,14 +176,13 @@ private:
 
   bool isPreviousModelSelected() const;
 
+  bool m_previousModelSelected;
+  FittingMode m_fittingMode;
   std::unique_ptr<IIndirectFitOutput> m_fitOutput;
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;
   // stores the single domain function
   Mantid::API::IFunction_sptr m_fitFunction;
   DefaultParametersType m_defaultParameters;
-  // Stores whether the current fit function is the same as
-  bool m_previousModelSelected;
-  FittingMode m_fittingMode;
 };
 
 } // namespace IDA

@@ -4,11 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#pragma once
 #include <memory>
 
 #include "DllConfig.h"
-#include "Indextypes.h"
+#include "IndexTypes.h"
 #include "IndirectFitOutputModel.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/TableRow.h"
@@ -77,7 +76,7 @@ extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
   TableRowExtractor extractRowFromTable(std::move(tableWs));
   std::unordered_map<int, std::unordered_map<std::string, ParameterValue>>
       parameterMap;
-  for (int rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
+  for (size_t rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
     parameterMap.emplace(rowIndex, extractRowFromTable(rowIndex));
   }
   return parameterMap;
@@ -88,12 +87,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitOutputModel::IndirectFitOutputModel(){};
+IndirectFitOutputModel::IndirectFitOutputModel() {}
 
 bool IndirectFitOutputModel::isEmpty() const { return m_parameters.empty(); }
 
 bool IndirectFitOutputModel::isSpectrumFit(FitDomainIndex index) const {
-  return index.value < m_parameters.size();
+  return static_cast<size_t>(index.value) < m_parameters.size();
 }
 
 std::unordered_map<std::string, ParameterValue>
@@ -142,9 +141,10 @@ void IndirectFitOutputModel::addOutput(
   m_resultGroup = resultGroup;
   m_resultWorkspace = resultWorkspace;
   m_outputResultLocations.clear();
-  for (int index = 0; index < resultGroup->size(); index++) {
+  for (size_t index = 0; index < resultGroup->size(); index++) {
     m_outputResultLocations.emplace(
-        index, ResultLocationNew(resultGroup, WorkspaceGroupIndex{index}));
+        index, ResultLocationNew(resultGroup,
+                                 WorkspaceGroupIndex{static_cast<int>(index)}));
   }
 }
 

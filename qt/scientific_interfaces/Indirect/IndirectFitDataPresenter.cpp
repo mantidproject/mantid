@@ -124,34 +124,30 @@ void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes(
     IAddWorkspaceDialog *dialog) {
   UNUSED_ARG(dialog);
 }
-void IndirectFitDataPresenter::setStartX(double startX,
-                                         TableDatasetIndex dataIndex,
-                                         WorkspaceIndex spectrumIndex) {
+void IndirectFitDataPresenter::setStartX(double startX, TableDatasetIndex,
+                                         WorkspaceIndex) {
   m_tablePresenter->updateTableFromModel();
   m_view->setStartX(startX);
 }
 
-void IndirectFitDataPresenter::setStartX(double startX,
-                                         TableDatasetIndex dataIndex) {
+void IndirectFitDataPresenter::setStartX(double startX, TableDatasetIndex) {
   m_tablePresenter->updateTableFromModel();
   m_view->setStartX(startX);
 }
 
-void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex dataIndex,
-                                       WorkspaceIndex spectrumIndex) {
+void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex,
+                                       WorkspaceIndex) {
   m_view->setEndX(endX);
   m_tablePresenter->updateTableFromModel();
 }
 
-void IndirectFitDataPresenter::setEndX(double endX,
-                                       TableDatasetIndex dataIndex) {
+void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex) {
   m_tablePresenter->updateTableFromModel();
   m_view->setEndX(endX);
 }
 
-void IndirectFitDataPresenter::setExclude(const std::string &exclude,
-                                          TableDatasetIndex dataIndex,
-                                          WorkspaceIndex spectrumIndex) {
+void IndirectFitDataPresenter::setExclude(const std::string &,
+                                          TableDatasetIndex, WorkspaceIndex) {
   m_tablePresenter->updateTableFromModel();
 }
 
@@ -165,8 +161,7 @@ void IndirectFitDataPresenter::setModelFromMultipleData() {
   emit dataChanged();
 }
 
-void IndirectFitDataPresenter::updateSpectraInTable(
-    TableDatasetIndex dataIndex) {
+void IndirectFitDataPresenter::updateSpectraInTable(TableDatasetIndex) {
   if (m_view->isMultipleDataTabSelected())
     m_tablePresenter->updateTableFromModel();
 }

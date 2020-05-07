@@ -54,7 +54,7 @@ protected:
                              const QStringList &headers);
   std::string getString(FitDomainIndex row, int column) const;
 
-  virtual void addTableEntry(IIndirectFitData *model, FitDomainIndex row);
+  virtual void addTableEntry(FitDomainIndex row);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row,
                int column);
   void setCellText(const QString &text, FitDomainIndex row, int column);

@@ -8,7 +8,7 @@
 
 #include "DllConfig.h"
 #include "IIndirectFitOutput.h"
-#include "Indextypes.h"
+#include "IndexTypes.h"
 #include "MantidAPI/IAlgorithm.h"
 
 namespace MantidQt {

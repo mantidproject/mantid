@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "Indextypes.h"
+#include "IndexTypes.h"
 //#include "IndirectFitOutput.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"

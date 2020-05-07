@@ -47,9 +47,8 @@ int JumpFitDataTablePresenter::endXColumn() const { return 4; }
 
 int JumpFitDataTablePresenter::excludeColumn() const { return 5; }
 
-void JumpFitDataTablePresenter::addTableEntry(IIndirectFitData *model,
-                                              FitDomainIndex row) {
-  IndirectDataTablePresenter::addTableEntry(model, row);
+void JumpFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
+  IndirectDataTablePresenter::addTableEntry(row);
 
   auto subIndices = m_model->getSubIndices(row);
   const auto workspace = m_model->getWorkspace(subIndices.first);
