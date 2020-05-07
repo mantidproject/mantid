@@ -123,6 +123,7 @@ IndirectDataTablePresenter::IndirectDataTablePresenter(
     IIndirectFitData *model, QTableWidget *dataTable,
     const QStringList &headers)
     : m_model(model), m_dataTable(dataTable) {
+
   setHorizontalHeaders(headers);
   m_dataTable->setItemDelegateForColumn(
       headers.size() - 1, std::make_unique<ExcludeRegionDelegate>().release());

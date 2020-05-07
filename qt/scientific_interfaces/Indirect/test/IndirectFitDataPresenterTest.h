@@ -141,6 +141,7 @@ public:
     m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
+    ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
     m_presenter = std::make_unique<IndirectFitDataPresenter>(
         std::move(m_model.get()), std::move(m_view.get()));
 
@@ -178,21 +179,6 @@ public:
         .WillOnce(Return(sampleName));
 
     m_view->getSelectedSample();
-  }
-
-  void
-  test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_view_and_model() {
-    ON_CALL(*m_view, isMultipleDataTabSelected()).WillByDefault(Return(true));
-    ON_CALL(*m_model, numberOfWorkspaces())
-        .WillByDefault(Return(TableDatasetIndex{2}));
-
-    Expectation isMultipleData =
-        EXPECT_CALL(*m_view, isMultipleDataTabSelected())
-            .Times(1)
-            .WillOnce(Return(true));
-    EXPECT_CALL(*m_model, numberOfWorkspaces()).Times(1).After(isMultipleData);
-
-    m_presenter->updateSpectraInTable(TableDatasetIndex{0});
   }
 
   ///----------------------------------------------------------------------

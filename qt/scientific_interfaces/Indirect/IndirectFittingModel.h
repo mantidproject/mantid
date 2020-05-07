@@ -45,12 +45,12 @@ public:
   virtual ~IndirectFittingModel() = default;
 
   // IIndirectFitData
-  bool hasWorkspace(std::string const &workspaceName) const;
+  virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const;
   Spectra getSpectra(TableDatasetIndex index) const;
   virtual bool isMultiFit() const;
-  TableDatasetIndex numberOfWorkspaces() const;
+  virtual TableDatasetIndex numberOfWorkspaces() const;
   int getNumberOfSpectra(TableDatasetIndex index) const;
   int getNumberOfDomains() const;
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
