@@ -31,7 +31,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 std::string getFitDataName(const std::string &baseWorkspaceName,
                            const Spectra &workspaceIndexes) {
-  return baseWorkspaceName + workspaceIndexes.getString();
+  return baseWorkspaceName + " (" + workspaceIndexes.getString() + ")";
 }
 
 bool doesExistInADS(std::string const &workspaceName) {
