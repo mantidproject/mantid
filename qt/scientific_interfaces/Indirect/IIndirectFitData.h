@@ -51,6 +51,8 @@ public:
                             const std::string &spectra) = 0;
   virtual void addWorkspace(const std::string &workspaceName,
                             const Spectra &spectra) = 0;
+  virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+                            const Spectra &spectra) = 0;
   virtual void removeWorkspace(TableDatasetIndex index) = 0;
   virtual void removeDataByIndex(FitDomainIndex fitDomainIndex) = 0;
   virtual void clear() = 0;

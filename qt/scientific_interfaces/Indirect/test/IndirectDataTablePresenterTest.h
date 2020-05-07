@@ -84,6 +84,8 @@ public:
                                   const std::string &spectra));
   MOCK_METHOD2(addWorkspace,
                void(const std::string &workspaceName, const Spectra &spectra));
+  MOCK_METHOD2(addWorkspace, void(Mantid::API::MatrixWorkspace_sptr workspace,
+                                  const Spectra &spectra));
   MOCK_METHOD1(removeWorkspace, void(TableDatasetIndex index));
   MOCK_METHOD1(removeDataByIndex, void(FitDomainIndex fitDomainIndex));
   MOCK_METHOD0(clear, void());

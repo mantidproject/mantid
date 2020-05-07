@@ -128,16 +128,6 @@ public:
   }
 
   void
-  test_that_getResolution_will_return_the_a_nullptr_when_the_resolution_has_not_been_set() {
-    Spectra const spectra = Spectra("0-1");
-    auto const resolution = createWorkspace(5, 3);
-
-    addWorkspacesToModel(spectra, m_workspace);
-
-    TS_ASSERT(!m_model->getResolution(TableDatasetIndex{0}));
-  }
-
-  void
   test_that_removeWorkspace_will_remove_the_workspace_specified_from_the_model() {
     Spectra const spectra = Spectra("0-1");
 
@@ -152,12 +142,6 @@ public:
     TS_ASSERT_THROWS(
         m_model->setResolution("InvalidName", TableDatasetIndex{0}),
         const std::runtime_error &);
-  }
-
-  void
-  test_that_setResolution_will_set_the_resolution_when_provided_a_correct_workspace_name() {
-    m_model->setResolution("Name", TableDatasetIndex{0});
-    TS_ASSERT_EQUALS(m_model->getResolution(TableDatasetIndex{0}), m_workspace);
   }
 
   void
@@ -195,13 +179,13 @@ private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,
                             Workspaces const &... workspaces) {
-    // m_model->addWorkspace(workspace, spectra);
-    // addWorkspacesToModel(spectra, workspaces...);
+    m_model->addWorkspace(workspace, spectra);
+    addWorkspacesToModel(spectra, workspaces...);
   }
 
   void addWorkspacesToModel(Spectra const &spectra,
                             MatrixWorkspace_sptr const &workspace) {
-    // m_model->addWorkspace(workspace, spectra);
+    m_model->addWorkspace(workspace, spectra);
   }
 
   MatrixWorkspace_sptr m_workspace;

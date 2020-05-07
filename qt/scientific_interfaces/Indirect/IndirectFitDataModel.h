@@ -49,6 +49,8 @@ public:
                     const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName,
                     const Spectra &spectra) override;
+  void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+                    const Spectra &spectra);
   void removeWorkspace(TableDatasetIndex index) override;
   void removeDataByIndex(FitDomainIndex fitDomainIndex) override;
 
@@ -86,10 +88,6 @@ public:
 
   void switchToSingleInputMode() override;
   void switchToMultipleInputMode() override;
-
-protected:
-  virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const Spectra &spectra);
 
 private:
   void IndirectFitDataModel::addNewWorkspace(

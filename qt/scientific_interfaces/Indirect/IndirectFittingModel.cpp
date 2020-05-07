@@ -456,6 +456,13 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
       createDefaultParameters(TableDatasetIndex{0}));
 }
 
+void IndirectFittingModel::addWorkspace(
+    Mantid::API::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
+  m_fitDataModel->addWorkspace(workspace, spectra);
+  m_defaultParameters.emplace_back(
+      createDefaultParameters(TableDatasetIndex{0}));
+}
+
 void IndirectFittingModel::removeWorkspace(TableDatasetIndex index) {
   m_fitDataModel->removeWorkspace(index);
   m_defaultParameters.remove(index);

@@ -29,8 +29,6 @@ public:
   boost::optional<double>
   getInstrumentResolution(TableDatasetIndex dataIndex) const;
   std::size_t getNumberHistograms(TableDatasetIndex index) const;
-  Mantid::API::MatrixWorkspace_sptr
-  getResolution(TableDatasetIndex index) const;
 
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
