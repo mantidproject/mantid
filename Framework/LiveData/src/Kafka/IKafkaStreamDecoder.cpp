@@ -14,9 +14,9 @@
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
+#include "private/Schema/6s4t_run_stop_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
-#include "private/Schema/6s4t_run_stop_generated.h"
 #include "private/Schema/pl72_run_start_generated.h"
 GNU_DIAG_ON("conversion")
 
@@ -421,28 +421,28 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     } else {
       auto runStartData =
           GetRunStart(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
-        IKafkaStreamDecoder::RunStartStruct runStartStruct = {
-            runStartData->instrument_name()->str(),
-            runStartData->run_name()->str(),
-            runStartData->start_time(),
-            static_cast<size_t>(runStartData->n_periods()),
-            runStartData->nexus_structure()->str(),
-            offset};
-        if (runStartStruct.runId != m_runId) {
-          runStartStructOutput = runStartStruct;
-          m_runId = runStartStruct.runId;
-          return false; // not interrupted
-        }
+      IKafkaStreamDecoder::RunStartStruct runStartStruct = {
+          runStartData->instrument_name()->str(),
+          runStartData->run_name()->str(),
+          runStartData->start_time(),
+          static_cast<size_t>(runStartData->n_periods()),
+          runStartData->nexus_structure()->str(),
+          offset};
+      if (runStartStruct.runId != m_runId) {
+        runStartStructOutput = runStartStruct;
+        m_runId = runStartStruct.runId;
+        return false; // not interrupted
       }
     }
+  }
   return true; // interrupted
 }
 
 IKafkaStreamDecoder::RunStartStruct
 IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
-  auto runStartData
-      = GetRunStart(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+  auto runStartData =
+      GetRunStart(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
   IKafkaStreamDecoder::RunStartStruct runStart = {
       runStartData->instrument_name()->str(),
       runStartData->run_name()->str(),
@@ -469,7 +469,10 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
   }
   if (!flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-          RUN_START_MESSAGE_ID.c_str())) {
+          RUN_START_MESSAGE_ID.c_str()) &&
+      !flatbuffers::BufferHasIdentifier(
+          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+          RUN_STOP_MESSAGE_ID.c_str())) {
     throw std::runtime_error("IKafkaStreamDecoder::getRunInfoMessage() - "
                              "Received unexpected message type from run info "
                              "topic. Unable to continue");
@@ -504,8 +507,9 @@ void IKafkaStreamDecoder::checkRunMessage(
   if (flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(buffer.c_str()),
           RUN_START_MESSAGE_ID.c_str())) {
-    auto runStopMsg = GetRunStop(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-    if (!checkOffsets){
+    auto runStopMsg =
+        GetRunStop(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+    if (!checkOffsets) {
       auto stopTime = runStopMsg->stop_time();
       g_log.debug() << "Received an end-of-run message with stop time = "
                     << stopTime << std::endl;
