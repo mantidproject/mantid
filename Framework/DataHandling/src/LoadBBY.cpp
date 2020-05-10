@@ -522,7 +522,7 @@ void LoadBBY::loadInstrumentParameters(
         }
         auto hdfTag = boost::algorithm::trim_copy(details[0]);
         try {
-          // extract the parameter and add it to the parameter dictionary
+          // extract the parameter and add it to the parameter dictionary,
           // check the default for value numeric and string
           auto updateOk = false;
           if (!hdfTag.empty()) {
