@@ -532,11 +532,9 @@ void LoadBBY::loadInstrumentParameters(
                 logParams[logTag] = factor * tmpFloat;
                 updateOk = true;
               }
-            } else {
-              if (loadNXString(entry, hdfTag, tmpString)) {
-                logStrings[logTag] = tmpString;
-                updateOk = true;
-              }
+            } else if (loadNXString(entry, hdfTag, tmpString)) {
+              logStrings[logTag] = tmpString;
+              updateOk = true;
             }
           }
           if (!updateOk) {
@@ -548,7 +546,7 @@ void LoadBBY::loadInstrumentParameters(
               g_log.warning() << "Cannot find hdf parameter " << hdfTag
                               << ", using default.\n";
           }
-        } catch (std::invalid_argument &) {
+        } catch (const std::invalid_argument &) {
           g_log.warning() << "Invalid format for BILBY parameter " << x.first
                           << std::endl;
         }
