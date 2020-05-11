@@ -26,5 +26,12 @@ New Features
 - The loading in the Muon and Frequency domain interfaces has been sped up by reducing the number of calls made to algorithms.
   On average, this should result in a 50% decrease in load times. This reduction in the number of algorithms also improves
   the clarity of the workspace history, as the number of algorithms present in the history is now reduced.
+- On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
+
+Improvements
+-------------
+- Improved the plotting code the Muon Analysis interface, with a significant amount of redundant code removed.
+  This code improvement will lead to more maintainable code, which will be more stable and
+  easier to add new functionality in the future.
 
 :ref:`Release 5.1.0 <v5.1.0>`

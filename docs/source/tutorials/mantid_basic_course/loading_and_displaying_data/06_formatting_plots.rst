@@ -87,6 +87,7 @@ File > Settings
 
 * :ref:`scripting_plots`
 * :ref:`plotting`
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
 .. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
    :width: 150px
