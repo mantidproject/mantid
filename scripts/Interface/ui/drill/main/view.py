@@ -55,7 +55,7 @@ class DrillView(QMainWindow):
         self.actionCopyRow.triggered.connect(self.copy_selected_rows)
         self.actionCutRow.triggered.connect(self.cut_selected_rows)
         self.actionPasteRow.triggered.connect(self.paste_rows)
-        self.actionErase.triggered.connect(self.erase_selected_rows)
+        self.actionErase.triggered.connect(self.erase_selected_cells)
         self.actionProcessRow.triggered.connect(self.process_selected_rows)
         self.actionProcessAll.triggered.connect(self.process_all_rows)
         self.actionStopProcessing.triggered.connect(
@@ -91,7 +91,7 @@ class DrillView(QMainWindow):
         self.cut.clicked.connect(self.cut_selected_rows)
 
         self.erase.setIcon(icons.get_icon("mdi.eraser"))
-        self.erase.clicked.connect(self.erase_selected_rows)
+        self.erase.clicked.connect(self.erase_selected_cells)
 
         self.deleterow.setIcon(icons.get_icon("mdi.table-row-remove"))
         self.deleterow.clicked.connect(self.del_selected_rows)
@@ -210,13 +210,13 @@ class DrillView(QMainWindow):
         for row in rows:
             self.table.deleteRow(row)
 
-    def erase_selected_rows(self):
+    def erase_selected_cells(self):
         """
-        Erase the contents of the selected rows.
+        Erase the contents of the selected cells.
         """
-        rows = self.table.getSelectedRows()
-        for row in rows:
-            self.table.eraseRow(row)
+        indexes = self.table.getSelectedCells()
+        for (r, c) in indexes:
+            self.table.eraseCell(r, c)
 
     def process_selected_rows(self):
         """
@@ -346,7 +346,7 @@ class DrillView(QMainWindow):
                 and event.modifiers() == Qt.ControlModifier):
             self.paste_rows()
         elif (event.key() == Qt.Key_Delete):
-            self.del_selected_rows()
+            self.erase_selected_cells()
 
     def show_directory_manager(self):
         """

@@ -66,6 +66,14 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.eraseRow(0)
         self.assertIsNone(self.table.item(0, 0))
 
+    def test_eraseCell(self):
+        self.assertIsNone(self.table.item(0, 0))
+        cell = QTableWidgetItem("test")
+        self.table.setItem(0, 0, cell)
+        self.assertIsNotNone(self.table.item(0, 0))
+        self.table.eraseCell(0, 0)
+        self.assertIsNone(self.table.item(0, 0))
+
     def test_getSelectedRows(self):
         self.assertEqual(self.table.getSelectedRows(), [])
         self.selectRow(0, Qt.NoModifier)

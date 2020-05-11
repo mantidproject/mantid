@@ -82,6 +82,21 @@ class DrillTableWidget(QTableWidget):
             self.takeItem(position, column)
             self.cellChanged.emit(position, column)
 
+    def eraseCell(self, row, column):
+        """
+        Erase the contents of a single cell.
+
+        Args:
+            row (int): row index
+            column (int): column index
+        """
+        n_rows = self.rowCount()
+        n_cols = self.columnCount()
+        if ((row < 0) or (row > n_rows) or (column < 0) or (column > n_cols)):
+            return;
+        self.takeItem(row, column)
+        self.cellChanged.emit(row, column)
+
     def getSelectedRows(self):
         """
         Get the list of currently selected rows.
