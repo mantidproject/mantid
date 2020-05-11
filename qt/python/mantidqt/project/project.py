@@ -39,7 +39,7 @@ class Project(AnalysisDataServiceObserver):
 
         self.project_file_ext = ".mtdproj"
         self.mplot_project_file_ext = ".mantid"
-        self.valid_file_exts = [self.project_file_ext,self.mplot_project_file_ext]
+        self.valid_file_exts = [self.project_file_ext, self.mplot_project_file_ext]
 
         self.plot_gfm = globalfiguremanager_instance
         self.plot_gfm.add_observer(self)
@@ -90,12 +90,10 @@ class Project(AnalysisDataServiceObserver):
         The function that is called if the save as... button is clicked on the mainwindow
         :return: True; if the user cancels.
         """
-        path = self._save_file_dialog()
-        if path is None:
-            # Cancel close dialogs
-            return True
+        from mantidqt.project.saveprojectdialog.presenter import ProjectSaveDialogPresenter
+        ProjectSaveDialogPresenter(self)
 
-        # todo: get a list of workspaces but to be implemented on GUI implementation
+    def do_save(self, path):
         self.last_project_location = path
         task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
         task.start()
@@ -112,7 +110,8 @@ class Project(AnalysisDataServiceObserver):
                                       QMessageBox.Yes)
 
     def _save_file_dialog(self):
-        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
+        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave,
+                                  file_mode=QFileDialog.AnyFile,
                                   file_filter="Project files ( *" + self.project_file_ext + ")")
 
     def _save(self):
