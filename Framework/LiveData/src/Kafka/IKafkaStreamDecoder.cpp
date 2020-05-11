@@ -120,13 +120,6 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
   // Get last two messages in run topic to ensure we get a runStart message
   m_runStream =
       m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
-  try {
-    m_spDetStream =
-        m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
-  } catch (const std::runtime_error &) {
-    g_log.debug() << "No detector-spectrum map message found, will assume a "
-                     "1:1 mapping.";
-  }
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
@@ -369,36 +362,7 @@ void IKafkaStreamDecoder::waitForRunEndObservation() {
 
   // Rejoin event stream at start of new run
   joinStreamAtTime(runStartStruct);
-  std::string detSpecMapMsgBuffer = getDetSpecMapForRun(runStartStruct);
-  initLocalCaches(detSpecMapMsgBuffer, runStartStruct);
-}
-
-/**
- * Try to find a detector-spectrum map message published after the
- * current run start time
- *
- * @param runStartStruct details of the current run
- * @return received detector-spectrum map message buffer, empty string if a
- *         mapping was not streamed
- */
-std::string IKafkaStreamDecoder::getDetSpecMapForRun(
-    const IKafkaStreamDecoder::RunStartStruct &runStartStruct) {
-  std::string rawMsgBuffer;
-  try {
-    m_spDetStream = m_broker->subscribe(
-        {m_spDetTopic}, nanosecondsToMilliseconds(runStartStruct.startTime),
-        SubscribeAtOption::TIME);
-    int64_t offset;
-    int32_t partition;
-    std::string topicName;
-    m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
-  } catch (const std::runtime_error &) {
-  }
-  if (rawMsgBuffer.empty()) {
-    g_log.debug() << "No detector-spectrum map message found for run "
-                  << runStartStruct.runId << ", will assume a 1:1 mapping.";
-  }
-  return rawMsgBuffer;
+  initLocalCaches(runStartStruct);
 }
 
 /**
@@ -421,13 +385,42 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     } else {
       auto runStartData =
           GetRunStart(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
+      bool detSpecMapSpecified = false;
+      size_t numberOfSpectra = 0;
+      std::vector<int32_t> spectrumNumbers;
+      std::vector<int32_t> detectorIDs;
+      if (runStartData->detector_spectrum_map() != nullptr &&
+          runStartData->detector_spectrum_map()->n_spectra() != 0) {
+        detSpecMapSpecified = true;
+        auto spDetMsg = runStartData->detector_spectrum_map();
+        numberOfSpectra = static_cast<size_t>(spDetMsg->n_spectra());
+        auto numberOfDetectors = spDetMsg->detector_id()->size();
+        if (numberOfDetectors != numberOfSpectra) {
+          std::ostringstream os;
+          os << "IKafkaStreamDecoder::waitForNewRunStartMessage() - Invalid "
+                "spectra/detector mapping. Expected matched length arrays but "
+                "found numberOfSpectra="
+             << numberOfSpectra << ", numberOfDetectors=" << numberOfDetectors;
+          throw std::runtime_error(os.str());
+        }
+        spectrumNumbers.assign(spDetMsg->spectrum()->data(),
+                               spDetMsg->spectrum()->data() +
+                                   spDetMsg->spectrum()->size());
+        detectorIDs.assign(spDetMsg->detector_id()->data(),
+                           spDetMsg->detector_id()->data() +
+                               spDetMsg->detector_id()->size());
+      }
       IKafkaStreamDecoder::RunStartStruct runStartStruct = {
           runStartData->instrument_name()->str(),
           runStartData->run_name()->str(),
           runStartData->start_time(),
           static_cast<size_t>(runStartData->n_periods()),
           runStartData->nexus_structure()->str(),
-          offset};
+          offset,
+          detSpecMapSpecified,
+          numberOfSpectra,
+          spectrumNumbers,
+          detectorIDs};
       if (runStartStruct.runId != m_runId) {
         runStartStructOutput = runStartStruct;
         m_runId = runStartStruct.runId;
@@ -473,6 +466,8 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
       !flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
           RUN_STOP_MESSAGE_ID.c_str())) {
+    g_log.error() << "Message with flatbuffer ID of "
+                  << rawMsgBuffer.substr(4, 8) << " in run info topic.\n";
     throw std::runtime_error("IKafkaStreamDecoder::getRunInfoMessage() - "
                              "Received unexpected message type from run info "
                              "topic. Unable to continue");

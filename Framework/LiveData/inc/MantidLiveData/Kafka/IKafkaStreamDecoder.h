@@ -115,6 +115,12 @@ protected:
     size_t nPeriods;
     std::string nexusStructure;
     int64_t runStartMsgOffset;
+
+    // Detector-Spectrum mapping information
+    bool detSpecMapSpecified = false;
+    size_t numberOfSpectra = 0;
+    std::vector<int32_t> spectrumNumbers;
+    std::vector<int32_t> detectorIDs;
   };
 
   /// Main loop of listening for data messages and populating the cache
@@ -123,8 +129,7 @@ protected:
   virtual void captureImplExcept() = 0;
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
-  virtual void initLocalCaches(const std::string &rawMsgBuffer,
-                               const RunStartStruct &runStartData) = 0;
+  virtual void initLocalCaches(const RunStartStruct &runStartData) = 0;
 
   /// Get an expected message from the run information topic
   int64_t getRunInfoMessage(std::string &rawMsgBuffer);
@@ -161,8 +166,6 @@ protected:
   Types::Core::DateAndTime m_runStart;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
-  /// Subscriber for the run info stream
-  std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
   /// Subscriber for the chopper timestamp stream
   std::unique_ptr<IKafkaStreamSubscriber> m_chopperStream;
   /// Run number
@@ -247,8 +250,6 @@ protected:
   void joinStreamAtTime(const RunStartStruct &runStartData);
   /// Convert a duration in nanoseconds to milliseconds
   int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds) const;
-  /// Get a det-spec map message using the time specified in a run start message
-  std::string getDetSpecMapForRun(const RunStartStruct &runStartStruct);
 };
 } // namespace LiveData
 } // namespace Mantid

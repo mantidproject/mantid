@@ -232,17 +232,14 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
 void KafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture starting");
 
-  // Load spectra-detector and runstart struct then initialise the cache
+  // Load runstart struct then initialise the cache
   std::string buffer;
   std::string runBuffer;
   int64_t offset;
   int32_t partition;
   std::string topicName;
-  if (m_spDetStream) {
-    m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
-  }
   auto runStartStruct = getRunStartMessage(runBuffer);
-  initLocalCaches(buffer, runStartStruct);
+  initLocalCaches(runStartStruct);
 
   m_interrupt = false; // Allow MonitorLiveData or user to interrupt
   m_endRun = false; // Indicates to MonitorLiveData that end of run is reached
@@ -572,14 +569,14 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
  * events
  */
 void KafkaEventStreamDecoder::initLocalCaches(
-    const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+    const RunStartStruct &runStartData) {
   m_runId = runStartData.runId;
 
   const auto jsonGeometry = runStartData.nexusStructure;
   const auto instName = runStartData.instrumentName;
 
   DataObjects::EventWorkspace_sptr eventBuffer;
-  if (rawMsgBuffer.empty()) {
+  if (!runStartData.detSpecMapSpecified) {
     /* Load the instrument to get the number of spectra :c */
     auto ws =
         API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
@@ -597,24 +594,11 @@ void KafkaEventStreamDecoder::initLocalCaches(
         Kernel::UnitFactory::Instance().create("TOF");
     eventBuffer->setYUnit("Counts");
   } else {
-    /* Parse mapping from stream */
-    auto spDetMsg = GetSpectraDetectorMapping(
-        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-    auto nudet = spDetMsg->detector_id()->size();
-    if (nudet != nspec) {
-      std::ostringstream os;
-      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-            "spectra/detector mapping. Expected matched length arrays but "
-            "found nspec="
-         << nspec << ", ndet=" << nudet;
-      throw std::runtime_error(os.str());
-    }
-
     // Create buffer
     eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
-        "EventWorkspace", static_cast<size_t>(spDetMsg->n_spectra()),
-        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+        "EventWorkspace", runStartData.numberOfSpectra,
+        runStartData.spectrumNumbers.data(), runStartData.detectorIDs.data(),
+        static_cast<uint32_t>(runStartData.detectorIDs.size()));
   }
 
   // Load the instrument if possible but continue if we can't

@@ -42,7 +42,7 @@ public:
       const std::string &runInfoTopic, const std::string &spDetTopic,
       const std::string &sampleEnvTopic, const std::string &chopperTopic,
       const std::string &monitorTopic, const std::size_t bufferThreshold);
-  ~KafkaEventStreamDecoder();
+  ~KafkaEventStreamDecoder() override;
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
   KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;
 
@@ -64,8 +64,7 @@ private:
   void flushIntermediateBuffer();
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
-  void initLocalCaches(const std::string &rawMsgBuffer,
-                       const RunStartStruct &runStartData) override;
+  void initLocalCaches(const RunStartStruct &runStartData) override;
 
   void sampleDataFromMessage(const std::string &buffer) override;
 
