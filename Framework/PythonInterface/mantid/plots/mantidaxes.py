@@ -547,7 +547,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.plot`.
         """
-        if datafunctions.validate_args(*args):
+        if datafunctions.validate_args(*args,**kwargs):
             logger.debug('using plotfunctions')
 
             autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
