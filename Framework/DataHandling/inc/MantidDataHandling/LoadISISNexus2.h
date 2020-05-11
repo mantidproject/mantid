@@ -175,8 +175,6 @@ private:
 
   /// Time channels
   std::shared_ptr<HistogramData::HistogramX> m_tof_data;
-  /// Proton charge
-  double m_proton_charge;
   /// Spectra numbers
   std::vector<int> m_spec;
   /// Pointer to one-past-the-end of spectrum number array (m_spec)
