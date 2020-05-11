@@ -133,6 +133,7 @@ def _get_splash_image():
                                                                 Qt.KeepAspectRatio,
                                                                 Qt.SmoothTransformation)
 
+
 SPLASH = QSplashScreen(_get_splash_image(),
                        Qt.WindowStaysOnTopHint)
 SPLASH.show()
