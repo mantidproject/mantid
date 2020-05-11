@@ -157,6 +157,7 @@ class DrillHeaderView(QHeaderView):
         li = self.logicalIndexAt(event.pos())
         if self.mouseOnButton(event.pos(), li):
             self.buttonPressed = li
+            self.updateSection(li)
         else:
             super(DrillHeaderView, self).mousePressEvent(event)
 
@@ -173,6 +174,7 @@ class DrillHeaderView(QHeaderView):
             li = self.buttonPressed
             self.buttonPressed = None
             self.changeSectionFolding(li)
+            self.updateSection(li)
         else:
             super(DrillHeaderView, self).mouseReleaseEvent(event)
 
