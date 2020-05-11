@@ -11,7 +11,6 @@
 import copy
 import sys
 from functools import wraps
-
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
@@ -98,14 +97,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 to_redraw = ax.remove_workspace_artists(workspace)
             else:
                 to_redraw = False
-            # We check for axes type below as a pseudo check for an axes being
-            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
-            # to a workspace, the other a colorbar. Deleting the workspace
-            # deletes the colorfill, but the plot remains open due to the
-            # non-empty colorbar. This solution seems to work for the majority
-            # of cases but could lead to unmanaged figures only containing an
-            # Axes object being closed.
-            if type(ax) is not Axes:
+            if type(ax) is not Axes:  # Solution for filtering out colorbar axes. Works most of the time.
                 empty_axes.append(MantidAxes.is_empty(ax))
             redraw = redraw | to_redraw
 
