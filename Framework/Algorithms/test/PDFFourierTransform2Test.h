@@ -80,6 +80,7 @@ public:
     PDFFourierTransform2 pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", "Forward");
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
     pdfft.setProperty("SofQType", "S(Q)");
     pdfft.setProperty("Rmax", 20.0);
@@ -102,6 +103,7 @@ public:
     PDFFourierTransform2 pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", "Forward");
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
     pdfft.setProperty("SofQType", "S(Q)");
     pdfft.setProperty("Rmax", 20.0);
@@ -135,6 +137,7 @@ public:
     PDFFourierTransform2 pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", "Forward");
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
     pdfft.setProperty("SofQType", "S(Q)");
     pdfft.setProperty("Rmax", 20.0);
@@ -171,6 +174,7 @@ public:
     PDFFourierTransform2 pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", "Forward");
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
     pdfft.setProperty("SofQType", "S(Q)-1");
     pdfft.setProperty("Qmax", 20.0);
@@ -199,6 +203,7 @@ public:
     PDFFourierTransform2 pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", "Backward");
     pdfft.setProperty("OutputWorkspace", "SofQ");
     pdfft.setProperty("SofQType", "S(Q)");
     pdfft.setProperty("Qmax", 20.0);

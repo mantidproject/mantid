@@ -55,7 +55,7 @@ and in this algorithm, it is implemented as
 
    <center>
 
-:math:`G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]\sin(Qr) M(Q,Q_{max}) \Delta Q`
+:math:`G(r) =  \frac{2}{\pi r^2} \sum_{Q_{min}}^{Q_{max}} (S(Q)-1)[\sin(Qr) - Qr\cos(Qr)]^{right bin}_{left bin}`
 
 .. raw:: html
 
@@ -140,7 +140,7 @@ transforms to
 
    </center>
    
-**Note:** All output forms except :math:`G(r)` are calculated by transforming :math:`G(r)`.   
+**Note:** All output forms are calculated by transforming :math:`g(r)-1`.
 
 Usage
 -----
@@ -154,7 +154,7 @@ Usage
     xx = np.array(range(0,100))*0.1
     yy = np.exp(-(2.0 * xx)**2)
     ws = CreateWorkspace(DataX=xx, DataY=yy, UnitX='MomentumTransfer')
-    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)')   
+    Rt = PDFFourierTransform(ws, SofQType='S(Q)', PDFType='g(r)')
 
     # Look at sample results:
     print('part of S(Q) and its correlation function')

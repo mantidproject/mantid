@@ -46,15 +46,16 @@ private:
   double determineRho0();
   void convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q,
                          std::vector<double> &DFOfQ, std::vector<double> &DQ);
-  void convertToLittleGRPlus1(std::vector<double> &FOfR, std::vector<double> &R,
-                              std::vector<double> &DFOfR,
-                              std::vector<double> &DR);
+  void convertToLittleGRMinus1(std::vector<double> &FOfR,
+                               std::vector<double> &R,
+                               std::vector<double> &DFOfR,
+                               std::vector<double> &DR);
   void convertFromSQMinus1(HistogramData::HistogramY &FOfQ,
                            HistogramData::HistogramX &Q,
                            HistogramData::HistogramE &DFOfQ);
-  void convertFromLittleGRPlus1(HistogramData::HistogramY &FOfR,
-                                HistogramData::HistogramX &R,
-                                HistogramData::HistogramE &DFOfR);
+  void convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR,
+                                 HistogramData::HistogramX &R,
+                                 HistogramData::HistogramE &DFOfR);
 };
 
 } // namespace Algorithms
