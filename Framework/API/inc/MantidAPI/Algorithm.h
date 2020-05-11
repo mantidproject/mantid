@@ -416,7 +416,10 @@ private:
   void doSetInputProperties(const std::string &name, const T1 &wksp,
                             IndexType type, const T2 &list);
   void lockWorkspaces();
+
   void unlockWorkspaces();
+
+  void clearWorkspaceCaches();
 
   void linkHistoryWithLastChild();
 

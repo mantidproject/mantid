@@ -18,6 +18,7 @@ Powder Diffraction
 - Polaris.create_total_scattering_pdf fourier filter can be performed using the butterworth filter by calling with `bw_order`.
 - SampleDetails.set_materials now differentiates between sample density and crystal density for converting between pdf types.
 - :ref:`LoadWAND <algm-LoadWAND>` now adds `duration` log to the workspace
+- Polaris.create_total_scattering_pdf now no longer calculates the PDF with the Lorch filter enabled by default and must be enabled.
 
 Engineering Diffraction
 -----------------------
@@ -33,6 +34,7 @@ Single Crystal Diffraction
 Improvements
 ^^^^^^^^^^^^
 - :ref:`CombinePeaksWorkspaces <algm-CombinePeaksWorkspaces>` now combines the modulation vectors present in the two workspaces, provided the total number of vectors is less than 3.
+- New algorithm :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` for making UBs for runs at different goniometer angles share common indexing and determine the goniometer axis and rotation required to match UBs to a reference.
 - New instrument geometry for MaNDi instrument at SNS
 
 Imaging

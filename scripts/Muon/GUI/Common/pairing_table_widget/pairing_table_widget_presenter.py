@@ -122,7 +122,9 @@ class PairingTablePresenter(object):
             self._model.add_pair_to_analysis(pair_name)
         else:
             self._model.remove_pair_from_analysis(pair_name)
-        self.selected_pair_changed_notifier.notify_subscribers(state)
+
+        pair_info = {'is_added': pair_added, 'name': pair_name}
+        self.selected_pair_changed_notifier.notify_subscribers(pair_info)
 
     def plot_default_case(self):
         for row in range(self._view.num_rows()):
