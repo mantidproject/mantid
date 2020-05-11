@@ -33,6 +33,17 @@ class DrillHeaderView(QHeaderView):
         minSize = self.fontMetrics().width("....") + 2 * margin
         self.setMinimumSectionSize(minSize)
 
+    def reset(self):
+        """
+        Override QHeaderView::reset. Reset state of the header.
+        """
+        self.buttonsRectangles = dict()
+        self.sectionsFolded = dict()
+        self.sectionsTexts = dict()
+        self.sectionsSizes = dict()
+        self.buttonPressed = None
+        super(DrillHeaderView, self).reset()
+
     def isButtonPressed(self, li):
         """
         Tells if a push button is pressed by providing the logical index of the
