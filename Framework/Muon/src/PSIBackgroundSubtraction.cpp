@@ -8,6 +8,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid::API;
@@ -29,7 +31,7 @@ void PSIBackgroundSubtraction::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
+          "InputWorkspace", "", Direction::InOut, PropertyMode::Mandatory),
       "Input workspace containing the PSI bin data "
       "which the background correction will be applied to.");
 
@@ -52,10 +54,9 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
 }
 
 void PSIBackgroundSubtraction::exec() {
-  setRethrows(true);
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // Caclulate and subtract background from inputWS
-  calculateBackgroundUsingFit(*inputWS);
+  calculateBackgroundUsingFit(inputWS);
 }
 /**
  * Calculate the background of a PSI workspace by performing a fit, comprising
@@ -63,13 +64,12 @@ void PSIBackgroundSubtraction::exec() {
  * @param inputWorkspace ::  Input PSI workspace which is modified inplace
  */
 void PSIBackgroundSubtraction::calculateBackgroundUsingFit(
-    MatrixWorkspace &inputWorkspace) {
-  IAlgorithm_sptr fit = setupFitAlgorithm(inputWorkspace.getName());
-  auto numberOfHistograms = inputWorkspace.getNumberHistograms();
+    MatrixWorkspace_sptr &inputWorkspace) {
+  IAlgorithm_sptr fit = setupFitAlgorithm(inputWorkspace->getName());
+  auto numberOfHistograms = inputWorkspace->getNumberHistograms();
+  std::vector<double> backgroundValues(numberOfHistograms);
   for (size_t index = 0; index < numberOfHistograms; ++index) {
-    auto &countsdata = inputWorkspace.mutableY(index);
-    auto &timedata = inputWorkspace.x(index);
-    auto maxtime = timedata.back();
+    auto maxtime = inputWorkspace->x(index).back();
     auto [background, fitQuality] =
         calculateBackgroundFromFit(fit, maxtime, static_cast<int>(index));
     // If fit quality is poor, do not subtract the background and instead log a
@@ -80,9 +80,24 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(
           << "Skipping background calculation for WorkspaceIndex: "
           << static_cast<int>(index) << "\n";
     } else {
-      countsdata = countsdata - background;
+      backgroundValues[index] = background;
     }
   }
+  // Create background workspace
+  IAlgorithm_sptr wsAlg = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
+  wsAlg->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
+  wsAlg->setProperty<std::vector<double>>("DataY", std::move(backgroundValues));
+  wsAlg->setProperty<int>("NSpec", static_cast<int>(numberOfHistograms));
+  wsAlg->execute();
+  MatrixWorkspace_sptr backgroundWS = wsAlg->getProperty("OutputWorkspace");
+  backgroundWS->setYUnit("Counts");
+
+  // Subtract background from inputworkspace
+  auto minusAlg = createChildAlgorithm("Minus");
+  minusAlg->setProperty("LHSWorkspace", inputWorkspace);
+  minusAlg->setProperty("RHSWorkspace", backgroundWS);
+  minusAlg->setProperty("OutputWorkspace", inputWorkspace);
+  minusAlg->execute();
 }
 /**
  * Setup the fit algorithm used to obtain the background from PSI data

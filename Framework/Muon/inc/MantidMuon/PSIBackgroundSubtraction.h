@@ -6,16 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Muon {
 
-class MANTID_MUON_DLL PSIBackgroundSubtraction : public API::Algorithm {
+class MANTID_MUON_DLL PSIBackgroundSubtraction
+    : public API::DataProcessorAlgorithm {
 
 public:
-  PSIBackgroundSubtraction() : API::Algorithm() {}
+  PSIBackgroundSubtraction() : API::DataProcessorAlgorithm() {}
   const std::string name() const override { return "PSIBackgroundSubtraction"; }
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
@@ -29,7 +30,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  void calculateBackgroundUsingFit(API::MatrixWorkspace &inputWorkspace);
+  void calculateBackgroundUsingFit(API::MatrixWorkspace_sptr &inputWorkspace);
   /// setup the child fit algorithm, can be overwritten by the tests with a
   /// mock.
   API::IAlgorithm_sptr setupFitAlgorithm(const std::string &wsName);
