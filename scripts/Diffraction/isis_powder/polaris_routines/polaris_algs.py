@@ -88,10 +88,12 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
     sample_geometry = common.generate_sample_geometry(sample_details)
     sample_material = common.generate_sample_material(sample_details)
-    self_scattering_correction = mantid.TotScatCalculateSelfScattering(InputWorkspace=raw_ws,
-                                                                       CalFileName=cal_file_name,
-                                                                       SampleGeometry=sample_geometry,
-                                                                       SampleMaterial=sample_material)
+    self_scattering_correction = mantid.TotScatCalculateSelfScattering(
+        InputWorkspace=raw_ws,
+        CalFileName=cal_file_name,
+        SampleGeometry=sample_geometry,
+        SampleMaterial=sample_material,
+        CrystalDensity=sample_details.material_object.crystal_density)
 
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
@@ -102,6 +104,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
                                                          WorkspaceToMatch=focused_ws)
+
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
