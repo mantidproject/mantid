@@ -16,7 +16,7 @@ General
 =======
 
 
-- Facility and default Instrument: These settings control the default settings used
+- Facility and Default Instrument: These settings control the default settings used
   for Mantid interfaces that require a facility or instrument. This can be set outside
   of settings by changing the instrument in other interfaces, such as
   `Muon Analysis 2 <MuonAnalysis_2-ref>`_.
@@ -40,7 +40,7 @@ General
 Categories
 ==========
 
-- Choose which Algorithms categories to show in the Algorithm Toolbox.
+- Choose which Algorithm categories to show in the Algorithm Toolbox.
 - Choose which Interface categories to show in the Interfaces menu.
 
 
