@@ -24,6 +24,8 @@ New Features
   This allows the user to create a standalone Workbench (or MantidPlot) plot of the displayed data.
   The user may then perform standard operations on the plot, e.g drag and drop workspaces onto the figure.
 - On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
+- Addition of background correction algorithm (PSIBackgroundCorrection) to remove the background present in
+  PSI bin data loaded using LoadPSIMuonBin.
 
 Improvements
 -------------
