@@ -35,6 +35,7 @@ class RundexSettings(object):
                 "TransmissionBeamRuns",
                 "MaskFiles",
                 "ReferenceFiles",
+                "OutputWorkspace",
                 "CustomOptions"
                 ],
             REFL: [

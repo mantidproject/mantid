@@ -78,7 +78,8 @@ class DrillModel(QObject):
             if (e < len(self.samples) and len(self.samples[e]) > 0):
                 kwargs = self.convolute(self.samples[e])
                 kwargs.update(self.settings)
-                kwargs['OutputWorkspace'] = "sample_" + str(e)
+                if "OutputWorkspace" not in kwargs:
+                    kwargs['OutputWorkspace'] = "sample_" + str(e + 1)
                 try:
                     tasks.append(DrillTask(e, self.algorithm, **kwargs))
                 except Exception as ex:
