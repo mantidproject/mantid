@@ -396,10 +396,7 @@ void IndirectFitPlotPresenter::emitFWHMChanged(double minimum, double maximum) {
 
 void IndirectFitPlotPresenter::emitSelectedFitDataChanged() {
   const auto index = m_view->getSelectedDataIndex();
-  if (index.value >= 0)
-    emit selectedFitDataChanged(index);
-  else
-    emit noFitDataSelected();
+  emit selectedFitDataChanged(index);
 }
 
 } // namespace IDA

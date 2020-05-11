@@ -28,7 +28,7 @@ getIndirectFitData(int const &numberOfSpectra) {
   Spectra const spec =
       Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
               MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
-                  static_cast<int>(workspace->getNumberHistograms() - 1)});
+                  workspace->getNumberHistograms() - 1});
   IndirectFitData data(workspace, spec);
   return std::make_unique<IndirectFitData>(data);
 }
@@ -50,7 +50,7 @@ public:
     Spectra const spec =
         Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
                 MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
-                    static_cast<int>(workspace->getNumberHistograms() - 1)});
+                    workspace->getNumberHistograms() - 1});
 
     workspace->setTitle("Test Title");
     IndirectFitData const data(workspace, spec);

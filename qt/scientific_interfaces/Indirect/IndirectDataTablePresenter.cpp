@@ -131,7 +131,7 @@ std::string IndirectDataTablePresenter::getString(FitDomainIndex row,
 
 QString IndirectDataTablePresenter::getText(FitDomainIndex row,
                                             int column) const {
-  return m_dataTable->item(row.value, column)->text();
+  return m_dataTable->item(static_cast<int>(row.value), column)->text();
 }
 
 void IndirectDataTablePresenter::removeSelectedData() {
@@ -158,7 +158,7 @@ void IndirectDataTablePresenter::handleCellChanged(int irow, int column) {
   if (!m_emitCellChanged) {
     return;
   }
-  FitDomainIndex row{irow};
+  FitDomainIndex row{static_cast<size_t>(irow)};
 
   if (startXColumn() == column) {
     setModelStartXAndEmit(getDouble(row, column), row);
@@ -213,7 +213,7 @@ void IndirectDataTablePresenter::setHorizontalHeaders(
 }
 
 void IndirectDataTablePresenter::addTableEntry(FitDomainIndex row) {
-  m_dataTable->insertRow(row.value);
+  m_dataTable->insertRow(static_cast<int>(row.value));
   const auto &name = m_model->getWorkspace(row)->getName();
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();
@@ -240,12 +240,12 @@ void IndirectDataTablePresenter::addTableEntry(FitDomainIndex row) {
 
 void IndirectDataTablePresenter::setCell(std::unique_ptr<QTableWidgetItem> cell,
                                          FitDomainIndex row, int column) {
-  m_dataTable->setItem(row.value, column, cell.release());
+  m_dataTable->setItem(static_cast<int>(row.value), column, cell.release());
 }
 
 void IndirectDataTablePresenter::setCellText(const QString &text,
                                              FitDomainIndex row, int column) {
-  m_dataTable->item(row.value, column)->setText(text);
+  m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
 }
 
 } // namespace IDA

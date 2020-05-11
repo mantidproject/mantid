@@ -446,7 +446,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 paramWsName);
         auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (rowCount == m_fittingModel->getNumberOfDomains())
+        if (rowCount == static_cast<int>(m_fittingModel->getNumberOfDomains()))
           m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
       } else {
         IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
@@ -700,7 +700,7 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 QStringList IndirectFitAnalysisTab::getDatasetNames() const {
   QStringList datasetNames;
   auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
-  for (int i{0}; i < numberWorkspaces.value; ++i) {
+  for (size_t i{0}; i < numberWorkspaces.value; ++i) {
     TableDatasetIndex index{i};
     auto const name =
         QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
@@ -714,7 +714,7 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
 
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
@@ -740,7 +740,7 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
   m_plotPresenter->updateAvailableSpectra();
   m_dataPresenter->updateSpectraInTable(i);
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   setModelFitFunction();

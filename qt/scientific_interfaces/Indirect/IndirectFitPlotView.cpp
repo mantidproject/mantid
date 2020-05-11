@@ -147,25 +147,30 @@ std::string IndirectFitPlotView::getSpectrumText() const {
 
 WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return WorkspaceIndex{m_plotForm->spPlotSpectrum->value()};
+    return WorkspaceIndex{
+        static_cast<size_t>(m_plotForm->spPlotSpectrum->value())};
   else if (m_plotForm->cbPlotSpectrum->count() != 0)
-    return WorkspaceIndex{std::stoi(getSpectrumText())};
+    return WorkspaceIndex{std::stoul(getSpectrumText())};
   return WorkspaceIndex{0};
 }
 
 FitDomainIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return FitDomainIndex{m_plotForm->spPlotSpectrum->value() -
-                          m_plotForm->spPlotSpectrum->minimum()};
-  return FitDomainIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
+    return FitDomainIndex{
+        static_cast<size_t>(m_plotForm->spPlotSpectrum->value() -
+                            m_plotForm->spPlotSpectrum->minimum())};
+  return FitDomainIndex{
+      static_cast<size_t>(m_plotForm->cbPlotSpectrum->currentIndex())};
 }
 
 TableDatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {
-  return TableDatasetIndex{m_plotForm->cbDataSelection->currentIndex()};
+  return TableDatasetIndex{
+      static_cast<size_t>(m_plotForm->cbDataSelection->currentIndex())};
 }
 
 TableDatasetIndex IndirectFitPlotView::dataSelectionSize() const {
-  return TableDatasetIndex{m_plotForm->cbDataSelection->count()};
+  return TableDatasetIndex{
+      static_cast<size_t>(m_plotForm->cbDataSelection->count())};
 }
 
 bool IndirectFitPlotView::isPlotGuessChecked() const {
@@ -210,7 +215,7 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
 void IndirectFitPlotView::setPlotSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->spPlotSpectrum);
   MantidQt::API::SignalBlocker comboBlocker(m_plotForm->cbPlotSpectrum);
-  m_plotForm->spPlotSpectrum->setValue(spectrum.value);
+  m_plotForm->spPlotSpectrum->setValue(static_cast<int>(spectrum.value));
   auto index =
       m_plotForm->cbPlotSpectrum->findText(QString::number(spectrum.value));
   m_plotForm->cbPlotSpectrum->setCurrentIndex(index);
@@ -252,7 +257,7 @@ void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
 
 void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName,
                                                  TableDatasetIndex index) {
-  m_plotForm->cbDataSelection->setItemText(index.value,
+  m_plotForm->cbDataSelection->setItemText(static_cast<int>(index.value),
                                            QString::fromStdString(dataName));
 }
 
@@ -391,7 +396,7 @@ void IndirectFitPlotView::displayMessage(const std::string &message) const {
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
   if (index >= 0)
-    emit selectedFitDataChanged(TableDatasetIndex{index});
+    emit selectedFitDataChanged(TableDatasetIndex{static_cast<size_t>(index)});
 }
 
 // Required due to a bug in qt causing the valueChanged signal to be emitted
@@ -402,14 +407,14 @@ void IndirectFitPlotView::emitDelayedPlotSpectrumChanged() {
 
 void IndirectFitPlotView::emitPlotSpectrumChanged() {
   emit plotSpectrumChanged(WorkspaceIndex{
-      boost::numeric_cast<int>(m_plotForm->spPlotSpectrum->value())});
+      boost::numeric_cast<size_t>(m_plotForm->spPlotSpectrum->value())});
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {
   bool successState{false};
   int spectrumInt = spectrum.toInt(&successState);
   if (successState)
-    emit plotSpectrumChanged(WorkspaceIndex{spectrumInt});
+    emit plotSpectrumChanged(WorkspaceIndex{static_cast<size_t>(spectrumInt)});
 }
 
 void IndirectFitPlotView::emitPlotGuessChanged(int doPlotGuess) {

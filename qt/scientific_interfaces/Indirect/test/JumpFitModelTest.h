@@ -242,7 +242,7 @@ private:
     addWorkspacesToModel(spectra, workspaces...);
   }
 
-  void addWorkspacesToModel(Spectra const &spectra,
+  void addWorkspacesToModel(Spectra const &,
                             MatrixWorkspace_sptr const &workspace) {
     m_model->addWorkspace(workspace->getName());
   }

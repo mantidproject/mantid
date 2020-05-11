@@ -63,8 +63,8 @@ public:
   MOCK_CONST_METHOD1(getSpectra, Spectra(TableDatasetIndex index));
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
-  MOCK_CONST_METHOD1(getNumberOfSpectra, int(TableDatasetIndex index));
-  MOCK_CONST_METHOD0(getNumberOfDomains, int());
+  MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(TableDatasetIndex index));
+  MOCK_CONST_METHOD0(getNumberOfDomains, size_t());
   MOCK_CONST_METHOD2(getDomainIndex,
                      FitDomainIndex(TableDatasetIndex dataIndex,
                                     IDA::WorkspaceIndex spectrum));
@@ -115,7 +115,7 @@ public:
                      Mantid::API::MatrixWorkspace_sptr(FitDomainIndex index));
   MOCK_CONST_METHOD1(getFittingRange,
                      std::pair<double, double>(FitDomainIndex index));
-  MOCK_CONST_METHOD1(getSpectrum, int(FitDomainIndex index));
+  MOCK_CONST_METHOD1(getSpectrum, size_t(FitDomainIndex index));
   MOCK_CONST_METHOD1(getExcludeRegionVector,
                      std::vector<double>(FitDomainIndex index));
   MOCK_CONST_METHOD1(getExcludeRegion, std::string(FitDomainIndex index));

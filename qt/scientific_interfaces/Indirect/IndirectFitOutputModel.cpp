@@ -70,11 +70,11 @@ getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &workspace,
   return std::vector<std::string>();
 }
 
-std::unordered_map<int, std::unordered_map<std::string, ParameterValue>>
+std::unordered_map<size_t, std::unordered_map<std::string, ParameterValue>>
 extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
   auto rowCount = tableWs->rowCount();
   TableRowExtractor extractRowFromTable(std::move(tableWs));
-  std::unordered_map<int, std::unordered_map<std::string, ParameterValue>>
+  std::unordered_map<size_t, std::unordered_map<std::string, ParameterValue>>
       parameterMap;
   for (size_t rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
     parameterMap.emplace(rowIndex, extractRowFromTable(rowIndex));
@@ -143,8 +143,8 @@ void IndirectFitOutputModel::addOutput(
   m_outputResultLocations.clear();
   for (size_t index = 0; index < resultGroup->size(); index++) {
     m_outputResultLocations.emplace(
-        index, ResultLocationNew(resultGroup,
-                                 WorkspaceGroupIndex{static_cast<int>(index)}));
+        index, ResultLocationNew(resultGroup, WorkspaceGroupIndex{
+                                                  static_cast<size_t>(index)}));
   }
 }
 

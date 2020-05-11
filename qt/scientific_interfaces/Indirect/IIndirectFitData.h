@@ -26,14 +26,15 @@ using IndirectFitDataCollectionType =
 */
 class MANTIDQT_INDIRECT_DLL IIndirectFitData {
 public:
+  virtual ~IIndirectFitData() = default;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const = 0;
   virtual Spectra getSpectra(TableDatasetIndex index) const = 0;
   virtual bool isMultiFit() const = 0;
   virtual TableDatasetIndex numberOfWorkspaces() const = 0;
-  virtual int getNumberOfSpectra(TableDatasetIndex index) const = 0;
-  virtual int getNumberOfDomains() const = 0;
+  virtual size_t getNumberOfSpectra(TableDatasetIndex index) const = 0;
+  virtual size_t getNumberOfDomains() const = 0;
   virtual FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
                                         WorkspaceIndex spectrum) const = 0;
   virtual std::vector<double> getQValuesForData() const = 0;
@@ -81,7 +82,7 @@ public:
   getWorkspace(FitDomainIndex index) const = 0;
   virtual std::pair<double, double>
   getFittingRange(FitDomainIndex index) const = 0;
-  virtual int getSpectrum(FitDomainIndex index) const = 0;
+  virtual size_t getSpectrum(FitDomainIndex index) const = 0;
   virtual std::vector<double>
   getExcludeRegionVector(FitDomainIndex index) const = 0;
   virtual std::string getExcludeRegion(FitDomainIndex index) const = 0;

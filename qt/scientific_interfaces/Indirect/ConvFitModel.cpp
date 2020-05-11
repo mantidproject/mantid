@@ -20,11 +20,6 @@ using namespace Mantid::API;
 
 namespace {
 
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
-}
-
 IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
                                            std::string const &filename) {
   auto loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");

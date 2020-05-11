@@ -68,14 +68,14 @@ Spectra IndirectFitDataModel::getSpectra(TableDatasetIndex index) const {
 }
 
 TableDatasetIndex IndirectFitDataModel::numberOfWorkspaces() const {
-  return TableDatasetIndex{static_cast<int>(m_fittingData->size())};
+  return TableDatasetIndex{m_fittingData->size()};
 }
 
 bool IndirectFitDataModel::isMultiFit() const {
   return numberOfWorkspaces().value > 1;
 }
 
-int IndirectFitDataModel::getNumberOfSpectra(TableDatasetIndex index) const {
+size_t IndirectFitDataModel::getNumberOfSpectra(TableDatasetIndex index) const {
   if (index < m_fittingData->size())
     return m_fittingData->at(index.value).numberOfSpectra().value;
   else
@@ -85,8 +85,8 @@ int IndirectFitDataModel::getNumberOfSpectra(TableDatasetIndex index) const {
   return 1;
 }
 
-int IndirectFitDataModel::getNumberOfDomains() const {
-  int sum{0};
+size_t IndirectFitDataModel::getNumberOfDomains() const {
+  size_t sum{0};
   for (auto fittingData : *m_fittingData) {
     sum += fittingData.numberOfSpectra().value;
   }
@@ -106,7 +106,7 @@ std::vector<double> IndirectFitDataModel::getQValuesForData() const {
 std::vector<std::pair<std::string, int>>
 IndirectFitDataModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, int>> resolutionVector;
-  for (auto index = 0; index < m_resolutions->size(); ++index) {
+  for (size_t index = 0; index < m_resolutions->size(); ++index) {
 
     auto spectra = getSpectra(TableDatasetIndex{index});
     auto singleSpectraResolution =
@@ -169,10 +169,8 @@ std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
 void IndirectFitDataModel::addWorkspace(const std::string &workspaceName) {
   auto ws = Mantid::API::AnalysisDataService::Instance()
                 .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-  addWorkspace(
-      ws,
-      Spectra(WorkspaceIndex{0},
-              WorkspaceIndex{static_cast<int>(ws->getNumberHistograms()) - 1}));
+  addWorkspace(ws, Spectra(WorkspaceIndex{0},
+                           WorkspaceIndex{ws->getNumberHistograms() - 1}));
 }
 
 void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
@@ -211,7 +209,7 @@ FitDomainIndex
 IndirectFitDataModel::getDomainIndex(TableDatasetIndex dataIndex,
                                      WorkspaceIndex spectrum) const {
   FitDomainIndex index{0};
-  for (int iws = 0; iws < m_fittingData->size(); ++iws) {
+  for (size_t iws = 0; iws < m_fittingData->size(); ++iws) {
     if (iws < dataIndex.value) {
       index += getNumberOfSpectra(iws);
     } else {
@@ -309,12 +307,12 @@ void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
 void IndirectFitDataModel::switchToSingleInputMode() {
   m_fittingData = m_fittingDataSingle.get();
   m_resolutions = m_resolutionsSingle.get();
-};
+}
 
 void IndirectFitDataModel::switchToMultipleInputMode() {
   m_fittingData = m_fittingDataMultiple.get();
   m_resolutions = m_resolutionsMultiple.get();
-};
+}
 
 std::vector<double>
 IndirectFitDataModel::getExcludeRegionVector(TableDatasetIndex dataIndex,
@@ -327,24 +325,24 @@ Mantid::API::MatrixWorkspace_sptr
 IndirectFitDataModel::getWorkspace(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return getWorkspace(subIndices.first);
-};
+}
 
 std::pair<double, double>
 IndirectFitDataModel::getFittingRange(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return getFittingRange(subIndices.first, subIndices.second);
-};
+}
 
-int IndirectFitDataModel::getSpectrum(FitDomainIndex index) const {
+size_t IndirectFitDataModel::getSpectrum(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return subIndices.second.value;
-};
+}
 
 std::vector<double>
 IndirectFitDataModel::getExcludeRegionVector(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return getExcludeRegionVector(subIndices.first, subIndices.second);
-};
+}
 
 std::string IndirectFitDataModel::getExcludeRegion(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
@@ -353,10 +351,10 @@ std::string IndirectFitDataModel::getExcludeRegion(FitDomainIndex index) const {
 
 std::pair<TableDatasetIndex, WorkspaceIndex>
 IndirectFitDataModel::getSubIndices(FitDomainIndex index) const {
-  int sum{0};
-  for (int datasetIndex = 0; datasetIndex < m_fittingData->size();
+  size_t sum{0};
+  for (size_t datasetIndex = 0; datasetIndex < m_fittingData->size();
        datasetIndex++) {
-    for (int workspaceIndex = 0;
+    for (size_t workspaceIndex = 0;
          workspaceIndex <
          m_fittingData->at(datasetIndex).spectra().size().value;
          workspaceIndex++) {
@@ -369,7 +367,9 @@ IndirectFitDataModel::getSubIndices(FitDomainIndex index) const {
       sum++;
     }
   }
-};
+  throw std::runtime_error(
+      "Failed to find workspace and spectrum index for fit domain.");
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

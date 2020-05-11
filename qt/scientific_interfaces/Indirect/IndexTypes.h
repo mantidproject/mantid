@@ -23,7 +23,7 @@ namespace IDA {
  * the same type.
  */
 template <int Class> struct IndexType {
-  using IntImplementationType = int;
+  using IntImplementationType = size_t;
   IntImplementationType value = 0;
   IndexType() noexcept : value(0) {}
   IndexType(IntImplementationType data) noexcept : value(data) {}

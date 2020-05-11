@@ -343,14 +343,15 @@ void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
   if (isFullFunctionBrowserActive()) {
-    m_functionBrowser->setCurrentDataset(i.value);
+    m_functionBrowser->setCurrentDataset(static_cast<int>(i.value));
   } else {
-    m_templateBrowser->setCurrentDataset(i.value);
+    m_templateBrowser->setCurrentDataset(static_cast<int>(i.value));
   }
 }
 
 FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return FitDomainIndex{m_functionBrowser->getCurrentDataset()};
+  return FitDomainIndex{
+      static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(

@@ -304,8 +304,8 @@ MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
     const MatrixWorkspace_sptr &guessWorkspace) const {
   const auto range = getGuessRange();
   return createInputAndGuessWorkspace(getWorkspace(), std::move(guessWorkspace),
-                                      m_activeSpectrum.value, range.first,
-                                      range.second);
+                                      static_cast<int>(m_activeSpectrum.value),
+                                      range.first, range.second);
 }
 
 std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {

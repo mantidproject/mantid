@@ -25,28 +25,6 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
-namespace {
-
-MultiDomainFunction_sptr getFunction(std::string const &functionString) {
-  return FunctionFactory::Instance().createInitializedMultiDomainFunction(
-      functionString, 10);
-}
-
-MultiDomainFunction_sptr
-getFunctionWithWorkspaceName(std::string const &workspaceName) {
-  std::string const functionString =
-      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-      "name=Resolution,Workspace=" +
-      workspaceName +
-      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-      "0175)))";
-  return getFunction(functionString);
-}
-
-} // namespace
-
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
@@ -158,10 +136,8 @@ public:
   MOCK_CONST_METHOD2(getFittingRange,
                      std::pair<double, double>(TableDatasetIndex dataIndex,
                                                IDA::WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD3(createDisplayName,
-                     std::string(std::string const &formatString,
-                                 std::string const &rangeDelimiter,
-                                 TableDatasetIndex dataIndex));
+  MOCK_CONST_METHOD1(createDisplayName,
+                     std::string(TableDatasetIndex dataIndex));
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
   MOCK_CONST_METHOD0(getFittingFunction,

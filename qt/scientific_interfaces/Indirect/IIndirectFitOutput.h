@@ -41,6 +41,7 @@ struct ResultLocationNew {
 */
 class MANTIDQT_INDIRECT_DLL IIndirectFitOutput {
 public:
+  virtual ~IIndirectFitOutput() = default;
   virtual bool isSpectrumFit(FitDomainIndex index) const = 0;
 
   virtual std::unordered_map<std::string, ParameterValue>

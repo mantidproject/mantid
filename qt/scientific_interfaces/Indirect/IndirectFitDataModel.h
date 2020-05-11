@@ -31,8 +31,8 @@ public:
   Spectra getSpectra(TableDatasetIndex index) const override;
   bool isMultiFit() const override;
   TableDatasetIndex numberOfWorkspaces() const override;
-  int getNumberOfSpectra(TableDatasetIndex index) const override;
-  int getNumberOfDomains() const override;
+  size_t getNumberOfSpectra(TableDatasetIndex index) const override;
+  size_t getNumberOfDomains() const override;
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) const override;
   std::vector<double> getQValuesForData() const override;
@@ -79,7 +79,7 @@ public:
   getWorkspace(FitDomainIndex index) const override;
   std::pair<double, double>
   getFittingRange(FitDomainIndex index) const override;
-  int getSpectrum(FitDomainIndex index) const override;
+  size_t getSpectrum(FitDomainIndex index) const override;
   std::vector<double>
   getExcludeRegionVector(FitDomainIndex index) const override;
   std::string getExcludeRegion(FitDomainIndex index) const override;

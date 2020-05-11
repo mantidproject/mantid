@@ -20,8 +20,6 @@ using ExtendedResolutionType =
 
 class MANTIDQT_INDIRECT_DLL ConvFitModel : public IndirectFittingModel {
 public:
-  using IndirectFittingModel::addWorkspace;
-
   ConvFitModel();
   ~ConvFitModel() override;
 

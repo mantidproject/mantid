@@ -47,9 +47,9 @@ public:
 private:
   std::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   std::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
-  std::unordered_map<int, std::unordered_map<std::string, ParameterValue>>
+  std::unordered_map<size_t, std::unordered_map<std::string, ParameterValue>>
       m_parameters;
-  std::unordered_map<int, ResultLocationNew> m_outputResultLocations;
+  std::unordered_map<size_t, ResultLocationNew> m_outputResultLocations;
 };
 
 } // namespace IDA

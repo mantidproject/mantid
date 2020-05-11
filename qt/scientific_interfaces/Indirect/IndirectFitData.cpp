@@ -187,7 +187,7 @@ std::string createExcludeRegionString(std::string regionString) {
 
 std::vector<MantidQt::CustomInterfaces::IDA::WorkspaceIndex>
 workspaceIndexVectorFromString(const std::string &listString) {
-  auto const intVec = vectorFromString<int>(listString);
+  auto const intVec = vectorFromString<size_t>(listString);
   std::vector<MantidQt::CustomInterfaces::IDA::WorkspaceIndex> output;
   for (auto const i : intVec) {
     output.emplace_back(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{i});
@@ -236,9 +236,7 @@ Spectra &Spectra::operator=(Spectra &&vec) {
 
 bool Spectra::empty() const { return m_vec.empty(); }
 
-FitDomainIndex Spectra::size() const {
-  return FitDomainIndex{static_cast<int>(m_vec.size())};
-}
+FitDomainIndex Spectra::size() const { return FitDomainIndex{m_vec.size()}; }
 
 std::string Spectra::getString() const {
   if (empty())
@@ -247,7 +245,7 @@ std::string Spectra::getString() const {
     return m_vec.size() > 1 ? std::to_string(m_vec.front().value) + "-" +
                                   std::to_string(m_vec.back().value)
                             : std::to_string(m_vec.front().value);
-  std::vector<int> out(m_vec.size());
+  std::vector<size_t> out(m_vec.size());
   std::transform(m_vec.begin(), m_vec.end(), out.begin(),
                  [](WorkspaceIndex i) { return i.value; });
   return Mantid::Kernel::Strings::toString(out);
@@ -271,7 +269,7 @@ FitDomainIndex Spectra::indexOf(WorkspaceIndex i) const {
     throw std::runtime_error("Spectrum index " + std::to_string(i.value) +
                              " not found.");
   }
-  return FitDomainIndex{static_cast<int>(std::distance(begin(), it))};
+  return FitDomainIndex{static_cast<size_t>(std::distance(begin(), it))};
 }
 
 Spectra Spectra::combine(const Spectra &other) const {
@@ -414,17 +412,17 @@ void IndirectFitData::setSpectra(Spectra const &spectra) {
 }
 
 void IndirectFitData::validateSpectra(Spectra const &spectra) {
-  int maxValue = static_cast<int>(workspace()->getNumberHistograms()) - 1;
-  std::vector<int> notInRange;
+  size_t maxValue = workspace()->getNumberHistograms() - 1;
+  std::vector<size_t> notInRange;
   for (auto const i : spectra) {
-    if (i.value < 0 || i.value > maxValue)
+    if (i.value > maxValue)
       notInRange.emplace_back(i.value);
   }
   if (!notInRange.empty()) {
     if (notInRange.size() > 5)
       throw std::runtime_error(
           "Spectra out of range: " +
-          join(std::vector<int>(notInRange.begin(), notInRange.begin() + 5),
+          join(std::vector<size_t>(notInRange.begin(), notInRange.begin() + 5),
                ",") +
           "...");
     throw std::runtime_error("Spectra out of range: " + join(notInRange, ","));

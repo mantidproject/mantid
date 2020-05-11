@@ -185,7 +185,7 @@ void cleanTemporaries(const std::string &base) {
 }
 
 std::ostringstream &addInputString(const std::string &workspaceName,
-                                   int workspaceIndex,
+                                   size_t workspaceIndex,
                                    std::ostringstream &stream) {
   if (!workspaceName.empty()) {
     stream << workspaceName << ",i" << workspaceIndex << ";";
@@ -358,11 +358,11 @@ TableDatasetIndex IndirectFittingModel::numberOfWorkspaces() const {
   return m_fitDataModel->numberOfWorkspaces();
 }
 
-int IndirectFittingModel::getNumberOfSpectra(TableDatasetIndex index) const {
+size_t IndirectFittingModel::getNumberOfSpectra(TableDatasetIndex index) const {
   return m_fitDataModel->getNumberOfSpectra(index);
 }
 
-int IndirectFittingModel::getNumberOfDomains() const {
+size_t IndirectFittingModel::getNumberOfDomains() const {
   return m_fitDataModel->getNumberOfDomains();
 }
 
@@ -709,7 +709,7 @@ void IndirectFittingModel::cleanFailedRun(
        datasetIndex < m_fitDataModel->numberOfWorkspaces(); ++datasetIndex) {
     const auto base = prefix + std::to_string(datasetIndex.value + 1);
     removeFromADSIfExists(base);
-    for (int index = 0;
+    for (size_t index = 0;
          index < m_fitDataModel->getNumberOfSpectra(datasetIndex); index++) {
       cleanTemporaries(base + "_" + std::to_string(index));
     }

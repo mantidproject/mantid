@@ -166,7 +166,7 @@ void IndirectFitDataPresenter::updateSpectraInTable(TableDatasetIndex) {
     m_tablePresenter->updateTableFromModel();
 }
 
-void IndirectFitDataPresenter::updateDataInTable(TableDatasetIndex dataIndex) {
+void IndirectFitDataPresenter::updateDataInTable(TableDatasetIndex) {
   m_tablePresenter->updateTableFromModel();
 }
 

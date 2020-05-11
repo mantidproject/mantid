@@ -90,60 +90,6 @@ double computeHeightApproximation(IFunction_sptr function) {
     return height - background->getParameter("A0");
   return height;
 }
-
-std::string getSuffix(const MatrixWorkspace_sptr &workspace) {
-  const auto position = workspace->getName().rfind("_");
-  return workspace->getName().substr(position + 1);
-}
-
-std::string getFitString(const MatrixWorkspace_sptr &workspace) {
-  auto suffix = getSuffix(std::move(workspace));
-  boost::algorithm::to_lower(suffix);
-  if (suffix == "iqt")
-    return "Fit";
-  return "_IqtFit";
-}
-
-boost::optional<std::string>
-findFullParameterName(const IFunction_sptr &function, const std::string &name) {
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    const auto fullName = function->parameterName(i);
-    if (boost::algorithm::ends_with(fullName, name))
-      return fullName;
-  }
-  return boost::none;
-}
-
-std::vector<std::string> constructGlobalTies(const std::string &parameter,
-                                             std::size_t nDomains) {
-  if (nDomains <= 1)
-    return std::vector<std::string>();
-
-  std::string firstParameter = "f0." + parameter;
-  std::vector<std::string> ties;
-  for (auto i = 1u; i < nDomains; ++i)
-    ties.emplace_back("f" + std::to_string(i) + "." + parameter + "=" +
-                      firstParameter);
-  return ties;
-}
-
-void addGlobalTie(CompositeFunction &composite, const std::string &parameter) {
-  if (composite.nFunctions() == 0)
-    return;
-
-  const auto fullName =
-      findFullParameterName(composite.getFunction(0), parameter);
-
-  if (fullName) {
-    const auto ties = constructGlobalTies(*fullName, composite.nFunctions());
-    composite.addTies(boost::algorithm::join(ties, ","));
-  }
-}
-
-IFunction_sptr createFunction(const std::string &functionString) {
-  return FunctionFactory::Instance().createInitialized(functionString);
-}
-
 } // namespace
 
 namespace MantidQt {
