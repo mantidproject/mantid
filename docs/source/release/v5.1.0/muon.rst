@@ -23,6 +23,9 @@ New Features
 - Addition of an external plotting button to the Muon Analysis 2 GUI.
   This allows the user to create a standalone Workbench (or MantidPlot) plot of the displayed data.
   The user may then perform standard operations on the plot, e.g drag and drop workspaces onto the figure.
+- The loading in the Muon and Frequency domain interfaces has been sped up by reducing the number of calls made to algorithms.
+  On average, this should result in a 50% decrease in load times. This reduction in the number of algorithms also improves
+  the clarity of the workspace history, as the number of algorithms present in the history is now reduced.
 - On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
 - Addition of background correction algorithm (PSIBackgroundCorrection) to remove the background present in
   PSI bin data loaded using LoadPSIMuonBin.
