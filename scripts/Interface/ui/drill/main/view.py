@@ -177,11 +177,15 @@ class DrillView(QMainWindow):
 
     def paste_rows(self):
         """
-        Paste the buffer in new rows.
+        Paste the buffer in new rows after the selected ones. If no row
+        selected, paste at the end of the table.
         """
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Paste rows button"], False)
-        position = self.table.getLastSelectedRow() + 1
+        position = self.table.getLastSelectedRow()
+        if (position == -1):
+            position = self.table.getLastRow()
+        position += 1
         for row_contents in self.buffer:
             self.table.addRow(position)
             self.table.setRowContents(position, row_contents)
