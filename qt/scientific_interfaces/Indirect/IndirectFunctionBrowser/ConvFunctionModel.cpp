@@ -561,7 +561,7 @@ ConvFunctionModel::getParameterDescription(ParamID name) const {
 boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
   if (name >= ParamID::FLAT_BG_A0) {
     return m_model.backgroundPrefix();
-  } else if (name == ParamID::DELTA_HEIGHT) {
+  } else if (name == ParamID::DELTA_HEIGHT || name == ParamID::DELTA_CENTER) {
     return m_model.deltaFunctionPrefix();
   } else if (name == ParamID::TEMPERATURE) {
     return m_model.tempFunctionPrefix();
