@@ -59,7 +59,7 @@ class DrillPresenter:
         try:
             self.model.process(rows)
         except Exception as e:
-            self.view.set_popup(e.elements)
+            self.view.processing_error(e.elements)
         else:
             self.view.set_disabled(True)
             self.view.set_progress(0, 100)

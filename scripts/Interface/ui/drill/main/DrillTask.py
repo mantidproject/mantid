@@ -31,8 +31,15 @@ class DrillTask(QRunnable):
         self.signals = DrillTaskSignals()
         # setup the algo
         self.alg = sapi.AlgorithmManager.create(alg)
+        # check every properties before throwing an exception
+        errors = list()
         for (k, v) in kwargs.items():
-            self.alg.setProperty(k, v)
+            try:
+                self.alg.setProperty(k, v)
+            except Exception as e:
+                errors.append(str(e))
+        if errors:
+            raise Exception("* " + "\n* ".join(errors))
         # setup the observer
         self.observer = DrillAlgorithmObserver()
         self.observer.observeFinish(self.alg)

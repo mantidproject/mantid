@@ -477,7 +477,7 @@ class DrillView(QMainWindow):
         """
         self.table.setRowBackground(row, self.ERROR_COLOR)
 
-    def set_popup(self, elements):
+    def processing_error(self, elements):
         """
         Display a popup window that represents errors repported by the row
         processing.
@@ -486,13 +486,13 @@ class DrillView(QMainWindow):
             elements (list(tuple(int, str))): list of error messages and the
                                               corresponding row
         """
-        window = QMessageBox(self)
-        window.setWindowTitle("Error")
         text = str()
         for e in elements:
             text += ("Row " + str(int(e[0]) + 1) + ":\n")
             text += e[1]
             text += '\n\n'
-        window.setText(text[:-2])
-        window.show()
+        w = QMessageBox(QMessageBox.Critical, "Processing error",
+                "Error while processing selected rows", QMessageBox.Ok, self)
+        w.setDetailedText(text)
+        w.exec()
 
