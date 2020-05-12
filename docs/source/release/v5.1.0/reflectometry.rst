@@ -24,6 +24,7 @@ New
   *Background subtraction on the ISIS Reflectometry Interface*
 
 - Background subtraction options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+- The **Options** dialog can now be accessed from the Tools menu, controlling the display of warnings and rounding precision.
 
 Improvements
 ------------

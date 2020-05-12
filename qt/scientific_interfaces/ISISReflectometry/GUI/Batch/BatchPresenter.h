@@ -69,6 +69,8 @@ public:
   void notifyInstrumentChanged(const std::string &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
   void notifySettingsChanged() override;
+  void notifySetRoundPrecision(int &precision) override;
+  void notifyResetRoundPrecision() override;
   void notifyAnyBatchReductionResumed() override;
   void notifyAnyBatchReductionPaused() override;
   void notifyAnyBatchAutoreductionResumed() override;
@@ -79,6 +81,9 @@ public:
   bool isAutoreducing() const override;
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isWarnDiscardChangesChecked() const override;
+  bool isBatchUnsaved() const override;
+  void setBatchUnsaved(bool isUnsaved = true) override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   int percentComplete() const override;
@@ -110,6 +115,7 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
+  bool m_unsavedBatchFlag;
 
   friend class Encoder;
   friend class Decoder;
