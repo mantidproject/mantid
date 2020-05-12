@@ -39,14 +39,14 @@ class TextParser(object):
                 line = file_obj.readline()
                 if line.strip() and msg in line:
                     return line
-            raise ValueError("'{}' not found".format(msg))
+            raise EOFError(f'"{msg.decode()}" not found')
         elif regex:
             test = re.compile(regex)
             while not self.file_end(file_obj=file_obj):
                 line = file_obj.readline()
                 if test.match(line):
                     return(line)
-            raise ValueError("'{}' not found".format(regex))
+            raise EOFError(f'"{regex.decode()}" not found')
         else:
             raise ValueError("No msg or regex provided: nothing to match")
 
@@ -69,7 +69,7 @@ class TextParser(object):
                 found = True
 
         if not found:
-            raise ValueError("No entry " + msg + " has been found.")
+            raise EOFError(f'No entry "{msg.decode()}" has been found.')
         else:
             file_obj.seek(last_entry)
 
