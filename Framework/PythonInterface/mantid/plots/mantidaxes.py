@@ -1182,8 +1182,7 @@ class MantidAxes3D(Axes3D):
     def set_title(self, *args, **kwargs):
         # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called
         # instead.
-        title = super(Axes3D, self).set_title(*args, **kwargs)
-        return title
+        return Axes.set_title(self, *args, **kwargs)
 
     def set_xlim3d(self, *args):
         min, max = super().set_xlim3d(*args)
