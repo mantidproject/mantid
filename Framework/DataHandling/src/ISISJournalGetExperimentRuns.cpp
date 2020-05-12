@@ -110,7 +110,7 @@ void ISISJournalGetExperimentRuns::init() {
                   "The instrument name");
   declareProperty("Cycle", "",
                   std::make_shared<MandatoryValidator<std::string>>(),
-                  "The cycle name e.g. 19_4");
+                  "The cycle name, for example 19_4");
   declareProperty("InvestigationId", "",
                   std::make_shared<MandatoryValidator<std::string>>(),
                   "ID of the selected investigation");
