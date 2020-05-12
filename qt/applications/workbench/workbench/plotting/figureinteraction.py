@@ -23,12 +23,11 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes, MantidAxes3D
+from mantid.plots import datafunctions, MantidAxes
 from mantid.plots.utility import zoom, MantidAxType
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -297,15 +296,14 @@ class FigureInteraction(object):
 
         menu = QMenu()
 
-        if fig_type == FigureType.Image:
+        if fig_type == FigureType.Image or fig_type == FigureType.Contour:
             if isinstance(event.inaxes, MantidAxes):
                 self._add_axes_scale_menu(menu, event.inaxes)
                 self._add_normalization_option_menu(menu, event.inaxes)
                 self._add_colorbar_axes_scale_menu(menu, event.inaxes)
-            elif isinstance(event.inaxes, MantidAxes3D) and isinstance(event.inaxes.collections[0], Poly3DCollection):
-                # Surface plots
-                self._add_colorbar_axes_scale_menu(menu, event.inaxes)
-        else:
+        elif fig_type == FigureType.Surface:
+            self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+        elif fig_type != FigureType.Wireframe:
             if self.fit_browser.tool is not None:
                 self.fit_browser.add_to_menu(menu)
                 menu.addSeparator()
@@ -713,7 +711,7 @@ class FigureInteraction(object):
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))
                 # 2D plots have no spec number so remove it
-                if figure_type(self.canvas.figure) == FigureType.Image:
+                if figure_type(self.canvas.figure) in [FigureType.Image, FigureType.Contour]:
                     arg_set_copy.pop('specNum')
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
                     if ws_artist.spec_num == arg_set.get('specNum'):

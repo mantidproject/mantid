@@ -184,7 +184,6 @@ def pcolormesh(workspaces, fig=None):
 
     :param workspaces: A list of workspace handles
     :param fig: An optional figure to contain the new plots. Its current contents will be cleared
-    :param contour: An optional bool for whether to draw contour lines.
     :returns: The figure containing the plots
     """
     # check inputs

@@ -10,11 +10,10 @@
 import datetime
 
 import numpy as np
-from matplotlib.collections import PolyCollection, QuadMesh
+from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
-from mpl_toolkits.mplot3d.axes3d import Axes3D
 from scipy.interpolate import interp1d
 
 import mantid.api
