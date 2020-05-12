@@ -109,7 +109,7 @@ void LoadCSNSNexus::init() {
 <<<<<<< HEAD
       // std::make_shared<StringListValidator>(propOptions),
 =======
-      //std::make_shared<StringListValidator>(propOptions),
+      // std::make_shared<StringListValidator>(propOptions),
 >>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
       "choose different instrument with different detector combinations ");
 
@@ -366,7 +366,7 @@ void LoadCSNSNexus::loadHistData(
 <<<<<<< HEAD
     // std::shared_ptr<API::MatrixWorkspace> workspace,
 =======
-    //std::shared_ptr<API::MatrixWorkspace> workspace,
+    // std::shared_ptr<API::MatrixWorkspace> workspace,
 >>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
     std::vector<uint32_t> &timeOfFlight, size_t pidNums,
     std::vector<uint32_t> &histData) {
@@ -488,7 +488,7 @@ void LoadCSNSNexus::loadEventData(
 <<<<<<< HEAD
     // std::shared_ptr<DataObjects::EventWorkspace> workspace,
 =======
-    //std::shared_ptr<DataObjects::EventWorkspace> workspace,
+    // std::shared_ptr<DataObjects::EventWorkspace> workspace,
 >>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
     const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
     std::multimap<uint32_t, std::pair<float, int64_t>> evtData) {
@@ -558,7 +558,7 @@ void LoadCSNSNexus::exec() {
 <<<<<<< HEAD
             // ws_hist = std::dynamic_pointer_cast<MatrixWorkspace>(
 =======
-        //ws_hist = std::dynamic_pointer_cast<MatrixWorkspace>(
+            // ws_hist = std::dynamic_pointer_cast<MatrixWorkspace>(
 >>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
             WorkspaceFactory::Instance().create("Workspace2D", pid_bank.size(),
                                                 tof_bank.size(),
@@ -584,7 +584,7 @@ void LoadCSNSNexus::exec() {
 <<<<<<< HEAD
         // ws_mon = std::dynamic_pointer_cast<MatrixWorkspace>(
 =======
-    //ws_mon = std::dynamic_pointer_cast<MatrixWorkspace>(
+        // ws_mon = std::dynamic_pointer_cast<MatrixWorkspace>(
 >>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
         WorkspaceFactory::Instance().create(
             "Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1));
@@ -609,7 +609,7 @@ void LoadCSNSNexus::exec() {
 <<<<<<< HEAD
     // std::dynamic_pointer_cast<Workspace>(wksp_group));
 =======
-                //std::dynamic_pointer_cast<Workspace>(wksp_group));
+    // std::dynamic_pointer_cast<Workspace>(wksp_group));
 >>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
   } else {
     if (m_loadBank) {
@@ -627,15 +627,15 @@ void LoadCSNSNexus::exec() {
       setProperty("OutputWorkspace",
                   // std::dynamic_pointer_cast<Workspace>(ws_mon));
 =======
-                    //std::dynamic_pointer_cast<Workspace>(ws_evt));
+        // std::dynamic_pointer_cast<Workspace>(ws_evt));
       } else {
         setProperty("OutputWorkspace",
                     boost::dynamic_pointer_cast<Workspace>(ws_hist));
-                    //std::dynamic_pointer_cast<Workspace>(ws_hist));
+        // std::dynamic_pointer_cast<Workspace>(ws_hist));
       }
     } else if (m_loadMonitor) {
       setProperty("OutputWorkspace",
-                  //std::dynamic_pointer_cast<Workspace>(ws_mon));
+                  // std::dynamic_pointer_cast<Workspace>(ws_mon));
 >>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
                   boost::dynamic_pointer_cast<Workspace>(ws_mon));
     }
