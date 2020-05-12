@@ -38,9 +38,10 @@ SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
                  "axes[1].set_xlim(...)\n"
                  "axes[1].set_ylim(...)\n"
                  "\n"
-                 "fig.show()"
+                 "plt.show()"
                  "\n"
-                 "# Scripting Plots in Mantid: https://docs.mantidproject.org/nightly/plotting/scripting_plots.html")
+                 "# Scripting Plots in Mantid: \
+                 https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):
