@@ -254,9 +254,9 @@ void LoadILLPolarizedDiffraction::loadMetaData(
 }
 
 /**
- * Initializes the output workspace based on the resolved instrument. 
- * If there are multiple entries in the file and the current entry 
- * is not the first one, the returned workspace is a clone 
+ * Initializes the output workspace based on the resolved instrument.
+ * If there are multiple entries in the file and the current entry
+ * is not the first one, the returned workspace is a clone
  * of the workspace from the first entry
  * @return : workspace with the correct data dimensions
  */
@@ -312,7 +312,7 @@ LoadILLPolarizedDiffraction::loadTwoTheta0(const NXEntry &entry, int bankId) {
 /**
  * Rotates each pixel to its corresponding 2theta read from the file
  * @param entry : entry from which the 2theta positions will be read
- * @param workspace : workspace containing the instrument being moved 
+ * @param workspace : workspace containing the instrument being moved
  */
 void LoadILLPolarizedDiffraction::moveTwoThetaZero(
     const NXEntry &entry, API::MatrixWorkspace_sptr &workspace) {
