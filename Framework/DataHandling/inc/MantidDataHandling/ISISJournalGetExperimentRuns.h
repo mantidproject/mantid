@@ -22,25 +22,20 @@ an investigation and cycle.
  */
 class DLLExport ISISJournalGetExperimentRuns : public API::Algorithm {
 public:
-  /// Constructor
   ISISJournalGetExperimentRuns() : API::Algorithm() {}
-  /// Destructor
   ~ISISJournalGetExperimentRuns() override = default;
-  /// Algorithm's name for identification overriding a virtual method
+
   const std::string name() const override {
     return "ISISJournalGetExperimentRuns";
   }
-  /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Obtains information of the runs associated with a specific "
            "investigation.";
   }
-  /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
     return {"CatalogGetDataFiles"};
   }
-  /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling"; }
 
 protected:
@@ -50,9 +45,7 @@ protected:
               std::string const &cycle = std::string());
 
 private:
-  /// Overwrites Algorithm method.
   void init() override;
-  /// Overwrites Algorithm method
   void exec() override;
 };
 } // namespace DataHandling
