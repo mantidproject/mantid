@@ -62,7 +62,7 @@ class WorkspaceWidget(PluginWidget):
                                                                  errors=False, overplot=False, advanced=True))
         self.workspacewidget.plotSurfaceClicked.connect(partial(self._do_plot_3D, plot_type='surface'))
         self.workspacewidget.plotWireframeClicked.connect(partial(self._do_plot_3D, plot_type='wireframe'))
-        self.workspacewidget.plotContourClicked.connect(partial(self._do_plot_colorfill, contour=True))
+        self.workspacewidget.plotContourClicked.connect(partial(self._do_plot_3D, plot_type='contour'))
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -121,7 +121,7 @@ class WorkspaceWidget(PluginWidget):
         plot(self._ads.retrieveWorkspaces(names, unrollGroups=True), errors=errors,
              overplot=overplot,wksp_indices=[0], plot_kwargs=plot_kwargs)
 
-    def _do_plot_colorfill(self, names, contour=False):
+    def _do_plot_colorfill(self, names):
         """
         Plot a colorfill from the selected workspaces
 
@@ -129,7 +129,7 @@ class WorkspaceWidget(PluginWidget):
         :param contour: An optional bool for whether to draw contour lines.
         """
         try:
-            pcolormesh(names, contour=contour)
+            pcolormesh(names)
         except BaseException:
             import traceback
             traceback.print_exc()
@@ -139,7 +139,7 @@ class WorkspaceWidget(PluginWidget):
         Make a 3D plot from the selected workspace.
 
         :param workspaces: A list of workspace names.
-        :param plot_type: The type of 3D plot, either 'surface' or 'wireframe'.
+        :param plot_type: The type of 3D plot, either 'surface', 'wireframe', or 'contour'.
         """
         plot_function = getattr(functions, f'plot_{plot_type}', None)
 

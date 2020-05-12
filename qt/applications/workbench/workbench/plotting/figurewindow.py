@@ -12,9 +12,6 @@
 import weakref
 
 # 3rdparty imports
-from matplotlib.collections import LineCollection, QuadMesh
-from mpl_toolkits.mplot3d.axes3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 from qtpy.QtCore import QEvent, Qt, Signal, Slot
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QMainWindow
@@ -124,27 +121,18 @@ class FigureWindow(QMainWindow, ObservingView):
         if len(names) == 0:
             return
         # local import to avoid circular import with FigureManager
-        from mantidqt.plotting.functions import pcolormesh, plot_from_names, plot_surface, plot_wireframe
+        from mantidqt.plotting.functions import pcolormesh, plot_from_names, plot_surface, plot_wireframe, plot_contour
 
         fig = self._canvas.figure
         fig_type = figure_type(fig, ax)
         if fig_type == FigureType.Image:
-            # if the axes that a workspace has been dragged onto is a colorbar (a colorbar is identified by having a
-            # QuadMesh), find the other axes on the figure that the colorbar 'belongs' to, so the plot type can be
-            # determined.
-            if any(isinstance(col, QuadMesh) for col in ax.collections):
-                for axes in fig.get_axes():
-                    if not any(isinstance(col, QuadMesh) for col in axes.collections):
-                        ax = axes
-                        break
-
-            if isinstance(ax, Axes3D):
-                if any(isinstance(col, Poly3DCollection) for col in ax.collections):
-                    plot_surface(names, fig=fig)
-                elif any(isinstance(col, Line3DCollection) for col in ax.collections):
-                    plot_wireframe(names, fig=fig)
-            else:
-                pcolormesh(names, fig=fig, contour=any(isinstance(col, LineCollection) for col in ax.collections))
+            pcolormesh(names, fig=fig)
+        elif fig_type == FigureType.Surface:
+            plot_surface(names, fig=fig)
+        elif fig_type == FigureType.Wireframe:
+            plot_wireframe(names, fig=fig)
+        elif fig_type == FigureType.Contour:
+            plot_contour(names, fig=fig)
         else:
             plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
                             overplot=ax, fig=fig)

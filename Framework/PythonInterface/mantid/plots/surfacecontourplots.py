@@ -16,7 +16,7 @@ import numpy as np
 from mantid.api import MatrixWorkspace, NumericAxis, Workspace, WorkspaceFactory
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
-from mantidqt.plotting.functions import pcolormesh
+from mantidqt.plotting.functions import plot_contour, plot_surface
 
 
 def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name: str, custom_log_values: List[float],
@@ -28,19 +28,16 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
         title = _construct_title(workspace_names, plot_index)
 
         if plot_type == SpectraSelection.Surface:
-            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
-            surface = ax.plot_surface(matrix_ws, cmap='viridis')
+            fig = plot_surface([matrix_ws])
+            ax = fig.get_axes()[0]
 
             ax.set_title("Surface" + title)
             ax.set_ylabel(axis_name)
 
             fig.canvas.set_window_title("Surface" + title)
-
-            fig.colorbar(surface)
-
             fig.show()
         elif plot_type == SpectraSelection.Contour:
-            fig = pcolormesh([matrix_ws], contour=True)
+            fig = plot_contour([matrix_ws])
             ax = fig.get_axes()[0]
 
             ax.set_ylabel(axis_name)

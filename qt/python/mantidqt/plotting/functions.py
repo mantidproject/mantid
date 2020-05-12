@@ -178,7 +178,7 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
-def pcolormesh(workspaces, fig=None, contour=False):
+def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots
 
@@ -211,12 +211,6 @@ def pcolormesh(workspaces, fig=None, contour=False):
             else:
                 row_idx += 1
                 col_idx = 0
-
-            if contour:
-                ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
-                           colors=DEFAULT_CONTOUR_COLOUR,
-                           linewidths=DEFAULT_CONTOUR_WIDTH)
-
         else:
             # nothing here
             ax.axis('off')
@@ -271,8 +265,10 @@ def plot_surface(workspaces, fig=None):
 
         surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
         ax.set_title(ws.name())
-        fig.colorbar(surface)
+        fig.colorbar(surface, ax=[ax])
         fig.show()
+
+    return fig
 
 
 @manage_workspace_names
@@ -288,3 +284,20 @@ def plot_wireframe(workspaces, fig=None):
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())
         fig.show()
+
+    return fig
+
+@manage_workspace_names
+def plot_contour(workspaces, fig=None):
+    for ws in workspaces:
+        fig = pcolormesh(workspaces, fig)
+        ax = fig.get_axes()[0]
+
+        ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
+                   colors=DEFAULT_CONTOUR_COLOUR,
+                   linewidths=DEFAULT_CONTOUR_WIDTH)
+
+        ax.set_title(ws.name())
+        fig.show()
+
+    return fig
