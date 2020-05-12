@@ -118,7 +118,8 @@ void LoadILLPolarizedDiffraction::exec() {
 }
 
 /**
- * Loads the polarized detector data
+ * Loads the polarized detector data, sets up workspaces and labels
+ *  according to the measurement type and data dimensions
  */
 void LoadILLPolarizedDiffraction::loadData() {
 
@@ -253,8 +254,11 @@ void LoadILLPolarizedDiffraction::loadMetaData(
 }
 
 /**
- * Initializes the output workspace based on the resolved instrument, scan
- * points, and scan type
+ * Initializes the output workspace based on the resolved instrument. 
+ * If there are multiple entries in the file and the current entry 
+ * is not the first one, the returned workspace is a clone 
+ * of the workspace from the first entry
+ * @return : workspace with the correct data dimensions
  */
 API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace() {
   size_t nSpectra = D7_NUMBER_PIXELS + NUMBER_MONITORS;
@@ -284,10 +288,11 @@ void LoadILLPolarizedDiffraction::loadInstrument(
 }
 
 /**
- * Loads twotheta0 offsets for each detector bank from the file
- * @param twoTheta0Read : 2theta0 read from the file
+ * Loads twotheta for each detector pixel from the file
+ * @param entry : entry from which the pixel 2theta positions will be read
+ * @param bankId : bank ID for which 2theta positions will be read
+ * @return : vector of pixel 2theta positions in the chosen bank
  */
-
 std::vector<double>
 LoadILLPolarizedDiffraction::loadTwoTheta0(const NXEntry &entry, int bankId) {
   NXFloat theta0Pixels = entry.openNXFloat("D7/Detector/bank" +
@@ -305,8 +310,9 @@ LoadILLPolarizedDiffraction::loadTwoTheta0(const NXEntry &entry, int bankId) {
 }
 
 /**
- * Rotates a detector bank to the 2theta0 read from the file
- * @param twoTheta0Read : 2theta0 read from the file
+ * Rotates each pixel to its corresponding 2theta read from the file
+ * @param entry : entry from which the 2theta positions will be read
+ * @param workspace : workspace containing the instrument being moved 
  */
 void LoadILLPolarizedDiffraction::moveTwoThetaZero(
     const NXEntry &entry, API::MatrixWorkspace_sptr &workspace) {
@@ -334,9 +340,8 @@ void LoadILLPolarizedDiffraction::moveTwoThetaZero(
 }
 
 /**
- * Makes up the full path of the relevant IDF dependent on resolution mode
- * @param instName : the name of the instrument (including the resolution mode
- * suffix)
+ * Makes up the full path of the relevant IDF
+ * @param instName : the name of the instrument
  * @return : the full path to the corresponding IDF
  */
 std::string LoadILLPolarizedDiffraction::getInstrumentFilePath(
