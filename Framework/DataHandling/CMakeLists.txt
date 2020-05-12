@@ -451,6 +451,7 @@ set(TEST_FILES
     LoadBinaryStlTest.h
     LoadCalFileTest.h
     LoadCanSAS1dTest.h
+    LoadCSNSNexusTest.h
     LoadDaveGrpTest.h
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h

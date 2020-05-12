@@ -106,7 +106,11 @@ void LoadCSNSNexus::init() {
   declareProperty(
       "Instrument", "GPPD",
       boost::make_shared<StringListValidator>(propOptions),
+<<<<<<< HEAD
       // std::make_shared<StringListValidator>(propOptions),
+=======
+      //std::make_shared<StringListValidator>(propOptions),
+>>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
       "choose different instrument with different detector combinations ");
 
   const vector<string> exts{".h5", ".nxs"};
@@ -359,7 +363,11 @@ LoadCSNSNexus::getHistData(const vector<string> &inputList) {
  */
 void LoadCSNSNexus::loadHistData(
     boost::shared_ptr<API::MatrixWorkspace> workspace,
+<<<<<<< HEAD
     // std::shared_ptr<API::MatrixWorkspace> workspace,
+=======
+    //std::shared_ptr<API::MatrixWorkspace> workspace,
+>>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
     std::vector<uint32_t> &timeOfFlight, size_t pidNums,
     std::vector<uint32_t> &histData) {
   size_t timeNums = timeOfFlight.size();
@@ -477,7 +485,11 @@ std::multimap<uint32_t, std::pair<float, int64_t>> LoadCSNSNexus::getEventData(
  */
 void LoadCSNSNexus::loadEventData(
     boost::shared_ptr<DataObjects::EventWorkspace> workspace,
+<<<<<<< HEAD
     // std::shared_ptr<DataObjects::EventWorkspace> workspace,
+=======
+    //std::shared_ptr<DataObjects::EventWorkspace> workspace,
+>>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
     const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
     std::multimap<uint32_t, std::pair<float, int64_t>> evtData) {
   workspace->initialize(pidNums, 1, 1);
@@ -543,7 +555,11 @@ void LoadCSNSNexus::exec() {
       } else {
         g_log.information() << "load histogram data " << endl;
         ws_hist = boost::dynamic_pointer_cast<MatrixWorkspace>(
+<<<<<<< HEAD
             // ws_hist = std::dynamic_pointer_cast<MatrixWorkspace>(
+=======
+        //ws_hist = std::dynamic_pointer_cast<MatrixWorkspace>(
+>>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
             WorkspaceFactory::Instance().create("Workspace2D", pid_bank.size(),
                                                 tof_bank.size(),
                                                 tof_bank.size() - 1));
@@ -565,7 +581,11 @@ void LoadCSNSNexus::exec() {
     vector<int64_t> pid_mon = getPixelId(m_monitors);
     vector<uint32_t> tof_mon = getTimeBin("monitor");
     ws_mon = boost::dynamic_pointer_cast<MatrixWorkspace>(
+<<<<<<< HEAD
         // ws_mon = std::dynamic_pointer_cast<MatrixWorkspace>(
+=======
+    //ws_mon = std::dynamic_pointer_cast<MatrixWorkspace>(
+>>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
         WorkspaceFactory::Instance().create(
             "Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1));
     std::vector<uint32_t> histData_mon = getHistData(m_monitors);
@@ -586,12 +606,17 @@ void LoadCSNSNexus::exec() {
     }
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<Workspace>(wksp_group));
+<<<<<<< HEAD
     // std::dynamic_pointer_cast<Workspace>(wksp_group));
+=======
+                //std::dynamic_pointer_cast<Workspace>(wksp_group));
+>>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
   } else {
     if (m_loadBank) {
       if (m_loadEvent) {
         setProperty("OutputWorkspace",
                     boost::dynamic_pointer_cast<Workspace>(ws_evt));
+<<<<<<< HEAD
         // std::dynamic_pointer_cast<Workspace>(ws_evt));
       } else {
         setProperty("OutputWorkspace",
@@ -601,6 +626,17 @@ void LoadCSNSNexus::exec() {
     } else if (m_loadMonitor) {
       setProperty("OutputWorkspace",
                   // std::dynamic_pointer_cast<Workspace>(ws_mon));
+=======
+                    //std::dynamic_pointer_cast<Workspace>(ws_evt));
+      } else {
+        setProperty("OutputWorkspace",
+                    boost::dynamic_pointer_cast<Workspace>(ws_hist));
+                    //std::dynamic_pointer_cast<Workspace>(ws_hist));
+      }
+    } else if (m_loadMonitor) {
+      setProperty("OutputWorkspace",
+                  //std::dynamic_pointer_cast<Workspace>(ws_mon));
+>>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
                   boost::dynamic_pointer_cast<Workspace>(ws_mon));
     }
   }
