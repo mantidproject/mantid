@@ -30,6 +30,11 @@ class DrillView(QMainWindow):
     rundex_loaded = Signal(str)            # the path and filename
     rundex_saved = Signal(str)             # the path and filename
 
+    # colors for the table rows
+    OK_COLOR = "#3f00ff00"
+    ERROR_COLOR = "#3fff0000"
+    PROCESSING_COLOR = "#3fffff00"
+
     def __init__(self):
         super(DrillView, self).__init__()
         self.here = os.path.dirname(os.path.realpath(__file__))
@@ -452,7 +457,7 @@ class DrillView(QMainWindow):
         Args:
             row (int): the row index
         """
-        self.table.setRowProcessingColor(row)
+        self.table.setRowBackground(row, self.PROCESSING_COLOR)
 
     def set_row_done(self, row):
         """
@@ -461,7 +466,7 @@ class DrillView(QMainWindow):
         Args:
             row (int): the row index
         """
-        self.table.setRowOkColor(row)
+        self.table.setRowBackground(row, self.OK_COLOR)
 
     def set_row_error(self, row):
         """
@@ -470,7 +475,7 @@ class DrillView(QMainWindow):
         Args:
             row (int): the row index
         """
-        self.table.setRowErrorColor(row)
+        self.table.setRowBackground(row, self.ERROR_COLOR)
 
     def set_popup(self, elements):
         """

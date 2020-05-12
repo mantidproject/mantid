@@ -21,10 +21,6 @@ class DrillTableWidget(QTableWidget):
     rowAdded = Signal(int)
     rowDeleted = Signal(int)
 
-    OK_COLOR = "#3f00ff00"
-    ERROR_COLOR = "#3fff0000"
-    PROCESSING_COLOR = "#3fffff00"
-
     def __init__(self, parent=None):
         super(DrillTableWidget, self).__init__(parent)
         header = DrillHeaderView(self)
@@ -248,31 +244,4 @@ class DrillTableWidget(QTableWidget):
                 self.setItem(row, c, item)
 
             self.item(row, c).setBackground(brush)
-
-    def setRowOkColor(self, row):
-        """
-        Set the OK_COLOR to an existing row.
-
-        Args:
-            row (int): the row index
-        """
-        self.setRowBackground(row, self.OK_COLOR)
-
-    def setRowErrorColor(self, row):
-        """
-        Set the ERROR_COLOR to an existing row.
-
-        Args:
-            row (int): the row index
-        """
-        self.setRowBackground(row, self.ERROR_COLOR)
-
-    def setRowProcessingColor(self, row):
-        """
-        Set the PROCESSING_COLOR to an existing row.
-
-        Args:
-            row (int): the row index
-        """
-        self.setRowBackground(row, self.PROCESSING_COLOR)
 
