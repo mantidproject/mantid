@@ -37,7 +37,6 @@ public:
   LoadILLPolarizedDiffraction();
 
 private:
-  
   void init() override;
   void exec() override;
 
@@ -51,12 +50,12 @@ private:
   void moveTwoThetaZero(const NeXus::NXEntry &, API::MatrixWorkspace_sptr &);
 
   size_t m_numberOfChannels; // number of channels data
-  
-  std::string m_instName;               ///< instrument name to load the IDF
-  std::set<std::string> m_instNames;    ///< supported instruments
-  std::string m_filename;               ///< file name to load
 
-  LoadHelper m_loadHelper;                  ///< a helper for metadata
+  std::string m_instName;            ///< instrument name to load the IDF
+  std::set<std::string> m_instNames; ///< supported instruments
+  std::string m_filename;            ///< file name to load
+
+  LoadHelper m_loadHelper;                    ///< a helper for metadata
   API::WorkspaceGroup_sptr m_outputWorkspace; ///< output workspace
 };
 
