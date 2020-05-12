@@ -287,6 +287,7 @@ def plot_wireframe(workspaces, fig=None):
 
     return fig
 
+
 @manage_workspace_names
 def plot_contour(workspaces, fig=None):
     for ws in workspaces:
