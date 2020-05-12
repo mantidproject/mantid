@@ -47,5 +47,6 @@ Bugfixes
 - Fixed the default axis scale settings applying to the wrong axis.
 - Performing an overplot by dragging workspaces onto colorfill plots now correctly replaces the workspace.
 - Removed gridlines from the colorbar on colorfill plots.
+- The Instrument View now passes through useful error messages to the workbench if it fails to start, for example if your data contains NaN or infinite values.
 
 :ref:`Release 5.1.0 <v5.1.0>`

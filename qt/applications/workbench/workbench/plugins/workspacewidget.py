@@ -173,7 +173,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace "
-                                   "'{}':\n{}.\n".format(ws.name(), exception))
+                                   "'{}':\n{}\n".format(ws.name(), exception))
             else:
                 logger.warning("Could not show instrument for workspace '{}':"
                                "\nNo instrument available.\n"

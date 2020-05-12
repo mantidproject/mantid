@@ -9,6 +9,7 @@ using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
 %End
 
+%Include ../common_sip/exceptions.sip
 %Include ../common_sip/string.sip
 %Include ../common_sip/vector.sip
 
@@ -18,23 +19,7 @@ qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
 %End
 
-// ----------------------------------------------------------------------------
-// Exceptions
-// ----------------------------------------------------------------------------
 
-%Exception std::invalid_argument(SIP_Exception) /PyName=ValueError/
-{
-%TypeHeaderCode
-#include <stdexcept>
-%End
-%RaiseCode
-    const char *detail = sipExceptionRef.what();
-
-    SIP_BLOCK_THREADS
-    PyErr_SetString(PyExc_ValueError, detail);
-    SIP_UNBLOCK_THREADS
-%End
-};
 // ----------------------------------------------------------------------------
 // Classes
 // ----------------------------------------------------------------------------
