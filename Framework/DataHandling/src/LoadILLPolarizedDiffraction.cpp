@@ -23,8 +23,6 @@
 
 #include <Poco/Path.h>
 
-#include <iostream>
-
 namespace Mantid {
 namespace DataHandling {
 
