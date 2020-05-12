@@ -42,13 +42,8 @@ constexpr size_t D7_NUMBER_PIXELS = 132;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
 constexpr size_t NUMBER_MONITORS = 2;
-// This is the angular size of a pixel in degrees (in low resolution mode)
-constexpr double D7_PIXEL_SIZE = 1;
 // The conversion factor from radian to degree
-constexpr double RAD_TO_DEG = 180. / M_PI;
-// A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
-constexpr double WAVE_TO_E = 81.8;
-
+constexpr double DEG_TO_RAD = M_PI / 180.;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -332,8 +327,8 @@ void LoadILLPolarizedDiffraction::moveTwoThetaZero(
       V3D position = pixel->getPos();
       double const radius =
           sqrt(position[0] * position[0] + position[2] * position[2]);
-      position = V3D(radius * sin(M_PI * theta0[jj] / 180.0), position[1],
-                     radius * cos(M_PI * theta0[jj] / 180.0));
+      position = V3D(radius * sin(DEG_TO_RAD * theta0[jj]), position[1],
+                     radius * cos(DEG_TO_RAD * theta0[jj]));
       componentInfo.setPosition(componentIndex, position);
     }
   }
