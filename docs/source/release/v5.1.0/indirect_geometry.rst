@@ -16,7 +16,7 @@ Improvements
   They should not impact functionality of the Abins Algorithm, but will break any user python scripts
   that import ``AbinsModules``.
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work also for ILL fixed window scan reduced data, in which case the correction will be calculated for elastic wavelength.
-
+- The centre parameter has been added to delta function in the ConvFit tab of Indirect Data Analysis.
 
 Bug Fixes
 #########
