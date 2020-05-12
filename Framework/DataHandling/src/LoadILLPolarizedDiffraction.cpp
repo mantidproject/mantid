@@ -264,8 +264,7 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace() {
     workspace = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
   } else {
-    API::Workspace_sptr tmp =
-        std::move((m_outputWorkspace->getItem(0))->clone());
+    API::Workspace_sptr tmp = (m_outputWorkspace->getItem(0))->clone();    
     workspace = std::dynamic_pointer_cast<API::MatrixWorkspace>(tmp);
   }
   return workspace;
