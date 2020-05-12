@@ -726,6 +726,12 @@
     <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
   </instrument>
 
+  <instrument name="D7">
+    <technique>Polarized diffraction</technique>
+    <technique>Polarized spectroscopy</technique>
+  </instrument>
+
+  
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
