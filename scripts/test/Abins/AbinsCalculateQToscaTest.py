@@ -10,13 +10,13 @@ import numpy as np
 # from mantid.simpleapi import *
 import abins
 from abins.constants import CM1_2_HARTREE, FIRST_OPTICAL_PHONON, WAVENUMBER_TO_INVERSE_A
-from abins import InstrumentProducer, KpointsData
+import abins.instruments
+from abins import KpointsData
 
 
 class CalculateQToscaTest(unittest.TestCase):
     def setUp(self):
-        producer = InstrumentProducer()
-        self._tosca_instrument = producer.produce_instrument("TOSCA")
+        self._tosca_instrument = abins.instruments.get_instrument("TOSCA")
         self._raw_data = KpointsData(num_k=1, num_atoms=2)
         self._raw_data.set({"k_vectors": np.asarray([[0.0, 0.0, 0.0]]),
                             "weights": np.asarray([0.3]),

@@ -10,7 +10,7 @@ import numpy as np
 
 import abins
 from abins.constants import FUNDAMENTALS
-
+import abins.instruments
 
 class SCalculatorFactoryPowderTest(unittest.TestCase):
     """
@@ -19,7 +19,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
     _temperature = 10  # 10 K,  temperature for the benchmark
     _sample_form = "Powder"
-    _instrument = abins.InstrumentProducer().produce_instrument("TOSCA")
+    _instrument = abins.instruments.get_instrument("TOSCA")
     _order_event = FUNDAMENTALS
     _si2 = "Si2-sc_CalculateSPowder"
 

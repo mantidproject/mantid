@@ -910,8 +910,7 @@ class Abins(PythonAlgorithm):
         instrument_name = self.getProperty("Instrument").value
         if instrument_name in ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
-            instrument_producer = abins.InstrumentProducer()
-            self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
+            self._instrument = abins.instruments.get_instrument(self._instrument_name)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 

@@ -22,15 +22,12 @@ from .frequencypowdergenerator import FrequencyPowderGenerator
 # Calculating modules
 from .powdercalculator import PowderCalculator
 from .scalculatorfactory import SCalculatorFactory
-from .SPowderSemiEmpiricalCalculator import SPowderSemiEmpiricalCalculator
+from .spowdersemiempiricalcalculator import SPowderSemiEmpiricalCalculator
 
 # Data
 from .generaldata import GeneralData
 from .kpointsdata import KpointsData
 from .atomsdata import AtomsData
 from .abinsdata import AbinsData
-from .PowderData import PowderData
+from .powderdata import PowderData
 from .sdata import SData
-
-# Instruments
-from .instrumentproducer import InstrumentProducer
