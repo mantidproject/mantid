@@ -60,6 +60,7 @@ public:
   std::vector<uint32_t> getTimeBin(std::string typeName);
   std::vector<uint32_t> getHistData(const vector<string> &inputList);
   void loadHistData(boost::shared_ptr<API::MatrixWorkspace> workspace,
+  //void loadHistData(std::shared_ptr<API::MatrixWorkspace> workspace,
                     std::vector<uint32_t> &timeOfFlight, size_t pidNums,
                     std::vector<uint32_t> &histData);
 
@@ -69,6 +70,7 @@ public:
                const vector<uint32_t> &endList, const vector<int64_t> &pids);
   void
   loadEventData(boost::shared_ptr<DataObjects::EventWorkspace> workspace,
+  //loadEventData(std::shared_ptr<DataObjects::EventWorkspace> workspace,
                 const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
                 std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
 
