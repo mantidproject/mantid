@@ -9,13 +9,17 @@
 #
 
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
+from matplotlib.collections import LineCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
+from mantid.plots import MantidAxes
+from mantid.plots.legend import convert_color_to_hex
 from mantidqt.icons import get_icon
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.widgets.plotconfigdialog import curve_in_ax
 
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
-
     sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
@@ -28,6 +32,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_waterfall_offset_amount_triggered = QtCore.Signal()
     sig_waterfall_fill_area_triggered = QtCore.Signal()
     sig_waterfall_conversion = QtCore.Signal(bool)
+    sig_change_line_collection_colour_triggered = QtCore.Signal(QtGui.QColor)
 
     toolitems = (
         ('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
@@ -156,6 +161,11 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Show/hide the separator between this button and the "Fit" button
         self.toggle_separator_visibility(action, enabled)
 
+    def _set_fit_enabled(self, on):
+        action = self._actions['toggle_fit']
+        action.setEnabled(on)
+        action.setVisible(on)
+
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
 
@@ -180,8 +190,63 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # shows/hides the separator positioned immediately after the action
         for i, toolbar_action in enumerate(self.actions()):
             if toolbar_action == action:
-                self.actions()[i+1].setVisible(enabled)
+                self.actions()[i + 1].setVisible(enabled)
                 break
+
+    def set_buttons_visiblity(self, fig):
+        if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] and len(fig.get_axes()) > 1:
+            self._set_fit_enabled(False)
+
+        # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
+        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
+        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax)) for ax in fig.get_axes()) or \
+                fig.get_axes()[0].is_waterfall():
+            self.set_generate_plot_script_enabled(False)
+
+        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
+        if not isinstance(fig.get_axes()[0], MantidAxes) or not fig.get_axes()[0].is_waterfall():
+            self.set_waterfall_options_enabled(False)
+
+        # For contour and wireframe plots, add a toolbar option to change the colour of the lines.
+        if figure_type(fig) in [FigureType.Wireframe, FigureType.Contour]:
+            self.set_up_color_selector_toolbar_button(fig)
+
+        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe]:
+            self.adjust_for_3d_plots()
+
+    def set_up_color_selector_toolbar_button(self, fig):
+        # check if the action is already in the toolbar
+        if self._actions.get('line_colour'):
+            return
+
+        a = self.addAction(get_icon('mdi.palette'), "Line Colour", lambda: None)
+        self._actions['line_colour'] = a
+
+        if figure_type(fig) == FigureType.Wireframe:
+            a.setToolTip("Set the colour of the wireframe.")
+        else:
+            a.setToolTip("Set the colour of the contour lines.")
+
+        line_collection = next(col for col in fig.get_axes()[0].collections if isinstance(col, LineCollection))
+        initial_colour = convert_color_to_hex(line_collection.get_color()[0])
+
+        colour_dialog = QtWidgets.QColorDialog(QtGui.QColor(initial_colour))
+        colour_dialog.setOption(QtWidgets.QColorDialog.NoButtons)
+        colour_dialog.setOption(QtWidgets.QColorDialog.DontUseNativeDialog)
+        colour_dialog.currentColorChanged.connect(self.change_line_collection_colour)
+
+        button = [child for child in self.children() if isinstance(child, QtWidgets.QToolButton)][-1]
+
+        menu = QtWidgets.QMenu("Menu", parent=button)
+        colour_selector_action = QtWidgets.QWidgetAction(menu)
+        colour_selector_action.setDefaultWidget(colour_dialog)
+        menu.addAction(colour_selector_action)
+
+        button.setMenu(menu)
+        button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
+    def change_line_collection_colour(self, colour):
+        self.sig_change_line_collection_colour_triggered.emit(colour)
 
 
 class ToolbarStateManager(object):
@@ -189,6 +254,7 @@ class ToolbarStateManager(object):
     An object that lets users check and manipulate the state of the toolbar
     whilst hiding any implementation details.
     """
+
     def __init__(self, toolbar):
         self._toolbar = toolbar
 

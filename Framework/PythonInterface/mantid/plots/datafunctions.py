@@ -1040,11 +1040,3 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                                              "as the range between min value and max value is too large")
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
         figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
-
-
-def figure_contains_only_3d_plots(fig) -> bool:
-    for ax in fig.get_axes():
-        # any Axes that is not an Axes3D must be a colorbar (containing a QuadMesh)
-        if not isinstance(ax, Axes3D) and not any(isinstance(col, QuadMesh) for col in ax.collections):
-            return False
-    return True

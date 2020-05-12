@@ -1186,7 +1186,6 @@ class MantidAxes3D(Axes3D):
 
     def set_xlim3d(self, *args):
         min, max = super().set_xlim3d(*args)
-
         self._set_overflowing_data_to_nan(min, max, 0)
 
     def set_ylim3d(self, *args):

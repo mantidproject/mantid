@@ -17,22 +17,16 @@ from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.collections import LineCollection, QuadMesh
-from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
-from qtpy.QtGui import QColor
-from qtpy.QtWidgets import QApplication, QLabel, QFileDialog, QColorDialog, QToolButton, QWidgetAction, QMenu
+from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
 from mantid.plots import datafunctions, MantidAxes
-from mantid.plots.legend import convert_color_to_hex
-from mantidqt.icons import get_icon
 from mantidqt.io import open_a_file_dialog
-from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
-from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
@@ -223,6 +217,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_fill_area_triggered.connect(
                 self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
+            self.toolbar.sig_change_line_collection_colour_triggered.connect(self.change_line_collection_colour)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -292,29 +287,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar] \
-                or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
-            self._set_fit_enabled(False)
 
-        # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
-        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
-        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes(
-        )[0].is_waterfall():
-            self.toolbar.set_generate_plot_script_enabled(False)
-
-        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
-        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or \
-                not self.canvas.figure.get_axes()[0].is_waterfall():
-            self.toolbar.set_waterfall_options_enabled(False)
-
-        # For contour and wireframe plots, add a toolbar option to change the colour of the lines.
-        if figure_type(self.canvas.figure) == FigureType.Image and \
-                any(isinstance(col, LineCollection) for col in self.canvas.figure.get_axes()[0].collections):
-            self.set_up_color_selector_toolbar_button()
-
-        if datafunctions.figure_contains_only_3d_plots(self.canvas.figure):
-            self.toolbar.adjust_for_3d_plots()
+        if self.toolbar:
+            self.toolbar.set_buttons_visiblity(self.canvas.figure)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -397,11 +372,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
-    def _set_fit_enabled(self, on):
-        action = self.toolbar._actions['toggle_fit']
-        action.setEnabled(on)
-        action.setVisible(on)
-
     def generate_plot_script_clipboard(self):
         script = generate_script(self.canvas.figure, exclude_headers=True)
         QApplication.clipboard().setText(script)
@@ -467,38 +437,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def update_toolbar_waterfall_plot(self, is_waterfall):
         self.toolbar.set_waterfall_options_enabled(is_waterfall)
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
-
-    def set_up_color_selector_toolbar_button(self):
-        # check if the action is already in the toolbar
-        if self.toolbar._actions.get('line_colour'):
-            return
-
-        a = self.toolbar.addAction(get_icon('mdi.palette'), "Line Colour", lambda: None)
-        self.toolbar._actions['line_colour'] = a
-
-        ax_collections = self.canvas.figure.get_axes()[0].collections
-        if any(isinstance(col, Line3DCollection) for col in ax_collections):
-            a.setToolTip("Set the colour of the wireframe.")
-        else:
-            a.setToolTip("Set the colour of the contour lines.")
-
-        line_collection = next(col for col in ax_collections if isinstance(col, LineCollection))
-        initial_colour = convert_color_to_hex(line_collection.get_color()[0])
-
-        colour_dialog = QColorDialog(QColor(initial_colour))
-        colour_dialog.setOption(QColorDialog.NoButtons)
-        colour_dialog.setOption(QColorDialog.DontUseNativeDialog)
-        colour_dialog.currentColorChanged.connect(self.change_line_collection_colour)
-
-        button = [child for child in self.toolbar.children() if isinstance(child, QToolButton)][-1]
-
-        menu = QMenu("Menu", parent=button)
-        colour_selector_action = QWidgetAction(menu)
-        colour_selector_action.setDefaultWidget(colour_dialog)
-        menu.addAction(colour_selector_action)
-
-        button.setMenu(menu)
-        button.setPopupMode(QToolButton.InstantPopup)
 
     def change_line_collection_colour(self, colour):
         for col in self.canvas.figure.get_axes()[0].collections:
