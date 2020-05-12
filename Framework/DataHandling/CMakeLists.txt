@@ -62,6 +62,7 @@ set(SRC_FILES
     src/LoadHelper.cpp
     src/LoadIDFFromNexus.cpp
     src/LoadILLDiffraction.cpp
+    src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLIndirect2.cpp
     src/LoadILLPolarizationFactors.cpp
     src/LoadILLReflectometry.cpp
@@ -270,6 +271,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadHelper.h
     inc/MantidDataHandling/LoadIDFFromNexus.h
     inc/MantidDataHandling/LoadILLDiffraction.h
+    inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLIndirect2.h
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
     inc/MantidDataHandling/LoadILLReflectometry.h
