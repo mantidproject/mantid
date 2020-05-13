@@ -115,7 +115,8 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
-        if figure_type(canvas.figure) == FigureType.Image:
+        if figure_type(canvas.figure) in [FigureType.Image, FigureType.Contour,
+                                          FigureType.Surface, FigureType.Wireframe]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
 
