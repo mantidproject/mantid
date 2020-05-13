@@ -936,3 +936,15 @@ signals:
     void findingFiles();
     void filesFound();
 };
+
+// ---------------------------------
+// DataSelector
+// ---------------------------------
+class DataSelector : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/DataSelector.h"
+%End
+public:
+    DataSelector(QWidget *parent = nullptr);
+};
