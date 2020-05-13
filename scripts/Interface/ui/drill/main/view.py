@@ -198,13 +198,17 @@ class DrillView(QMainWindow):
 
     def add_row_after(self):
         """
-        Add a row after the selected ones. If no row selected, the row is added
-        at the end of the table.
+        Add row(s) after the selected ones. If no row selected, the row(s)
+        is(are) added at the end of the table. The number of row to add is
+        taken from the ui spinbox.
         """
         position = self.table.getLastSelectedRow()
         if position == -1:
             position = self.table.getLastRow()
-        self.table.addRow(position + 1)
+        n = self.nrows.value()
+        for i in range(n):
+            self.table.addRow(position + 1)
+            position += 1
 
     def del_selected_rows(self):
         """
