@@ -16,6 +16,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <fstream>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -189,6 +190,22 @@ public:
     checkOutputWorkspace(alg, correctMasking);
   }
 
+    void testMaskWorkspaceSelectIfNotFinite() {
+    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
+      return !isfinite(ws.y(wsIndex).front());
+    };
+    MaskDetectorsIf alg;
+    MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+    //add some non finite values
+    inWS->mutableY(1)[0] = std::numeric_limits<double>::quiet_NaN();
+    inWS->mutableY(3)[0] = std::numeric_limits<double>::infinity();
+
+    setupAlgorithmForOutputWorkspace(alg, inWS, "SelectIf", "NotFinite", 0.0);
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    checkOutputWorkspace(alg, correctMasking);
+  }
+
 private:
   constexpr static int numBanks{1};
   constexpr static int numPixels{2};
@@ -204,7 +221,9 @@ private:
     const auto &spectrumInfo = mask->spectrumInfo();
     for (size_t i = 0; i < numHist; ++i) {
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), correctMasking(*inW, i))
-      TS_ASSERT_EQUALS(mask->y(i).front(), inW->y(i).front())
+      if (std::isfinite(mask->y(i).front())) {
+        TS_ASSERT_EQUALS(mask->y(i).front(), inW->y(i).front());
+      }
     }
   }
 
