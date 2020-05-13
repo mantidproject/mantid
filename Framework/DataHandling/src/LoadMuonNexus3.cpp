@@ -31,7 +31,6 @@
 
 #include <functional>
 #include <vector>
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -144,15 +143,22 @@ void LoadMuonNexus3::exec() {
     Workspace2D_sptr workspace2D =
         std::dynamic_pointer_cast<Workspace2D>(outWS);
     m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
-        g_log, m_filename, entry, workspace2D, m_entrynumber,
+        g_log, m_filename, entry, workspace2D, static_cast<int>(m_entrynumber),
         m_isFileMultiPeriod);
   }
   m_loadMuonStrategy->loadMuonLogData();
   m_loadMuonStrategy->loadGoodFrames();
+  m_loadMuonStrategy->applyTimeZeroCorrection();
+  // Grouping info should be returned if user has set the property
   auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
-  setProperty("DetectorGroupingTable", loadedGrouping);
+  if (!getPropertyValue("DetectorGroupingTable").empty()) {
+    setProperty("DetectorGroupingTable", loadedGrouping);
+  };
+  // Deadtime table should be returned if user has set the property
   auto deadtimeTable = m_loadMuonStrategy->loadDeadTimeTable();
-  setProperty("DeadTimeTable", deadtimeTable);
+  if (!getPropertyValue("DeadTimeTable").empty()) {
+    setProperty("DeadTimeTable", deadtimeTable);
+  }
 }
 
 /**
@@ -190,6 +196,9 @@ void LoadMuonNexus3::loadMuonProperties(const NXEntry &entry) {
   std::string mainFieldDirection =
       LoadMuonNexus3Helper::loadMainFieldDirectionFromNexus(entry);
   setProperty("MainFieldDirection", mainFieldDirection);
+
+  double timeZero = LoadMuonNexus3Helper::loadTimeZeroFromNexusFile(entry);
+  setProperty("timeZero", timeZero);
 
   try {
     auto firstGoodData =

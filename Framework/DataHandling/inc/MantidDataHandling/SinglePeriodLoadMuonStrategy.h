@@ -30,6 +30,8 @@ public:
   void loadMuonLogData() override;
   // Returns the good frames from the nexus entry
   void loadGoodFrames() override;
+  // Apply the time zero correction to the workspace time axis
+  void applyTimeZeroCorrection() override;
   // Load detector grouping
   API::Workspace_sptr loadDetectorGrouping() override;
   // Load default grouping from ID

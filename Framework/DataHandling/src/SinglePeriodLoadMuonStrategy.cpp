@@ -5,14 +5,16 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidDataHandling/LoadMuonNexus3Helper.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -141,6 +143,27 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
       std::dynamic_pointer_cast<Workspace>(deadTimeTable);
 
   return deadtimeWorkspace;
+}
+/**
+ * Performs time-zero correction on the loaded workspace and also changes the
+ * unit label on the time axis, which is incorrect due to being loaded using
+ * LoadISISNexus2
+ */
+void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
+
+  m_logger.notice("Applying time zero correction");
+  double timeZero = LoadMuonNexus3Helper::loadTimeZeroFromNexusFile(m_entry);
+  auto &newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
+      Kernel::UnitFactory::Instance().create("Label"));
+  newUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
+  m_workspace->getAxis(0)->unit() = newUnit;
+  int numHistograms = static_cast<int>(m_workspace->getNumberHistograms());
+
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int i = 0; i < numHistograms; i++) {
+    auto &timeAxis = m_workspace->mutableX(i);
+    timeAxis = timeAxis - timeZero;
+  }
 }
 
 } // namespace DataHandling

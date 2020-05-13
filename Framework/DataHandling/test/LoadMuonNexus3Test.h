@@ -46,8 +46,13 @@ public:
         std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
     const Mantid::API::Run &run1 = output2D_1->run();
-    int goodfrm1 = run1.getPropertyAsIntegerValue("goodfrm");
-    TS_ASSERT_EQUALS(goodfrm1, 36197);
+    int goodfrm = run1.getPropertyAsIntegerValue("goodfrm");
+    TS_ASSERT_EQUALS(goodfrm, 36197);
+    double firstGoodData = ld.getProperty("FirstGoodData");
+    TS_ASSERT_EQUALS(firstGoodData, 0.384);
+    double timeZero = ld.getProperty("TimeZero");
+    TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
+    // check time zero applied to time axis
   }
 };
 

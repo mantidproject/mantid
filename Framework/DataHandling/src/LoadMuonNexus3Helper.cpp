@@ -12,8 +12,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <iostream>
-
 namespace Mantid {
 namespace DataHandling {
 namespace LoadMuonNexus3Helper {
@@ -35,7 +33,9 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
       NXInt goodFrames = entry.openNXInt("good_frames");
       goodFrames.load();
       return goodFrames;
-    } catch (...) {
+    } catch (std::runtime_error) {
+      throw std::runtime_error(
+          "Could not load good frames data from nexus file, check Nexus file");
     }
   } else {
     try {
@@ -44,7 +44,9 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
       NXInt goodFrames = periodClass.openNXInt("good_frames");
       goodFrames.load();
       return goodFrames;
-    } catch (...) {
+    } catch (std::runtime_error) {
+      throw std::runtime_error(
+          "Could not load good frames data from nexus file, check Nexus file");
     }
   }
 }
@@ -67,18 +69,17 @@ loadDetectorGroupingFromNexus(NXEntry &entry,
 
     std::vector<detid_t> detectorsLoaded;
     std::vector<detid_t> grouping;
-    // Return the detectors which are loaded
+    // Get the detectors which are loaded
     // then find the grouping ID for each detector
     for (int64_t spectraIndex = 0; spectraIndex < numberOfSpectra;
          spectraIndex++) {
-      const auto detIdSet =
+      const auto &detIdSet =
           localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
       for (auto detector : detIdSet) {
         detectorsLoaded.emplace_back(detector);
       }
     }
     if (!isFileMultiPeriod) {
-      // Simplest case - one grouping entry per detector
       for (const auto &detectorNumber : detectorsLoaded) {
         grouping.emplace_back(groupingData[detectorNumber - 1]);
       }
@@ -97,10 +98,9 @@ std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
     if (orientation[0] == 't') {
       mainFieldDirection = "Transverse";
     }
-  } catch (...) {
+  } catch (std::runtime_error) {
     // no data - assume main field was longitudinal
   }
-
   return mainFieldDirection;
 }
 std::tuple<std::vector<detid_t>, std::vector<double>>
@@ -165,6 +165,16 @@ double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry) {
     }
   } catch (std::exception &e) {
     throw e;
+  }
+}
+
+double loadTimeZeroFromNexusFile(const NeXus::NXEntry &entry) {
+  try {
+    NXClass detectorEntry = entry.openNXGroup("instrument/detector_1");
+    double timeZero = static_cast<double>(detectorEntry.getFloat("time_zero"));
+    return timeZero;
+  } catch (std::runtime_error) {
+    throw std::runtime_error("Could not load time zero, check Nexus file");
   }
 }
 } // namespace LoadMuonNexus3Helper

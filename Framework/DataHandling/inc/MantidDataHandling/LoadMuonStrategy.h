@@ -28,6 +28,8 @@ public:
   virtual void loadMuonLogData() = 0;
   // Returns the good frames from the nexus entry
   virtual void loadGoodFrames() = 0;
+  // Apply time zero correction
+  virtual void applyTimeZeroCorrection() = 0;
   // Load detector grouping
   virtual API::Workspace_sptr loadDetectorGrouping() = 0;
   // Load dead time table

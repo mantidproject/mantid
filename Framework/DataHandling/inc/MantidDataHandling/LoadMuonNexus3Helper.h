@@ -38,6 +38,9 @@ loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
                        const bool isFileMultiPeriod);
 // Load first good data from the nexus entry
 double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry);
+// Load time zero from the nexus entry
+double loadTimeZeroFromNexusFile(const NeXus::NXEntry &entry);
+
 } // namespace LoadMuonNexus3Helper
 } // namespace DataHandling
 } // namespace Mantid
