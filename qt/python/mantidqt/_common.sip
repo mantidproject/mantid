@@ -948,3 +948,15 @@ class DataSelector : QWidget
 public:
     DataSelector(QWidget *parent = nullptr);
 };
+
+// ---------------------------------
+// WorkspaceSelector
+// ---------------------------------
+class WorkspaceSelector : QComboBox
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
+%End
+public:
+    WorkspaceSelector(QWidget *parent = nullptr, bool init = true);
+};
