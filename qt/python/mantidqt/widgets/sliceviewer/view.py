@@ -93,6 +93,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
         self.mpl_toolbar.linePlotsClicked.connect(self.on_line_plots_toggle)
+        self.mpl_toolbar.homeClicked.connect(self.reset_image_view_to_data_limits)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
 
@@ -249,6 +250,13 @@ class SliceViewerDataView(QWidget):
         self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
         self.clear_line_plots()
+        self.canvas.draw_idle()
+
+    def reset_image_view_to_data_limits(self):
+        """Reset the image view limits to encompass all of the data"""
+        lim = self.ax.dataLim
+        self.ax.set_xlim(*lim.intervalx)
+        self.ax.set_ylim(*lim.intervaly)
         self.canvas.draw_idle()
 
     def update_plot_data(self, data):
