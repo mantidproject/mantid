@@ -412,37 +412,6 @@ const static QString MAINWINDOW_JSON_STRING{
     QString("\"tag\": \"ISIS Reflectometry\"}")};
 } // namespace
 
-/**
- * QApplication
- *
- * Uses setUpWorld/tearDownWorld to initialize & finalize
- * QApplication object
- */
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    m_app = new QApplication(m_argc, m_argv);
-
-    qRegisterMetaType<std::string>("StdString");
-    qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
-
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-  int m_argc = 1;
-  GNU_DIAG_OFF("pedantic")
-  char *m_argv[1] = {"DecoderTest"};
-  GNU_DIAG_ON("pedantic")
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {

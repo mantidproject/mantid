@@ -26,6 +26,9 @@ set(
   JumpFitModelTest.h
 )
 
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
+
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesIndirectTest
   QT_VERSION 4
