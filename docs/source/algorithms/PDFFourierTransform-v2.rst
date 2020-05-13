@@ -36,14 +36,14 @@ References
 PDF Options
 --------------
 
-**G(r)**
+**g(r)**
 ########
 
 .. raw:: html
 
    <center>
 
-:math:`G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]\sin(Qr)dQ`
+:math:`g(r) = \rho(r)/\rho_0 = 1+\frac{1}{2\pi^2\rho_0r} \int_{0}^{\infty} Q[S(Q)-1]\sin(Qr)dQ`
 
 .. raw:: html
 
@@ -55,12 +55,11 @@ and in this algorithm, it is implemented as
 
    <center>
 
-:math:`G(r) =  \frac{2}{\pi r^2} \sum_{Q_{min}}^{Q_{max}} (S(Q)-1)[\sin(Qr) - Qr\cos(Qr)]^{right bin}_{left bin}`
+:math:`g(r)-1 =  \frac{1}{2\pi \rho_0 r^3} \sum_{Q_{min}}^{Q_{max}} M(Q,Q_{max})(S(Q)-1)[\sin(Qr) - Qr\cos(Qr)]^{right bin}_{left bin}`
 
 .. raw:: html
 
    </center>
-
 
 where :math:`M(Q,Q_{max})` is an optional filter function. If Filter
 property is set (true) then
@@ -87,8 +86,7 @@ otherwise
 
    </center>
 
-
-**g(r)**
+**G(r)**
 ########
 
 .. raw:: html
@@ -100,20 +98,6 @@ otherwise
 .. raw:: html
 
    </center>
-
-
-transforms to
-
-.. raw:: html
-
-   <center>
-
-:math:`g(r) = \frac{G(r)}{4 \pi \rho_0 r} + 1`
-
-.. raw:: html
-
-   </center>
-
 
 **RDF(r)**
 ##########
@@ -128,18 +112,6 @@ transforms to
 
    </center>
 
-transforms to
-
-.. raw:: html
-
-   <center>
-
-:math:`RDF(r) = r G(r) + 4 \pi \rho_0 r^2`
-
-.. raw:: html
-
-   </center>
-   
 **Note:** All output forms are calculated by transforming :math:`g(r)-1`.
 
 Usage

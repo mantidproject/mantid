@@ -202,7 +202,6 @@ def _determine_chopper_mode(ws):
 def fast_fourier_filter(ws, freq_params=None):
     if freq_params:
         x_range = ws.dataX(0)
-        q_min = x_range[0]
         q_max = x_range[-1]
         q_delta = (x_range[1] - x_range[0])
         r_min = freq_params[0]
@@ -215,5 +214,5 @@ def fast_fourier_filter(ws, freq_params=None):
         mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
                                    Filter=False, DeltaR=0.01, Rmax=r_max, Direction='Forward')
         mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
-                                   Filter=False, Qmin=q_min, Qmax=q_max, deltaQ=q_delta, Rmin=r_min, Rmax=r_max,
+                                   Filter=False, Qmax=q_max, deltaQ=q_delta, Rmin=r_min, Rmax=r_max,
                                    Direction='Backward')

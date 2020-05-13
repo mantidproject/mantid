@@ -93,7 +93,7 @@ void PDFFourierTransform2::init() {
   declareProperty("Filter", false,
                   "Set to apply Lorch function filter to the input");
 
-  // Set up spectral dencity data type
+  // Set up spectral density data type
   std::vector<std::string> soqTypes;
   soqTypes.emplace_back(S_OF_Q);
   soqTypes.emplace_back(S_OF_Q_MINUS_ONE);
@@ -492,7 +492,7 @@ void PDFFourierTransform2::exec() {
   } else if (direction == BACKWARD) {
     outputWS->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
-    outputWS->setYUnitLabel("Spectrum Dencity");
+    outputWS->setYUnitLabel("Spectrum Density");
     outputWS->mutableRun().addProperty("Rmin", inputX[Xmin_index], "Angstroms",
                                        true);
     outputWS->mutableRun().addProperty("Rmax", inputX[Xmax_index], "Angstroms",

@@ -196,7 +196,7 @@ The output PDF can be customized with the following parameters:
 - By calling with `freq_params` a fourier filter will be performed on the focused signal removing any
   components from atomic distances outside of the parameters. The parameters must be given as list:
   [lower], or [lower, upper]. The upper bound serves to remove noise from the spectrum density, by default
-  when a fourier filter is performed this is set to 200 to minimise loss of detail while still being computationally
+  when a fourier filter is performed this is set to 1000 to minimise loss of detail while still being computationally
   efficient.
 
 Example

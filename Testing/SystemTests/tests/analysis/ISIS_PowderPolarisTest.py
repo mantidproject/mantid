@@ -260,7 +260,7 @@ class TotalScatteringFilterTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.63779, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.74389, places=3)
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
