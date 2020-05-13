@@ -162,7 +162,6 @@ class SliceViewerDataView(QWidget):
         self.axx.yaxis.tick_right()
         self.axy = self.fig.add_subplot(gs[0], sharey=image_axes)
         self.axy.xaxis.tick_top()
-
         self.mpl_toolbar.update()  # sync list of axes in navstack
         self.canvas.draw_idle()
 
@@ -357,7 +356,7 @@ class SliceViewerDataView(QWidget):
             self.xfig[0].set_data(x, y)
         except (AttributeError, IndexError):
             self.axx.clear()
-            self.xfig = self.axx.plot(x, y)
+            self.xfig = self.axx.plot(x, y, scalex=False)
             self.axx.set_xlabel(self.ax.get_xlabel())
             self.update_line_plot_limits()
         self.canvas.draw_idle()
@@ -367,7 +366,7 @@ class SliceViewerDataView(QWidget):
             self.yfig[0].set_data(y, x)
         except (AttributeError, IndexError):
             self.axy.clear()
-            self.yfig = self.axy.plot(y, x)
+            self.yfig = self.axy.plot(y, x, scaley=False)
             self.axy.set_ylabel(self.ax.get_ylabel())
             self.update_line_plot_limits()
         self.canvas.draw_idle()
