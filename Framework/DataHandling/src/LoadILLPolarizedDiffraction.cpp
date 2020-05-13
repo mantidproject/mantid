@@ -155,6 +155,11 @@ void LoadILLPolarizedDiffraction::loadData() {
     // channels
     auto workspace = initStaticWorkspace();
 
+    // check the polarization direction and set the workspace title
+    std::string polDirection = entry.getString("D7/POL/actual_state");
+    std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
+    workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
+
     // Set x axis units
     if (acquisitionMode[0] == 1) {
       std::shared_ptr<Kernel::Units::Label> lblUnit =
