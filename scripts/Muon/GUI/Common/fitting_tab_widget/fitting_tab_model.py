@@ -82,11 +82,21 @@ class FittingTabModel(object):
 
     # plot guess
     def change_plot_guess(self, plot_guess, workspace_names, index):
+        guess_ws_name = self.evaluate_plot_guess(workspace_names, plot_guess, index)
+        if guess_ws_name and AnalysisDataService.doesExist(guess_ws_name):
+            self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
+
+    def update_plot_guess(self, workspace_names, index):
+        if not self.context.fitting_context.plot_guess:
+            return
+        self.evaluate_plot_guess(workspace_names, plot_guess=True, index=index)
+
+    def evaluate_plot_guess(self, workspace_names: str, plot_guess: bool, index: int):
         fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
-            guess_ws_name = MUON_ANALYSIS_GUESS_WS
+            guess_ws_name = MUON_ANALYSIS_GUESS_WS + data_ws_name
         elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
-            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
+            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS + data_ws_name
         else:
             guess_ws_name = '__unknown_interface_fitting_guess'
         # Handle case of function removed
@@ -106,9 +116,7 @@ class FittingTabModel(object):
                 except RuntimeError:
                     mantid.logger.error('Could not evaluate the function.')
                     return
-
-            if AnalysisDataService.doesExist(guess_ws_name):
-                self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
+            return guess_ws_name
 
     def _get_guess_parameters(self, workspace_names, index):
         if self.fitting_options["tf_asymmetry_mode"]:  # Currently not supporting plot guess and tf asymmetry mode
@@ -121,27 +129,6 @@ class FittingTabModel(object):
             fit_function = equiv_functions[index]
             data_ws_name = workspace_names[index]
         return fit_function, data_ws_name
-
-    def update_plot_guess(self, workspace_names, index):
-        if not self.context.fitting_context.plot_guess:
-            return
-
-        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
-        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
-            guess_ws_name = MUON_ANALYSIS_GUESS_WS
-        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
-            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
-        else:
-            guess_ws_name = '__unknown_interface_fitting_guess'
-        try:
-            EvaluateFunction(InputWorkspace=data_ws_name,
-                             Function=fit_function,
-                             StartX=self.fitting_options["startX"],
-                             EndX=self.fitting_options["endX"],
-                             OutputWorkspace=guess_ws_name)
-        except RuntimeError:
-            mantid.logger.error('Could not evaluate the function.')
-            return
 
     # single fitting
     def evaluate_single_fit(self, workspace):

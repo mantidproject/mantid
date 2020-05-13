@@ -103,11 +103,11 @@ class PlottingCanvasModel(object):
     def create_plot_information_for_guess_ws(self, guess_ws_name: str) -> WorkspacePlotInformation:
         """
         Creates a workspacePlotInformation instance for the fit_guess
-        By default this is plotted on the zero'th axis.
         :param guess_ws_name: The workspace name for the fit function guess
         :return: A WorkspacePlotInformation instance describing the data to be plotted
         """
-        return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=0,
+        axis = self._get_workspace_plot_axis(guess_ws_name)
+        return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=axis,
                                         normalised=self._normalised,
                                         errors=False, label=FIT_FUNCTION_GUESS_LABEL)
 
