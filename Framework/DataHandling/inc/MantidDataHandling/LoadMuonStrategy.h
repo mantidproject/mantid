@@ -41,7 +41,7 @@ protected:
   // Create deadtimes table
   DataObjects::TableWorkspace_sptr
   createDeadTimeTable(std::vector<detid_t> detectorsLoaded,
-                              std::vector<double> deadTimes) const;
+                      std::vector<double> deadTimes) const;
   // Logger
   Kernel::Logger &m_logger;
   // File name, used for running child algorithms

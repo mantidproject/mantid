@@ -176,7 +176,7 @@ private:
   /// A pointer to the ISISRunLogs creator
   boost::scoped_ptr<ISISRunLogs> m_logCreator;
   /// Progress reporting object
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
   // Handle to the NeXus file

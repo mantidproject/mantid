@@ -77,7 +77,7 @@ void LoadMuonNexus3::init() {
       "algorithm. For multiperiod files, one workspace will be\n"
       "generated for each period");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
   declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
   declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
@@ -91,7 +91,7 @@ void LoadMuonNexus3::init() {
 
   std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
   declareProperty("MainFieldDirection", "Transverse",
-                  boost::make_shared<StringListValidator>(FieldOptions),
+                  std::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
                   "(run/instrument/detector/orientation, default "
                   "longitudinal). Version 1 only.",
@@ -138,11 +138,11 @@ void LoadMuonNexus3::exec() {
   // DO lots of stuff to this workspace
   if (m_multiPeriodsLoaded) {
     WorkspaceGroup_sptr wksp_grp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
   } else {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =
-        boost::dynamic_pointer_cast<Workspace2D>(outWS);
+        std::dynamic_pointer_cast<Workspace2D>(outWS);
     m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
         g_log, m_filename, entry, workspace2D, m_entrynumber,
         m_isFileMultiPeriod);
@@ -181,7 +181,7 @@ void LoadMuonNexus3::runLoadISISNexus() {
   IAlgorithm_sptr childAlg =
       createChildAlgorithm("LoadISISNexus", 0, 1, true, 2);
   declareProperty("LoadMonitors", "Exclude"); // we need to set this property
-  auto ISISLoader = boost::dynamic_pointer_cast<API::Algorithm>(childAlg);
+  auto ISISLoader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
   ISISLoader->copyPropertiesFrom(*this);
   ISISLoader->executeAsChildAlg();
   this->copyPropertiesFrom(*ISISLoader);
@@ -199,7 +199,7 @@ void LoadMuonNexus3::loadMuonProperties(const NXEntry &entry) {
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading the FirstGoodData value: "
                     << e.what() << "\n";
-  } 
+  }
 }
 } // namespace DataHandling
 } // namespace Mantid

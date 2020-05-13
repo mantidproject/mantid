@@ -85,11 +85,12 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() {
   auto [detectorsLoaded, grouping] =
       LoadMuonNexus3Helper::loadDetectorGroupingFromNexus(m_entry, m_workspace,
                                                           m_isFileMultiPeriod);
-  DataObjects::TableWorkspace_sptr table = createDetectorGroupingTable(detectorsLoaded, grouping);
+  DataObjects::TableWorkspace_sptr table =
+      createDetectorGroupingTable(detectorsLoaded, grouping);
 
   Workspace_sptr table_workspace;
   if (table->rowCount() != 0) {
-    table_workspace = boost::dynamic_pointer_cast<Workspace>(table);
+    table_workspace = std::dynamic_pointer_cast<Workspace>(table);
   } else {
     m_logger.notice("Loading grouping information from IDF");
     table_workspace = loadDefaultDetectorGrouping();
@@ -114,7 +115,7 @@ SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
     const auto idfGrouping = groupLoader.getGroupingFromIDF();
     return idfGrouping->toTable();
   } catch (const std::runtime_error &) {
-    auto dummyGrouping = boost::make_shared<Grouping>();
+    auto dummyGrouping = std::make_shared<Grouping>();
     if (instrument->getNumberDetectors() != 0) {
       dummyGrouping = groupLoader.getDummyGrouping();
     } else {
@@ -139,9 +140,8 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
                                                    m_isFileMultiPeriod);
   auto deadTimeTable = createDeadTimeTable(detectorsLoaded, deadTimes);
 
-
   Workspace_sptr deadtimeWorkspace =
-     boost::dynamic_pointer_cast<Workspace>(deadTimeTable);
+      std::dynamic_pointer_cast<Workspace>(deadTimeTable);
 
   return deadtimeWorkspace;
 }

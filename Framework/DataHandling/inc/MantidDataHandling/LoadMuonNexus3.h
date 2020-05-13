@@ -14,6 +14,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
