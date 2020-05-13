@@ -23,11 +23,11 @@ DECLARE_ALGORITHM(MaskDetectorsIf)
 
 using namespace Kernel;
 
-//anonymous namespace
+// anonymous namespace
 namespace {
-/** Binary function specification  of (not) isfinite so it can be used interchangeably
-*   with the other binary operators
-*/
+/** Binary function specification  of (not) isfinite so it can be used
+ * interchangeably with the other binary operators
+ */
 template <class T> struct not_finite {
   T first_argument_type;
   T second_argument_type;
@@ -38,7 +38,7 @@ template <class T> struct not_finite {
     return !std::isfinite(value);
   };
 };
-}
+} // namespace
 
 /** Initialisation method. Declares properties to be used in algorithm.
  */
@@ -52,7 +52,8 @@ void MaskDetectorsIf::init() {
       "Mode", "SelectIf", std::make_shared<StringListValidator>(select_mode),
       "Mode to select or deselect detectors based on comparison with values.");
   const std::vector<std::string> select_operator{
-      "Equal", "NotEqual", "Greater", "GreaterEqual", "Less", "LessEqual", "NotFinite"};
+      "Equal", "NotEqual",  "Greater",  "GreaterEqual",
+      "Less",  "LessEqual", "NotFinite"};
   declareProperty("Operator", "Equal",
                   std::make_shared<StringListValidator>(select_operator),
                   "Operator to compare to given values.");

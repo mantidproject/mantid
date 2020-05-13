@@ -190,13 +190,13 @@ public:
     checkOutputWorkspace(alg, correctMasking);
   }
 
-    void testMaskWorkspaceSelectIfNotFinite() {
+  void testMaskWorkspaceSelectIfNotFinite() {
     auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
       return !isfinite(ws.y(wsIndex).front());
     };
     MaskDetectorsIf alg;
     MatrixWorkspace_sptr inWS = makeFakeWorkspace();
-    //add some non finite values
+    // add some non finite values
     inWS->mutableY(1)[0] = std::numeric_limits<double>::quiet_NaN();
     inWS->mutableY(3)[0] = std::numeric_limits<double>::infinity();
 

@@ -117,6 +117,74 @@ public:
     verifyAndClear();
   }
 
+  void testJobRunnerGetProcessAll() {
+    auto presenter = makePresenter();
+    TS_ASSERT_EQUALS(m_jobRunner->getProcessAll(), false);
+    expectReductionResumed();
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testJobRunnerGetProcessPartial() {
+    auto presenter = makePresenter();
+    TS_ASSERT_EQUALS(m_jobRunner->getProcessPartial(), false);
+    expectReductionResumed();
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testWarnProcessAllWhenReductionResumedOptionChecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessAllChecked())
+        .WillByDefault(Return(true));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessAllPrevented())
+        .Times(1)
+        .WillOnce(Return(true));
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testNoWarnProcessAllWhenReductionResumedOptionUnchecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessAllChecked())
+        .WillByDefault(Return(false));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessAllPrevented())
+        .Times(1)
+        .WillOnce(Return(false));
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testWarnProcessPartialGroupWhenReductionResumedOptionChecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessPartialGroupChecked())
+        .WillByDefault(Return(true));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented())
+        .Times(1)
+        .WillOnce(Return(true));
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testNoWarnProcessPartialGroupWhenReductionResumedOptionUnchecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessPartialGroupChecked())
+        .WillByDefault(Return(false));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented())
+        .Times(1)
+        .WillOnce(Return(false));
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
   void testChildPresentersUpdatedWhenAnyBatchReductionResumed() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, notifyAnyBatchReductionResumed()).Times(1);
@@ -439,6 +507,21 @@ public:
     verifyAndClear();
   }
 
+  void testRunsPresenterNotifiesSetRoundPrecision() {
+    auto presenter = makePresenter();
+    auto prec = 2;
+    EXPECT_CALL(*m_runsPresenter, setRoundPrecision(prec));
+    presenter->notifySetRoundPrecision(prec);
+    verifyAndClear();
+  }
+
+  void testRunsPresenterNotifiesResetRoundPrecision() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, resetRoundPrecision());
+    presenter->notifyResetRoundPrecision();
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobRunner> *m_jobRunner;
@@ -508,6 +591,8 @@ private:
     // The mock job runner should by default return our default algorithms list
     ON_CALL(*m_jobRunner, getAlgorithms())
         .WillByDefault(Return(m_mockAlgorithmsList));
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(false));
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(false));
     // The mock runs presenter should by default return true when autoreduction
     // is resumed
     ON_CALL(*m_runsPresenter, resumeAutoreduction())
@@ -523,6 +608,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_instrumentPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_savePresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_jobRunner));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }
 
   void expectReductionResumed() {

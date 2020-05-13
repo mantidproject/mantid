@@ -324,5 +324,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
+        self.context.ads_observer.unsubscribe()
         self.context.ads_observer = None
         super(FrequencyAnalysisGui, self).closeEvent(event)
