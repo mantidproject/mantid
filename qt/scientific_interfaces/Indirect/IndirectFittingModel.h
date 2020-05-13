@@ -56,7 +56,8 @@ public:
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) const;
   std::vector<double> getQValuesForData() const;
-  virtual std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
+  virtual std::vector<std::pair<std::string, size_t>>
+  getResolutionsForFit() const;
   void clearWorkspaces();
   void clear();
 

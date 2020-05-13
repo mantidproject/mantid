@@ -8,7 +8,6 @@
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
-//#include "IndirectFitOutput.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 

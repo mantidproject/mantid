@@ -36,7 +36,7 @@ public:
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) const override;
   std::vector<double> getQValuesForData() const override;
-  std::vector<std::pair<std::string, int>>
+  std::vector<std::pair<std::string, size_t>>
   getResolutionsForFit() const override;
   std::vector<std::string> getWorkspaceNames() const override;
 

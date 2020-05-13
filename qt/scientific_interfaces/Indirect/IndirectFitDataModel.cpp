@@ -103,9 +103,9 @@ std::vector<double> IndirectFitDataModel::getQValuesForData() const {
   return qValues;
 }
 
-std::vector<std::pair<std::string, int>>
+std::vector<std::pair<std::string, size_t>>
 IndirectFitDataModel::getResolutionsForFit() const {
-  std::vector<std::pair<std::string, int>> resolutionVector;
+  std::vector<std::pair<std::string, size_t>> resolutionVector;
   for (size_t index = 0; index < m_resolutions->size(); ++index) {
 
     auto spectra = getSpectra(TableDatasetIndex{index});
@@ -197,7 +197,7 @@ void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
 }
 
 void IndirectFitDataModel::addWorkspace(
-    Mantid::API ::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
+    Mantid::API::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
   if (!m_fittingData->empty() &&
       equivalentWorkspaces(workspace, m_fittingData->back().workspace()))
     m_fittingData->back().combine(IndirectFitData(workspace, spectra));

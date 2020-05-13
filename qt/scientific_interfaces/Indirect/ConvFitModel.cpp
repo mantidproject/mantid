@@ -369,7 +369,7 @@ void ConvFitModel::setParameterNameChanges(
       model, std::move(backgroundIndex), m_temperature.is_initialized());
 }
 
-std::vector<std::pair<std::string, int>>
+std::vector<std::pair<std::string, size_t>>
 ConvFitModel::getResolutionsForFit() const {
   return m_fitDataModel->getResolutionsForFit();
 }

@@ -35,7 +35,7 @@ public:
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
-  std::vector<std::pair<std::string, int>>
+  std::vector<std::pair<std::string, size_t>>
   getResolutionsForFit() const override;
 
 private:

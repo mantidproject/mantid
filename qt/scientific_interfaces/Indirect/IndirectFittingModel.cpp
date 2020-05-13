@@ -318,9 +318,8 @@ IndirectFittingModel::createOutputName(const std::string &fitMode) const {
   std::string inputWorkspace =
       isMultiFit() ? "Multi" : m_fitDataModel->getWorkspaceNames()[0];
   std::string spectra =
-      isMultiFit()
-          ? ""
-          : m_fitDataModel->getSpectra(TableDatasetIndex{0}).getString();
+      isMultiFit() ? "" : m_fitDataModel->getSpectra(TableDatasetIndex{0})
+                              .getString();
   return inputWorkspace + "_" + m_fitType + "_" + fitMode + "_" + m_fitString +
          "_" + spectra + "_Results";
 }
@@ -554,7 +553,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(TableDatasetIndex) const {
+    IndirectFittingModel::createDefaultParameters(TableDatasetIndex) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -744,9 +743,9 @@ std::vector<double> IndirectFittingModel::getQValuesForData() const {
   return m_fitDataModel->getQValuesForData();
 }
 
-std::vector<std::pair<std::string, int>>
+std::vector<std::pair<std::string, size_t>>
 IndirectFittingModel::getResolutionsForFit() const {
-  return std::vector<std::pair<std::string, int>>();
+  return std::vector<std::pair<std::string, size_t>>();
 }
 
 } // namespace IDA

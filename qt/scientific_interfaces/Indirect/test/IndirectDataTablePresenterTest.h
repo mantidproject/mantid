@@ -70,7 +70,7 @@ public:
                                     IDA::WorkspaceIndex spectrum));
   MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
   MOCK_CONST_METHOD0(getResolutionsForFit,
-                     std::vector<std::pair<std::string, int>>());
+                     std::vector<std::pair<std::string, size_t>>());
   MOCK_CONST_METHOD0(getWorkspaceNames, std::vector<std::string>());
 
   MOCK_METHOD2(setSpectra,

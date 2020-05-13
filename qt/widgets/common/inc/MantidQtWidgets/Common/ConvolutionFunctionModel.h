@@ -24,12 +24,12 @@ public:
   void setModel(const std::string &background, const std::string &workspace,
                 int workspaceIndex, const std::string &peaks,
                 bool hasDeltaFunction);
-  void
-  setModel(const std::string &background,
-           const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
-           const std::string &peaks, bool hasDeltaFunction,
-           const std::vector<double> &qValues, const bool isQDependent,
-           bool hasTempCorrection, double tempValue);
+  void setModel(
+      const std::string &background,
+      const std::vector<std::pair<std::string, size_t>> &resolutionWorkspaces,
+      const std::string &peaks, bool hasDeltaFunction,
+      const std::vector<double> &qValues, const bool isQDependent,
+      bool hasTempCorrection, double tempValue);
   boost::optional<QString> backgroundPrefix() const {
     return m_backgroundPrefix;
   }

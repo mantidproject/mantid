@@ -279,7 +279,7 @@ void ConvFunctionModel::setResolution(std::string const &name,
 }
 
 void ConvFunctionModel::setResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_fitResolutions = fitResolutions;
   setModel();
 }

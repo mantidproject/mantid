@@ -54,7 +54,7 @@ template <int Class> struct IndexType {
   template <class T> static IndexType cast(const T &i) {
     return IndexType<Class>{static_cast<IntImplementationType>(i)};
   }
-}; // namespace IDA
+};
 
 // The index of the fitting Domain, i.e. ignores workspaces and spectra
 using FitDomainIndex = IndexType<0>;
