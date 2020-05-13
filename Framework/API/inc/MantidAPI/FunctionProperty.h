@@ -26,7 +26,7 @@ is the creation string accepted by the FunctionFactory.
 @date 08/02/2012
 */
 class MANTID_API_DLL FunctionProperty
-    : public Kernel::PropertyWithValue<boost::shared_ptr<IFunction>> {
+    : public Kernel::PropertyWithValue<std::shared_ptr<IFunction>> {
 public:
   /// Constructor.
   FunctionProperty(const std::string &name,
@@ -41,8 +41,7 @@ public:
 
   /// Bring in the PropertyWithValue assignment operator explicitly (avoids
   /// VSC++ warning)
-  FunctionProperty &
-  operator=(const boost::shared_ptr<IFunction> &value) override;
+  FunctionProperty &operator=(const std::shared_ptr<IFunction> &value) override;
 
   /// Add the value of another property
   FunctionProperty &operator+=(Kernel::Property const *) override;

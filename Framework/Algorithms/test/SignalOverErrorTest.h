@@ -35,7 +35,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););

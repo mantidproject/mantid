@@ -31,7 +31,7 @@ void MaskBins::init() {
   declareWorkspaceInputProperties<MatrixWorkspace>(
       "InputWorkspace",
       "The name of the input workspace. Must contain histogram data.",
-      boost::make_shared<HistogramValidator>());
+      std::make_shared<HistogramValidator>());
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name of the Workspace containing the masked bins.");
@@ -39,7 +39,7 @@ void MaskBins::init() {
   // This validator effectively makes these properties mandatory
   // Would be nice to have an explicit validator for this, but
   // MandatoryValidator is already taken!
-  auto required = boost::make_shared<BoundedValidator<double>>();
+  auto required = std::make_shared<BoundedValidator<double>>();
   required->setUpper(std::numeric_limits<double>::max() * 0.99);
   declareProperty("XMin", std::numeric_limits<double>::max(), required,
                   "The value to start masking from.");
@@ -88,7 +88,7 @@ void MaskBins::exec() {
     setProperty("OutputWorkspace", outputWS);
   }
 
-  if (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS)) {
+  if (std::dynamic_pointer_cast<const EventWorkspace>(inputWS)) {
     this->execEvent();
   } else {
     MantidVec::difference_type startBin(0), endBin(0);
@@ -124,7 +124,7 @@ void MaskBins::exec() {
  */
 void MaskBins::execEvent() {
   MatrixWorkspace_sptr outputMatrixWS = getProperty("OutputWorkspace");
-  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
+  auto outputWS = std::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
 
   Progress progress(this, 0.0, 1.0, outputWS->getNumberHistograms() * 2);
 

@@ -31,7 +31,7 @@ class MANTID_API_DLL TransformScaleFactoryImpl
     : public Kernel::DynamicFactory<ITransformScale> {
 public:
   /// Returns scaling transform
-  boost::shared_ptr<ITransformScale>
+  std::shared_ptr<ITransformScale>
   create(const std::string &type) const override;
   TransformScaleFactoryImpl(const TransformScaleFactoryImpl &) = delete;
   TransformScaleFactoryImpl &

@@ -116,7 +116,7 @@ void MergeMDFiles::loadBoxData() {
       }
 
       // Open the event data, track the total number of events
-      auto bc = boost::shared_ptr<API::BoxController>(
+      auto bc = std::shared_ptr<API::BoxController>(
           new API::BoxController(static_cast<size_t>(m_nDims)));
       bc->fromXMLString(m_fileComponentsStructure[i].getBCXMLdescr());
 
@@ -215,7 +215,7 @@ void MergeMDFiles::doExecByCloning(
   // Fix the max depth to something bigger.
   bc->setMaxDepth(20);
   bc->setSplitThreshold(5000);
-  auto saver = boost::shared_ptr<API::IBoxControllerIO>(
+  auto saver = std::shared_ptr<API::IBoxControllerIO>(
       new DataObjects::BoxControllerNeXusIO(bc.get()));
   saver->setDataType(sizeof(coord_t), m_MDEventType);
   if (m_fileBasedTargetWS) {
@@ -391,7 +391,7 @@ void MergeMDFiles::exec() {
   loader->executeAsChildAlg();
   IMDWorkspace_sptr result = (loader->getProperty("OutputWorkspace"));
 
-  auto firstWS = boost::dynamic_pointer_cast<API::IMDEventWorkspace>(result);
+  auto firstWS = std::dynamic_pointer_cast<API::IMDEventWorkspace>(result);
   if (!firstWS)
     throw std::runtime_error(
         "Can not load MDEventWorkspace from initial file " + firstFile);

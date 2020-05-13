@@ -161,7 +161,7 @@ public:
     auto normalizationOption = Mantid::VATES::VisualNormalization::AutoSelect;
     MDHWNexusLoadingPresenter presenter(std::move(view), filename);
     const double time = 0.0;
-    auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+    auto factory = std::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
         normalizationOption, time);
 
     factory

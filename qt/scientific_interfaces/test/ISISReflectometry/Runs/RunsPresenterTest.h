@@ -206,6 +206,44 @@ public:
     verifyAndClear();
   }
 
+  void testWarningGivenIfUnsavedBatchAutoreductionResumedOptionChecked() {
+    auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
+    expectAutoreductionSettingsChanged();
+    expectUserRespondsYes();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testNoWarningGivenIfUnsavedBatchAutoreductionResumedOptionChecked() {
+    auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(false));
+    expectAutoreductionSettingsChanged();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testWarningNotGivenIfSavedBatchAutoreductionResumedOptionUnchecked() {
+    auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
+    expectAutoreductionSettingsChanged();
+    expectUserNotPrompted();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
   const std::string autoReductionSearch = "1120015";
 
   void testResumeAutoreductionWithNewSettings() {
@@ -233,8 +271,10 @@ public:
     auto runsTable = makeRunsTableWithContent();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
     expectAutoreductionSettingsChanged();
-    expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
     expectCheckForNewRuns();
     presenter.resumeAutoreduction();
@@ -245,8 +285,11 @@ public:
     auto presenter = makePresenter();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
     expectAutoreductionSettingsChanged();
-    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
+    expectUserNotPrompted();
     expectCheckForNewRuns();
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -256,9 +299,11 @@ public:
     auto presenter = makePresenter();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
     auto runsTable = makeRunsTableWithContent();
     expectAutoreductionSettingsChanged();
-    expectRunsTableWithContent(runsTable);
     expectUserRespondsNo();
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
@@ -770,15 +815,19 @@ private:
   }
 
   void expectUserRespondsYes() {
-    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _))
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
         .Times(1)
         .WillOnce(Return(true));
   }
 
   void expectUserRespondsNo() {
-    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _))
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
         .Times(1)
         .WillOnce(Return(false));
+  }
+
+  void expectUserNotPrompted() {
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
   }
 
   void expectCheckForNewRuns() {
@@ -1016,9 +1065,9 @@ private:
                              updateInterval);
   }
 
-  boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
+  std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
-    auto algRunner = boost::make_shared<NiceMock<MockAlgorithmRunner>>();
+    auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
     ON_CALL(m_view, getMonitorAlgorithmRunner())
         .WillByDefault(Return(algRunner));
     return algRunner;
@@ -1033,7 +1082,7 @@ private:
 
   void assertAlgorithmPropertiesContainOptions(
       AlgorithmRuntimeProps const &expected,
-      boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+      std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     for (auto const &kvp : expected) {
       TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
@@ -1042,7 +1091,7 @@ private:
 
   void assertPostProcessingPropertiesContainOptions(
       AlgorithmRuntimeProps &expected,
-      boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+      std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     auto resultString = alg->getPropertyValue("PostProcessingProperties");
     auto result = parseKeyValueString(resultString, ";");

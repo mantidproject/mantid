@@ -27,7 +27,7 @@ Kernel::Logger g_log("MultiDomainCreator");
 }
 
 void MultiDomainCreator::setCreator(size_t i, IDomainCreator *creator) {
-  m_creators[i] = boost::shared_ptr<IDomainCreator>(creator);
+  m_creators[i] = std::shared_ptr<IDomainCreator>(creator);
 }
 
 /**
@@ -40,8 +40,8 @@ bool MultiDomainCreator::hasCreator(size_t i) const {
 
 /// Create a domain from the input workspace
 void MultiDomainCreator::createDomain(
-    boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> &ivalues, size_t i0) {
+    std::shared_ptr<API::FunctionDomain> &domain,
+    std::shared_ptr<API::FunctionValues> &ivalues, size_t i0) {
   if (m_workspacePropertyNames.size() != m_creators.size()) {
     throw std::runtime_error(
         "Cannot create JointDomain: number of workspaces does not match "
@@ -70,7 +70,7 @@ void MultiDomainCreator::createDomain(
  */
 void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
   auto mdFunction =
-      boost::dynamic_pointer_cast<API::MultiDomainFunction>(function);
+      std::dynamic_pointer_cast<API::MultiDomainFunction>(function);
   if (mdFunction) {
     // loop over member functions and init them
     for (size_t iFun = 0; iFun < mdFunction->nFunctions(); ++iFun) {
@@ -117,10 +117,10 @@ void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
  *    empty the property won't be created.
  * @return A shared pointer to the created workspace.
  */
-boost::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
+std::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
     const std::string &baseName, API::IFunction_sptr function,
-    boost::shared_ptr<API::FunctionDomain> domain,
-    boost::shared_ptr<API::FunctionValues> values,
+    std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
   UNUSED_ARG(domain);
   UNUSED_ARG(values);
@@ -140,8 +140,8 @@ boost::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
     std::string localName = baseName + "Workspace_" + std::to_string(i);
     auto fun = functions[i];
     auto creator = m_creators[i];
-    boost::shared_ptr<API::FunctionDomain> localDomain;
-    boost::shared_ptr<API::FunctionValues> localValues;
+    std::shared_ptr<API::FunctionDomain> localDomain;
+    std::shared_ptr<API::FunctionValues> localValues;
     fun->setUpForFit();
     creator->createDomain(localDomain, localValues);
     creator->initFunction(fun);

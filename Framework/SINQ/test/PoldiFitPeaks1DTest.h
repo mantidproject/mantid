@@ -67,12 +67,12 @@ public:
 
     // make sure that we get back a composite of peak and background
     CompositeFunction_sptr composite =
-        boost::dynamic_pointer_cast<CompositeFunction>(totalProfile);
+        std::dynamic_pointer_cast<CompositeFunction>(totalProfile);
     TS_ASSERT(composite);
 
     // make sure that the profile is the first function in the composite
     IPeakFunction_sptr profile =
-        boost::dynamic_pointer_cast<IPeakFunction>(composite->getFunction(0));
+        std::dynamic_pointer_cast<IPeakFunction>(composite->getFunction(0));
     TS_ASSERT(profile);
 
     TS_ASSERT_EQUALS(profile->centre(), m_testPeak->q());

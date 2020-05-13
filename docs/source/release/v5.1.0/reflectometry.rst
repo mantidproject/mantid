@@ -12,6 +12,25 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ############################
 
+New
+---
+
+.. figure:: ../../images/ISISReflectometryInterface/background_subtraction.png
+  :class: screenshot
+  :width: 700px
+  :align: right
+  :alt: Background subtraction on the ISIS Reflectometry Interface
+
+  *Background subtraction on the ISIS Reflectometry Interface*
+
+- Background subtraction options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+- The **Options** dialog can now be accessed from the Tools menu, controlling the display of warnings and rounding precision.
+
+Improvements
+------------
+
+- Flag to enable / disable apply scaling factor from `ScalingFactorFile`, called `ApplyScalingFactor`, added to :ref:`algm-LiquidsReflectometryReduction`.
+
 Bug fixes
 ---------
 

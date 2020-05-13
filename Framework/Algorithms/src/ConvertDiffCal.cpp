@@ -132,7 +132,7 @@ void ConvertDiffCal::exec() {
   OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
 
   // initial setup of new style config
-  ITableWorkspace_sptr configWksp = boost::make_shared<TableWorkspace>();
+  ITableWorkspace_sptr configWksp = std::make_shared<TableWorkspace>();
   configWksp->addColumn("int", "detid");
   configWksp->addColumn("double", "difc");
   configWksp->addColumn("double", "difa");

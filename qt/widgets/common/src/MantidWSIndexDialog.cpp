@@ -213,7 +213,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
       // Convert the spectra choices of the user into workspace indices for us
       // to use.
       Mantid::API::MatrixWorkspace_const_sptr ws =
-          boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
                   wsName.toStdString()));
       if (nullptr == ws)
@@ -703,7 +703,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
 
 Mantid::API::MatrixWorkspace_const_sptr
 MantidWSIndexWidget::getWorkspace(const QString &workspaceName) const {
-  return boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+  return std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(
           workspaceName.toStdString()));
 }
@@ -731,7 +731,7 @@ void MantidWSIndexWidget::checkForSpectraAxes() {
 
   for (; it != m_wsNames.constEnd(); ++it) {
     Mantid::API::MatrixWorkspace_const_sptr ws =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
     if (nullptr == ws)
@@ -759,7 +759,7 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
   // Cycle through the workspaces ...
   for (; it != m_wsNames.constEnd(); ++it) {
     Mantid::API::MatrixWorkspace_const_sptr ws =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
     if (nullptr == ws)
@@ -787,7 +787,7 @@ void MantidWSIndexWidget::generateSpectraNumIntervals() {
   bool firstWs = true;
   foreach (const QString wsName, m_wsNames) {
     Mantid::API::MatrixWorkspace_const_sptr ws =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 wsName.toStdString()));
     if (!ws)

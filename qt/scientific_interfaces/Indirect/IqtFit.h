@@ -13,7 +13,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_IqtFit.h"
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {

@@ -215,7 +215,7 @@ private:
 
     void makeFunction() {
       const std::string fun = "name=ExpDecay,Height=50,Lifetime=1";
-      function = boost::dynamic_pointer_cast<IFunction1D>(
+      function = std::dynamic_pointer_cast<IFunction1D>(
           FunctionFactory::Instance().createInitialized(fun));
       if (!function) {
         TS_FAIL("A 1D function is expected.");
@@ -269,7 +269,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-          "Function", boost::dynamic_pointer_cast<IFunction>(function)));
+          "Function", std::dynamic_pointer_cast<IFunction>(function)));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
       TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("WorkspaceIndex", workspaceIndex));
@@ -324,7 +324,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-          "Function", boost::dynamic_pointer_cast<IFunction>(function)));
+          "Function", std::dynamic_pointer_cast<IFunction>(function)));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
     }

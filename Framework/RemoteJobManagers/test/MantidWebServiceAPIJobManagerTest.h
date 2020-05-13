@@ -14,7 +14,7 @@
 #include "MantidKernel/SimpleJSON.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::RemoteJobManagers;
@@ -134,8 +134,8 @@ public:
 
   void test_constructCasts() {
     // can create
-    boost::shared_ptr<MockMantidAPIStatusOK> djm;
-    TS_ASSERT(djm = boost::make_shared<MockMantidAPIStatusOK>());
+    std::shared_ptr<MockMantidAPIStatusOK> djm;
+    TS_ASSERT(djm = std::make_shared<MockMantidAPIStatusOK>());
     // can cast to inherited interfaces and base classes
 
     MockMantidAPIStatusOK wsapi;

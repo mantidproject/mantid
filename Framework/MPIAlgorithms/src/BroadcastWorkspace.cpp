@@ -35,7 +35,7 @@ void BroadcastWorkspace::init() {
                                                         Direction::Output));
 
   declareProperty("BroadcasterRank", 0,
-                  boost::make_shared<BoundedValidator<int>>(
+                  std::make_shared<BoundedValidator<int>>(
                       0, mpi::communicator().size() - 1));
 }
 

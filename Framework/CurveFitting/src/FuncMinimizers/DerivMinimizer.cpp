@@ -24,8 +24,8 @@ double DerivMinimizer::fun(const gsl_vector *x, void *params) {
   for (size_t i = 0; i < n; ++i) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
-  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+  std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
           minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
@@ -44,8 +44,8 @@ void DerivMinimizer::dfun(const gsl_vector *x, void *params, gsl_vector *g) {
   for (size_t i = 0; i < n; ++i) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
-  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+  std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
           minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
@@ -70,8 +70,8 @@ void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f,
   for (size_t i = 0; i < n; ++i) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
-  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+  std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
           minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();

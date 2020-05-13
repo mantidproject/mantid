@@ -28,7 +28,7 @@ using Mantid::CurveFitting::Algorithms::VesuvioCalculateMS;
 namespace {
 Mantid::API::IAlgorithm_sptr
 createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
-  Mantid::API::IAlgorithm_sptr alg = boost::make_shared<VesuvioCalculateMS>();
+  Mantid::API::IAlgorithm_sptr alg = std::make_shared<VesuvioCalculateMS>();
   alg->initialize();
   alg->setRethrows(true);
   alg->setChild(true);

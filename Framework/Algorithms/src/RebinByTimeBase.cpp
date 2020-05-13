@@ -15,7 +15,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,7 +49,7 @@ void RebinByTimeBase::init() {
       "An input workspace containing TOF events.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Params", boost::make_shared<RebinParamsValidator>()),
+                      "Params", std::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
@@ -68,7 +68,7 @@ void RebinByTimeBase::exec() {
   using Mantid::DataObjects::EventWorkspace;
   IEventWorkspace_sptr inWS = getProperty("InputWorkspace");
 
-  if (!boost::dynamic_pointer_cast<EventWorkspace>(inWS)) {
+  if (!std::dynamic_pointer_cast<EventWorkspace>(inWS)) {
     const std::string algName = this->name();
     throw std::invalid_argument(
         algName + " Algorithm requires an EventWorkspace as an input.");
@@ -140,7 +140,7 @@ void RebinByTimeBase::exec() {
   }
 
   // X-unit is relative time since the start of the run.
-  outputWS->getAxis(0)->unit() = boost::make_shared<Units::Time>();
+  outputWS->getAxis(0)->unit() = std::make_shared<Units::Time>();
 
   // Copy the units over too.
   for (int i = 1; i < outputWS->axes(); ++i) {

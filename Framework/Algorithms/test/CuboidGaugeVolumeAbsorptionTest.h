@@ -125,7 +125,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     // This test cut and paste from FlatPlateAbsorption. Since we have a larger
     // sample now, but the

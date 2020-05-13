@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/DllConfig.h"
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <string>
 
 namespace Mantid {
@@ -38,12 +38,12 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
-  boost::shared_ptr<const Mantid::DataObjects::MDHistoWorkspace> transposeMD(
-      boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> &toTranspose,
+  std::shared_ptr<const Mantid::DataObjects::MDHistoWorkspace> transposeMD(
+      std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> &toTranspose,
       const std::vector<int> &axes);
-  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>
+  std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>
   getDataWorkspace() const;
-  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>
+  std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>
   getShapeWorkspace() const;
   void init() override;
   void exec() override;

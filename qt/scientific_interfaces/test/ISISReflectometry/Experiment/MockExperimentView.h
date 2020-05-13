@@ -58,6 +58,22 @@ public:
   MOCK_METHOD0(showAllPerAngleOptionsAsValid, void());
   MOCK_METHOD0(showStitchParametersValid, void());
   MOCK_METHOD0(showStitchParametersInvalid, void());
+
+  MOCK_CONST_METHOD0(getSubtractBackground, bool());
+  MOCK_METHOD1(setSubtractBackground, void(bool));
+  MOCK_CONST_METHOD0(getBackgroundSubtractionMethod, std::string());
+  MOCK_METHOD1(setBackgroundSubtractionMethod, void(std::string const &));
+  MOCK_METHOD0(enableBackgroundSubtractionMethod, void());
+  MOCK_METHOD0(disableBackgroundSubtractionMethod, void());
+  MOCK_CONST_METHOD0(getPolynomialDegree, int());
+  MOCK_METHOD1(setPolynomialDegree, void(int));
+  MOCK_METHOD0(enablePolynomialDegree, void());
+  MOCK_METHOD0(disablePolynomialDegree, void());
+  MOCK_CONST_METHOD0(getCostFunction, std::string());
+  MOCK_METHOD1(setCostFunction, void(std::string const &));
+  MOCK_METHOD0(enableCostFunction, void());
+  MOCK_METHOD0(disableCostFunction, void());
+
   MOCK_METHOD0(enablePolarizationCorrections, void());
   MOCK_METHOD0(disablePolarizationCorrections, void());
   MOCK_METHOD0(enableFloodCorrectionInputs, void());

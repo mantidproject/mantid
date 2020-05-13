@@ -137,7 +137,7 @@ public:
   }
 
   void test_UnitX_Throws_When_Invalid() {
-    auto alg = boost::make_shared<CreateSimulationWorkspace>();
+    auto alg = std::make_shared<CreateSimulationWorkspace>();
     alg->initialize();
 
     TS_ASSERT_THROWS(alg->setPropertyValue("UnitX", "NOT_A_UNIT"),
@@ -199,7 +199,7 @@ private:
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &wsName = "") {
-    auto alg = boost::make_shared<CreateSimulationWorkspace>();
+    auto alg = std::make_shared<CreateSimulationWorkspace>();
     alg->setRethrows(true);
     alg->initialize();
     if (!wsName.empty())
@@ -220,8 +220,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    auto matWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
+    auto matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
     auto idfForOriginal = matWS->getInstrument()->getFilename();
     auto idfForSimulationWS =
         simulationWorkspace->getInstrument()->getFilename();

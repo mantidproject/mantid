@@ -163,7 +163,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outName));
-    wksp = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+    wksp = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
     TS_ASSERT(wksp);
     TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);
 

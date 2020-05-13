@@ -93,7 +93,7 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
     return;
   size_t index = 0;
   for (const auto &item : *wsGroup) {
-    auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(item);
+    auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(item);
     if (!matrixWs) {
       validationOutput["InputWorkspace"] =
           "Input group contains an invalid workspace type at item " +
@@ -115,7 +115,7 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
 void SumSpectra::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
+                      std::make_shared<CommonBinsValidator>()),
                   "The workspace containing the spectra to be summed.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -124,7 +124,7 @@ void SumSpectra::init() {
       " A workspace of this name will be created and stored in the Analysis "
       "Data Service.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "The first Workspace index to be included in the summing");
@@ -237,7 +237,7 @@ void SumSpectra::exec() {
 
   Progress progress(this, 0.0, 1.0, m_indices.size());
   EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
+      std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
     if (m_calculateWeightedSum) {
       g_log.warning("Ignoring request for WeightedSum");
@@ -520,9 +520,9 @@ void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace,
 
   // Transform to real workspace types
   RebinnedOutput_sptr inWS =
-      boost::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
+      std::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
   RebinnedOutput_sptr outWS =
-      boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+      std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   // Check finalize state prior to the sum process, at the completion
   // the output is unfinalized
@@ -613,11 +613,11 @@ void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace,
                            size_t &numMasked, size_t &numZeros) {
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
   EventWorkspace_const_sptr inputWorkspace =
-      boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
+      std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
 
   // Get the pointer to the output event list
   EventWorkspace_sptr outputEventWorkspace =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
   EventList &outputEL = outputEventWorkspace->getSpectrum(0);
   outputEL.setSpectrumNo(m_outSpecNum);
   outputEL.clearDetectorIDs();

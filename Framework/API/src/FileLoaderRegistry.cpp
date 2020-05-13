@@ -30,11 +30,11 @@ template <> struct DescriptorCallback<Kernel::FileDescriptor> {
 /// @cond
 template <typename T> struct DescriptorSetter {
   // general one does nothing
-  void apply(boost::shared_ptr<NexusFileLoader> & /*unused*/,
+  void apply(std::shared_ptr<NexusFileLoader> & /*unused*/,
              std::shared_ptr<T> & /*unused*/) {}
 };
 template <> struct DescriptorSetter<Kernel::NexusHDF5Descriptor> {
-  void apply(boost::shared_ptr<NexusFileLoader> &loader,
+  void apply(std::shared_ptr<NexusFileLoader> &loader,
              std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor) {
     loader->setFileInfo(descriptor);
   }
@@ -69,7 +69,7 @@ searchForLoader(const std::string &filename,
 
     // Use static cast for speed. Checks have been done at registration to check
     // the types
-    auto alg = boost::static_pointer_cast<FileLoaderType>(
+    auto alg = std::static_pointer_cast<FileLoaderType>(
         factory.create(name, version)); // highest version
     try {
       const int confidence = alg->confidence(*(descriptor.get()));
@@ -87,7 +87,7 @@ searchForLoader(const std::string &filename,
     callback.apply(descriptor);
   }
 
-  auto nxsLoader = boost::dynamic_pointer_cast<NexusFileLoader>(bestLoader);
+  auto nxsLoader = std::dynamic_pointer_cast<NexusFileLoader>(bestLoader);
   if (nxsLoader)
     setdescriptor.apply(nxsLoader, descriptor);
 
@@ -121,7 +121,7 @@ void FileLoaderRegistryImpl::unsubscribe(const std::string &name,
  * @return A string containing the name of an algorithm to load the file
  * @throws Exception::NotFoundError if an algorithm cannot be found
  */
-const boost::shared_ptr<IAlgorithm>
+const std::shared_ptr<IAlgorithm>
 FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
   using Kernel::FileDescriptor;
   using Kernel::NexusDescriptor;

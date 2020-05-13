@@ -41,7 +41,7 @@ public:
         m_tolerance(0.1), m_experiment(makeEmptyExperiment()),
         m_instrument(makeEmptyInstrument()),
         m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {
-    m_jobAlgorithm = boost::make_shared<MockBatchJobAlgorithm>();
+    m_jobAlgorithm = std::make_shared<MockBatchJobAlgorithm>();
   }
 
 protected:
@@ -51,7 +51,7 @@ protected:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
-  boost::shared_ptr<MockBatchJobAlgorithm> m_jobAlgorithm;
+  std::shared_ptr<MockBatchJobAlgorithm> m_jobAlgorithm;
 
   class BatchJobRunnerFriend : public BatchJobRunner {
     friend class BatchJobRunnerTest;
@@ -105,11 +105,19 @@ protected:
   void selectGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
     jobRunner.m_rowLocationsToProcess.push_back(
         MantidQt::MantidWidgets::Batch::RowPath{groupIndex});
+    auto selectedRowLocation =
+        MantidQt::MantidWidgets::Batch::RowPath{groupIndex};
+    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations(
+        std::move(selectedRowLocation));
   }
 
   void selectRow(BatchJobRunnerFriend &jobRunner, int groupIndex,
                  int rowIndex) {
     jobRunner.m_rowLocationsToProcess.push_back(
         MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
+    auto selectedPath =
+        MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations(
+        {std::move(selectedPath)});
   }
 };

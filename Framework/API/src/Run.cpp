@@ -15,7 +15,7 @@
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <numeric>
@@ -70,8 +70,8 @@ bool Run::operator==(const Run &other) {
 
 bool Run::operator!=(const Run &other) { return !this->operator==(other); }
 
-boost::shared_ptr<Run> Run::clone() {
-  auto clone = boost::make_shared<Run>();
+std::shared_ptr<Run> Run::clone() {
+  auto clone = std::make_shared<Run>();
   for (auto property : this->m_manager->getProperties()) {
     clone->addProperty(property->clone());
   }

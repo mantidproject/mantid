@@ -73,7 +73,7 @@ private:
   std::vector<int> m_vruns;
 };
 
-using ChopperConfiguration_sptr = boost::shared_ptr<ChopperConfiguration>;
+using ChopperConfiguration_sptr = std::shared_ptr<ChopperConfiguration>;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -314,13 +314,13 @@ void SaveGSASInstrumentFile::init() {
 
   vector<string> instruments{"powgen", "nomad"};
   declareProperty("Instrument", "powgen",
-                  boost::make_shared<StringListValidator>(instruments),
+                  std::make_shared<StringListValidator>(instruments),
                   "Name of the instrument that parameters are belonged to. "
                   "So far, only PG3 and NOM are supported.");
 
   vector<string> vecfreq{"10", "30", "60"};
   declareProperty("ChopperFrequency", "60",
-                  boost::make_shared<StringListValidator>(vecfreq),
+                  std::make_shared<StringListValidator>(vecfreq),
                   "Frequency of the chopper. ");
 
   declareProperty("IDLine", "",
@@ -328,7 +328,7 @@ void SaveGSASInstrumentFile::init() {
   declareProperty("Sample", "",
                   "Sample information written to header (title) ");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -569,7 +569,7 @@ ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
 
   // Create a configuration object
   ChopperConfiguration_sptr chconfig =
-      boost::make_shared<ChopperConfiguration>(bankids);
+      std::make_shared<ChopperConfiguration>(bankids);
 
   // Add chopper/instrument constants by banks
   for (bmiter = profmap.begin(); bmiter != profmap.end(); ++bmiter) {
@@ -639,8 +639,8 @@ SaveGSASInstrumentFile::setupPG3Constants(int intfrequency) {
   }
 
   // Return
-  return boost::make_shared<ChopperConfiguration>(
-      intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
+  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr,
+                                                mndspstr, mxdspstr, maxtofstr);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -670,8 +670,8 @@ SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
   }
 
   // Create configuration
-  return boost::make_shared<ChopperConfiguration>(
-      intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
+  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr,
+                                                mndspstr, mxdspstr, maxtofstr);
 }
 
 //----------------------------------------------------------------------------------------------

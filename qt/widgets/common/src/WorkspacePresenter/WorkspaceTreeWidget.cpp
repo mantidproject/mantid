@@ -30,6 +30,8 @@
 
 #include <Poco/Path.h>
 
+#include <memory>
+
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QMainWindow>
@@ -86,8 +88,8 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
 
   m_tree->setDragEnabled(true);
 
-  auto presenter = boost::make_shared<WorkspacePresenter>(this);
-  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+  auto presenter = std::make_shared<WorkspacePresenter>(this);
+  m_presenter = std::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
 
   if (m_viewOnly)
@@ -188,7 +190,7 @@ void WorkspaceTreeWidget::setTreeUpdating(const bool state) {
 void WorkspaceTreeWidget::incrementUpdateCount() { m_updateCount.ref(); }
 
 WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
-  return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
+  return std::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
 }
 
 /** Returns the names of the selected workspaces
@@ -519,7 +521,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
           if (item->text(0).contains(filterRegEx)) {
             // my name does match the filter
             if (auto group =
-                    boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+                    std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
               // I am a group, I will want my children to be visible
               // but I cannot do that until this iterator has finished
               // store this pointer in a list for processing later
@@ -773,7 +775,7 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
 
   Workspace_sptr workspace = userData.value<Workspace_sptr>();
 
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
     auto members = group->getAllItems();
     for (const auto &ws : members) {
       auto *node = addTreeEntry(std::make_pair(ws->getName(), ws), item);
@@ -907,7 +909,7 @@ void WorkspaceTreeWidget::onTreeSelectionChanged() {
       // check it's group
       auto wsSptr =
           items.first()->data(0, Qt::UserRole).value<Workspace_sptr>();
-      auto grpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+      auto grpSptr = std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
       if (grpSptr) {
         m_groupButton->setText("Ungroup");
         m_groupButton->setEnabled(true);
@@ -1100,7 +1102,7 @@ void WorkspaceTreeWidget::addClearMenuItems(QMenu *menu,
 bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
   bool hasUB = false;
   Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-  IMDWorkspace_sptr wsIMD = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+  IMDWorkspace_sptr wsIMD = std::dynamic_pointer_cast<IMDWorkspace>(ws);
   if (ws && wsIMD) {
     hasUB = wsIMD->hasOrientedLattice();
   }
@@ -1272,22 +1274,20 @@ void WorkspaceTreeWidget::popupContextMenu() {
 
     // Add the items that are appropriate for the type
     if (auto matrixWS =
-            boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-                ws)) {
+            std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws)) {
       addMatrixWorkspaceMenuItems(menu, matrixWS);
     } else if (auto mdeventWS =
-                   boost::dynamic_pointer_cast<const IMDEventWorkspace>(ws)) {
+                   std::dynamic_pointer_cast<const IMDEventWorkspace>(ws)) {
       addMDEventWorkspaceMenuItems(menu, mdeventWS);
-    } else if (auto mdWS =
-                   boost::dynamic_pointer_cast<const IMDWorkspace>(ws)) {
+    } else if (auto mdWS = std::dynamic_pointer_cast<const IMDWorkspace>(ws)) {
       addMDHistoWorkspaceMenuItems(menu, mdWS);
     } else if (auto peaksWS =
-                   boost::dynamic_pointer_cast<const IPeaksWorkspace>(ws)) {
+                   std::dynamic_pointer_cast<const IPeaksWorkspace>(ws)) {
       addPeaksWorkspaceMenuItems(menu, peaksWS);
     } else if (auto groupWS =
-                   boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
+                   std::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
       addWorkspaceGroupMenuItems(menu);
-    } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
+    } else if (std::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
                    ws)) {
       addTableWorkspaceMenuItems(menu);
     } else {
@@ -1592,7 +1592,7 @@ void WorkspaceTreeWidget::showColourFillPlot() {
   for (auto &item : items) {
     auto ws = item->data(0, Qt::UserRole).value<Workspace_sptr>();
 
-    if (auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (auto &name : wsGroup->getNames())
         allWsNames.append(QString::fromStdString(name));
     } else

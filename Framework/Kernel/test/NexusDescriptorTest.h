@@ -10,8 +10,7 @@
 #include "MantidKernel/NexusDescriptor.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -57,7 +56,7 @@ public:
           "The AutoTestData directory needs to be in the search path");
     }
 
-    m_testHDF5 = boost::make_shared<NexusDescriptor>(m_testHDF5Path);
+    m_testHDF5 = std::make_shared<NexusDescriptor>(m_testHDF5Path);
   }
 
   //=================================== Static isReadable methods
@@ -177,5 +176,5 @@ private:
   std::string m_testHDF5Path;
   std::string m_testHDF4Path;
   std::string m_testNonHDFPath;
-  boost::shared_ptr<NexusDescriptor> m_testHDF5;
+  std::shared_ptr<NexusDescriptor> m_testHDF5;
 };

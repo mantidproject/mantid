@@ -74,7 +74,7 @@ public:
   std::vector<size_t> pixelID_to_wi_vector;
 
   /// One entry of pulse times for each preprocessor
-  std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
+  std::vector<std::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
 private:
   DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws,

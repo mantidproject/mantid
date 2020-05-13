@@ -19,19 +19,19 @@ namespace API {
  */
 FunctionProperty::FunctionProperty(const std::string &name,
                                    const unsigned int direction)
-    : Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>(
-          name, boost::shared_ptr<IFunction>(),
+    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(
+          name, std::shared_ptr<IFunction>(),
           Kernel::IValidator_sptr(new Kernel::NullValidator()), direction) {}
 
 /// Copy constructor
 FunctionProperty::FunctionProperty(const FunctionProperty &right)
-    : Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>(right) {}
+    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(right) {}
 
 /// Copy assignment operator. Copies the pointer to the function.
 FunctionProperty &FunctionProperty::operator=(const FunctionProperty &right) {
   if (&right == this)
     return *this;
-  Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>::operator=(right);
+  Kernel::PropertyWithValue<std::shared_ptr<IFunction>>::operator=(right);
   return *this;
 }
 
@@ -41,8 +41,8 @@ FunctionProperty &FunctionProperty::operator=(const FunctionProperty &right) {
  * @return assigned PropertyWithValue
  */
 FunctionProperty &FunctionProperty::
-operator=(const boost::shared_ptr<IFunction> &value) {
-  Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>::operator=(value);
+operator=(const std::shared_ptr<IFunction> &value) {
+  Kernel::PropertyWithValue<std::shared_ptr<IFunction>>::operator=(value);
   return *this;
 }
 
@@ -86,7 +86,7 @@ std::string FunctionProperty::getDefault() const { return ""; }
 std::string FunctionProperty::setValue(const std::string &value) {
   std::string error;
   try {
-    m_value = boost::shared_ptr<IFunction>(
+    m_value = std::shared_ptr<IFunction>(
         FunctionFactory::Instance().createInitialized(value));
     m_definition = value;
   } catch (std::exception &e) {
@@ -125,7 +125,7 @@ std::string FunctionProperty::isValid() const {
  *  @return true if the function has not been created yet.
  */
 bool FunctionProperty::isDefault() const {
-  return m_value == boost::shared_ptr<IFunction>();
+  return m_value == std::shared_ptr<IFunction>();
 }
 
 /// Create a history record

@@ -255,7 +255,7 @@ void evaluateInPlace(const std::string &name,
                      const std::vector<double> &parameters,
                      Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
   const auto degree = parameters.size() - 1;
-  auto bkg = boost::dynamic_pointer_cast<Mantid::API::IFunction1D>(
+  auto bkg = std::dynamic_pointer_cast<Mantid::API::IFunction1D>(
       Mantid::API::FunctionFactory::Instance().createFunction(name));
   if (degree > 2) {
     Mantid::API::IFunction1D::Attribute att = bkg->getAttribute("n");
@@ -301,11 +301,11 @@ const std::string CalculatePolynomialBackground::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CalculatePolynomialBackground::init() {
-  auto increasingAxis = boost::make_shared<API::IncreasingAxisValidator>();
-  auto nonnegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto increasingAxis = std::make_shared<API::IncreasingAxisValidator>();
+  auto nonnegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
   auto orderedPairs =
-      boost::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
+      std::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, increasingAxis),
@@ -323,13 +323,13 @@ void CalculatePolynomialBackground::init() {
       {CostFunc::WEIGHTED_LEAST_SQUARES, CostFunc::UNWEIGHTED_LEAST_SQUARES}};
   declareProperty(
       Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES,
-      boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
+      std::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
       "The cost function to be passed to the Fit algorithm.");
   std::array<std::string, 2> minimizerOpts{
       {Minimizer::LEVENBERG_MARQUARDT_MD, Minimizer::LEVENBERG_MARQUARDT}};
   declareProperty(
       Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD,
-      boost::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
+      std::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
       "The minimizer to be passed to the Fit algorithm.");
 }
 

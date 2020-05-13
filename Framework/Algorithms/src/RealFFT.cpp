@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_halfcomplex.h>
 #include <gsl/gsl_fft_real.h>
@@ -49,7 +48,7 @@ void RealFFT::init() {
                   "spectra: the real, the imaginary parts of the transform and "
                   "their modulus.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "WorkspaceIndex", 0, mustBePositive,
@@ -57,7 +56,7 @@ void RealFFT::init() {
 
   std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty(
-      "Transform", "Forward", boost::make_shared<StringListValidator>(fft_dir),
+      "Transform", "Forward", std::make_shared<StringListValidator>(fft_dir),
       R"(The direction of the transform: "Forward" or "Backward".)");
   declareProperty(
       "IgnoreXBins", false,
@@ -109,7 +108,7 @@ void RealFFT::exec() {
     outWS->replaceAxis(1, std::move(tAxis));
 
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(ySize);
-    boost::shared_array<double> data(new double[2 * ySize]);
+    std::vector<double> data(2 * ySize);
 
     auto &yData = inWS->mutableY(spec);
     for (int i = 0; i < ySize; i++) {
@@ -117,7 +116,7 @@ void RealFFT::exec() {
     }
 
     gsl_fft_real_wavetable *wavetable = gsl_fft_real_wavetable_alloc(ySize);
-    gsl_fft_real_transform(data.get(), 1, ySize, wavetable, workspace);
+    gsl_fft_real_transform(data.data(), 1, ySize, wavetable, workspace);
     gsl_fft_real_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
 

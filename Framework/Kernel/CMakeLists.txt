@@ -311,7 +311,6 @@ set(INC_FILES
     inc/MantidKernel/VisibleWhenProperty.h
     inc/MantidKernel/WarningSuppressions.h
     inc/MantidKernel/WriteLock.h
-    inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
     inc/MantidKernel/make_cow.h
     inc/MantidKernel/normal_distribution.h)
@@ -495,8 +494,8 @@ set_target_properties(Kernel
 
 target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${JSONCPP_INCLUDE_DIR}
-                           PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
+                                  ${JSONCPP_INCLUDE_DIR} ${NEXUS_INCLUDE_DIR}
+                           PRIVATE ${GSL_INCLUDE_DIR}
 			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

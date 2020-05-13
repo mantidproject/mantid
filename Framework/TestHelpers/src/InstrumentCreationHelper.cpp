@@ -21,9 +21,9 @@ namespace InstrumentCreationHelper {
 void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
                                   bool includeMonitors, bool startYNegative,
                                   const std::string &instrumentName) {
-  auto instrument = boost::make_shared<Instrument>(instrumentName);
+  auto instrument = std::make_shared<Instrument>(instrumentName);
   instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+      std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
   const double pixelRadius(0.05);
   auto pixelShape = ComponentCreationHelper::createCappedCylinder(

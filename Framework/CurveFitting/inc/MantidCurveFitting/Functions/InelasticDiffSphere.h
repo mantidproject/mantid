@@ -73,7 +73,7 @@ private:
   void initLinJlist();
 
   /// Cache Q values from the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
 
   /// xnl coefficients
   std::vector<xnlc> m_xnl;

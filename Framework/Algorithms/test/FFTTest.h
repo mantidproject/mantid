@@ -535,11 +535,9 @@ public:
    * We have to use the ADS to test WorkspaceGroups
    */
   void testValidateInputsWithWSGroup() {
-    auto ws1 =
-        boost::static_pointer_cast<Workspace>(createWS(100, 0, "real_1"));
-    auto ws2 =
-        boost::static_pointer_cast<Workspace>(createWS(100, 0, "real_2"));
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto ws1 = std::static_pointer_cast<Workspace>(createWS(100, 0, "real_1"));
+    auto ws2 = std::static_pointer_cast<Workspace>(createWS(100, 0, "real_2"));
+    auto group = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().add("group", group);
     group->addWorkspace(ws1);
     group->addWorkspace(ws2);
@@ -757,7 +755,7 @@ private:
 
   MatrixWorkspace_sptr createWS(int n, int dn) {
     Mantid::DataObjects::Workspace2D_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
 
     auto &X = ws->mutableX(0);

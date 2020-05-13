@@ -21,8 +21,8 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -58,7 +58,7 @@ void LoadNexus::init() {
                   "files, one workspace will be generated for each period.");
 
   // Declare optional input parameters
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "SpectrumMin", 1, mustBePositive,

@@ -424,7 +424,7 @@ LineViewer::applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
 
   // Check if this is a axis-aligned cut of a histogram workspace with at most
   // 5 dimensions. If so, we'll use IntegrateMDHistoWorkspace.
-  auto histWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
+  auto histWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
   if (histWS && histWS->getNumDims() <= 5 && (dx == 0 || dy == 0)) {
     const int axis = dx != 0 ? m_freeDimX : m_freeDimY;
     const int paxis = dx != 0 ? m_freeDimY : m_freeDimX;
@@ -564,7 +564,7 @@ void LineViewer::apply() {
 
   // Different call for
   MatrixWorkspace_sptr matrixWs =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws);
+      std::dynamic_pointer_cast<MatrixWorkspace>(m_ws);
 
   IAlgorithm_sptr alg;
   if (matrixWs)
@@ -1204,7 +1204,7 @@ void LineViewer::showFull() {
   if (!m_sliceWS)
     return;
   MatrixWorkspace_sptr sliceMatrix =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
+      std::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix) {
     const bool distribution(false);
     QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY(),

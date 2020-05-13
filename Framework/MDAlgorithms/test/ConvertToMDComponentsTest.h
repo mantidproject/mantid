@@ -39,7 +39,7 @@ public:
     this->m_InWS2D = std::move(InWS2D);
     // and create the class, which will deal with the target workspace
     if (!this->m_OutWSWrapper)
-      this->m_OutWSWrapper = boost::shared_ptr<MDAlgorithms::MDEventWSWrapper>(
+      this->m_OutWSWrapper = std::shared_ptr<MDAlgorithms::MDEventWSWrapper>(
           new MDAlgorithms::MDEventWSWrapper());
   }
   Convert2MDComponentsTestHelper() { ConvertToMD::initialize(); }
@@ -321,7 +321,7 @@ public:
   }
 
   void maskAllDetectors(const std::string &wsName) {
-    auto inputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve(wsName));
     const size_t nRows = inputWS->getNumberHistograms();
     auto &spectrumInfo = inputWS->mutableSpectrumInfo();

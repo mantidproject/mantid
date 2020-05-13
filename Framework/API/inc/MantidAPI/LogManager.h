@@ -66,7 +66,9 @@ public:
   virtual void splitByTime(Kernel::TimeSplitterType &splitter,
                            std::vector<LogManager *> outputs) const;
   /// Filter the run by the given boolean log
-  void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter);
+  void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
+                   const std::vector<std::string> &excludedFromFiltering =
+                       std::vector<std::string>());
 
   /// Return an approximate memory size for the object in bytes
   virtual size_t getMemorySize() const;
@@ -202,9 +204,9 @@ private:
       m_singleValueCache;
 };
 /// shared pointer to the logManager base class
-using LogManager_sptr = boost::shared_ptr<LogManager>;
+using LogManager_sptr = std::shared_ptr<LogManager>;
 /// shared pointer to the logManager base class (const version)
-using LogManager_const_sptr = boost::shared_ptr<const LogManager>;
+using LogManager_const_sptr = std::shared_ptr<const LogManager>;
 
 /**
  * Add a property of a specified type (Simply creates a Kernel::Property of that

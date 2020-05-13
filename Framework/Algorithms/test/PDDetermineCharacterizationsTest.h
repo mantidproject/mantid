@@ -175,7 +175,7 @@ public:
                      const double tofmin, const double tofmax,
                      const double wlmin, const double wlmax) {
 
-    PropertyManager_sptr expectedInfo = boost::make_shared<PropertyManager>();
+    PropertyManager_sptr expectedInfo = std::make_shared<PropertyManager>();
     expectedInfo->declareProperty(
         std::make_unique<PropertyWithValue<double>>("frequency", freq));
     expectedInfo->declareProperty(

@@ -10,7 +10,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
 #include <memory>
 
 #include "MantidAPI/Sample.h"
@@ -71,7 +70,7 @@ public:
         std::make_unique<const TimeSeriesProperty<int>>("period_log");
     decorator.setNPeriods(3, periodLog);
 
-    WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
         decorator.combinedWorkspace());
     TSM_ASSERT("Should be a WorkspaceGroup", outWS);
     TS_ASSERT_EQUALS(3, outWS->size());
@@ -85,12 +84,12 @@ public:
 
     decorator->setGeometryFlag(geometryFlag);
 
-    WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
         decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
       auto memberWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
       TSM_ASSERT_EQUALS(
           "Child workspaces should all have the geometry flag set",
           geometryFlag, memberWS->sample().getGeometryFlag());
@@ -105,12 +104,12 @@ public:
 
     decorator->setThickness(thickness);
 
-    WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
         decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
       auto memberWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
       TSM_ASSERT_EQUALS("Child workspaces should all have the thickness set",
                         thickness, memberWS->sample().getThickness());
     }
@@ -123,12 +122,12 @@ public:
 
     decorator->setHeight(height);
 
-    WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
         decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
       auto memberWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
       TSM_ASSERT_EQUALS("Child workspaces should all have the height set",
                         height, memberWS->sample().getHeight());
     }
@@ -142,12 +141,12 @@ public:
 
     decorator->setWidth(width);
 
-    WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
         decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
       auto memberWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
       TSM_ASSERT_EQUALS("Child workspaces should all have the width set", width,
                         memberWS->sample().getWidth());
     }
@@ -164,11 +163,10 @@ public:
     collection.setThickness(thickness);
 
     collection.setIndexInfo(Indexing::IndexInfo({3, 1, 2}));
-    const auto ws = boost::dynamic_pointer_cast<WorkspaceGroup>(
+    const auto ws = std::dynamic_pointer_cast<WorkspaceGroup>(
         collection.combinedWorkspace());
     for (size_t i = 0; i < periods; ++i) {
-      auto eventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(ws->getItem(i));
+      auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws->getItem(i));
       TS_ASSERT_EQUALS(eventWS->getSpectrum(0).getSpectrumNo(), 3);
       TS_ASSERT_EQUALS(eventWS->getSpectrum(1).getSpectrumNo(), 1);
       TS_ASSERT_EQUALS(eventWS->getSpectrum(2).getSpectrumNo(), 2);

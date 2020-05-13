@@ -51,7 +51,7 @@ GetEi2::GetEi2()
 void GetEi2::init()
 
 { // Declare required input parameters for algorithm and do some validation here
-  auto validator = boost::make_shared<CompositeValidator>();
+  auto validator = std::make_shared<CompositeValidator>();
   validator->add<WorkspaceUnitValidator>("TOF");
   validator->add<HistogramValidator>();
   validator->add<InstrumentValidator>();
@@ -61,7 +61,7 @@ void GetEi2::init()
                                             Direction::InOut, validator),
       "The X units of this workspace must be time of flight with times in\n"
       "microseconds");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("Monitor1Spec", EMPTY_INT(), mustBePositive,
                   "The spectrum number of the output of the first monitor, "
@@ -71,7 +71,7 @@ void GetEi2::init()
                   "The spectrum number of the output of the second monitor "
                   "e.g. MAPS 41475, MARI 3, MERLIN 69638.\n If empty, it will "
                   "be read from the instrument file.\n");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty(
       "EnergyEstimate", EMPTY_DBL(), positiveDouble,
@@ -103,7 +103,7 @@ void GetEi2::init()
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
 
-  auto inRange0toOne = boost::make_shared<BoundedValidator<double>>();
+  auto inRange0toOne = std::make_shared<BoundedValidator<double>>();
   inRange0toOne->setLower(0.0);
   inRange0toOne->setUpper(1.0);
   declareProperty("PeakSearchRange", 0.1, inRange0toOne,
@@ -370,7 +370,7 @@ GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
   childAlg->setProperty("XMax", end);
   childAlg->executeAsChildAlg();
   MatrixWorkspace_sptr monitors = childAlg->getProperty("OutputWorkspace");
-  if (boost::dynamic_pointer_cast<API::IEventWorkspace>(m_input_ws)) {
+  if (std::dynamic_pointer_cast<API::IEventWorkspace>(m_input_ws)) {
     // Convert to a MatrixWorkspace representation
     childAlg = createChildAlgorithm("ConvertToMatrixWorkspace");
     childAlg->setProperty("InputWorkspace", monitors);

@@ -164,13 +164,13 @@ const std::string CorrectTOFAxis::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CorrectTOFAxis::init() {
-  auto tofWorkspace = boost::make_shared<Kernel::CompositeValidator>();
+  auto tofWorkspace = std::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
   auto mustBePositiveDouble =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+      std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveDouble->setLower(0);
-  auto mustBePositiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositiveInt->setLower(0);
 
   declareProperty(
@@ -193,7 +193,7 @@ void CorrectTOFAxis::init() {
                                             IndexTypes::SPECTRUM_NUMBER,
                                             IndexTypes::WORKSPACE_INDEX};
   declareProperty(PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
-                  boost::make_shared<Kernel::StringListValidator>(indexTypes),
+                  std::make_shared<Kernel::StringListValidator>(indexTypes),
                   "The type of indices used in " +
                       PropertyNames::REFERENCE_SPECTRA + " or " +
                       PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +

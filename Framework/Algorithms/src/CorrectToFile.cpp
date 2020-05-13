@@ -36,13 +36,13 @@ void CorrectToFile::init() {
       Kernel::UnitFactory::Instance().getKeys();
   propOptions.emplace_back("SpectrumNumber");
   declareProperty("FirstColumnValue", "Wavelength",
-                  boost::make_shared<Kernel::StringListValidator>(propOptions),
+                  std::make_shared<Kernel::StringListValidator>(propOptions),
                   "The units of the first column of the correction file "
                   "(default wavelength)");
 
   std::vector<std::string> operations{"Divide", "Multiply"};
   declareProperty("WorkspaceOperation", "Divide",
-                  boost::make_shared<Kernel::StringListValidator>(operations),
+                  std::make_shared<Kernel::StringListValidator>(operations),
                   "Allowed values: Divide, Multiply (default is divide)");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),

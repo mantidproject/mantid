@@ -25,9 +25,9 @@
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <limits>
+#include <memory>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -60,7 +60,7 @@ void LoadMuonNexus::init() {
       "algorithm. For multiperiod files, one workspace will be\n"
       "generated for each period");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(1);
   declareProperty("SpectrumMin", static_cast<int64_t>(EMPTY_INT()),
                   mustBePositive,
@@ -80,7 +80,7 @@ void LoadMuonNexus::init() {
                   "together based on the groupings in the NeXus file, only\n"
                   "for single period data (default no). Version 1 only.");
 
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int64_t>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<int64_t>>();
   mustBeNonNegative->setLower(0);
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBeNonNegative,
                   "0 indicates that every entry is loaded, into a separate "
@@ -90,7 +90,7 @@ void LoadMuonNexus::init() {
 
   std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
   declareProperty("MainFieldDirection", "Transverse",
-                  boost::make_shared<StringListValidator>(FieldOptions),
+                  std::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
                   "(run/instrument/detector/orientation, default "
                   "longitudinal). Version 1 only.",
@@ -174,7 +174,7 @@ void LoadMuonNexus::runLoadInstrument(
   // we may get instrument by some other means yet to be decided upon
   // at present just create a dummy instrument with the correct name.
   if (!loadInst->isExecuted()) {
-    auto inst = boost::make_shared<Geometry::Instrument>();
+    auto inst = std::make_shared<Geometry::Instrument>();
     inst->setName(m_instrument_name);
     localWorkspace->setInstrument(inst);
   }

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/SingletonHolder.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QList>
 #include <QMap>
@@ -16,7 +16,7 @@
 namespace Mantid {
 namespace API {
 class IAlgorithm;
-using IAlgorithm_sptr = boost::shared_ptr<IAlgorithm>;
+using IAlgorithm_sptr = std::shared_ptr<IAlgorithm>;
 } // namespace API
 } // namespace Mantid
 

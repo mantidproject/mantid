@@ -11,7 +11,7 @@
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -24,7 +24,7 @@ public:
   static void destroySuite(CyclicGroupTest *suite) { delete suite; }
 
   void testConstructor() {
-    CyclicGroup_const_sptr group = boost::make_shared<const CyclicGroup>(
+    CyclicGroup_const_sptr group = std::make_shared<const CyclicGroup>(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     TS_ASSERT_EQUALS(group->order(), 2);
@@ -32,7 +32,7 @@ public:
 
   void testCreate() {
     Group_const_sptr group = GroupFactory::create<CyclicGroup>("-x,-y,-z");
-    TS_ASSERT(boost::dynamic_pointer_cast<const CyclicGroup>(group));
+    TS_ASSERT(std::dynamic_pointer_cast<const CyclicGroup>(group));
 
     TS_ASSERT_EQUALS(group->order(), 2);
   }

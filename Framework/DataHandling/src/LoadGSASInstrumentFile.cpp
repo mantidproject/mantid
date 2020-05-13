@@ -193,7 +193,7 @@ void LoadGSASInstrumentFile::exec() {
       int bankId = bankIds[i];
       size_t wsId = workspaceOfBank[bankId];
       Workspace_sptr wsi = wsg->getItem(wsId - 1);
-      auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+      auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
       // Get column from table workspace
       API::Column_const_sptr OutTabColumn = outTabWs->getColumn(i + 1);
       std::string parameterXMLString;
@@ -427,7 +427,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
                 << "\n";
 
   // Create TableWorkspace
-  auto tablews = boost::make_shared<TableWorkspace>();
+  auto tablews = std::make_shared<TableWorkspace>();
 
   // set columns :
   // Any 2 columns cannot have the same name.

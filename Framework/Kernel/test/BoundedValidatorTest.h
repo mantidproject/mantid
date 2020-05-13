@@ -35,12 +35,12 @@ public:
   }
 
   void testClone() {
-    boost::shared_ptr<BoundedValidator<int>> bv =
-        boost::make_shared<BoundedValidator<int>>(1, 10, true);
+    std::shared_ptr<BoundedValidator<int>> bv =
+        std::make_shared<BoundedValidator<int>>(1, 10, true);
     IValidator_sptr vv = bv->clone();
     TS_ASSERT_DIFFERS(bv, vv);
-    boost::shared_ptr<BoundedValidator<int>> bvv;
-    TS_ASSERT(bvv = boost::dynamic_pointer_cast<BoundedValidator<int>>(vv));
+    std::shared_ptr<BoundedValidator<int>> bvv;
+    TS_ASSERT(bvv = std::dynamic_pointer_cast<BoundedValidator<int>>(vv));
     TS_ASSERT_EQUALS(bv->hasLower(), bvv->hasLower())
     TS_ASSERT_EQUALS(bv->hasUpper(), bvv->hasUpper())
     TS_ASSERT_EQUALS(bv->lower(), bvv->lower())

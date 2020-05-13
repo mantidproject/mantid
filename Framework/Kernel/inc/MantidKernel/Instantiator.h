@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#endif
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -33,10 +31,10 @@ public:
   virtual ~AbstractInstantiator() = default;
 
   /// Creates an instance of a concrete subclass of Base.
-  virtual boost::shared_ptr<Base> createInstance() const = 0;
+  virtual std::shared_ptr<Base> createInstance() const = 0;
 
   /// Creates an instance of a concrete subclass of Base, which is
-  /// not wrapped in a boost shared_ptr
+  /// not wrapped in a shared_ptr
   virtual Base *createUnwrappedInstance() const = 0;
 
 private:
@@ -61,12 +59,12 @@ public:
   /** Creates an instance of a concrete subclass of Base.
    *  @return A pointer to the base type
    */
-  boost::shared_ptr<Base> createInstance() const override {
-    return boost::shared_ptr<Base>(new C());
+  std::shared_ptr<Base> createInstance() const override {
+    return std::make_shared<C>();
   }
 
   /** Creates an instance of a concrete subclass of Base that is not wrapped in
-   * a boost shared_ptr.
+   * a shared_ptr.
    *  @return A bare pointer to the base type
    */
   Base *createUnwrappedInstance() const override {

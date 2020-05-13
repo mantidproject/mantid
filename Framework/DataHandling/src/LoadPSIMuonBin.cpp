@@ -25,9 +25,9 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <map>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -220,7 +220,7 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
   if (getPropertyValue("DeadTimeTable").empty())
     return;
   Mantid::DataObjects::TableWorkspace_sptr deadTimeTable =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
           Mantid::API::WorkspaceFactory::Instance().createTable(
               "TableWorkspace"));
   assert(deadTimeTable);
@@ -498,8 +498,8 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
 
   // Set axis variables
   outputWorkspace->setYUnit("Counts");
-  boost::shared_ptr<Kernel::Units::Label> lblUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> lblUnit =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
   outputWorkspace->getAxis(0)->unit() = lblUnit;

@@ -59,6 +59,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
 oneGroupWithARowWithInputQRangeModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
 oneGroupWithARowWithOutputQRangeModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL
+ReductionJobs oneGroupWithARowWithInputQRangeModelMixedPrecision();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithAnotherRowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
 oneGroupWithAnotherRunWithSameAngleModel();
@@ -68,6 +70,12 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithTwoSimpleRowsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs anotherGroupWithARowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithARowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithTwoRowsModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL
+ReductionJobs twoGroupsWithTwoRowsAndOneEmptyGroupModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL
+ReductionJobs oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
+twoGroupsWithOneRowAndOneInvalidRowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithMixedRowsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs emptyReductionJobs();
 MANTIDQT_ISISREFLECTOMETRY_DLL
@@ -82,11 +90,15 @@ MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string>
 makeStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string>
 makeEmptyStitchOptions();
+MANTIDQT_ISISREFLECTOMETRY_DLL BackgroundSubtraction
+makeBackgroundSubtraction();
 MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections
 makePolarizationCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections
 makeEmptyPolarizationCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections makeFloodCorrections();
+MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions
+makeTransmissionStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeTransmissionRunRange();
 MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions
 makeEmptyTransmissionStitchOptions();

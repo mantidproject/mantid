@@ -132,7 +132,7 @@ API::Workspace_sptr EventWorkspaceCollection::combinedWorkspace() {
   if (this->nPeriods() == 1) {
     final = getSingleHeldWorkspace();
   } else {
-    auto wsg = boost::make_shared<API::WorkspaceGroup>();
+    auto wsg = std::make_shared<API::WorkspaceGroup>();
     for (auto &ws : m_WsVec) {
       wsg->addWorkspace(ws);
     }
@@ -244,7 +244,7 @@ void EventWorkspaceCollection::setInstrument(
   }
 }
 void EventWorkspaceCollection::setMonitorWorkspace(
-    const boost::shared_ptr<API::MatrixWorkspace> &monitorWS) {
+    const std::shared_ptr<API::MatrixWorkspace> &monitorWS) {
   for (auto &ws : m_WsVec) {
     ws->setMonitorWorkspace(
         monitorWS); // TODO, do we really set the same monitor on all periods???

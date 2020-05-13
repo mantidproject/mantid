@@ -55,8 +55,7 @@ PeaksWorkspace_sptr createIndexedPeaksWorkspace() {
   indexer.setProperty("PeaksWorkspace", loadedWS);
   indexer.execute();
 
-  return boost::dynamic_pointer_cast<PeaksWorkspace_sptr::element_type>(
-      loadedWS);
+  return std::dynamic_pointer_cast<PeaksWorkspace_sptr::element_type>(loadedWS);
 }
 
 PeaksWorkspace_sptr runPredictFractionalPeaks(

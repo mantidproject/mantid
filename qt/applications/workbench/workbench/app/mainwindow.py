@@ -24,6 +24,7 @@ from mantid.utils import is_required_version
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.plugins.exception_handler import exception_logger
 from workbench.utils.windowfinder import find_window
+from workbench.widgets.about.presenter import AboutPresenter
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 # -----------------------------------------------------------------------------
@@ -120,17 +121,20 @@ MAIN_APP = qapplication()
 atexit.register(qCleanupResources)
 
 
-def _get_splash_image_name():
+def _get_splash_image():
     # gets the width of the screen where the main window was initialised
     width = QGuiApplication.primaryScreen().size().width()
+    height = QGuiApplication.primaryScreen().size().height()
 
-    if width > 2048:
-        return ':/images/MantidSplashScreen_4k.jpg'
-    else:
-        return ':/images/MantidSplashScreen.png'
+    # the proportion of the whole window size for the splash screen
+    splash_screen_scaling = 0.2
+    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(width * splash_screen_scaling,
+                                                                height * splash_screen_scaling,
+                                                                Qt.KeepAspectRatio,
+                                                                Qt.SmoothTransformation)
 
 
-SPLASH = QSplashScreen(QPixmap(_get_splash_image_name()),
+SPLASH = QSplashScreen(_get_splash_image(),
                        Qt.WindowStaysOnTopHint)
 SPLASH.show()
 SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
@@ -351,11 +355,14 @@ class MainWindow(QMainWindow):
             self, "Mantid Homepage", on_triggered=self.open_mantid_homepage)
         action_mantid_forum = create_action(
             self, "Mantid Forum", on_triggered=self.open_mantid_forum)
+        action_about = create_action(
+            self, "About Mantid Workbench", on_triggered=self.open_about)
 
         self.help_menu_actions = [
             action_mantid_help, action_mantid_concepts,
             action_algorithm_descriptions, None,
-            action_mantid_homepage, action_mantid_forum]
+            action_mantid_homepage, action_mantid_forum,
+            None, action_about]
 
     def create_widget_actions(self):
         """
@@ -693,6 +700,10 @@ class MainWindow(QMainWindow):
     def open_mantid_forum(self):
         self.interface_manager.showWebPage('https://forum.mantidproject.org/')
 
+    def open_about(self):
+        about = AboutPresenter(self)
+        about.show()
+
     def readSettings(self, settings):
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
@@ -834,12 +845,16 @@ def start_workbench(app, command_line_options):
 
     main_window.show()
     main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
-    # Project Recovey on startup
+    # Project Recovery on startup
     main_window.project_recovery.repair_checkpoints()
     if main_window.project_recovery.check_for_recover_checkpoint():
         main_window.project_recovery.attempt_recovery()
     else:
         main_window.project_recovery.start_recovery_thread()
+
+    if not (command_line_options.execute or command_line_options.quit):
+        if AboutPresenter.should_show_on_startup():
+            AboutPresenter(main_window).show()
 
     # lift-off!
     return app.exec_()

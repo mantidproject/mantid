@@ -296,7 +296,7 @@ getNames(const MantidQt::CustomInterfaces::IDA::ResolutionCollectionType
   names.reserve(workspaces.size().value);
   std::transform(
       workspaces.begin(), workspaces.end(), std::back_inserter(names),
-      [](const boost::weak_ptr<Mantid::API::MatrixWorkspace> &workspace) {
+      [](const std::weak_ptr<Mantid::API::MatrixWorkspace> &workspace) {
         return workspace.lock()->getName();
       });
   return names;
@@ -307,7 +307,7 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel,
   if (convolutionModel->name() == "Convolution")
     convolutionModel->getFunction(0)->setAttribute("Workspace", attr);
   else {
-    auto convolution = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto convolution = std::dynamic_pointer_cast<CompositeFunction>(
         convolutionModel->getFunction(1));
     convolution->getFunction(0)->setAttribute("Workspace", attr);
   }

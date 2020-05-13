@@ -73,7 +73,7 @@ public:
   void unsubscribe(const std::string &name, const int version = -1);
 
   /// Returns the name of an Algorithm that can load the given filename
-  const boost::shared_ptr<IAlgorithm>
+  const std::shared_ptr<IAlgorithm>
   chooseLoader(const std::string &filename) const;
   /// Checks whether the given algorithm can load the file
   bool canLoad(const std::string &algorithmName,

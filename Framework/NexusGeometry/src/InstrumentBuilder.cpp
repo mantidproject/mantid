@@ -13,7 +13,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 
 #include "MantidNexusGeometry/NexusShapeFactory.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <utility>
 
 namespace Mantid {
@@ -33,7 +33,7 @@ InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
   // operations in instrument make a new one anyway, but at present i'm not
   // changing the instrument API, particularly since getReferenceFrame on
   // instrument returns the shared pointer
-  m_instrument->setReferenceFrame(boost::make_shared<Geometry::ReferenceFrame>(
+  m_instrument->setReferenceFrame(std::make_shared<Geometry::ReferenceFrame>(
       pointingUp, alongBeam, thetaSign, handedness, origin));
 
   m_instrument->setPos(0, 0, 0);
@@ -57,7 +57,7 @@ InstrumentBuilder::addComponent(const std::string &compName,
 */
 void InstrumentBuilder::addTubes(
     const std::string &bankName, const std::vector<detail::TubeBuilder> &tubes,
-    const boost::shared_ptr<const Mantid::Geometry::IObject> &pixelShape) {
+    const std::shared_ptr<const Mantid::Geometry::IObject> &pixelShape) {
   for (size_t i = 0; i < tubes.size(); i++)
     doAddTube(bankName + "_tube_" + std::to_string(i), tubes[i], pixelShape);
 }
@@ -69,7 +69,7 @@ void InstrumentBuilder::addTubes(
 */
 void InstrumentBuilder::doAddTube(
     const std::string &compName, const detail::TubeBuilder &tube,
-    const boost::shared_ptr<const Mantid::Geometry::IObject> &pixelShape) {
+    const std::shared_ptr<const Mantid::Geometry::IObject> &pixelShape) {
   auto *objComp(new Geometry::ObjCompAssembly(compName));
   const auto &pos = tube.tubePosition();
   objComp->setPos(pos(0), pos(1), pos(2));
@@ -90,7 +90,7 @@ void InstrumentBuilder::doAddTube(
 void InstrumentBuilder::addDetectorToLastBank(
     const std::string &detName, detid_t detId,
     const Eigen::Vector3d &relativeOffset,
-    boost::shared_ptr<const Geometry::IObject> shape) {
+    std::shared_ptr<const Geometry::IObject> shape) {
   if (!m_lastBank)
     throw std::runtime_error("No bank to add the detector to");
   auto *detector = new Geometry::Detector(
@@ -107,7 +107,7 @@ void InstrumentBuilder::addDetectorToLastBank(
 /// Adds detector to instrument
 void InstrumentBuilder::addDetectorToInstrument(
     const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
-    boost::shared_ptr<const Geometry::IObject> &shape) {
+    std::shared_ptr<const Geometry::IObject> &shape) {
   auto *detector(new Geometry::Detector(
       detName, detId,
       const_cast<Geometry::IComponent *>(m_instrument->getBaseComponent())));
@@ -121,7 +121,7 @@ void InstrumentBuilder::addDetectorToInstrument(
 
 void InstrumentBuilder::addMonitor(
     const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
-    boost::shared_ptr<const Geometry::IObject> &shape) {
+    std::shared_ptr<const Geometry::IObject> &shape) {
   auto *detector(new Geometry::Detector(
       detName, detId,
       const_cast<Geometry::IComponent *>(m_instrument->getBaseComponent())));

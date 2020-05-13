@@ -40,7 +40,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void Q1DWeighted::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
@@ -52,13 +52,13 @@ void Q1DWeighted::init() {
                   "Workspace that will contain the I(Q) data");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
+          "OutputBinning", std::make_shared<RebinParamsValidator>()),
       "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta "
       "x_2,\\dots,x_n</math>");
 
-  auto positiveInt = boost::make_shared<BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
 
   declareProperty("NPixelDivision", 1, positiveInt,
@@ -319,7 +319,7 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
   setProperty("OutputWorkspace", outputWS);
 
   // Create workspace group that holds output workspaces for wedges
-  auto wsgroup = boost::make_shared<WorkspaceGroup>();
+  auto wsgroup = std::make_shared<WorkspaceGroup>();
 
   if (m_nWedges != 0) {
     // Create wedge workspaces
@@ -346,7 +346,7 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
   for (size_t iout = 0; iout < m_nWedges + 1; ++iout) {
 
     auto ws = (iout == 0) ? outputWS
-                          : boost::dynamic_pointer_cast<MatrixWorkspace>(
+                          : std::dynamic_pointer_cast<MatrixWorkspace>(
                                 wsgroup->getItem(iout - 1));
     auto &YOut = ws->mutableY(0);
     auto &EOut = ws->mutableE(0);

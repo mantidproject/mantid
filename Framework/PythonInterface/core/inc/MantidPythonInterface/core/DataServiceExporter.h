@@ -14,6 +14,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/str.hpp>
 
+#include <memory>
 #include <set>
 
 namespace Mantid {
@@ -26,7 +27,7 @@ namespace PythonInterface {
 template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   // typedef the type created by boost.python
   using PythonType = boost::python::class_<SvcType, boost::noncopyable>;
-  using WeakPtr = boost::weak_ptr<typename SvcPtrType::element_type>;
+  using WeakPtr = std::weak_ptr<typename SvcPtrType::element_type>;
 
   /**
    * Define the necessary boost.python framework to expor the templated

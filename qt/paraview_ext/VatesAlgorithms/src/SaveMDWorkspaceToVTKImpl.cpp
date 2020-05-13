@@ -28,7 +28,6 @@
 #include "vtkXMLStructuredGridWriter.h"
 #include "vtkXMLUnstructuredGridWriter.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <memory>
 #include <utility>
@@ -84,7 +83,7 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     const std::string &filename, VisualNormalization normalization,
     int recursionDepth, const std::string &compressorType) {
   auto isHistoWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
+      std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
       nullptr;
   auto fullFilename = getFullFilename(filename, isHistoWorkspace);
 

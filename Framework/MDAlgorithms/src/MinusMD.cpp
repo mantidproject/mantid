@@ -59,7 +59,7 @@ void MinusMD::checkInputs() {
 template <typename MDE, size_t nd>
 void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MinusMD.");
 

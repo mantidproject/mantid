@@ -460,7 +460,7 @@ private:
 
     inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
 
-    boost::shared_ptr<Geometry::Instrument> spInst(
+    std::shared_ptr<Geometry::Instrument> spInst(
         new Geometry::Instrument("basic_ring"));
     Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
     source->setPos(0.0, 0.0, -10.0);

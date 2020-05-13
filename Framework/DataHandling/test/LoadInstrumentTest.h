@@ -179,13 +179,13 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i =
+    std::shared_ptr<const Instrument> i =
         output->getInstrument()->baseInstrument();
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
 
-    boost::shared_ptr<const IComponent> samplepos = i->getSample();
+    std::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
@@ -227,13 +227,13 @@ public:
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+        std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584
     TS_ASSERT_EQUALS(output2DInst->getNumberHistograms(), histogramNumber);
 
     // Check running algorithm for same XML file leads to same instrument object
     // being attached
-    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
     output->setInstrument(instr);
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), instr);
     LoadInstrument loadAgain;
@@ -276,13 +276,13 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loaderSLS.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Z(), -11.016, 0.01);
 
-    boost::shared_ptr<const IObjComponent> samplepos =
-        boost::dynamic_pointer_cast<const IObjComponent>(i->getSample());
+    std::shared_ptr<const IObjComponent> samplepos =
+        std::dynamic_pointer_cast<const IObjComponent>(i->getSample());
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
@@ -883,10 +883,10 @@ private:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
 
     // test if a dummy parameter has been read in
-    boost::shared_ptr<const IComponent> comp =
+    std::shared_ptr<const IComponent> comp =
         i->getComponentByName("bank_90degnew");
     TS_ASSERT_EQUALS(comp->getName(), "bank_90degnew");
 

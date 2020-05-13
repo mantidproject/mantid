@@ -777,7 +777,7 @@ void CatalogSearch::populateResultTable(int sort_section,
   // Check to see if the workspace exists...
   if (Mantid::API::AnalysisDataService::Instance().doesExist(
           "__searchResults")) {
-    workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+    workspace = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "__searchResults"));
   } else {
@@ -960,7 +960,7 @@ void CatalogSearch::populateDataFileTable() {
   // Check to see if the workspace exists...
   if (Mantid::API::AnalysisDataService::Instance().doesExist(
           "__dataFileResults")) {
-    workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+    workspace = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "__dataFileResults"));
   } else {

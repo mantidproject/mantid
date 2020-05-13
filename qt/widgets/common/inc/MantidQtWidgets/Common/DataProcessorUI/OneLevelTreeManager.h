@@ -100,7 +100,7 @@ public:
                     size_t whitelistColumns) const override;
 
   /// Return the model
-  boost::shared_ptr<AbstractTreeModel> getModel() override;
+  std::shared_ptr<AbstractTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
@@ -115,7 +115,7 @@ private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
-  boost::shared_ptr<QOneLevelTreeModel> m_model;
+  std::shared_ptr<QOneLevelTreeModel> m_model;
 
   /// Insert an empty row in the model
   void insertRow(int rowIndex);

@@ -165,7 +165,7 @@ private:
 
 /// Shared pointer to ThermalNeutronBk2BkExpConvPVoigt peak/function
 using ThermalNeutronBk2BkExpConvPVoigt_sptr =
-    boost::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>;
+    std::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>;
 
 //--- Public inline function --------------------------------------------------
 /** Calculate d = a/sqrt(h**2+k**2+l**2)

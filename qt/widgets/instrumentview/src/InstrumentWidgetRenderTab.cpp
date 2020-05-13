@@ -418,7 +418,7 @@ void InstrumentWidgetRenderTab::initSurface() {
   auto surface = getSurface();
 
   // 3D axes switch needs to be shown for the 3D surface
-  auto p3d = boost::dynamic_pointer_cast<Projection3D>(surface);
+  auto p3d = std::dynamic_pointer_cast<Projection3D>(surface);
   if (p3d) {
     p3d->set3DAxesState(areAxesOn());
   }
@@ -432,7 +432,7 @@ void InstrumentWidgetRenderTab::initSurface() {
   // enable u-correction for surfaces of rotation. correction applied in the
   // last
   // session is loaded and re-applied in the new session
-  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  auto rotSurface = std::dynamic_pointer_cast<RotationSurface>(surface);
   if (rotSurface) {
     m_UCorrection->setEnabled(true);
     QString groupName = m_instrWidget->getInstrumentSettingsGroupName();
@@ -599,8 +599,8 @@ void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
 }
 
 void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
-  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(
-      m_instrWidget->getSurface());
+  auto surface =
+      std::dynamic_pointer_cast<UnwrappedSurface>(m_instrWidget->getSurface());
   if (!surface)
     return;
   surface->setFlippedView(on);
@@ -805,7 +805,7 @@ void InstrumentWidgetRenderTab::showMenuToolTip(QAction *action) {
  */
 void InstrumentWidgetRenderTab::setUCorrection() {
   auto surface = getSurface();
-  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  auto rotSurface = std::dynamic_pointer_cast<RotationSurface>(surface);
   if (rotSurface) {
     QPointF oldUCorr = rotSurface->getUCorrection();
     // ask the user to enter a number for the u-correction
@@ -843,7 +843,7 @@ void InstrumentWidgetRenderTab::setUCorrection() {
  */
 QPointF InstrumentWidgetRenderTab::getUCorrection() const {
   auto surface = getSurface();
-  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  auto rotSurface = std::dynamic_pointer_cast<RotationSurface>(surface);
   if (rotSurface) {
     return rotSurface->getUCorrection();
   }

@@ -51,17 +51,15 @@ void CatalogDownloadDataFiles::init() {
                   "The session information of the catalog to use.");
   declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "FileLocations", std::vector<std::string>(),
-                      boost::make_shared<NullValidator>(), Direction::Output),
+                      std::make_shared<NullValidator>(), Direction::Output),
                   "A list of file locations to the catalog datafiles.");
 }
 
 /// Execute the algorithm
 void CatalogDownloadDataFiles::exec() {
   // Cast a catalog to a catalogInfoService to access downloading functionality.
-  auto catalogInfoService =
-      boost::dynamic_pointer_cast<API::ICatalogInfoService>(
-          API::CatalogManager::Instance().getCatalog(
-              getPropertyValue("Session")));
+  auto catalogInfoService = std::dynamic_pointer_cast<API::ICatalogInfoService>(
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
   // Check if the catalog created supports publishing functionality.
   if (!catalogInfoService)
     throw std::runtime_error("The catalog that you are using does not support "

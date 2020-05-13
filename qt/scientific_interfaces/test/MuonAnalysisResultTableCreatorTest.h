@@ -117,8 +117,8 @@ public:
             getParamTable(m_firstRun));
     ads.add("EMU00020919; Pair; long; Asym; #1_Parameters",
             getParamTable(m_firstRun + 1));
-    ads.add("EMU00020918", boost::make_shared<WorkspaceGroup>());
-    ads.add("EMU00020919", boost::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020918", std::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020919", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("EMU00020918",
                    "EMU00020918; Pair; long; Asym; #1_Workspace");
     ads.addToGroup("EMU00020918",
@@ -153,8 +153,8 @@ public:
             getParamTable(m_firstRun));
     ads.add("EMU00020919; Pair; long; Asym; #1_Parameters",
             getAlternateParamTable());
-    ads.add("EMU00020918", boost::make_shared<WorkspaceGroup>());
-    ads.add("EMU00020919", boost::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020918", std::make_shared<WorkspaceGroup>());
+    ads.add("EMU00020919", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("EMU00020918",
                    "EMU00020918; Pair; long; Asym; #1_Workspace");
     ads.addToGroup("EMU00020918",
@@ -183,7 +183,7 @@ public:
             getParamTable(m_firstRun + 1));
     ads.add("MuonSeqFit_Label_EMU20919_Workspace",
             getWorkspace(m_firstRun + 1));
-    ads.add("MuonSeqFit_Label", boost::make_shared<WorkspaceGroup>());
+    ads.add("MuonSeqFit_Label", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20918_Parameters");
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20918_Workspace");
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20919_Parameters");
@@ -215,7 +215,7 @@ public:
             getParamTable(m_firstRun + 1));
     ads.add("MuonSimulFit_Label_EMU20919_long_Workspace",
             getWorkspace(m_firstRun + 1));
-    ads.add("MuonSimulFit_Label", boost::make_shared<WorkspaceGroup>());
+    ads.add("MuonSimulFit_Label", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("MuonSimulFit_Label",
                    "MuonSimulFit_Label_EMU20918_long_Parameters");
     ads.addToGroup("MuonSimulFit_Label",
@@ -258,7 +258,7 @@ public:
               getParamTable(m_firstRun + 1, true));
       ads.add(prefix + runs[i][1] + "_long_Workspace",
               getWorkspace(m_firstRun + 1));
-      ads.add(prefix, boost::make_shared<WorkspaceGroup>());
+      ads.add(prefix, std::make_shared<WorkspaceGroup>());
       ads.addToGroup(prefix, prefix + runs[i][0] + "_long_Parameters");
       ads.addToGroup(prefix, prefix + runs[i][0] + "_long_Workspace");
       ads.addToGroup(prefix, prefix + runs[i][1] + "_long_Parameters");
@@ -289,7 +289,7 @@ public:
     RAII_ADS ads;
     for (int i = 0; i < labels.size(); ++i) {
       const std::string &prefix = "MuonSimulFit_" + labels[i].toStdString();
-      ads.add(prefix, boost::make_shared<WorkspaceGroup>());
+      ads.add(prefix, std::make_shared<WorkspaceGroup>());
       for (size_t j = 0; j < runs[i].size(); ++j) {
         const int run = m_firstRun + static_cast<int>(j);
         ads.add(prefix + runs[i][j] + "_long_Parameters",

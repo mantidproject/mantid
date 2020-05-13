@@ -240,9 +240,9 @@ MDWSTransform::buildQTrahsf(MDWSDescription &TargWSDescription,
   // Now define lab frame to target frame transformation
   Kernel::DblMatrix Scale(3, 3, true);
   Kernel::DblMatrix Transf(3, 3, true);
-  boost::shared_ptr<Geometry::OrientedLattice> spLatt;
+  std::shared_ptr<Geometry::OrientedLattice> spLatt;
   if (UnitUB)
-    spLatt = boost::shared_ptr<Geometry::OrientedLattice>(
+    spLatt = std::shared_ptr<Geometry::OrientedLattice>(
         new Geometry::OrientedLattice(1, 1, 1));
   else
     spLatt = TargWSDescription.getLattice();

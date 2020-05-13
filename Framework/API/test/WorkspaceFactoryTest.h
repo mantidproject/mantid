@@ -77,7 +77,7 @@ public:
     ws_child->mutableRun().addProperty("Ei", 12.0);
     ws_child->mutableSample().setName("MySample");
 
-    ws_child->setMonitorWorkspace(boost::make_shared<Workspace1DTest>());
+    ws_child->setMonitorWorkspace(std::make_shared<Workspace1DTest>());
 
     MatrixWorkspace_sptr child;
     TS_ASSERT_THROWS_NOTHING(child =

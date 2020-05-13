@@ -73,20 +73,20 @@ void AddTimeSeriesLog::init() {
                   "In/out workspace that will store the new log information");
 
   declareProperty(
-      "Name", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Name", "", std::make_shared<MandatoryValidator<std::string>>(),
       "A string name for either a new time series log to be created "
       "or an existing name to update",
       Direction::Input);
   declareProperty(
-      "Time", "", boost::make_shared<DateTimeValidator>(),
+      "Time", "", std::make_shared<DateTimeValidator>(),
       "An ISO formatted date/time string specifying the timestamp for "
       "the given log value, e.g 2010-09-14T04:20:12",
       Direction::Input);
-  auto nonEmtpyDbl = boost::make_shared<MandatoryValidator<double>>();
+  auto nonEmtpyDbl = std::make_shared<MandatoryValidator<double>>();
   declareProperty("Value", EMPTY_DBL(), nonEmtpyDbl,
                   "The value for the log at the given time", Direction::Input);
 
-  auto optionsValidator = boost::make_shared<ListValidator<std::string>>();
+  auto optionsValidator = std::make_shared<ListValidator<std::string>>();
   optionsValidator->addAllowedValue("double");
   optionsValidator->addAllowedValue("int");
   declareProperty("Type", "double", optionsValidator,

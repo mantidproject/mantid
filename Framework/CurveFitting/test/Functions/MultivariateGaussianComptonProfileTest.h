@@ -109,7 +109,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<MultivariateGaussianComptonProfile>
+  std::shared_ptr<MultivariateGaussianComptonProfile>
   createFunctionWithParamsSet() {
     auto func = createFunction();
     func->setAttributeValue("IntegrationSteps", 34);
@@ -122,8 +122,8 @@ private:
     return func;
   }
 
-  boost::shared_ptr<MultivariateGaussianComptonProfile> createFunction() {
-    auto profile = boost::make_shared<MultivariateGaussianComptonProfile>();
+  std::shared_ptr<MultivariateGaussianComptonProfile> createFunction() {
+    auto profile = std::make_shared<MultivariateGaussianComptonProfile>();
     profile->initialize();
     return profile;
   }

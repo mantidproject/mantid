@@ -14,6 +14,8 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/Workspace.h"
 
+#include <memory>
+
 using namespace Mantid::API;
 
 namespace {
@@ -23,11 +25,11 @@ std::string noWorkspaceErrorMessage(std::string const &process) {
 }
 
 MatrixWorkspace_sptr convertToMatrixWorkspace(const Workspace_sptr &workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 WorkspaceGroup_sptr convertToGroupWorkspace(const Workspace_sptr &workspace) {
-  return boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  return std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
 }
 
 Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
@@ -43,7 +45,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
 }
 
 std::unordered_map<std::string, std::size_t> extractAxisLabels(Axis *axis) {
-  auto const *textAxis = boost::static_pointer_cast<TextAxis>(axis);
+  auto const *textAxis = static_cast<TextAxis *>(axis);
   std::unordered_map<std::string, std::size_t> labels;
 
   for (auto i = 0u; i < textAxis->length(); ++i)
@@ -167,8 +169,7 @@ bool doesGroupContain(std::string const &groupName,
                       const MatrixWorkspace_sptr &workspace) {
   auto const adsWorkspace = getADSWorkspace(groupName);
   if (adsWorkspace->isGroup()) {
-    auto const group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(adsWorkspace);
+    auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(adsWorkspace);
     return group->contains(workspace);
   }
   return false;

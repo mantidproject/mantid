@@ -48,7 +48,7 @@ void SortXAxis::init() {
 
   auto orderingValues = std::vector<std::string>({"Ascending", "Descending"});
   auto orderingValidator =
-      boost::make_shared<StringListValidator>(orderingValues);
+      std::make_shared<StringListValidator>(orderingValues);
   declareProperty("Ordering", orderingValues[0], orderingValidator,
                   "Ascending or descending sorting", Direction::Input);
 }

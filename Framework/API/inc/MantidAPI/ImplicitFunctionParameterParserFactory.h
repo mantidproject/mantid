@@ -30,7 +30,7 @@ public:
       const ImplicitFunctionParameterParserFactoryImpl &) = delete;
   ImplicitFunctionParameterParserFactoryImpl &
   operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
-  boost::shared_ptr<ImplicitFunctionParameterParser>
+  std::shared_ptr<ImplicitFunctionParameterParser>
   create(const std::string &xmlString) const override;
   ImplicitFunctionParameterParser *createImplicitFunctionParameterParserFromXML(
       Poco::XML::Element *parametersElement) const;

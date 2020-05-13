@@ -11,7 +11,14 @@ Plotting Window
 The plotting window displays the data specified by the tabs within the interface. This data can be displayed as a single plot, 
 or as tiled plots, where each tile corresponds to either a Group/pair or a run.
 By default this plot window is docked to the right-hand side of the main interface window, but can be undocked by
-double-clicking on the title bar of the window. 
+double-clicking on the title bar of the window.
+
+The workspaces plotted in the figure depends on the tab which is currently being viewed:
+
+- If the user is on the Home, Grouping or Phase table tabs the workspaces corresponding to the loaded runs and
+  selected groups are plotted.
+- If the user is on the fitting tab, the workspace displayed in the workspace selection box is plotted.
+- If the user is on the sequential the plotted workspace is controlled through the table present in this tab.
 
 Plotting Controls 
 ^^^^^^^^^^^^^^^^^

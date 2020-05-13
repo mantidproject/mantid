@@ -30,7 +30,7 @@ void FindDetectorsInShape::init() {
                       "Workspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty("ShapeXML", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the shape");
   declareProperty(
       "IncludeMonitors", false,

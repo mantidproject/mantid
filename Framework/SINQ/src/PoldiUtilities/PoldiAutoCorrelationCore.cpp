@@ -85,7 +85,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
 
   m_logger.information() << "  Setting result...\n";
   DataObjects::Workspace2D_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, dValues.size(),
                                               dValues.size()));
 

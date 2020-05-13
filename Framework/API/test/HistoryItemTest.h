@@ -24,7 +24,7 @@ public:
     AlgorithmHistory algHist(
         "AnAlg", 1,
         boost::uuids::to_string(boost::uuids::random_generator()()));
-    HistoryItem item(boost::make_shared<AlgorithmHistory>(algHist));
+    HistoryItem item(std::make_shared<AlgorithmHistory>(algHist));
     item.unrolled(true);
 
     TS_ASSERT_EQUALS(*(item.getAlgorithmHistory()), algHist)

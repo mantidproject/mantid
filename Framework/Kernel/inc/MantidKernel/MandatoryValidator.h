@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/TypedValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -46,7 +46,7 @@ template <typename TYPE>
 class DLLExport MandatoryValidator : public TypedValidator<TYPE> {
 public:
   IValidator_sptr clone() const override {
-    return boost::make_shared<MandatoryValidator>();
+    return std::make_shared<MandatoryValidator>();
   }
 
 private:

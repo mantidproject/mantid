@@ -56,7 +56,7 @@ public:
     alg.setProperty("OutputWorkspace", "abcd");
     API::Workspace_sptr ows = alg.getProperty("OutputWorkspace");
     DataObjects::PeaksWorkspace_sptr peaks =
-        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+        std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
     // std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<'\n';
 
     LoadIsawUB loadUB;
@@ -109,7 +109,7 @@ public:
     TS_ASSERT_DELTA(-0.0060874, out[12], .01);
     TS_ASSERT_DELTA(-0.0103673, out[16], .01);
 
-    boost::shared_ptr<Jacob> Jac(
+    std::shared_ptr<Jacob> Jac(
         new Jacob((int)peakErrs.nParams(), (int)(3 * NPeaks)));
     peakErrs.functionDeriv1D(Jac.get(), xValues.data(), (size_t)(3 * NPeaks));
 

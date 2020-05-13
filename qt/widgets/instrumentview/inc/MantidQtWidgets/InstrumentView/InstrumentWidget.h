@@ -20,7 +20,7 @@
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -105,7 +105,7 @@ public:
   SurfaceType getSurfaceType() const { return m_surfaceType; }
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
   /// Get pointer to the projection surface
-  boost::shared_ptr<ProjectionSurface> getSurface() const;
+  std::shared_ptr<ProjectionSurface> getSurface() const;
   /// True if the workspace is being replaced
   bool isWsBeingReplaced() const;
   /// True if the GL instrument display is currently on
@@ -148,7 +148,7 @@ public:
   bool hasWorkspace(const std::string &wsName) const;
   void handleWorkspaceReplacement(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> &workspace);
+      const std::shared_ptr<Mantid::API::Workspace> &workspace);
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
@@ -321,10 +321,10 @@ private:
   /// ADS notification handlers
   void preDeleteHandle(
       const std::string &ws_name,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void clearADSHandle() override;
@@ -337,7 +337,7 @@ private:
   /// get a workspace from the ADS
   Mantid::API::Workspace_sptr getWorkspaceFromADS(const std::string &name);
   /// get a handle to the unwrapped surface
-  boost::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
+  std::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
   /// Load tabs on the widget form a project file
   void loadTabs(const std::string &lines) const;
   /// Save tabs on the widget to a string

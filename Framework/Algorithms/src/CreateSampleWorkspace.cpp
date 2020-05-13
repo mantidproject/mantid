@@ -71,7 +71,7 @@ void CreateSampleWorkspace::init() {
                   "An output workspace.");
   std::vector<std::string> typeOptions{"Histogram", "Event"};
   declareProperty("WorkspaceType", "Histogram",
-                  boost::make_shared<StringListValidator>(typeOptions),
+                  std::make_shared<StringListValidator>(typeOptions),
                   "The type of workspace to create (default: Histogram)");
 
   // pre-defined function strings these use $PCx$ to define peak centres values
@@ -121,24 +121,24 @@ void CreateSampleWorkspace::init() {
     functionOptions.emplace_back(preDefinedFunction.first);
   }
   declareProperty("Function", "One Peak",
-                  boost::make_shared<StringListValidator>(functionOptions),
+                  std::make_shared<StringListValidator>(functionOptions),
                   "Preset options of the data to fill the workspace with");
   declareProperty(
       "UserDefinedFunction", "",
       "Parameters defining the fitting function and its initial values");
 
   declareProperty("NumBanks", 2,
-                  boost::make_shared<BoundedValidator<int>>(0, 100),
+                  std::make_shared<BoundedValidator<int>>(0, 100),
                   "The Number of banks in the instrument (default:2)");
   declareProperty("NumMonitors", 0,
-                  boost::make_shared<BoundedValidator<int>>(0, 100),
+                  std::make_shared<BoundedValidator<int>>(0, 100),
                   "The number of monitors in the instrument (default:0)");
   declareProperty("BankPixelWidth", 10,
-                  boost::make_shared<BoundedValidator<int>>(0, 10000),
+                  std::make_shared<BoundedValidator<int>>(0, 10000),
                   "The number of pixels in horizontally and vertically in a "
                   "bank (default:10)");
   declareProperty("NumEvents", 1000,
-                  boost::make_shared<BoundedValidator<int>>(0, 100000),
+                  std::make_shared<BoundedValidator<int>>(0, 100000),
                   "The number of events per detector, this is only used for "
                   "EventWorkspaces (default:1000)");
   declareProperty(
@@ -150,21 +150,21 @@ void CreateSampleWorkspace::init() {
   declareProperty("XMin", 0.0, "The minimum X axis value (default:0)");
   declareProperty("XMax", 20000.0, "The maximum X axis value (default:20000)");
   declareProperty("BinWidth", 200.0,
-                  boost::make_shared<BoundedValidator<double>>(0, 100000, true),
+                  std::make_shared<BoundedValidator<double>>(0, 100000, true),
                   "The bin width of the X axis (default:200)");
   declareProperty("PixelSpacing", 0.008,
-                  boost::make_shared<BoundedValidator<double>>(0, 100000, true),
+                  std::make_shared<BoundedValidator<double>>(0, 100000, true),
                   "The spacing between detector pixels in M (default:0.008)");
   declareProperty("BankDistanceFromSample", 5.0,
-                  boost::make_shared<BoundedValidator<double>>(0, 1000, true),
+                  std::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the sample to "
                   "bank in M (default:5.0)");
   declareProperty("SourceDistanceFromSample", 10.0,
-                  boost::make_shared<BoundedValidator<double>>(0, 1000, true),
+                  std::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the source to "
                   "the sample in M (default:10.0)");
   declareProperty("NumScanPoints", 1,
-                  boost::make_shared<BoundedValidator<int>>(0, 360, true),
+                  std::make_shared<BoundedValidator<int>>(0, 360, true),
                   "Add a number of time indexed detector scan points to the "
                   "instrument. The detectors are rotated in 1 degree "
                   "increments around the the sample position in the x-z plane. "
@@ -255,8 +255,8 @@ void CreateSampleWorkspace::exec() {
   } catch (Exception::NotFoundError &) {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = ws->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(unit);
+    std::shared_ptr<Units::Label> label =
+        std::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
 
@@ -500,11 +500,10 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     API::Progress &progress, int numBanks, int numMonitors, int pixels,
     double pixelSpacing, const double bankDistanceFromSample,
     const double sourceSampleDistance) {
-  auto testInst = boost::make_shared<Instrument>("basic_rect");
+  auto testInst = std::make_shared<Instrument>("basic_rect");
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
-  testInst->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+  testInst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
@@ -525,7 +524,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     // Mark them all as detectors
     for (int x = 0; x < pixels; x++) {
       for (int y = 0; y < pixels; y++) {
-        boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+        std::shared_ptr<Detector> detector = bank->getAtXY(x, y);
         if (detector) {
           // Mark it as a detector (add to the instrument cache)
           testInst->markAsDetector(detector.get());
@@ -556,7 +555,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     bank->initialize(monitorShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing,
                      monitorNumber, true, 1);
 
-    boost::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
+    std::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
     if (detector) {
       // Mark it as a monitor (add to the instrument cache)
       testInst->markAsMonitor(detector.get());

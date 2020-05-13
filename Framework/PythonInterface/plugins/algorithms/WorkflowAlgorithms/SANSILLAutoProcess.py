@@ -131,13 +131,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if can_dim != sample_dim and can_dim != 0:
             result['ContainerRuns'] = message.format('Container', can_dim, sample_dim)
         if str_dim != 0:
-            issues['SampleTransmissionRuns'] = tr_message.format('SampleTransmission', str_dim)
+            result['SampleTransmissionRuns'] = tr_message.format('SampleTransmission', str_dim)
         if ctr_dim != 0:
-            issues['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission', ctr_dim)
+            result['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission', ctr_dim)
         if btr_dim != 0:
-            issues['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam', btr_dim)
+            result['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam', btr_dim)
         if atr_dim != 0:
-            issues['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber', atr_dim)
+            result['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber', atr_dim)
         if mask_dim != sample_dim and mask_dim != 0:
             result['MaskFiles'] = message.format('Mask', mask_dim, sample_dim)
         if ref_dim != sample_dim and ref_dim != 0:

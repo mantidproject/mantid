@@ -75,9 +75,11 @@ private:
   void createInstrument(ANSTO::Tar::File &tarFile,
                         InstrumentInfo &instrumentInfo,
                         std::map<std::string, double> &logParams,
+                        std::map<std::string, std::string> &logStrings,
                         std::map<std::string, std::string> &allParams);
   void loadInstrumentParameters(NeXus::NXEntry &entry,
                                 std::map<std::string, double> &logParams,
+                                std::map<std::string, std::string> &logStrings,
                                 std::map<std::string, std::string> &allParams);
 
   // load nx dataset

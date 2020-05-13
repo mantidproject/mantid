@@ -59,7 +59,7 @@ public:
     }
 
     ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "DeadTimeTable"));
 
@@ -103,6 +103,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
     Workspace_sptr outputWS = loader.getProperty("OutputWorkspace");
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    return std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
   }
 };

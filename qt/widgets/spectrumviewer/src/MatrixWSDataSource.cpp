@@ -78,12 +78,12 @@ MatrixWSDataSource::~MatrixWSDataSource() {}
 
 bool MatrixWSDataSource::hasData(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (m_matWs->getName() == wsName)
     return true;
 
   Mantid::API::MatrixWorkspace_const_sptr other =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!other)
     return false;
 

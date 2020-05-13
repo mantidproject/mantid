@@ -97,7 +97,7 @@ void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
   readTriangles(pTris, noOfTriangles, Faces);
 
   // First check whether Object can be written to the file
-  boost::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
+  std::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
   handle->setGeometryCache(noOfPoints, noOfTriangles, std::move(Points),
                            std::move(Faces));
 }

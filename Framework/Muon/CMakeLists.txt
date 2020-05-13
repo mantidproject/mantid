@@ -16,6 +16,7 @@ set(SRC_FILES
     src/MuonGroupingCounts.cpp
     src/MuonGroupingAsymmetry.cpp
     src/MuonPreProcess.cpp
+    src/PSIBackgroundSubtraction.cpp
     src/MuonPairingAsymmetry.cpp
     src/PhaseQuadMuon.cpp
     src/PlotAsymmetryByLogValue.cpp
@@ -41,6 +42,7 @@ set(INC_FILES
     inc/MantidMuon/MuonPairingAsymmetry.h
     inc/MantidMuon/MuonGroupingAsymmetry.h
     inc/MantidMuon/MuonPreProcess.h
+    inc/MantidMuon/PSIBackgroundSubtraction.h
     inc/MantidMuon/PhaseQuadMuon.h
     inc/MantidMuon/PlotAsymmetryByLogValue.h
     inc/MantidMuon/RemoveExpDecay.h
@@ -64,6 +66,7 @@ set(TEST_FILES
     MuonGroupingCountsTest.h
     MuonGroupingAsymmetryTest.h
     MuonPreProcessTest.h
+    PSIBackgroundSubtractionTest.h
     PhaseQuadMuonTest.h
     PlotAsymmetryByLogValueTest.h
     RemoveExpDecayTest.h

@@ -32,7 +32,6 @@ set(
   src/HintingLineEdit.cpp
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
-  src/IndirectFitPropertyBrowserLegacy.cpp
   src/IFunctionModel.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
@@ -161,7 +160,6 @@ set(
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
-  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -187,6 +185,7 @@ set(
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -257,6 +256,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+    inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -324,7 +324,6 @@ set(
   src/HelpWindow.cpp
   src/FlowLayout.cpp
   src/Hint.cpp
-  src/IndirectFitPropertyBrowserLegacy.cpp
   src/InterfaceManager.cpp
   src/ListPropertyWidget.cpp
   src/LocalParameterEditor.cpp
@@ -493,7 +492,6 @@ set(
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
-  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/LocalParameterEditor.h
   inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
@@ -506,6 +504,7 @@ set(
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -628,6 +627,7 @@ set(
   inc/MantidQtWidgets/Common/PluginLibraries.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QStringUtils.h
   inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -931,6 +931,7 @@ set(TEST_FILES
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
+    test/FitPropertyBrowserTest.h
     test/FunctionModelTest.h
     test/FunctionMultiDomainPresenterTest.h
     test/FunctionBrowserUtilsTest.h
@@ -976,6 +977,7 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitPropertyBrowserTest.h
   test/FunctionModelTest.h
   test/FunctionMultiDomainPresenterTest.h
   test/FunctionBrowserUtilsTest.h
@@ -1047,6 +1049,7 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitPropertyBrowserTest.h
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h

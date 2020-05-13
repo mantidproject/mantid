@@ -56,14 +56,14 @@ void RadiusSum::init() {
                   "An output workspace.");
 
   auto twoOrThreeElements =
-      boost::make_shared<ArrayLengthValidator<double>>(2, 3);
+      std::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(
       std::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
                                               std::move(twoOrThreeElements)),
       "Coordinate of the centre of the ring");
 
-  auto nonNegative = boost::make_shared<BoundedValidator<double>>();
+  auto nonNegative = std::make_shared<BoundedValidator<double>>();
   nonNegative->setLower(0);
   declareProperty("MinRadius", 0.0, nonNegative->clone(),
                   "Length of the inner ring. Default=0");
@@ -72,7 +72,7 @@ void RadiusSum::init() {
                       std::move(nonNegative)),
                   "Length of the outer ring. Default=ImageSize.");
 
-  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  auto nonNegativeInt = std::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
   declareProperty("NumBins", 100, std::move(nonNegativeInt),
                   "Number of slice bins for the output. Default=100");
@@ -631,7 +631,7 @@ void RadiusSum::setUpOutputWorkspace(const std::vector<double> &values) {
   if (inputWorkspaceHasInstrumentAssociated(inputWS)) {
     auto horizontal = std::make_unique<API::NumericAxis>(xSize);
     auto labelX = UnitFactory::Instance().create("Label");
-    boost::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");
+    std::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");
     horizontal->unit() = labelX;
     outputWS->replaceAxis(0, std::move(horizontal));
   }

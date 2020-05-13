@@ -176,7 +176,7 @@ public:
     cloneWorkspace->setPropertyValue("OutputWorkspace", "dist_workspace");
     cloneWorkspace->execute();
     Workspace_sptr temp = cloneWorkspace->getProperty("OutputWorkspace");
-    auto distWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    auto distWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     auto convertToDist = algManager.createUnmanaged("ConvertToDistribution");
     convertToDist->setChild(true);

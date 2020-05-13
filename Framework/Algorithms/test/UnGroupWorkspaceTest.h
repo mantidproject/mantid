@@ -104,7 +104,7 @@ public:
 private:
   void addTestGroupToADS(const std::string &name,
                          const std::vector<std::string> &inputs) {
-    auto newGroup = boost::make_shared<Mantid::API::WorkspaceGroup>();
+    auto newGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
 
     auto &ads = Mantid::API::AnalysisDataService::Instance();
     for (const auto &input : inputs) {
