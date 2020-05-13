@@ -31,6 +31,7 @@ Improvements
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 
 - Surface plots no longer spill over the axes when their limits are reduced.
+- Monitors are no longer shown on bin and colorfill plots. Note that if the workspace has monitors which are not at any end of the spectrum index range, the plotting could become much slower.
 
 Bugfixes
 ########
