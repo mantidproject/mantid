@@ -4,8 +4,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 from .view import DrillView
 from .model import DrillModel
+from .SansSettingsView import SansSettingsView
 
 class DrillPresenter:
 
@@ -34,6 +36,7 @@ class DrillPresenter:
         self.view.process_stopped.connect(self.on_process_stop)
         self.view.rundex_loaded.connect(self.on_rundex_loaded)
         self.view.rundex_saved.connect(self.on_rundex_saved)
+        self.view.show_settings.connect(self.on_settings_window)
 
     def disconnect_view_signals(self):
         self.view.instrument_changed.disconnect()
@@ -83,6 +86,14 @@ class DrillPresenter:
 
     def on_rundex_saved(self, filename):
         self.model.export_rundex_data(filename)
+
+    def on_settings_window(self):
+        sw = SansSettingsView(self.view)
+        sw.setSettings(self.model.getSettings())
+        sw.accepted.connect(
+                lambda : self.model.setSettings(sw.getSettings())
+                )
+        sw.show()
 
     def on_process_started(self, row):
         self.view.set_row_processing(row)

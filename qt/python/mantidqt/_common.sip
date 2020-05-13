@@ -937,6 +937,7 @@ public:
     void setLabelMinWidth(const int);
     void setText(const QString&);
     void setUserInput(const QVariant &);
+    QVariant getUserInput() const;
     void setReadOnly(bool readOnly);
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);

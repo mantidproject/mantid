@@ -29,6 +29,7 @@ class DrillView(QMainWindow):
     process_stopped = Signal()
     rundex_loaded = Signal(str)            # the path and filename
     rundex_saved = Signal(str)             # the path and filename
+    show_settings = Signal()
 
     # colors for the table rows
     OK_COLOR = "#3f00ff00"
@@ -84,7 +85,9 @@ class DrillView(QMainWindow):
         self.load.clicked.connect(self.load_rundex)
 
         self.settings.setIcon(icons.get_icon("mdi.settings"))
-        self.settings.clicked.connect(self.show_settings)
+        self.settings.clicked.connect(
+                lambda : self.show_settings.emit()
+                )
 
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
         self.paste.clicked.connect(self.paste_rows)
@@ -143,15 +146,6 @@ class DrillView(QMainWindow):
     ###########################################################################
     # actions                                                                 #
     ###########################################################################
-
-    def show_settings(self):
-        """
-        Show settings window according to the selected technique.
-        """
-        settings = QMainWindow(self)
-        technique = self.techniqueSelector.currentText()
-        uic.loadUi(os.path.join(self.here, technique + '_settings.ui'), settings)
-        settings.show()
 
     def copy_selected_rows(self):
         """

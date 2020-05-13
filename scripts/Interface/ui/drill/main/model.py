@@ -30,7 +30,6 @@ class DrillException(Exception):
 
 class DrillModel(QObject):
 
-    settings = dict()
     algorithm = None
     process_started = Signal(int)
     process_done = Signal(int)
@@ -42,6 +41,10 @@ class DrillModel(QObject):
         super(DrillModel, self).__init__()
         self.set_instrument(config['default.instrument'])
         self.samples = list()
+        # read default settings
+        self.settings = dict()
+        for (k, v) in RundexSettings.SETTINGS[self.technique].items():
+            self.settings[k] = v
         self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(
@@ -60,30 +63,76 @@ class DrillModel(QObject):
                 lambda : self.processing_done.emit()
                 )
 
-    def convolute(self, options):
-        local_options = dict()
-        local_options.update(options)
-        if "CustomOptions" in local_options:
-            local_options.update(local_options["CustomOptions"])
-            del local_options["CustomOptions"]
-        return local_options
+    def setSettings(self, settings):
+        """
+        Update the settings from a dictionnary.
+
+        Args:
+            settings (dict(str: any)): settings key,value pairs. Value can be
+                                       str, int, float or bool
+        """
+        for (k, v) in settings.items():
+            if self.settings[k]:
+                self.settings[k] = v
+
+    def getSettings(self):
+        """
+        Get the settings.
+
+        Returns:
+            dict(str, any): the settings. Value can be str, int, float or bool
+        """
+        return self.settings
+
+    def getProcessingParameters(self, sample):
+        """
+        Get the keyword arguments to be provided to an algorithm. This will
+        merge the global settings and the row specific settings in a single
+        dictionnary. It will also remove all the empty parameters.
+
+        Args:
+            sample (int): sample index
+
+        Returns:
+            dict(str, any): key, value pairs of parameters. Value can be str,
+                            int, float, bool
+        """
+        params = dict()
+        params.update(self.settings)
+        params.update(self.samples[sample])
+        # override global params with custom ones
+        if "CustomOptions" in params:
+            params.update(params["CustomOptions"])
+            del params["CustomOptions"]
+        # remove empty params
+        for (k, v) in list(params.items()):
+            if not v:
+                del params[k]
+        # add the output workspace param
+        if "OutputWorkspace" not in params:
+            params["OutputWorkspace"] = "sample_" + str(sample + 1)
+        return params
 
     def process(self, elements):
+        """
+        Start samples processing.
+
+        Args:
+            elements (list(int)): list of sample indexes to be processed
+        """
         # to be sure that the pool is cleared
         self.tasksPool.abortProcessing()
         # TODO: check the elements before algorithm submission
         tasks = list()
         errors = list()
         for e in elements:
-            if (e < len(self.samples) and len(self.samples[e]) > 0):
-                kwargs = self.convolute(self.samples[e])
-                kwargs.update(self.settings)
-                if "OutputWorkspace" not in kwargs:
-                    kwargs['OutputWorkspace'] = "sample_" + str(e + 1)
-                try:
-                    tasks.append(DrillTask(e, self.algorithm, **kwargs))
-                except Exception as ex:
-                    errors.append((e, str(ex)))
+            if (e >= len(self.samples)) or (not self.samples[e]):
+                continue
+            kwargs = self.getProcessingParameters(e)
+            try:
+                tasks.append(DrillTask(e, self.algorithm, **kwargs))
+            except Exception as ex:
+                errors.append((e, str(ex)))
         if errors:
             raise DrillException(errors)
         else:

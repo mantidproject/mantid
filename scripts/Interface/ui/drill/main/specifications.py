@@ -52,3 +52,29 @@ class RundexSettings(object):
             REFL: "ReflectometryILLAutoProcess"
             }
 
+    SETTINGS = {
+            SANS: {
+                "ThetaDependent": True,
+                "SensitivityMaps": None,
+                "DefaultMaskFile": None,
+                "NormaliseBy": "Timer",
+                "SampleThickness": 0.1,
+                "BeamRadius": 0.05,
+                "WaterCrossSection": 1,
+                "OutputType": "I(Q)",
+                "CalculateResolution": "None",
+                "DefaultQBinning": "PixelSizeBased",
+                "BinningFactor": 1,
+                "OutputBinning": None,
+                "NPixelDivision": 1,
+                "NumberOfWedges": 0,
+                "WedgeAngle": 30,
+                "WedgeOffset": 0,
+                "AsymmetricWedges": False,
+                "MaxQxy": 0,
+                "DeltaQ": 0,
+                "IQxQyLogBinning": False,
+                "PanelOutputWorkspaces": None
+                }
+            }
+
