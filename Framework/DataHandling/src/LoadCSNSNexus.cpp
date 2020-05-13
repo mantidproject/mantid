@@ -592,10 +592,10 @@ void LoadCSNSNexus::exec() {
       }
     } else if (m_loadMonitor) {
       setProperty("OutputWorkspace",
-                   boost::dynamic_pointer_cast<Workspace>(ws_mon));
-      }
+                  boost::dynamic_pointer_cast<Workspace>(ws_mon));
     }
   }
+}
 
 } // namespace DataHandling
 } // namespace Mantid
