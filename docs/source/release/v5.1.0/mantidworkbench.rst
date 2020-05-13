@@ -31,6 +31,7 @@ Improvements
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 
 - Surface plots no longer spill over the axes when their limits are reduced.
+- When showing monochromatic workspaces, the instrument widget will not show the integration bar, nor the pick widget the detector spectra graph.
 
 Bugfixes
 ########
