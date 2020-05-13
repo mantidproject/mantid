@@ -151,7 +151,6 @@ void LoadMuonNexus3::exec() {
   m_loadMuonStrategy->loadGoodFrames();
   auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
   setProperty("DetectorGroupingTable", loadedGrouping);
-  // Load dead time table
   auto deadtimeTable = m_loadMuonStrategy->loadDeadTimeTable();
   setProperty("DeadTimeTable", deadtimeTable);
 }

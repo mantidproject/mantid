@@ -14,8 +14,6 @@
 #include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidDataHandling/LoadMuonNexus3Helper.h"
 
-#include <iostream>
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -56,8 +54,7 @@ void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
 }
 
 /**
- * Loads the good frames assuming we have just one workavoid if else in c++space
- * loaded for a workspace 2d object
+ * Loads the good frames data from the stored workspace object
  */
 void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
   // Overwrite existing log entry
