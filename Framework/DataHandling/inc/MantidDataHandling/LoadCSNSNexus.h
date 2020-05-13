@@ -59,37 +59,19 @@ public:
   std::vector<int64_t> getPixelId(const std::vector<std::string> &inputList);
   std::vector<uint32_t> getTimeBin(std::string typeName);
   std::vector<uint32_t> getHistData(const vector<string> &inputList);
-<<<<<<< HEAD
   void loadHistData(
       boost::shared_ptr<API::MatrixWorkspace> workspace,
-      // void loadHistData(std::shared_ptr<API::MatrixWorkspace> workspace,
       std::vector<uint32_t> &timeOfFlight, size_t pidNums,
       std::vector<uint32_t> &histData);
-=======
-  void loadHistData(
-      boost::shared_ptr<API::MatrixWorkspace> workspace,
-      // void loadHistData(std::shared_ptr<API::MatrixWorkspace> workspace,
-      std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-      std::vector<uint32_t> &histData);
->>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
 
   std::multimap<uint32_t, std::pair<float, int64_t>>
   getEventData(const vector<string> &inputList,
                const vector<uint32_t> &startList,
                const vector<uint32_t> &endList, const vector<int64_t> &pids);
-<<<<<<< HEAD
   void loadEventData(
       boost::shared_ptr<DataObjects::EventWorkspace> workspace,
-      // loadEventData(std::shared_ptr<DataObjects::EventWorkspace> workspace,
       const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
       std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
-=======
-  void loadEventData(
-      boost::shared_ptr<DataObjects::EventWorkspace> workspace,
-      // loadEventData(std::shared_ptr<DataObjects::EventWorkspace> workspace,
-      const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-      std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
->>>>>>> 06c2c5fc9ec23f7ef1b9fb7628755657a6d08084
 
 private:
   void init() override;
