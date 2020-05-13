@@ -242,9 +242,10 @@ std::string Spectra::getString() const {
   if (empty())
     return "";
   if (m_isContinuous)
-    return m_vec.size() > 1 ? std::to_string(m_vec.front().value) + "-" +
-                                  std::to_string(m_vec.back().value)
-                            : std::to_string(m_vec.front().value);
+    return m_vec.size() > 1
+               ? std::to_string(m_vec.front().value) + "-" +
+                     std::to_string(m_vec.back().value)
+               : std::to_string(m_vec.front().value);
   std::vector<size_t> out(m_vec.size());
   std::transform(m_vec.begin(), m_vec.end(), out.begin(),
                  [](WorkspaceIndex i) { return i.value; });
@@ -297,8 +298,10 @@ void Spectra::checkContinuous() {
 
 void Spectra::erase(WorkspaceIndex workspaceIndex) {
   auto iteratorToErase = std::find(m_vec.begin(), m_vec.end(), workspaceIndex);
-  m_vec.erase(iteratorToErase);
-  checkContinuous();
+  if (iteratorToErase != m_vec.end()) {
+    m_vec.erase(iteratorToErase);
+    checkContinuous();
+  }
 }
 
 IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace,

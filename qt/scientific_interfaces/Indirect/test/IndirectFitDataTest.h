@@ -107,6 +107,12 @@ public:
     TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
+  void test_erasing_non_existent_spectra_handled_gracefully() {
+    Spectra spectra = Spectra("7-8,10");
+    spectra.erase(IDA::WorkspaceIndex{9});
+    TS_ASSERT_EQUALS(Spectra("7-8,10"), spectra);
+  }
+
   void test_data_is_stored_in_the_ADS() {
     auto const data = getIndirectFitData(1);
     SetUpADSWithWorkspace ads("WorkspaceName", data->workspace());
