@@ -19,6 +19,7 @@ Algorithms
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
    cost of cloning the inputWorkspace.
 - Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
+- Added an algorithm, :ref:`ISISJournalGetExperimentRuns <algm-ISISJournalGetExperimentRuns>`, which returns run information for a particular experiment from ISIS journal files.
 
 Data Handling
 -------------
