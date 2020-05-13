@@ -83,6 +83,10 @@ public:
     TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("bm_counts"), 0.0800,
                     1.0e-5);
 
+    // test string log properties
+    TS_ASSERT(run.getProperty("rough_40")->value().compare("moving") == 0);
+    TS_ASSERT(run.getProperty("rough_100")->value().compare("moving") == 0);
+
     // test instrument setup
     TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
                         run.getProperty("L1_chopper_value"))

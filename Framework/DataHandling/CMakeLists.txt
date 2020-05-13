@@ -30,6 +30,7 @@ set(SRC_FILES
     src/H5Util.cpp
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
+    src/ISISJournalGetExperimentRuns.cpp
     src/ISISRunLogs.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
@@ -68,6 +69,7 @@ set(SRC_FILES
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
+    src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
     src/LoadInstrument.cpp
     src/LoadInstrumentFromNexus.cpp
@@ -237,6 +239,7 @@ set(INC_FILES
     inc/MantidDataHandling/H5Util.h
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
+    inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
     inc/MantidDataHandling/ISISRunLogs.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
@@ -276,6 +279,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
+    inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
     inc/MantidDataHandling/LoadInstrument.h
     inc/MantidDataHandling/LoadInstrumentFromNexus.h
@@ -443,6 +447,7 @@ set(TEST_FILES
     H5UtilTest.h
     ISISDataArchiveTest.h
     ISISJournalTest.h
+    ISISJournalGetExperimentRunsTest.h
     InstrumentRayTracerTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h

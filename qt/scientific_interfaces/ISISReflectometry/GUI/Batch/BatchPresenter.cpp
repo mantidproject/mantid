@@ -45,7 +45,7 @@ BatchPresenter::BatchPresenter(
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)),
+      m_savePresenter(std::move(savePresenter)), m_unsavedBatchFlag(false),
       m_jobRunner(new BatchJobRunner(std::move(model))) {
 
   m_view->subscribe(this);
@@ -56,6 +56,8 @@ BatchPresenter::BatchPresenter(
   m_experimentPresenter->acceptMainPresenter(this);
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
+
+  m_unsavedBatchFlag = false;
 
   observePostDelete();
   observeRename();
@@ -172,7 +174,11 @@ void BatchPresenter::resumeReduction() {
   m_jobRunner->notifyReductionResumed();
   // Get the algorithms to process
   auto algorithms = m_jobRunner->getAlgorithms();
-  if (algorithms.size() < 1) {
+  if (algorithms.size() < 1 ||
+      (m_jobRunner->getProcessAll() &&
+       m_mainPresenter->isProcessAllPrevented()) ||
+      (m_jobRunner->getProcessPartial() &&
+       m_mainPresenter->isProcessPartialGroupPrevented())) {
     notifyReductionPaused();
     return;
   }
@@ -316,6 +322,31 @@ bool BatchPresenter::isAnyBatchProcessing() const {
    */
 bool BatchPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
+}
+
+/**
+    Checks whether the requested operation is prevented by unsaved
+    * changes and user input to avoid losing them
+    * @return : Bool on whether the calling function should continue
+    */
+bool BatchPresenter::isWarnDiscardChangesChecked() const {
+  return m_mainPresenter->isWarnDiscardChangesChecked();
+}
+
+/** Returns whether there are any unsaved changes in the current batch */
+bool BatchPresenter::isBatchUnsaved() const { return m_unsavedBatchFlag; }
+
+/** Set the state of unsaved changes in the current batch */
+void BatchPresenter::setBatchUnsaved(bool isUnsaved) {
+  m_unsavedBatchFlag = isUnsaved;
+}
+
+void BatchPresenter::notifySetRoundPrecision(int &precision) {
+  m_runsPresenter->setRoundPrecision(precision);
+}
+
+void BatchPresenter::notifyResetRoundPrecision() {
+  m_runsPresenter->resetRoundPrecision();
 }
 
 /** Get the percent of jobs that have been completed out of the current

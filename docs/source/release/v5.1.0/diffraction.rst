@@ -18,6 +18,7 @@ Powder Diffraction
 - Polaris.create_total_scattering_pdf fourier filter can be performed using the butterworth filter by calling with `bw_order`.
 - SampleDetails.set_materials now differentiates between sample density and crystal density for converting between pdf types.
 - :ref:`LoadWAND <algm-LoadWAND>` now adds `duration` log to the workspace
+- Polaris.create_total_scattering_pdf now no longer calculates the PDF with the Lorch filter enabled by default and must be enabled.
 
 Engineering Diffraction
 -----------------------

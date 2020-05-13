@@ -121,17 +121,20 @@ MAIN_APP = qapplication()
 atexit.register(qCleanupResources)
 
 
-def _get_splash_image_name():
+def _get_splash_image():
     # gets the width of the screen where the main window was initialised
     width = QGuiApplication.primaryScreen().size().width()
+    height = QGuiApplication.primaryScreen().size().height()
 
-    if width > 2048:
-        return ':/images/MantidSplashScreen_4k.jpg'
-    else:
-        return ':/images/MantidSplashScreen.png'
+    # the proportion of the whole window size for the splash screen
+    splash_screen_scaling = 0.2
+    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(width * splash_screen_scaling,
+                                                                height * splash_screen_scaling,
+                                                                Qt.KeepAspectRatio,
+                                                                Qt.SmoothTransformation)
 
 
-SPLASH = QSplashScreen(QPixmap(_get_splash_image_name()),
+SPLASH = QSplashScreen(_get_splash_image(),
                        Qt.WindowStaysOnTopHint)
 SPLASH.show()
 SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft

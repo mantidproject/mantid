@@ -121,14 +121,7 @@ public:
     TS_ASSERT_EQUALS(mon_ws->y(0)[3], 0.);
 
     const std::vector<Property *> &logs = mon_ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 62);
-
-    std::string header =
-        mon_ws->run().getPropertyValueAsType<std::string>("run_header");
-    TS_ASSERT_EQUALS(86, header.size());
-    TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N "
-                     "28-APR-2009  09:20:29     0.00",
-                     header);
+    TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
@@ -206,14 +199,7 @@ public:
     TS_ASSERT(ws->getSpectrum(1234).hasDetectorID(1235));
 
     const std::vector<Property *> &logs = ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 62);
-
-    std::string header =
-        ws->run().getPropertyValueAsType<std::string>("run_header");
-    TS_ASSERT_EQUALS(86, header.size());
-    TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N "
-                     "28-APR-2009  09:20:29     0.00",
-                     header);
+    TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
@@ -610,14 +596,7 @@ public:
     TS_ASSERT(ws->getSpectrum(1234 - 2).hasDetectorID(1235));
 
     const std::vector<Property *> &logs = ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 62);
-
-    std::string header =
-        ws->run().getPropertyValueAsType<std::string>("run_header");
-    TS_ASSERT_EQUALS(86, header.size());
-    TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N "
-                     "28-APR-2009  09:20:29     0.00",
-                     header);
+    TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(

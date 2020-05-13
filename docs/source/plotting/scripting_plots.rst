@@ -227,6 +227,7 @@ Example Script
 
 * :ref:`plotting`
 * :ref:`06_formatting_plots`
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png  
    :width: 30px

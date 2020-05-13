@@ -67,3 +67,11 @@ The toggle whitespace visible option is global and will affect the appearance of
 =========
 The status bar tells you if the code in the currently open tab is running or not. If the code has been run previously the status bar will give details of the previous run including 
 runtime, and whether the code ran without errors.
+
+Useful Links
+============
+
+How to use a script to:
+
+* :ref:`Control Workspaces <scripting_workspaces>`
+* :ref:`Customise Plots <scripting_plots>`
