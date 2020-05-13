@@ -20,7 +20,6 @@ class ProjectSaveDialogView(QDialog):
 
         self.ui = load_ui(__file__, 'saveprojectdialog.ui', baseinstance=self)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
-        self.setModal(True)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def set_location(self, path):
@@ -29,8 +28,8 @@ class ProjectSaveDialogView(QDialog):
     def get_location(self):
         return self.location_line_edit.text()
 
-    def get_save_all_workspaces(self):
-        return self.save_all_workspaces_radio_button.isChecked()
+    def get_save_altered_workspaces_only(self):
+        return self.save_altered_workspaces_only_radio_button.isChecked()
 
     def get_remember_selection(self):
         return self.remember_selection_checkbox.isChecked()

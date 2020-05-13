@@ -35,6 +35,9 @@ class Project(AnalysisDataServiceObserver):
         # Last save locations
         self.last_project_location = None
 
+        # whether to discard workspaces that have only been loaded when saving the project
+        self.save_altered_workspaces_only = False
+
         self.observeAll(True)
 
         self.project_file_ext = ".mtdproj"
@@ -93,8 +96,9 @@ class Project(AnalysisDataServiceObserver):
         from mantidqt.project.saveprojectdialog.presenter import ProjectSaveDialogPresenter
         ProjectSaveDialogPresenter(self)
 
-    def do_save(self, path):
+    def do_save(self, path, altered_workspaces_only):
         self.last_project_location = path
+        self.save_altered_workspaces_only = altered_workspaces_only
         task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
         task.start()
 
@@ -118,6 +122,10 @@ class Project(AnalysisDataServiceObserver):
         self.__is_saving = True
         try:
             workspaces_to_save = self._get_workspace_names_to_save()
+
+            if self.save_altered_workspaces_only:
+                workspaces_to_save = self._filter_unaltered_workspaces(workspaces_to_save)
+
             # Calculate the size of the workspaces in the project.
             project_size = self._get_project_size(workspaces_to_save)
             warning_size = int(ConfigService.getString("projectSaving.warningSize"))
@@ -127,6 +135,9 @@ class Project(AnalysisDataServiceObserver):
                 result = self._offer_large_size_confirmation()
             if result is None or result != QMessageBox.Cancel:
                 plots_to_save = self.plot_gfm.figs
+
+
+
                 interfaces_to_save = self.interface_populating_function()
                 project_saver = ProjectSaver(self.project_file_ext)
                 project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
@@ -149,6 +160,17 @@ class Project(AnalysisDataServiceObserver):
         for group_ws in group_workspaces:
             workspaces_in_groups_names.extend(group_ws.getNames())
         return [name for name in workspace_names if name not in workspaces_in_groups_names]
+
+    @staticmethod
+    def _filter_unaltered_workspaces(workspace_names):
+        workspaces = AnalysisDataService.retrieveWorkspaces(workspace_names)
+        altered_workspace_names = []
+        for ws in workspaces:
+            history = ws.getHistory()
+            if not (history.size() == 1 and history.getAlgorithm(0).name() == "Load"):
+                altered_workspace_names.append(ws.name())
+
+        return altered_workspace_names
 
     @staticmethod
     def inform_user_not_possible():
