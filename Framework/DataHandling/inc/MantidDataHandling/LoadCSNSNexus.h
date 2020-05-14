@@ -18,6 +18,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
+#include <boost/shared_ptr.hpp>
+
 using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;

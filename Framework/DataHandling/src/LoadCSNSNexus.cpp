@@ -17,7 +17,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-//#include "boost/make_shared.hpp"
+#include "boost/make_shared.hpp"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
@@ -50,6 +50,7 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidKernel/Logger.h"
 
+#include <boost/make_shared.hpp>
 /****************************************/
 using Mantid::Types::Core::DateAndTime;
 using namespace Mantid::DataObjects;
