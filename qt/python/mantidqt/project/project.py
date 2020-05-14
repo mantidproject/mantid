@@ -136,7 +136,8 @@ class Project(AnalysisDataServiceObserver):
             if result is None or result != QMessageBox.Cancel:
                 plots_to_save = self.plot_gfm.figs
 
-
+                if self.save_altered_workspaces_only:
+                    plots_to_save = self._filter_plots_with_unaltered_workspaces(plots_to_save, workspaces_to_save)
 
                 interfaces_to_save = self.interface_populating_function()
                 project_saver = ProjectSaver(self.project_file_ext)
@@ -171,6 +172,18 @@ class Project(AnalysisDataServiceObserver):
                 altered_workspace_names.append(ws.name())
 
         return altered_workspace_names
+
+    @staticmethod
+    def _filter_plots_with_unaltered_workspaces(plots, workspaces):
+        from mantid.plots import MantidAxes
+        plots_copy = plots.copy()
+        for i, plot in plots_copy.items():
+            # check that every axes only uses workspaces that are being saved, otherwise delete the plot
+            if not all(all(ws in workspaces for ws in ax.tracked_workspaces if isinstance(ax, MantidAxes))
+                       for ax in plot.canvas.figure.axes):
+                del plots[i]
+
+        return plots
 
     @staticmethod
     def inform_user_not_possible():
