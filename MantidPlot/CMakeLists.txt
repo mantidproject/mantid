@@ -702,7 +702,6 @@ if(MAKE_VATES)
 endif()
 
 find_package(QwtPlot3d REQUIRED)
-find_package(QScintillaQt4 REQUIRED)
 
 #
 # Now create the target and add its dependencies and flags

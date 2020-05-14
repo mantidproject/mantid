@@ -120,12 +120,14 @@ if(ENABLE_MANTIDPLOT)
   set(QT_USE_IMPORTED_TARGETS ON)
   find_package(Qt4
                COMPONENTS QtCore
+                          QtDesigner
                           QtGui
                           QtOpenGL
-                          QtXml
+                          QtScript
                           QtSvg
+                          QtXml
                REQUIRED)
-
+  find_package(QScintillaQt4 REQUIRED)
   find_package(Qwt5 REQUIRED)
   if(QWT5_VERSION VERSION_LESS 5.0
      OR QWT5_VERSION VERSION_EQUAL 6.0
