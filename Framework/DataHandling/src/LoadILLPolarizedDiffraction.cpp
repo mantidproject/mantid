@@ -15,13 +15,18 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <Poco/Path.h>
+
+#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,7 +56,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
 int LoadILLPolarizedDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/D7/2theta")) {
+  if (descriptor.pathExists("/entry0/D7")) {
     return 80;
   } else {
     return 0;
@@ -92,6 +97,22 @@ void LoadILLPolarizedDiffraction::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
+  std::vector<std::string> positionCalibrationOptions{"None", "Nexus",
+                                                      "YIGFile"};
+  declareProperty(
+      "PositionCalibration", "None",
+      std::make_shared<StringListValidator>(positionCalibrationOptions),
+      "Select the type of pixel position calibration. If None, the pixel "
+      "positions are read from IDF file. If Nexus, the positions are read from "
+      "Nexus file. If YIGFile, then the calibration twotheta data is loaded "
+      "from a user-defined calibration file.");
+
+  declareProperty(std::make_unique<FileProperty>(
+                      "YIGFilename", "", FileProperty::OptionalLoad, ".xml"),
+                  "File path of the YIG calibration data file to load");
+  setPropertySettings("YIGFilename",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "PositionCalibration", IS_EQUAL_TO, "YIGFile"));
 }
 
 /**
@@ -218,8 +239,12 @@ void LoadILLPolarizedDiffraction::loadData() {
     // load the instrument if it has not been created
     if (m_outputWorkspace->getNumberOfEntries() == 0) {
       loadInstrument(workspace);
-      // rotate detectors to their position during measurement
-      moveTwoThetaZero(entry, workspace);
+      // rotate detectors to their position during measurement if position
+      // calibration is requested
+      if (std::string(getPropertyValue("PositionCalibration"))
+              .compare("None") != 0) {
+        moveTwoTheta(entry, workspace);
+      }
       // sets meta data for the measurement
       loadMetaData(workspace);
     }
@@ -291,19 +316,24 @@ void LoadILLPolarizedDiffraction::loadInstrument(
  * @return : vector of pixel 2theta positions in the chosen bank
  */
 std::vector<double>
-LoadILLPolarizedDiffraction::loadTwoTheta0(const NXEntry &entry, int bankId) {
-  NXFloat theta0Pixels = entry.openNXFloat("D7/Detector/bank" +
-                                           std::to_string(bankId) + "_offset");
-  theta0Pixels.load();
-  NXFloat theta0Bank =
-      entry.openNXFloat("D7/2theta/actual_bank" + std::to_string(bankId));
-  theta0Bank.load();
+LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const NXEntry &entry,
+                                                   int bankId) {
+  std::vector<double> twoTheta(D7_NUMBER_PIXELS);
 
-  std::vector<double> theta0(theta0Pixels.size());
-  for (auto ii = 0; ii < theta0Pixels.size(); ii++) {
-    theta0[ii] = theta0Pixels[ii] - theta0Bank[0];
+  if (getPropertyValue("PositionCalibration").compare("Nexus") == 0) {
+    NXFloat twoThetaPixels = entry.openNXFloat(
+        "D7/Detector/bank" + std::to_string(bankId) + "_offset");
+    twoThetaPixels.load();
+
+    for (auto ii = 0; ii < twoThetaPixels.size(); ii++) {
+      twoTheta[ii] = twoThetaPixels[ii];
+    }
+  } else {
+    // load position from IPF from YIG calibration, not implemented yet
+    throw std::runtime_error(
+        "Position calibration using YIGFiles is not implemented.");
   }
-  return theta0;
+  return twoTheta;
 }
 
 /**
@@ -311,7 +341,7 @@ LoadILLPolarizedDiffraction::loadTwoTheta0(const NXEntry &entry, int bankId) {
  * @param entry : entry from which the 2theta positions will be read
  * @param workspace : workspace containing the instrument being moved
  */
-void LoadILLPolarizedDiffraction::moveTwoThetaZero(
+void LoadILLPolarizedDiffraction::moveTwoTheta(
     const NXEntry &entry, API::MatrixWorkspace_sptr &workspace) {
 
   Instrument_const_sptr instrument = workspace->getInstrument();
@@ -320,7 +350,11 @@ void LoadILLPolarizedDiffraction::moveTwoThetaZero(
 
   auto &componentInfo = workspace->mutableComponentInfo();
   for (auto ii = 0; ii < static_cast<int>(D7_NUMBER_BANKS); ii++) {
-    std::vector<double> theta0 = loadTwoTheta0(entry, ii + 2);
+    NXFloat twoThetaBank = entry.openNXFloat(
+        "D7/2theta/actual_bank" +
+        std::to_string(ii + 2)); // detector bank IDs start at 2
+    twoThetaBank.load();
+    std::vector<double> twoThetaPixels = loadTwoThetaDetectors(entry, ii + 2);
     for (auto jj = 0; jj < numberDetectorsBank; jj++) {
       IComponent_const_sptr pixel =
           instrument->getDetector(ii * numberDetectorsBank + jj + 1);
@@ -329,8 +363,10 @@ void LoadILLPolarizedDiffraction::moveTwoThetaZero(
       V3D position = pixel->getPos();
       double const radius =
           sqrt(position[0] * position[0] + position[2] * position[2]);
-      position = V3D(radius * sin(DEG_TO_RAD * theta0[jj]), position[1],
-                     radius * cos(DEG_TO_RAD * theta0[jj]));
+      position = V3D(
+          radius * sin(DEG_TO_RAD * (twoThetaPixels[jj] - twoThetaBank[0])),
+          position[1],
+          radius * cos(DEG_TO_RAD * (twoThetaPixels[jj] - twoThetaBank[0])));
       componentInfo.setPosition(componentIndex, position);
     }
   }
