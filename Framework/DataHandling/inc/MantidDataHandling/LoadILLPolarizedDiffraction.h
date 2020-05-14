@@ -41,13 +41,15 @@ private:
   void exec() override;
 
   std::string getInstrumentFilePath(const std::string &) const;
+  bool calibrationFileExists(const std::string &filename) const;
+
   API::MatrixWorkspace_sptr initStaticWorkspace();
 
   void loadData();
   void loadMetaData(API::MatrixWorkspace_sptr &);
   void loadInstrument(API::MatrixWorkspace_sptr &);
-  std::vector<double> loadTwoTheta0(const NeXus::NXEntry &, int);
-  void moveTwoThetaZero(const NeXus::NXEntry &, API::MatrixWorkspace_sptr &);
+  std::vector<double> loadTwoThetaDetectors(const NeXus::NXEntry &, int);
+  void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr &);
 
   size_t m_numberOfChannels; // number of channels data
 
