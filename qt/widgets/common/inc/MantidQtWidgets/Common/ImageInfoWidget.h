@@ -25,7 +25,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public QTableWidget {
   Q_OBJECT
 
 public:
-  ImageInfoWidget(std::string& wsName,
+  ImageInfoWidget(const Mantid::API::Workspace_sptr &ws,
                   CoordinateConversion &coordConversion,
                   QWidget *parent = nullptr);
 

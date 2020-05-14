@@ -38,7 +38,7 @@ from .peaksviewer.representation.painter import MplPainter
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, dims_info, can_normalise, workspace_name, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, workspace, parent=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -106,7 +106,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
-        self.image_info_widget = ImageInfoWidget(workspace_name, self)
+        self.image_info_widget = ImageInfoWidget(workspace, self)
         self.dimensions.axesChanged.connect(self.image_info_widget.display_type.changeDimensions)
         self.toolbar_layout.addStretch(1)
         self.toolbar_layout.addWidget(self.image_info_widget)
@@ -485,7 +485,7 @@ class SliceViewerDataView(QWidget):
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
 
-    def __init__(self, presenter, dims_info, can_normalise, workspace_name, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, workspace, parent=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -494,7 +494,7 @@ class SliceViewerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)
-        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, workspace_name, self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, workspace, self)
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None

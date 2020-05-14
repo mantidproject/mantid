@@ -17,14 +17,14 @@ ImageInfoWidget_cpp = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidge
 
 class ImageInfoWidget(QWidget):
 
-    def __init__(self, workspace_name, parent):
+    def __init__(self, workspace, parent):
         super(QWidget, self).__init__(parent)
 
         layout = QVBoxLayout()
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setChecked(True)
         self.display_type = SliceViewerCoordConversion()
-        self.table_widget = ImageInfoWidget_cpp(workspace_name, self.display_type, self)
+        self.table_widget = ImageInfoWidget_cpp(workspace, self.display_type, self)
         layout.addWidget(self.track_cursor)
         layout.addWidget(self.table_widget)
         self.setLayout(layout)

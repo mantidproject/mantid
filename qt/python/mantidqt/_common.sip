@@ -936,10 +936,24 @@ public:
 class ImageInfoWidget : public QTableWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/ImageInfoWidget.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
 %End
 public:
-    ImageInfoWidget(std::string &wsName, CoordinateConversion& coordConversion, QWidget *parent = nullptr);
+    ImageInfoWidget(SIP_PYOBJECT ws, CoordinateConversion& coordConversion, QWidget *parent = nullptr) [(const Mantid::API::Workspace_sptr&, CoordinateConversion&,QWidget*=nullptr)];
+    %MethodCode
+    try {
+      auto extractor = Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(boost::python::object(boost::python::handle<>(a0)));
+      sipCpp = new sipImageInfoWidget(extractor(), *a1, a2);
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
 	void updateTable(const double x, const double y, const double z);
+  private:
+  ImageInfoWidget(const ImageInfoWidget&);
 };
 
 class SliceViewerCoordConversion : public CoordinateConversion {

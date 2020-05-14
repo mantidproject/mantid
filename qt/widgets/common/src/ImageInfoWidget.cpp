@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/ImageInfoWidget.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 #include <QAbstractScrollArea>
 #include <QHeaderView>
@@ -18,13 +17,11 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoWidget::ImageInfoWidget(std::string& wsName,
+ImageInfoWidget::ImageInfoWidget(const Mantid::API::Workspace_sptr &workspace,
                                  CoordinateConversion &coordConversion,
                                  QWidget *parent)
-    : QTableWidget(2, 0, parent) {
-  auto workspace =
-    Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-  m_model = std::make_unique<ImageInfoModel>(workspace, coordConversion);
+    : QTableWidget(2, 0, parent),
+  m_model(std::make_unique<ImageInfoModel>(workspace, coordConversion)) {
   horizontalHeader()->hide();
   verticalHeader()->hide();
 
