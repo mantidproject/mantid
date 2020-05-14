@@ -53,8 +53,6 @@ endif()
 
 # Wrapper module linked against Qt5
 if(ENABLE_WORKBENCH)
-  find_package(QScintillaQt5 REQUIRED)
-
   mtd_add_sip_module(MODULE_NAME _commonqt5
                      TARGET_NAME mantidqt_commonqt5
                      HEADER_DEPS

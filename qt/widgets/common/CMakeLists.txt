@@ -845,10 +845,6 @@ if(ENABLE_WORKBENCH)
     endif()
   endif()
 
-  find_package(
-    QScintillaQt5
-    REQUIRED
-  )
 endif()
 
 mtd_add_qt_library(
