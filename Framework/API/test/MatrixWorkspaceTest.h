@@ -2068,8 +2068,9 @@ public:
     WorkspaceTester workspace;
     workspace.initialize(5, 5, 4);
     MantidVec xValues = {1., 2., 3., 4., 5.};
-    //set some values
-    for (size_t wsIndex = 0; wsIndex < workspace.getNumberHistograms(); wsIndex++) {
+    // set some values
+    for (size_t wsIndex = 0; wsIndex < workspace.getNumberHistograms();
+         wsIndex++) {
       for (size_t binIndex = 0; binIndex < workspace.blocksize(); binIndex++) {
         // incrementing numbers
         double fillValue = static_cast<double>(binIndex + 1);
@@ -2089,11 +2090,12 @@ public:
         }
         workspace.mutableY(wsIndex)[binIndex] = fillValue;
       }
-      //set the x values
-      std::copy(xValues.begin(), xValues.end(), workspace.mutableX(wsIndex).begin());
+      // set the x values
+      std::copy(xValues.begin(), xValues.end(),
+                workspace.mutableX(wsIndex).begin());
     }
     MantidVec integratedValues;
-    //the enitre range
+    // the enitre range
     workspace.getIntegratedSpectra(integratedValues, 0, 0, true);
     MantidVec expected = {10., 0., 0., 4., 6.};
     TS_ASSERT_EQUALS(integratedValues, expected);
