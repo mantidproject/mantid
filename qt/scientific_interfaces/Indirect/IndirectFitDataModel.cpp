@@ -107,8 +107,15 @@ std::vector<std::pair<std::string, size_t>>
 IndirectFitDataModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, size_t>> resolutionVector;
   for (size_t index = 0; index < m_resolutions->size(); ++index) {
-
+    auto resolutionWorkspace = m_resolutions->at(index).lock();
     auto spectra = getSpectra(TableDatasetIndex{index});
+    if (!resolutionWorkspace) {
+      for (auto &spectraIndex : spectra) {
+        resolutionVector.emplace_back(std::make_pair("", 0));
+      }
+      continue;
+    }
+
     auto singleSpectraResolution =
         m_resolutions->at(index).lock()->getNumberHistograms() == 1;
     for (auto &spectraIndex : spectra) {
