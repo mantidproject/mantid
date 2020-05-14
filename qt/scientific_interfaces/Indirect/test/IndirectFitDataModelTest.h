@@ -22,7 +22,7 @@ public:
   IndirectFitDataModelTest() = default;
 
   void setUp() override {
-    m_model.clear();
+    m_fitData = std::make_unique<IndirectFitDataModel>();
     auto resolutionWorkspace =
         Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     auto dataWorkspace =
@@ -31,14 +31,14 @@ public:
         "resolution workspace", std::move(resolutionWorkspace));
     Mantid::API::AnalysisDataService::Instance().addOrReplace(
         "data workspace", std::move(dataWorkspace));
-    m_model.addWorkspace("data workspace");
-    m_model.setResolution("resolution workspace", TableDatasetIndex{0});
+    m_fitData->addWorkspace("data workspace");
+    m_fitData->setResolution("resolution workspace", TableDatasetIndex{0});
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_that_getResolutionsForFit_return_correctly() {
-    auto resolutionVector = m_model.getResolutionsForFit();
+    auto resolutionVector = m_fitData->getResolutionsForFit();
 
     TS_ASSERT_EQUALS(resolutionVector[2].first, "resolution workspace");
     TS_ASSERT_EQUALS(resolutionVector[2].second, 2);
@@ -48,12 +48,34 @@ public:
   test_that_getResolutionsForFit_return_correctly_if_resolution_workspace_removed() {
     Mantid::API::AnalysisDataService::Instance().clear();
 
-    auto resolutionVector = m_model.getResolutionsForFit();
+    auto resolutionVector = m_fitData->getResolutionsForFit();
 
     TS_ASSERT_EQUALS(resolutionVector[2].first, "");
     TS_ASSERT_EQUALS(resolutionVector[2].second, 0);
   }
 
+  void test_can_set_spectra_on_existing_workspace() {
+    m_fitData->setSpectra("1", TableDatasetIndex{0});
+
+    TS_ASSERT_EQUALS(m_fitData->getSpectra(TableDatasetIndex{0}), Spectra("1"));
+  }
+
+  void test_that_setting_spectra_on_non_existent_workspace_throws_exception() {
+    TS_ASSERT_THROWS(m_fitData->setSpectra("1", TableDatasetIndex{1}),
+                     const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setSpectra(Spectra("1"), TableDatasetIndex{1}),
+                     const std::out_of_range &)
+  }
+
+  void test_that_setting_startX_on_non_existent_workspace_throws_exception() {
+    TS_ASSERT_THROWS(m_fitData->setStartX(0, TableDatasetIndex{1}),
+                     const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setStartX(
+                         0, TableDatasetIndex{1},
+                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10}),
+                     const std::out_of_range &)
+  }
+
 private:
-  IndirectFitDataModel m_model;
+  std::unique_ptr<IIndirectFitData> m_fitData;
 };

@@ -80,10 +80,10 @@ public:
 
   void setStartX(double startX, TableDatasetIndex dataIndex,
                  WorkspaceIndex spectrum);
-  void setStartX(double startX, TableDatasetIndex dataIndex);
+  virtual void setStartX(double startX, TableDatasetIndex dataIndex);
   void setEndX(double endX, TableDatasetIndex dataIndex,
                WorkspaceIndex spectrum);
-  void setEndX(double endX, TableDatasetIndex dataIndex);
+  virtual void setEndX(double endX, TableDatasetIndex dataIndex);
   void setExcludeRegion(const std::string &exclude, TableDatasetIndex dataIndex,
                         WorkspaceIndex spectrum);
 

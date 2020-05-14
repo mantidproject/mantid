@@ -6,12 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include <string>
-#include <utility>
-
-#include "DllConfig.h"
-#include "IndexTypes.h"
-#include "IndirectFitData.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

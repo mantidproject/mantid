@@ -168,7 +168,7 @@ void IndirectFitDataModel::setSpectra(const Spectra &spectra,
 std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
   std::vector<std::string> names;
   names.reserve(m_fittingData->size());
-  for (auto fittingData : *m_fittingData)
+  for (const auto &fittingData : *m_fittingData)
     names.emplace_back(fittingData.workspace()->getName());
   return names;
 }
@@ -293,7 +293,7 @@ void IndirectFitDataModel::setExcludeRegion(const std::string &exclude,
 void IndirectFitDataModel::addNewWorkspace(
     const Mantid::API::MatrixWorkspace_sptr &workspace,
     const Spectra &spectra) {
-  m_fittingData->emplace_back(IndirectFitData(std::move(workspace), spectra));
+  m_fittingData->emplace_back(IndirectFitData(workspace, spectra));
 }
 
 void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {
