@@ -62,11 +62,11 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
                                         int workspaceIndex,
                                         const std::string &peaks,
                                         bool hasDeltaFunction) {
-  auto const resolution = workspace.empty()
-                              ? "name=Resolution"
-                              : "name=Resolution,Workspace=\"" + workspace +
-                                    "\",WorkspaceIndex=" +
-                                    std::to_string(workspaceIndex);
+  auto const resolution =
+      workspace.empty()
+          ? "name=Resolution"
+          : "name=Resolution,Workspace=\"" + workspace +
+                "\",WorkspaceIndex=" + std::to_string(workspaceIndex);
   auto const model = hasDeltaFunction ? "name=DeltaFunction;" + peaks : peaks;
   auto const convolution = "composite=Convolution;" + resolution + ";" + model;
   auto const function =
@@ -208,11 +208,11 @@ CompositeFunction_sptr ConvolutionFunctionModel::createConvolutionFunction(
 
 IFunction_sptr ConvolutionFunctionModel::createResolutionFunction(
     const std::string &workspaceName, int workspaceIndex) {
-  std::string resolution = workspaceName.empty()
-                               ? "name=Resolution"
-                               : "name=Resolution,Workspace=\"" +
-                                     workspaceName + "\",WorkspaceIndex=" +
-                                     std::to_string(workspaceIndex);
+  std::string resolution =
+      workspaceName.empty()
+          ? "name=Resolution"
+          : "name=Resolution,Workspace=\"" + workspaceName +
+                "\",WorkspaceIndex=" + std::to_string(workspaceIndex);
   return FunctionFactory::Instance().createInitialized(resolution);
 }
 

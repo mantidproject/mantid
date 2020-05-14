@@ -129,7 +129,8 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
   fitAlgorithm->setProperty("InputWorkspace" + suffix, workspace);
   fitAlgorithm->setProperty("StartX" + suffix, xRange.first);
   fitAlgorithm->setProperty("EndX" + suffix, xRange.second);
-  fitAlgorithm->setProperty("WorkspaceIndex" + suffix, static_cast<int>(spectrum));
+  fitAlgorithm->setProperty("WorkspaceIndex" + suffix,
+                            static_cast<int>(spectrum));
 
   if (!excludeRegions.empty())
     fitAlgorithm->setProperty("Exclude" + suffix, excludeRegions);
@@ -318,8 +319,9 @@ IndirectFittingModel::createOutputName(const std::string &fitMode) const {
   std::string inputWorkspace =
       isMultiFit() ? "Multi" : m_fitDataModel->getWorkspaceNames()[0];
   std::string spectra =
-      isMultiFit() ? "" : m_fitDataModel->getSpectra(TableDatasetIndex{0})
-                              .getString();
+      isMultiFit()
+          ? ""
+          : m_fitDataModel->getSpectra(TableDatasetIndex{0}).getString();
   return inputWorkspace + "_" + m_fitType + "_" + fitMode + "_" + m_fitString +
          "_" + spectra + "_Results";
 }
@@ -553,7 +555,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-    IndirectFittingModel::createDefaultParameters(TableDatasetIndex) const {
+IndirectFittingModel::createDefaultParameters(TableDatasetIndex) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -615,8 +617,8 @@ IndirectFittingModel::getSingleFit(TableDatasetIndex dataIndex,
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, getSingleFunction(dataIndex, spectrum),
                    getResultXAxisUnit());
-  addInputDataToSimultaneousFit(fitAlgorithm, ws, spectrum.value, range, exclude,
-                                std::string(""));
+  addInputDataToSimultaneousFit(fitAlgorithm, ws, spectrum.value, range,
+                                exclude, std::string(""));
   fitAlgorithm->setProperty("OutputWorkspace",
                             singleFitOutputName(dataIndex, spectrum));
   return fitAlgorithm;

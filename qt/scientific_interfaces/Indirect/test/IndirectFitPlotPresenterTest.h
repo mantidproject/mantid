@@ -39,9 +39,10 @@ getFunctionWithWorkspaceName(std::string const &workspaceName) {
       "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
       "(composite=Convolution,FixResolution=true,NumDeriv=true;"
       "name=Resolution,Workspace=" +
-      workspaceName + ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-                      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-                      "0175)))";
+      workspaceName +
+      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+      "0175)))";
   return getFunction(functionString);
 }
 } // namespace
@@ -563,15 +564,13 @@ public:
         .WillByDefault(Return(TableDatasetIndex(2)));
     ON_CALL(*m_fittingModel, numberOfWorkspaces())
         .WillByDefault(Return(TableDatasetIndex(2)));
-    ON_CALL(*m_fittingModel,
-            createDisplayName(TableDatasetIndex(1)))
+    ON_CALL(*m_fittingModel, createDisplayName(TableDatasetIndex(1)))
         .WillByDefault(Return("DisplayName-1"));
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     Expectation createName =
-        EXPECT_CALL(*m_fittingModel, createDisplayName(index))
-            .Times(1);
+        EXPECT_CALL(*m_fittingModel, createDisplayName(index)).Times(1);
     EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", index))
         .Times(1)
         .After(createName);
@@ -593,8 +592,7 @@ public:
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     Expectation createName =
-        EXPECT_CALL(*m_fittingModel, createDisplayName(index))
-            .Times(1);
+        EXPECT_CALL(*m_fittingModel, createDisplayName(index)).Times(1);
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-1"))
         .Times(1)
         .After(createName);
@@ -612,8 +610,7 @@ public:
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     Expectation createName =
-        EXPECT_CALL(*m_fittingModel, createDisplayName(index))
-            .Times(1);
+        EXPECT_CALL(*m_fittingModel, createDisplayName(index)).Times(1);
     EXPECT_CALL(*m_view,
                 setNameInDataSelection("DisplayName-1", TableDatasetIndex(0)))
         .Times(1)

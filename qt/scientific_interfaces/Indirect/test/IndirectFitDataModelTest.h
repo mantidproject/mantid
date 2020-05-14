@@ -12,8 +12,8 @@
 #include <gmock/gmock.h>
 
 #include "IndirectFitDataModel.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces::IDA;
 
