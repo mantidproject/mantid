@@ -33,7 +33,7 @@ public:
   // Apply the time zero correction to the workspace time axis
   void applyTimeZeroCorrection() override;
   // Load detector grouping
-  API::Workspace_sptr loadDetectorGrouping() override;
+  API::Workspace_sptr loadDetectorGrouping() const override;
   // Load default grouping from ID
   API::Workspace_sptr loadDefaultDetectorGrouping() const;
   // Load dead time table
@@ -44,6 +44,8 @@ private:
   DataObjects::Workspace2D_sptr m_workspace;
   int m_entryNumber;
   bool m_isFileMultiPeriod;
+  std::vector<detid_t> m_detectors;
+  std::vector<detid_t> getLoadedDetectors();
 };
 } // namespace DataHandling
 } // namespace Mantid

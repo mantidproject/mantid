@@ -51,36 +51,24 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
   }
 }
 // Loads the detector grouping from the Muon Nexus V2 entry
-std::tuple<std::vector<detid_t>, std::vector<detid_t>>
-loadDetectorGroupingFromNexus(NXEntry &entry,
-                              DataObjects::Workspace2D_sptr &localWorkspace,
+std::vector<detid_t>
+loadDetectorGroupingFromNexus(const NXEntry &entry,
+                              const std::vector<detid_t> &detectorsLoaded,
                               bool isFileMultiPeriod) {
 
-  int64_t numberOfSpectra = localWorkspace->getNumberHistograms();
   std::vector<detid_t> grouping;
-  std::vector<detid_t> detectorsLoaded;
-
   // Open nexus entry
   NXClass detectorGroup = entry.openNXGroup("instrument/detector_1");
   if (detectorGroup.containsDataSet("grouping")) {
     NXInt groupingData = detectorGroup.openNXInt("grouping");
     groupingData.load();
-    // Get the detectors which are loaded
-    // then find the grouping ID for each detector
-    for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
-         spectraIndex++) {
-      const auto &detIdSet =
-          localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
-      // each spectrum should only point to one detector in the Muon file
-      detectorsLoaded.emplace_back(*detIdSet.begin());
-    }
     if (!isFileMultiPeriod) {
       for (const auto &detectorNumber : detectorsLoaded) {
         grouping.emplace_back(groupingData[detectorNumber - 1]);
       }
     }
   }
-  return std::make_tuple(detectorsLoaded, grouping);
+  return grouping;
 }
 std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   std::string mainFieldDirection = "Longitudinal"; // default
@@ -97,29 +85,18 @@ std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   }
   return mainFieldDirection;
 }
-std::tuple<std::vector<detid_t>, std::vector<double>>
+ std::vector<double>
 loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
-                       const DataObjects::Workspace2D_sptr &localWorkspace,
+                       const std::vector<detid_t> &loadedDetectors,
                        const bool isFileMultiPeriod) {
 
-  size_t numberOfSpectra = localWorkspace->getNumberHistograms();
 
   std::vector<double> deadTimes;
-  std::vector<detid_t> loadedDetectors;
   // Open detector nexus entry
   NXClass detectorGroup = entry.openNXGroup("instrument/detector_1");
   if (detectorGroup.containsDataSet("dead_time")) {
     NXFloat deadTimesData = detectorGroup.openNXFloat("dead_time");
     deadTimesData.load();
-
-    // Find the detectors which are loaded
-    for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
-         spectraIndex++) {
-      const auto detIdSet =
-          localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
-      // each spectrum should only point to one detector in the Muon file
-      loadedDetectors.emplace_back(*detIdSet.begin());
-    }
     if (!isFileMultiPeriod) {
       // Simplest case - one grouping entry per detector
       for (const auto &detectorNumber : loadedDetectors) {
@@ -127,7 +104,7 @@ loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
       }
     }
   }
-  return std::make_tuple(loadedDetectors, deadTimes);
+  return deadTimes;
 }
 
 double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry) {

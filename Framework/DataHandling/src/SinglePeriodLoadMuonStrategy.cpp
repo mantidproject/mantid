@@ -30,7 +30,8 @@ SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(
     Kernel::Logger &g_log, const std::string &filename, NXEntry entry,
     Workspace2D_sptr workspace, int entryNumber, bool isFileMultiPeriod)
     : LoadMuonStrategy(g_log, filename), m_entry(entry), m_workspace(workspace),
-      m_entryNumber(entryNumber), m_isFileMultiPeriod(isFileMultiPeriod) {}
+      m_detectors(getLoadedDetectors()), m_entryNumber(entryNumber),
+      m_isFileMultiPeriod(isFileMultiPeriod) {}
 
 // Loads MuonLogData for a single period file
 void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
@@ -79,13 +80,12 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
  * stored
  * @returns :: Grouping table
  */
-Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() {
+Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
 
-  auto [detectorsLoaded, grouping] =
-      LoadMuonNexus3Helper::loadDetectorGroupingFromNexus(m_entry, m_workspace,
-                                                          m_isFileMultiPeriod);
+  auto grouping = LoadMuonNexus3Helper::loadDetectorGroupingFromNexus(
+      m_entry, m_detectors, m_isFileMultiPeriod);
   DataObjects::TableWorkspace_sptr table =
-      createDetectorGroupingTable(detectorsLoaded, grouping);
+      createDetectorGroupingTable(m_detectors, grouping);
 
   Workspace_sptr table_workspace;
   if (table->rowCount() != 0) {
@@ -134,10 +134,9 @@ SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
 
   m_logger.notice("Loading deadtime table");
-  auto [detectorsLoaded, deadTimes] =
-      LoadMuonNexus3Helper::loadDeadTimesFromNexus(m_entry, m_workspace,
-                                                   m_isFileMultiPeriod);
-  auto deadTimeTable = createDeadTimeTable(detectorsLoaded, deadTimes);
+  auto deadTimes = LoadMuonNexus3Helper::loadDeadTimesFromNexus(
+      m_entry, m_detectors, m_isFileMultiPeriod);
+  auto deadTimeTable = createDeadTimeTable(m_detectors, deadTimes);
 
   Workspace_sptr deadtimeWorkspace =
       std::dynamic_pointer_cast<Workspace>(deadTimeTable);
@@ -164,6 +163,23 @@ void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
     auto &timeAxis = m_workspace->mutableX(i);
     timeAxis = timeAxis - timeZero;
   }
+}
+/**
+ * Finds the detectors loaded into the present workspace
+ */
+std::vector<detid_t> SinglePeriodLoadMuonStrategy::getLoadedDetectors() {
+
+  std::vector<detid_t> loadedDetectors;
+  size_t numberOfSpectra = m_workspace->getNumberHistograms();
+
+  for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
+       spectraIndex++) {
+    const auto detIdSet =
+        m_workspace->getSpectrum(spectraIndex).getDetectorIDs();
+    // each spectrum should only point to one detector in the Muon file
+    loadedDetectors.emplace_back(*detIdSet.begin());
+  }
+  return loadedDetectors;
 }
 
 } // namespace DataHandling

@@ -29,7 +29,8 @@ LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log,
  * @return Detector Grouping Table create using the data
  */
 DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDetectorGroupingTable(
-    std::vector<detid_t> detectorsLoaded, std::vector<detid_t> grouping) {
+    const std::vector<detid_t> &detectorsLoaded,
+    const std::vector<detid_t> &grouping) const {
   auto detectorGroupingTable =
       std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
           API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
@@ -56,9 +57,9 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDetectorGroupingTable(
  * @param deadTimes :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
-DataObjects::TableWorkspace_sptr
-LoadMuonStrategy::createDeadTimeTable(std::vector<detid_t> detectorsLoaded,
-                                      std::vector<double> deadTimes) const {
+DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(
+    const std::vector<detid_t> &detectorsLoaded,
+    const std::vector<double> &deadTimes) const {
   auto deadTimesTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
       API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
