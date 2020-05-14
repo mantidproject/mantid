@@ -5,19 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexus3.h"
-#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadMuonNexus3Helper.h"
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D.h"
-
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/GroupingLoader.h"
-#include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
-
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -25,17 +21,12 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 
-// clang-format off
-#include <nexus/NeXusException.hpp>
-// clang-format on
-
-#include <functional>
 #include <vector>
 
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMuonNexus3)
 
 using namespace Kernel;
 using namespace API;
@@ -55,49 +46,24 @@ LoadMuonNexus3::LoadMuonNexus3()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus3::confidence(Kernel::NexusDescriptor &descriptor) const {
-
+int LoadMuonNexus3::confidence(NexusHDF5Descriptor &descriptor) const {
   // Without this entry we cannot use LoadISISNexus
-  if (!descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+  if (!descriptor.isEntry("/raw_data_1", "NXentry")) {
     return 0;
   }
-  const auto &firstEntryNameType = descriptor.firstEntryNameType();
-  const std::string root = "/" + firstEntryNameType.first;
-  if (!descriptor.pathExists(root + "/definition"))
+  const std::string root = "/raw_data_1";
+  // Check if Muon source in defintiion entry
+  if (!descriptor.isEntry(root + "/definition"))
     return 0;
-
-  bool upperIDF(true);
-  if (descriptor.pathExists(root + "/IDF_version"))
-    upperIDF = true;
-  else {
-    if (descriptor.pathExists(root + "/idf_version"))
-      upperIDF = false;
-    else
-      return 0;
+  ::NeXus::File file(descriptor.getFilename());
+  file.openPath(root + "/definition");
+  std::string def = file.getStrData();
+  if (def == "muonTD" || def == "pulsedTD") {
+    return 82; // have to return 82 to "beat" the LoadMuonNexusV2 algorithm,
+               // which returns 81 for this file as well
+  } else {
+    return 0;
   }
-
-  try {
-    std::string versionField = "idf_version";
-    if (upperIDF)
-      versionField = "IDF_version";
-
-    auto &file = descriptor.data();
-    file.openPath(root + "/" + versionField);
-    int32_t version = 0;
-    file.getData(&version);
-    if (version != 2)
-      return 0;
-
-    file.openPath(root + "/definition");
-    std::string def = file.getStrData();
-    if (def == "muonTD" || def == "pulsedTD") {
-      // If all this succeeded then we'll assume this is an ISIS Muon NeXus file
-      // version 3
-      return 82;
-    }
-  } catch (...) {
-  }
-  return 0;
 }
 /// Initialization method.
 void LoadMuonNexus3::init() {
@@ -152,25 +118,21 @@ void LoadMuonNexus3::init() {
       "Table or a group of tables with information about the "
       "detector grouping stored in the file (if any). Version 1 only.");
 }
-void LoadMuonNexus3::exec() {
+void LoadMuonNexus3::execLoader() {
 
-  // we need to execute the child algorithm LoadISISNexus2, as this
-  // will do the majority of the loading for us
-  runLoadISISNexus();
-  Workspace_sptr outWS = getProperty("OutputWorkspace");
-
-  // Open the nexus entry
+  // prepare nexus entry
   m_entrynumber = getProperty("EntryNumber");
   m_filename = getPropertyValue("Filename");
-  // Create the root Nexus class
   NXRoot root(m_filename);
-  // Open the raw data group 'raw_data_1'
   NXEntry entry = root.openEntry("raw_data_1");
-  // Check if multi period file
-  isEntryMultiPeriod(entry);
-  // Load Muon specific properties
+
+  // Execute child algorithm LoadISISNexus2 and load Muon specific properties
+  runLoadISISNexus();
   loadMuonProperties(entry);
-  // DO lots of stuff to this workspace
+
+  // Check if single or multi period file and create appriate loading strategy
+  isEntryMultiPeriod(entry);
+  Workspace_sptr outWS = getProperty("OutputWorkspace");
   if (m_multiPeriodsLoaded) {
     WorkspaceGroup_sptr wksp_grp =
         std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
@@ -227,6 +189,10 @@ void LoadMuonNexus3::runLoadISISNexus() {
   ISISLoader->executeAsChildAlg();
   this->copyPropertiesFrom(*ISISLoader);
 }
+/**
+ * Loads Muon specific data from the nexus entry
+ * and sets the appropriate output properties
+ */
 void LoadMuonNexus3::loadMuonProperties(const NXEntry &entry) {
 
   std::string mainFieldDirection =
@@ -236,14 +202,8 @@ void LoadMuonNexus3::loadMuonProperties(const NXEntry &entry) {
   double timeZero = LoadMuonNexus3Helper::loadTimeZeroFromNexusFile(entry);
   setProperty("timeZero", timeZero);
 
-  try {
-    auto firstGoodData =
-        LoadMuonNexus3Helper::loadFirstGoodDataFromNexus(entry);
-    setProperty("FirstGoodData", firstGoodData);
-  } catch (std::exception &e) {
-    g_log.warning() << "Error while loading the FirstGoodData value: "
-                    << e.what() << "\n";
-  }
+  auto firstGoodData = LoadMuonNexus3Helper::loadFirstGoodDataFromNexus(entry);
+  setProperty("FirstGoodData", firstGoodData);
 }
 } // namespace DataHandling
 } // namespace Mantid

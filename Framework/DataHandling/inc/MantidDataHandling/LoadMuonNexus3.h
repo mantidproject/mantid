@@ -14,7 +14,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidAPI/NexusFileLoader.h"
 
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -28,10 +28,9 @@ namespace DataHandling {
 /** @class LoadMuonNexus3 LoadMuonNexus3.h DataHandling/LoadMuonNexus3.h
 
 Loads a file in the Nexus Muon format version 2 and stores it in a 2D workspace
-(Workspace2D class). LoadMuonNexus is an algorithm and as such inherits
-from the Algorithm class, via DataHandlingCommand, and overrides
-the init() & exec() methods.
-
+(Workspace2D class). LoadMuonNexus is an algorithm that loads
+an HDF5 file and as such inherits from API::NexusFileLoader and
+the init() & execLoader() methods.
 Required Properties:
 <UL>
 <LI> Filename - The name of and path to the input NeXus file </LI>
@@ -39,7 +38,7 @@ Required Properties:
 data
      (a multiperiod file will store higher periods in workspaces called
 OutputWorkspace_PeriodNo)
-     [ not yet implemented for Nexus ]</LI>
+     [ not yet implemented for Muon Nexus 2 ]</LI>
 </UL>
 
 Optional Properties: (note that these options are not available if reading a
@@ -48,14 +47,11 @@ multiperiod file)
 <LI> spectrum_min  - The spectrum to start loading from</LI>
 <LI> spectrum_max  - The spectrum to load to</LI>
 <LI> spectrum_list - An ArrayProperty of spectra to load</LI>
-<LI> auto_group - Determines whether the spectra are automatically grouped
-together based on the groupings in the NeXus file. </LI>
 </UL>
 
 @author Stephen Smith, ISIS
 */
-class DLLExport LoadMuonNexus3
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadMuonNexus3 : public API::NexusFileLoader {
 public:
   // Default constructor
   LoadMuonNexus3();
@@ -67,7 +63,7 @@ public:
            "workspace (Workspace2D class).";
   }
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
   // Version
   int version() const override { return 3; }
 
@@ -78,7 +74,7 @@ private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void exec() override;
+  void execLoader() override;
   // Determines whether entry contains multi period data
   void isEntryMultiPeriod(const NeXus::NXEntry &entry);
   // Run child algorithm LoadISISNexus3

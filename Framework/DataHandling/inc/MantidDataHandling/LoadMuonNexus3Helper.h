@@ -31,7 +31,7 @@ loadDetectorGroupingFromNexus(NeXus::NXEntry &entry,
                               bool isFileMultiPeriod);
 // Load the orientation from the nexus entry
 std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry);
-// Load deadtime i
+// Load deadtime information
 std::tuple<std::vector<detid_t>, std::vector<double>>
 loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
                        const DataObjects::Workspace2D_sptr &localWorkspace,
