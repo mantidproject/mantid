@@ -46,6 +46,7 @@
 #include <atomic>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <numeric>
 
 using std::size_t;
@@ -2062,6 +2063,52 @@ public:
     idx = ws->findY(NAN, {0, 0});
     TS_ASSERT_EQUALS(idx.first, 1);
     TS_ASSERT_EQUALS(idx.second, 0);
+  }
+  void testGetIntegratedSpectra() {
+    WorkspaceTester workspace;
+    workspace.initialize(5, 5, 4);
+    MantidVec xValues = {1., 2., 3., 4., 5.};
+    //set some values
+    for (size_t wsIndex = 0; wsIndex < workspace.getNumberHistograms(); wsIndex++) {
+      for (size_t binIndex = 0; binIndex < workspace.blocksize(); binIndex++) {
+        // incrementing numbers
+        double fillValue = static_cast<double>(binIndex + 1);
+        // apart from some exceptions
+        if (wsIndex == 1) {
+          // all NaN
+          fillValue = std::numeric_limits<double>::quiet_NaN();
+        } else if (wsIndex == 2) {
+          // all infinite
+          fillValue = std::numeric_limits<double>::infinity();
+        } else if ((wsIndex == 3) && (binIndex % 2 == 1)) {
+          // alternate value NaN
+          fillValue = std::numeric_limits<double>::quiet_NaN();
+        } else if ((wsIndex == 4) && (binIndex % 2 == 0)) {
+          // other alternate value inf
+          fillValue = std::numeric_limits<double>::infinity();
+        }
+        workspace.mutableY(wsIndex)[binIndex] = fillValue;
+      }
+      //set the x values
+      std::copy(xValues.begin(), xValues.end(), workspace.mutableX(wsIndex).begin());
+    }
+    MantidVec integratedValues;
+    //the enitre range
+    workspace.getIntegratedSpectra(integratedValues, 0, 0, true);
+    MantidVec expected = {10., 0., 0., 4., 6.};
+    TS_ASSERT_EQUALS(integratedValues, expected);
+    // just the first two values
+    workspace.getIntegratedSpectra(integratedValues, 0.0, 2.0, false);
+    expected = {3., 0., 0., 1., 2.};
+    TS_ASSERT_EQUALS(integratedValues, expected);
+    // just the middle two values
+    workspace.getIntegratedSpectra(integratedValues, 2.0, 3.9, false);
+    expected = {5., 0., 0., 3., 2.};
+    TS_ASSERT_EQUALS(integratedValues, expected);
+    // just the last two values
+    workspace.getIntegratedSpectra(integratedValues, 3.0, 5.0, false);
+    expected = {7., 0., 0., 3., 4.};
+    TS_ASSERT_EQUALS(integratedValues, expected);
   }
 
 private:
