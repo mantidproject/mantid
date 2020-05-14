@@ -94,6 +94,10 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         norm_kwargs['ApplyScalingFactor'] = False
         norm_wksp = LiquidsReflectometryReduction(**norm_kwargs)
 
+        print("Norm:", len(norm_wksp.readX(0)))
+        for x, y in zip(norm_wksp.readX(0), norm_wksp.readY(0)):
+            print('  ', x, y)
+
         # Calculate the theoretical reflectivity for normalization using Refl1D
         q = norm_wksp.readX(0)
         model_json = self.getProperty("Refl1DModelParameters").value
@@ -105,10 +109,6 @@ class LRReductionWithReference(DataProcessorAlgorithm):
             DataY=model_reflectivity,
             DataE=np.zeros(len(q)),
             UnitX=norm_wksp.getAxis(0).getUnit().unitID())
-
-        print("Norm:", len(norm_wksp.readX(0)))
-        for x, y in zip(norm_wksp.readX(0), norm_wksp.readY(0)):
-            print('  ', x, y)
 
         print("Model:", len(model_wksp.readX(0)))
         for x, y in zip(model_wksp.readX(0), model_wksp.readY(0)):
