@@ -126,8 +126,8 @@ bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(
  * @param widget :: the widget to check
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkFileFinderWidgetIsValid(const QString &name,
-                                                FileFinderWidget *widget) {
+bool UserInputValidator::checkFileFinderWidgetIsValid(
+    const QString &name, FileFinderWidget *widget) {
   if (!widget->isValid()) {
     addErrorMessage(name + " file error: " + widget->getFileProblem());
     return false;

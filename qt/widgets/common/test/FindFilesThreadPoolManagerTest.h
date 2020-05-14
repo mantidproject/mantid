@@ -13,8 +13,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using MantidQt::API::FakeFindFilesThread;
 using MantidQt::API::FakeFileFinderWidget;
+using MantidQt::API::FakeFindFilesThread;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesThreadPoolManager;

@@ -9,8 +9,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -594,13 +594,15 @@ std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::newVanadiumNo() const {
-  return qListToVector(m_uiTabCalib.FileFinderWidget_new_vanadium_num->getFilenames(),
-                       m_uiTabCalib.FileFinderWidget_new_vanadium_num->isValid());
+  return qListToVector(
+      m_uiTabCalib.FileFinderWidget_new_vanadium_num->getFilenames(),
+      m_uiTabCalib.FileFinderWidget_new_vanadium_num->isValid());
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::newCeriaNo() const {
-  return qListToVector(m_uiTabCalib.FileFinderWidget_new_ceria_num->getFilenames(),
-                       m_uiTabCalib.FileFinderWidget_new_ceria_num->isValid());
+  return qListToVector(
+      m_uiTabCalib.FileFinderWidget_new_ceria_num->getFilenames(),
+      m_uiTabCalib.FileFinderWidget_new_ceria_num->isValid());
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
@@ -920,14 +922,16 @@ std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
 
 std::vector<std::string>
 EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
-  return qListToVector(m_uiTabFocus.FileFinderWidget_cropped_run_num->getFilenames(),
-                       m_uiTabFocus.FileFinderWidget_cropped_run_num->isValid());
+  return qListToVector(
+      m_uiTabFocus.FileFinderWidget_cropped_run_num->getFilenames(),
+      m_uiTabFocus.FileFinderWidget_cropped_run_num->isValid());
 }
 
 std::vector<std::string>
 EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
-  return qListToVector(m_uiTabFocus.FileFinderWidget_texture_run_num->getFilenames(),
-                       m_uiTabFocus.FileFinderWidget_texture_run_num->isValid());
+  return qListToVector(
+      m_uiTabFocus.FileFinderWidget_texture_run_num->getFilenames(),
+      m_uiTabFocus.FileFinderWidget_texture_run_num->isValid());
 }
 
 std::vector<std::string>
@@ -1042,14 +1046,18 @@ void EnggDiffractionViewQtGUI::setPrefix(const std::string &prefix) {
   QString prefixInput = QString::fromStdString(prefix);
   // focus tab
   m_uiTabFocus.FileFinderWidget_run_num->setInstrumentOverride(prefixInput);
-  m_uiTabFocus.FileFinderWidget_texture_run_num->setInstrumentOverride(prefixInput);
+  m_uiTabFocus.FileFinderWidget_texture_run_num->setInstrumentOverride(
+      prefixInput);
 
   // calibration tab
-  m_uiTabCalib.FileFinderWidget_new_ceria_num->setInstrumentOverride(prefixInput);
-  m_uiTabCalib.FileFinderWidget_new_vanadium_num->setInstrumentOverride(prefixInput);
+  m_uiTabCalib.FileFinderWidget_new_ceria_num->setInstrumentOverride(
+      prefixInput);
+  m_uiTabCalib.FileFinderWidget_new_vanadium_num->setInstrumentOverride(
+      prefixInput);
 
   // rebin tab
-  m_uiTabPreproc.FileFinderWidget_preproc_run_num->setInstrumentOverride(prefixInput);
+  m_uiTabPreproc.FileFinderWidget_preproc_run_num->setInstrumentOverride(
+      prefixInput);
 }
 
 void EnggDiffractionViewQtGUI::showEvent(QShowEvent * /*unused*/) {

@@ -1233,8 +1233,8 @@ bool SANSRunWindow::loadCSVFile() {
       m_uiForm.batch_table->item(0, 2), m_uiForm.batch_table->item(0, 3),
       m_uiForm.batch_table->item(0, 4), m_uiForm.batch_table->item(0, 5)};
   FileFinderWidget *run_files[] = {m_uiForm.scatterSample, m_uiForm.transmis,
-                             m_uiForm.direct,        m_uiForm.scatCan,
-                             m_uiForm.transCan,      m_uiForm.dirCan};
+                                   m_uiForm.direct,        m_uiForm.scatCan,
+                                   m_uiForm.transCan,      m_uiForm.dirCan};
   // if the cell is not empty, set the text to the single mode file
   for (unsigned short i = 0; i < 6; i++) {
     if (batch_items[i])
