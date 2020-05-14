@@ -25,7 +25,8 @@ set(INCLUDE_FILES
     inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
     inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
     inc/MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h
-    inc/MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h)
+    inc/MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h
+)
 
 set(SOURCE_FILES
     src/AutoScaleRangeGenerator.cpp
@@ -50,7 +51,8 @@ set(SOURCE_FILES
     src/TimeControlWidget.cpp
     src/VatesParaViewApplication.cpp
     src/ViewBase.cpp
-    src/VsiApplyBehaviour.cpp)
+    src/VsiApplyBehaviour.cpp
+)
 
 # These are the headers to be preprocessed using Qt's moc preprocessor.
 set(MOC_FILES
@@ -70,7 +72,8 @@ set(MOC_FILES
     inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
     inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
     inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
-    inc/MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h)
+    inc/MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h
+)
 
 # These are the ui files to be processed using Qt's ui file processor.
 set(UI_FILES
@@ -84,7 +87,8 @@ set(UI_FILES
     inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
     inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
     inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui
-    inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.ui)
+    inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.ui
+)
 
 # Add the QtWidgets icons
 set(RES_FILES ../../../resources/icons/ViewWidgetsIcons.qrc)
@@ -97,67 +101,39 @@ mtd_add_qt_library(
   NOMOC ${INCLUDE_FILES}
   UI ${UI_FILES}
   RES ${RES_FILES}
-  DEFS
-	IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
-  INCLUDE_DIRS
-	inc
-  SYSTEM_INCLUDE_DIRS
-	${PARAVIEW_INCLUDE_DIRS}
-  LINK_LIBS
-	${TCMALLOC_LIBRARIES_LINKTIME}
-	pqApplicationComponents
-	pqComponents
-	${vtkjsoncpp_LIBRARIES}
-	vtkPVServerManagerRendering
-	vtkRenderingFreeType
-	vtksys
-	VatesAPI
-	${PYTHON_LIBRARIES}
-	${POCO_LIBRARIES}
-	${Boost_LIBRARIES}
-	${CORE_MANTIDLIBS}
-	DataObjects
-  QT4_LINK_LIBS
-	Qt4::Qscintilla
-	Qwt5
+  DEFS IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
+  INCLUDE_DIRS inc
+  SYSTEM_INCLUDE_DIRS ${PARAVIEW_INCLUDE_DIRS}
+  LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
+            pqApplicationComponents
+            pqComponents
+            ${vtkjsoncpp_LIBRARIES}
+            vtkPVServerManagerRendering
+            vtkRenderingFreeType
+            vtksys
+            VatesAPI
+            ${PYTHON_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${CORE_MANTIDLIBS}
+            DataObjects
+  QT4_LINK_LIBS Qt4::Qscintilla Qwt5
   MTD_QT_LINK_LIBS
-	MantidQtWidgetsCommon
-	MantidQtWidgetsPlotting
-	VatesSimpleGuiQtWidgets
-	MantidQtWidgetsFactory
-	MantidQtWidgetsSliceViewer
-  INSTALL_DIR_BASE
-	${PLUGINS_DIR}
-  OSX_INSTALL_RPATH
-	@loader_path/../../Contents/MacOS
-	@loader_path/../../Contents/Frameworks
+    MantidQtWidgetsCommon MantidQtWidgetsPlotting VatesSimpleGuiQtWidgets
+    MantidQtWidgetsFactory MantidQtWidgetsSliceViewer
+  INSTALL_DIR_BASE ${PLUGINS_DIR}
+  OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS
+                    @loader_path/../../Contents/Frameworks
   LINUX_INSTALL_RPATH
-	"\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR};\$ORIGIN"
-  )
+    "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR};\$ORIGIN"
+)
 
 # Set the name of the generated library
-set_target_properties(VatesSimpleGuiViewWidgetsQt4
-                      PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiViewWidgetsQt4)
+set_target_properties(
+  VatesSimpleGuiViewWidgetsQt4 PROPERTIES OUTPUT_NAME
+                                          MantidVatesSimpleGuiViewWidgetsQt4
+)
 # Add to the 'VatesSimpleGui' group in VS
-set_property(TARGET VatesSimpleGuiViewWidgetsQt4
-             PROPERTY FOLDER MantidVatesSimpleGui)
-
-if(SQUISH_FOUND)
-  # Need to set the AUT first
-  set(SQUISH_AUT MantidPlot)
-  set(SQUISH_AUT_PATH $<TARGET_FILE_DIR:${SQUISH_AUT}>)
-
-  # Need to set environmental variables next
-  set(
-    SQUISH_ENV_VARS
-    PV_PLUGIN_PATH=$<TARGET_FILE_DIR:${SQUISH_AUT}>/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}
-    SCRIPTS_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
-    SQUISH_SCRIPT_DIR=${VSI_GLOBAL_SCRIPTS}:${CMAKE_CURRENT_SOURCE_DIR}/test/common/scripts
-    )
-  set(TEST_SUITES
-      test/suite_MDEventWorkspace
-      test/suite_MDHistoWorkspace)
-
-  squish_add_test_suite(${TEST_SUITES})
-
-endif()
+set_property(
+  TARGET VatesSimpleGuiViewWidgetsQt4 PROPERTY FOLDER MantidVatesSimpleGui
+)

@@ -385,21 +385,6 @@ include(PylintSetup)
 # Set up the unit tests target
 # ##############################################################################
 
-# GUI testing via Squish
-find_package(Squish)
-if(SQUISH_FOUND)
-  # CMAKE_MODULE_PATH gets polluted when ParaView is present
-  set(MANTID_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-  include(SquishAddTestSuite)
-  enable_testing()
-  message(STATUS "Found Squish for GUI testing")
-else()
-  message(
-    STATUS
-      "Could not find Squish - GUI testing not available. Try specifying your SQUISH_INSTALL_DIR cmake variable."
-  )
-endif()
-
 # ##############################################################################
 # External Data for testing
 # ##############################################################################
