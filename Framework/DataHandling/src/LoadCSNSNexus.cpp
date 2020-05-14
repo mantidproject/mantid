@@ -475,7 +475,8 @@ std::multimap<uint32_t, std::pair<float, int64_t>> LoadCSNSNexus::getEventData(
  * @param[in] evtData :: event data
  */
 void LoadCSNSNexus::loadEventData(
-    boost::shared_ptr<DataObjects::EventWorkspace> workspace,
+    EventWorkspace_sptr& workspace,
+    //boost::shared_ptr<DataObjects::EventWorkspace> workspace,
     const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
     std::multimap<uint32_t, std::pair<float, int64_t>> evtData) {
   workspace->initialize(pidNums, 1, 1);
