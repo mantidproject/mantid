@@ -13,4 +13,3 @@ FileFinder = import_qt(
         '..._common',
         'mantidqt.widgets.filefinder',
         'FileFinderWidget')
-

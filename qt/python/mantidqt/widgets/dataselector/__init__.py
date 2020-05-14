@@ -12,4 +12,3 @@ DataSelector = import_qt(
         'mantidqt.widgets.dataselector',
         'DataSelector'
         )
-

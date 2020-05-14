@@ -12,4 +12,3 @@ WorkspaceSelector = import_qt(
         'mantidqt.widgets.workspaceselector',
         'WorkspaceSelector'
         )
-
