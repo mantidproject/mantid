@@ -120,14 +120,14 @@ bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(
 }
 
 /**
- * Check that the given MWRunFiles widget has valid files.
+ * Check that the given FileFinderWidget widget has valid files.
  *
  * @param name   :: the "name" of the widget so as to be recognised by the user.
  * @param widget :: the widget to check
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkMWRunFilesIsValid(const QString &name,
-                                                MWRunFiles *widget) {
+bool UserInputValidator::checkFileFinderWidgetIsValid(const QString &name,
+                                                FileFinderWidget *widget) {
   if (!widget->isValid()) {
     addErrorMessage(name + " file error: " + widget->getFileProblem());
     return false;

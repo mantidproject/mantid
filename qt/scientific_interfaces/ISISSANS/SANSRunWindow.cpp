@@ -334,9 +334,9 @@ void SANSRunWindow::initLayout() {
 
   m_runFiles.emplace_back(m_uiForm.direct);
   m_runFiles.emplace_back(m_uiForm.dirCan);
-  std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
+  std::vector<FileFinderWidget *>::const_iterator it = m_runFiles.begin();
   for (; it != m_runFiles.end(); ++it) {
-    (*it)->doButtonOpt(MWRunFiles::Icon);
+    (*it)->doButtonOpt(FileFinderWidget::Icon);
   }
 
   connectFirstPageSignals();
@@ -1232,7 +1232,7 @@ bool SANSRunWindow::loadCSVFile() {
       m_uiForm.batch_table->item(0, 0), m_uiForm.batch_table->item(0, 1),
       m_uiForm.batch_table->item(0, 2), m_uiForm.batch_table->item(0, 3),
       m_uiForm.batch_table->item(0, 4), m_uiForm.batch_table->item(0, 5)};
-  MWRunFiles *run_files[] = {m_uiForm.scatterSample, m_uiForm.transmis,
+  FileFinderWidget *run_files[] = {m_uiForm.scatterSample, m_uiForm.transmis,
                              m_uiForm.direct,        m_uiForm.scatCan,
                              m_uiForm.transCan,      m_uiForm.dirCan};
   // if the cell is not empty, set the text to the single mode file
@@ -2231,7 +2231,7 @@ bool SANSRunWindow::handleLoadButtonClick() {
  *  @param output where the number will be displayed
  */
 void SANSRunWindow::readNumberOfEntries(const QString &RunStep,
-                                        API::MWRunFiles *const output) {
+                                        API::FileFinderWidget *const output) {
   QString periods = runReduceScriptFunction("print(i.ReductionSingleton()." +
                                             RunStep + ".periods_in_file)");
   output->setNumberOfEntries(periods.toInt());
@@ -2735,7 +2735,7 @@ bool SANSRunWindow::entriesAreValid(ValMap &vals) {
  *  @return true if there are no red stars on any run widgets, false otherwise
  */
 bool SANSRunWindow::runFilesAreValid() {
-  std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
+  std::vector<FileFinderWidget *>::const_iterator it = m_runFiles.begin();
   for (; it != m_runFiles.end(); ++it) {
     if (!(*it)->isValid()) {
       m_uiForm.runNumbers->setFocus();
@@ -3319,7 +3319,7 @@ void SANSRunWindow::enableOrDisableDefaultSave() {
  */
 void SANSRunWindow::disOrEnablePeriods(const int tickState) {
   const bool enable = tickState == Qt::Checked;
-  std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
+  std::vector<FileFinderWidget *>::const_iterator it = m_runFiles.begin();
   for (; it != m_runFiles.end(); ++it) {
     (*it)->doMultiEntry(enable);
   }
@@ -3528,8 +3528,8 @@ void SANSRunWindow::resetDefaultOutput(const QString &wsName) {
  * present) file
  *  @param assignFn this is different for can or sample
  */
-bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
-                                     API::MWRunFiles &direct,
+bool SANSRunWindow::assignMonitorRun(API::FileFinderWidget &trans,
+                                     API::FileFinderWidget &direct,
                                      const QString &assignFn) {
   // need something to place between names printed by Python that won't be
   // intepreted as the names or removed as white space
@@ -3539,13 +3539,13 @@ bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
   assignCom.append(", r'" + direct.getFirstFilename() + "'");
 
   int period = trans.getEntryNum();
-  if (period != MWRunFiles::ALL_ENTRIES) {
+  if (period != FileFinderWidget::ALL_ENTRIES) {
     assignCom.append(", period_t=" + QString::number(period));
   }
 
   period = direct.getEntryNum();
   // we can only do single period reductions now
-  if (period != MWRunFiles::ALL_ENTRIES) {
+  if (period != FileFinderWidget::ALL_ENTRIES) {
     assignCom.append(", period_d=" + QString::number(period));
   }
   assignCom.append(")");
@@ -3577,7 +3577,7 @@ bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
  * @param[in] assignFn the Python command to run
  * @return true if there were no Python errors, false otherwise
  */
-bool SANSRunWindow::assignDetBankRun(API::MWRunFiles &runFile,
+bool SANSRunWindow::assignDetBankRun(API::FileFinderWidget &runFile,
                                      const QString &assignFn) {
   // need something to place between names printed by Python that won't be
   // intepreted as the names or removed as white space
@@ -3587,7 +3587,7 @@ bool SANSRunWindow::assignDetBankRun(API::MWRunFiles &runFile,
   assignCom.append(", reload = True");
   int period = runFile.getEntryNum();
 
-  if (period != MWRunFiles::ALL_ENTRIES) {
+  if (period != FileFinderWidget::ALL_ENTRIES) {
     assignCom.append(", period = " + QString::number(period));
   }
 

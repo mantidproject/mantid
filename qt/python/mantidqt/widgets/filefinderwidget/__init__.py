@@ -12,5 +12,5 @@ from mantidqt.utils.qt import import_qt
 FileFinderWidget = import_qt(
         '..._common',
         'mantidqt.widgets.filefinderwidget',
-        'MWRunFiles')
+        'FileFinderWidget')
 

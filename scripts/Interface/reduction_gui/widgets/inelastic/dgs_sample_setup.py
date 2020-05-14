@@ -99,7 +99,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.horizontalLayout.removeWidget(self._content.sample_edit)
         self._content.horizontalLayout.removeWidget(self._content.sample_browse)
         spacer = self._content.horizontalLayout.takeAt(0)
-        self._content.sample_edit = mantidqtpython.MantidQt.API.MWRunFiles()
+        self._content.sample_edit = mantidqtpython.MantidQt.API.FileFinderWidget()
         # Unfortunately, can only use live if default instrument = gui-set instrument
         if self._instrument_name == config.getInstrument().name():
             self._content.sample_edit.setProperty("liveButton","Show")
@@ -123,7 +123,7 @@ class SampleSetupWidget(BaseWidget):
 
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
-        if IS_IN_MANTIDPLOT and isinstance(ui_ctrl, mantidqtpython.MantidQt.API.MWRunFiles):
+        if IS_IN_MANTIDPLOT and isinstance(ui_ctrl, mantidqtpython.MantidQt.API.FileFinderWidget):
             ui_ctrl.fileEditingFinished.connect(call_back)
             ui_ctrl.fileFindingFinished.connect(call_back)
         else:  # assume QLineEdit
@@ -230,7 +230,7 @@ class SampleSetupWidget(BaseWidget):
 
     def live_button_widget(self):
         """
-            Returns a reference to the MWRunFiles widget that contains the live button
+            Returns a reference to the FileFinderWidget that contains the live button
             (if using interface inside MantidPlot)
         """
         return self._livebuttonwidget

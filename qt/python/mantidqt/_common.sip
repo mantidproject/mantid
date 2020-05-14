@@ -899,15 +899,15 @@ public:
 };
 
 // ---------------------------------
-// MWRunFiles
+// FileFinderWidget
 // ---------------------------------
-class MWRunFiles : QWidget
+class FileFinderWidget : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 %End
 public:
-    MWRunFiles(QWidget *parent = nullptr);
+    FileFinderWidget(QWidget *parent = nullptr);
 
     QString getText();
     QString getFirstFilename() const;

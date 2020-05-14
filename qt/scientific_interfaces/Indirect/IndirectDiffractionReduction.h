@@ -80,7 +80,8 @@ private:
                  const std::string &reflection = "");
 
   void runGenericReduction(const QString &instName, const QString &mode);
-  void connectRunButtonValidation(const MantidQt::API::MWRunFiles *file_field);
+  void connectRunButtonValidation(
+          const MantidQt::API::FileFinderWidget *file_field);
   void runOSIRISdiffonlyReduction();
   void createGroupingWorkspace(const std::string &outputWsName);
 

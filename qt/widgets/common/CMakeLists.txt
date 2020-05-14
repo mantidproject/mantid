@@ -55,7 +55,7 @@ set(
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
-  src/MWRunFiles.cpp
+  src/FileFinderWidget.cpp
   src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
@@ -177,7 +177,7 @@ set(
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
@@ -296,7 +296,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
@@ -338,7 +338,7 @@ set(
   src/MdSettings.cpp
   src/Message.cpp
   src/NonOrthogonal.cpp
-  src/MWRunFiles.cpp
+  src/FileFinderWidget.cpp
   src/OptionsPropertyWidget.cpp
   src/pixmaps.cpp
   src/PlotAxis.cpp
@@ -499,7 +499,7 @@ set(
   inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidWidget.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
@@ -766,7 +766,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
@@ -797,7 +797,7 @@ foreach(
 endforeach()
 
 # Python unit tests
-set(TEST_PY_FILES test/MWRunFilesTest.py)
+set(TEST_PY_FILES test/FileFinderWidgetTest.py)
 
 set(
   TARGET_LIBRARIES

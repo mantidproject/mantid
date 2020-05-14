@@ -50,7 +50,7 @@ void IndirectMolDyn::setup() {}
 bool IndirectMolDyn::validate() {
   UserInputValidator uiv;
 
-  if (uiv.checkMWRunFilesIsValid("Data", m_uiForm.mwRun)) {
+  if (uiv.checkFileFinderWidgetIsValid("Data", m_uiForm.mwRun)) {
     QString filename = m_uiForm.mwRun->getFirstFilename();
     QString version = m_uiForm.cbVersion->currentText();
     QFileInfo finfo(filename);
