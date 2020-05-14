@@ -207,7 +207,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::createConvolutionFunction(
 }
 
 IFunction_sptr ConvolutionFunctionModel::createResolutionFunction(
-    const std::string &workspaceName, int workspaceIndex) {
+    const std::string &workspaceName, size_t workspaceIndex) {
   std::string resolution =
       workspaceName.empty()
           ? "name=Resolution"

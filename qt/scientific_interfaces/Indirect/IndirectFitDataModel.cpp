@@ -111,7 +111,7 @@ IndirectFitDataModel::getResolutionsForFit() const {
     auto spectra = getSpectra(TableDatasetIndex{index});
     if (!resolutionWorkspace) {
       for (auto &spectraIndex : spectra) {
-        resolutionVector.emplace_back(std::make_pair("", 0));
+        resolutionVector.emplace_back(std::make_pair("", spectraIndex.value));
       }
       continue;
     }

@@ -51,7 +51,7 @@ public:
     auto resolutionVector = m_fitData->getResolutionsForFit();
 
     TS_ASSERT_EQUALS(resolutionVector[2].first, "");
-    TS_ASSERT_EQUALS(resolutionVector[2].second, 0);
+    TS_ASSERT_EQUALS(resolutionVector[2].second, 2);
   }
 
   void test_can_set_spectra_on_existing_workspace() {

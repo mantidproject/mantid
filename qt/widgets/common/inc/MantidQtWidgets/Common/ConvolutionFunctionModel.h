@@ -64,7 +64,7 @@ private:
   createConvolutionFunction(IFunction_sptr resolutionFunction,
                             const IFunction_sptr &innerFunction);
   IFunction_sptr createResolutionFunction(const std::string &workspaceName,
-                                          int workspaceIndex);
+                                          size_t workspaceIndex);
   CompositeFunction_sptr addBackground(CompositeFunction_sptr domainFunction,
                                        const std::string &background);
   boost::optional<QString> m_backgroundPrefix;
