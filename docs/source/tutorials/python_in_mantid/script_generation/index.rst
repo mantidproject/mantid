@@ -14,7 +14,7 @@ Script Generation
    03_extracting_alg_prop
    04_pim_ex_2
 
-**Other Plotting Documentation**
+**Contents**
 
 * :ref:`01_running_algorithms`
 * :ref:`02_generalising`

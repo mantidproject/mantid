@@ -11,21 +11,24 @@ Controlling Mantid with Python
    :maxdepth: 1
 
    01_matrix_and_plot
-   02_instrument_view
-   03_sliceviewer
    04_pim_ex_3
 
+..   02_instrument_view
+..   03_sliceviewer
 
-**Other Plotting Documentation**
+
+
+**Contents**
 
 * :ref:`01_matrix_and_plot`
-* :ref:`02_instrument_view`
-* :ref:`03_sliceviewer`
+.. * :ref:`02_instrument_view`
+.. * :ref:`03_sliceviewer`
 * :ref:`04_pim_ex_3`
 
 
-
-#An example of MantidPlot matrices and graphs
+.. figure:: /images/Mantid_artifact.png
+   :alt: Mantid_artifact
+   :align: right
 
 * To display results within MantidPlot, a user can view workspaces as a matrix and also plot graphs from the results.
 

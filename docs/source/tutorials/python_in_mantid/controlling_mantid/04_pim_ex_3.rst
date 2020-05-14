@@ -16,7 +16,7 @@ Graphing
 
 #. Load the GEM data set - GEM40979.raw using SpectrumMin=431 & SpectrumMax=750
 #. Convert units to dSpacing
-#. Smooth the data using SmoothData using NPoints=20
+#. Smooth the data using :ref:<algm-SmoothData> using NPoints=20
 #. Plot workspace indices 0,1,2
 #. Rescale x-axis to range to 4 < x < 6
 #. Rescale y-axis to range to 0 < y < 5e3
@@ -25,7 +25,7 @@ Graphing
 #. Change the title of the X axis
 #. Change the title of the Y axis
 
-Reference: http://www.mantidproject.org/MantidPlot:_1D_Plots_in_Python
+:ref:<scripting_plots>
 
 Instrument view
 ---------------

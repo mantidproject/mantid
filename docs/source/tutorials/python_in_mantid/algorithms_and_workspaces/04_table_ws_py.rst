@@ -5,9 +5,11 @@ TableWorkspace with Python
 ===========================
 
 
-TableWorkspaces are a type of workspace designed to handle data other than particle count spectra. They contain only one array rather than the 3 tables of X-value, Y-value and Z-value of most workspaces and few algorithms manipulate. TableWorkspaces are similar to sheets in Microsoft Excel. An example is the [Fit algorithm] that saves the calculated fit parameters in this format.
+TableWorkspaces are a type of :ref:`workspace <02_ws_types>` designed to handle data other than particle count spectra. They contain only one array rather than the 3 tables of X-value, Y-value and Z-value of most :ref:`workspaces <03_matrix_ws_py>` and few :ref:`algorithms <Algorithm>` manipulate. TableWorkspaces are similar to sheets in Microsoft Excel. An example is the :ref:`algm-Fit` algorithm that saves the calculated fit parameters in this format.
 
-#ITableWorkspaceHierachy.png
+
+.. figure:: /images/ITableWorkspaceHierachy.png
+   :alt: ITableWorkspaceHierachy
 
 Creating a TableWorkspace
 =========================
@@ -38,4 +40,4 @@ There are various ways to access your data from the workspace.
 PeaksWorkspace
 ==============
 
-A peaks workspace is a type of table workspace, with a fixed structure, on which each row is represents a peak. This functionality is also exposed to python, however usage is outside the scope of this course. See [PeaksWorkspace] for more details.
+A peaks workspace is a type of table workspace, with a fixed structure, on which each row is represents a peak. This functionality is also exposed to python, however usage is outside the scope of this course. See :ref:`PeaksWorkspace` for more details.

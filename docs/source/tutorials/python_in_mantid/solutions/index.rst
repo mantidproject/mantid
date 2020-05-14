@@ -15,7 +15,7 @@ Python in Mantid: Solutions
    04_pim_sol
 
 
-**Other Plotting Documentation**
+**Contents**
 
 * :ref:`01_pim_sol`
 * :ref:`02_pim_sol`

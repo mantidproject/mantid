@@ -77,4 +77,4 @@ All of these properties can be accessed via Python:
 	facility = config.getFacility('SNS')  # or config.getFacility() returns the current default
 	inst_info = config.getInstrument('CNCS') # or config.Instrument() returns the current default
 
-The list of methods available are shown in the python reference: instrument and facility
+The list of methods available are shown in the python reference: :ref:<InstrumentInfo>

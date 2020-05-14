@@ -19,7 +19,7 @@ Further Algorithm and Workspaces with Python
    07_pim_ex_4
 
 
-**Other Plotting Documentation**
+**Contents**
 
 * :ref:`01_access_ws`
 * :ref:`02_matrix_ws_attributes`

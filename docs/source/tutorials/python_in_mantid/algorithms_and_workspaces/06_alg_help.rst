@@ -4,7 +4,7 @@
 Algorithm Help
 ==============
 
-Each of the algorithm functions has help that can be generated using the Python help() command.
+Each of the algorithm functions has help that can be generated using the Python `help()` command.
 
 To show the details of a particular algorithm use the help command with the algorithm name as an argument.
 
@@ -16,10 +16,10 @@ For example
 
 produces
 
-Help on function Rebin in module mantid.simpleapi: 
-
 .. code-block:: python
 
+    Help on function Rebin in module mantid.simpleapi: 
+    
     Rebin(InputWorkspace,Params,PreserveEvents, Version=1)
         Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.
         
