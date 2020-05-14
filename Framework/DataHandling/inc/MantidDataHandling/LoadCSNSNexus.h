@@ -61,7 +61,7 @@ public:
   std::vector<int64_t> getPixelId(const std::vector<std::string> &inputList);
   std::vector<uint32_t> getTimeBin(std::string typeName);
   std::vector<uint32_t> getHistData(const vector<string> &inputList);
-  void loadHistData(boost::shared_ptr<API::MatrixWorkspace> workspace,
+  void loadHistData(MatrixWorkspace_sptr &workspace,
                     std::vector<uint32_t> &timeOfFlight, size_t pidNums,
                     std::vector<uint32_t> &histData);
 

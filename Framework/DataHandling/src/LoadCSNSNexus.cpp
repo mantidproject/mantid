@@ -358,7 +358,7 @@ LoadCSNSNexus::getHistData(const vector<string> &inputList) {
  * @param[in] histData :: histogram data
  */
 void LoadCSNSNexus::loadHistData(
-    boost::shared_ptr<API::MatrixWorkspace> workspace,
+    MatrixWorkspace_sptr &workspace,
     std::vector<uint32_t> &timeOfFlight, size_t pidNums,
     std::vector<uint32_t> &histData) {
   size_t timeNums = timeOfFlight.size();
