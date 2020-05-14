@@ -9,4 +9,8 @@
 #
 from mantidqt.utils.qt import import_qt
 
-FileFinder = import_qt('..._common', 'mantidqt.widgets.filefinder', 'MWRunFiles')
+FileFinderWidget = import_qt(
+        '..._common',
+        'mantidqt.widgets.filefinderwidget',
+        'MWRunFiles')
+
