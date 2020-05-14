@@ -65,7 +65,6 @@ loadDetectorGroupingFromNexus(NXEntry &entry,
   if (detectorGroup.containsDataSet("grouping")) {
     NXInt groupingData = detectorGroup.openNXInt("grouping");
     groupingData.load();
-    int numGroupingEntries = groupingData.dim0();
 
     std::vector<detid_t> detectorsLoaded;
     std::vector<detid_t> grouping;
@@ -119,10 +118,8 @@ loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
   if (detectorGroup.containsDataSet("dead_time")) {
     NXFloat deadTimesData = detectorGroup.openNXFloat("dead_time");
     deadTimesData.load();
-    int numGroupingEntries = deadTimesData.dim0();
 
-    // Return the detectors which are loaded
-    // then find the grouping ID for each detector
+    // Find the detectors which are loaded
     for (int64_t spectraIndex = 0; spectraIndex < numberOfSpectra;
          spectraIndex++) {
       const auto detIdSet =
@@ -163,8 +160,8 @@ double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry) {
       double bin_size = resolution / 1000000.0;
       return bin * bin_size;
     }
-  } catch (std::exception &e) {
-    throw e;
+  } catch (std::runtime_error) {
+    throw std::runtime_error("Error loading FirstGoodData, check Nexus file");
   }
 }
 

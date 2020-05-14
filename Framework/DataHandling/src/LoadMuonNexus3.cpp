@@ -56,10 +56,46 @@ LoadMuonNexus3::LoadMuonNexus3()
  * be used
  */
 int LoadMuonNexus3::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
-    // It also could be an Event Nexus file or a TOFRaw file,
-    // so confidence is set to less than 80.
-    return 75;
+
+  // Without this entry we cannot use LoadISISNexus
+  if (!descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+    return 0;
+  }
+  const auto &firstEntryNameType = descriptor.firstEntryNameType();
+  const std::string root = "/" + firstEntryNameType.first;
+  if (!descriptor.pathExists(root + "/definition"))
+    return 0;
+
+  bool upperIDF(true);
+  if (descriptor.pathExists(root + "/IDF_version"))
+    upperIDF = true;
+  else {
+    if (descriptor.pathExists(root + "/idf_version"))
+      upperIDF = false;
+    else
+      return 0;
+  }
+
+  try {
+    std::string versionField = "idf_version";
+    if (upperIDF)
+      versionField = "IDF_version";
+
+    auto &file = descriptor.data();
+    file.openPath(root + "/" + versionField);
+    int32_t version = 0;
+    file.getData(&version);
+    if (version != 2)
+      return 0;
+
+    file.openPath(root + "/definition");
+    std::string def = file.getStrData();
+    if (def == "muonTD" || def == "pulsedTD") {
+      // If all this succeeded then we'll assume this is an ISIS Muon NeXus file
+      // version 3
+      return 82;
+    }
+  } catch (...) {
   }
   return 0;
 }
