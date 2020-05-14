@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
+import json
+
 import systemtesting
 from mantid import *
 
@@ -14,6 +16,16 @@ from mantid.simpleapi import *
 class LRReductionWithRefrenceTest(systemtesting.MantidSystemTest):
     def runTest(self):
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
+
+        # Create the Refl1D theoretical model
+        refl1d_model_parameters = dict(
+            back_sld=2.07,
+            back_roughness=1.0,
+            front_sld=0,
+            layers=[dict(thickness=10, sld=3.5, isld=0, roughness=2),],
+            scale=1,
+            background=0)
+        refl1d_model_json = json.dumps(refl1d_model_parameters)
 
         LRReductionWithReference(
             RunNumbers=[119814],
@@ -40,6 +52,7 @@ class LRReductionWithRefrenceTest(systemtesting.MantidSystemTest):
             ScalingFactorFile=scaling_factor_file,
             SlitsWidthFlag=True,
             CropFirstAndLastPoints=False,
+            Refl1DModelParameters=refl1d_model_json,
             OutputWorkspace='reflectivity_119814_no_scaling')
 
     def validate(self):
