@@ -122,14 +122,14 @@ bool equivalentFunctions(const IFunction_const_sptr &func1,
 
 void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
                                    const MatrixWorkspace_sptr &workspace,
-                                   IDAWorkspaceIndex spectrum,
+                                   size_t spectrum,
                                    const std::pair<double, double> &xRange,
                                    const std::vector<double> &excludeRegions,
                                    const std::string &suffix) {
   fitAlgorithm->setProperty("InputWorkspace" + suffix, workspace);
   fitAlgorithm->setProperty("StartX" + suffix, xRange.first);
   fitAlgorithm->setProperty("EndX" + suffix, xRange.second);
-  fitAlgorithm->setProperty("WorkspaceIndex" + suffix, spectrum.value);
+  fitAlgorithm->setProperty("WorkspaceIndex" + suffix, static_cast<int>(spectrum));
 
   if (!excludeRegions.empty())
     fitAlgorithm->setProperty("Exclude" + suffix, excludeRegions);
@@ -615,7 +615,7 @@ IndirectFittingModel::getSingleFit(TableDatasetIndex dataIndex,
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, getSingleFunction(dataIndex, spectrum),
                    getResultXAxisUnit());
-  addInputDataToSimultaneousFit(fitAlgorithm, ws, spectrum, range, exclude,
+  addInputDataToSimultaneousFit(fitAlgorithm, ws, spectrum.value, range, exclude,
                                 std::string(""));
   fitAlgorithm->setProperty("OutputWorkspace",
                             singleFitOutputName(dataIndex, spectrum));
