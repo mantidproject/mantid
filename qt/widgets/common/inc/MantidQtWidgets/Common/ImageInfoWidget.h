@@ -8,7 +8,8 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/DisplayType.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/CoordinateConversion.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 
 #include <QTableWidget>
@@ -24,9 +25,9 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public QTableWidget {
   Q_OBJECT
 
 public:
-  ImageInfoWidget(std::string &wsName, DisplayType *type = nullptr,
+  ImageInfoWidget(std::string& wsName,
+                  CoordinateConversion &coordConversion,
                   QWidget *parent = nullptr);
-  ~ImageInfoWidget() override;
 
   void updateTable(const double x, const double y, const double z);
 

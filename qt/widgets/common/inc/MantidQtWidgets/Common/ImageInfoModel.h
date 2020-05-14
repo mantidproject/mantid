@@ -11,8 +11,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtWidgets/Common/DisplayType.h"
+#include "MantidQtWidgets/Common/CoordinateConversion.h"
 
 #include <string>
 #include <vector>
@@ -33,8 +32,8 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModel {
 
 public:
-  ImageInfoModel(Mantid::API::Workspace_sptr &ws, DisplayType *type = nullptr);
-  ~ImageInfoModel();
+  ImageInfoModel(const Mantid::API::Workspace_sptr &ws,
+                 CoordinateConversion &coordConversion);
 
   std::vector<std::string> getInfoList(const double x, const double y,
                                        const double z);
@@ -50,11 +49,11 @@ private:
                        const int precision, std::vector<std::string> &list);
 
   Mantid::API::Workspace_sptr m_workspace;
-  std::shared_ptr<Mantid::API::SpectrumInfo> m_spectrumInfo;
+  const Mantid::API::SpectrumInfo *m_spectrumInfo;
   std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_source;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
-  DisplayType *m_displayType;
+  CoordinateConversion &m_coordConversion;
   double m_xMin;
   double m_xMax;
   double m_yMax;

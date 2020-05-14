@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/DisplayType.h"
+#include "MantidQtWidgets/Common/CoordinateConversion.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -19,17 +19,16 @@ namespace MantidWidgets {
 
 enum state { X = 0, Y = 1 };
 
-class EXPORT_OPT_MANTIDQT_COMMON SliceViewerDisplayType : public DisplayType {
+class EXPORT_OPT_MANTIDQT_COMMON SliceViewerCoordConversion
+    : public CoordinateConversion {
 public:
-  SliceViewerDisplayType();
-  ~SliceViewerDisplayType(){};
+  SliceViewerCoordConversion();
   /**
    * Converts the x and y display coordinates to the repective x and y data
    * coordinates
    **/
-  void convertToDataCoord(const double xDisplayCoord,
-                          const double yDisplayCoord, double &xDataCoord,
-                          double &yDataCoord) override;
+  std::vector<double> toDataCoord(const double xDisplayCoord,
+                                  const double yDisplayCoord) const override;
 
   void changeDimensions(const int xAxisState, const int yAxisState);
 

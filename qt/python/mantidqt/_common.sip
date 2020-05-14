@@ -925,13 +925,12 @@ signals:
 // ---------------------------------
 // ImageInformationWidget
 // ---------------------------------
-class DisplayType {
+class CoordinateConversion {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/DisplayType.h"
+#include "MantidQtWidgets/Common/CoordinateConversion.h"
 %End
 public:
-    DisplayType();
-	virtual void convertToDataCoord(const double xDisplayCoord, const double yDisplayCoord, double &xDataCoord, double &yDataCoord) = 0;
+	virtual std::vector<double> toDataCoord(const double xDisplayCoord, const double yDisplayCoord) const = 0;
 };
 
 class ImageInfoWidget : public QTableWidget {
@@ -939,17 +938,17 @@ class ImageInfoWidget : public QTableWidget {
 #include "MantidQtWidgets/Common/ImageInfoWidget.h"
 %End
 public:
-    ImageInfoWidget(std::string &wsName, DisplayType *type, QWidget *parent = nullptr);
+    ImageInfoWidget(std::string &wsName, CoordinateConversion& coordConversion, QWidget *parent = nullptr);
 	void updateTable(const double x, const double y, const double z);
 };
 
-class SliceViewerDisplayType : public DisplayType {
+class SliceViewerCoordConversion : public CoordinateConversion {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/SliceViewerDisplayType.h"
+#include "MantidQtWidgets/Common/SliceViewerCoordConversion.h"
 %End
 public:
-    SliceViewerDisplayType();
-	void convertToDataCoord(const double xDisplayCoord, const double yDisplayCoord, double &xDataCoord, double &yDataCoord);
+    SliceViewerCoordConversion();
+	std::vector<double> toDataCoord(const double xDisplayCoord, const double yDisplayCoord) const;
 	void changeDimensions(const int xAxisState, const int yAxisState);
 };
 

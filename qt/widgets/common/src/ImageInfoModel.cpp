@@ -20,7 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace {
-Logger g_log("ImageInfoWidget");
+Logger g_log("ImageInfoModel");
 }
 
 namespace MantidQt {
@@ -29,14 +29,15 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoModel::ImageInfoModel(Workspace_sptr &ws, DisplayType *type)
-    : m_workspace(ws), m_displayType(type) {
+ImageInfoModel::ImageInfoModel(const Workspace_sptr &ws,
+                               CoordinateConversion &coordConversion)
+    : m_workspace(ws), m_coordConversion(coordConversion) {
 
   auto matWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
   if (matWs) {
     matWs->getXMinMax(m_xMin, m_xMax);
     m_yMax = static_cast<double>(matWs->getNumberHistograms());
-    m_spectrumInfo = std::make_unique<SpectrumInfo>(matWs->spectrumInfo());
+    m_spectrumInfo = &matWs->spectrumInfo();
     m_instrument = matWs->getInstrument();
     if (m_instrument) {
       m_source = m_instrument->getSource();
@@ -53,11 +54,6 @@ ImageInfoModel::ImageInfoModel(Workspace_sptr &ws, DisplayType *type)
     }
   }
 }
-
-/**
- * Destructor
- */
-ImageInfoModel::~ImageInfoModel() {}
 
 std::vector<std::string>
 ImageInfoModel::getInfoList(const double x, const double y, const double z) {
@@ -76,31 +72,31 @@ std::vector<std::string> ImageInfoModel::getMatrixWorkspaceInfo(
     const double xDisplayCoord, const double yDisplayCoord, const double value,
     MatrixWorkspace_sptr ws) {
   std::vector<std::string> list;
-  double x(xDisplayCoord);
-  double y(yDisplayCoord);
-  if (m_displayType) {
-    m_displayType->convertToDataCoord(xDisplayCoord, yDisplayCoord, x, y);
-  }
+
+  std::vector<double> coords =
+      m_coordConversion.toDataCoord(xDisplayCoord, yDisplayCoord);
+  double x = coords[0];
+  double y = coords[1];
 
   if (x >= m_xMax || x <= m_xMin || y >= m_yMax || y < 0)
     return list;
 
   addNameAndValue("Value", value, 4, list);
 
-  int row = (int)y;
+  int row = (int)(y-0.5);
   const auto &spec = ws->getSpectrum(row);
 
   double spec_num = spec.getSpectrumNo();
   addNameAndValue("Spec Num", spec_num, 0, list);
 
   std::string x_label = "";
-  Unit_sptr &old_unit = ws->getAxis(0)->unit();
+  const auto &old_unit = ws->getAxis(0)->unit();
   if (old_unit) {
     x_label = old_unit->caption();
     addNameAndValue(x_label, x, 3, list);
   }
 
-  auto ids = spec.getDetectorIDs();
+  const auto &ids = spec.getDetectorIDs();
   if (!ids.empty()) {
     auto id = *(ids.begin());
     addNameAndValue("Det ID", id, 0, list);
@@ -182,36 +178,35 @@ std::vector<std::string> ImageInfoModel::getMatrixWorkspaceInfo(
   }
 
   if (!(x_label == "Wavelength")) {
-    const Unit_sptr &wl_unit = UnitFactory::Instance().create("Wavelength");
+    const auto wl_unit = UnitFactory::Instance().create("Wavelength");
     double wavelength = wl_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                       emode, efixed, delta);
     addNameAndValue("Wavelength", wavelength, 4, list);
   }
 
   if (!(x_label == "Energy")) {
-    const Unit_sptr &e_unit = UnitFactory::Instance().create("Energy");
+    const auto e_unit = UnitFactory::Instance().create("Energy");
     double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
                                                  efixed, delta);
     addNameAndValue("Energy", energy, 4, list);
   }
 
   if ((!(x_label == "d-Spacing")) && (two_theta != 0.0) && (emode == 0)) {
-    const Unit_sptr &d_unit = UnitFactory::Instance().create("dSpacing");
+    const auto d_unit = UnitFactory::Instance().create("dSpacing");
     double d_spacing = d_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                     emode, efixed, delta);
     addNameAndValue("d-Spacing", d_spacing, 4, list);
   }
 
   if ((!(x_label == "q")) && (two_theta != 0.0)) {
-    const Unit_sptr &q_unit =
-        UnitFactory::Instance().create("MomentumTransfer");
+    const auto q_unit = UnitFactory::Instance().create("MomentumTransfer");
     double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
                                                 efixed, delta);
     addNameAndValue("|Q|", mag_q, 4, list);
   }
 
   if ((!(x_label == "DeltaE")) && (two_theta != 0.0) && (emode != 0)) {
-    const Unit_sptr &deltaE_unit = UnitFactory::Instance().create("DeltaE");
+    const auto deltaE_unit = UnitFactory::Instance().create("DeltaE");
     double delta_E = deltaE_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                        emode, efixed, delta);
     addNameAndValue("DeltaE", delta_E, 4, list);

@@ -79,7 +79,7 @@ set(
   src/SequentialFitDialog.cpp
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
-  src/SliceViewerDisplayType.cpp
+  src/SliceViewerCoordConversion.cpp
   src/SlitCalculator.cpp
   src/TextPropertyWidget.cpp
   src/TSVSerialiser.cpp
@@ -149,7 +149,6 @@ set(
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
   inc/MantidQtWidgets/Common/DataSelector.h
-  inc/MantidQtWidgets/Common/DisplayType.h
   inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
@@ -164,7 +163,6 @@ set(
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/IFunctionView.h
-  inc/MantidQtWidgets/Common/ImageInfoModel.h
   inc/MantidQtWidgets/Common/ImageInfoWidget.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
@@ -201,7 +199,6 @@ set(
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
   inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
-  inc/MantidQtWidgets/Common/SliceViewerDisplayType.h
   inc/MantidQtWidgets/Common/SlitCalculator.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
@@ -246,6 +243,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
+	inc/MantidQtWidgets/Common/CoordinateConversion.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
@@ -254,6 +252,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
+	inc/MantidQtWidgets/Common/ImageInfoModel.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -266,6 +265,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
+	inc/MantidQtWidgets/Common/SliceViewerCoordConversion.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
     inc/MantidQtWidgets/Common/WorkspaceIcons.h
@@ -461,7 +461,7 @@ set(
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
   src/SequentialFitDialog.cpp
-  src/SliceViewerDisplayType.cpp
+  src/SliceViewerCoordConversion.cpp
   src/SlicingAlgorithmDialog.cpp
   src/SlitCalculator.cpp
   src/TrackedAction.cpp
@@ -540,7 +540,6 @@ set(
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
   inc/MantidQtWidgets/Common/DataSelector.h
-  inc/MantidQtWidgets/Common/DisplayType.h
   inc/MantidQtWidgets/Common/DiagResults.h
   inc/MantidQtWidgets/Common/DoubleSpinBox.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
@@ -553,7 +552,6 @@ set(
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
-  inc/MantidQtWidgets/Common/ImageInfoModel.h
   inc/MantidQtWidgets/Common/ImageInfoWidget.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/InputController.h
@@ -576,7 +574,6 @@ set(
   inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.h
-  inc/MantidQtWidgets/Common/SliceViewerDisplayType.h
   inc/MantidQtWidgets/Common/SlitCalculator.h
   inc/MantidQtWidgets/Common/TrackedAction.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
@@ -619,6 +616,7 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/Configurable.h
+  inc/MantidQtWidgets/Common/CoordinateConversion.h
   inc/MantidQtWidgets/Common/DllOption.h
   inc/MantidQtWidgets/Common/DropEventHelper.h
   inc/MantidQtWidgets/Common/FileDialogHandler.h
@@ -628,6 +626,7 @@ set(
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFunctionView.h
+  inc/MantidQtWidgets/Common/ImageInfoModel.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/IProjectSerialisable.h
   inc/MantidQtWidgets/Common/LogValueFinder.h
@@ -645,6 +644,7 @@ set(
   inc/MantidQtWidgets/Common/QStringUtils.h
   inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
+  inc/MantidQtWidgets/Common/SliceViewerCoordConversion.h
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/SignalBlocker.h
   inc/MantidQtWidgets/Common/UserSubWindowFactory.h

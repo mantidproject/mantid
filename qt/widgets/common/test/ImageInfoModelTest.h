@@ -8,6 +8,7 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidQtWidgets/Common/CoordinateConversion.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -16,6 +17,14 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::DataObjects;
+
+class FakeCoordinateConversion : public CoordinateConversion {
+public:
+  std::vector<double> toDataCoord(const double x,
+                                  const double y) const override {
+    return std::vector<double>{x, y};
+  };
+};
 
 class ImageInfoModelTest : public CxxTest::TestSuite {
 public:
@@ -28,20 +37,22 @@ public:
     Workspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    TS_ASSERT_THROWS_NOTHING(ImageInfoModel model(workspace))
+    FakeCoordinateConversion coordConvert;
+    TS_ASSERT_THROWS_NOTHING(ImageInfoModel model(workspace, coordConvert))
   }
 
   void test_construct_with_md_workspace() {
     Workspace_sptr workspace =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    TS_ASSERT_THROWS_NOTHING(ImageInfoModel model(workspace))
+    FakeCoordinateConversion coordConvert;
+    TS_ASSERT_THROWS_NOTHING(ImageInfoModel model(workspace, coordConvert))
   }
 
   void test_getInfoList_with_matrix_ws() {
     Workspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModel model(workspace);
+    ImageInfoModel model = createModel(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -62,7 +73,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, false);
     workspace->getAxis(0)->setUnit("TOF");
     Workspace_sptr ws = std::dynamic_pointer_cast<Workspace>(workspace);
-    ImageInfoModel model(ws);
+    ImageInfoModel model = createModel(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -76,7 +87,7 @@ public:
   void test_getInfoList_with_md_ws() {
     Workspace_sptr workspace =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    ImageInfoModel model(workspace);
+    ImageInfoModel model = createModel(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -90,7 +101,8 @@ public:
     Workspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModel model(workspace);
+    ImageInfoModel model = createModel(workspace);
+
     auto list1 = model.getInfoList(-1, 4, 7);
     auto list2 = model.getInfoList(10, 4, 7);
 
@@ -102,10 +114,17 @@ public:
     Workspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModel model(workspace);
+    ImageInfoModel model = createModel(workspace);
     auto list1 = model.getInfoList(2, -1, 7);
     auto list2 = model.getInfoList(2, 10, 7);
     TS_ASSERT_EQUALS(0, list1.size())
     TS_ASSERT_EQUALS(0, list2.size())
+  }
+
+private:
+  ImageInfoModel createModel(Workspace_sptr workspace) {
+    FakeCoordinateConversion coordConvert;
+    ImageInfoModel model(workspace, coordConvert);
+    return model;
   }
 };

@@ -18,12 +18,13 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoWidget::ImageInfoWidget(std::string &wsName, DisplayType *type,
+ImageInfoWidget::ImageInfoWidget(std::string& wsName,
+                                 CoordinateConversion &coordConversion,
                                  QWidget *parent)
     : QTableWidget(2, 0, parent) {
   auto workspace =
-      Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-  m_model = std::make_unique<ImageInfoModel>(workspace, type);
+    Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+  m_model = std::make_unique<ImageInfoModel>(workspace, coordConversion);
   horizontalHeader()->hide();
   verticalHeader()->hide();
 
@@ -33,11 +34,6 @@ ImageInfoWidget::ImageInfoWidget(std::string &wsName, DisplayType *type,
 
   setFixedHeight(height);
 }
-
-/**
- * Destructor
- */
-ImageInfoWidget::~ImageInfoWidget() {}
 
 void ImageInfoWidget::updateTable(const double x, const double y,
                                   const double z) {

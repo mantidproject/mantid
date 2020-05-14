@@ -5,28 +5,30 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidQtWidgets/Common/SliceViewerDisplayType.h"
+#include "MantidQtWidgets/Common/SliceViewerCoordConversion.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-SliceViewerDisplayType::SliceViewerDisplayType()
+SliceViewerCoordConversion::SliceViewerCoordConversion()
     : m_xAxis(state::X), m_yAxis(state::Y) {}
 
-void SliceViewerDisplayType::convertToDataCoord(const double xDisplayCoord,
-                                                const double yDisplayCoord,
-                                                double &xDataCoord,
-                                                double &yDataCoord) {
+std::vector<double>
+SliceViewerCoordConversion::toDataCoord(const double xDisplayCoord,
+                                        const double yDisplayCoord) const {
+  std::vector<double> dataCoords;
+  dataCoords.reserve(2);
   if (m_xAxis == state::Y) {
-    xDataCoord = yDisplayCoord;
-    yDataCoord = xDisplayCoord;
+    dataCoords.emplace_back(yDisplayCoord);
+    dataCoords.emplace_back(xDisplayCoord);
   } else {
-    xDataCoord = xDisplayCoord;
-    yDataCoord = yDisplayCoord;
+    dataCoords.emplace_back(xDisplayCoord);
+    dataCoords.emplace_back(yDisplayCoord);
   }
+  return dataCoords;
 }
 
-void SliceViewerDisplayType::changeDimensions(const int xAxisState,
-                                              const int yAxisState) {
+void SliceViewerCoordConversion::changeDimensions(const int xAxisState,
+                                                  const int yAxisState) {
   if ((xAxisState == state::X && yAxisState == state::Y) ||
       (xAxisState == state::Y && yAxisState == state::X)) {
     m_xAxis = static_cast<state>(xAxisState);

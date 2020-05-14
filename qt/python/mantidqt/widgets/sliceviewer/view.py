@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+
 # 3rd party imports
 
 import mantid.api
@@ -412,7 +413,7 @@ class SliceViewerDataView(QWidget):
 
     def mouse_click(self, event):
         if self.image_info_widget.track_cursor.checkState() == Qt.Unchecked \
-                and event.inaxes == self.ax and event.button == MouseButton.LEFT:
+                and event.inaxes == self.ax and event.button == 1:
             data = self.image.get_cursor_data(event)
             if data is not None and self.image_info_widget.track_cursor.checkState() == Qt.Unchecked:
                 self.image_info_widget.table_widget.updateTable(event.xdata, event.ydata, data)
