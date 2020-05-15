@@ -24,8 +24,8 @@
 #include "MantidKernel/DateAndTime.h"
 
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
