@@ -142,15 +142,13 @@ LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
  * @param runDetails  :: where to add properties
  *
  */
-void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
-                                       API::Run &runDetails,
-                                       std::string entryName,
-                                       int level) {
+void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
+                                       std::string entryName, int level) {
   std::string emptyStr; // needed for first call
   int datatype;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
-  if(entryName.compare("") != 0) {
-      strcpy(nxname, entryName.c_str());
+  if (entryName.compare("") != 0) {
+    strcpy(nxname, entryName.c_str());
   }
 
   // As a workaround against some "not so good" old ILL nexus files
@@ -163,7 +161,8 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
       NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
-      if (std::string(nxname) == "entry0" || std::string(nxname).compare(entryName) == 0) {
+      if (std::string(nxname) == "entry0" ||
+          std::string(nxname).compare(entryName) == 0) {
         recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr,
                                         emptyStr, level /* level */);
       } else {
