@@ -10,19 +10,12 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-import argparse
 import atexit
-import importlib
 import os
 import sys
-from functools import partial
 
-from mantid.api import FrameworkManagerImpl
-from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
-from sys import setswitchinterval
-from mantid.utils import is_required_version
+from mantid.kernel import ConfigService, logger
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
-from workbench.plugins.exception_handler import exception_logger
 from workbench.utils.windowfinder import find_window
 from workbench.widgets.about.presenter import AboutPresenter
 from workbench.widgets.settings.presenter import SettingsPresenter
@@ -44,7 +37,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, qVersion)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -65,7 +58,7 @@ plugins.setup_library_paths()
 # Importing resources loads the data in. This must be imported before the
 # QApplication is created or paths to Qt's resources will not be set up correctly
 from workbench.app.resources import qCleanupResources  # noqa
-from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
+from workbench.config import CONF  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
