@@ -214,6 +214,14 @@ TextAxis const *getTextAxis(const MatrixWorkspace &workspace,
   return dynamic_cast<TextAxis const *>(workspace.getAxis(axisIndex));
 }
 
+std::vector<std::string>
+getUniqueWorkspaceNames(std::vector<std::string> &&workspaceNames) {
+  std::set<std::string> uniqueNames(workspaceNames.begin(),
+                                    workspaceNames.end());
+  workspaceNames.assign(uniqueNames.begin(), uniqueNames.end());
+  return workspaceNames;
+}
+
 auto getNumericAxisValueReader(std::size_t axisIndex) {
   return [axisIndex](const MatrixWorkspace &workspace, std::size_t index) {
     if (auto const axis = getNumericAxis(workspace, axisIndex))
@@ -338,9 +346,9 @@ const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
 
 void QENSFitSimultaneous::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")->setDocumentation(
-      "Math expressions defining ties between parameters of "
-      "the fitting function.");
+  getPointerToProperty("Ties")
+      ->setDocumentation("Math expressions defining ties between parameters of "
+                         "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
@@ -439,10 +447,19 @@ void QENSFitSimultaneous::execConcrete() {
   const auto groupWs = makeGroup(fitResult.second);
   const auto resultWs = processIndirectFitParameters(
       parameterWs, createDatasetGrouping(workspaces));
+  AnalysisDataService::Instance().addOrReplace(
+      getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces)) {
     renameWorkspaces(groupWs, getWorkspaceIndices(), outputBaseName,
                      "_Workspace", getWorkspaceNames());
+    auto inputWorkspaceNames = getUniqueWorkspaceNames(getWorkspaceNames());
+    renameWorkspaces(resultWs,
+                     std::vector<std::string>(inputWorkspaceNames.size(), ""),
+                     outputBaseName, "_Result", inputWorkspaceNames);
+  } else {
+    renameWorkspaces(resultWs, std::vector<std::string>({""}), outputBaseName,
+                     "_Result");
   }
 
   copyLogs(resultWs, workspaces);
@@ -712,9 +729,18 @@ void QENSFitSimultaneous::renameWorkspaces(
         inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
     return workspaceName;
   };
-  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup),
-                                   outputBaseName, endOfSuffix + "s",
-                                   getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
+}
+
+void QENSFitSimultaneous::renameWorkspaces(
+    const API::WorkspaceGroup_sptr &outputGroup,
+    std::vector<std::string> const &spectra, std::string const &outputBaseName,
+    std::string const &endOfSuffix) {
+  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
 } // namespace Algorithms

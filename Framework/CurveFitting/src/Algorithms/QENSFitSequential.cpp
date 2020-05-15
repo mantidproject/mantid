@@ -423,15 +423,13 @@ void QENSFitSequential::init() {
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
-  declareProperty("StartX", EMPTY_DBL(),
-                  "A value of x in, or on the low x "
-                  "boundary of, the first bin to "
-                  "include in\n"
-                  "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(),
-                  "A value in, or on the high x boundary "
-                  "of, the last bin the fitting range\n"
-                  "(default the highest value of x)");
+  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
+                                         "boundary of, the first bin to "
+                                         "include in\n"
+                                         "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
+                                       "of, the last bin the fitting range\n"
+                                       "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
