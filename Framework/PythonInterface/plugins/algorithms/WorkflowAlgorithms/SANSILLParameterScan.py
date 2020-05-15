@@ -32,6 +32,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
     observable = None
     pixel_y_min = None
     pixel_y_max = None
+    peak_order = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -47,11 +48,11 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
     def setUp(self):
         self.sample = self.getPropertyValue('SampleRuns')
-        self.absorber = self.getPropertyValue('AbsorberRuns').split(',')
-        self.container = self.getPropertyValue('ContainerRuns').split(',')
+        self.absorber = self.getPropertyValue('AbsorberRuns')
+        self.container = self.getPropertyValue('ContainerRuns')
         self.sensitivity = self.getPropertyValue('SensitivityMaps')
         self.default_mask = self.getPropertyValue('DefaultMaskFile')
-        self.mask = self.getPropertyValue('MaskFiles').split(',')
+        self.mask = self.getPropertyValue('MaskFiles')
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
@@ -59,6 +60,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.observable = self.getPropertyValue('Observable')
         self.pixel_y_min = self.getProperty('PixelYMin').value
         self.pixel_y_max = self.getProperty('PixelYMax').value
+        self.peak_order = self.getProperty('PeakOrder').value
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
     def PyInit(self):
@@ -117,6 +119,8 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         self.declareProperty('PixelYMin', 0, validator=IntBoundedValidator(lower=0), doc='Minimal y-index taken in the integration')
         self.declareProperty('PixelYMax', 320, validator=IntBoundedValidator(lower=0), doc='Maximal y-index taken in the integration')
+        self.declareProperty('PeakOrder', 40, validator=IntBoundedValidator(lower=0),
+                             doc='Parameter of the argrelmax function, roughly equivalent to the minimum expected width of the peaks.')
 
         self.setPropertyGroup('SensitivityMaps', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
@@ -126,6 +130,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.setPropertyGroup('Observable', 'Options')
         self.setPropertyGroup('PixelYMin', 'Options')
         self.setPropertyGroup('PixelYMax', 'Options')
+        self.setPropertyGroup('PeakOrder', "Options")
 
     def PyExec(self):
 
@@ -174,12 +179,12 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         # nothing is provided for the sample name, so if it fails to find the already loaded and semi processed workspaces,
         # it will not reduce
-        SANSILLReduction(Run="",
+        SANSILLReduction(Run=self.sample,
                          AbsorberInputWorkspace=absorber_name,
                          ContainerInputWorkspace=container_name,
                          SampleThickness=self.thickness,
-                         SensivityMaps=sens_input,
-                         SensivityOutputWorkspace=self.output_sens,
+                         # SensivityMaps=sens_input,
+                         # SensivityOutputWorkspace=self.output_sens,
                          MaskedInputWorkspace=mask_input,
                          DefaultMaskedInputWorkspace=default_mask_input,
                          NormaliseBy=self.normalise,
@@ -187,7 +192,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
 
         instrument = mtd["__joined"].getInstrument()
         detector = instrument.getComponentByName("detector")
-        if "detector-width" in detector.getParameterNames() or "detector-height" in detector.getParameterNames():
+        if "detector-width" in detector.getParameterNames() and "detector-height" in detector.getParameterNames():
             width = int(detector.getNumberParameter("detector-width")[0])
             height = int(detector.getNumberParameter("detector-height")[0])
         else:
@@ -195,18 +200,41 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             logger.warning("Width or height not found for the instrument. {0}, {1} assumed.".format(width, height))
 
         grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
-        GroupDetectors(InputWorkspace=sort_x_axis_output, OutputWorkspace=self.output2D, GroupingPattern=grouping)
-        Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
-        Rebin(InputWorkspace=self.output2D, OutputWorkspace=self.output, Params='1')
+        GroupDetectors(InputWorkspace=sort_x_axis_output, OutputWorkspace="grouped", GroupingPattern=grouping)
+        ConvertSpectrumAxis(InputWorkspace="grouped", OutputWorkspace=self.output2D, Target="Theta")
+
+        integration_1d = '_integration_1d'
+        Transpose(InputWorkspace=self.output2D, OutputWorkspace=integration_1d)
+        GroupDetectors(InputWorkspace=integration_1d, OutputWorkspace=integration_1d, WorkspaceIndexList="0-260")
+        # TODO non absolute wkspindex list
+
+        from scipy.signal import argrelmax
+        data = mtd[integration_1d].extractY()[0]
+
+        peaks = argrelmax(data, order=self.peak_order)[0]
+
+        Transpose(InputWorkspace=integration_1d, OutputWorkspace=integration_1d)
+        names = []
+        for index, peak in enumerate(peaks):
+            name = "peak_" + str(index)
+            names.append(name)
+            peak = int(peak)
+            selection_range_start = max(peak - self.peak_order // 2, 0)
+            selection_range_end = min(peak + self.peak_order // 2, 260)
+            CropWorkspace(InputWorkspace=integration_1d, OutputWorkspace=name, StartWorkspaceIndex=selection_range_start,
+                          EndWorkspaceIndex=selection_range_end)
+            Transpose(InputWorkspace=name, OutputWorkspace=name)
+
+        GroupWorkspaces(InputWorkspaces=names, OutputWorkspace=self.output)
 
         self.setProperty('OutputWorkspace', mtd[self.output])
         self.setProperty('Output2D', mtd[self.output2D])
 
 
-def create_detector_grouping(x_min, x_max, detector_width, detector_height):
+def create_detector_grouping(y_min, y_max, detector_width, detector_height):
     grouping = []
     for i in range(detector_width):
-        grouping.append(str(i*detector_height + x_min) + "-" + str(i*detector_height + x_max - 1))
+        grouping.append(str(i * detector_height + y_min) + "-" + str(i * detector_height + y_max - 1))
     grouping = ",".join(grouping)
     return grouping
 
