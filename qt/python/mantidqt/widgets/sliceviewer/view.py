@@ -80,6 +80,7 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
+        self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
         self.create_axes_orthogonal()
         self.mpl_layout.addWidget(self.canvas)
         self.colorbar_label = QLabel("Colormap")
@@ -176,7 +177,7 @@ class SliceViewerDataView(QWidget):
         if image_axes is None:
             return
 
-        self.clear_line_plots()
+        self.delete_line_plot_lines()
         all_axes = self.fig.axes
         # The order is defined by the order of the add_subplot calls so we always want to remove
         # the last two Axes. Do it backwards to cope with the container size change
@@ -250,7 +251,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar.set_mappable(self.image)
         self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
-        self.clear_line_plots()
+        self.delete_line_plot_lines()
         self.canvas.draw_idle()
 
     def reset_image_view_to_data_limits(self):
@@ -316,8 +317,10 @@ class SliceViewerDataView(QWidget):
         """
         self.mpl_toolbar.set_action_enabled(ToolItemText.NONORTHOGONAL_AXES, state=False)
 
-    def clear_line_plots(self):
+    def delete_line_plot_lines(self):
         try:  # clear old plots
+            self.xfig.remove()
+            self.yfig.remove()
             del self.xfig
             del self.yfig
         except AttributeError:
@@ -360,22 +363,31 @@ class SliceViewerDataView(QWidget):
         if self.line_plots and event.inaxes == self.ax:
             self.update_line_plots(event.xdata, event.ydata)
 
+    def mouse_outside_image(self, _):
+        """
+        Indicates that the mouse have moved outside of an axes.
+        We clear the line plots so that it is not confusing what they mean.
+        """
+        if self.line_plots:
+            self.delete_line_plot_lines()
+            self.canvas.draw_idle()
+
     def plot_x_line(self, x, y):
         try:
-            self.xfig[0].set_data(x, y)
+            self.xfig.set_data(x, y)
         except (AttributeError, IndexError):
             self.axx.clear()
-            self.xfig = self.axx.plot(x, y, scalex=False)
+            self.xfig = self.axx.plot(x, y, scalex=False)[0]
             self.axx.set_xlabel(self.ax.get_xlabel())
             self.update_line_plot_limits()
         self.canvas.draw_idle()
 
     def plot_y_line(self, x, y):
         try:
-            self.yfig[0].set_data(y, x)
+            self.yfig.set_data(y, x)
         except (AttributeError, IndexError):
             self.axy.clear()
-            self.yfig = self.axy.plot(y, x, scaley=False)
+            self.yfig = self.axy.plot(y, x, scaley=False)[0]
             self.axy.set_ylabel(self.ax.get_ylabel())
             self.update_line_plot_limits()
         self.canvas.draw_idle()
