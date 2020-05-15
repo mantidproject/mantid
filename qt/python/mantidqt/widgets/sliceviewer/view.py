@@ -11,6 +11,7 @@ import mantid.api
 from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
 from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib import gridspec
+from matplotlib.artist import setp as set_artist_property
 from matplotlib.figure import Figure
 from matplotlib.transforms import Bbox, BboxTransform
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
@@ -157,8 +158,8 @@ class SliceViewerDataView(QWidget):
                                wspace=0.0,
                                hspace=0.0)
         image_axes.set_position(gs[1].get_position(self.fig))
-        image_axes.xaxis.set_visible(False)
-        image_axes.yaxis.set_visible(False)
+        set_artist_property(image_axes.get_xticklabels(), visible=False)
+        set_artist_property(image_axes.get_yticklabels(), visible=False)
         self.axx = self.fig.add_subplot(gs[3], sharex=image_axes)
         self.axx.yaxis.tick_right()
         self.axy = self.fig.add_subplot(gs[0], sharey=image_axes)
@@ -184,8 +185,8 @@ class SliceViewerDataView(QWidget):
 
         gs = gridspec.GridSpec(1, 1)
         image_axes.set_position(gs[0].get_position(self.fig))
-        image_axes.xaxis.set_visible(True)
-        image_axes.yaxis.set_visible(True)
+        set_artist_property(image_axes.get_xticklabels(), visible=True)
+        set_artist_property(image_axes.get_yticklabels(), visible=True)
         self.axx, self.axy = None, None
 
         self.mpl_toolbar.update()  # sync list of axes in navstack
