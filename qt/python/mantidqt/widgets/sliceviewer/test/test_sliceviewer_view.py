@@ -19,14 +19,15 @@ from qtpy.QtWidgets import QApplication
 @start_qapplication
 class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
     def test_deleted_on_close(self):
-        ws = CreateMDHistoWorkspace(Dimensionality=3,
-                                    Extents='-3,3,-10,10,-1,1',
-                                    SignalInput=range(100),
-                                    ErrorInput=range(100),
-                                    NumberOfBins='5,5,4',
-                                    Names='Dim1,Dim2,Dim3',
-                                    Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                    OutputWorkspace='ws_MD_2d')
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=3,
+            Extents='-3,3,-10,10,-1,1',
+            SignalInput=range(100),
+            ErrorInput=range(100),
+            NumberOfBins='5,5,4',
+            Names='Dim1,Dim2,Dim3',
+            Units='MomentumTransfer,EnergyTransfer,Angstrom',
+            OutputWorkspace='ws_MD_2d')
         pres = SliceViewer(ws)
         self.assert_widget_created()
         pres.view.close()

@@ -1077,6 +1077,32 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
 }
 
 /**
+ * Return the time series's filtered times as a vector<DateAndTime>
+ * @return A vector of DateAndTime objects
+ */
+template <typename TYPE>
+std::vector<DateAndTime>
+TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
+  if (m_filter.empty()) {
+    return this->timesAsVector(); // no filtering to do
+  }
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+  sortIfNecessary();
+
+  std::vector<DateAndTime> out;
+
+  for (const auto &value : m_values) {
+    if (isTimeFiltered(value.time())) {
+      out.emplace_back(value.time());
+    }
+  }
+
+  return out;
+}
+
+/**
  * @return Return the series as list of times, where the time is the number of
  * seconds since the start.
  */
@@ -1267,6 +1293,12 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::maxValue() const {
   return std::max_element(m_values.begin(), m_values.end(),
                           TimeValueUnit<TYPE>::valueCmp)
       ->value();
+}
+
+template <typename TYPE> double TimeSeriesProperty<TYPE>::mean() const {
+  Mantid::Kernel::Statistics raw_stats = Mantid::Kernel::getStatistics(
+      this->filteredValuesAsVector(), StatOptions::Mean);
+  return raw_stats.mean;
 }
 
 /// Returns the number of values at UNIQUE time intervals in the time series

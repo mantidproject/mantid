@@ -4,6 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import NamedTuple, List
+
+from Muon.GUI.Common.contexts.fitting_context import FitInformation
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_Fit, run_CalculateMuonAsymmetry
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
@@ -16,6 +19,11 @@ MUON_ANALYSIS_SUFFIX = ' MA'
 FREQUENCY_DOMAIN_ANALYSIS_SUFFIX = ' FD'
 MUON_ANALYSIS_GUESS_WS = '__muon_analysis_fitting_guess'
 FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS = '__frequency_domain_analysis_fitting_guess'
+
+
+class FitPlotInformation(NamedTuple):
+    input_workspaces: List[str]
+    fit: FitInformation
 
 
 class FittingTabModel(object):
@@ -74,47 +82,43 @@ class FittingTabModel(object):
             return function_temp.name()
 
     # single fitting
-    def evaluate_single_fit(self, workspace, plot_fit):
+    def evaluate_single_fit(self, workspace):
 
         if self.fit_type == "Single":
             if self.tf_asymmetry_mode:
                 params = self.get_parameters_for_single_tf_fit(workspace[0])
-                function_object, output_status, output_chi_squared = self.do_single_tf_fit(params, plot_fit)
+                function_object, output_status, output_chi_squared = self.do_single_tf_fit(params)
             else:
                 params = self.get_parameters_for_single_fit(workspace[0])
-                function_object, output_status, output_chi_squared = self.do_single_fit(params,
-                                                                                        plot_fit)
+                function_object, output_status, output_chi_squared = self.do_single_fit(params)
         else:  # single simultaneous fit
             if self.tf_asymmetry_mode:
                 params = self.get_parameters_for_simultaneous_tf_fit(workspace)
                 function_object, output_status, output_chi_squared = self.do_simultaneous_tf_fit(params,
-                                                                                                 self.global_parameters,
-                                                                                                 plot_fit)
+                                                                                                 self.global_parameters)
             else:
                 params = self.get_parameters_for_simultaneous_fit(workspace)
                 function_object, output_status, output_chi_squared = self.do_simultaneous_fit(params,
-                                                                                              self.global_parameters,
-                                                                                              plot_fit)
+                                                                                              self.global_parameters)
         return function_object, output_status, output_chi_squared
 
-    def do_single_fit(self, parameter_dict, plot_fit=True):
+    def do_single_fit(self, parameter_dict):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             self.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
         self._handle_single_fit_results(parameter_dict['InputWorkspace'], function_object, fitting_parameters_table,
-                                        output_workspace, covariance_matrix, plot_fit)
+                                        output_workspace, covariance_matrix)
 
         return function_object, output_status, output_chi_squared
 
-    def do_single_tf_fit(self, parameter_dict, plot_fit=True):
+    def do_single_tf_fit(self, parameter_dict):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             run_CalculateMuonAsymmetry(parameter_dict, alg)
         CopyLogs(InputWorkspace=parameter_dict['ReNormalizedWorkspaceList'], OutputWorkspace=output_workspace,
                  StoreInADS=False)
         self._handle_single_fit_results(parameter_dict['ReNormalizedWorkspaceList'], function_object,
-                                        fitting_parameters_table, output_workspace, covariance_matrix,
-                                        plot_fit)
+                                        fitting_parameters_table, output_workspace, covariance_matrix)
 
         return function_object, output_status, output_chi_squared
 
@@ -127,7 +131,7 @@ class FittingTabModel(object):
         return output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix
 
     def _handle_single_fit_results(self, input_workspace, fit_function, fitting_parameters_table, output_workspace,
-                                   covariance_matrix, plot_fit=True):
+                                   covariance_matrix):
         workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace, self.function_name)
         table_name, table_directory = create_parameter_table_name(input_workspace, self.function_name)
 
@@ -137,14 +141,14 @@ class FittingTabModel(object):
 
         self.add_fit_to_context(wrapped_parameter_workspace,
                                 fit_function,
-                                input_workspace, [workspace_name], plot_fit=plot_fit)
+                                input_workspace, [workspace_name])
 
-    def do_simultaneous_fit(self, parameter_dict, global_parameters, plot_fit=True):
+    def do_simultaneous_fit(self, parameter_dict, global_parameters):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
         self._handle_simultaneous_fit_results(parameter_dict['InputWorkspace'], function_object,
                                               fitting_parameters_table, output_workspace, global_parameters,
-                                              covariance_matrix, plot_fit)
+                                              covariance_matrix)
 
         return function_object, output_status, output_chi_squared
 
@@ -163,7 +167,7 @@ class FittingTabModel(object):
                      StoreInADS=False)
         return output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix
 
-    def do_simultaneous_tf_fit(self, parameter_dict, global_parameters, plot_fit=True):
+    def do_simultaneous_tf_fit(self, parameter_dict, global_parameters):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             run_CalculateMuonAsymmetry(parameter_dict, alg)
@@ -177,36 +181,34 @@ class FittingTabModel(object):
 
         self._handle_simultaneous_fit_results(parameter_dict['ReNormalizedWorkspaceList'], function_object,
                                               fitting_parameters_table, output_workspace, global_parameters,
-                                              covariance_matrix, plot_fit)
+                                              covariance_matrix)
 
         return function_object, output_status, output_chi_squared
 
     # sequential fitting
-    def evaluate_sequential_fit(self, workspaces, plot_fit, use_initial_values):
+    def evaluate_sequential_fit(self, workspaces, use_initial_values):
         # workspaces are stored as list of list [[Fit1 workspaces], [Fit2 workspaces], [Fit3 workspaces]]
         if self.fit_type == "Single":
             # flatten the workspace list
             workspace_list = [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
             if self.tf_asymmetry_mode:
                 function_object, output_status, output_chi_squared = self.do_sequential_tf_fit(workspace_list,
-                                                                                               plot_fit,
                                                                                                use_initial_values)
             else:
                 function_object, output_status, output_chi_squared = self.do_sequential_fit(workspace_list,
-                                                                                            plot_fit,
                                                                                             use_initial_values)
         else:
             # in a simultaneous-sequential fit, each fit corresponds to a list of workspaces
             if self.tf_asymmetry_mode:
                 function_object, output_status, output_chi_squared = \
-                    self.do_sequential_simultaneous_tf_fit(workspaces, plot_fit, use_initial_values)
+                    self.do_sequential_simultaneous_tf_fit(workspaces, use_initial_values)
             else:
                 function_object, output_status, output_chi_squared = \
-                    self.do_sequential_simultaneous_fit(workspaces, plot_fit, use_initial_values)
+                    self.do_sequential_simultaneous_fit(workspaces, use_initial_values)
 
         return function_object, output_status, output_chi_squared
 
-    def do_sequential_fit(self, workspace_list, plot_fit=True, use_initial_values=False):
+    def do_sequential_fit(self, workspace_list, use_initial_values=False):
         function_object_list = []
         output_status_list = []
         output_chi_squared_list = []
@@ -219,8 +221,7 @@ class FittingTabModel(object):
                 self.set_fit_function_parameter_values(params['Function'],
                                                        previous_values)
 
-            function_object, output_status, output_chi_squared = self.do_single_fit(params,
-                                                                                    plot_fit)
+            function_object, output_status, output_chi_squared = self.do_single_fit(params)
 
             function_object_list.append(function_object)
             output_status_list.append(output_status)
@@ -228,7 +229,7 @@ class FittingTabModel(object):
 
         return function_object_list, output_status_list, output_chi_squared_list
 
-    def do_sequential_simultaneous_fit(self, workspaces, plot_fit, use_initial_values=False):
+    def do_sequential_simultaneous_fit(self, workspaces, use_initial_values=False):
         function_object_list = []
         output_status_list = []
         output_chi_squared_list = []
@@ -243,15 +244,14 @@ class FittingTabModel(object):
                                                        previous_values)
 
             function_object, output_status, output_chi_squared = self.do_simultaneous_fit(params,
-                                                                                          self.global_parameters,
-                                                                                          plot_fit)
+                                                                                          self.global_parameters)
             function_object_list.append(function_object)
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)
 
         return function_object_list, output_status_list, output_chi_squared_list
 
-    def do_sequential_tf_fit(self, workspace_list, plot_fit=True, use_initial_values=False):
+    def do_sequential_tf_fit(self, workspace_list, use_initial_values=False):
         function_object_list = []
         output_status_list = []
         output_chi_squared_list = []
@@ -264,8 +264,7 @@ class FittingTabModel(object):
                 self.set_fit_function_parameter_values(params['InputFunction'],
                                                        previous_values)
 
-            function_object, output_status, output_chi_squared = self.do_single_tf_fit(params,
-                                                                                       plot_fit)
+            function_object, output_status, output_chi_squared = self.do_single_tf_fit(params)
 
             function_object_list.append(function_object)
             output_status_list.append(output_status)
@@ -273,7 +272,7 @@ class FittingTabModel(object):
 
         return function_object_list, output_status_list, output_chi_squared_list
 
-    def do_sequential_simultaneous_tf_fit(self, workspaces, plot_fit=True, use_initial_values=False):
+    def do_sequential_simultaneous_tf_fit(self, workspaces, use_initial_values=False):
         function_object_list = []
         output_status_list = []
         output_chi_squared_list = []
@@ -287,8 +286,7 @@ class FittingTabModel(object):
                                                        previous_values)
 
             function_object, output_status, output_chi_squared = self.do_simultaneous_tf_fit(params,
-                                                                                             self.global_parameters,
-                                                                                             plot_fit)
+                                                                                             self.global_parameters)
 
             function_object_list.append(function_object)
             output_status_list.append(output_status)
@@ -297,7 +295,7 @@ class FittingTabModel(object):
         return function_object_list, output_status_list, output_chi_squared_list
 
     def _handle_simultaneous_fit_results(self, input_workspace_list, fit_function, fitting_parameters_table,
-                                         output_workspace, global_parameters, covariance_matrix, plot_fit=True):
+                                         output_workspace, global_parameters, covariance_matrix):
         if len(input_workspace_list) > 1:
             table_name, table_directory = create_parameter_table_name(input_workspace_list[0] + '+ ...',
                                                                       self.function_name)
@@ -324,8 +322,7 @@ class FittingTabModel(object):
                                 fit_function,
                                 input_workspace_list,
                                 workspace_name,
-                                global_parameters,
-                                plot_fit)
+                                global_parameters)
 
     # workspace operations
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function):
@@ -351,10 +348,10 @@ class FittingTabModel(object):
         return workspace_wrapper
 
     def add_fit_to_context(self, parameter_workspace, function,
-                           input_workspace, output_workspace_name, global_parameters=None, plot_fit=True):
+                           input_workspace, output_workspace_name, global_parameters=None):
         self.context.fitting_context.add_fit_from_values(
             parameter_workspace, self.function_name,
-            input_workspace, output_workspace_name, global_parameters, plot_fit)
+            input_workspace, output_workspace_name, global_parameters)
 
     def change_plot_guess(self, plot_guess, parameter_dict):
         try:
@@ -512,9 +509,8 @@ class FittingTabModel(object):
         }
 
     def clear_fit_information(self):
-        fits = self.context.fitting_context.fit_list.copy()
-        self.context.fitting_context.remove_fits_from_stored_fit_list(fits)
-        self.context.fitting_context.number_of_fits = 0
+        self.fit_function = None
+        self.function_name = ''
 
     def freq_type(self):
         if self.context._frequency_context is not None:

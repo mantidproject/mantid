@@ -421,6 +421,12 @@ Reference" and hit Enter.
 | Launch            | F5            | F5            | F5            |
 +-------------------+---------------+---------------+---------------+
 
+Remote Development
+------------------
+VSCode supports the ability to open and work from directories on a remote machine using SSH. 
+
+Detailed instructions on how to set this up can be found `here <https://code.visualstudio.com/docs/remote/ssh>`_.
+
 (Advanced) Getting Live Warnings and Errors with Clangd
 =======================================================
 (Linux only)

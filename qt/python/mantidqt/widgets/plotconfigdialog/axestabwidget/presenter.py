@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.view import AxesTabWidgetView
@@ -52,17 +54,25 @@ class AxesTabWidgetPresenter:
         if "xlabel" in self.current_view_props:
             ax.set_xlabel(self.current_view_props['xlabel'])
             ax.set_xscale(self.current_view_props['xscale'])
-            ax.set_xlim(self.current_view_props['xlim'])
+
+            if isinstance(ax, Axes3D):
+                ax.set_xlim3d(self.current_view_props['xlim'])
+            else:
+                ax.set_xlim(self.current_view_props['xlim'])
 
         if "ylabel" in self.current_view_props:
             ax.set_ylabel(self.current_view_props['ylabel'])
             ax.set_yscale(self.current_view_props['yscale'])
-            ax.set_ylim(self.current_view_props['ylim'])
+
+            if isinstance(ax, Axes3D):
+                ax.set_ylim3d(self.current_view_props['ylim'])
+            else:
+                ax.set_ylim(self.current_view_props['ylim'])
 
         if "zlabel" in self.current_view_props:
             ax.set_zlabel(self.current_view_props['zlabel'])
             ax.set_zscale(self.current_view_props['zscale'])
-            ax.set_zlim(self.current_view_props['zlim'])
+            ax.set_zlim3d(self.current_view_props['zlim'])
 
         self.update_view()
 

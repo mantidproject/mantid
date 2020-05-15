@@ -38,9 +38,6 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
 
             fig.colorbar(surface)
 
-            # grid is enabled by default so set the toolbar button to be checked
-            fig.canvas.toolbar._actions['toggle_grid'].setChecked(True)
-
             fig.show()
         elif plot_type == SpectraSelection.Contour:
             fig = pcolormesh([matrix_ws])

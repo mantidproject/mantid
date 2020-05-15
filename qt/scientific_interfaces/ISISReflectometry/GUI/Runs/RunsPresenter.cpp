@@ -197,12 +197,8 @@ bool RunsPresenter::resumeAutoreduction() {
   if (m_searcher->searchSettingsChanged(searchString, instrument,
                                         ISearcher::SearchType::AUTO)) {
     // If there are unsaved changes, ask the user first
-    auto ok = true;
-    if (hasGroupsWithContent(runsTable().reductionJobs())) {
-      ok = m_messageHandler->askUserYesNo(
-          "There are unsaved changes in the table. Continue?", "Warning");
-      if (!ok)
-        return false;
+    if (isOverwritingTablePrevented()) {
+      return false;
     }
     m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
@@ -256,6 +252,8 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_view->setSearchInstrument(instrumentName);
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
+
+void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
@@ -317,6 +315,15 @@ bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
+bool RunsPresenter::isOverwritingTablePrevented() const {
+  return m_mainPresenter->isBatchUnsaved() && isOverwriteBatchPrevented();
+}
+
+bool RunsPresenter::isOverwriteBatchPrevented() const {
+  return m_mainPresenter->isWarnDiscardChangesChecked() &&
+         !m_messageHandler->askUserDiscardChanges();
+}
+
 bool RunsPresenter::searchInProgress() const {
   return m_searcher->searchInProgress();
 }
@@ -325,6 +332,14 @@ int RunsPresenter::percentComplete() const {
   if (!m_mainPresenter)
     return 0;
   return m_mainPresenter->percentComplete();
+}
+
+void RunsPresenter::setRoundPrecision(int &precision) {
+  m_tablePresenter->setTablePrecision(precision);
+}
+
+void RunsPresenter::resetRoundPrecision() {
+  m_tablePresenter->resetTablePrecision();
 }
 
 IRunsTablePresenter *RunsPresenter::tablePresenter() const {
