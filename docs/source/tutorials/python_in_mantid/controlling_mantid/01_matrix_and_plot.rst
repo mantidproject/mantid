@@ -5,16 +5,9 @@ Matrix and Plot Control
 =======================
 
 
-Dragging a workspace from the Mantid Workspaces list in to main area creates a Mantid Matrix, which displays the underlying data in a worksheet.
+Right-clicking a workspace from the Workspaces Toolbox and selecting **Show Data** creates a Data Matrix, which displays the underlying data in a worksheet.
 
-To do this from Python use the `importMatrixWorkspace("workspace-name")` function, giving the name of the workspace to import, e.g.
-
-.. code-block:: python
-
-    RawData = Load("MAR11015")
-    workspace_mtx = importMatrixWorkspace("RawData")
-
-#Using a Mantid matrix to plot a spectrum
+.. To do this from Python use the `importMatrixWorkspace("workspace-name")` function, giving the name of the workspace to import, e.g.
 
 .. figure:: /images/Mantid_plotSpectrum.png
    :alt: Mantid_plotSpectrum
@@ -25,6 +18,8 @@ Right clicking on a row or a column allows a plot of that spectrum or time bin, 
 
 .. code-block:: python
 
+    RawData = Load("MAR11015")
+    
     graph_spec = plotSpectrum(RawData, 0)
     graph_time = plotBin(RawData, 0)
 
@@ -33,62 +28,121 @@ To include error bars on a plot, there is an extra argument that can be set to '
 .. code-block:: python
 
     graph_spec = plotSpectrum(RawData, 0, error_bars=True)
+    graph_time = plotBin(RawData, 0)
 
-The handle returned by the plot commands, *graph_spec* and *graph_time* above, can be used to adjust the properties of the plot, for example setting scales, axis titles, plot titles etc. For example,
+ For setting scales, axis titles, plot titles etc. you can use:
 
 .. code-block:: python
 
-    # Get the active layer of the the graph
-    l = graph_spec.activeLayer()
+    RawData = Load("MAR11015")
+    plotSpectrum(RawData,1, error_bars=True)
 
-    # Rescale the x-axis to a show a smaller region
-    l.setAxisScale(Layer.Bottom, 2.0, 2.5) 
+    # Get current axes of the graph
+    fig, axes = plt.gcf(), plt.gca()
 
-    # Retitle the y-axis
-    l.setAxisTitle(Layer.Left, "Cross-section")
+    plt.yscale('log')
 
-    # Give the graph a new title
-    l.setTitle("Cross-section vs wavelength")
+    #Rescale the axis limits
+    axes.set_xlim(0,5000)
 
-    # Put y-axis to a log scale 
-    l.setAxisScale(Layer.Left, 1, 1000, Layer.Log10)
+    #Change the y-axis label
+    axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
 
-    # Change the title of a curve
-    l.setCurveTitle(0, "My Title")
+    #Add legend entries
+    axes.legend(['Good Line'])
+
+    #Give the graph a modest title
+    plt.title("My Wonderful Plot", fontsize=20)
 
 Multiple workspaces/spectra can be plotted by providing lists within the `plotSpectrum()` or `plotBin()` functions, e.g.
 
 .. code-block:: python
 
     # Plot multiple spectra from a single workspace
-    g1 = plotSpectrum(RawData, [0,1,3])
+    plotSpectrum(RawData, [0,1,3])
 
     # Here you need to load files into RawData1 and RawData2 before the next two commands
 
-    # Plot a spectra across multiple workspaces
-    g2 = plotSpectrum([RawData1,RawData2], 0)
+    # Plot a spectrum from different workspaces
+    plotSpectrum([RawData1,RawData2], 0)
 
     # Plot multiple spectra across multiple workspaces
-    g2 = plotSpectrum([RawData1,RawData2], [0,1,3])
+    plotSpectrum([RawData1,RawData2], [0,1,3])
 
-Existing plots can be merged with the `mergePlots()` function although the above functions are preferred
+2D plots can be produced as an `image <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.imshow.html>`_ or a `pseudocolormesh <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.pcolormesh.html>`_ (for a non-regular grid):
 
-.. code-block:: python
+.. plot::
+   :include-source:
 
-    # g1,g2 are already created graphs
-    mergePlots(g1, g2) # All of the curves from g2 will be merged on to g1
+    ''' ----------- Image > imshow() ----------- '''
 
-Contour and 3D plots can be generated from an imported matrix workspace (see above). The commands return a handle that can be used to adjust the properties of the plot in the manner shown above.
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LogNorm
 
-.. code-block:: python
+    data = Load('MAR11060')
 
-    graph_2d = workspace_mtx.plotGraph2D()
-    graph_3d = workspace_mtx.plotGraph3D()
+    fig, axes = plt.subplots(subplot_kw={'projection':'mantid'})
+    c = axes.imshow(data, cmap='twilight_r', aspect='auto', norm=LogNorm())
+    cbar=fig.colorbar(c)
+    cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
+    #fig.show()
 
-**Other Plotting Documentation**
 
-* :ref:`scripting_plots`
-* :ref:`plotting`
-* :ref:`06_formatting_plots`
-* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
+.. plot::
+   :include-source:
 
+
+    ''' ----------- Pseudocolormesh > pcolormesh() ----------- '''
+
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LogNorm
+
+    data = Load('CNCS_7860')
+    data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
+    data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
+    md = ConvertToMD(InputWorkspace=data,QDimensions='|Q|',dEAnalysisMode='Direct')
+    sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100')
+
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+    c = ax.pcolormesh(sqw, cmap='afmhot', norm=LogNorm())
+    cbar=fig.colorbar(c)
+    cbar.set_label('Intensity (arb. units)') #add text to colorbar
+    #fig.show()
+
+
+`3D plots <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html>`_ `Surface <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#surface-plots>`_ and `Contour <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#contour-plots>`_ plots can also be created:
+
+.. plot::
+   :include-source:
+
+    ''' ----------- Surface plot ----------- '''
+
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+
+    data = Load('MUSR00015189.nxs')
+    data = mtd['data_1']
+
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+    ax.plot_surface(data)
+    #fig.show()
+
+.. plot::
+   :include-source:
+
+    ''' ----------- Contour plot ----------- '''
+    
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+
+    data = Load('MUSR00015189.nxs')
+    data = mtd['data_1']
+
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+    ax.contour(data, cmap ='summer')
+    #fig.show()
+
+
+* See :ref:`here <plotting>` for custom color cycles and colormaps 

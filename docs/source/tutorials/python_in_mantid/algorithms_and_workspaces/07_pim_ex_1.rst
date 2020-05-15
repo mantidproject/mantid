@@ -19,14 +19,12 @@ The HRPD data contains a spike every 20 milliseconds. While this is nicely local
 
 The aim of this exercise is to use Mantid to write a script, not point-and-click, to exclude the contribution from the pulse.
 
-Performing the Analysis
-#######################
-
 #. :ref:`algm-Load` - Load the given HRPD data set, HRP39182.RAW into a workspace called 'HRP39182'
 #. :ref:`algm-MaskBins` - Mask out the bins corresponding to the pulse with XMin=19990 and XMax=20040 and an output workspace called ‘masked'
 #. Repeat the previous step for the other 4 pulses, each of which is 20000 microseconds after the previous. *All MaskBins executions should happen on the same InputWorkspace so that all 5 pulses are masked from the same workspace. Hint: A loop might be useful.* 
 #. :ref:`algm-AlignDetectors` - Correct the masked workspace for small variations in detector position, using the calibration file `hrpd_new_072_01_corr.cal`. (Note: This performs an explicit conversion to dSpacing)
 #. :ref:`algm-DiffractionFocussing` - Focus the data in the masked workspace using the same cal file as the previous step (called a grouping file here)
+
 
 Using SNS Data
 ==============
@@ -38,6 +36,7 @@ Using SNS Data
 #. :ref:`algm-Rebin` - Bin the data in d-spacing from 1.4 to 8 angstroms using logarithmic binning of .0004.
 #. :ref:`algm-DiffractionFocussing` - Focus the data in the workspace using the same cal file as the previous step (PG3_golden.cal).
 #. :ref:`algm-CompressEvents` - Saves some memory. Note the number of events again.
+
 
 Using ILL Data
 ==============

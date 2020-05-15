@@ -30,8 +30,6 @@ Controlling Mantid with Python
    :alt: Mantid_artifact
    :align: right
 
-* To display results within MantidPlot, a user can view workspaces as a matrix and also plot graphs from the results.
+* To display results within Workbench, a user can view workspaces as a data matrix and also plot graphs from the results.
 
-* There is also an instrument view which displays a 3D model of the instrument with the detectors marked up by colours based upon the data in the workspace.
-
-* All of these elements can be controlled by a Python script so that repetitive tasks can be scripted.
+* These can be controlled by a Python script so that repetitive tasks can be scripted.

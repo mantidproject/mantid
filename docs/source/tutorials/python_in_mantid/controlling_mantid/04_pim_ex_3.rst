@@ -25,16 +25,7 @@ Graphing
 #. Change the title of the X axis
 #. Change the title of the Y axis
 
-:ref:<scripting_plots>
-
-Instrument view
----------------
-
-#. Load LOQ48097 data set
-#. Get the instrument view
-#. Change the colour map to _standard.map (All of the colourmap files can be found in C:\MantidInstall\colormaps)
-#. Set the colour map range to (0,195)
-#. Show the window
+:ref:`scripting_plots`
 
 Using SNS Data
 ==============

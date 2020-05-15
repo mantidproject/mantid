@@ -1,4 +1,4 @@
-.. _03_extracting_alg_prop:
+.. _02_extracting_alg_prop:
 
 ===============================
 Extracting Algorithm Properties
