@@ -120,7 +120,7 @@ void LoadILLPolarizedDiffraction::init() {
  */
 void LoadILLPolarizedDiffraction::exec() {
 
-  Progress progress(this, 0, 1, 1);
+  Progress progress(this, 0, 1, 2);
 
   m_filename = getPropertyValue("Filename");
 
@@ -129,6 +129,9 @@ void LoadILLPolarizedDiffraction::exec() {
 
   progress.report("Loading the detector polarization analysis data");
   loadData();
+
+  progress.report("Loading the metadata");
+  loadMetaData();
 }
 
 /**
@@ -245,10 +248,7 @@ void LoadILLPolarizedDiffraction::loadData() {
               .compare("None") != 0) {
         moveTwoTheta(entry, workspace);
       }
-      // sets meta data for the measurement
-      loadMetaData(workspace);
     }
-
     // adds the current entry workspace to the output group
     m_outputWorkspace->addWorkspace(workspace);
 
@@ -260,18 +260,23 @@ void LoadILLPolarizedDiffraction::loadData() {
 /**
  * Dumps the metadata from the whole file to SampleLogs
  */
-void LoadILLPolarizedDiffraction::loadMetaData(
-    API::MatrixWorkspace_sptr &workspace) {
-
-  auto &mutableRun = workspace->mutableRun();
-  mutableRun.addProperty("Facility", std::string("ILL"));
+void LoadILLPolarizedDiffraction::loadMetaData() {
 
   // Open NeXus file
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
-    m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun());
+    const int nexusLevelRead = 1;
+    for (auto workspaceId = 0;
+         workspaceId < m_outputWorkspace->getNumberOfEntries(); workspaceId++) {
+      MatrixWorkspace_sptr workspace =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(
+              m_outputWorkspace->getItem(workspaceId));
+      auto const entryName = std::string("entry" + std::to_string(workspaceId));
+      m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(),
+                                         entryName, nexusLevelRead);
+    }
     NXclose(&nxHandle);
   }
 }

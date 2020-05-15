@@ -46,7 +46,7 @@ private:
   API::MatrixWorkspace_sptr initStaticWorkspace();
 
   void loadData();
-  void loadMetaData(API::MatrixWorkspace_sptr &);
+  void loadMetaData();
   void loadInstrument(API::MatrixWorkspace_sptr &);
   std::vector<double> loadTwoThetaDetectors(const NeXus::NXEntry &, int);
   void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr &);
