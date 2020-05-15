@@ -35,6 +35,8 @@ set(
   # viewer library is removed
   src/IFunctionModel.cpp
   src/ImageInfoModel.cpp
+  src/ImageInfoModelMatrixWS.cpp
+  src/ImageInfoModelMD.cpp
   src/ImageInfoWidget.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
@@ -252,7 +254,9 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
-	inc/MantidQtWidgets/Common/ImageInfoModel.h
+    inc/MantidQtWidgets/Common/ImageInfoModel.h
+    inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
+    inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -332,6 +336,8 @@ set(
   src/FlowLayout.cpp
   src/Hint.cpp
   src/ImageInfoModel.cpp
+  src/ImageInfoModelMatrixWS.cpp
+  src/ImageInfoModelMD.cpp
   src/ImageInfoWidget.cpp
   src/InterfaceManager.cpp
   src/ListPropertyWidget.cpp
@@ -627,6 +633,8 @@ set(
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/ImageInfoModel.h
+  inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
+  inc/MantidQtWidgets/Common/ImageInfoModelMD.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/IProjectSerialisable.h
   inc/MantidQtWidgets/Common/LogValueFinder.h
@@ -988,7 +996,8 @@ set(
   test/FunctionMultiDomainPresenterTest.h
   test/FunctionBrowserUtilsTest.h
   test/LogValueFinderTest.h
-  test/ImageInfoModelTest.h
+  test/ImageInfoModelMatrixWSTest.h
+  test/ImageInfoModelMDTest.h
   test/InterfaceManagerTest.h
   test/NonOrthogonalTest.h
   test/ParseKeyValueStringTest.h
@@ -1058,7 +1067,8 @@ set(
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
   test/FitPropertyBrowserTest.h
-  test/ImageInfoModelTest.h
+  test/ImageInfoModelMatrixWSTest.h
+  test/ImageInfoModelMDTest.h
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h

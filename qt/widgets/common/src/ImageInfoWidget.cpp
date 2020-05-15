@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/ImageInfoWidget.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/ImageInfoModelMD.h"
+#include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 
 #include <QAbstractScrollArea>
 #include <QHeaderView>
@@ -20,8 +23,8 @@ namespace MantidWidgets {
 ImageInfoWidget::ImageInfoWidget(const Mantid::API::Workspace_sptr &workspace,
                                  CoordinateConversion &coordConversion,
                                  QWidget *parent)
-    : QTableWidget(2, 0, parent),
-  m_model(std::make_unique<ImageInfoModel>(workspace, coordConversion)) {
+    : QTableWidget(2, 0, parent) {
+  createImageInfoModel(workspace, coordConversion);
   horizontalHeader()->hide();
   verticalHeader()->hide();
 
@@ -59,6 +62,17 @@ void ImageInfoWidget::updateTable(const double x, const double y,
     for (int i = 0; i < static_cast<int>(info.size()) / 2; i++)
       table_width += columnWidth(i);
     setMaximumWidth(table_width);
+  }
+}
+
+void ImageInfoWidget::createImageInfoModel(
+    const Mantid::API::Workspace_sptr &ws,
+    CoordinateConversion &coordConversion) {
+  if (auto matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws))
+    m_model = std::make_unique<ImageInfoModelMatrixWS>(matWS, coordConversion);
+  else if (auto MDWS =
+               std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws)) {
+    m_model = std::make_unique<ImageInfoModelMD>(MDWS);
   }
 }
 

@@ -6,11 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidQtWidgets/Common/CoordinateConversion.h"
-#include "MantidQtWidgets/Common/ImageInfoModel.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -26,33 +25,29 @@ public:
   };
 };
 
-class ImageInfoModelTest : public CxxTest::TestSuite {
+class ImageInfoModelMatrixWSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ImageInfoModelTest *createSuite() { return new ImageInfoModelTest(); }
-  static void destroySuite(ImageInfoModelTest *suite) { delete suite; }
+  static ImageInfoModelMatrixWSTest *createSuite() {
+    return new ImageInfoModelMatrixWSTest();
+  }
+  static void destroySuite(ImageInfoModelMatrixWSTest *suite) { delete suite; }
 
-  void test_construct_with_matrix_workspace() {
-    Workspace_sptr workspace =
+  void test_construct() {
+    MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
     FakeCoordinateConversion coordConvert;
-    TS_ASSERT_THROWS_NOTHING(ImageInfoModel model(workspace, coordConvert))
+    TS_ASSERT_THROWS_NOTHING(
+        ImageInfoModelMatrixWS model(workspace, coordConvert))
   }
 
-  void test_construct_with_md_workspace() {
-    Workspace_sptr workspace =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    FakeCoordinateConversion coordConvert;
-    TS_ASSERT_THROWS_NOTHING(ImageInfoModel model(workspace, coordConvert))
-  }
-
-  void test_getInfoList_with_matrix_ws() {
-    Workspace_sptr workspace =
+  void test_getInfoList() {
+    MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModel model = createModel(workspace);
+    ImageInfoModelMatrixWS model = createModel(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -68,12 +63,11 @@ public:
     }
   }
 
-  void test_getInfoList_with_matrix_with_no_instrument() {
-    Workspace2D_sptr workspace =
+  void test_getInfoList_with_no_instrument() {
+    MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, false);
     workspace->getAxis(0)->setUnit("TOF");
-    Workspace_sptr ws = std::dynamic_pointer_cast<Workspace>(workspace);
-    ImageInfoModel model = createModel(workspace);
+    ImageInfoModelMatrixWS model = createModel(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -84,24 +78,11 @@ public:
     }
   }
 
-  void test_getInfoList_with_md_ws() {
-    Workspace_sptr workspace =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    ImageInfoModel model = createModel(workspace);
-
-    auto list = model.getInfoList(2, 4, 7);
-
-    const std::string expectList[]{"x", "2", "y", "4", "Value", "7"};
-    for (size_t i = 0; i < list.size(); ++i) {
-      TS_ASSERT_EQUALS(expectList[i], list[i]);
-    }
-  }
-
-  void test_getInfoList_with_matrix_ws_return_nothing_if_x_out_of_ws_range() {
-    Workspace_sptr workspace =
+  void test_getInfoList_ws_return_nothing_if_x_out_of_ws_range() {
+    MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModel model = createModel(workspace);
+    ImageInfoModelMatrixWS model = createModel(workspace);
 
     auto list1 = model.getInfoList(-1, 4, 7);
     auto list2 = model.getInfoList(10, 4, 7);
@@ -110,11 +91,11 @@ public:
     TS_ASSERT_EQUALS(0, list2.size())
   }
 
-  void test_getInfoList_with_matrix_ws_return_nothing_if_y_out_of_range() {
-    Workspace_sptr workspace =
+  void test_getInfoList_return_nothing_if_y_out_of_range() {
+    MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModel model = createModel(workspace);
+    ImageInfoModelMatrixWS model = createModel(workspace);
     auto list1 = model.getInfoList(2, -1, 7);
     auto list2 = model.getInfoList(2, 10, 7);
     TS_ASSERT_EQUALS(0, list1.size())
@@ -122,9 +103,9 @@ public:
   }
 
 private:
-  ImageInfoModel createModel(Workspace_sptr workspace) {
+  ImageInfoModelMatrixWS createModel(MatrixWorkspace_sptr workspace) {
     FakeCoordinateConversion coordConvert;
-    ImageInfoModel model(workspace, coordConvert);
+    ImageInfoModelMatrixWS model(workspace, coordConvert);
     return model;
   }
 };

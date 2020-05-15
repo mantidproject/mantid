@@ -32,6 +32,9 @@ public:
   void updateTable(const double x, const double y, const double z);
 
 private:
+  void createImageInfoModel(const Mantid::API::Workspace_sptr &ws,
+                            CoordinateConversion &coordConversion);
+
   std::unique_ptr<ImageInfoModel> m_model;
 };
 

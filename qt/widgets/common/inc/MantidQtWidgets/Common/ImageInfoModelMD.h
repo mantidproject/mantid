@@ -8,23 +8,23 @@
 
 #include "DllOption.h"
 
-#include "MantidAPI/Workspace.h"
-#include "MantidQtWidgets/Common/CoordinateConversion.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtWidgets/Common/ImageInfoModel.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModel {
+class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMD : public ImageInfoModel {
 
 public:
+  ImageInfoModelMD(const Mantid::API::IMDWorkspace_sptr &ws);
+
   // Creates a list containing pairs of strings with information about the
   // coordinates in the workspace.
-  virtual std::vector<std::string> getInfoList(const double x, const double y,
-                                               const double z) = 0;
+  std::vector<std::string> getInfoList(const double x, const double y,
+                                       const double z);
 
-protected:
-  void addNameAndValue(const std::string &label, const double value,
-                       const int precision, std::vector<std::string> &list);
+  Mantid::API::IMDWorkspace_sptr m_workspace;
 };
 
 } // namespace MantidWidgets
