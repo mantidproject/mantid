@@ -143,23 +143,29 @@ LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
  *
  */
 void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
-                                       API::Run &runDetails) {
+                                       API::Run &runDetails,
+                                       std::string entryName,
+                                       int level) {
   std::string emptyStr; // needed for first call
   int datatype;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
+  if(entryName.compare("") != 0) {
+      strcpy(nxname, entryName.c_str());
+  }
 
   // As a workaround against some "not so good" old ILL nexus files
   // (ILLIN5_Vana_095893.nxs for example)
-  // we begin the parse on the first entry (entry0). This allow to avoid the
+  // by default we begin the parse on the first entry (entry0),
+  // or from a chosen entryName. This allow to avoid the
   // bogus entries that follows.
 
   NXstatus getnextentry_status =
       NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
-      if (std::string(nxname) == "entry0") {
+      if (std::string(nxname) == "entry0" || std::string(nxname).compare(entryName) == 0) {
         recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr,
-                                        emptyStr, 1 /* level */);
+                                        emptyStr, level /* level */);
       } else {
         g_log.debug() << "Unexpected group name in nexus file : " << nxname
                       << '\n';
