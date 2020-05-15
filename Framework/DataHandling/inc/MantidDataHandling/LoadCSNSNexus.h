@@ -69,7 +69,8 @@ public:
   getEventData(const vector<string> &inputList,
                const vector<uint32_t> &startList,
                const vector<uint32_t> &endList, const vector<int64_t> &pids);
-  void loadEventData(EventWorkspace_sptr& workspace,
+  void
+  loadEventData(EventWorkspace_sptr &workspace,
                 const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
                 std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
 

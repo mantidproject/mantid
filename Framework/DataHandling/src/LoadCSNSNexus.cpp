@@ -357,10 +357,10 @@ LoadCSNSNexus::getHistData(const vector<string> &inputList) {
  * @param[in] pidNums :: total pixel numbers
  * @param[in] histData :: histogram data
  */
-void LoadCSNSNexus::loadHistData(
-    MatrixWorkspace_sptr &workspace,
-    std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-    std::vector<uint32_t> &histData) {
+void LoadCSNSNexus::loadHistData(MatrixWorkspace_sptr &workspace,
+                                 std::vector<uint32_t> &timeOfFlight,
+                                 size_t pidNums,
+                                 std::vector<uint32_t> &histData) {
   size_t timeNums = timeOfFlight.size();
   MantidVecPtr x, e;
   MantidVec xA;
@@ -475,8 +475,8 @@ std::multimap<uint32_t, std::pair<float, int64_t>> LoadCSNSNexus::getEventData(
  * @param[in] evtData :: event data
  */
 void LoadCSNSNexus::loadEventData(
-    EventWorkspace_sptr& workspace,
-    const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
+    EventWorkspace_sptr &workspace, const std::vector<uint32_t> &timeOfFlight,
+    size_t pidNums,
     std::multimap<uint32_t, std::pair<float, int64_t>> evtData) {
   workspace->initialize(pidNums, 1, 1);
   float m_tof;
