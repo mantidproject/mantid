@@ -17,7 +17,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "boost/make_shared.hpp"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
@@ -26,7 +25,9 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/IFileLoader.h"
