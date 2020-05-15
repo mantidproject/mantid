@@ -139,6 +139,70 @@ class LRReductionWithReference(DataProcessorAlgorithm):
 
         out_wksp = Divide(sample_wksp, incident_flux)
 
+        import matplotlib.pyplot as plt
+        from mantid import plots
+        from matplotlib.backends.backend_pdf import PdfPages
+
+
+        with PdfPages('lr_reduction_with_reference.pdf') as pdf:
+            fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+            ax.set_title('Norm Workspace')
+            ax.plot(norm_wksp, label="Normalization", distribution=False)
+            ax.legend()
+            pdf.savefig(fig)
+
+            fig_model, ax_model = plt.subplots(subplot_kw={'projection':'mantid'})
+            ax_model.set_title('Refl1D Model Workspace')
+            ax_model.plot(model_wksp, label="Refl1D Model")
+            ax_model.legend()
+            pdf.savefig(fig_model)
+
+            ax.set_title('Norm + Refl1D Model')
+            ax.plot(model_wksp, label="Refl1D Model")
+            ax.legend()
+            pdf.savefig(fig)
+
+            fig_flux, ax_flux = plt.subplots(subplot_kw={'projection':'mantid'})
+            ax_flux.set_title('Incident Flux ( Norm / Model )  Workspace')
+            ax_flux.plot(incident_flux, label="Incident Flux")
+            ax_flux.legend()
+            pdf.savefig(fig_flux)
+
+            ax.set_title('Norm + Refl1D Model + Incident Flux')
+            ax.plot(incident_flux, label="Incident Flux")
+            ax.legend()
+            pdf.savefig(fig)
+
+            fig_sample, ax_sample = plt.subplots(subplot_kw={'projection':'mantid'})
+            ax_sample.set_title('Sample Workspace')
+            ax_sample.plot(sample_wksp, label="Sample")
+            ax_sample.legend()
+            pdf.savefig(fig_sample)
+
+            ax.set_title('Norm + Refl1D Model + Incident Flux + Sample')
+            ax.plot(sample_wksp, label="Sample")
+            ax.legend()
+            pdf.savefig(fig)
+
+            fig_out, ax_out = plt.subplots(subplot_kw={'projection':'mantid'})
+            ax_out.set_title('Output Workspace')
+            ax_out.plot(out_wksp, label="Output")
+            ax_out.legend()
+            pdf.savefig(fig_out)
+
+            ax.set_title('Norm + Refl1D Model + Incident Flux + Sample + Output')
+            ax.plot(out_wksp, label="Output")
+            ax.legend()
+            pdf.savefig(fig)
+
+            fig_compare, ax_compare = plt.subplots(subplot_kw={'projection':'mantid'})
+            ax_compare.set_title('Output Workspace')
+            ax_compare.plot(model_wksp, label="Model")
+            ax_compare.plot(out_wksp, label="Output")
+            ax_compare.legend()
+            pdf.savefig(fig_compare)
+
+
         print("\n\nOutputWorkspace # of histograms:", out_wksp.getNumberHistograms())
         print("OutputWorkspace:")
         for x, y in zip(out_wksp.readX(0), out_wksp.readY(0)):
