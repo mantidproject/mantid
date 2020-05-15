@@ -43,6 +43,7 @@ Data Objects
 ------------
 
 - Added MatrixWorkspace::findY to find the histogram and bin with a given value
+- Matrix Workspaces now ignore non-finite values when integrating values for the instrument view.  Please note this is different from the :ref:`Integration <algm-Integration>` algorithm.
 
 Python
 ------
