@@ -6,11 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import io
 import numpy as np
-import AbinsModules
+
+from .textparser import TextParser
+from .abinitioloader import AbInitioLoader
+from abins.constants import CRYSTAL, FLOAT_TYPE
 from mantid.kernel import Atom, logger
 
 
-class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
+class CRYSTALLoader(AbInitioLoader):
     """
     Class for loading CRYSTAL ab initio vibrational or phonon data. Special thanks to Leonardo Bernasconi for
     contributing to this module.
@@ -19,7 +22,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         """
         :param input_ab_initio_filename: name of a file with vibrational or phonon data (foo.out)
         """
-        super(LoadCRYSTAL, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         self._num_k = None
         self._num_modes = None
@@ -28,8 +31,8 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         # Transformation (expansion) matrix E
         # More info in 'Creating a super cell' at
         # http://www.theochem.unito.it/crystal_tuto/mssc2008_cd/tutorials/geometry/geom_tut.html
-        self._inv_expansion_matrix = np.eye(3, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        self._parser = AbinsModules.GeneralAbInitioParser()
+        self._inv_expansion_matrix = np.eye(3, dtype=FLOAT_TYPE)
+        self._parser = TextParser()
 
         self._ab_initio_program = "CRYSTAL"
 
@@ -52,7 +55,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         with io.open(filename, "rb") as crystal_file:
             logger.notice("Reading from " + filename)
 
-            if system is AbinsModules.AbinsConstants.CRYSTAL:
+            if system is CRYSTAL:
                 lattice_vectors = self._read_lattice_vectors(file_obj=crystal_file)
             else:
                 lattice_vectors = [[0, 0, 0]] * 3
@@ -121,7 +124,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
                     line = crystal_file.readline().split()[1:]
                     vector = [float(item) for item in line]
                     vectors.append(vector)
-            temp = np.asarray(vectors).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+            temp = np.asarray(vectors).astype(dtype=FLOAT_TYPE, casting="safe")
             self._inv_expansion_matrix = np.linalg.inv(temp)
 
         return phonon_dispersion
@@ -391,7 +394,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
             atom = Atom(symbol=symbol)
             data["atoms"]["atom_{}".format(i)] = {
                 "symbol": symbol, "mass": atom.mass, "sort": i,
-                "coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
+                "coord": np.asarray(l[3:6]).astype(dtype=FLOAT_TYPE)}
 
         self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses, approximate=True)
 
@@ -408,7 +411,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         :param unit_cell: list with unit cell vectors
         """
         #     a) Put frequencies into dictionary
-        data["frequencies"] = np.asarray(freq).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+        data["frequencies"] = np.asarray(freq).astype(dtype=FLOAT_TYPE, casting="safe")
 
         #     b) Extract atomic displacements, normalize them and put them into data dictionary
         # Extract
@@ -437,13 +440,12 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         data["atomic_displacements"] = np.transpose(a=all_k_atomic_disp, axes=(0, 2, 1, 3))
 
         # c) Put weights into dictionary
-        data["weights"] = np.asarray(weights).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+        data["weights"] = np.asarray(weights).astype(dtype=FLOAT_TYPE, casting="safe")
 
         # d) Put k-vectors into dictionary
-        data["k_vectors"] = np.asarray(k_coordinates).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE,
-                                                             casting="safe")
+        data["k_vectors"] = np.asarray(k_coordinates).astype(dtype=FLOAT_TYPE, casting="safe")
         # e) put unit cell into dictionary
-        temp = np.asarray(unit_cell).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+        temp = np.asarray(unit_cell).astype(dtype=FLOAT_TYPE, casting="safe")
         data["unit_cell"] = np.dot(self._inv_expansion_matrix, temp)
 
     def _create_kpoint_data(self, freq=None, atomic_displacements=None, atomic_coordinates=None):

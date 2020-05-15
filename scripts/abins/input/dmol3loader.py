@@ -4,14 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
 import io
 import numpy as np
 from math import sqrt
+
+from .textparser import TextParser
+from .abinitioloader import AbInitioLoader
+from abins.constants import ATOMIC_LENGTH_2_ANGSTROM, FLOAT_TYPE
 from mantid.kernel import Atom
 
 
-class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
+class DMOL3Loader(AbInitioLoader):
     """
     Class for loading DMOL3 ab initio vibrational data.
     """
@@ -19,10 +22,10 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
         """
         :param input_ab_initio_filename: name of file with vibrational data (foo.outmol)
         """
-        super(LoadDMOL3, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "DMOL3"
         self._norm = 0
-        self._parser = AbinsModules.GeneralAbInitioParser()
+        self._parser = TextParser()
 
     def read_vibrational_or_phonon_data(self):
         """
@@ -71,14 +74,14 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
             vector = [self._convert_to_angstroms(string=s) for s in line]
             vectors.append(vector)
 
-        data["unit_cell"] = np.asarray(vectors).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        data["unit_cell"] = np.asarray(vectors).astype(dtype=FLOAT_TYPE)
 
     def _convert_to_angstroms(self, string=None):
         """
         :param string: string with number
         :returns: converted coordinate of lattice vector to Angstroms
         """
-        au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+        au2ang = ATOMIC_LENGTH_2_ANGSTROM
         return float(string) * au2ang
 
     def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
@@ -102,8 +105,8 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
             symbol = str(entries[0].decode("utf-8").capitalize())
             atom = Atom(symbol=symbol)
             # We change unit of atomic displacements from atomic length units to Angstroms
-            au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
-            float_type = AbinsModules.AbinsConstants.FLOAT_TYPE
+            au2ang = ATOMIC_LENGTH_2_ANGSTROM
+            float_type = FLOAT_TYPE
 
             atoms["atom_{}".format(atom_indx)] = {"symbol": symbol, "mass": atom.mass, "sort": atom_indx,
                                                   "coord": np.asarray(entries[1:]).astype(dtype=float_type) * au2ang}
@@ -146,10 +149,9 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
 
         self._num_k = 1  # Only Gamma point
 
-        data["frequencies"] = np.asarray(freq).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
-        data["k_vectors"] = np.asarray(k_coordinates).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE,
-                                                             casting="safe")
-        data["weights"] = np.asarray(weights).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+        data["frequencies"] = np.asarray(freq).astype(dtype=FLOAT_TYPE, casting="safe")
+        data["k_vectors"] = np.asarray(k_coordinates).astype(dtype=FLOAT_TYPE, casting="safe")
+        data["weights"] = np.asarray(weights).astype(dtype=FLOAT_TYPE, casting="safe")
 
         num_freq = len(freq[0])
         num_atoms = len(data["atoms"])
@@ -236,7 +238,7 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
                      created
         :param mass: mass of atom
         """
-        # We multiply by square root of atomic mass so that no modifications are needed in CalculatePowder module
+        # We multiply by square root of atomic mass so that no modifications are needed in PowderCalculator
         floated_item = float(item)
         self._norm += floated_item * floated_item
         if part == "real":

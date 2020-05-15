@@ -4,10 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
+from abins import GeneralData
+from abins.constants import ALL_KEYWORDS_POWDER_DATA, GAMMA_POINT
 
 
-class PowderData(AbinsModules.GeneralData):
+class PowderData(GeneralData):
     """
     Class for storing powder data.
     """
@@ -32,13 +33,11 @@ class PowderData(AbinsModules.GeneralData):
 
     def _check_items(self, items=None):
 
-        k_pkt = AbinsModules.AbinsConstants.GAMMA_POINT
-
         if not isinstance(items, dict):
             raise ValueError("Invalid value. Dictionary with the following entries : %s" %
-                             AbinsModules.AbinsConstants.ALL_KEYWORDS_POWDER_DATA + " was expected.")
+                             ALL_KEYWORDS_POWDER_DATA + " was expected.")
 
-        if sorted(items.keys()) != sorted(AbinsModules.AbinsConstants.ALL_KEYWORDS_POWDER_DATA):
+        if sorted(items.keys()) != sorted(ALL_KEYWORDS_POWDER_DATA):
             raise ValueError("Invalid structure of the dictionary.")
 
         if not isinstance(items["a_tensors"], dict):
@@ -47,10 +46,10 @@ class PowderData(AbinsModules.GeneralData):
         if not isinstance(items["b_tensors"], dict):
             raise ValueError("New value of Debye-Waller factors should be a dictionary.")
 
-        if items["a_tensors"][k_pkt].shape[0] != self._num_atoms:
+        if items["a_tensors"][GAMMA_POINT].shape[0] != self._num_atoms:
             raise ValueError("Invalid dimension of a_tensors.")
 
-        if items["b_tensors"][k_pkt].shape[0] != self._num_atoms:
+        if items["b_tensors"][GAMMA_POINT].shape[0] != self._num_atoms:
             raise ValueError("Invalid dimension of b_tensors.")
 
     def __str__(self):

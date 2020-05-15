@@ -4,16 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
+import abins
+import abins.input
 
 
-class AbinsData(AbinsModules.GeneralData):
+class AbinsData(abins.GeneralData):
     """
     Class for storing input DFT data.
     """
     def __init__(self, ):
 
-        super(AbinsData, self).__init__()
+        super().__init__()
         self._atoms_data = None
         self._kpoints_data = None
         self._data = None
@@ -29,8 +30,8 @@ class AbinsData(AbinsModules.GeneralData):
         :type ab_initio_program: str
         """
         # This should live closer to the Loaders but for now it is the only place the dict is used.
-        ab_initio_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
-                             "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
+        ab_initio_loaders = {"CASTEP": abins.input.CASTEPLoader, "CRYSTAL": abins.input.CRYSTALLoader,
+                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader}
 
         if ab_initio_program.upper() not in ab_initio_loaders:
             raise ValueError("No loader available for {}: unknown program. "
@@ -46,12 +47,12 @@ class AbinsData(AbinsModules.GeneralData):
         :param atoms_data: object of type AtomsData
         """
 
-        if isinstance(k_points_data, AbinsModules.KpointsData):
+        if isinstance(k_points_data, abins.KpointsData):
             self._kpoints_data = k_points_data
         else:
             raise ValueError("Invalid type of k-points data.")
 
-        if isinstance(atoms_data, AbinsModules.AtomsData):
+        if isinstance(atoms_data, abins.AtomsData):
             self._atoms_data = atoms_data
         else:
             raise ValueError("Invalid type of atoms data.")

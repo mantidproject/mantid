@@ -4,14 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import AbinsModules
+import abins
 import json
 import numpy as np
 
 
-class GeneralLoadAbInitioTester(object):
+class Tester(object):
+    """Base class for testing Abins input loaders"""
 
-    _loaders_extensions = {"LoadCASTEP": "phonon", "LoadCRYSTAL": "out", "LoadDMOL3": "outmol", "LoadGAUSSIAN": "log"}
+    _loaders_extensions = {"CASTEPLoader": "phonon", "CRYSTALLoader": "out", "DMOL3Loader": "outmol", "GAUSSIANLoader": "log"}
 
     @staticmethod
     def _prepare_data(seedname):
@@ -22,7 +23,7 @@ class GeneralLoadAbInitioTester(object):
         :type seedname: str
         """
 
-        with open(AbinsModules.AbinsTestHelpers.find_file(seedname + "_data.txt")) as data_file:
+        with open(abins.test_helpers.find_file(seedname + "_data.txt")) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
         num_k = len(correct_data["datasets"]["k_points_data"]["weights"])
@@ -30,7 +31,7 @@ class GeneralLoadAbInitioTester(object):
         array = {}
         for k in range(num_k):
 
-            temp = np.loadtxt(AbinsModules.AbinsTestHelpers.find_file(
+            temp = np.loadtxt(abins.test_helpers.find_file(
                     "{seedname}_atomic_displacements_data_{k}.txt".format(seedname=seedname, k=k))
                 ).view(complex).reshape(-1)
             total_size = temp.size
@@ -77,10 +78,10 @@ class GeneralLoadAbInitioTester(object):
                          json.loads(data["attributes"]["advanced_parameters"]))
 
         try:
-            self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
+            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension),
                              data["attributes"]["filename"])
         except AssertionError:
-            self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension.upper()),
+            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension.upper()),
                              data["attributes"]["filename"])
 
         # check datasets
@@ -89,10 +90,10 @@ class GeneralLoadAbInitioTester(object):
     def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
 
         try:
-            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension)
+            read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension)
             ab_initio_loader = loader(input_ab_initio_filename=read_filename)
         except ValueError:
-            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension.upper())
+            read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension.upper())
             ab_initio_loader = loader(input_ab_initio_filename=read_filename)
 
         loaded_data = ab_initio_loader.load_formatted_data().extract()
@@ -148,10 +149,10 @@ class GeneralLoadAbInitioTester(object):
         """
         # 1) Read data
         try:
-            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
+            read_filename = abins.test_helpers.find_file(filename=filename + "." + extension)
             ab_initio_reader = loader(input_ab_initio_filename=read_filename)
         except ValueError:
-            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension.upper())
+            read_filename = abins.test_helpers.find_file(filename=filename + "." + extension.upper())
             ab_initio_reader = loader(input_ab_initio_filename=read_filename)
 
         data = self._get_reader_data(ab_initio_reader)
@@ -164,7 +165,7 @@ class GeneralLoadAbInitioTester(object):
     @staticmethod
     def _get_reader_data(ab_initio_reader):
         """
-        :param ab_initio_reader: object of type  GeneralAbInitioProgram
+        :param ab_initio_reader: object of type  AbInitioProgram
         :returns: read data
         """
         abins_type_data = ab_initio_reader.read_vibrational_or_phonon_data()
@@ -180,7 +181,7 @@ class GeneralLoadAbInitioTester(object):
         Write ab initio calculation data to JSON file for use in test cases
 
         :param ab_initio_reader: Reader after import of external calculation
-        :type ab_initio_reader: AbinsModules.GeneralAbInitioProgram
+        :type ab_initio_reader: abins.AbInitioProgram
         :param filename: Seed for text files for JSON output. Data will be written to the file {seedname}_data.txt,
             except for the atomic displacements which are written to files {seedname}_atomic_displacements_data_{I}.txt,
             where {I} are k-point indices.

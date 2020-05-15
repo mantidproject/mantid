@@ -6,11 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import re
-import AbinsModules
-from  mantid.kernel import Atom
+
+from .abinitioloader import AbInitioLoader
+from abins.constants import COMPLEX_TYPE
+from mantid.kernel import Atom
 
 
-class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
+class CASTEPLoader(AbInitioLoader):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
@@ -21,7 +23,7 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
 
         :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
         """
-        super(LoadCASTEP, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
@@ -148,7 +150,7 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
 
         dim = 3  # we have 3D space
         # in general case eigenvectors are complex
-        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=AbinsModules.AbinsConstants.COMPLEX_TYPE)
+        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=COMPLEX_TYPE)
         for freq in range(self._num_phonons):
             for atom in range(self._num_atoms):
 
