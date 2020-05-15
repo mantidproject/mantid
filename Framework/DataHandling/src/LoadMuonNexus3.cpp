@@ -130,7 +130,8 @@ void LoadMuonNexus3::execLoader() {
   runLoadISISNexus();
   loadMuonProperties(entry);
 
-  // Check if single or multi period file and create appropriate loading strategy
+  // Check if single or multi period file and create appropriate loading
+  // strategy
   isEntryMultiPeriod(entry);
   Workspace_sptr outWS = getProperty("OutputWorkspace");
   if (m_multiPeriodsLoaded) {

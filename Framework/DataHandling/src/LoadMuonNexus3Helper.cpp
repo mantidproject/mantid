@@ -85,11 +85,10 @@ std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   }
   return mainFieldDirection;
 }
- std::vector<double>
+std::vector<double>
 loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
                        const std::vector<detid_t> &loadedDetectors,
                        const bool isFileMultiPeriod) {
-
 
   std::vector<double> deadTimes;
   // Open detector nexus entry

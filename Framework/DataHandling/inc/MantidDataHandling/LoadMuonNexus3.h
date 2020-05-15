@@ -8,13 +8,13 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidAPI/NexusFileLoader.h"
 
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -86,7 +86,7 @@ private:
   /// The sample name read from Nexus
   std::string m_sampleName;
   /// The number of the input entry
-  int m_entrynumber;
+  int64_t m_entrynumber;
   /// The number of periods in the raw file
   int m_numberOfPeriods;
   // Is file multi period
