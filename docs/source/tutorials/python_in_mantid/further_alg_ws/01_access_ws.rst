@@ -1,4 +1,4 @@
-.. _pim_further_alg_ws:
+.. _01_access_ws:
 
 ================================
 Accessing Workspaces From Python

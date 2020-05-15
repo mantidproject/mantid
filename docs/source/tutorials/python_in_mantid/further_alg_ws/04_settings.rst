@@ -38,6 +38,7 @@ The dictionary-like manner can also be used to update settings, i.e.
 	from mantid import config
 
 	config['default.instrument'] = 'INST_NAME'
+
 where the value on the RHS must be a string. NOTE: Settings changed in this manner only affect the current Mantid session
 
 

@@ -21,7 +21,7 @@ You will also need to ensure that your Python path is set correctly to make the 
 A Simple Example
 ================
 
-The simplest exercise is to load a data file. This is done using the :ref:`Load` function, i.e.
+The simplest exercise is to load a data file. This is done using the :ref:`algm-Load` function, i.e.
 
 .. code-block:: python
 
@@ -34,13 +34,13 @@ The simplest exercise is to load a data file. This is done using the :ref:`Load`
 The workspace that was the result of the load is returned and assigned to the `run` variable. The function is defined such that the created workspace will have the name `run`, which will appear in the workspace list.
 This is a feature of all of the single-shot functions: "The output workspace name is picked up from the variable that the function return is assigned to."
 
-This workspace can then be carried into another algorithm, :ref:`ConvertUnits` for example. Running
+This workspace can then be carried into another algorithm, :ref:`algm-ConvertUnits` for example. Running
 
 .. code-block:: python
 
     run = ConvertUnits(InputWorkspace=run, Target='dSpacing')
 
-will execute the :ref:`ConvertUnits` algorithm with the input workspace set as `run` and the target unit set to `dSpacing`. As the function is assigned to the run variable, the output replaces the input workspace. If a different variable were used the the output would have ended up in workspace name that matches that variable name.
+will execute the :ref:`algm-ConvertUnits` algorithm with the input workspace set as `run` and the target unit set to `dSpacing`. As the function is assigned to the run variable, the output replaces the input workspace. If a different variable were used the the output would have ended up in workspace name that matches that variable name.
 
 
 Keywords

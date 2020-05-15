@@ -21,10 +21,10 @@ Controlling Mantid with Python
 **Contents**
 
 * :ref:`01_matrix_and_plot`
-.. * :ref:`02_instrument_view`
-.. * :ref:`03_sliceviewer`
 * :ref:`04_pim_ex_3`
 
+.. * :ref:`02_instrument_view`
+.. * :ref:`03_sliceviewer`
 
 .. figure:: /images/Mantid_artifact.png
    :alt: Mantid_artifact

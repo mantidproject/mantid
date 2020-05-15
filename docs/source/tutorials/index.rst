@@ -32,7 +32,7 @@ capabilities of Mantid, by developing your own scripts.
 
    mantid_basic_course/index
    introduction_to_python/index
-   pim_intro/index
+   python_in_mantid/index
    muon_GUI_course/index
 
 **Sections:**

@@ -9,14 +9,14 @@ Script Generation
    :glob:
    :maxdepth: 1
 
-   01_running_algorithms
+   01_auto_generation
    02_generalising
    03_extracting_alg_prop
    04_pim_ex_2
 
 **Contents**
 
-* :ref:`01_running_algorithms`
+* :ref:`01_auto_generation`
 * :ref:`02_generalising`
 * :ref:`03_extracting_alg_prop`
 * :ref:`04_pim_ex_2`
