@@ -55,20 +55,21 @@ class ProjectTest(unittest.TestCase):
         self._folders_to_remove.clear()
 
     def test_save_calls_save_as_when_last_location_is_not_none(self):
-        self.project.save_as = mock.MagicMock()
+        self.project.open_project_save_dialog = mock.MagicMock()
         self.project.save()
-        self.assertEqual(self.project.save_as.call_count, 1)
+        self.assertEqual(self.project.open_project_save_dialog.call_count, 1)
 
     def test_save_does_not_call_save_as_when_last_location_is_not_none(self):
-        self.project.save_as = mock.MagicMock()
+        self.project.open_project_save_dialog = mock.MagicMock()
         self.project.last_project_location = "1"
-        self.assertEqual(self.project.save_as.call_count, 0)
+        self.assertEqual(self.project.open_project_save_dialog.call_count, 0)
 
     def test_save_saves_project_successfully(self):
         temp_file_path = tempfile.mkdtemp()
         self._folders_to_remove.add(temp_file_path)
         working_file = os.path.join(temp_file_path, "temp" + ".mtdproj")
         self.project.last_project_location = working_file
+        self.project.remember_workspace_saving_option = True
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project._offer_overwriting_gui = mock.MagicMock(return_value=QMessageBox.Yes)
 
@@ -85,12 +86,10 @@ class ProjectTest(unittest.TestCase):
         self._folders_to_remove.add(temp_file_path)
         working_file = os.path.join(temp_file_path, "temp" + ".mtdproj")
         working_directory = os.path.dirname(working_file)
-        self.project._save_file_dialog = mock.MagicMock(return_value=working_file)
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
-        self.project.save_as()
+        self.project.save_as(working_file)
 
-        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         self.assertTrue(os.path.isfile(working_file))
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
@@ -101,11 +100,9 @@ class ProjectTest(unittest.TestCase):
         working_directory = tempfile.mkdtemp()
         self._folders_to_remove.add(working_directory)
         return_value_for_load = os.path.join(working_directory, os.path.basename(working_directory) + ".mtdproj")
-        self.project._save_file_dialog = mock.MagicMock(return_value=return_value_for_load)
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project.save_as()
+        self.project.save_as(return_value_for_load)
 
-        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         ADS.clear()
 
         self.project._load_file_dialog = mock.MagicMock(return_value=return_value_for_load)
