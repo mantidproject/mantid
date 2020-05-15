@@ -194,8 +194,8 @@ class SampleLogsModel(object):
             elif invalid_value_count > 0:
                 saturation = 10 + (170 * (invalid_value_count/(log_size+invalid_value_count)))
                 item.setData(QColor.fromHsv(0, saturation, 255), Qt.BackgroundRole)
-                tooltip_string = ("{count}/{size} of the values in the log {aux_verb} marked invalid, " 
-                                 "and {aux_verb} filtered.")
+                tooltip_string = ("{count}/{size} of the values in the log {aux_verb} marked invalid, "
+                                  "and {aux_verb} filtered.")
                 item.setToolTip(tooltip_string.format(count=invalid_value_count,
                                                       size=log_size+invalid_value_count,
                                                       aux_verb = "is" if invalid_value_count == 1 else "are"))
