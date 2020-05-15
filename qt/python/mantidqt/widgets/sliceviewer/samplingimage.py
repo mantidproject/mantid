@@ -38,6 +38,23 @@ class SamplingImage(mimage.AxesImage):
         self.ws = workspace
         self.transpose = transpose
         self.normalization = normalize
+        self._resize_cid, self._xlim_cid , self._ylim_cid = None, None, None
+
+    def connect_events(self):
+        axes = self.axes
+        self._resize_cid = axes.get_figure().canvas.mpl_connect('resize_event', self._resize)
+        self._xlim_cid = axes.callbacks.connect('xlim_changed', self._xlim_changed)
+        self._ylim_cid = axes.callbacks.connect('ylim_changed', self._ylim_changed)
+
+    def disconnect_events(self):
+        axes = self.axes
+        axes.get_figure().canvas.mpl_disconnect(self._resize_cid)
+        axes.callbacks.disconnect(self._xlim_cid)
+        axes.callbacks.disconnect(self._ylim_cid)
+
+    def remove(self):
+        self.disconnect_events()
+        super().remove()
 
     def _xlim_changed(self, ax):
         if self._update_extent():
@@ -136,9 +153,6 @@ def imshow_sampling(axes, workspace, cmap=None, norm=None, aspect=None,
     im.set_extent(im.get_extent())
 
     axes.add_image(im)
-
-    axes.get_figure().canvas.mpl_connect('resize_event', im._resize)
-    axes.callbacks.connect('xlim_changed', im._xlim_changed)
-    axes.callbacks.connect('ylim_changed', im._ylim_changed)
+    im.connect_events()
 
     return im
