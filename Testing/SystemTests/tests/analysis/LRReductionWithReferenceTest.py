@@ -34,7 +34,7 @@ class LRReductionWithRefrenceTest(systemtesting.MantidSystemTest):
             SubtractSignalBackground=True,
             SignalBackgroundPixelRange=[151, 169],
             NormFlag=True,
-            NormPeakPixelRange=[154, 160],
+            NormPeakPixelRange=[154, 166],
             NormBackgroundPixelRange=[151, 163],
             SubtractNormBackground=True,
             LowResDataAxisPixelRangeFlag=True,
