@@ -466,7 +466,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(const std::shared_ptr<Mantid::API::IFunction> &f) const;
+  void setWorkspace(const Mantid::API::IFunction_sptr &function) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
   /// Adds the workspace index property to the browser.

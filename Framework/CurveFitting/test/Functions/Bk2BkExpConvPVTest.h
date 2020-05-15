@@ -29,7 +29,7 @@ public:
 
     Bk2BkExpConvPV peak;
     peak.initialize();
-    peak.setParameter("Height", 100.0);
+    peak.setParameter("Intensity", 100.0);
     peak.setParameter("TOF_h", 400.0);
     peak.setParameter("Alpha", 1.0);
     peak.setParameter("Beta", 1.5);
