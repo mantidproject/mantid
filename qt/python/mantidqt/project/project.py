@@ -36,7 +36,11 @@ class Project(AnalysisDataServiceObserver):
         self.last_project_location = None
 
         # whether to discard workspaces that have only been loaded when saving the project
-        self.save_altered_workspaces_only = False
+        self.save_altered_workspaces_only = \
+            ConfigService.getString('projectSaving.saveAlteredWorkspacesOnly') == 'True'
+        # whether to remember which workspaces to save or ask every time
+        self.remember_workspace_saving_option = \
+            ConfigService.getString('projectSaving.rememberWorkspaceSavingOption') == 'True'
 
         self.observeAll(True)
 
@@ -71,8 +75,8 @@ class Project(AnalysisDataServiceObserver):
         The function that is called if the save button is clicked on the mainwindow
         :return: True; if the user cancels
         """
-        if self.last_project_location is None:
-            return self.save_as()
+        if self.last_project_location is None or not self.remember_workspace_saving_option:
+            return self.open_project_save_dialog()
         else:
             # Offer an are you sure? overwriting GUI
             answer = self._offer_overwriting_gui()
@@ -83,24 +87,30 @@ class Project(AnalysisDataServiceObserver):
                 task.start()
             elif answer == QMessageBox.No:
                 # Save with a new name
-                return self.save_as()
+                return self.open_project_save_dialog()
             else:
                 # Cancel clicked
                 return True
 
-    def save_as(self):
+    def open_project_save_dialog(self):
         """
         The function that is called if the save as... button is clicked on the mainwindow
         :return: True; if the user cancels.
         """
         from mantidqt.project.saveprojectdialog.presenter import ProjectSaveDialogPresenter
+        self.saving_cancelled = False
         ProjectSaveDialogPresenter(self)
+        return self.saving_cancelled
 
-    def do_save(self, path, altered_workspaces_only):
+    def save_as(self, path):
         self.last_project_location = path
-        self.save_altered_workspaces_only = altered_workspaces_only
         task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
         task.start()
+
+    def set_saving_settings(self):
+        ConfigService.setString('projectSaving.saveAlteredWorkspacesOnly', str(self.save_altered_workspaces_only))
+        ConfigService.setString('projectSaving.rememberWorkspaceSavingOption',
+                                str(self.remember_workspace_saving_option))
 
     @staticmethod
     def _offer_overwriting_gui():

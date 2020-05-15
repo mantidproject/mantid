@@ -21,10 +21,13 @@ class ProjectSaveDialogPresenter:
         self.view.browse_push_button.clicked.connect(lambda: self.browse_button_clicked())
         self.view.location_line_edit.textChanged.connect(lambda: self.location_selected())
         self.view.accepted.connect(lambda: self.save_as())
+        self.view.rejected.connect(lambda: self.cancel())
 
+        self.view.set_save_altered_workspaces_only(project.save_altered_workspaces_only)
+        self.view.set_remember_selection(project.remember_workspace_saving_option)
         self.view.set_location(project.last_project_location)
         self.view.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.view.get_location() != "")
-        self.view.open()
+        self.view.exec()
 
     def location_selected(self):
         self.view.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
@@ -36,7 +39,10 @@ class ProjectSaveDialogPresenter:
             self.view.set_location(filename)
 
     def save_as(self):
-        path = self.view.get_location()
-        if path:
-            self.project.do_save(path=path,
-                                 altered_workspaces_only=self.view.get_save_altered_workspaces_only())
+        self.project.remember_workspace_saving_option = self.view.get_remember_selection()
+        self.project.save_altered_workspaces_only = self.view.get_save_altered_workspaces_only()
+        self.project.set_saving_settings()
+        self.project.save_as(path=self.view.get_location())
+
+    def cancel(self):
+        self.project.saving_cancelled = True

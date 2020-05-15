@@ -28,8 +28,14 @@ class ProjectSaveDialogView(QDialog):
     def get_location(self):
         return self.location_line_edit.text()
 
+    def set_save_altered_workspaces_only(self, check):
+        self.save_altered_workspaces_only_radio_button.setChecked(check)
+
     def get_save_altered_workspaces_only(self):
         return self.save_altered_workspaces_only_radio_button.isChecked()
 
+    def set_remember_selection(self, check):
+        self.remember_selection_check_box.setChecked(check)
+
     def get_remember_selection(self):
-        return self.remember_selection_checkbox.isChecked()
+        return self.remember_selection_check_box.isChecked()

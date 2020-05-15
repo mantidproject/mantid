@@ -589,7 +589,7 @@ class MainWindow(QMainWindow):
         self.project.save()
 
     def save_project_as(self):
-        self.project.save_as()
+        self.project.open_project_save_dialog()
 
     def load_project(self):
         self.project.load()
