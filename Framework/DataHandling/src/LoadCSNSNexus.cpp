@@ -104,12 +104,12 @@ int LoadCSNSNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadCSNSNexus::init() {
   std::vector<std::string> instList{"GPPD"};
-  instList.emplace_back( "MR");
-  instList.emplace_back( "SANS");
-  instList.emplace_back( "MPI");
+  instList.emplace_back("MR");
+  instList.emplace_back("SANS");
+  instList.emplace_back("MPI");
   auto instTypeValidator = boost::make_shared<StringListValidator>(instList);
   declareProperty(
-      "Instrument", "GPPD",instTypeValidator,
+      "Instrument", "GPPD", instTypeValidator,
       "choose different instrument with different detector combinations ");
 
   const vector<string> exts{".h5", ".nxs"};
@@ -546,9 +546,9 @@ void LoadCSNSNexus::exec() {
 
       } else {
         g_log.information() << "load histogram data " << endl;
-        ws_hist = WorkspaceFactory::Instance().create("Workspace2D", pid_bank.size(),
-                                                tof_bank.size(),
-                                                tof_bank.size() - 1);
+        ws_hist = WorkspaceFactory::Instance().create(
+            "Workspace2D", pid_bank.size(), tof_bank.size(),
+            tof_bank.size() - 1);
         std::vector<uint32_t> histData = getHistData(m_modules);
         loadHistData(ws_hist, tof_bank, pid_bank.size(), histData);
         ws_hist->mutableRun().setStartAndEndTime(start_time, end_time);
@@ -567,7 +567,7 @@ void LoadCSNSNexus::exec() {
     vector<int64_t> pid_mon = getPixelId(m_monitors);
     vector<uint32_t> tof_mon = getTimeBin("monitor");
     ws_mon = WorkspaceFactory::Instance().create(
-            "Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1);
+        "Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1);
     std::vector<uint32_t> histData_mon = getHistData(m_monitors);
     loadHistData(ws_mon, tof_mon, pid_mon.size(), histData_mon);
     ws_mon->mutableRun().setStartAndEndTime(start_time, end_time);
@@ -584,11 +584,11 @@ void LoadCSNSNexus::exec() {
       wksp_group->addWorkspace(ws_hist);
       wksp_group->addWorkspace(ws_mon);
     }
-    setProperty("OutputWorkspace",wksp_group);
+    setProperty("OutputWorkspace", wksp_group);
   } else {
     if (m_loadBank) {
       if (m_loadEvent) {
-        setProperty("OutputWorkspace",ws_evt);
+        setProperty("OutputWorkspace", ws_evt);
       } else {
         setProperty("OutputWorkspace", ws_hist);
       }
