@@ -133,7 +133,6 @@ SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
 
-  m_logger.notice("Loading deadtime table");
   auto deadTimes = LoadMuonNexus3Helper::loadDeadTimesFromNexus(
       m_entry, m_detectors, m_isFileMultiPeriod);
   auto deadTimeTable = createDeadTimeTable(m_detectors, deadTimes);
@@ -150,7 +149,6 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
  */
 void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
 
-  m_logger.notice("Applying time zero correction");
   double timeZero = LoadMuonNexus3Helper::loadTimeZeroFromNexusFile(m_entry);
   auto newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));

@@ -65,7 +65,7 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
   // Version
-  int version() const override { return 3; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
@@ -86,26 +86,16 @@ private:
   /// The sample name read from Nexus
   std::string m_sampleName;
   /// The number of the input entry
-  int64_t m_entrynumber;
+  int m_entrynumber;
   /// The number of periods in the raw file
-  int64_t m_numberOfPeriods;
-  /// Has the spectrum_list property been set?
-  bool m_list;
-  /// Have the spectrum_min/max properties been set?
-  bool m_interval;
+  int m_numberOfPeriods;
   // Is file multi period
   bool m_isFileMultiPeriod;
   // Are multi periods loaded
   bool m_multiPeriodsLoaded;
-  /// The value of the spectrum_list property
-  std::vector<specnum_t> m_specList;
-  /// The value of the spectrum_min property
-  int64_t m_specMin;
-  /// The value of the spectrum_max property
-  int64_t m_specMax;
   /// The group which each detector belongs to in order
   std::vector<specnum_t> m_groupings;
-  // The loading stratergy used
+  // The loading strategy used
   std::unique_ptr<LoadMuonStrategy> m_loadMuonStrategy;
 };
 
