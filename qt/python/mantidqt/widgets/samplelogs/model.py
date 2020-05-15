@@ -184,7 +184,7 @@ class SampleLogsModel(object):
         onto a QTableView
         """
 
-        def create_table_item(column, itemname, invalid_value_count, callable, *args):
+        def create_table_item(column, itemname, invalid_value_count, log_size, callable, *args):
             item = QStandardItem()
             item.setEditable(False)
             #format if there is invalid data entries
@@ -192,9 +192,12 @@ class SampleLogsModel(object):
                 item.setData(QColor.fromHsv(0, 180, 255), Qt.BackgroundRole)
                 item.setToolTip("All of the values in the log are marked invalid, none of them are filtered.")
             elif invalid_value_count > 0:
-                item.setData(QColor.fromHsv(0, 100, 255), Qt.BackgroundRole)
-                tooltip_string = "{count} of the values in the log {aux_verb} marked invalid, and {aux_verb} filtered."
+                saturation = 10 + (170 * (invalid_value_count/(log_size+invalid_value_count)))
+                item.setData(QColor.fromHsv(0, saturation, 255), Qt.BackgroundRole)
+                tooltip_string = ("{count}/{size} of the values in the log {aux_verb} marked invalid, " 
+                                 "and {aux_verb} filtered.")
                 item.setToolTip(tooltip_string.format(count=invalid_value_count,
+                                                      size=log_size+invalid_value_count,
                                                       aux_verb = "is" if invalid_value_count == 1 else "are"))
             try:
                 item.setText(callable(*args))
@@ -215,10 +218,11 @@ class SampleLogsModel(object):
             if key in logs_to_highlight.keys():
                 invalid_value_count = logs_to_highlight[key]
             log = self.run.getLogData(key)
-            name = create_table_item("Name", key, invalid_value_count, lambda: log.name)
-            log_type = create_table_item("Type", key, invalid_value_count, get_type, log)
-            value = create_table_item("Value", key, invalid_value_count, lambda log: str(get_value(log)), log)
-            unit = create_table_item("Units", key, invalid_value_count, lambda: log.units)
+            size = log.size() if hasattr(log, 'size') else 0
+            name = create_table_item("Name", key, invalid_value_count, size, lambda: log.name)
+            log_type = create_table_item("Type", key, invalid_value_count, size, get_type, log)
+            value = create_table_item("Value", key, invalid_value_count, size, lambda log: str(get_value(log)), log)
+            unit = create_table_item("Units", key, invalid_value_count, size, lambda: log.units)
             model.appendRow((name, log_type, value, unit))
 
         model.sort(0)
