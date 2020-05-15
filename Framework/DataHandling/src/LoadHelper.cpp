@@ -140,6 +140,8 @@ LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
  * @param nxfileID    :: Nexus file handle to be parsed, just after an
  *NXopengroup
  * @param runDetails  :: where to add properties
+ * @param entryName :: entry name to load properties from
+ * @param level :: starting nexus file tree level
  *
  */
 void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
