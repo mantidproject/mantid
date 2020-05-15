@@ -10,10 +10,10 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace, \
-    SpecialCoordinateSystem
-from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, \
-    FakeMDEventData
+from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace,
+                        SpecialCoordinateSystem)
+from mantid.simpleapi import (CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace,
+                              FakeMDEventData)
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from numpy.testing import assert_equal, assert_allclose
 import numpy as np
@@ -255,6 +255,18 @@ class SliceViewerModelTest(unittest.TestCase):
                                                   units=SpecialCoordinateSystem.QLab,
                                                   has_oriented_lattice=True)
 
+    def test_matrix_workspace_cannot_support_peaks_overlay(self):
+        self._assert_supports_peaks_overlay(False, MatrixWorkspace)
+
+    def test_md_workspace_with_fewer_than_three_dimensions_cannot_support_peaks_overlay(self):
+        for ndims in range(3):
+            self._assert_supports_peaks_overlay(False, IMDEventWorkspace, ndims=ndims)
+            self._assert_supports_peaks_overlay(False, IMDHistoWorkspace, ndims=ndims)
+
+    def test_md_workspace_with_three_or_more_dimensions_can_support_peaks_overlay(self):
+        self._assert_supports_peaks_overlay(True, IMDEventWorkspace, ndims=3)
+        self._assert_supports_peaks_overlay(True, IMDHistoWorkspace, ndims=3)
+
     def test_create_non_orthogonal_transform_raises_error_if_not_supported(self):
         model = SliceViewerModel(
             self._create_mock_workspace(MatrixWorkspace,
@@ -310,9 +322,18 @@ class SliceViewerModelTest(unittest.TestCase):
         model = SliceViewerModel(self._create_mock_workspace(ws_type, units, has_oriented_lattice))
         self.assertEqual(expectation, model.can_support_nonorthogonal_axes())
 
-    def _create_mock_workspace(self, ws_type, units, has_oriented_lattice):
+    def _assert_supports_peaks_overlay(self, expectation, ws_type, ndims=2):
+        ws = self._create_mock_workspace(ws_type,
+                                         units=SpecialCoordinateSystem.QLab,
+                                         has_oriented_lattice=False,
+                                         ndims=ndims)
+        model = SliceViewerModel(ws)
+        self.assertEqual(expectation, model.can_support_peaks_overlays())
+
+    def _create_mock_workspace(self, ws_type, units, has_oriented_lattice, ndims=2):
         ws = MagicMock(spec=ws_type)
         if hasattr(ws, 'getExperimentInfo'):
+            ws.getNumDims.return_value = ndims
             ws.getSpecialCoordinateSystem.return_value = units
             ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]
             expt_info = MagicMock()
@@ -321,6 +342,7 @@ class SliceViewerModelTest(unittest.TestCase):
             expt_info.sample.return_value = sample
             ws.getExperimentInfo.return_value = expt_info
         elif hasattr(ws, 'getNumberHistograms'):
+            ws.getNumDims.return_value = 2
             ws.getNumberHistograms.return_value = 3
             mock_dimension = MagicMock()
             mock_dimension.getNBins.return_value = 3

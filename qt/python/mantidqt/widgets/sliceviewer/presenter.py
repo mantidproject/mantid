@@ -47,6 +47,8 @@ class SliceViewer(object):
         if self.model.can_normalize_workspace():
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
             self.view.data_view.set_normalization(ws)
+        if not self.model.can_support_peaks_overlays():
+            self.view.data_view.disable_peaks_button()
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_nonorthogonal_axes_button()
 
