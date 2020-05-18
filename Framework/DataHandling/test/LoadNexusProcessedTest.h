@@ -1236,7 +1236,6 @@ private:
     TSM_ASSERT_EQUALS(message, value, refValue);
   }
 
-
   void doHistoryTest(const MatrixWorkspace_sptr &matrix_ws) {
     const WorkspaceHistory history = matrix_ws->getHistory();
     int nalgs = static_cast<int>(history.size());
