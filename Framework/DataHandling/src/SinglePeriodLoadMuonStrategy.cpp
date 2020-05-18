@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataHandling/LoadMuonLog.h"
-#include "MantidDataHandling/LoadMuonNexus3Helper.h"
+#include "MantidDataHandling/LoadMuonNexusV2Helper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
@@ -50,7 +50,7 @@ void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
     m_logger.error("Unable to successfully run LoadMuonLog Child Algorithm");
   }
   std::string mainFieldDirection =
-      LoadMuonNexus3Helper::loadMainFieldDirectionFromNexus(m_entry);
+      LoadMuonNexusV2Helper::loadMainFieldDirectionFromNexus(m_entry);
   // set output property and add to workspace logs
   auto &run = m_workspace->mutableRun();
   run.addProperty("main_field_direction", mainFieldDirection);
@@ -64,7 +64,7 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
   auto &run = m_workspace->mutableRun();
   run.removeProperty("goodfrm");
 
-  NXInt goodframes = LoadMuonNexus3Helper::loadGoodFramesDataFromNexus(
+  NXInt goodframes = LoadMuonNexusV2Helper::loadGoodFramesDataFromNexus(
       m_entry, m_isFileMultiPeriod);
 
   if (m_isFileMultiPeriod) {
@@ -82,7 +82,7 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
 
-  auto grouping = LoadMuonNexus3Helper::loadDetectorGroupingFromNexus(
+  auto grouping = LoadMuonNexusV2Helper::loadDetectorGroupingFromNexus(
       m_entry, m_detectors, m_isFileMultiPeriod);
   DataObjects::TableWorkspace_sptr table =
       createDetectorGroupingTable(m_detectors, grouping);
@@ -133,7 +133,7 @@ SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
 
-  auto deadTimes = LoadMuonNexus3Helper::loadDeadTimesFromNexus(
+  auto deadTimes = LoadMuonNexusV2Helper::loadDeadTimesFromNexus(
       m_entry, m_detectors, m_isFileMultiPeriod);
   auto deadTimeTable = createDeadTimeTable(m_detectors, deadTimes);
 
@@ -149,7 +149,7 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
  */
 void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
 
-  double timeZero = LoadMuonNexus3Helper::loadTimeZeroFromNexusFile(m_entry);
+  double timeZero = LoadMuonNexusV2Helper::loadTimeZeroFromNexusFile(m_entry);
   auto newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));
   newUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);

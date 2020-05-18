@@ -4,14 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadMuonNexus3.h"
+#include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
-#include "MantidDataHandling/LoadMuonNexus3Helper.h"
+#include "MantidDataHandling/LoadMuonNexusV2Helper.h"
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -26,7 +26,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMuonNexus3)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMuonNexusV2)
 
 using namespace Kernel;
 using namespace API;
@@ -36,9 +36,8 @@ using std::size_t;
 using namespace DataObjects;
 
 /// Empty default constructor
-LoadMuonNexus3::LoadMuonNexus3()
-    : m_filename(), m_sampleName(), m_isFileMultiPeriod(false),
-      m_multiPeriodsLoaded(false) {}
+LoadMuonNexusV2::LoadMuonNexusV2()
+    : m_filename(), m_isFileMultiPeriod(false), m_multiPeriodsLoaded(false) {}
 
 /**
  * Return the confidence criteria for this algorithm can load the file
@@ -46,27 +45,27 @@ LoadMuonNexus3::LoadMuonNexus3()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus3::confidence(NexusHDF5Descriptor &descriptor) const {
+int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
   // Without this entry we cannot use LoadISISNexus
   if (!descriptor.isEntry("/raw_data_1", "NXentry")) {
     return 0;
   }
   const std::string root = "/raw_data_1";
-  // Check if Muon source in defintiion entry
+  // Check if Muon source in definition entry
   if (!descriptor.isEntry(root + "/definition"))
     return 0;
   ::NeXus::File file(descriptor.getFilename());
   file.openPath(root + "/definition");
   std::string def = file.getStrData();
   if (def == "muonTD" || def == "pulsedTD") {
-    return 82; // have to return 82 to "beat" the LoadMuonNexusV2 algorithm,
+    return 82; // have to return 82 to "beat" the LoadMuonNexus2 algorithm,
                // which returns 81 for this file as well
   } else {
     return 0;
   }
 }
 /// Initialization method.
-void LoadMuonNexus3::init() {
+void LoadMuonNexusV2::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                  FileProperty::Load, ".nxs"),
                   "The name of the Nexus file to load");
@@ -88,14 +87,14 @@ void LoadMuonNexus3::init() {
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
-                  "one worskspace");
+                  "one workspace");
 
   std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
   declareProperty("MainFieldDirection", "Transverse",
                   std::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
                   "(run/instrument/detector/orientation, default "
-                  "longitudinal). Version 1 only.",
+                  "longitudinal).",
                   Direction::Output);
 
   declareProperty("TimeZero", 0.0,
@@ -108,17 +107,15 @@ void LoadMuonNexus3::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>(
           "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
-      "Table or a group of tables containing detector dead times. Version 1 "
-      "only.");
+      "Table or a group of tables containing detector dead times.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable",
-                                                     "", Direction::Output,
-                                                     PropertyMode::Optional),
-      "Table or a group of tables with information about the "
-      "detector grouping stored in the file (if any). Version 1 only.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "DetectorGroupingTable", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "Table or a group of tables with information about the "
+                  "detector grouping stored in the file (if any).");
 }
-void LoadMuonNexus3::execLoader() {
+void LoadMuonNexusV2::execLoader() {
 
   // prepare nexus entry
   m_entrynumber = getProperty("EntryNumber");
@@ -149,8 +146,8 @@ void LoadMuonNexus3::execLoader() {
   m_loadMuonStrategy->loadGoodFrames();
   m_loadMuonStrategy->applyTimeZeroCorrection();
   // Grouping info should be returned if user has set the property
-  auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
   if (!getPropertyValue("DetectorGroupingTable").empty()) {
+    auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
     setProperty("DetectorGroupingTable", loadedGrouping);
   };
   // Deadtime table should be returned if user has set the property
@@ -164,7 +161,7 @@ void LoadMuonNexus3::execLoader() {
  * Determines whether the file is multi period
  * If multi period the function determines whether multi periods are loaded
  */
-void LoadMuonNexus3::isEntryMultiPeriod(const NXEntry &entry) {
+void LoadMuonNexusV2::isEntryMultiPeriod(const NXEntry &entry) {
   NXClass periodClass = entry.openNXGroup("periods");
   int numberOfPeriods = periodClass.getInt("number");
   if (numberOfPeriods > 1) {
@@ -181,7 +178,7 @@ void LoadMuonNexus3::isEntryMultiPeriod(const NXEntry &entry) {
  * Runs the child algorithm LoadISISNexus, which loads data into an output
  * workspace
  */
-void LoadMuonNexus3::runLoadISISNexus() {
+void LoadMuonNexusV2::runLoadISISNexus() {
   IAlgorithm_sptr childAlg =
       createChildAlgorithm("LoadISISNexus", 0, 1, true, 2);
   declareProperty("LoadMonitors", "Exclude"); // we need to set this property
@@ -194,16 +191,16 @@ void LoadMuonNexus3::runLoadISISNexus() {
  * Loads Muon specific data from the nexus entry
  * and sets the appropriate output properties
  */
-void LoadMuonNexus3::loadMuonProperties(const NXEntry &entry) {
+void LoadMuonNexusV2::loadMuonProperties(const NXEntry &entry) {
 
   std::string mainFieldDirection =
-      LoadMuonNexus3Helper::loadMainFieldDirectionFromNexus(entry);
+      LoadMuonNexusV2Helper::loadMainFieldDirectionFromNexus(entry);
   setProperty("MainFieldDirection", mainFieldDirection);
 
-  double timeZero = LoadMuonNexus3Helper::loadTimeZeroFromNexusFile(entry);
+  double timeZero = LoadMuonNexusV2Helper::loadTimeZeroFromNexusFile(entry);
   setProperty("timeZero", timeZero);
 
-  auto firstGoodData = LoadMuonNexus3Helper::loadFirstGoodDataFromNexus(entry);
+  auto firstGoodData = LoadMuonNexusV2Helper::loadFirstGoodDataFromNexus(entry);
   setProperty("FirstGoodData", firstGoodData);
 }
 } // namespace DataHandling

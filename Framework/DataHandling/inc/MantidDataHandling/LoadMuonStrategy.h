@@ -46,8 +46,8 @@ protected:
                       const std::vector<double> &deadTimes) const;
   // Logger
   Kernel::Logger &m_logger;
-  // File name, used for running child algorithms
-  std::string m_filename;
+  // Filename, used for running child algorithms
+  const std::string & m_filename;
 };
 } // namespace DataHandling
 } // namespace Mantid

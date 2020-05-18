@@ -8,13 +8,13 @@
 
 // These functions handle the nexus operations needed to load
 // the information from the Muon Nexus V2 file
-#include "MantidDataHandling/LoadMuonNexus3Helper.h"
+#include "MantidDataHandling/LoadMuonNexusV2Helper.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace DataHandling {
-namespace LoadMuonNexus3Helper {
+namespace LoadMuonNexusV2Helper {
 
 using namespace NeXus;
 using namespace Kernel;
@@ -157,6 +157,6 @@ getLoadedDetectors(const DataObjects::Workspace2D_sptr &localWorkspace) {
   return loadedDetectors;
 }
 
-} // namespace LoadMuonNexus3Helper
+} // namespace LoadMuonNexusV2Helper
 } // namespace DataHandling
 } // namespace Mantid

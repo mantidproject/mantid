@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/NexusFileLoader.h"
@@ -25,9 +24,9 @@
 
 namespace Mantid {
 namespace DataHandling {
-/** @class LoadMuonNexus3 LoadMuonNexus3.h DataHandling/LoadMuonNexus3.h
+/** @class LoadMuonNexusV2 LoadMuonNexusV2.h DataHandling/LoadMuonNexusV2.h
 
-Loads a file in the Nexus Muon format version 2 and stores it in a 2D workspace
+Loads a file in the Nexus Muon format V2 and stores it in a 2D workspace
 (Workspace2D class). LoadMuonNexus is an algorithm that loads
 an HDF5 file and as such inherits from API::NexusFileLoader and
 the init() & execLoader() methods.
@@ -38,7 +37,7 @@ Required Properties:
 data
      (a multiperiod file will store higher periods in workspaces called
 OutputWorkspace_PeriodNo)
-     [ not yet implemented for Muon Nexus 2 ]</LI>
+     [ not yet implemented for Muon Nexus V2 ]</LI>
 </UL>
 
 Optional Properties: (note that these options are not available if reading a
@@ -51,12 +50,12 @@ multiperiod file)
 
 @author Stephen Smith, ISIS
 */
-class DLLExport LoadMuonNexus3 : public API::NexusFileLoader {
+class DLLExport LoadMuonNexusV2 : public API::NexusFileLoader {
 public:
   // Default constructor
-  LoadMuonNexus3();
+  LoadMuonNexusV2();
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "LoadMuonNexus3"; }
+  const std::string name() const override { return "LoadMuonNexusV2"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Loads a Muon Nexus V2 data file and stores it in a 2D "
@@ -83,8 +82,6 @@ private:
   void loadMuonProperties(const NeXus::NXEntry &entry);
   /// The name and path of the input file
   std::string m_filename;
-  /// The sample name read from Nexus
-  std::string m_sampleName;
   /// The number of the input entry
   int64_t m_entrynumber;
   /// The number of periods in the raw file
@@ -93,8 +90,6 @@ private:
   bool m_isFileMultiPeriod;
   // Are multi periods loaded
   bool m_multiPeriodsLoaded;
-  /// The group which each detector belongs to in order
-  std::vector<specnum_t> m_groupings;
   // The loading strategy used
   std::unique_ptr<LoadMuonStrategy> m_loadMuonStrategy;
 };

@@ -19,7 +19,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-namespace LoadMuonNexus3Helper {
+namespace LoadMuonNexusV2Helper {
 
 // Loads the good frame data from the nexus file
 NeXus::NXInt loadGoodFramesDataFromNexus(const NeXus::NXEntry &entry,

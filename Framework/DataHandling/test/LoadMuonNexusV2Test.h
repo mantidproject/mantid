@@ -12,7 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadMuonNexus3.h"
+#include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include <cmath>
@@ -27,7 +27,7 @@ private:
   // helper methods
 public:
   void testExec() {
-    LoadMuonNexus3 ld;
+    LoadMuonNexusV2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
@@ -73,5 +73,5 @@ public:
   void testDefaultLoad() { loader.execute(); }
 
 private:
-  LoadMuonNexus3 loader;
+  LoadMuonNexusV2 loader;
 };
