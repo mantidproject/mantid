@@ -302,6 +302,52 @@ protected:
 };
 
 /**
+ * A sector: area bounded by two curves of the same shape but different size.
+ *
+ * The constructor takes a curve shape and the ring widths in the x and y
+ * directions.
+ * It has QPointF "centre" property and "xwidth" and "ywidth" double properties.
+ */
+class Shape2DSector : public Shape2D {
+public:
+  Shape2DSector(double inner_radius, double outer_radius, double start_angle,
+                double end_angle, const QPointF &center);
+  Shape2DSector(const Shape2DSector &sector);
+  Shape2D *clone() const override { return new Shape2DSector(*this); }
+  bool selectAt(const QPointF &p) const override;
+  bool contains(const QPointF &p) const override;
+  // double properties
+  QStringList getDoubleNames() const override;
+  double getDouble(const QString &prop) const override;
+  void setDouble(const QString &prop, double value) override;
+  // QPointF properties
+  QStringList getPointNames() const override { return QStringList("center"); }
+  QPointF getPoint(const QString &prop) const override;
+  void setPoint(const QString &prop, const QPointF &value) override;
+  /// Load state for the shape from a project file
+  // static Shape2D *loadFromProject(const std::string &lines);
+  /// Save state for the shape to a project file
+  // virtual std::string saveToProject() const override;
+  std::string type() const override { return "sector"; }
+
+protected:
+  void drawShape(QPainter &painter) const override;
+  void addToPath(QPainterPath & /*path*/) const override {}
+  void refit() override;
+  void resetBoundingRect() override;
+  size_t getShapeNControlPoints() const override { return 4; }
+  QPointF getShapeControlPoint(size_t i) const override;
+  void setShapeControlPoint(size_t i, const QPointF &pos) override;
+  double m_innerRadius;
+  double m_outerRadius;
+  double m_startAngle;
+  double m_endAngle;
+  QPointF m_center;
+};
+
+QRectF findArcBoundingBox(double startAngle, double endAngle);
+
+/**
  * An arbitrary shape. Implemented as a polygon.
  * It can have disjointed parts and holes.
  *

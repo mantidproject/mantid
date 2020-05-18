@@ -620,6 +620,258 @@ std::string Shape2DRing::saveToProject() const {
   return tsv.outputLines();
 }
 
+// --- Shape2DSector --- //
+
+Shape2DSector::Shape2DSector(double inner_radius, double outer_radius,
+                             double start_angle, double end_angle,
+                             const QPointF &center) {
+  m_innerRadius = std::min(inner_radius, outer_radius);
+  m_outerRadius = std::max(inner_radius, outer_radius);
+
+  m_startAngle = fmod(start_angle, 2 * M_PI);
+  m_endAngle = fmod(end_angle, 2 * M_PI);
+  m_center = center;
+  resetBoundingRect();
+}
+
+Shape2DSector::Shape2DSector(const Shape2DSector &sector)
+    : m_innerRadius(sector.m_innerRadius), m_outerRadius(sector.m_outerRadius),
+      m_startAngle(sector.m_startAngle), m_endAngle(sector.m_endAngle),
+      m_center(sector.m_center) {
+  resetBoundingRect();
+}
+bool Shape2DSector::selectAt(const QPointF &p) const { return contains(p); }
+
+bool Shape2DSector::contains(const QPointF &p) const {
+  QPointF relPos = p - m_center;
+
+  double distance = sqrt(pow(relPos.x(), 2) + pow(relPos.y(), 2));
+  if (distance < m_innerRadius || distance > m_outerRadius) {
+    return false;
+  }
+
+  double angle = atan2(relPos.x(), relPos.y());
+  if (angle < 0) {
+    angle += 2 * M_PI;
+  }
+  return ((m_startAngle <= angle && angle <= m_endAngle) ||
+          (m_startAngle > m_endAngle &&
+           (angle <= m_endAngle || angle >= m_startAngle)));
+}
+
+void Shape2DSector::drawShape(QPainter &painter) const {
+  QPainterPath path;
+  double to_degrees = 180 / M_PI;
+  double x_origin = m_center.x() + cos(m_startAngle) * m_innerRadius;
+  double y_origin = m_center.y() + sin(m_startAngle) * m_innerRadius;
+
+  double x_arcEnd = m_center.x() + cos(m_endAngle) * m_outerRadius;
+  double y_arcEnd = m_center.y() + sin(m_endAngle) * m_outerRadius;
+
+  double sweepLength = (m_endAngle - m_startAngle) * to_degrees;
+
+  path.moveTo(x_origin, y_origin);
+  QRectF absoluteBBox = findArcBoundingBox(m_startAngle, m_endAngle);
+  path.arcTo(QRectF(absoluteBBox.topLeft() * m_innerRadius + m_center,
+                    absoluteBBox.bottomRight() * m_innerRadius + m_center),
+             m_startAngle * to_degrees, sweepLength);
+  path.lineTo(x_arcEnd, y_arcEnd);
+  path.arcTo(QRectF(absoluteBBox.topLeft() * m_outerRadius + m_center,
+                    absoluteBBox.bottomRight() * m_outerRadius + m_center),
+             m_endAngle * to_degrees, -sweepLength);
+  path.moveTo(x_origin, y_origin);
+  path.closeSubpath();
+
+  painter.drawPath(path);
+}
+
+QRectF findArcBoundingBox(double startAngle, double endAngle) {
+  double x_min, x_max, y_min, y_max;
+
+  if ((startAngle <= M_PI / 2 && endAngle >= M_PI / 2) ||
+      (startAngle > endAngle &&
+       !(startAngle >= M_PI / 2 && endAngle <= M_PI / 2))) {
+    y_max = 1;
+  } else {
+    y_max = std::max(sin(startAngle), sin(endAngle));
+  }
+
+  if ((startAngle <= M_PI && endAngle >= M_PI) ||
+      (startAngle > endAngle && !(startAngle >= M_PI && endAngle <= M_PI))) {
+    x_min = -1;
+  } else {
+    x_min = std::min(cos(startAngle), cos(endAngle));
+  }
+
+  if ((startAngle <= 3 * M_PI / 2 && endAngle >= 3 * M_PI / 2) ||
+      (startAngle > endAngle &&
+       !(startAngle >= 3 * M_PI / 2 && endAngle <= 3 * M_PI / 2))) {
+    y_min = -1;
+  } else {
+    y_min = std::min(sin(startAngle), sin(endAngle));
+  }
+
+  if (startAngle > endAngle) {
+    x_max = 1;
+  } else {
+    x_max = std::max(cos(startAngle), cos(endAngle));
+  }
+
+  QPointF topLeft(x_min, y_max);
+  QPointF bottomRight(x_max, y_min);
+  return QRectF(topLeft, bottomRight);
+}
+
+void Shape2DSector::refit() {
+  if (m_innerRadius <= 0)
+    m_innerRadius = 0.000001;
+  if (m_outerRadius <= m_innerRadius)
+    m_outerRadius = m_innerRadius + 0.000001;
+  resetBoundingRect();
+}
+
+void Shape2DSector::resetBoundingRect() {
+  double x_min, x_max, y_min, y_max;
+
+  if ((m_startAngle <= M_PI / 2 && m_endAngle >= M_PI / 2) ||
+      (m_startAngle > m_endAngle &&
+       !(m_startAngle >= M_PI / 2 && m_endAngle <= M_PI / 2))) {
+    y_max = m_outerRadius;
+  } else {
+    y_max = std::max(sin(m_startAngle), sin(m_endAngle));
+    y_max = y_max < 0 ? y_max * m_innerRadius : y_max * m_outerRadius;
+  }
+
+  if ((m_startAngle <= M_PI && m_endAngle >= M_PI) ||
+      (m_startAngle > m_endAngle &&
+       !(m_startAngle >= M_PI && m_endAngle <= M_PI))) {
+    x_min = -m_outerRadius;
+  } else {
+    x_min = std::min(cos(m_startAngle), cos(m_endAngle));
+    x_min = x_min > 0 ? x_min * m_innerRadius : x_min * m_outerRadius;
+  }
+
+  if ((m_startAngle <= 3 * M_PI / 2 && m_endAngle >= 3 * M_PI / 2) ||
+      (m_startAngle > m_endAngle &&
+       !(m_startAngle >= 3 * M_PI / 2 && m_endAngle <= 3 * M_PI / 2))) {
+    y_min = -m_outerRadius;
+  } else {
+    y_min = std::min(sin(m_startAngle), sin(m_endAngle));
+    y_min = y_min > 0 ? y_min * m_innerRadius : y_min * m_outerRadius;
+  }
+
+  if (m_startAngle > m_endAngle) {
+    x_max = m_outerRadius;
+  } else {
+    x_max = std::max(cos(m_startAngle), cos(m_endAngle));
+    x_max = x_max < 0 ? x_max * m_innerRadius : x_max * m_outerRadius;
+  }
+
+  QPointF top_left(x_min, y_max);
+  QPointF bottom_right(x_max, y_min);
+  m_boundingRect = RectF(top_left, bottom_right);
+}
+
+QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
+  double halfAngle =
+      m_startAngle < m_endAngle
+          ? fmod(m_startAngle + m_endAngle, 2 * M_PI) / 2.
+          : fmod((m_startAngle + m_endAngle + 2 * M_PI) / 2, 2 * M_PI);
+  double halfLength = (m_outerRadius + m_innerRadius) / 2;
+
+  switch (i) {
+  case 0:
+    return QPointF(m_center.x() + cos(halfAngle) * m_outerRadius,
+                   m_center.y() + sin(halfAngle) * m_outerRadius);
+  case 1:
+    return QPointF(m_center.x() + cos(halfAngle) * m_innerRadius,
+                   m_center.y() + sin(halfAngle) * m_innerRadius);
+  case 2:
+    return QPointF(m_center.x() + cos(m_startAngle) * halfLength,
+                   m_center.y() + sin(m_startAngle) * halfLength);
+  case 3:
+    return QPointF(m_center.x() + cos(m_endAngle) * halfLength,
+                   m_center.y() + sin(m_endAngle) * halfLength);
+  }
+  return QPointF();
+}
+
+void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
+  QPointF to_center = pos - m_center;
+  switch (i) {
+  case 0:
+    m_outerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
+    break;
+  case 1:
+    m_innerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
+    break;
+  case 2:
+    m_startAngle = atan2(to_center.x(), to_center.y());
+    if (m_startAngle < 0)
+      m_startAngle += 2 * M_PI;
+    break;
+  case 3:
+    m_endAngle = atan2(to_center.x(), to_center.y());
+    if (m_endAngle < 0)
+      m_endAngle += 2 * M_PI;
+    break;
+  }
+  refit();
+}
+
+QStringList Shape2DSector::getDoubleNames() const {
+  QStringList res;
+  res << "outerRadius"
+      << "innerRadius"
+      << "startAngle"
+      << "endAngle";
+  return res;
+}
+
+double Shape2DSector::getDouble(const QString &prop) const {
+  if (prop == "outerRadius") {
+    return m_outerRadius;
+  }
+  if (prop == "innerRadius") {
+    return m_innerRadius;
+  }
+  if (prop == "startAngle") {
+    return m_startAngle;
+  }
+  if (prop == "endAngle") {
+    return m_endAngle;
+  }
+  return 0.0;
+}
+
+void Shape2DSector::setDouble(const QString &prop, double value) {
+  if (prop == "outerRadius") {
+    m_outerRadius = value;
+    refit();
+  } else if (prop == "innerRadius") {
+    m_innerRadius = value;
+    refit();
+  } else if (prop == "startAngle") {
+    m_startAngle = value;
+    refit();
+  } else if (prop == "endAngle") {
+    m_endAngle = value;
+    refit();
+  }
+}
+
+QPointF Shape2DSector::getPoint(const QString &prop) const {
+  if (prop == "center") {
+    return m_center;
+  }
+  return QPointF();
+}
+
+void Shape2DSector::setPoint(const QString &prop, const QPointF &value) {
+  if (prop == "center") {
+    m_center = value;
+  }
+}
 //------------------------------------------------------------------------------
 
 /// Construct a zero-sized shape.
