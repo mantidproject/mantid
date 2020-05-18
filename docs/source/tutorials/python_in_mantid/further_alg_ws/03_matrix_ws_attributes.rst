@@ -1,4 +1,4 @@
-.. _02_matrix_ws_attributes:
+.. _03_matrix_ws_attributes:
 
 ==========================
 MatrixWorkspace Attributes

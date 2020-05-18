@@ -1,4 +1,4 @@
-.. _07_pim_ex_4:
+.. _08_pim_ex_4:
 
 ============================
 Python in Mantid: Exercise 4

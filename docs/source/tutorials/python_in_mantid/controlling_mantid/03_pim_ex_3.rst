@@ -1,4 +1,4 @@
-.. _04_pim_ex_3:
+.. _03_pim_ex_3:
 
 ============================
 Python in Mantid: Exercise 3
@@ -25,7 +25,6 @@ Graphing
 #. Change the title of the X axis
 #. Change the title of the Y axis
 
-:ref:`scripting_plots`
 
 Using SNS Data
 ==============

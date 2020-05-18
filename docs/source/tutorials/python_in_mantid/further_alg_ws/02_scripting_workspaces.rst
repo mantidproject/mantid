@@ -1,4 +1,4 @@
-.. _scripting_workspaces:
+.. _02_scripting_workspaces:
 
 =====================
 Workspaces in Scripts

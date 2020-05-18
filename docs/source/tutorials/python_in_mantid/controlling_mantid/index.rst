@@ -11,20 +11,22 @@ Controlling Mantid with Python
    :maxdepth: 1
 
    01_matrix_and_plot
-   04_pim_ex_3
+   02_scripting_plots
+   03_pim_ex_3
 
-..   02_instrument_view
-..   03_sliceviewer
+..   03_instrument_view
+..   04_sliceviewer
 
 
 
 **Contents**
 
 * :ref:`01_matrix_and_plot`
-* :ref:`04_pim_ex_3`
+* :ref:`02_scripting_plots`
+* :ref:`03_pim_ex_3`
 
-.. * :ref:`02_instrument_view`
-.. * :ref:`03_sliceviewer`
+.. * :ref:`03_instrument_view`
+.. * :ref:`04_sliceviewer`
 
 .. figure:: /images/Mantid_artifact.png
    :alt: Mantid_artifact
