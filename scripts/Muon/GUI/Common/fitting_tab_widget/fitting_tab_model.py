@@ -93,6 +93,8 @@ class FittingTabModel(object):
 
     def evaluate_plot_guess(self, workspace_names: str, plot_guess: bool, index: int):
         fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
+        if not data_ws_name:
+            return
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
             guess_ws_name = MUON_ANALYSIS_GUESS_WS + data_ws_name
         elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
