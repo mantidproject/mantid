@@ -147,9 +147,10 @@ void MaskDetectorsIf::outputToWorkspace() {
    * Subsequent algorithms may not respect the flag and process the values
    * incorrectly. The algorithm ClearMaskedSpectra can clear the masked data.
    * This is probably a mistake but will be left in for compatability for now.
-   * the following lines would clear the data properly
-   * other algorithms to look into that do this are MaskInstrument and
-   * clearMaskedSpectra.
+   *
+   * The following lines would clear the data properly:
+   * (Other algorithms to look into that do this are MaskInstrument and
+   * clearMaskedSpectra.)
    *
    *  const auto &spectrumInfo = workspace->spectrumInfo();
    *  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
