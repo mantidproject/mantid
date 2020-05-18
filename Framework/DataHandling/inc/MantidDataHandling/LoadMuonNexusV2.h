@@ -7,6 +7,7 @@
 #pragma once
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -38,10 +39,6 @@ multiperiod file)
 
 @author Stephen Smith, ISIS
 */
-
-// Forward declare load strategy
-class LoadMuonStrategy;
-
 class DLLExport LoadMuonNexusV2 : public API::NexusFileLoader {
 public:
   // Default constructor

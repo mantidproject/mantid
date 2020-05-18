@@ -35,6 +35,6 @@ double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry);
 // Load time zero from the nexus entry
 double loadTimeZeroFromNexusFile(const NeXus::NXEntry &entry);
 
-} // namespace LoadMuonNexus3Helper
+} // namespace LoadMuonNexusV2Helper
 } // namespace DataHandling
 } // namespace Mantid

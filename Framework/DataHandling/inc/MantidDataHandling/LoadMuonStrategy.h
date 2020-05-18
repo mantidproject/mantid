@@ -42,7 +42,7 @@ protected:
   // Logger
   Kernel::Logger &m_logger;
   // Filename, used for running child algorithms
-  const std::string & m_filename;
+  const std::string &m_filename;
 };
 } // namespace DataHandling
 } // namespace Mantid

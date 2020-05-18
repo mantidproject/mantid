@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadMuonNexusV2Helper.h"
-#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -132,6 +131,8 @@ void LoadMuonNexusV2::execLoader() {
   if (m_multiPeriodsLoaded) {
     WorkspaceGroup_sptr wksp_grp =
         std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+    g_log.warning("Multi period files not yet supported by LoadMuonNexusV2");
+    return;
   } else {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =

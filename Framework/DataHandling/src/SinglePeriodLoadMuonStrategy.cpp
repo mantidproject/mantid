@@ -157,10 +157,9 @@ void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
       Kernel::UnitFactory::Instance().create("Label"));
   newUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
   m_workspace->getAxis(0)->unit() = newUnit;
-  int numHistograms = static_cast<int>(m_workspace->getNumberHistograms());
 
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < numHistograms; i++) {
+  auto numHistograms = m_workspace->getNumberHistograms();
+  for (auto i = 0; i < numHistograms; ++i) {
     auto &timeAxis = m_workspace->mutableX(i);
     timeAxis = timeAxis - timeZero;
   }

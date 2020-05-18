@@ -7,7 +7,6 @@
 #pragma once
 #include "MantidDataHandling/LoadMuonStrategy.h"
 
-
 namespace Mantid {
 namespace DataHandling {
 class SinglePeriodLoadMuonStrategy : public LoadMuonStrategy {
@@ -15,7 +14,7 @@ public:
   // Constructor
   SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log,
                                const std::string &filename,
-                               NeXus::NXEntry& entry,
+                               NeXus::NXEntry &entry,
                                DataObjects::Workspace2D_sptr workspace,
                                int entryNumber, bool isFileMultiPeriod);
   // Loads the muon log data
@@ -32,7 +31,7 @@ public:
   API::Workspace_sptr loadDeadTimeTable() const override;
 
 private:
-  NeXus::NXEntry& m_entry;
+  NeXus::NXEntry &m_entry;
   DataObjects::Workspace2D_sptr m_workspace;
   int m_entryNumber;
   bool m_isFileMultiPeriod;
