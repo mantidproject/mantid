@@ -26,7 +26,7 @@ void export_IMDWorkspace() {
 
   boost::python::enum_<Mantid::Kernel::SpecialCoordinateSystem>(
       "SpecialCoordinateSystem")
-      .value("None", Mantid::Kernel::None)
+      .value("NONE", Mantid::Kernel::None)
       .value("QLab", Mantid::Kernel::QLab)
       .value("QSample", Mantid::Kernel::QSample)
       .value("HKL", Mantid::Kernel::HKL);

@@ -129,7 +129,8 @@ class SliceViewerModel:
         """
         returns dict of (minimum, maximun, number_of_bins, width, name, units) for dimension n
         """
-        dim = self._get_ws().getDimension(n)
+        workspace = self._get_ws()
+        dim = workspace.getDimension(n)
         return {
             'minimum': dim.getMinimum(),
             'maximum': dim.getMaximum(),
@@ -137,7 +138,8 @@ class SliceViewerModel:
             'width': dim.getBinWidth(),
             'name': dim.name,
             'units': dim.getUnits(),
-            'type': self.get_ws_type().name
+            'type': self.get_ws_type().name,
+            'qdim': dim.getMDFrame().isQ()
         }
 
     def get_dimensions_info(self) -> List[Dict]:

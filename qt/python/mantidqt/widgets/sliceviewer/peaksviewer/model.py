@@ -90,7 +90,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
         self._representations = representations
 
-    def slice_center(self, selected_index, slice_info):
+    def slicepoint(self, selected_index, slice_info):
         """
         Return the value of the center in the slice dimension for the peak at the given index
         :param selected_index: Index of a peak in the table
@@ -98,7 +98,10 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         """
         frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
         peak = self.ws.getPeak(selected_index)
-        return slice_info.transform(getattr(peak, frame_to_slice_fn)())[2]
+        slicepoint = slice_info.slicepoint
+        slicepoint[slice_info.z_index] = getattr(peak, frame_to_slice_fn)()[slice_info.z_index]
+
+        return slicepoint
 
     def zoom_to(self, index):
         """
