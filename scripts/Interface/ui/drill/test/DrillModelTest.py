@@ -8,7 +8,7 @@
 import unittest
 import mock
 
-from Interface.ui.drill.main.DrillModel import DrillModel, DrillException
+from Interface.ui.drill.model.DrillModel import DrillModel, DrillException
 
 
 class DrillModelTest(unittest.TestCase):
@@ -36,48 +36,48 @@ class DrillModelTest(unittest.TestCase):
 
     def setUp(self):
         # mock config
-        patch = mock.patch('Interface.ui.drill.main.DrillModel.config')
+        patch = mock.patch('Interface.ui.drill.model.DrillModel.config')
         self.mConfig = patch.start()
         self.mConfig.__getitem__.return_value = "i1"
         self.addCleanup(patch.stop)
 
         # mock specifications
         patch = mock.patch.dict(
-                'Interface.ui.drill.main.DrillModel.RundexSettings.TECHNIQUES',
+                'Interface.ui.drill.model.DrillModel.RundexSettings.TECHNIQUES',
                 self.TECHNIQUES
                 )
         self.mTechniques = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.main.DrillModel.RundexSettings.COLUMNS',
+                'Interface.ui.drill.model.DrillModel.RundexSettings.COLUMNS',
                 self.COLUMNS
                 )
         self.mColumns = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.main.DrillModel.RundexSettings.ALGORITHMS',
+                'Interface.ui.drill.model.DrillModel.RundexSettings.ALGORITHMS',
                 self.ALGORITHMS
                 )
         self.mAlgo = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.main.DrillModel.RundexSettings.SETTINGS',
+                'Interface.ui.drill.model.DrillModel.RundexSettings.SETTINGS',
                 self.SETTINGS
                 )
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
 
         # mock drill task
-        patch = mock.patch('Interface.ui.drill.main.DrillModel.DrillTask')
+        patch = mock.patch('Interface.ui.drill.model.DrillModel.DrillTask')
         self.mDrillTask = patch.start()
         self.addCleanup(patch.stop)
 
         # mock drill tasks pool
         patch = mock.patch(
-                'Interface.ui.drill.main.DrillModel.DrillAlgorithmPool'
+                'Interface.ui.drill.model.DrillModel.DrillAlgorithmPool'
                 )
         self.mTasksPool = patch.start()
         self.addCleanup(patch.stop)

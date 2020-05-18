@@ -15,12 +15,14 @@ else:
         logger.error('Drill is enabled only if the facility is set to ILL.')
     else:
         from mantidqt.gui_helper import get_qapplication
-        from Interface.ui.drill.main import (model, view, presenter)
+        from Interface.ui.drill.view.DrillView import DrillView
+        from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
+        from Interface.ui.drill.model.DrillModel import DrillModel
         app, within_mantid = get_qapplication()
         instrument = config['default.instrument']
-        main_view = view.DrillView()
-        main_model = model.DrillModel()
-        main_presenter = presenter.DrillPresenter(main_model, main_view)
+        main_view = DrillView()
+        main_model = DrillModel()
+        main_presenter = DrillPresenter(main_model, main_view)
         UsageService.registerFeatureUsage(FeatureType.Interface, "Drill", False)
         main_view.show()
         if not within_mantid:

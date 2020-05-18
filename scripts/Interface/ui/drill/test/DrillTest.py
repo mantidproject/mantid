@@ -12,9 +12,9 @@ from qtpy.QtWidgets import QApplication, QTableWidgetItem
 from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
-from Interface.ui.drill.main.view import DrillView
-from Interface.ui.drill.main.model import DrillModel
-from Interface.ui.drill.main.presenter import DrillPresenter
+from Interface.ui.drill.view.DrillView import DrillView
+from Interface.ui.drill.model.DrillModel import DrillModel
+from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
 
 app = QApplication(sys.argv)
 

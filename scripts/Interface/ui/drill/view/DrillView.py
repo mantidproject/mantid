@@ -41,7 +41,7 @@ class DrillView(QMainWindow):
         self.here = os.path.dirname(os.path.realpath(__file__))
 
         # setup ui
-        uic.loadUi(os.path.join(self.here, 'main.ui'), self,
+        uic.loadUi(os.path.join(self.here, 'ui/main.ui'), self,
                 'Interface.ui.drill.main.DrillTableWidget')
         self.setup_header()
         self.setup_table()

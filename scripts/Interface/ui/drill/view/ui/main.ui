@@ -503,7 +503,7 @@
   <customwidget>
    <class>DrillTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>Interface.ui.drill.main.DrillTableWidget</header>
+   <header>Interface.ui.drill.view.DrillTableWidget</header>
   </customwidget>
  </customwidgets>
  <resources/>

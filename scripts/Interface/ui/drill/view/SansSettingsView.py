@@ -15,7 +15,7 @@ import os
 
 class SansSettingsView(QDialog):
 
-    ui_filename = "SANS_settings.ui"
+    ui_filename = "ui/SANS_settings.ui"
 
     def __init__(self, parent=None):
         super(SansSettingsView, self).__init__(parent)

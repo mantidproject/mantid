@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QApplication, QTableWidgetItem
 from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
-from Interface.ui.drill.main.DrillTableWidget import DrillTableWidget
+from Interface.ui.drill.view.DrillTableWidget import DrillTableWidget
 
 app = QApplication(sys.argv)
 
