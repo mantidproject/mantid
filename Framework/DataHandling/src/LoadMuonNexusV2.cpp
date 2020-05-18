@@ -33,8 +33,8 @@ using namespace DataObjects;
 
 /// Empty default constructor
 LoadMuonNexusV2::LoadMuonNexusV2()
-    : m_filename(), m_isFileMultiPeriod(false), m_multiPeriodsLoaded(false),
-      m_entrynumber(0), m_numberOfPeriods(0) {}
+    : m_filename(), m_entrynumber(0), m_isFileMultiPeriod(false),
+      m_multiPeriodsLoaded(false) {}
 
 /**
  * Return the confidence criteria for this algorithm can load the file

@@ -29,8 +29,8 @@ SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(
     Kernel::Logger &g_log, const std::string &filename, NXEntry &entry,
     Workspace2D_sptr workspace, int entryNumber, bool isFileMultiPeriod)
     : LoadMuonStrategy(g_log, filename), m_entry(entry), m_workspace(workspace),
-      m_detectors(getLoadedDetectors()), m_entryNumber(entryNumber),
-      m_isFileMultiPeriod(isFileMultiPeriod) {}
+      m_entryNumber(entryNumber), m_isFileMultiPeriod(isFileMultiPeriod),
+      m_detectors(getLoadedDetectors()) {}
 
 /**
  * Loads Muon specific logs into the stored workspace
@@ -159,7 +159,7 @@ void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
   m_workspace->getAxis(0)->unit() = newUnit;
 
   auto numHistograms = m_workspace->getNumberHistograms();
-  for (auto i = 0; i < numHistograms; ++i) {
+  for (size_t i = 0; i < numHistograms; ++i) {
     auto &timeAxis = m_workspace->mutableX(i);
     timeAxis = timeAxis - timeZero;
   }

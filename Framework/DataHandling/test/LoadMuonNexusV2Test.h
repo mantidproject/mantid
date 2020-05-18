@@ -7,13 +7,16 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
-#include <cxxtest/TestSuite.h>
-
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
+
+#include <cxxtest/TestSuite.h>
 
 #include <cmath>
 
@@ -42,18 +45,30 @@ public:
         output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS"));
 
-    Workspace2D_sptr output2D_1 =
+
+    Workspace2D_sptr output2D =
         std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
-    const Mantid::API::Run &run1 = output2D_1->run();
-    int goodfrm = run1.getPropertyAsIntegerValue("goodfrm");
+    const Mantid::API::Run &run = output2D->run();
+    int goodfrm = run.getPropertyAsIntegerValue("goodfrm");
     TS_ASSERT_EQUALS(goodfrm, 36197);
     double firstGoodData = ld.getProperty("FirstGoodData");
     TS_ASSERT_EQUALS(firstGoodData, 0.384);
     double timeZero = ld.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
-    // check time zero applied to time axis
+
+    // Check the unit has been set correctly
+    TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Label");
+    TS_ASSERT(!output2D->isDistribution());
+
+    // Check that sample temp and field set
+    double temperature = run.getPropertyAsSingleValue("sample_temp");
+    TS_ASSERT_EQUALS(100.0, temperature);
+    double field = run.getPropertyAsSingleValue("sample_magn_field");
+    TS_ASSERT_EQUALS(0.0, field);
   }
+
+  void testExecWithGroupingTable() {}
 };
 
 //------------------------------------------------------------------------------

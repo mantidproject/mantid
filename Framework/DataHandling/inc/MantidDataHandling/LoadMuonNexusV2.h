@@ -73,8 +73,6 @@ private:
   std::string m_filename;
   /// The number of the input entry
   int64_t m_entrynumber;
-  /// The number of periods in the raw file
-  int m_numberOfPeriods;
   // Is file multi period
   bool m_isFileMultiPeriod;
   // Are multi periods loaded
