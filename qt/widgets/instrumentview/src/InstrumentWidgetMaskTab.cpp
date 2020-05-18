@@ -130,6 +130,12 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_ring_rectangle->setToolTip("Draw a rectangular ring (Shift+Alt+R)");
   m_ring_rectangle->setShortcut(QKeySequence("Shift+Alt+R"));
 
+  m_sector = new QPushButton();
+  m_sector->setCheckable(true);
+  m_sector->setAutoExclusive(true);
+  m_sector->setIcon(QIcon(":/MaskTools/selection-box-ring.png"));
+  m_sector->setToolTip("Draw a circle sector (Shift+Alt+R)");
+
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
@@ -144,6 +150,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_rectangle);
   toolBox->addWidget(m_ring_ellipse);
   toolBox->addWidget(m_ring_rectangle);
+  toolBox->addWidget(m_sector);
   toolBox->addWidget(m_free_draw);
   toolBox->addStretch();
   toolBox->setSpacing(2);
@@ -155,6 +162,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_sector, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
   m_move->setChecked(true);
   auto *toolGroup = new QFrame();
@@ -405,6 +413,9 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
   case DrawRectangularRing:
     m_ring_rectangle->setChecked(true);
     break;
+  case DrawSector:
+    m_sector->setChecked(true);
+    break;
   case DrawFree:
     m_free_draw->setChecked(true);
     break;
@@ -461,6 +472,14 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_instrWidget->getSurface()->setInteractionMode(
         ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
+  } else if (m_sector->isChecked()) {
+    m_activity = DrawSector;
+    m_instrWidget->getSurface()->startCreatingShape2D("sector", borderColor,
+                                                      fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(
+        ProjectionSurface::DrawRegularMode);
+    m_activeTool->setText("Tool: Sector. " + whatIsBeingSelected);
+
   } else if (m_free_draw->isChecked()) {
     m_activity = DrawFree;
     m_instrWidget->getSurface()->startCreatingFreeShape(borderColor, fillColor);
