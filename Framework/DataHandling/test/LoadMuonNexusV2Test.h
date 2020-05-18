@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
-class LoadMuonNexus3Test : public CxxTest::TestSuite {
+class LoadMuonNexusV2Test : public CxxTest::TestSuite {
 private:
   // helper methods
 public:
@@ -60,7 +60,7 @@ public:
 // Performance test
 //------------------------------------------------------------------------------
 
-class LoadMuonNexus3TestPerformance : public CxxTest::TestSuite {
+class LoadMuonNexusV2TestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     loader.initialize();
