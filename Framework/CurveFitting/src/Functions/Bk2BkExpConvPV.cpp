@@ -172,7 +172,7 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha,
   } else {
     omega2 = 2 * N * eta / M_PI * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
   }
-  double omega = omega1 + omega2;
+  double omega = omega1 - omega2;
 
   return omega;
 }
