@@ -139,7 +139,7 @@ class SampleLogsModelTest(unittest.TestCase):
 
         model = SampleLogsModel(ws)
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 60)
+        self.assertEqual(len(log_names), 48)
         invalid_logs = model.get_logs_with_invalid_data()
         self.assertEqual(2, len(invalid_logs.keys()))
         self.assertIn('cryo_temp1',invalid_logs.keys())
