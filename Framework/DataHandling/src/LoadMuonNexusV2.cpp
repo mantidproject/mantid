@@ -178,12 +178,17 @@ void LoadMuonNexusV2::isEntryMultiPeriod(const NXEntry &entry) {
  * workspace
  */
 void LoadMuonNexusV2::runLoadISISNexus() {
+  // Here we explicit set the number of OpenMP threads, as by default
+  // LoadISISNexus spawns up a large number of threads, this was found
+  // when the algorithm was profiled, which showed 100% CPU usage. This is
+  // unnecessary as the Muon file has a small number of spectra (typically ~100)
+  omp_set_num_threads(1);
   IAlgorithm_sptr childAlg =
       createChildAlgorithm("LoadISISNexus", 0, 1, true, 2);
   declareProperty("LoadMonitors", "Exclude"); // we need to set this property
   auto ISISLoader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
   ISISLoader->copyPropertiesFrom(*this);
-  ISISLoader->executeAsChildAlg();
+  ISISLoader->execute();
   this->copyPropertiesFrom(*ISISLoader);
 }
 /**
