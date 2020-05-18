@@ -78,6 +78,18 @@ class SliceViewerModel:
         else:
             return False
 
+    def can_support_peaks_overlays(self) -> bool:
+        """
+        Check if the given workspace can support peaks overlay
+        """
+        try:
+            if self._get_ws().getNumDims() > 2:
+                return True
+        except AttributeError:
+            pass
+
+        return False
+
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
         return self._ws.getSpecialCoordinateSystem()
