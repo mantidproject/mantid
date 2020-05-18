@@ -1126,6 +1126,7 @@ public:
     MatrixWorkspace_sptr workspace;
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(output_ws));
+
     check_log(workspace, "cryo_temp1", 1, 3, 7.0);
 
     SaveNexusProcessed save;
@@ -1164,7 +1165,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // Test some aspects of the file
-    auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr workspace;
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(group_ws + "_1"));
     // should be filtered
     check_log(workspace, "raw_uah_log", 429, 17, 99.4740982879);
