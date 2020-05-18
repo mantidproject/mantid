@@ -12,11 +12,12 @@ import unittest
 import shutil
 import warnings
 
+import matplotlib.pyplot as plt
 from qtpy.QtWidgets import QMessageBox
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
-from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, Load, Rebin, RenameWorkspace, UnGroupWorkspace
 from unittest import mock
 from mantidqt.project.project import Project
 from mantidqt.utils.qt.testing import start_qapplication
@@ -243,6 +244,53 @@ class ProjectTest(unittest.TestCase):
                                  workspace_to_save=['newGroup', 'ws3'],
                                  plots_to_save="mocked_figs",
                                  interfaces_to_save="mocked_interfaces")
+
+    def test_filter_unaltered_workspaces_function_removes_workspaces_that_have_only_been_loaded(self):
+        unaltered_workspace = Load("IRS26174.raw")
+        Rebin(unaltered_workspace, OutputWorkspace="altered_workspace", Params=50)
+
+        altered_workspaces = self.project._filter_unaltered_workspaces(["unaltered_workspace", "altered_workspace"])
+
+        self.assertEqual(len(altered_workspaces), 1)
+        self.assertEqual(altered_workspaces[0], "altered_workspace")
+
+    def test_filter_plots_removes_plots_that_use_unaltered_workspaces(self):
+        unaltered_workspace = Load("IRS26174.raw")
+        altered_workspace = Rebin(unaltered_workspace, Params=50)
+
+        figure_managers = {}
+        for i, ws in enumerate([unaltered_workspace, altered_workspace]):
+            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+            ax.plot(ws, specNum=1)
+
+            fig_manager = mock.Mock()
+            fig_manager.canvas.figure.axes = [ax]
+
+            figure_managers[i] = fig_manager
+
+        filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(
+            plots=figure_managers, workspaces=["altered_workspace"])
+
+        self.assertEqual(len(filtered_figure_managers), 1)
+
+    def test_calling_save_when_remember_workspace_saving_option_is_false_opens_save_dialog(self):
+        self.project.last_project_location = "location"
+        self.project.remember_workspace_saving_option = False
+        self.project.open_project_save_dialog = mock.Mock()
+
+        self.project.save()
+
+        self.project.open_project_save_dialog.assert_called_once()
+
+    def test_saving_project_with_save_altered_workspaces_only_calls_filter_functions(self):
+        self.project.save_altered_workspaces_only = True
+        self.project._filter_plots_with_unaltered_workspaces = mock.Mock()
+        self.project._filter_unaltered_workspaces = mock.Mock(return_value=[])
+
+        self.project._save()
+
+        self.project._filter_plots_with_unaltered_workspaces.assert_called_once()
+        self.project._filter_unaltered_workspaces.assert_called_once()
 
 
 if __name__ == "__main__":

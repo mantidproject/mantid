@@ -174,6 +174,11 @@ class Project(AnalysisDataServiceObserver):
 
     @staticmethod
     def _filter_unaltered_workspaces(workspace_names):
+        """
+        Removes workspaces whose history contains Load and nothing else.
+        :param workspace_names: a list of workspace names
+        :return: the filtered list of workspace names.
+        """
         workspaces = AnalysisDataService.retrieveWorkspaces(workspace_names)
         altered_workspace_names = []
         for ws in workspaces:
@@ -185,6 +190,11 @@ class Project(AnalysisDataServiceObserver):
 
     @staticmethod
     def _filter_plots_with_unaltered_workspaces(plots, workspaces):
+        """
+        :param plots: a dictionary of figure managers.
+        :param workspaces: a list of workspace names.
+        :return: a dictionary of figure managers containing plots that only uses the workspaces in workspaces.
+        """
         from mantid.plots import MantidAxes
         plots_copy = plots.copy()
         for i, plot in plots_copy.items():
