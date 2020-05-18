@@ -152,7 +152,7 @@ void MaskDetectorsIf::outputToWorkspace() {
    * clearMaskedSpectra.
    *
    *  const auto &spectrumInfo = workspace->spectrumInfo();
-   *  for (size_t i = 0; i < spectrumInfo.size(); ++i)
+   *  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
    *  if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
    *     workspace->getSpectrum(i).clearData();
    *  }
