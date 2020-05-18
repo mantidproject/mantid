@@ -38,7 +38,7 @@ public:
   double getInstrumentProperty(const API::MatrixWorkspace_sptr &,
                                const std::string &);
   void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
-                             std::string entryName = "", int level = 1);
+                             std::string entryName = "");
   void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
   std::string dateTimeInIsoFormat(const std::string &);
 

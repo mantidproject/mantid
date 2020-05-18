@@ -141,11 +141,10 @@ LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
  *NXopengroup
  * @param runDetails  :: where to add properties
  * @param entryName :: entry name to load properties from
- * @param level :: starting nexus file tree level
  *
  */
 void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
-                                       std::string entryName, int level) {
+                                       std::string entryName) {
   std::string emptyStr; // needed for first call
   int datatype;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
@@ -166,7 +165,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
       if (std::string(nxname) == "entry0" ||
           std::string(nxname).compare(entryName) == 0) {
         recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr,
-                                        emptyStr, level /* level */);
+                                        emptyStr, 1 /* level */);
       } else {
         g_log.debug() << "Unexpected group name in nexus file : " << nxname
                       << '\n';
