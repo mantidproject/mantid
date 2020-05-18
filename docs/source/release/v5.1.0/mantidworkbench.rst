@@ -63,6 +63,8 @@ Bugfixes
 - The Instrument View now passes through useful error messages to the workbench if it fails to start, for example if your data contains NaN or infinite values.
 - The correct interpolation now appears in the plot figure options for colorfill plots.
 - Changing the axis scale on a colourfill plot now has the same result if it is done from either the context menu or figure options.
+- The plot guess of the Bk2BkExpConvPV is now correct.
+- A sign error has been fixed in the Bk2Bk2ExpConvPV function.
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
