@@ -48,7 +48,8 @@ private:
   void loadData();
   void loadMetaData();
   void loadInstrument(API::MatrixWorkspace_sptr &);
-  std::vector<double> loadTwoThetaDetectors(const NeXus::NXEntry &, int);
+  std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &,
+                                            const NeXus::NXEntry &);
   void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr &);
 
   size_t m_numberOfChannels; // number of channels data
