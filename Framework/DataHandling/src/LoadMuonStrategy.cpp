@@ -9,9 +9,6 @@
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-
-#include <boost/scoped_ptr.hpp>
-
 #include <vector>
 
 namespace Mantid {
@@ -52,10 +49,10 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDetectorGroupingTable(
   return detectorGroupingTable;
 }
 /**
- * Creates Detector Deadtimes Table .
+ * Creates the deadtime table for the loaded detectors .
  * @param detectorsLoaded :: Vector containing the list of detectorsLoaded
- * @param deadTimes :: Vector containing corresponding grouping
- * @return Detector Grouping Table create using the data
+ * @param deadTimes :: Vector containing corresponding deadtime
+ * @return Deadtime table created using the input data
  */
 DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(
     const std::vector<detid_t> &detectorsLoaded,

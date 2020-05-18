@@ -1,9 +1,8 @@
-
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidAPI/Algorithm.h"
@@ -27,37 +26,41 @@ using namespace DataObjects;
 
 // Constructor
 SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(
-    Kernel::Logger &g_log, const std::string &filename, NXEntry entry,
+    Kernel::Logger &g_log, const std::string &filename, NXEntry &entry,
     Workspace2D_sptr workspace, int entryNumber, bool isFileMultiPeriod)
     : LoadMuonStrategy(g_log, filename), m_entry(entry), m_workspace(workspace),
       m_detectors(getLoadedDetectors()), m_entryNumber(entryNumber),
       m_isFileMultiPeriod(isFileMultiPeriod) {}
 
-// Loads MuonLogData for a single period file
+/**
+ * Loads Muon specific logs into the stored workspace
+ * These are logs which are not loaded by LoadISISNexus
+ */
 void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
 
-  auto loadMuonLogs = AlgorithmFactory::Instance().create("LoadMuonLog", 1);
-  loadMuonLogs->initialize();
-  // Pass through the same input filename
-  loadMuonLogs->setAlwaysStoreInADS(false);
-  loadMuonLogs->setProperty("Filename", m_filename);
-  loadMuonLogs->setProperty<MatrixWorkspace_sptr>("Workspace", m_workspace);
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
-    m_logger.notice("Loading Muon Log data");
-    loadMuonLogs->executeAsChildAlg();
-  } catch (std::runtime_error &) {
-    m_logger.error("Unable to successfully run LoadMuonLog Child Algorithm");
+  auto &run = m_workspace->mutableRun();
+  auto runSample = m_entry.openNXGroup("sample");
+
+  if (runSample.containsDataSet("temperature")) {
+    float temperature = runSample.getFloat("temperature");
+    run.addProperty("sample_temp", static_cast<double>(temperature));
+  }
+
+  if (runSample.containsDataSet("magnetic_field")) {
+    float magn_field = runSample.getFloat("magnetic_field");
+    run.addProperty("sample_magn_field", static_cast<double>(magn_field));
   }
   std::string mainFieldDirection =
       LoadMuonNexusV2Helper::loadMainFieldDirectionFromNexus(m_entry);
-  // set output property and add to workspace logs
-  auto &run = m_workspace->mutableRun();
   run.addProperty("main_field_direction", mainFieldDirection);
+
+  double firstGoodData =
+      LoadMuonNexusV2Helper::loadFirstGoodDataFromNexus(m_entry);
+  run.addProperty("FirstGoodData", firstGoodData);
 }
 
 /**
- * Loads the good frames data from the stored workspace object
+ * Loads the good frames data into the stored workspace object
  */
 void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
   // Overwrite existing log entry
@@ -163,7 +166,7 @@ void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
   }
 }
 /**
- * Finds the detectors loaded into the present workspace
+ * Finds the detectors which are loaded in the stored workspace
  */
 std::vector<detid_t> SinglePeriodLoadMuonStrategy::getLoadedDetectors() {
 

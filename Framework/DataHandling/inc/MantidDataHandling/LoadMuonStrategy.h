@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -13,10 +12,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <boost/scoped_array.hpp>
-#include <boost/scoped_ptr.hpp>
-
-#include <vector>
 namespace Mantid {
 namespace DataHandling {
 

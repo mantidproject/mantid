@@ -1,25 +1,22 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadMuonNexusV2Helper.h"
+#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 
 #include <vector>
 
@@ -37,7 +34,8 @@ using namespace DataObjects;
 
 /// Empty default constructor
 LoadMuonNexusV2::LoadMuonNexusV2()
-    : m_filename(), m_isFileMultiPeriod(false), m_multiPeriodsLoaded(false) {}
+    : m_filename(), m_isFileMultiPeriod(false), m_multiPeriodsLoaded(false),
+      m_entrynumber(0), m_numberOfPeriods(0) {}
 
 /**
  * Return the confidence criteria for this algorithm can load the file

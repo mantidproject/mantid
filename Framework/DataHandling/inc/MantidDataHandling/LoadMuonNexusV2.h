@@ -1,26 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidDataHandling/DataBlockComposite.h"
-#include "MantidDataHandling/LoadMuonStrategy.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDTypes.h"
-
-#include <boost/scoped_array.hpp>
-#include <boost/scoped_ptr.hpp>
-
-#include <nexus/NeXusFile.hpp>
-
-#include <climits>
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -35,9 +23,9 @@ Required Properties:
 <LI> Filename - The name of and path to the input NeXus file </LI>
 <LI> OutputWorkspace - The name of the workspace in which to store the imported
 data
-     (a multiperiod file will store higher periods in workspaces called
+ (a multiperiod file will store higher periods in workspaces called
 OutputWorkspace_PeriodNo)
-     [ not yet implemented for Muon Nexus V2 ]</LI>
+ [ not yet implemented for Muon Nexus V2 ]</LI>
 </UL>
 
 Optional Properties: (note that these options are not available if reading a
@@ -50,6 +38,10 @@ multiperiod file)
 
 @author Stephen Smith, ISIS
 */
+
+// Forward declare load strategy
+class LoadMuonStrategy;
+
 class DLLExport LoadMuonNexusV2 : public API::NexusFileLoader {
 public:
   // Default constructor
