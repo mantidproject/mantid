@@ -68,7 +68,7 @@ class DrillPresenter:
             self.view.set_progress(0, 100)
 
     def on_process_stop(self):
-        self.model.stop_process();
+        self.model.stopProcess();
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
 

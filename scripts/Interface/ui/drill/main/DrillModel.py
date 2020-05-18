@@ -72,7 +72,7 @@ class DrillModel(QObject):
                                        str, int, float or bool
         """
         for (k, v) in settings.items():
-            if self.settings[k]:
+            if k in self.settings:
                 self.settings[k] = v
 
     def getSettings(self):
@@ -106,7 +106,7 @@ class DrillModel(QObject):
             del params["CustomOptions"]
         # remove empty params
         for (k, v) in list(params.items()):
-            if not v:
+            if v == '':
                 del params[k]
         # add the output workspace param
         if "OutputWorkspace" not in params:
@@ -139,7 +139,10 @@ class DrillModel(QObject):
             for t in tasks:
                 self.tasksPool.addProcess(t)
 
-    def stop_process(self):
+    def stopProcess(self):
+        """
+        Stop current processing.
+        """
         self.tasksPool.abortProcessing()
 
     def set_instrument(self, instrument):

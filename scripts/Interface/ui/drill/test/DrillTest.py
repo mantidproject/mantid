@@ -309,29 +309,6 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.view.table.item(2, column).text(),
                          "1002,2002+3002,11002:14002,17002-18002")
 
-    ###########################################################################
-    # test model specific functions                                           #
-    ###########################################################################
-
-    def test_convolute(self):
-        self.presenter.on_instrument_changed("D22")
-
-        # add contents
-        reference = dict()
-        for i in range(self.view.table.columnCount() - 1):
-            item = QTableWidgetItem(str(i))
-            self.view.table.setItem(0, i, item)
-            reference[self.model.columns[i]] = str(i)
-        item = QTableWidgetItem("test=test")
-        self.view.table.setItem(0, self.view.table.columnCount() - 1, item)
-        reference["CustomOptions"] = {"test" : "test"}
-
-        self.assertEqual(reference, self.model.samples[0])
-
-        convolution = self.model.convolute(self.model.samples[0])
-        reference.update(reference["CustomOptions"])
-        del reference["CustomOptions"]
-        self.assertEqual(reference, convolution)
 
 if __name__ == "__main__":
     unittest.main()
