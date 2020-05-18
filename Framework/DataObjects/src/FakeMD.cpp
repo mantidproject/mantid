@@ -31,6 +31,7 @@ using Kernel::ThreadSchedulerFIFO;
  * @param uniformParams Add a uniform, randomized distribution of events
  * @param peakParams Add a peak with a normal distribution around a central
  point
+ * @param ellipsoidParams Add a multivariate gaussian peak (ellipsoid)
  * @param randomSeed Seed int for the random number generator
  * @param randomizeSignal If true, the events' signal and error values will be "
                           randomized around 1.0+-0.5

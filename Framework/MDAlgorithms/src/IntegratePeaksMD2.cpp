@@ -408,10 +408,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
       // if ellipsoid find covariance and centroid in spherical region
       // using one-pass algorithm from https://doi.org/10.1145/359146.359153
-      // which might not work if iterating in over boxes that are adjacent...
       if (ellipseBool) {
-        // flat bg to subtract (if event intensity < bg per event
-        // set to 0)
+        // flat bg to subtract
         const auto bgDensity =
             bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
         std::vector<V3D> eigenvects;
@@ -717,13 +715,14 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  * eigenvectors and eigenvalues that diagonalise the covariance matrix in the
  * vectors provided
  *
- *  @param ws           input workspace
- *  @param pos          V3D of peak centre
- *  @param radius       radius that defines spherical region
- *  @param qAxisBool    bool to fix an eigenvector along direction pos
- *  @param bgDensity    background counts per unit volume
- *  @param eigenvects   eigenvectors of covariance matrix of spherical region
- *  @param eigenvals    eigenvectors of covariance matrix of spherical region
+ *  @param ws             input workspace
+ *  @param getRadiusSq    Coord transfrom for sphere
+ *  @param pos            V3D of peak centre
+ *  @param radiusSquared  radius that defines spherical region for covarariance
+ *  @param qAxisBool      bool to fix an eigenvector along direction pos
+ *  @param bgDensity      background counts per unit volume
+ *  @param eigenvects     eigenvectors of covariance matrix of spherical region
+ *  @param eigenvals      eigenvectors of covariance matrix of spherical region
  */
 template <typename MDE, size_t nd>
 void IntegratePeaksMD2::findEllipsoid(

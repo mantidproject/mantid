@@ -28,8 +28,8 @@ namespace DataObjects {
  *dimensions that are considered when
  *        calculating distance.
  * @param outD :: # of output dimensions
- * @param directions :: eigenvectors of an ellipsoid (if used)
- * @param abcRadii :: radii of ellipsoid along each eigenvector (if used)
+ * @param eigenvects :: eigenvectors of an ellipsoid (if used)
+ * @param eigenvals :: variances along each eigenvector (if used)
  * @return
  */
 CoordTransformDistance::CoordTransformDistance(
