@@ -45,7 +45,6 @@ public:
         output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outWS"));
 
-
     Workspace2D_sptr output2D =
         std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
