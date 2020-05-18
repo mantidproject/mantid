@@ -199,8 +199,6 @@ void PropertyManager::splitByTime(
  * @param filter :: A boolean time series to filter each property on
  * @param excludedFromFiltering :: A string list of properties that
  * will be excluded from filtering
- * @param applyInvalidDataFilters :: Wether to also apply any matching invalid
- * data filter logs (default:true)
  */
 void PropertyManager::filterByProperty(
     const Kernel::TimeSeriesProperty<bool> &filter,
