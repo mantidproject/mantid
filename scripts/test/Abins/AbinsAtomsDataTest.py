@@ -7,10 +7,10 @@
 import unittest
 from mantid.simpleapi import logger
 import numpy as np
-from AbinsModules import AtomsData
+from abins import AtomsData
 
 
-class AbinsAtomsDataTest(unittest.TestCase):
+class AtomsDataTest(unittest.TestCase):
     _good_data = {"atom_0": {'sort': 0, 'symbol': 'Si', 'coord': np.asarray([0.,  0.,  0.]), 'mass': 28.085500},
                   "atom_1": {'sort': 1, 'symbol': 'Si', 'coord': np.asarray([0.25,  0.25,  0.25]), 
                              'mass': 28.085500}}

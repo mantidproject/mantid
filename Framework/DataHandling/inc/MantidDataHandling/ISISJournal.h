@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/IJournal.h"
+#include "MantidDataHandling/DllConfig.h"
+#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/System.h"
 
 #include <Poco/AutoPtr.h>
@@ -19,21 +22,15 @@ class Document;
 }
 
 namespace Mantid {
-namespace Kernel {
-class InternetHelper;
-}
 
 namespace DataHandling {
-namespace ISISJournal {
 /**
  * ISISJournal: Helper class to aid in fetching ISIS specific run information
  * from journal files
  */
 
-class DLLExport ISISJournal {
+class MANTID_DATAHANDLING_DLL ISISJournal : public API::IJournal {
 public:
-  using RunData = std::map<std::string, std::string>;
-
   ISISJournal(std::string const &instrument, std::string const &cycle,
               std::unique_ptr<Kernel::InternetHelper> internetHelper =
                   std::make_unique<Kernel::InternetHelper>());
@@ -45,11 +42,11 @@ public:
   ISISJournal &operator=(ISISJournal &&rhs);
 
   /// Get the list of cycle names
-  std::vector<std::string> getCycleNames();
+  std::vector<std::string> getCycleNames() override;
   /// Get data for runs that match the given filters
   std::vector<RunData>
   getRuns(std::vector<std::string> const &valuesToLookup = {},
-          RunData const &filters = RunData());
+          RunData const &filters = RunData()) override;
 
 private:
   std::unique_ptr<Kernel::InternetHelper> m_internetHelper;
@@ -60,6 +57,5 @@ private:
 
   std::string getURLContents(std::string const &url);
 };
-} // namespace ISISJournal
 } // namespace DataHandling
 } // namespace Mantid

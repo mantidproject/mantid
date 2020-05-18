@@ -767,9 +767,12 @@ class FigureInteraction(object):
         # not rescaled properly because the vertical marker artists were
         # included in the last computation of the data limits and
         # set_xscale/set_yscale only autoscale the view
-        ax.relim()
+        xlim = copy(ax.get_xlim())
+        ylim = copy(ax.get_ylim())
         ax.set_xscale(scale_types[0])
         ax.set_yscale(scale_types[1])
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
 
         self.canvas.draw_idle()
 

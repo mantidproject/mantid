@@ -28,7 +28,7 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(log.size(), 4)
 
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 58)
+        self.assertEqual(len(log_names), 46)
         self.assertIn("w", log_names)
 
         values = model.get_log_display_values("w")
@@ -38,7 +38,7 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(values[3], "degrees")
 
         self.assertTrue(model.is_log_plottable("w"))
-        self.assertFalse(model.is_log_plottable("dur"))
+        self.assertFalse(model.is_log_plottable("goodfrm"))
         self.assertTrue(model.are_any_logs_plottable())
 
         stats = model.get_statistics("w")
@@ -50,7 +50,7 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(itemModel.horizontalHeaderItem(1).text(), "Type")
         self.assertEqual(itemModel.horizontalHeaderItem(2).text(), "Value")
         self.assertEqual(itemModel.horizontalHeaderItem(3).text(), "Units")
-        self.assertEqual(itemModel.rowCount(), 58)
+        self.assertEqual(itemModel.rowCount(), 46)
         self.assertEqual(itemModel.item(0,0).text(), "C6_MASTER_FREQUENCY")
         self.assertEqual(itemModel.item(0,1).text(), "float series")
         self.assertEqual(itemModel.item(0,2).text(), "50.0 (2 entries)")
@@ -81,7 +81,7 @@ class SampleLogsModelTest(unittest.TestCase):
         model = SampleLogsModel(ws)
 
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 152)
+        self.assertEqual(len(log_names), 140)
         self.assertIn("raw_uah_log", log_names)
         self.assertIn("current_period", log_names)
         self.assertIn("period", log_names)
@@ -128,10 +128,10 @@ class SampleLogsModelTest(unittest.TestCase):
         # Change exp
         model.set_exp(1)
         self.assertEqual(model.get_exp(), 1)
-        values = model.get_log_display_values("dur")
-        self.assertEqual(values[0], "dur")
+        values = model.get_log_display_values("rb_proposal")
+        self.assertEqual(values[0], "rb_proposal")
         self.assertEqual(values[1], "number")
-        self.assertEqual(values[2], 12)
+        self.assertEqual(values[2], 1455001)
         self.assertEqual(values[3], "")
 
     def test_Invalid_data_logs(self):

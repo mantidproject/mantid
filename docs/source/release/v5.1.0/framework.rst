@@ -19,6 +19,7 @@ Algorithms
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
    cost of cloning the inputWorkspace.
 - Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
+- Added an algorithm, :ref:`ISISJournalGetExperimentRuns <algm-ISISJournalGetExperimentRuns>`, which returns run information for a particular experiment from ISIS journal files.
 
 Data Handling
 -------------
@@ -35,10 +36,15 @@ Data Handling
 - Nexus log data alarms are now supported by Mantid. Log data that is marked as invalid will trigger a warning in the log and be filtered by default.  If the entire log is marked as invalid, then the values will be used as unfiltered as no better values exist, but the warning will still appear in the log.
 
 
+The :ref:`LoadISISNexus <algm-LoadISISNexus>` algorithm has been modified to remove the need for the VMS compatibility block.
+This has lead to the removal of the following variables from the sample logs as they were deemed unnecessary: dmp,
+dmp_freq, dmp_units dur, dur_freq, dur_secs, dur_wanted, durunits, mon_sum1, mon_sum2, mon_sum3, run_header (this is available in the workspace title).
+
 Data Objects
 ------------
 
 - Added MatrixWorkspace::findY to find the histogram and bin with a given value
+- Matrix Workspaces now ignore non-finite values when integrating values for the instrument view.  Please note this is different from the :ref:`Integration <algm-Integration>` algorithm.
 
 Python
 ------

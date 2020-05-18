@@ -348,7 +348,7 @@ public:
     // which makes up presumably the heaviest duty for the algorithm.
     LoadNexusProcessed loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "ILL_D33_LTOF_red.nxs");
+    loader.setPropertyValue("Filename", "ILL/D33/LTOF_red.nxs");
     loader.setPropertyValue("OutputWorkspace", "__in");
     loader.execute();
     MaskBinsIf masker;

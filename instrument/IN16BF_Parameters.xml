@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IN16BF" valid-from = "2014-03-11T00:00:00">
+
+<component-link name = "IN16BF">
+
+<parameter name="deltaE-mode" type="string">
+  <value val="indirect"/>
+</parameter>
+
+<parameter name="analysers" type="string">
+  <value val="silicon" />
+</parameter>
+
+<parameter name="refl-silicon" type="string">
+  <value val="111,311" />
+</parameter>
+
+<!-- Sample log merging behaviour -->
+<parameter name="sample_logs_sum" type="string">
+  <value val="time, duration" />
+</parameter>
+<parameter name="sample_logs_time_series" type="string">
+    <value val="sample.temperature, sample.pressure, sample.field" />
+</parameter>
+<parameter name="sample_logs_list" type="string">
+    <value val="run_number, start_time, end_time, SamS_Rot.offset_value, SamS_Rot.target_value, SamS_Rot.value, sample.setpoint_field, sample.setpoint_pressure, sample.setpoint_temperature" />
+</parameter>
+<parameter name="sample_logs_fail" type="string">
+    <value val="PSD.PSD angle 1, Doppler.mirror_sense, acquisition_mode, Doppler.maximum_delta_energy, wavelength" />
+</parameter>
+<parameter name="sample_logs_fail_tolerances" type="string">
+    <value val="1, 0, 0, 0.001, 0.001" />
+</parameter>
+
+<!-- Reduction workflow parameters under this line -->
+<parameter name="Workflow.beam-width" type="string">
+    <value val="3.5" />
+</parameter>
+<parameter name="Workflow.beam-height" type="string">
+    <value val="3.0" />
+</parameter>
+<parameter name="Workflow.GroupingFile" type="string">
+  <value val="IN16B_Grouping.xml" />
+</parameter>
+<parameter name="Workflow.GroupingFile.PSDOnly" type="string">
+  <value val="IN16B_Grouping_PSD_Only.xml" />
+</parameter>
+<parameter name="EquatorialGroupingFile" type="string">
+  <value val="IN16B_Grouping_Equatorial.xml" />
+</parameter>
+</component-link>
+
+</parameter-file>
