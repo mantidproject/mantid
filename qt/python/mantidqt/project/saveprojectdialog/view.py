@@ -20,6 +20,7 @@ class ProjectSaveDialogView(QDialog):
 
         self.ui = load_ui(__file__, 'saveprojectdialog.ui', baseinstance=self)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.setWindowTitle("Save Project")
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def set_location(self, path):

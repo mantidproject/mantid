@@ -18,10 +18,10 @@ class ProjectSaveDialogPresenter:
 
         self.project = project
 
-        self.view.browse_push_button.clicked.connect(lambda: self.browse_button_clicked())
-        self.view.location_line_edit.textChanged.connect(lambda: self.location_selected())
-        self.view.accepted.connect(lambda: self.save_as())
-        self.view.rejected.connect(lambda: self.cancel())
+        self.view.browse_push_button.clicked.connect(self.browse_button_clicked)
+        self.view.location_line_edit.textChanged.connect(self.location_selected)
+        self.view.accepted.connect(self.save_as)
+        self.view.rejected.connect(self.cancel)
 
         self.view.set_save_altered_workspaces_only(project.save_altered_workspaces_only)
         self.view.set_remember_selection(project.remember_workspace_saving_option)
