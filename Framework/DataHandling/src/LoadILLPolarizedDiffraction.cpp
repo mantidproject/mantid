@@ -312,6 +312,7 @@ void LoadILLPolarizedDiffraction::loadInstrument(
 
 /**
  * Loads twotheta for each detector pixel from the file
+ * @param workspace : workspace with loaded instrument
  * @param entry : entry from which the pixel 2theta positions will be read
  * @param bankId : bank ID for which 2theta positions will be read
  * @return : vector of pixel 2theta positions in the chosen bank
