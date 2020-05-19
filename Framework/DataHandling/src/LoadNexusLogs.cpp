@@ -295,11 +295,10 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
  */
 std::unique_ptr<Kernel::Property>
 createTimeSeriesValidityFilter(::NeXus::File &file,
-                               const std::unique_ptr<Kernel::Property> &prop,
+                               const Kernel::Property &prop,
                                Kernel::Logger &log) {
-  ;
-  auto tsProp = dynamic_cast<Kernel::ITimeSeriesProperty *>(prop.get());
-  auto times = tsProp->timesAsVector();
+  const auto tsProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(&prop);
+  const auto times = tsProp->timesAsVector();
   std::vector<int> values;
   std::vector<bool> boolValues;
   // Now the the validity of the values
@@ -347,8 +346,8 @@ createTimeSeriesValidityFilter(::NeXus::File &file,
     }
   }
   if (invalidDataFound) {
-    log.warning() << "Some \"" << prop->name() << "\" log data is invalid!\n";
-    auto tspName = API::LogManager::getInvalidValuesFilterLogName(prop->name());
+    log.warning() << "Some \"" << prop.name() << "\" log data is invalid!\n";
+    const auto tspName = API::LogManager::getInvalidValuesFilterLogName(prop.name());
     auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
     tsp->create(times, boolValues);
     log.debug() << "   done reading \"value_valid\" array\n";
@@ -850,7 +849,7 @@ void LoadNexusLogs::loadNXLog(
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
       auto logValue = createTimeSeries(file, entry_name, freqStart, g_log);
       auto validityLogValue =
-          createTimeSeriesValidityFilter(file, logValue, g_log);
+          createTimeSeriesValidityFilter(file, *logValue, g_log);
       if (validityLogValue) {
         appendEndTimeLog(validityLogValue.get(), workspace->run());
         workspace->mutableRun().addProperty(std::move(validityLogValue),
@@ -915,7 +914,7 @@ void LoadNexusLogs::loadSELog(
 
       logValue = createTimeSeries(file, propName, freqStart, g_log);
       auto validityLogValue =
-          createTimeSeriesValidityFilter(file, logValue, g_log);
+          createTimeSeriesValidityFilter(file, *logValue, g_log);
       if (validityLogValue) {
         appendEndTimeLog(validityLogValue.get(), workspace->run());
         workspace->mutableRun().addProperty(std::move(validityLogValue));
