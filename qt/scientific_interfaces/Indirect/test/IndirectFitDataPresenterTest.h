@@ -120,10 +120,6 @@ private:
     UNUSED_ARG(spectrum);
     return "";
   };
-
-  std::vector<std::string> getSpectrumDependentAttributes() const override {
-    return {};
-  };
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -145,12 +141,9 @@ public:
     m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
-
-    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
-        std::move(m_model.get()), std::move(m_table.get()));
+    ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
     m_presenter = std::make_unique<IndirectFitDataPresenter>(
-        std::move(m_model.get()), std::move(m_view.get()),
-        std::move(m_dataTablePresenter));
+        std::move(m_model.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
@@ -186,21 +179,6 @@ public:
         .WillOnce(Return(sampleName));
 
     m_view->getSelectedSample();
-  }
-
-  void
-  test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_view_and_model() {
-    ON_CALL(*m_view, isMultipleDataTabSelected()).WillByDefault(Return(true));
-    ON_CALL(*m_model, numberOfWorkspaces())
-        .WillByDefault(Return(TableDatasetIndex{2}));
-
-    Expectation isMultipleData =
-        EXPECT_CALL(*m_view, isMultipleDataTabSelected())
-            .Times(1)
-            .WillOnce(Return(true));
-    EXPECT_CALL(*m_model, numberOfWorkspaces()).Times(1).After(isMultipleData);
-
-    m_presenter->updateSpectraInTable(TableDatasetIndex{0});
   }
 
   ///----------------------------------------------------------------------
@@ -286,7 +264,6 @@ private:
     m_model.reset();
     m_view.reset();
 
-    m_dataTablePresenter.reset();
     m_table.reset();
   }
 
@@ -300,7 +277,6 @@ private:
   }
 
   std::unique_ptr<QTableWidget> m_table;
-  std::unique_ptr<IndirectDataTablePresenter> m_dataTablePresenter;
 
   std::unique_ptr<MockIIndirectFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;

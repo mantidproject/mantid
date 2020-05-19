@@ -167,6 +167,14 @@ std::vector<std::string> extractWorkspaceNames(const std::string &input) {
   return v;
 }
 
+std::vector<std::string> getUniqueWorkspaceNames(const std::string &input) {
+  auto workspaceNames = extractWorkspaceNames(input);
+  std::set<std::string> uniqueNames(workspaceNames.begin(),
+                                    workspaceNames.end());
+  workspaceNames.assign(uniqueNames.begin(), uniqueNames.end());
+  return workspaceNames;
+}
+
 std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
   const auto workspaceNames = extractWorkspaceNames(input);
 
@@ -549,8 +557,14 @@ void QENSFitSequential::exec() {
     const auto inputStringProp = getPropertyValue("Input");
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
                      extractWorkspaceNames(inputStringProp));
+    auto inputWorkspaceNames = getUniqueWorkspaceNames(inputStringProp);
+    renameWorkspaces(resultWs,
+                     std::vector<std::string>(inputWorkspaceNames.size(), ""),
+                     outputBaseName, "_Result", inputWorkspaceNames);
   } else {
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+    renameWorkspaces(resultWs, std::vector<std::string>({""}), outputBaseName,
+                     "_Result");
   }
 
   copyLogs(resultWs, workspaces);

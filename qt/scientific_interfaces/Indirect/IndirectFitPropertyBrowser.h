@@ -60,12 +60,12 @@ public:
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveMembers);
   void setFitEnabled(bool enable);
-  void setCurrentDataset(TableRowIndex i);
-  TableRowIndex currentDataset() const;
+  void setCurrentDataset(FitDomainIndex i);
+  FitDomainIndex currentDataset() const;
   void updateFunctionBrowserData(
-      TableRowIndex nData, const QStringList &datasetNames,
+      int nData, const QStringList &datasetNames,
       const std::vector<double> &qValues,
-      const std::vector<std::pair<std::string, int>> &fitResolutions);
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void
@@ -78,7 +78,7 @@ public slots:
   void setModelResolution(std::string const &name,
                           TableDatasetIndex const &index);
   void setModelResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions);
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
 
 protected slots:
   void clear();
