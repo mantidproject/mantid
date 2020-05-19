@@ -40,6 +40,8 @@ namespace {
 constexpr size_t D7_NUMBER_BANKS = 3;
 // This defines the number of physical pixels in D7
 constexpr size_t D7_NUMBER_PIXELS = 132;
+// This defines the number of pixels per bank in D7
+constexpr size_t D7_NUMBER_PIXELS_BANK = 44;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
 constexpr size_t NUMBER_MONITORS = 2;
@@ -242,10 +244,7 @@ void LoadILLPolarizedDiffraction::loadData() {
       loadInstrument(workspace);
       // rotate detectors to their position during measurement if position
       // calibration is requested
-      if (std::string(getPropertyValue("PositionCalibration"))
-              .compare("None") != 0) {
-        moveTwoTheta(entry, workspace);
-      }
+      moveTwoTheta(entry, workspace);
     }
     // adds the current entry workspace to the output group
     m_outputWorkspace->addWorkspace(workspace);
@@ -317,23 +316,18 @@ void LoadILLPolarizedDiffraction::loadInstrument(
  * @param bankId : bank ID for which 2theta positions will be read
  * @return : vector of pixel 2theta positions in the chosen bank
  */
-#include <iostream>
 std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
-    const API::MatrixWorkspace_sptr &workspace, const NXEntry &entry) {
-  std::vector<double> twoTheta(D7_NUMBER_PIXELS);
+    const API::MatrixWorkspace_sptr &workspace, const NXEntry &entry,
+    int bankId) {
 
-  constexpr int numberPixelsPerBank = D7_NUMBER_PIXELS / D7_NUMBER_BANKS;
+  std::vector<double> twoTheta(static_cast<int>(D7_NUMBER_PIXELS_BANK));
 
   if (getPropertyValue("PositionCalibration").compare("Nexus") == 0) {
-    for (auto bankId = 0; bankId < static_cast<int>(D7_NUMBER_BANKS);
-         bankId++) {
-      NXFloat twoThetaPixels = entry.openNXFloat(
-          "D7/Detector/bank" + std::to_string(bankId + 2) + "_offset");
-      twoThetaPixels.load();
-      for (auto pixelId = 0; pixelId < twoThetaPixels.size(); pixelId++) {
-        twoTheta[bankId * D7_NUMBER_PIXELS / D7_NUMBER_BANKS + pixelId] =
-            twoThetaPixels[pixelId];
-      }
+    NXFloat twoThetaPixels = entry.openNXFloat(
+        "D7/Detector/bank" + std::to_string(bankId) + "_offset");
+    twoThetaPixels.load();
+    for (auto pixelId = 0; pixelId < twoThetaPixels.size(); pixelId++) {
+      twoTheta[pixelId] = twoThetaPixels[pixelId];
     }
   } else {
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadParameterFile");
@@ -344,17 +338,13 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     auto instrumentMap = workspace->instrumentParameters();
     Instrument_const_sptr instrument = workspace->getInstrument();
 
-    for (auto ii = 0; ii < static_cast<int>(numberPixelsPerBank); ii++) {
+    for (auto ii = 0; ii < static_cast<int>(D7_NUMBER_PIXELS_BANK); ii++) {
       auto pixel = instrument->getDetector(ii + 1);
       std::vector<double> twoThetaRead =
-          (pixel->parameterMap()).getDouble(pixel->getName(), "twoTheta_bank2");
+          (pixel->parameterMap())
+              .getDouble(pixel->getName(),
+                         std::string("twoTheta_bank" + std::to_string(bankId)));
       twoTheta[ii] = twoThetaRead[0];
-      twoThetaRead =
-          (pixel->parameterMap()).getDouble(pixel->getName(), "twoTheta_bank3");
-      twoTheta[ii + numberPixelsPerBank] = twoThetaRead[0];
-      twoThetaRead =
-          (pixel->parameterMap()).getDouble(pixel->getName(), "twoTheta_bank4");
-      twoTheta[ii + numberPixelsPerBank * 2] = twoThetaRead[0];
     }
   }
   return twoTheta;
@@ -369,32 +359,36 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
     const NXEntry &entry, API::MatrixWorkspace_sptr &workspace) {
 
   Instrument_const_sptr instrument = workspace->getInstrument();
-  auto const numberDetectorsBank =
-      static_cast<int>(D7_NUMBER_PIXELS / D7_NUMBER_BANKS);
 
   auto &componentInfo = workspace->mutableComponentInfo();
-  std::vector<double> twoThetaPixels = loadTwoThetaDetectors(workspace, entry);
   for (auto ii = 0; ii < static_cast<int>(D7_NUMBER_BANKS); ii++) {
     NXFloat twoThetaBank = entry.openNXFloat(
         "D7/2theta/actual_bank" +
         std::to_string(ii + 2)); // detector bank IDs start at 2
     twoThetaBank.load();
-    for (auto jj = 0; jj < numberDetectorsBank; jj++) {
-      IComponent_const_sptr pixel =
-          instrument->getDetector(ii * numberDetectorsBank + jj + 1);
+    if (getPropertyValue("PositionCalibration").compare("None") == 0) {
+      Quat rotation(-twoThetaBank[0], V3D(0, 1, 0));
+      IComponent_const_sptr currentBank = instrument->getComponentByName(
+          std::string("bank" + std::to_string(ii + 2)));
       const auto componentIndex =
-          componentInfo.indexOf(pixel->getComponentID());
-      V3D position = pixel->getPos();
-      double const radius = sqrt(pow(position[0], 2) + pow(position[2], 2));
-      position = V3D(
-          radius *
-              sin(DEG_TO_RAD * (twoThetaPixels[ii * numberDetectorsBank + jj] -
-                                twoThetaBank[0])),
-          position[1],
-          radius *
-              cos(DEG_TO_RAD * (twoThetaPixels[ii * numberDetectorsBank + jj] -
-                                twoThetaBank[0])));
-      componentInfo.setPosition(componentIndex, position);
+          componentInfo.indexOf(currentBank->getComponentID());
+      componentInfo.setRotation(componentIndex, rotation);
+    } else {
+      std::vector<double> twoThetaPixels =
+          loadTwoThetaDetectors(workspace, entry, ii + 2);
+      for (auto jj = 0; jj < static_cast<int>(D7_NUMBER_PIXELS_BANK); jj++) {
+        IComponent_const_sptr pixel = instrument->getDetector(
+            ii * static_cast<int>(D7_NUMBER_PIXELS_BANK) + jj + 1);
+        const auto pixelIndex = componentInfo.indexOf(pixel->getComponentID());
+        V3D position = pixel->getPos();
+        double const radius = sqrt(pow(position[0], 2) + pow(position[2], 2));
+        std::cout << twoThetaBank[0] << std::endl;
+        position = V3D(
+            radius * sin(DEG_TO_RAD * (twoThetaPixels[jj] - twoThetaBank[0])),
+            position[1],
+            radius * cos(DEG_TO_RAD * (twoThetaPixels[jj] - twoThetaBank[0])));
+        componentInfo.setPosition(pixelIndex, position);
+      }
     }
   }
 }
