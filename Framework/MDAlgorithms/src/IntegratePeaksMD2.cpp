@@ -32,6 +32,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDAlgorithms/GSLFunctions.h"
+#include "MantidMDAlgorithms/MDBoxMaskFunction.h"
 
 #include <cmath>
 #include <fstream>
@@ -735,7 +736,9 @@ void IntegratePeaksMD2::findEllipsoid(
   Matrix<double> Evec; // hold eigenvectors
   Matrix<double> Eval; // hold eigenvals in diag
   // get leaf-only iterators over all boxes in ws
-  auto function = std::make_unique<MDBoxMaskFunction>(pos, radiusSquared);
+  auto function =
+      std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(
+          pos, radiusSquared);
   MDBoxBase<MDE, nd> *baseBox = ws->getBox();
   MDBoxIterator<MDE, nd> MDiter(baseBox, 1000, true, function.get());
   if (!qAxisBool) {
@@ -1017,38 +1020,6 @@ void IntegratePeaksMD2::checkOverlap(
     }
   }
 }
-
-namespace {
-
-class MDBoxMaskFunction : public Mantid::Geometry::MDImplicitFunction {
-
-private:
-  V3D m_pos;
-  double m_radiusSquared;
-
-public:
-  // constructor
-  MDBoxMaskFunction(const Mantid::Kernel::V3D &pos,
-                    const double &radiusSquared) {
-    m_pos = pos;
-    m_radiusSquared = radiusSquared;
-  }
-
-  using MDImplicitFunction::isPointContained; // Avoids Intel compiler
-                                              // warning.
-  bool isPointContained(const coord_t *coords) override {
-    double sum = 0;
-    for (size_t i = 0; i < m_nd; i++) {
-      sum += pow(coords[i] - m_pos[i], 2);
-    }
-    if (sum < m_radiusSquared) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-};
-}; // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.

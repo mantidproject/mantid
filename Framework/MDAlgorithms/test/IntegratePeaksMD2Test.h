@@ -28,7 +28,7 @@
 #include <cxxtest/TestSuite.h>
 #include <random>
 
-#include <MantidDataObjects\PeakShapeEllipsoid.h>
+#include <MantidDataObjects/PeakShapeEllipsoid.h>
 #include <Poco/File.h>
 
 using Mantid::API::AnalysisDataService;
