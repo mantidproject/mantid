@@ -35,11 +35,12 @@ public:
   public:
     using FnType = std::function<void()>;
 
-    explicit Callback(const Callback::FnType &callback) : m_mutex(), m_callback() {
+    explicit Callback(const Callback::FnType &callback)
+        : m_mutex(), m_callback() {
       setFunction(callback);
     }
 
-    Callback(Callback &&other)  noexcept {
+    Callback(Callback &&other) noexcept {
       {
         // We must lock the other obj - not ourself
         std::lock_guard lck(other.m_mutex);
@@ -249,7 +250,11 @@ protected:
   /// Subscribe to data stream at the time specified in a run start message
   void joinStreamAtTime(const RunStartStruct &runStartData);
   /// Convert a duration in nanoseconds to milliseconds
-  static int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds) ;
+  static int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds);
+
+  static RunStartStruct
+  extractRunStartDataFromMessage(const std::string &messageBuffer,
+                                 int64_t offset);
 };
 } // namespace LiveData
 } // namespace Mantid

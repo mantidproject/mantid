@@ -380,49 +380,14 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     int32_t partition;
     std::string topicName;
     m_runStream->consumeMessage(&runMsgBuffer, offset, partition, topicName);
-    if (runMsgBuffer.empty() || !flatbuffers::BufferHasIdentifier(
-        reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()),
-        RUN_START_MESSAGE_ID.c_str())) {
+    if (runMsgBuffer.empty() ||
+        !flatbuffers::BufferHasIdentifier(
+            reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()),
+            RUN_START_MESSAGE_ID.c_str())) {
       continue; // no start message available, try again
     } else {
-      auto runStartData =
-          GetRunStart(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
-      bool detSpecMapSpecified = false;
-      size_t numberOfSpectra = 0;
-      std::vector<int32_t> spectrumNumbers;
-      std::vector<int32_t> detectorIDs;
-      if (runStartData->detector_spectrum_map() != nullptr &&
-          runStartData->detector_spectrum_map()->n_spectra() != 0) {
-        detSpecMapSpecified = true;
-        auto spDetMsg = runStartData->detector_spectrum_map();
-        numberOfSpectra = static_cast<size_t>(spDetMsg->n_spectra());
-        auto numberOfDetectors = spDetMsg->detector_id()->size();
-        if (numberOfDetectors != numberOfSpectra) {
-          std::ostringstream os;
-          os << "IKafkaStreamDecoder::waitForNewRunStartMessage() - Invalid "
-                "spectra/detector mapping. Expected matched length arrays but "
-                "found numberOfSpectra="
-             << numberOfSpectra << ", numberOfDetectors=" << numberOfDetectors;
-          throw std::runtime_error(os.str());
-        }
-        spectrumNumbers.assign(spDetMsg->spectrum()->data(),
-                               spDetMsg->spectrum()->data() +
-                                   spDetMsg->spectrum()->size());
-        detectorIDs.assign(spDetMsg->detector_id()->data(),
-                           spDetMsg->detector_id()->data() +
-                               spDetMsg->detector_id()->size());
-      }
-      IKafkaStreamDecoder::RunStartStruct runStartStruct = {
-          runStartData->instrument_name()->str(),
-          runStartData->run_name()->str(),
-          runStartData->start_time(),
-          static_cast<size_t>(runStartData->n_periods()),
-          runStartData->nexus_structure()->str(),
-          offset,
-          detSpecMapSpecified,
-          numberOfSpectra,
-          spectrumNumbers,
-          detectorIDs};
+      auto runStartStruct =
+          extractRunStartDataFromMessage(runMsgBuffer, offset);
       if (runStartStruct.runId != m_runId) {
         runStartStructOutput = runStartStruct;
         m_runId = runStartStruct.runId;
@@ -434,19 +399,51 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
 }
 
 IKafkaStreamDecoder::RunStartStruct
+IKafkaStreamDecoder::extractRunStartDataFromMessage(
+    const std::string &messageBuffer, const int64_t offset) {
+  auto runStartData =
+      GetRunStart(reinterpret_cast<const uint8_t *>(messageBuffer.c_str()));
+  bool detSpecMapSpecified = false;
+  size_t numberOfSpectra = 0;
+  std::vector<int32_t> spectrumNumbers;
+  std::vector<int32_t> detectorIDs;
+  if (runStartData->detector_spectrum_map() != nullptr &&
+      runStartData->detector_spectrum_map()->n_spectra() != 0) {
+    detSpecMapSpecified = true;
+    auto spDetMsg = runStartData->detector_spectrum_map();
+    numberOfSpectra = static_cast<size_t>(spDetMsg->n_spectra());
+    auto numberOfDetectors = spDetMsg->detector_id()->size();
+    if (numberOfDetectors != numberOfSpectra) {
+      std::ostringstream os;
+      os << "IKafkaStreamDecoder::waitForNewRunStartMessage() - Invalid "
+            "spectra/detector mapping. Expected matched length arrays but "
+            "found numberOfSpectra="
+         << numberOfSpectra << ", numberOfDetectors=" << numberOfDetectors;
+      throw std::runtime_error(os.str());
+    }
+    spectrumNumbers.assign(spDetMsg->spectrum()->data(),
+                           spDetMsg->spectrum()->data() +
+                               spDetMsg->spectrum()->size());
+    detectorIDs.assign(spDetMsg->detector_id()->data(),
+                       spDetMsg->detector_id()->data() +
+                           spDetMsg->detector_id()->size());
+  }
+  return {runStartData->instrument_name()->str(),
+          runStartData->run_name()->str(),
+          runStartData->start_time(),
+          static_cast<size_t>(runStartData->n_periods()),
+          runStartData->nexus_structure()->str(),
+          offset,
+          detSpecMapSpecified,
+          numberOfSpectra,
+          spectrumNumbers,
+          detectorIDs};
+}
+
+IKafkaStreamDecoder::RunStartStruct
 IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
-  auto runStartData =
-      GetRunStart(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  IKafkaStreamDecoder::RunStartStruct runStart = {
-      runStartData->instrument_name()->str(),
-      runStartData->run_name()->str(),
-      runStartData->start_time(),
-      static_cast<size_t>(runStartData->n_periods()),
-      runStartData->nexus_structure()->str(),
-      offset,
-    false, 0, {}, {}};
-  return runStart;
+  return extractRunStartDataFromMessage(rawMsgBuffer, offset);
 }
 
 /**
