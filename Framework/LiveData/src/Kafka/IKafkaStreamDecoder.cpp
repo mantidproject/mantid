@@ -443,6 +443,22 @@ IKafkaStreamDecoder::extractRunStartDataFromMessage(
 IKafkaStreamDecoder::RunStartStruct
 IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
+  // If the first message is not a run start message then get another message
+  if (!flatbuffers::BufferHasIdentifier(
+          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+          RUN_START_MESSAGE_ID.c_str())) {
+    offset = getRunInfoMessage(rawMsgBuffer);
+
+    // If the second message is not a run start then give up
+    if (!flatbuffers::BufferHasIdentifier(
+            reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+            RUN_START_MESSAGE_ID.c_str())) {
+      throw std::runtime_error(
+          "IKafkaStreamDecoder::getRunStartMessage() - "
+          "Didn't find a run start message in the run info "
+          "topic. Unable to continue");
+    }
+  }
   return extractRunStartDataFromMessage(rawMsgBuffer, offset);
 }
 
