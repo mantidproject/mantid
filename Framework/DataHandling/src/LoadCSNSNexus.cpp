@@ -104,10 +104,9 @@ int LoadCSNSNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadCSNSNexus::init() {
-  declareProperty(
-	make_unique<PropertyWithValue<string>>(
-		"Instrument", "GPPD", Direction::Input),
-		"Different instrument with different detector combinations");
+  declareProperty(make_unique<PropertyWithValue<string>>("Instrument", "GPPD",
+                                                         Direction::Input),
+                  "Different instrument with different detector combinations");
 
   const vector<string> exts{".h5", ".nxs"};
   declareProperty(
