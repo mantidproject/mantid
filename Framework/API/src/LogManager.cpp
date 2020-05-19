@@ -555,19 +555,19 @@ void LogManager::clearLogs() { m_manager->clear(); }
 /// Gets the correct log name for the matching invalid values log for a given
 /// log name
 std::string
-LogManager::getInvalidValuesFilterLogName(const std::string logName) {
+LogManager::getInvalidValuesFilterLogName(const std::string &logName) {
   return PropertyManager::getInvalidValuesFilterLogName(logName);
 }
 
 /// returns true if the log has a matching invalid values log filter
-bool LogManager::hasInvalidValuesFilter(const std::string logName) const {
+bool LogManager::hasInvalidValuesFilter(const std::string &logName) const {
   return hasProperty(getInvalidValuesFilterLogName(logName));
 }
 
 /// returns the invalid values log if the log has a matching invalid values log
 /// filter
 Kernel::TimeSeriesProperty<bool> *
-LogManager::getInvalidValuesFilter(const std::string logName) const {
+LogManager::getInvalidValuesFilter(const std::string &logName) const {
   try {
     auto log = getLogData(getInvalidValuesFilterLogName(logName));
     if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
