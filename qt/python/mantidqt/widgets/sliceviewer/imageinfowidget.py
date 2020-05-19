@@ -21,6 +21,7 @@ class ImageInfoWidget(QWidget):
         super(QWidget, self).__init__(parent)
 
         layout = QVBoxLayout()
+        self.workspace = workspace
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setChecked(True)
         self.display_type = SliceViewerCoordConversion()

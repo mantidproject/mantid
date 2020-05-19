@@ -929,8 +929,8 @@ class CoordinateConversion {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/CoordinateConversion.h"
 %End
-public:
-	virtual std::vector<double> toDataCoord(const double xDisplayCoord, const double yDisplayCoord) const = 0;
+private:
+  CoordinateConversion(const CoordinateConversion&);
 };
 
 class ImageInfoWidget : public QTableWidget {
@@ -959,10 +959,16 @@ public:
 class SliceViewerCoordConversion : public CoordinateConversion {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/SliceViewerCoordConversion.h"
+#include <boost/python/object.hpp>
+#include <boost/python/tuple.hpp>
 %End
 public:
     SliceViewerCoordConversion();
-	std::vector<double> toDataCoord(const double xDisplayCoord, const double yDisplayCoord) const;
+    SIP_PYOBJECT toDataCoord(double x, double y) const;
+    %MethodCode
+      auto cppTuple = sipCpp->SliceViewerCoordConversion::toDataCoord(a0,a1);
+      return boost::python::incref(boost::python::tuple(cppTuple).ptr());
+    %End
 	void changeDimensions(const int xAxisState, const int yAxisState);
 };
 

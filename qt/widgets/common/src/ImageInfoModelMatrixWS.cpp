@@ -59,17 +59,17 @@ ImageInfoModelMatrixWS::getInfoList(const double xDisplayCoord,
                                     const double value) {
   std::vector<std::string> list;
 
-  std::vector<double> coords =
+  const auto dataCoords =
       m_coordConversion.toDataCoord(xDisplayCoord, yDisplayCoord);
-  double x = coords[0];
-  double y = coords[1];
+  const auto x = std::get<0>(dataCoords);
+  const auto y = std::get<1>(dataCoords);
 
   if (x >= m_xMax || x <= m_xMin || y >= m_yMax || y < 0)
     return list;
 
   addNameAndValue("Value", value, 4, list);
 
-  int row = (int)(y - 0.5);
+  int row = (int)y;
   const auto &spec = m_workspace->getSpectrum(row);
 
   double spec_num = spec.getSpectrumNo();

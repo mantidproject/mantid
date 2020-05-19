@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
-#include <vector>
+#include <tuple>
 
 /**
  * Creates an object containing information about converting display coordinates
@@ -19,8 +19,8 @@ namespace MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_COMMON CoordinateConversion {
 public:
-  virtual std::vector<double> toDataCoord(const double xDisplayCoord,
-                                          const double yDisplayCoord) const = 0;
+  virtual std::tuple<double, double>
+  toDataCoord(const double xDisplayCoord, const double yDisplayCoord) const = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

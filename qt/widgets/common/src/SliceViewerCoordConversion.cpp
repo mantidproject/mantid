@@ -12,19 +12,14 @@ namespace MantidWidgets {
 SliceViewerCoordConversion::SliceViewerCoordConversion()
     : m_xAxis(state::X), m_yAxis(state::Y) {}
 
-std::vector<double>
+std::tuple<double, double>
 SliceViewerCoordConversion::toDataCoord(const double xDisplayCoord,
                                         const double yDisplayCoord) const {
-  std::vector<double> dataCoords;
-  dataCoords.reserve(2);
   if (m_xAxis == state::Y) {
-    dataCoords.emplace_back(yDisplayCoord);
-    dataCoords.emplace_back(xDisplayCoord);
+    return std::make_tuple(yDisplayCoord, xDisplayCoord);
   } else {
-    dataCoords.emplace_back(xDisplayCoord);
-    dataCoords.emplace_back(yDisplayCoord);
+    return std::make_tuple(xDisplayCoord, yDisplayCoord);
   }
-  return dataCoords;
 }
 
 void SliceViewerCoordConversion::changeDimensions(const int xAxisState,

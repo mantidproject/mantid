@@ -10,6 +10,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/CoordinateConversion.h"
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {

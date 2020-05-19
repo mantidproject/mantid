@@ -19,9 +19,9 @@ using namespace Mantid::DataObjects;
 
 class FakeCoordinateConversion : public CoordinateConversion {
 public:
-  std::vector<double> toDataCoord(const double x,
-                                  const double y) const override {
-    return std::vector<double>{x, y};
+  std::tuple<double, double> toDataCoord(const double x,
+                                         const double y) const override {
+    return std::tuple<double, double>(x, y);
   };
 };
 
@@ -47,7 +47,8 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModelMatrixWS model = createModel(workspace);
+    FakeCoordinateConversion coordConvert;
+    ImageInfoModelMatrixWS model(workspace, coordConvert);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -67,7 +68,8 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, false);
     workspace->getAxis(0)->setUnit("TOF");
-    ImageInfoModelMatrixWS model = createModel(workspace);
+    FakeCoordinateConversion coordConvert;
+    ImageInfoModelMatrixWS model(workspace, coordConvert);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -82,7 +84,8 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModelMatrixWS model = createModel(workspace);
+    FakeCoordinateConversion coordConvert;
+    ImageInfoModelMatrixWS model(workspace, coordConvert);
 
     auto list1 = model.getInfoList(-1, 4, 7);
     auto list2 = model.getInfoList(10, 4, 7);
@@ -95,17 +98,11 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModelMatrixWS model = createModel(workspace);
+    FakeCoordinateConversion coordConvert;
+    ImageInfoModelMatrixWS model(workspace, coordConvert);
     auto list1 = model.getInfoList(2, -1, 7);
     auto list2 = model.getInfoList(2, 10, 7);
     TS_ASSERT_EQUALS(0, list1.size())
     TS_ASSERT_EQUALS(0, list2.size())
-  }
-
-private:
-  ImageInfoModelMatrixWS createModel(MatrixWorkspace_sptr workspace) {
-    FakeCoordinateConversion coordConvert;
-    ImageInfoModelMatrixWS model(workspace, coordConvert);
-    return model;
   }
 };

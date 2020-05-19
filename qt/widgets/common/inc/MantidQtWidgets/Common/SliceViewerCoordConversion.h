@@ -27,8 +27,9 @@ public:
    * Converts the x and y display coordinates to the repective x and y data
    * coordinates
    **/
-  std::vector<double> toDataCoord(const double xDisplayCoord,
-                                  const double yDisplayCoord) const override;
+  std::tuple<double, double>
+  toDataCoord(const double xDisplayCoord,
+              const double yDisplayCoord) const override;
 
   void changeDimensions(const int xAxisState, const int yAxisState);
 
