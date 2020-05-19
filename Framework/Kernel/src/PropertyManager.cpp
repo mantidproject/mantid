@@ -54,10 +54,9 @@ PropertyManager::getLogNameFromInvalidValuesFilter(const std::string &logName) {
   return retVal;
 }
 bool PropertyManager::isAnInvalidValuesFilterLog(const std::string &logName) {
-  const auto fullString = logName;
   const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
-  if (fullString.length() >= ending.length()) {
-    return (0 == fullString.compare(fullString.length() - ending.length(),
+  if (logName.length() >= ending.length()) {
+    return (0 == logName.compare(logName.length() - ending.length(),
                                     ending.length(), ending));
   } else {
     return false;
