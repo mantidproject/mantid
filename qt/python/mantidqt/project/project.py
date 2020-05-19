@@ -12,10 +12,12 @@ from qtpy.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, WorkspaceGroup
 from mantid.kernel import ConfigService
+from mantid.plots import MantidAxes
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
+from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresenter
 
 
 class Project(AnalysisDataServiceObserver):
@@ -97,7 +99,6 @@ class Project(AnalysisDataServiceObserver):
         The function that is called if the save as... button is clicked on the mainwindow
         :return: True; if the user cancels.
         """
-        from mantidqt.project.saveprojectdialog.presenter import ProjectSaveDialogPresenter
         self.saving_cancelled = False
         ProjectSaveDialogPresenter(self)
         return self.saving_cancelled
@@ -195,7 +196,6 @@ class Project(AnalysisDataServiceObserver):
         :param workspaces: a list of workspace names.
         :return: a dictionary of figure managers containing plots that only uses the workspaces in workspaces.
         """
-        from mantid.plots import MantidAxes
         plots_copy = plots.copy()
         for i, plot in plots_copy.items():
             # check that every axes only uses workspaces that are being saved, otherwise delete the plot

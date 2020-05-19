@@ -8,7 +8,7 @@
 
 from qtpy.QtWidgets import QDialogButtonBox
 
-from mantidqt.project.saveprojectdialog.view import ProjectSaveDialogView
+from mantidqt.widgets.saveprojectdialog.view import ProjectSaveDialogView
 
 
 class ProjectSaveDialogPresenter:

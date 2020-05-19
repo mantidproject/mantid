@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import Mock
 
 from mantid.kernel import ConfigService
-from mantidqt.project.saveprojectdialog.presenter import ProjectSaveDialogPresenter
+from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresenter
 from mantidqt.project.project import Project
 
 
