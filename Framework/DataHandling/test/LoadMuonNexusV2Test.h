@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -156,7 +156,8 @@ public:
     TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(0, 0),
                      testGroupingVec);
     testGroupingVec.clear();
-    for (int i = 49; i < output2D->getNumberHistograms() + 1; ++i)
+    for (int i = 49; i < static_cast<int>(output2D->getNumberHistograms() + 1);
+         ++i)
       testGroupingVec.emplace_back(i);
     TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0),
                      testGroupingVec);
@@ -261,6 +262,18 @@ public:
     ld.setPropertyValue("SpectrumList", spectraList);
 
     TS_ASSERT_THROWS(ld.execute(), const std::invalid_argument &)
+  }
+
+  void testMaxThreadsRestoredWhenAlgorithmFinished() {
+    int maxThreads = PARALLEL_GET_MAX_THREADS;
+    LoadMuonNexusV2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+
+    ld.execute();
+
+    TS_ASSERT_EQUALS(maxThreads, PARALLEL_GET_MAX_THREADS)
   }
 };
 
