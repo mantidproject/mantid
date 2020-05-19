@@ -1,11 +1,11 @@
 #pragma once
-#include <cxxtest/TestSuite.h>
-#include <MantidGeometry\MDGeometry\MDTypes.h>
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDAlgorithms/MDBoxMaskFunction.h"
+
+#include <cxxtest/TestSuite.h>
 #include <memory>
-#include <gtest\internal\gtest-internal.h>
 
-
+using Mantid::Geometry::MDAlgorithms::MDBoxMaskFunction;
 using Mantid::Kernel::V3D;
 
 class MDBoxMaskFunctionTest : public CxxTest::TestSuite {
@@ -26,6 +26,5 @@ public:
     pt[1] = 0.0;
     pt[2] = 0.0;
     TS_ASSERT_EQUALS(function->isPointContained(pt), true);
-
   }
-}
+};

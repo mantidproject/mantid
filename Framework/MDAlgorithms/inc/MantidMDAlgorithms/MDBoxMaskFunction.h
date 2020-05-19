@@ -3,7 +3,6 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include <MantidKernel/V3D.h>
 
-
 namespace Mantid::Geometry::MDAlgorithms {
 class MDBoxMaskFunction : public Mantid::Geometry::MDImplicitFunction {
 private:
@@ -21,7 +20,7 @@ public:
                                               // warning.
   bool isPointContained(const coord_t *coords) override {
     double sum = 0;
-    for (size_t i = 0; i < m_nd; i++) {
+    for (size_t i = 0; i < 3; i++) {
       sum += pow(coords[i] - m_pos[i], 2);
     }
     if (sum < m_radiusSquared) {
