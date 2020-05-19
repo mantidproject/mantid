@@ -265,7 +265,6 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
   NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
-    const int nexusLevelRead = 1;
     for (auto workspaceId = 0;
          workspaceId < m_outputWorkspace->getNumberOfEntries(); workspaceId++) {
       MatrixWorkspace_sptr workspace =
@@ -273,7 +272,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
               m_outputWorkspace->getItem(workspaceId));
       auto const entryName = std::string("entry" + std::to_string(workspaceId));
       m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(),
-                                         entryName, nexusLevelRead);
+                                         entryName);
     }
     NXclose(&nxHandle);
   }
@@ -343,7 +342,6 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     loadInst->execute();
 
     auto instrumentMap = workspace->instrumentParameters();
-    std::string parameterName = "twoTheta";
     Instrument_const_sptr instrument = workspace->getInstrument();
 
     for (auto ii = 0; ii < static_cast<int>(numberPixelsPerBank); ii++) {
