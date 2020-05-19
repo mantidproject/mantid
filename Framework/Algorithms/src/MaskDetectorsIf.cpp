@@ -7,11 +7,13 @@
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
 #include <iomanip>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,6 +22,23 @@ namespace Algorithms {
 DECLARE_ALGORITHM(MaskDetectorsIf)
 
 using namespace Kernel;
+
+// anonymous namespace
+namespace {
+/** Binary function specification  of (not) isfinite so it can be used
+ * interchangeably with the other binary operators
+ */
+template <class T> struct not_finite {
+  T first_argument_type;
+  T second_argument_type;
+  bool result_type;
+
+  constexpr bool operator()(const T &value, const T &ignored) const {
+    UNUSED_ARG(ignored);
+    return !std::isfinite(value);
+  };
+};
+} // namespace
 
 /** Initialisation method. Declares properties to be used in algorithm.
  */
@@ -33,10 +52,11 @@ void MaskDetectorsIf::init() {
       "Mode", "SelectIf", std::make_shared<StringListValidator>(select_mode),
       "Mode to select or deselect detectors based on comparison with values.");
   const std::vector<std::string> select_operator{
-      "Equal", "NotEqual", "Greater", "GreaterEqual", "Less", "LessEqual"};
+      "Equal", "NotEqual",  "Greater",  "GreaterEqual",
+      "Less",  "LessEqual", "NotFinite"};
   declareProperty("Operator", "Equal",
                   std::make_shared<StringListValidator>(select_operator),
-                  "Unary operator to compare to given values.");
+                  "Operator to compare to given values.");
   declareProperty("Value", 0.0);
   declareProperty(
       std::make_unique<API::FileProperty>(
@@ -74,8 +94,8 @@ void MaskDetectorsIf::exec() {
   retrieveProperties();
 
   if (isDefault("InputCalFile") && isDefault("OutputWorkspace")) {
-    g_log.error() << "No InputCalFle or OutputWorkspace specified; the "
-                     "algorithm will do nothing.";
+    g_log.error() << "No InputCalFle or OutputWorkspace specified; "
+                  << this->name() << " will do nothing.\n";
     return;
   }
   const size_t nspec = m_inputW->getNumberHistograms();
@@ -86,10 +106,15 @@ void MaskDetectorsIf::exec() {
     if (dets.empty())
       continue;
     else {
-      const double val = m_inputW->y(i)[0];
-      if (m_compar_f(val, m_value)) {
-        for (const auto det : dets) {
-          m_umap.emplace(det, m_select_on);
+      const size_t num_bins = m_inputW->y(i).size();
+      for (size_t j = 0; j < num_bins; ++j) {
+        const double val = m_inputW->y(i)[j];
+        if (m_compar_f(val, m_value)) {
+          for (const auto det : dets) {
+            m_umap.emplace(det, m_select_on);
+          }
+          // stop after the first bin matches the criteria
+          break;
         }
       }
     }
@@ -107,6 +132,7 @@ void MaskDetectorsIf::exec() {
 
 /**
  * Create an output workspace masking/unmasking the selected/deselected spectra
+ * This only flips the detector masked flags and does NOT clear the data.
  */
 void MaskDetectorsIf::outputToWorkspace() {
   API::MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
@@ -117,9 +143,23 @@ void MaskDetectorsIf::outputToWorkspace() {
     detectorInfo.setMasked(detectorInfo.indexOf(selection.first),
                            selection.second);
   }
+  /* This only flips the detector masked flags and does NOT clear the data.
+   * Subsequent algorithms may not respect the flag and process the values
+   * incorrectly. The algorithm ClearMaskedSpectra can clear the masked data.
+   * This is probably a mistake but will be left in for compatability for now.
+   *
+   * The following lines would clear the data properly:
+   * (Other algorithms to look into that do this are MaskInstrument and
+   * clearMaskedSpectra.)
+   *
+   *  const auto &spectrumInfo = workspace->spectrumInfo();
+   *  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+   *  if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
+   *     workspace->getSpectrum(i).clearData();
+   *  }
+   */
   setProperty("OutputWorkspace", outputW);
 }
-
 /**
  * Get the input properties and store them in the object variables
  */
@@ -149,6 +189,8 @@ void MaskDetectorsIf::retrieveProperties() {
     m_compar_f = std::equal_to<double>();
   else if (select_operator == "NotEqual")
     m_compar_f = std::not_equal_to<double>();
+  else if (select_operator == "NotFinite")
+    m_compar_f = not_finite<double>();
 }
 
 /**

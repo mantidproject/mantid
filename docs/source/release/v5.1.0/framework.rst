@@ -19,7 +19,13 @@ Algorithms
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
    cost of cloning the inputWorkspace.
 - Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
+- :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
+
+  - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
+  - A new Operator option has been added `NotFinite` that allows you to mask detectors that contain infinite or `NaN <https://en.wikipedia.org/wiki/NaN>`_ values.
+
 - Added an algorithm, :ref:`ISISJournalGetExperimentRuns <algm-ISISJournalGetExperimentRuns>`, which returns run information for a particular experiment from ISIS journal files.
+
 
 Data Handling
 -------------
