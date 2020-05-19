@@ -92,6 +92,8 @@ def start_workbench(app, command_line_options):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
+    # MainWindow needs to be imported locally to ensure the matplotlib
+    # backend is not imported too early.
     from workbench.app.mainwindow import MainWindow
 
     # The ordering here is very delicate. Test thoroughly when
