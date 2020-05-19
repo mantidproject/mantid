@@ -246,7 +246,7 @@ class ProjectTest(unittest.TestCase):
                                  interfaces_to_save="mocked_interfaces")
 
     def test_filter_unaltered_workspaces_function_removes_workspaces_that_have_only_been_loaded(self):
-        unaltered_workspace = Load("IRS26174.raw")
+        unaltered_workspace = Load('ENGINX00228061')
         Rebin(unaltered_workspace, OutputWorkspace="altered_workspace", Params=50)
 
         altered_workspaces = self.project._filter_unaltered_workspaces(["unaltered_workspace", "altered_workspace"])
@@ -255,7 +255,7 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(altered_workspaces[0], "altered_workspace")
 
     def test_filter_plots_removes_plots_that_use_unaltered_workspaces(self):
-        unaltered_workspace = Load("IRS26174.raw")
+        unaltered_workspace = Load('ENGINX00228061')
         altered_workspace = Rebin(unaltered_workspace, Params=50)
 
         figure_managers = {}
