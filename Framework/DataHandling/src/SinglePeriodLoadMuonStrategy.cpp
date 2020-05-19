@@ -181,6 +181,5 @@ std::vector<detid_t> SinglePeriodLoadMuonStrategy::getLoadedDetectors() {
   }
   return loadedDetectors;
 }
-
 } // namespace DataHandling
 } // namespace Mantid

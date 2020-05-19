@@ -113,7 +113,7 @@ void LoadMuonNexusV2::init() {
                   "detector grouping stored in the file (if any).");
 }
 void LoadMuonNexusV2::execLoader() {
-
+  this->setRethrows(true);
   // prepare nexus entry
   m_entrynumber = getProperty("EntryNumber");
   m_filename = getPropertyValue("Filename");

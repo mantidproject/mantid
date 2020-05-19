@@ -19,6 +19,8 @@ class DLLExport LoadMuonStrategy {
 public:
   // Constructor
   LoadMuonStrategy(Kernel::Logger &g_log, const std::string &filename);
+  // Virtual destructor
+  virtual ~LoadMuonStrategy() {}
   // Load muon log data
   virtual void loadMuonLogData() = 0;
   // Returns the good frames from the nexus entry
