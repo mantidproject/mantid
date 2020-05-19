@@ -4,9 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import abins
 import json
 import numpy as np
+
+import abins
+from abins.input import AbInitioLoader
 
 
 class Tester(object):
@@ -16,8 +18,8 @@ class Tester(object):
                            "CRYSTALLoader": "out",
                            "DMOL3Loader": "outmol",
                            "GAUSSIANLoader": "log",
-                           "LoadVASP": "xml",
-                           "LoadVASPOUTCAR": "OUTCAR"}
+                           "VASPLoader": "xml",
+                           "VASPOUTCARLoader": "OUTCAR"}
 
     @staticmethod
     def _prepare_data(seedname):
@@ -51,7 +53,6 @@ class Tester(object):
         return correct_data
 
     def _check_reader_data(self, correct_data=None, data=None, filename=None, extension=None):
-
         # check data
         correct_k_points = correct_data["datasets"]["k_points_data"]
         items = data["datasets"]["k_points_data"]
@@ -128,7 +129,7 @@ class Tester(object):
 
     def check(self, *,
               name: str,
-              loader: AbinsModules.GeneralAbInitioProgram,
+              loader: AbInitioLoader,
               extension: str = None):
         """Run loader and compare output with reference files
 

@@ -14,7 +14,7 @@ import h5py
 import numpy as np
 
 import abins
-from abins.constants import BUF
+from abins.constants import AB_INITIO_FILE_EXTENSIONS, BUF
 from mantid.kernel import logger, ConfigService
 
 
@@ -48,7 +48,7 @@ class IO(object):
         else:
             raise ValueError("Invalid name of the group. String was expected.")
 
-        if filename.split('.')[-1] in AbinsModules.AbinsConstants.AB_INITIO_FILE_EXTENSIONS:
+        if filename.split('.')[-1] in AB_INITIO_FILE_EXTENSIONS:
             core_name = filename[0:filename.rfind(".")]  # e.g. NaCl.phonon -> NaCl (core_name) -> NaCl.hdf5
         else:
             core_name = filename  # e.g. OUTCAR -> OUTCAR (core_name) -> OUTCAR.hdf5

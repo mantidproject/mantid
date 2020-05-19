@@ -15,14 +15,15 @@ from xml.etree import ElementTree
 import mantid.kernel
 
 import numpy as np
-import AbinsModules
-from AbinsModules.AbinsData import AbinsData
-from AbinsModules.AbinsConstants import COMPLEX_TYPE, FLOAT_TYPE, HZ2INV_CM, VASP_FREQ_TO_THZ
+
+from abins import AbinsData
+from abins.input import AbInitioLoader, TextParser
+from abins.constants import COMPLEX_TYPE, FLOAT_TYPE, HZ2INV_CM, VASP_FREQ_TO_THZ
 
 Logger = Union[logging.Logger,mantid.kernel.Logger]
 
 
-class LoadVASP(AbinsModules.GeneralAbInitioProgram):
+class VASPLoader(AbInitioLoader):
     """
     Class which handles loading files from VASP output files.
 
@@ -40,9 +41,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "VASP"
 
-    def read_vibrational_or_phonon_data(self,
-                                        logger: Logger = None,
-                                        ) -> AbinsData:
+    def read_vibrational_or_phonon_data(self, logger: Logger = None) -> AbinsData:
         input_filename = self._clerk.get_input_filename()
 
         if not os.path.isfile(input_filename):
@@ -80,7 +79,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                      'weights': np.array([1.], dtype=FLOAT_TYPE),
                      'atoms': {}}
 
-        parser = AbinsModules.GeneralAbInitioParser()
+        parser = TextParser()
 
         with open(filename, 'rb') as fd:
             # Lattice vectors are found first, with block formatted e.g.

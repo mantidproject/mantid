@@ -11,10 +11,8 @@
 from . import parameters
 from . import constants
 from . import test_helpers
-from . import input
 
 from .io import IO
-from .input.tester import Tester
 
 # Frequency generator
 from .frequencypowdergenerator import FrequencyPowderGenerator
@@ -31,6 +29,3 @@ from .atomsdata import AtomsData
 from .abinsdata import AbinsData
 from .powderdata import PowderData
 from .sdata import SData
-
-# VASP loader (unify with others after rebase)
-from .LoadVASP import LoadVASP
