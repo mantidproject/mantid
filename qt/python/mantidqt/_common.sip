@@ -929,6 +929,8 @@ class CoordinateConversion {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/CoordinateConversion.h"
 %End
+public:
+  virtual ~CoordinateConversion();
 private:
   CoordinateConversion(const CoordinateConversion&);
 };

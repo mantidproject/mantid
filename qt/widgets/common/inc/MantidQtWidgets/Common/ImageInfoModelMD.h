@@ -22,7 +22,7 @@ public:
   // Creates a list containing pairs of strings with information about the
   // coordinates in the workspace.
   std::vector<std::string> getInfoList(const double x, const double y,
-                                       const double z);
+                                       const double z) override;
 
   Mantid::API::IMDWorkspace_sptr m_workspace;
 };
