@@ -293,10 +293,8 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
  * @returns A pointer to a new property containing the time series filter or
  * null
  */
-std::unique_ptr<Kernel::Property>
-createTimeSeriesValidityFilter(::NeXus::File &file,
-                               const Kernel::Property &prop,
-                               Kernel::Logger &log) {
+std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(
+    ::NeXus::File &file, const Kernel::Property &prop, Kernel::Logger &log) {
   const auto tsProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(&prop);
   const auto times = tsProp->timesAsVector();
   std::vector<int> values;
@@ -347,7 +345,8 @@ createTimeSeriesValidityFilter(::NeXus::File &file,
   }
   if (invalidDataFound) {
     log.warning() << "Some \"" << prop.name() << "\" log data is invalid!\n";
-    const auto tspName = API::LogManager::getInvalidValuesFilterLogName(prop.name());
+    const auto tspName =
+        API::LogManager::getInvalidValuesFilterLogName(prop.name());
     auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
     tsp->create(times, boolValues);
     log.debug() << "   done reading \"value_valid\" array\n";

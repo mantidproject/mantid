@@ -44,7 +44,7 @@ class MANTID_API_DLL LogManager {
 public:
   // Gets the correct log name for the matching invalid values log for a given
   // log name
-  static std::string getInvalidValuesFilterLogName(const std::string& logName);
+  static std::string getInvalidValuesFilterLogName(const std::string &logName);
 
   LogManager();
   LogManager(const LogManager &other);
@@ -189,12 +189,12 @@ public:
   void clearLogs();
 
   // returns true if the log has a matching invalid values log filter
-  bool hasInvalidValuesFilter(const std::string& logName) const;
+  bool hasInvalidValuesFilter(const std::string &logName) const;
 
   // returns the invalid values log if the log has a matching invalid values log
   // filter
   Kernel::TimeSeriesProperty<bool> *
-  getInvalidValuesFilter(const std::string& logName) const;
+  getInvalidValuesFilter(const std::string &logName) const;
 
   bool operator==(const LogManager &other) const;
   bool operator!=(const LogManager &other) const;

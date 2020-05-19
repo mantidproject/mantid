@@ -41,11 +41,11 @@ const std::string PropertyManager::INVALID_VALUES_SUFFIX = "_invalid_values";
 /// Gets the correct log name for the matching invalid values log for a given
 /// log name
 std::string
-PropertyManager::getInvalidValuesFilterLogName(const std::string& logName) {
+PropertyManager::getInvalidValuesFilterLogName(const std::string &logName) {
   return logName + PropertyManager::INVALID_VALUES_SUFFIX;
 }
 std::string
-PropertyManager::getLogNameFromInvalidValuesFilter(const std::string& logName) {
+PropertyManager::getLogNameFromInvalidValuesFilter(const std::string &logName) {
   std::string retVal = "";
   if (PropertyManager::isAnInvalidValuesFilterLog(logName)) {
     retVal = logName.substr(
@@ -53,7 +53,7 @@ PropertyManager::getLogNameFromInvalidValuesFilter(const std::string& logName) {
   }
   return retVal;
 }
-bool PropertyManager::isAnInvalidValuesFilterLog(const std::string& logName) {
+bool PropertyManager::isAnInvalidValuesFilterLog(const std::string &logName) {
   const auto fullString = logName;
   const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
   if (fullString.length() >= ending.length()) {
@@ -220,8 +220,7 @@ void PropertyManager::filterByProperty(
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(
               currentProp->name()))) {
         // add the filter to the passed in filters
-        auto logFilter =
-            std::make_unique<LogFilter>(filter);
+        auto logFilter = std::make_unique<LogFilter>(filter);
         auto filterProp =
             getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(
                 currentProp->name()));
