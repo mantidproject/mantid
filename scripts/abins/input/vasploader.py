@@ -47,7 +47,7 @@ class VASPLoader(AbInitioLoader):
         if not os.path.isfile(input_filename):
             raise IOError("Could not find file: {}".format(input_filename))
 
-        if input_filename[-4:] == '.xml':
+        if input_filename.endswith('.xml'):
             data = self._read_vasprun(input_filename)
             self._num_atoms = len(data['atoms'])
             self._num_k = 1
@@ -72,6 +72,28 @@ class VASPLoader(AbInitioLoader):
 
     @classmethod
     def _read_outcar(cls, filename) -> Dict[str, Any]:
+        # First define some useful regular expressions:
+
+        # Float with leading spaced e.g. " -0.0005"
+        float_re = r'\s+(-?\d+\.\d+)'
+
+        # Lattice vector including row index e.g.
+        # A1 = (  17.7648860000,   0.0000000000,   0.0000000000)
+        # (string formatting is needed to replace {row_index} with an int)
+        lattice_re = (r'^\sA{row_index} = \('
+                      + f'{float_re},{float_re},{float_re}\\)$')
+
+        # POTCAR ion identity e.g. "  VRHFIN=Si: s2p2"
+        potcar_ion_re = r'^\s+VRHFIN =(\w+):'
+
+        # Eigenvalues table header e.g.
+        # "   1 f  =   91.546624 THz   575.204406 2PiTHz 3053.666603 cm-1   378.606542 meV"
+        # or
+        # "  24 f/i=   26.216426 THz   164.722665 2PiTHz  874.485829 cm-1   108.422463 meV"
+        eigenvalues_re = (r'^\s*\d+\s+f(/i|\s+)=\s+\d+\.\d+\s+THz'
+                          r'\s+\d+\.\d+\s+2PiTHz\s+\d+\.\d+\s+cm\-1'
+                          r'\s+\d+\.\d+\smeV$')
+
         # Vibration calculations within Vasp only calculate the Hessian
         # within the calculation cell: i.e. they only include Gamma-point
 
@@ -82,6 +104,7 @@ class VASPLoader(AbInitioLoader):
         parser = TextParser()
 
         with open(filename, 'rb') as fd:
+
             # Lattice vectors are found first, with block formatted e.g.
             #
             #  Lattice vectors:
@@ -95,10 +118,7 @@ class VASPLoader(AbInitioLoader):
 
             for i in range(3):
                 lattice_line = fd.readline().decode("utf-8")
-                float_re = r'\s+(\d+\.\d+)'
-                lattice_re = (r'^\sA' + str(i + 1) + r' = \('
-                              + f'{float_re},{float_re},{float_re}\\)$')
-                match = re.match(lattice_re, lattice_line)
+                match = re.match(lattice_re.format(row_index=(i + 1)), lattice_line)
                 if not match:
                     print(lattice_re, lattice_line)
                     raise ValueError("Something went wrong while reading lattice vectors from OUTCAR")
@@ -125,7 +145,7 @@ class VASPLoader(AbInitioLoader):
             symbol_lines = [parser.find_first(file_obj=fd, msg='VRHFIN') for _ in ion_counts]
 
             def _ion_count_or_error(line: bytes) -> str:
-                match = re.match(r'^\s+VRHFIN =(\w+):', line.decode("utf-8"))
+                match = re.match(potcar_ion_re, line.decode("utf-8"))
                 if match:
                     return match.groups()[0]
                 else:
@@ -140,11 +160,7 @@ class VASPLoader(AbInitioLoader):
             eig_header = 'Eigenvectors and eigenvalues of the dynamical matrix'
             parser.find_first(file_obj=fd, msg=eig_header)
 
-            eig_pattern = (r'^\s*\d+\s+f(/i|\s+)=\s+\d+\.\d+\s+THz'
-                           r'\s+\d+\.\d+\s+2PiTHz\s+\d+\.\d+\s+cm\-1'
-                           r'\s+\d+\.\d+\smeV$')
-
-            first_eigenvalue_line = parser.find_first(file_obj=fd, regex=eig_pattern)
+            first_eigenvalue_line = parser.find_first(file_obj=fd, regex=eigenvalues_re)
 
             # skip X Y Z header line
             _ = fd.readline()
@@ -183,7 +199,7 @@ class VASPLoader(AbInitioLoader):
             eigenvectors[0, 0, :, :] = [row[-3:] for row in first_eigenvector_data]
 
             for i in range(1, n_frequencies):
-                eigenvalue_line = parser.find_first(file_obj=fd, regex=eig_pattern)
+                eigenvalue_line = parser.find_first(file_obj=fd, regex=eigenvalues_re)
                 file_data['frequencies'][0, i] = cls._line_to_eigenvalue(eigenvalue_line)
 
                 # skip X Y Z header line
