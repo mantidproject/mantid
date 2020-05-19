@@ -15,22 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataView" name="fitDataView" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="MantidQt::CustomInterfaces::IDA::IndirectDockWidgetArea" name="dockArea" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -147,12 +131,6 @@
    <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
    <extends>QWidget</extends>
    <header>IndirectSpectrumSelectionView.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataView</class>
-   <extends>QWidget</extends>
-   <header>IndirectFitDataView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

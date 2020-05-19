@@ -46,6 +46,8 @@ ConvFit::ConvFit(QWidget *parent)
   IndirectFitPlotView *fitPlotView = new IndirectFitPlotView();
   plotViewArea->setWidget(fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable);
+  m_fitPropertyBrowser->setBaseSize(plotViewArea->baseSize());
+  m_fitPropertyBrowser->setSizePolicy(plotViewArea->sizePolicy());
   m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea,
                                     m_fitPropertyBrowser);
   m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
@@ -58,7 +60,7 @@ ConvFit::ConvFit(QWidget *parent)
   m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
   setFitPropertyBrowser(m_fitPropertyBrowser);
   auto dataPresenter = std::make_unique<ConvFitDataPresenter>(
-      m_convFittingModel, m_uiForm->fitDataView);
+      m_convFittingModel, m_uiForm->dockArea->m_uiForm->centralwidget);
   connect(
       dataPresenter.get(),
       SIGNAL(
@@ -133,7 +135,7 @@ void ConvFit::setModelResolution(const std::string &resolutionName,
 }
 
 void ConvFit::setStartAndEndHidden(bool hidden) {
-  m_uiForm->fitDataView->setStartAndEndHidden(hidden);
+  m_uiForm->dockArea->m_uiForm->centralwidget->setStartAndEndHidden(hidden);
 }
 
 void ConvFit::fitFunctionChanged() {
