@@ -31,12 +31,12 @@ DECLARE_FUNCTION(Bk2BkExpConvPV)
 // ----------------------------
 /** Constructor and Desctructor
  */
-Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0), mLowTOF(0.0), mUpperTOF(0.0) {}
+Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0) {}
 
 /** Initialize:  declare paraemters
  */
 void Bk2BkExpConvPV::init() {
-  declareParameter("TOF_h", -0.0);
+  declareParameter("X0", -0.0);
   declareParameter("Intensity", 1.0);
   declareParameter("Alpha", 1.0);
   declareParameter("Beta", 1.0);
@@ -65,7 +65,7 @@ void Bk2BkExpConvPV::setHeight(const double h) {
 double Bk2BkExpConvPV::height() const {
   double height[1];
   double peakCentre[1];
-  peakCentre[0] = this->getParameter("TOF_h");
+  peakCentre[0] = this->getParameter("X0");
   this->functionLocal(height, peakCentre, 1);
   return height[0];
 }
@@ -93,11 +93,11 @@ void Bk2BkExpConvPV::setFwhm(const double w) {
 
 /** Set peak center
  */
-void Bk2BkExpConvPV::setCentre(const double c) { setParameter("TOF_h", c); }
+void Bk2BkExpConvPV::setCentre(const double c) { setParameter("X0", c); }
 
 /** Center
  */
-double Bk2BkExpConvPV::centre() const { return getParameter("TOF_h"); }
+double Bk2BkExpConvPV::centre() const { return getParameter("X0"); }
 
 /** Implement the peak calculating formula
  */
@@ -109,7 +109,7 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
   const double sigma2 = this->getParameter("Sigma2");
   const double gamma = this->getParameter("Gamma");
   const double intensity = this->getParameter("Intensity");
-  const double tof_h = this->getParameter("TOF_h");
+  const double x0 = this->getParameter("X0");
 
   double invert_sqrt2sigma = 1.0 / sqrt(2.0 * sigma2);
   double N = alpha * beta * 0.5 / (alpha + beta);
@@ -118,14 +118,14 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
   calHandEta(sigma2, gamma, H, eta);
 
   g_log.debug() << "DB1143:  nData = " << nData << " From " << xValues[0]
-                << " To " << xValues[nData - 1] << " TOF_h = " << tof_h
+                << " To " << xValues[nData - 1] << " X0 = " << x0
                 << " Intensity = " << intensity << " alpha = " << alpha
                 << " beta = " << beta << " H = " << H << " eta = " << eta
                 << '\n';
 
   // 2. Do calculation for each data point
   for (size_t id = 0; id < nData; ++id) {
-    double dT = xValues[id] - tof_h;
+    double dT = xValues[id] - x0;
     double omega =
         calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
     out[id] = intensity * omega;

@@ -70,8 +70,6 @@ private:
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
 
   mutable double mFWHM;
-  mutable double mLowTOF;
-  mutable double mUpperTOF;
 };
 
 // typedef std::shared_ptr<TableWorkspace> TableWorkspace_sptr;

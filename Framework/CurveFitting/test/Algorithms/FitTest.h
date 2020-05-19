@@ -1357,8 +1357,8 @@ public:
     Fit fit;
     fit.initialize();
     TS_ASSERT(fit.isInitialized());
-    fit.setProperty("Function", "name=Bk2BkExpConvPV, Height=1000");
-    fit.setProperty("Ties", "TOF_h=55175.79, Alpha=0.03613, Beta=0.02376, "
+    fit.setProperty("Function", "name=Bk2BkExpConvPV, Intensity=1000");
+    fit.setProperty("Ties", "X0=55175.79, Alpha=0.03613, Beta=0.02376, "
                             "Sigma2=187.50514, Gamma=0");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
