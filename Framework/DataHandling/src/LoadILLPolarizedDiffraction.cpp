@@ -382,7 +382,6 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
         const auto pixelIndex = componentInfo.indexOf(pixel->getComponentID());
         V3D position = pixel->getPos();
         double const radius = sqrt(pow(position[0], 2) + pow(position[2], 2));
-        std::cout << twoThetaBank[0] << std::endl;
         position = V3D(
             radius * sin(DEG_TO_RAD * (twoThetaPixels[jj] - twoThetaBank[0])),
             position[1],
