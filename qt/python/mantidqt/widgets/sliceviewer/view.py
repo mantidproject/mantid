@@ -76,6 +76,7 @@ class SliceViewerDataView(QWidget):
         self.fig = Figure()
         self.fig.set_tight_layout(True)
         self.ax = None
+        self.axx, self.axy = None, None
         self._grid_on = False
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = FigureCanvas(self.fig)
@@ -122,6 +123,7 @@ class SliceViewerDataView(QWidget):
             self.ax.grid(self.grid_on)
         if self.line_plots:
             self.add_line_plots()
+
         self.plot_MDH = self.plot_MDH_orthogonal
 
         self.canvas.draw_idle()
@@ -165,6 +167,7 @@ class SliceViewerDataView(QWidget):
         self.axx.yaxis.tick_right()
         self.axy = self.fig.add_subplot(gs[0], sharey=image_axes)
         self.axy.xaxis.tick_top()
+        self.update_line_plot_labels()
         self.mpl_toolbar.update()  # sync list of axes in navstack
         self.canvas.draw_idle()
 
@@ -252,6 +255,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
         self.delete_line_plot_lines()
+        self.update_line_plot_labels()
         self.canvas.draw_idle()
 
     def reset_image_view_to_data_limits(self):
@@ -323,17 +327,8 @@ class SliceViewerDataView(QWidget):
             self.yfig.remove()
             del self.xfig
             del self.yfig
-        except AttributeError:
+        except (AttributeError):
             pass
-
-    def update_data_clim(self):
-        self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())
-        self.canvas.draw_idle()
-
-    def update_line_plot_limits(self):
-        if self.line_plots:
-            self.axx.set_ylim(self.colorbar.cmin_value, self.colorbar.cmax_value)
-            self.axy.set_xlim(self.colorbar.cmin_value, self.colorbar.cmax_value)
 
     def set_grid_on(self):
         """
@@ -378,7 +373,7 @@ class SliceViewerDataView(QWidget):
         except (AttributeError, IndexError):
             self.axx.clear()
             self.xfig = self.axx.plot(x, y, scalex=False)[0]
-            self.axx.set_xlabel(self.ax.get_xlabel())
+            self.update_line_plot_labels()
             self.update_line_plot_limits()
         self.canvas.draw_idle()
 
@@ -388,9 +383,27 @@ class SliceViewerDataView(QWidget):
         except (AttributeError, IndexError):
             self.axy.clear()
             self.yfig = self.axy.plot(y, x, scaley=False)[0]
-            self.axy.set_ylabel(self.ax.get_ylabel())
+            self.update_line_plot_labels()
             self.update_line_plot_limits()
         self.canvas.draw_idle()
+
+    def update_data_clim(self):
+        self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())
+        self.canvas.draw_idle()
+
+    def update_line_plot_limits(self):
+        try:  # set line plot intensity axes to match colorbar limits
+            self.axx.set_ylim(self.colorbar.cmin_value, self.colorbar.cmax_value)
+            self.axy.set_xlim(self.colorbar.cmin_value, self.colorbar.cmax_value)
+        except AttributeError:
+            pass
+
+    def update_line_plot_labels(self):
+        try:  # ensure plot labels are in sync with main axes
+            self.axx.set_xlabel(self.ax.get_xlabel())
+            self.axy.set_ylabel(self.ax.get_ylabel())
+        except AttributeError:
+            pass
 
     def update_line_plots(self, x, y):
         xmin, xmax, ymin, ymax = self.image.get_extent()
