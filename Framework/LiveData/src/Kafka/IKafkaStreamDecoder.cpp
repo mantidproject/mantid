@@ -148,7 +148,7 @@ void IKafkaStreamDecoder::joinStreamAtTime(
 }
 
 int64_t
-IKafkaStreamDecoder::nanosecondsToMilliseconds(uint64_t timeNanoseconds) const {
+IKafkaStreamDecoder::nanosecondsToMilliseconds(uint64_t timeNanoseconds) {
   return static_cast<int64_t>(timeNanoseconds / 1000000);
 }
 
@@ -163,7 +163,7 @@ void IKafkaStreamDecoder::stopCapture() noexcept {
   // will exit automatically
   while (m_capturing) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  };
+  }
 }
 
 /**
@@ -380,8 +380,10 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     int32_t partition;
     std::string topicName;
     m_runStream->consumeMessage(&runMsgBuffer, offset, partition, topicName);
-    if (runMsgBuffer.empty()) {
-      continue; // no message available, try again
+    if (runMsgBuffer.empty() || !flatbuffers::BufferHasIdentifier(
+        reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()),
+        RUN_START_MESSAGE_ID.c_str())) {
+      continue; // no start message available, try again
     } else {
       auto runStartData =
           GetRunStart(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
@@ -442,7 +444,8 @@ IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
       runStartData->start_time(),
       static_cast<size_t>(runStartData->n_periods()),
       runStartData->nexus_structure()->str(),
-      offset};
+      offset,
+    false, 0, {}, {}};
   return runStart;
 }
 
@@ -501,7 +504,7 @@ void IKafkaStreamDecoder::checkRunMessage(
     std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
   if (flatbuffers::BufferHasIdentifier(
           reinterpret_cast<const uint8_t *>(buffer.c_str()),
-          RUN_START_MESSAGE_ID.c_str())) {
+          RUN_STOP_MESSAGE_ID.c_str())) {
     auto runStopMsg =
         GetRunStop(reinterpret_cast<const uint8_t *>(buffer.c_str()));
     if (!checkOffsets) {
@@ -538,8 +541,7 @@ void IKafkaStreamDecoder::checkRunEnd(
 }
 
 int IKafkaStreamDecoder::runNumber() const noexcept {
-  /* If the run ID is empty or if any non-digit char was found in the string
-   */
+  // If the run ID is empty or if any non-digit char was found in the string
   if (m_runId.empty() ||
       (std::find_if_not(m_runId.cbegin(), m_runId.cend(), [](const char c) {
          return std::isdigit(c);
