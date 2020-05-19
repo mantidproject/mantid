@@ -104,14 +104,10 @@ int LoadCSNSNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadCSNSNexus::init() {
-  std::vector<std::string> instList{"GPPD"};
-  instList.emplace_back("MR");
-  instList.emplace_back("SANS");
-  instList.emplace_back("MPI");
-  auto instTypeValidator = boost::make_shared<StringListValidator>(instList);
   declareProperty(
-      "Instrument", "GPPD", instTypeValidator,
-      "choose different instrument with different detector combinations ");
+	make_unique<PropertyWithValue<string>>(
+		"Instrument", "GPPD", Direction::Input),
+		"Different instrument with different detector combinations");
 
   const vector<string> exts{".h5", ".nxs"};
   declareProperty(
