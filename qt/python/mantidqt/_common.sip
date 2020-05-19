@@ -907,7 +907,7 @@ class FileFinderWidget : QWidget
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 %End
 public:
-    FileFinderWidget(QWidget *parent = nullptr);
+    FileFinderWidget(QWidget *parent = nullptr) /KeywordArgs="All"/;
 
     QString getText();
     QString getFirstFilename() const;
@@ -946,7 +946,7 @@ class DataSelector : QWidget
 #include "MantidQtWidgets/Common/DataSelector.h"
 %End
 public:
-    DataSelector(QWidget *parent = nullptr);
+    DataSelector(QWidget *parent = nullptr) /KeywordArgs="All"/;
 };
 
 // ---------------------------------
@@ -958,5 +958,5 @@ class WorkspaceSelector : QComboBox
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 %End
 public:
-    WorkspaceSelector(QWidget *parent = nullptr, bool init = true);
+    WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
 };
