@@ -30,6 +30,7 @@ set(
         IndirectDataTablePresenter.cpp
         IndirectDataValidationHelper.cpp
         IndirectDiffractionReduction.cpp
+        IndirectDockWidgetArea.cpp
         IndirectEditResultsDialog.cpp
         IndirectFitAnalysisTab.cpp
         IndirectFitData.cpp
@@ -155,6 +156,7 @@ set(
         IndirectDataReduction.h
         IndirectDataReductionTab.h
         IndirectDataTablePresenter.h
+        IndirectDockWidgetArea.h
         IndirectDiffractionReduction.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
@@ -227,6 +229,7 @@ set(
         IndirectDataAnalysis.ui
         IndirectDataReduction.ui
         IndirectDiffractionReduction.ui
+        IndirectDockWidgetArea.ui
         IndirectEditResultsDialog.ui
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui
@@ -332,6 +335,7 @@ set(
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
         IndirectFitDataView.cpp
+        IndirectDockWidgetArea.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
@@ -426,6 +430,7 @@ set(
         IndirectDataReductionTab.h
         IndirectDataTablePresenter.h
         IndirectDiffractionReduction.h
+        IndirectDockWidgetArea.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
         IndirectFitDataPresenter.h
@@ -519,6 +524,7 @@ set(
         IndirectDataAnalysis.ui
         IndirectDataReduction.ui
         IndirectDiffractionReduction.ui
+        IndirectDockWidgetArea.ui
         IndirectEditResultsDialog.ui
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui

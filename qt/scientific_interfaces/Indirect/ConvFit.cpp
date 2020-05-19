@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFit.h"
 #include "ConvFitDataPresenter.h"
+#include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -38,13 +39,24 @@ ConvFit::ConvFit(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
       m_uiForm(new Ui::ConvFit) {
   m_uiForm->setupUi(parent);
+  m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
+  /*m_uiForm->dockArea->addDockWidget(Qt::RightDockWidgetArea,
+                                    m_fitPropertyBrowser);*/
+  QDockWidget *plotViewArea = new QDockWidget();
+  IndirectFitPlotView *fitPlotView = new IndirectFitPlotView();
+  plotViewArea->setWidget(fitPlotView);
+  plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable);
+  m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea,
+                                    m_fitPropertyBrowser);
+  m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
+  // m_uiForm->dockArea->setCentralWidget(fitPlotView);
+  // fitPlotView->show();
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
-  setPlotView(m_uiForm->pvFitPlotView);
+  setPlotView(fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(
-      new ConvTemplateBrowser);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
+  setFitPropertyBrowser(m_fitPropertyBrowser);
   auto dataPresenter = std::make_unique<ConvFitDataPresenter>(
       m_convFittingModel, m_uiForm->fitDataView);
   connect(
@@ -116,7 +128,7 @@ void ConvFit::setModelResolution(const std::string &resolutionName,
                                  TableDatasetIndex index) {
   m_convFittingModel->setResolution(resolutionName, index);
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
-  m_uiForm->fitPropertyBrowser->setModelResolution(fitResolutions);
+  m_fitPropertyBrowser->setModelResolution(fitResolutions);
   setModelFitFunction();
 }
 

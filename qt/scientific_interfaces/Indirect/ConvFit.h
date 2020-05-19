@@ -51,6 +51,7 @@ private:
   // ShortHand Naming for fit functions
   std::unordered_map<std::string, std::string> m_fitStrings;
   ConvFitModel *m_convFittingModel;
+  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
 };
 
 } // namespace IDA

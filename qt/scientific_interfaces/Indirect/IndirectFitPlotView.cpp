@@ -57,12 +57,12 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   createSplitterWithPlots();
 
   // Avoids squished plots for >qt5
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  char const *const overrideLabel = "";
-  m_topPlot->setOverrideAxisLabel(AxisID::XBottom, overrideLabel);
-  m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, overrideLabel);
-  m_plotForm->dwMiniPlots->setFeatures(QDockWidget::NoDockWidgetFeatures);
-#endif
+  //#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  //  char const *const overrideLabel = "";
+  //  m_topPlot->setOverrideAxisLabel(AxisID::XBottom, overrideLabel);
+  //  m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, overrideLabel);
+  //  m_plotForm->dwMiniPlots->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  //#endif
 
   m_plotForm->cbDataSelection->hide();
   addFitRangeSelector();
@@ -81,9 +81,9 @@ void IndirectFitPlotView::createSplitterWithPlots() {
 void IndirectFitPlotView::createSplitter() {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   auto const dragIcon = Icons::getIcon("mdi.dots-horizontal");
-  m_splitter = std::make_unique<Splitter>(dragIcon, m_plotForm->dwLayout);
+  m_splitter = std::make_unique<Splitter>(dragIcon);
 #else
-  m_splitter = std::make_unique<QSplitter>(m_plotForm->dwLayout);
+  m_splitter = std::make_unique<QSplitter>();
 #endif
   m_splitter->setOrientation(Qt::Vertical);
   m_splitter->setStyleSheet(

@@ -1,0 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "IndirectDockWidgetArea.h"
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
+IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent)
+    : QMainWindow(parent), m_uiForm(new Ui::IndirectDockWidgetArea) {
+  m_uiForm->setupUi(this);
+  QMainWindow::setWindowFlags(Qt::Widget);
+}
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt

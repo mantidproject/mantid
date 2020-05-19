@@ -24,33 +24,7 @@
     <widget class="QComboBox" name="cbDataSelection"/>
    </item>
    <item>
-    <widget class="QDockWidget" name="dwMiniPlots">
-     <property name="features">
-      <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-     </property>
-     <property name="allowedAreas">
-      <set>Qt::NoDockWidgetArea</set>
-     </property>
-     <property name="windowTitle">
-      <string>Mini-plots</string>
-     </property>
-     <widget class="QWidget" name="dwLayout">
-      <layout class="QGridLayout" name="gridLayout">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-      </layout>
-     </widget>
-    </widget>
+    <layout class="QGridLayout" name="gridLayout"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="loPlotOptions">
@@ -63,6 +37,9 @@
      </item>
      <item>
       <widget class="QStackedWidget" name="swPlotSpectrum">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
        <widget class="QWidget" name="pgPlotSpinBox">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
