@@ -94,7 +94,7 @@ void LoadILLPolarizedDiffraction::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                  FileProperty::Load, ".nxs"),
                   "File path of the data file to load");
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   std::vector<std::string> positionCalibrationOptions{"None", "Nexus",
