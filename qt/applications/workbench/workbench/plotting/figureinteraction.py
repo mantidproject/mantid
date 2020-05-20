@@ -234,7 +234,7 @@ class FigureInteraction(object):
                     move_and_show(YAxisEditor(canvas, ax))
                 else:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
-            if hasattr(ax, 'zaxis'):
+            elif hasattr(ax, 'zaxis'):
                 if ax.zaxis.label.contains(event)[0]:
                     move_and_show(LabelEditor(canvas, ax.zaxis.label))
                 elif (ax.zaxis.contains(event)[0]
