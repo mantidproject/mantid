@@ -10,9 +10,7 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-import atexit
 import os
-import sys
 
 from mantid.kernel import ConfigService, logger
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
@@ -21,43 +19,22 @@ from workbench.widgets.about.presenter import AboutPresenter
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 # -----------------------------------------------------------------------------
-# Constants
-# -----------------------------------------------------------------------------
-
-SYSCHECK_INTERVAL = 50
-ORIGINAL_SYS_EXIT = sys.exit
-ORIGINAL_STDOUT = sys.stdout
-ORIGINAL_STDERR = sys.stderr
-STACKTRACE_FILE = 'workbench_stacktrace.txt'
-
-from workbench import requirements  # noqa
-
-requirements.check_qt()
-
-# -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
-                            QMainWindow, QSplashScreen)  # noqa
+from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
+                            QSplashScreen)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.widgets import manageuserdirectories  # noqa
 from mantidqt.widgets.scriptrepository import ScriptRepositoryView  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
-from mantidqt.utils.qt import (add_actions, create_action, plugins,
-                               widget_updates_disabled)  # noqa
+from mantidqt.utils.qt import (add_actions, create_action, widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
 from mantidqt.usersubwindow import UserSubWindow  # noqa
 
-# Pre-application setup
-plugins.setup_library_paths()
-
-# Importing resources loads the data in. This must be imported before the
-# QApplication is created or paths to Qt's resources will not be set up correctly
-from workbench.app.resources import qCleanupResources  # noqa
 from workbench.config import CONF  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
@@ -66,12 +43,9 @@ from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
 
-
 # -----------------------------------------------------------------------------
 # Splash screen
 # -----------------------------------------------------------------------------
-
-atexit.register(qCleanupResources)
 
 
 def _get_splash_image():
@@ -87,14 +61,12 @@ def _get_splash_image():
                                                                 Qt.SmoothTransformation)
 
 
-SPLASH = QSplashScreen(_get_splash_image(),
-                       Qt.WindowStaysOnTopHint)
+SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
 SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
                    | Qt.AlignAbsolute, QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
-
 
 # -----------------------------------------------------------------------------
 # MainWindow
@@ -249,46 +221,52 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         # --- general application menu options --
         # file menu
-        action_open = create_action(
-            self, "Open Script", on_triggered=self.open_file,
-            shortcut="Ctrl+O", shortcut_context=Qt.ApplicationShortcut)
-        action_load_project = create_action(
-            self, "Open Project", on_triggered=self.load_project)
-        action_save_script = create_action(
-            self, "Save Script", on_triggered=self.save_script,
-            shortcut="Ctrl+S", shortcut_context=Qt.ApplicationShortcut)
-        action_save_script_as = create_action(
-            self, "Save Script as...", on_triggered=self.save_script_as)
-        action_generate_ws_script = create_action(
-            self, "Generate Recovery Script",
-            on_triggered=self.generate_script_from_workspaces)
-        action_save_project = create_action(
-            self, "Save Project", on_triggered=self.save_project)
-        action_save_project_as = create_action(
-            self, "Save Project as...", on_triggered=self.save_project_as)
-        action_manage_directories = create_action(
-            self, "Manage User Directories",
-            on_triggered=self.open_manage_directories)
-        action_script_repository = create_action(
-            self, "Script Repository",
-            on_triggered=self.open_script_repository)
-        action_settings = create_action(
-            self, "Settings", on_triggered=self.open_settings_window)
-        action_quit = create_action(
-            self, "&Quit", on_triggered=self.close, shortcut="Ctrl+Q",
-            shortcut_context=Qt.ApplicationShortcut)
-        self.file_menu_actions = [action_open, action_load_project, None,
-                                  action_save_script, action_save_script_as,
-                                  action_generate_ws_script, None, action_save_project,
-                                  action_save_project_as, None, action_settings, None,
-                                  action_manage_directories, None, action_script_repository,
-                                  None, action_quit]
+        action_open = create_action(self,
+                                    "Open Script",
+                                    on_triggered=self.open_file,
+                                    shortcut="Ctrl+O",
+                                    shortcut_context=Qt.ApplicationShortcut)
+        action_load_project = create_action(self, "Open Project", on_triggered=self.load_project)
+        action_save_script = create_action(self,
+                                           "Save Script",
+                                           on_triggered=self.save_script,
+                                           shortcut="Ctrl+S",
+                                           shortcut_context=Qt.ApplicationShortcut)
+        action_save_script_as = create_action(self,
+                                              "Save Script as...",
+                                              on_triggered=self.save_script_as)
+        action_generate_ws_script = create_action(self,
+                                                  "Generate Recovery Script",
+                                                  on_triggered=self.generate_script_from_workspaces)
+        action_save_project = create_action(self, "Save Project", on_triggered=self.save_project)
+        action_save_project_as = create_action(self,
+                                               "Save Project as...",
+                                               on_triggered=self.save_project_as)
+        action_manage_directories = create_action(self,
+                                                  "Manage User Directories",
+                                                  on_triggered=self.open_manage_directories)
+        action_script_repository = create_action(self,
+                                                 "Script Repository",
+                                                 on_triggered=self.open_script_repository)
+        action_settings = create_action(self, "Settings", on_triggered=self.open_settings_window)
+        action_quit = create_action(self,
+                                    "&Quit",
+                                    on_triggered=self.close,
+                                    shortcut="Ctrl+Q",
+                                    shortcut_context=Qt.ApplicationShortcut)
+        self.file_menu_actions = [
+            action_open, action_load_project, None, action_save_script, action_save_script_as,
+            action_generate_ws_script, None, action_save_project, action_save_project_as, None,
+            action_settings, None, action_manage_directories, None, action_script_repository, None,
+            action_quit
+        ]
 
         # view menu
-        action_restore_default = create_action(
-            self, "Restore Default Layout",
-            on_triggered=self.setup_default_layouts,
-            shortcut="Shift+F10", shortcut_context=Qt.ApplicationShortcut)
+        action_restore_default = create_action(self,
+                                               "Restore Default Layout",
+                                               on_triggered=self.setup_default_layouts,
+                                               shortcut="Shift+F10",
+                                               shortcut_context=Qt.ApplicationShortcut)
 
         self.view_menu_layouts = self.view_menu.addMenu("&User Layouts")
         self.populate_layout_menu()
@@ -296,26 +274,28 @@ class MainWindow(QMainWindow):
         self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
 
         # help menu
-        action_mantid_help = create_action(
-            self, "Mantid Help", on_triggered=self.open_mantid_help,
-            shortcut='F1', shortcut_context=Qt.ApplicationShortcut)
+        action_mantid_help = create_action(self,
+                                           "Mantid Help",
+                                           on_triggered=self.open_mantid_help,
+                                           shortcut='F1',
+                                           shortcut_context=Qt.ApplicationShortcut)
         action_algorithm_descriptions = create_action(
-            self, 'Algorithm Descriptions',
-            on_triggered=self.open_algorithm_descriptions_help)
-        action_mantid_concepts = create_action(
-            self, "Mantid Concepts", on_triggered=self.open_mantid_concepts_help)
-        action_mantid_homepage = create_action(
-            self, "Mantid Homepage", on_triggered=self.open_mantid_homepage)
-        action_mantid_forum = create_action(
-            self, "Mantid Forum", on_triggered=self.open_mantid_forum)
-        action_about = create_action(
-            self, "About Mantid Workbench", on_triggered=self.open_about)
+            self, 'Algorithm Descriptions', on_triggered=self.open_algorithm_descriptions_help)
+        action_mantid_concepts = create_action(self,
+                                               "Mantid Concepts",
+                                               on_triggered=self.open_mantid_concepts_help)
+        action_mantid_homepage = create_action(self,
+                                               "Mantid Homepage",
+                                               on_triggered=self.open_mantid_homepage)
+        action_mantid_forum = create_action(self,
+                                            "Mantid Forum",
+                                            on_triggered=self.open_mantid_forum)
+        action_about = create_action(self, "About Mantid Workbench", on_triggered=self.open_about)
 
         self.help_menu_actions = [
-            action_mantid_help, action_mantid_concepts,
-            action_algorithm_descriptions, None,
-            action_mantid_homepage, action_mantid_forum,
-            None, action_about]
+            action_mantid_help, action_mantid_concepts, action_algorithm_descriptions, None,
+            action_mantid_homepage, action_mantid_forum, None, action_about
+        ]
 
     def create_widget_actions(self):
         """
@@ -382,8 +362,8 @@ class MainWindow(QMainWindow):
                             lambda checked_py, script=script: self.launch_custom_python_gui(script))
                     else:
                         action = submenu.addAction(name)
-                        action.triggered.connect(lambda checked_cpp, name=name, key=key:
-                                                 self.launch_custom_cpp_gui(name, key))
+                        action.triggered.connect(lambda checked_cpp, name=name, key=key: self.
+                                                 launch_custom_cpp_gui(name, key))
 
     def redirect_python_warnings(self):
         """By default the warnings module writes warnings to sys.stderr. stderr is assumed to be
@@ -408,7 +388,8 @@ class MainWindow(QMainWindow):
         for item in items:
             key, scriptname = item.split('/')
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
-                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
+                logger.warning('Failed to find script "{}" in "{}"'.format(
+                    scriptname, interface_dir))
                 continue
             if scriptname in GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
@@ -451,16 +432,17 @@ class MainWindow(QMainWindow):
         for item in layout_keys:
             layout_options.append(self.create_load_layout_action(item, layout_dict[item]))
         layout_options.append(None)
-        action_settings = create_action(
-            self, "Settings", on_triggered=self.open_settings_layout_window)
+        action_settings = create_action(self,
+                                        "Settings",
+                                        on_triggered=self.open_settings_layout_window)
         layout_options.append(action_settings)
 
         add_actions(self.view_menu_layouts, layout_options)
 
     def create_load_layout_action(self, layout_name, layout):
-        action_load_layout = create_action(
-            self, layout_name,
-            on_triggered=lambda: self.restoreState(layout))
+        action_load_layout = create_action(self,
+                                           layout_name,
+                                           on_triggered=lambda: self.restoreState(layout))
         return action_load_layout
 
     def prep_window_for_reset(self):
@@ -489,12 +471,16 @@ class MainWindow(QMainWindow):
                 # column 2
                 [[logmessages]]
             ],
-            'width-fraction': [0.25,  # column 0 width
-                               0.50,  # column 1 width
-                               0.25],  # column 2 width
-            'height-fraction': [[0.5, 0.5],  # column 0 row heights
-                                [1.0],  # column 1 row heights
-                                [1.0]]  # column 2 row heights
+            'width-fraction': [
+                0.25,  # column 0 width
+                0.50,  # column 1 width
+                0.25
+            ],  # column 2 width
+            'height-fraction': [
+                [0.5, 0.5],  # column 0 row heights
+                [1.0],  # column 1 row heights
+                [1.0]
+            ]  # column 2 row heights
         }
 
         size = self.size()  # Preserve size on reset
@@ -514,14 +500,12 @@ class MainWindow(QMainWindow):
             # split everything on the horizontal
             for i in range(len(widgets) - 1):
                 first, second = widgets[i], widgets[i + 1]
-                self.splitDockWidget(first.dockwidget, second.dockwidget,
-                                     Qt.Horizontal)
+                self.splitDockWidget(first.dockwidget, second.dockwidget, Qt.Horizontal)
             # now arrange the rows
             for column in widgets_layout:
                 for i in range(len(column) - 1):
                     first_row, second_row = column[i], column[i + 1]
-                    self.splitDockWidget(first_row[0].dockwidget,
-                                         second_row[0].dockwidget,
+                    self.splitDockWidget(first_row[0].dockwidget, second_row[0].dockwidget,
                                          Qt.Vertical)
             # and finally tabify those in the same position
             for column in widgets_layout:
