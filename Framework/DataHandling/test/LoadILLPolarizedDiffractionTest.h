@@ -15,9 +15,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadILLPolarizedDiffraction.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Unit.h"
@@ -35,7 +35,9 @@ public:
   static LoadILLPolarizedDiffractionTest *createSuite() {
     return new LoadILLPolarizedDiffractionTest();
   }
-  static void destroySuite(LoadILLPolarizedDiffractionTest *suite) { delete suite; }
+  static void destroySuite(LoadILLPolarizedDiffractionTest *suite) {
+    delete suite;
+  }
 
   void setUp() override {
     ConfigService::Instance().appendDataSearchSubDir("/ILL/D7");
@@ -64,230 +66,240 @@ public:
   }
 
   void test_D7() {
-      LoadILLPolarizedDiffraction alg;
-      // Don't put output in ADS by default
-      alg.setChild(true);
-      TS_ASSERT_THROWS_NOTHING(alg.initialize())
-      TS_ASSERT(alg.isInitialized())
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
-      TS_ASSERT_THROWS_NOTHING(alg.execute())
-      TS_ASSERT(alg.isExecuted())
+    LoadILLPolarizedDiffraction alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
 
-      WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-      TS_ASSERT(outputWS)
-      TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
-      MatrixWorkspace_sptr workspaceEntry1 = std::dynamic_pointer_cast<
-              Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
-      TS_ASSERT(workspaceEntry1)
-      TS_ASSERT_EQUALS(workspaceEntry1->getNumberHistograms(), 134)
-      TS_ASSERT_EQUALS(workspaceEntry1->blocksize(), 1)
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
+    MatrixWorkspace_sptr workspaceEntry1 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    TS_ASSERT(workspaceEntry1)
+    TS_ASSERT_EQUALS(workspaceEntry1->getNumberHistograms(), 134)
+    TS_ASSERT_EQUALS(workspaceEntry1->blocksize(), 1)
 
-      Instrument_const_sptr instrument = workspaceEntry1->getInstrument();
-      TS_ASSERT(instrument)
+    Instrument_const_sptr instrument = workspaceEntry1->getInstrument();
+    TS_ASSERT(instrument)
 
-      V3D sample(0,0,0);
-      V3D zAxis(0,0,1);
+    V3D sample(0, 0, 0);
+    V3D zAxis(0, 0, 1);
 
-      const auto &pixel1 = instrument->getDetector(1);
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 12.66, 0.01)
+    const auto &pixel1 = instrument->getDetector(1);
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 12.66, 0.01)
 
-      const auto &pixel44 = instrument->getDetector(1);
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 55.45, 0.01)
+    const auto &pixel44 = instrument->getDetector(1);
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 55.45,
+                    0.01)
 
-      const auto &pixel45 = instrument->getDetector(1);
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 58.79, 0.01)
+    const auto &pixel45 = instrument->getDetector(1);
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 58.79,
+                    0.01)
 
-      const auto &pixel88 = instrument->getDetector(88);
-      TS_ASSERT(pixel88)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 101.58, 0.01)
+    const auto &pixel88 = instrument->getDetector(88);
+    TS_ASSERT(pixel88)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 101.58,
+                    0.01)
 
-      const auto &pixel89 = instrument->getDetector(89);
-      TS_ASSERT(pixel89)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 100.78, 0.01)
+    const auto &pixel89 = instrument->getDetector(89);
+    TS_ASSERT(pixel89)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 100.78,
+                    0.01)
 
-      const auto &pixel132 = instrument->getDetector(132);
-      TS_ASSERT(pixel132)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 143.57, 0.01)
+    const auto &pixel132 = instrument->getDetector(132);
+    TS_ASSERT(pixel132)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 143.57,
+                    0.01)
   }
 
   void test_D7_monochromatic() {
-      LoadILLPolarizedDiffraction alg;
-      // Don't put output in ADS by default
-      alg.setChild(true);
-      TS_ASSERT_THROWS_NOTHING(alg.initialize())
-      TS_ASSERT(alg.isInitialized())
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
-      TS_ASSERT_THROWS_NOTHING(alg.execute())
-      TS_ASSERT(alg.isExecuted())
+    LoadILLPolarizedDiffraction alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
 
-      WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-      TS_ASSERT(outputWS)
-      TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
-      MatrixWorkspace_sptr workspaceEntry1 =
-              std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                  outputWS->getItem(0));
-      TS_ASSERT(workspaceEntry1)
-      TS_ASSERT_EQUALS(workspaceEntry1->getNumberHistograms(), 134)
-      TS_ASSERT_EQUALS(workspaceEntry1->blocksize(), 1)
-      TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(132))
-      TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(133))
-      TS_ASSERT(workspaceEntry1->isHistogramData())
-      TS_ASSERT(!workspaceEntry1->isDistribution())
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
+    MatrixWorkspace_sptr workspaceEntry1 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    TS_ASSERT(workspaceEntry1)
+    TS_ASSERT_EQUALS(workspaceEntry1->getNumberHistograms(), 134)
+    TS_ASSERT_EQUALS(workspaceEntry1->blocksize(), 1)
+    TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(132))
+    TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(133))
+    TS_ASSERT(workspaceEntry1->isHistogramData())
+    TS_ASSERT(!workspaceEntry1->isDistribution())
 
-      TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Wavelength")
-      TS_ASSERT_EQUALS(workspaceEntry1->YUnitLabel(), "Counts")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(),
+                     "Wavelength")
+    TS_ASSERT_EQUALS(workspaceEntry1->YUnitLabel(), "Counts")
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 2.84, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.47, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 11)
-      TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 3.31, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 2.84, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.47, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 11)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 3.31, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 2.84, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.47, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 12)
-      TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 3.46, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 2.84, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.47, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 12)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 3.46, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 2.84, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.47, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 4)
-      TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 2.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 2.84, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.47, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 4)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 2.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 2.84, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.47, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 17)
-      TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 4.12, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 2.84, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.47, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 17)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 4.12, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 2.84, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.47, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 167943)
-      TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 409.80, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 2.84, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.47, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 167943)
+    TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 409.80, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 2.84, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.47, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 2042)
-      TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 2.84, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.47, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 2042)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
 
-      MatrixWorkspace_sptr workspaceEntry5 =
-              std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                  outputWS->getItem(5));
-      TS_ASSERT(workspaceEntry5)
-      TS_ASSERT_EQUALS(workspaceEntry5->getNumberHistograms(), 134)
-      TS_ASSERT_EQUALS(workspaceEntry5->blocksize(), 1)
-      TS_ASSERT(workspaceEntry5->detectorInfo().isMonitor(132))
-      TS_ASSERT(workspaceEntry5->detectorInfo().isMonitor(133))
-      TS_ASSERT(workspaceEntry5->isHistogramData())
-      TS_ASSERT(!workspaceEntry5->isDistribution())
+    MatrixWorkspace_sptr workspaceEntry5 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(5));
+    TS_ASSERT(workspaceEntry5)
+    TS_ASSERT_EQUALS(workspaceEntry5->getNumberHistograms(), 134)
+    TS_ASSERT_EQUALS(workspaceEntry5->blocksize(), 1)
+    TS_ASSERT(workspaceEntry5->detectorInfo().isMonitor(132))
+    TS_ASSERT(workspaceEntry5->detectorInfo().isMonitor(133))
+    TS_ASSERT(workspaceEntry5->isHistogramData())
+    TS_ASSERT(!workspaceEntry5->isDistribution())
   }
 
   void test_D7_timeOfFlight() {
-      LoadILLPolarizedDiffraction alg;
-      // Don't put output in ADS by default
-      alg.setChild(true);
-      TS_ASSERT_THROWS_NOTHING(alg.initialize())
-      TS_ASSERT(alg.isInitialized())
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850.nxs"))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
-      TS_ASSERT_THROWS_NOTHING(alg.execute())
-      TS_ASSERT(alg.isExecuted())
+    LoadILLPolarizedDiffraction alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
 
-      WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-      TS_ASSERT(outputWS)
-      TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
-      MatrixWorkspace_sptr workspaceEntry1 =
-              std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                  outputWS->getItem(0));
-      TS_ASSERT(workspaceEntry1)
-      TS_ASSERT_EQUALS(workspaceEntry1->getNumberHistograms(), 134)
-      TS_ASSERT_EQUALS(workspaceEntry1->blocksize(), 512)
-      TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(132))
-      TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(133))
-      TS_ASSERT(workspaceEntry1->isHistogramData())
-      TS_ASSERT(!workspaceEntry1->isDistribution())
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
+    MatrixWorkspace_sptr workspaceEntry1 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    TS_ASSERT(workspaceEntry1)
+    TS_ASSERT_EQUALS(workspaceEntry1->getNumberHistograms(), 134)
+    TS_ASSERT_EQUALS(workspaceEntry1->blocksize(), 512)
+    TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(132))
+    TS_ASSERT(workspaceEntry1->detectorInfo().isMonitor(133))
+    TS_ASSERT(workspaceEntry1->isHistogramData())
+    TS_ASSERT(!workspaceEntry1->isDistribution())
 
-      TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Time")
-      TS_ASSERT_EQUALS(workspaceEntry1->YUnitLabel(), "Counts")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Time")
+    TS_ASSERT_EQUALS(workspaceEntry1->YUnitLabel(), "Counts")
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 180.00, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 186.64, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 180.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 186.64, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(0)[511], 3573.04, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(0)[512], 3579.68, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(0)[511], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[511], 3573.04, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[512], 3579.68, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(0)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 180.00, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 186.64, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 180.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 186.64, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(1)[511], 3573.04, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(1)[512], 3579.68, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(1)[511], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[511], 3573.04, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[512], 3579.68, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(1)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 180.00, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 186.64, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 180.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 186.64, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(130)[365], 2603.60, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(130)[365], 2610.24, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(130)[365], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[365], 2603.60, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[365], 2610.24, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(130)[365], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 180.00, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 186.64, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 180.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 186.64, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(131)[365], 2603.60, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(131)[366], 2610.24, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(131)[365], 1)
-      TS_ASSERT_DELTA(workspaceEntry1->e(131)[365], 1.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[365], 2603.60, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[366], 2610.24, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(131)[365], 1)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[365], 1.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 180.00, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 186.64, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 5468)
-      TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 73.94, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 180.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 186.64, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 5468)
+    TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 73.94, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(132)[511], 3573.04, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(132)[512], 3579.68, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(132)[511], 5394)
-      TS_ASSERT_DELTA(workspaceEntry1->e(132)[511], 73.44, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[511], 3573.04, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[512], 3579.68, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(132)[511], 5394)
+    TS_ASSERT_DELTA(workspaceEntry1->e(132)[511], 73.44, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 180.00, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 186.64, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 180.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 186.64, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 0.00, 0.01)
 
-      TS_ASSERT_DELTA(workspaceEntry1->x(133)[511], 3573.04, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
-      TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
-      TS_ASSERT_DELTA(workspaceEntry1->e(133)[512], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[511], 3573.04, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[512], 0.00, 0.01)
 
-      MatrixWorkspace_sptr workspaceEntry2 =
-              std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                  outputWS->getItem(2));
-      TS_ASSERT(workspaceEntry2)
-      TS_ASSERT_EQUALS(workspaceEntry2->getNumberHistograms(), 134)
-      TS_ASSERT_EQUALS(workspaceEntry2->blocksize(), 512)
-      TS_ASSERT(workspaceEntry2->detectorInfo().isMonitor(132))
-      TS_ASSERT(workspaceEntry2->detectorInfo().isMonitor(133))
-      TS_ASSERT(workspaceEntry2->isHistogramData())
-      TS_ASSERT(!workspaceEntry2->isDistribution())
+    MatrixWorkspace_sptr workspaceEntry2 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(2));
+    TS_ASSERT(workspaceEntry2)
+    TS_ASSERT_EQUALS(workspaceEntry2->getNumberHistograms(), 134)
+    TS_ASSERT_EQUALS(workspaceEntry2->blocksize(), 512)
+    TS_ASSERT(workspaceEntry2->detectorInfo().isMonitor(132))
+    TS_ASSERT(workspaceEntry2->detectorInfo().isMonitor(133))
+    TS_ASSERT(workspaceEntry2->isHistogramData())
+    TS_ASSERT(!workspaceEntry2->isDistribution())
 
-      TS_ASSERT_EQUALS(workspaceEntry2->getAxis(0)->unit()->caption(), "Time")
-      TS_ASSERT_EQUALS(workspaceEntry2->YUnitLabel(), "Counts")
+    TS_ASSERT_EQUALS(workspaceEntry2->getAxis(0)->unit()->caption(), "Time")
+    TS_ASSERT_EQUALS(workspaceEntry2->YUnitLabel(), "Counts")
   }
 
   void test_D7_multifile() {
@@ -304,7 +316,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    //then read workspace group and then check for number of entries. and each for number of histograms etc
+    // then read workspace group and then check for number of entries. and each
+    // for number of histograms etc
 
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_outWS");
@@ -324,7 +337,8 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "400848.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "Nexus"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "Nexus"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -332,15 +346,15 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     MatrixWorkspace_sptr workspaceEntry1 =
-            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                outputWS->getItem(0));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
 
     Instrument_const_sptr instrument = workspaceEntry1->getInstrument();
     TS_ASSERT(instrument)
 
-    V3D sample(0,0,0);
-    V3D zAxis(0,0,1);
+    V3D sample(0, 0, 0);
+    V3D zAxis(0, 0, 1);
 
     const auto &pixel1 = instrument->getDetector(1);
     TS_ASSERT(pixel1)
@@ -348,75 +362,85 @@ public:
 
     const auto &pixel44 = instrument->getDetector(1);
     TS_ASSERT(pixel44)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 53.81, 0.01)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 53.81,
+                    0.01)
 
     const auto &pixel45 = instrument->getDetector(1);
     TS_ASSERT(pixel45)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 57.06, 0.01)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 57.06,
+                    0.01)
 
     const auto &pixel88 = instrument->getDetector(88);
     TS_ASSERT(pixel88)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 99.45, 0.01)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 99.45,
+                    0.01)
 
     const auto &pixel89 = instrument->getDetector(89);
     TS_ASSERT(pixel89)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 101.38, 0.01)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 101.38,
+                    0.01)
 
     const auto &pixel132 = instrument->getDetector(132);
     TS_ASSERT(pixel132)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 144.17, 0.01)
-
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 144.17,
+                    0.01)
   }
 
   void test_D7_yigfile_alignment() {
 
-      LoadILLPolarizedDiffraction alg;
-      alg.setChild(true);
-      alg.initialize();
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "400848.nxs"))
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "YIGFile"))
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("YIGFilename", "YIG_IPF"))
-      TS_ASSERT_THROWS_NOTHING(alg.execute())
-      TS_ASSERT(alg.isExecuted())
+    LoadILLPolarizedDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "400848.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "YIGFile"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("YIGFilename", "YIG_IPF"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
 
-      WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-      TS_ASSERT(outputWS)
-      TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
-      MatrixWorkspace_sptr workspaceEntry1 =
-              std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                  outputWS->getItem(0));
-      TS_ASSERT(workspaceEntry1)
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
+    MatrixWorkspace_sptr workspaceEntry1 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    TS_ASSERT(workspaceEntry1)
 
-      Instrument_const_sptr instrument = workspaceEntry1->getInstrument();
-      TS_ASSERT(instrument)
+    Instrument_const_sptr instrument = workspaceEntry1->getInstrument();
+    TS_ASSERT(instrument)
 
-      V3D sample(0,0,0);
-      V3D zAxis(0,0,1);
+    V3D sample(0, 0, 0);
+    V3D zAxis(0, 0, 1);
 
-      const auto &pixel1 = instrument->getDetector(1);
-      TS_ASSERT(pixel1)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 10.86, 0.01)
+    const auto &pixel1 = instrument->getDetector(1);
+    TS_ASSERT(pixel1)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 10.86, 0.01)
 
-      const auto &pixel44 = instrument->getDetector(1);
-      TS_ASSERT(pixel44)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 53.81, 0.01)
+    const auto &pixel44 = instrument->getDetector(1);
+    TS_ASSERT(pixel44)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 53.81,
+                    0.01)
 
-      const auto &pixel45 = instrument->getDetector(1);
-      TS_ASSERT(pixel45)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 57.06, 0.01)
+    const auto &pixel45 = instrument->getDetector(1);
+    TS_ASSERT(pixel45)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 57.06,
+                    0.01)
 
-      const auto &pixel88 = instrument->getDetector(88);
-      TS_ASSERT(pixel88)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 99.45, 0.01)
+    const auto &pixel88 = instrument->getDetector(88);
+    TS_ASSERT(pixel88)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 99.45,
+                    0.01)
 
-      const auto &pixel89 = instrument->getDetector(89);
-      TS_ASSERT(pixel89)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 101.38, 0.01)
+    const auto &pixel89 = instrument->getDetector(89);
+    TS_ASSERT(pixel89)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 101.38,
+                    0.01)
 
-      const auto &pixel132 = instrument->getDetector(132);
-      TS_ASSERT(pixel132)
-      TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 144.17, 0.01)
+    const auto &pixel132 = instrument->getDetector(132);
+    TS_ASSERT(pixel132)
+    TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 144.17,
+                    0.01)
   }
 
 private:
