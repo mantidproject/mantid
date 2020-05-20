@@ -298,6 +298,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
             self._set_fit_enabled(False)
 
+        # if any of the lines are a sample log plot disable fitting
+        for ax in self.canvas.figure.get_axes():
+            for artist in ax.get_lines():
+                if ax.get_artists_sample_log_plot_details(artist) is not None:
+                    self._set_fit_enabled(False)
+                    break
+
         # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
         if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax))
