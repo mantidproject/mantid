@@ -353,7 +353,7 @@ void ConvTemplateBrowser::setResolution(std::string const &name,
 }
 
 void ConvTemplateBrowser::setResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_presenter.setResolution(fitResolutions);
 }
 

@@ -8,14 +8,16 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
+import copy
 import sys
 from functools import wraps
-
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.collections import QuadMesh
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
@@ -95,14 +97,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 to_redraw = ax.remove_workspace_artists(workspace)
             else:
                 to_redraw = False
-            # We check for axes type below as a pseudo check for an axes being
-            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
-            # to a workspace, the other a colorbar. Deleting the workspace
-            # deletes the colorfill, but the plot remains open due to the
-            # non-empty colorbar. This solution seems to work for the majority
-            # of cases but could lead to unmanaged figures only containing an
-            # Axes object being closed.
-            if type(ax) is not Axes:
+            if type(ax) is not Axes:  # Solution for filtering out colorbar axes. Works most of the time.
                 empty_axes.append(MantidAxes.is_empty(ax))
             redraw = redraw | to_redraw
 
@@ -297,9 +292,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
             self._set_fit_enabled(False)
 
-        # For plot-to-script button to show, we must have a MantidAxes with lines in it
+        # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
-        if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
+        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax))
                    for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes(
         )[0].is_waterfall():
             self.toolbar.set_generate_plot_script_enabled(False)
@@ -308,6 +303,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or \
                 not self.canvas.figure.get_axes()[0].is_waterfall():
             self.toolbar.set_waterfall_options_enabled(False)
+
+        if datafunctions.figure_contains_only_3d_plots(self.canvas.figure):
+            self.toolbar.adjust_for_3d_plots()
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -346,7 +344,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            ax.grid(on)
+            if not any(isinstance(x, QuadMesh) for x in ax.collections):
+                ax.grid(on)
         canvas.draw_idle()
 
     def fit_toggle(self):
@@ -423,6 +422,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 if type(ax) is not Axes:
                     if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                         ax.relim()
+                    elif isinstance(ax, Axes3D):
+                        if hasattr(ax, 'original_data'):
+                            ax.collections[0]._vec = copy.deepcopy(ax.original_data)
+                        else:
+                            ax.view_init()
+
                     ax.autoscale()
 
             self.canvas.draw()

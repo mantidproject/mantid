@@ -672,7 +672,8 @@ DateAndTime &DateAndTime::operator-=(const double sec) {
  * @return a time_duration
  */
 time_duration DateAndTime::operator-(const DateAndTime &rhs) const {
-  return this->to_ptime() - rhs.to_ptime();
+  return durationFromNanoseconds(_nanoseconds) -
+         durationFromNanoseconds(rhs.totalNanoseconds());
 }
 
 //------------------------------------------------------------------------------------------------

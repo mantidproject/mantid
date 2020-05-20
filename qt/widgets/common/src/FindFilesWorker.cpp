@@ -44,7 +44,7 @@ FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
  * 1. Files are found directly by the FileFinder.  This is the default case.
  * 2. Files are found using the specified algorithm property.  In this case, a
  *    class user must have specified the algorithm and property via
- *    MWRunFiles::setAlgorithmProperty().
+ *    FileFinderWidget::setAlgorithmProperty().
  */
 void FindFilesWorker::run() {
   // Reset result member vars.

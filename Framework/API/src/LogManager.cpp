@@ -55,7 +55,7 @@ bool convertTimeSeriesToDouble(const Property *property, double &value,
       value = static_cast<double>(log->minValue());
       break;
     case Math::Mean:
-      value = log->getStatistics().mean;
+      value = static_cast<double>(log->mean());
       break;
     case Math::Median:
       value = log->getStatistics().median;
@@ -240,11 +240,15 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
  * Filter the run by the given boolean log. It replaces all time
  * series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each log on
+ * @param excludedFromFiltering :: A string list of logs that
+ * will be excluded from filtering
  */
-void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter) {
+void LogManager::filterByLog(
+    const Kernel::TimeSeriesProperty<bool> &filter,
+    const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
   m_singleValueCache->clear();
-  m_manager->filterByProperty(filter);
+  m_manager->filterByProperty(filter, excludedFromFiltering);
 }
 
 //-----------------------------------------------------------------------------------------------

@@ -152,7 +152,8 @@ class WorkspaceWidget(PluginWidget):
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                SliceViewer(ws=ws, parent=self)
+                presenter = SliceViewer(ws=ws, parent=self)
+                presenter.view.show()
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'."
                                "".format(ws.name()))
@@ -172,7 +173,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace "
-                                   "'{}':\n{}.\n".format(ws.name(), exception))
+                                   "'{}':\n{}\n".format(ws.name(), exception))
             else:
                 logger.warning("Could not show instrument for workspace '{}':"
                                "\nNo instrument available.\n"

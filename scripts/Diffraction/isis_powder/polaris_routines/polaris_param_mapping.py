@@ -26,6 +26,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="freq_params", int_name="freq_params", optional=True),
     ParamMapEntry(ext_name="grouping_file_name", int_name="grouping_file_name"),
     ParamMapEntry(ext_name="input_mode", int_name="input_mode", enum_class=INPUT_BATCHING),
+    ParamMapEntry(ext_name="lorch_filter", int_name="lorch_filter", optional=True),
     ParamMapEntry(ext_name="merge_banks", int_name="merge_banks", optional=True),
     ParamMapEntry(ext_name="mode", int_name="mode", enum_class=POLARIS_CHOPPER_MODES,
                   optional=True),

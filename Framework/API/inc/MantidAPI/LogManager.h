@@ -66,7 +66,9 @@ public:
   virtual void splitByTime(Kernel::TimeSplitterType &splitter,
                            std::vector<LogManager *> outputs) const;
   /// Filter the run by the given boolean log
-  void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter);
+  void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
+                   const std::vector<std::string> &excludedFromFiltering =
+                       std::vector<std::string>());
 
   /// Return an approximate memory size for the object in bytes
   virtual size_t getMemorySize() const;

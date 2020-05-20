@@ -106,7 +106,7 @@ void MonteCarloAbsorption::init() {
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
-                  "attempted (default: all points)");
+                  "attempted if ResimulateTracksForDifferentWavelengths=true");
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
       "The number of \"neutron\" events to generate per simulated point");
@@ -261,9 +261,10 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  MCAbsorptionStrategy strategy(
-      *beamProfile, inputWS.sample(), efixed.emode(), nevents, nlambda,
-      maxScatterPtAttempts, useSparseInstrument, interpolateOpt, false, g_log);
+  MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), efixed.emode(),
+                                nevents, nlambda, maxScatterPtAttempts,
+                                useSparseInstrument, interpolateOpt,
+                                resimulateTracksForDiffWavelengths, g_log);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 

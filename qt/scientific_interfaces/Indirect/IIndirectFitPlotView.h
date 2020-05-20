@@ -27,7 +27,7 @@ public:
   virtual void watchADS(bool watch) = 0;
 
   virtual WorkspaceIndex getSelectedSpectrum() const = 0;
-  virtual TableRowIndex getSelectedSpectrumIndex() const = 0;
+  virtual FitDomainIndex getSelectedSpectrumIndex() const = 0;
   virtual TableDatasetIndex getSelectedDataIndex() const = 0;
   virtual TableDatasetIndex dataSelectionSize() const = 0;
   virtual bool isPlotGuessChecked() const = 0;

@@ -27,18 +27,13 @@ public:
   JumpFitDataTablePresenter(JumpFitModel *model, QTableWidget *dataTable);
 
 protected:
-  void addTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                     TableRowIndex row) override;
-  void updateTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                        TableRowIndex row) override;
+  void addTableEntry(FitDomainIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-
-  JumpFitModel *m_jumpFitModel;
 };
 
 } // namespace IDA

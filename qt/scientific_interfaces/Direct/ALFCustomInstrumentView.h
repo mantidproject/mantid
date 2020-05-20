@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"

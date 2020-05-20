@@ -8,6 +8,10 @@
 
 #include "ISaveView.h"
 #include "ui_SaveWidget.h"
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QRadioButton>
 #include <memory>
 
 namespace MantidQt {
@@ -97,9 +101,18 @@ public slots:
   void onSavePathChanged();
   void onAutosaveChanged(int state);
 
+private slots:
+  void onSettingsChanged();
+
 private:
   /// Initialize the interface
   void initLayout();
+
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QComboBox &edit);
+  void connectSettingsChange(QCheckBox &edit);
+  void connectSettingsChange(QRadioButton &edit);
+  void connectSaveSettingsWidgets() override;
 
   /// The widget
   Ui::SaveWidget m_ui;

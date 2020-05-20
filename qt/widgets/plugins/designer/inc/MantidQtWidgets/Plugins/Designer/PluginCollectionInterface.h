@@ -9,10 +9,10 @@
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 #include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
@@ -86,7 +86,7 @@ DECLARE_WIDGET_PLUGIN(AlgorithmSelectorWidgetPlugin,
 DECLARE_WIDGET_PLUGIN(ScriptEditorPlugin, ScriptEditor,
                       "Widget for editing python script");
 
-DECLARE_WIDGET_PLUGIN(FileFinderPlugin, MantidQt::API::MWRunFiles,
+DECLARE_WIDGET_PLUGIN(FileFinderPlugin, MantidQt::API::FileFinderWidget,
                       "Searches for the given files within the paths defined "
                       "by\nMantid's datasearch.directories property");
 
