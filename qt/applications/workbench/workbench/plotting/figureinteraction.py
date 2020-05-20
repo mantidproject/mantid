@@ -689,6 +689,16 @@ class FigureInteraction(object):
 
             ax.update_waterfall(0, 0)
 
+        # The colorbar can get screwed up with ragged workspaces and log scales as they go
+        # through the normalisation toggle.
+        # Set it to Linear and change it back after if necessary, since there's no reason
+        # to duplicate the handling.
+        colorbar_log = False
+        if ax.images:
+            colorbar_log = isinstance(ax.images[-1].norm, LogNorm)
+            if colorbar_log:
+                self._change_colorbar_axes(Normalize)
+
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
             if arg_set['function'] == 'contour':
@@ -737,6 +747,8 @@ class FigureInteraction(object):
             colorbar_max = np.nanmax(ax.images[-1].get_array())
             for image in ax.images:
                 image.set_clim(colorbar_min, colorbar_max)
+            if colorbar_log:  # If it had a log scaled colorbar before, put it back.
+                self._change_colorbar_axes(LogNorm)
 
         ax.autoscale()
 
