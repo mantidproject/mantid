@@ -9,20 +9,7 @@ if(ENABLE_MANTIDPLOT)
 endif()
 
 # mantidqt
-if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
-  # The default value is just an empty string - this prevents a Python syntax
-  # error when not on Windows Configure utils.qt.plugins file for build. It is
-  # placed in the source directory and added to the .gitignore for simplicity.
-  if(WIN32)
-    # Note: single quotes are added here to make this a Python string
-    set(QT_PLUGINS_PATH "${THIRD_PARTY_DIR}/lib/qt%V/plugins")
-  endif()
-  # Configure the file necessary for DEVELOPMENT builds to run and detect Qt's
-  # plugins
-  configure_file(
-    mantidqt/utils/qt/plugins.py.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
-  )
+if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   if(APPLE)
     set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
   else()
