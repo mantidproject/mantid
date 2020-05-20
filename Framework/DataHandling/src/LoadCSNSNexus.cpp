@@ -52,6 +52,7 @@
 #include "MantidKernel/Logger.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 /****************************************/
 using Mantid::Types::Core::DateAndTime;
 using namespace Mantid::DataObjects;
@@ -118,12 +119,12 @@ void LoadCSNSNexus::init() {
                   "Optional: Name of entry (default csns)");
 
   declareProperty(
-      std::make_unique<ArrayProperty<string>>("Bankname", Direction::Input),
-      "Optional: A comma-separated list of bank to read");
-
-  declareProperty(
       make_unique<PropertyWithValue<bool>>("LoadBank", true, Direction::Input),
-      "Default true: load bank data, false: no bank data.");
+      "Default true: load bank data, false: load monitor data.");
+  
+  declareProperty(
+      std::make_unique<ArrayProperty<string>>("Bankname", Direction::Input),
+      "Optional: A comma-separated list of bank/monitor to read");
 
   declareProperty(
       std::make_unique<ArrayProperty<uint32_t>>("StartT0", Direction::Input),
@@ -136,19 +137,11 @@ void LoadCSNSNexus::init() {
                                                        Direction::Input),
                   "Default false: load event data, true: load histogram data.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<string>>("Monitorname", Direction::Input),
-      "Optional: A comma-separated list of monitors to read.");
-
-  declareProperty(make_unique<PropertyWithValue<bool>>("LoadMonitor", true,
-                                                       Direction::Input),
-                  "Default true: load monitor data, false: no monitor data.");
-
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output orkspace.");
 
-  std::string grp1 = "Bank";
+  std::string grp1 = "Bank/Monitor";
   setPropertyGroup("Bankname", grp1);
   setPropertyGroup("loadBank", grp1);
 
@@ -157,9 +150,6 @@ void LoadCSNSNexus::init() {
   setPropertyGroup("StartT0", grp2);
   setPropertyGroup("EndT0", grp2);
 
-  std::string grp3 = "Monitor";
-  setPropertyGroup("LoadMonitor", grp3);
-  setPropertyGroup("Monitorname", grp3);
 }
 
 /**
@@ -505,10 +495,10 @@ void LoadCSNSNexus::exec() {
   g_log.information() << "start load csns nexus data " << endl;
   string m_filename = getPropertyValue("Filename");
   m_entry = getPropertyValue("NXentryName");
+  vector<string> bankNames = getProperty("Bankname");
   m_file = std::make_unique<::NeXus::File>(m_filename, NXACC_READ);
 
   bool m_loadBank = getProperty("LoadBank");
-  bool m_loadMonitor = getProperty("Loadmonitor");
   bool m_loadEvent = getProperty("LoadEvent");
   Mantid::Types::Core::DateAndTime start_time =
       getExperimentTime("start_time_utc");
@@ -516,12 +506,10 @@ void LoadCSNSNexus::exec() {
   g_log.information() << "load experiment time " << endl;
 
   MatrixWorkspace_sptr ws_hist;
-  MatrixWorkspace_sptr ws_mon;
   EventWorkspace_sptr ws_evt(new EventWorkspace);
 
   if (m_loadBank) {
     string instName = getPropertyValue("Instrument");
-    vector<string> bankNames = getProperty("Bankname");
     bool m_inputCheck = checkBanknames(bankNames);
     if (m_inputCheck) {
       m_modules = getModules(instName, bankNames);
@@ -555,43 +543,25 @@ void LoadCSNSNexus::exec() {
     } else {
       throw std::runtime_error("Error in Banknames input!");
     }
-  }
+  }else{
 
-  if (m_loadMonitor) {
     g_log.information() << "load monitor data " << endl;
-    m_monitors = getProperty("Monitorname");
-    vector<int64_t> pid_mon = getPixelId(m_monitors);
+    vector<int64_t> pid_mon = getPixelId(bankNames);
     vector<uint32_t> tof_mon = getTimeBin("monitor");
-    ws_mon = WorkspaceFactory::Instance().create(
+    ws_hist =  WorkspaceFactory::Instance().create(
         "Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1);
-    std::vector<uint32_t> histData_mon = getHistData(m_monitors);
-    loadHistData(ws_mon, tof_mon, pid_mon.size(), histData_mon);
-    ws_mon->mutableRun().setStartAndEndTime(start_time, end_time);
-    ws_mon->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-    ws_mon->setYUnit("Counts");
+    std::vector<uint32_t> histData_mon = getHistData(bankNames);
+    loadHistData(ws_hist, tof_mon, pid_mon.size(), histData_mon);
+    ws_hist->mutableRun().setStartAndEndTime(start_time, end_time);
+    ws_hist->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+    ws_hist->setYUnit("Counts");
   }
 
-  WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
-  if (m_loadMonitor && m_loadBank) {
-    if (m_loadEvent) {
-      wksp_group->addWorkspace(ws_evt);
-      wksp_group->addWorkspace(ws_mon);
-    } else {
-      wksp_group->addWorkspace(ws_hist);
-      wksp_group->addWorkspace(ws_mon);
-    }
-    setProperty("OutputWorkspace", wksp_group);
+  if (m_loadEvent) {
+     setProperty("OutputWorkspace", ws_evt);
   } else {
-    if (m_loadBank) {
-      if (m_loadEvent) {
-        setProperty("OutputWorkspace", ws_evt);
-      } else {
-        setProperty("OutputWorkspace", ws_hist);
-      }
-    } else if (m_loadMonitor) {
-      setProperty("OutputWorkspace", ws_mon);
-    }
-  }
+     setProperty("OutputWorkspace", ws_hist);
+ 	}
 }
 
 } // namespace DataHandling

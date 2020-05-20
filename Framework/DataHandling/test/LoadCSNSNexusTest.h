@@ -51,33 +51,18 @@ public:
     // specify name of file to load workspace from
     inputFile = "CSNS_GPPD_test.nxs";
     algToBeTested.setPropertyValue("Filename", inputFile);
-    algToBeTested.setPropertyValue("Instrument", "GPPD");
-    // algToBeTested.setPropertyValue("LoadBank",true );
     algToBeTested.setPropertyValue("Bankname", "module322");
-    // algToBeTested.setPropertyValue("LoadEvent",false );
-    // algToBeTested.setPropertyValue("LoadMonitor",true );
-    algToBeTested.setPropertyValue("Monitorname", "monitor2");
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
     //
     //  test workspace created by LoadCSNSNexus
-    // WorkspaceGroup_sptr output =
-    //    AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
-    // TS_ASSERT_EQUALS(output->getNumberOfEntries(), 4);
-    // int ii;
-    // std::cin >> ii;
-    MatrixWorkspace_sptr outputItem1 =
+    MatrixWorkspace_sptr outputItem =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace + "_1");
-    TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 5328);
-    MatrixWorkspace_sptr outputItem2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace + "_2");
-    TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 1024);
+            outputSpace);
+    TS_ASSERT_EQUALS(outputItem->getNumberHistograms(), 5328);
 
-    AnalysisDataService::Instance().remove(outputSpace + "_1");
-    AnalysisDataService::Instance().remove(outputSpace + "_2");
+    AnalysisDataService::Instance().remove(outputSpace);
   }
 
 private:
@@ -100,17 +85,15 @@ public:
     if (!loadCSNSNexusAlg.isInitialized())
       loadCSNSNexusAlg.initialize();
 
-    outputSpace = "LoadCSNSNexusTest";
+    outputSpace = "outputWS";
     loadCSNSNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
 
     inputFile = "CSNS_GPPD_test.nxs";
     loadCSNSNexusAlg.setPropertyValue("Filename", inputFile);
     loadCSNSNexusAlg.setPropertyValue("Bankname", "module322");
-    loadCSNSNexusAlg.setPropertyValue("Monitorname", "monitor2");
   }
   void tearDown() override {
-    AnalysisDataService::Instance().remove("LoadCSNSNexusTest_1");
-    AnalysisDataService::Instance().remove("LoadCSNSNexusTest_2");
+    AnalysisDataService::Instance().remove("outputWS");
   }
 
   void testExec() { loadCSNSNexusAlg.execute(); }
