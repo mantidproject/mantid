@@ -63,8 +63,10 @@ int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
 }
 /// Initialization method.
 void LoadMuonNexusV2::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".nxs"),
+
+  std::vector<std::string> extensions{".nxs", ".nxs_v2"};
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
                   "The name of the Nexus file to load");
 
   declareProperty(
@@ -90,8 +92,7 @@ void LoadMuonNexusV2::init() {
   declareProperty("MainFieldDirection", "Transverse",
                   std::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
-                  "(run/instrument/detector/orientation, default "
-                  "longitudinal).",
+                  "(default longitudinal).",
                   Direction::Output);
 
   declareProperty("TimeZero", 0.0,
@@ -110,7 +111,7 @@ void LoadMuonNexusV2::init() {
                       "DetectorGroupingTable", "", Direction::Output,
                       PropertyMode::Optional),
                   "Table or a group of tables with information about the "
-                  "detector grouping stored in the file (if any).");
+                  "detector grouping.");
 }
 void LoadMuonNexusV2::execLoader() {
   this->setRethrows(true);

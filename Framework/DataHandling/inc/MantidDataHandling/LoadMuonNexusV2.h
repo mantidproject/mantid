@@ -27,11 +27,6 @@ data
  (a multiperiod file will store higher periods in workspaces called
 OutputWorkspace_PeriodNo)
  [ not yet implemented for Muon Nexus V2 ]</LI>
-</UL>
-
-Optional Properties: (note that these options are not available if reading a
-multiperiod file)
-<UL>
 <LI> spectrum_min  - The spectrum to start loading from</LI>
 <LI> spectrum_max  - The spectrum to load to</LI>
 <LI> spectrum_list - An ArrayProperty of spectra to load</LI>
@@ -47,8 +42,10 @@ public:
   const std::string name() const override { return "LoadMuonNexusV2"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Loads a Muon Nexus V2 data file and stores it in a 2D "
-           "workspace (Workspace2D class).";
+    return "The LoadMuonNexus algorithm will read the given NeXus Muon data "
+           "file Version 2 and use the results to populate the named "
+           "workspace. LoadMuonNexus may be invoked by Load if it is "
+           "given a NeXus file of this type.";
   }
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
@@ -79,7 +76,7 @@ private:
   bool m_multiPeriodsLoaded;
   // The loading strategy used
   std::unique_ptr<LoadMuonStrategy> m_loadMuonStrategy;
-};
+}; // namespace DataHandling
 
 } // namespace DataHandling
 } // namespace Mantid

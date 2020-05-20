@@ -70,8 +70,7 @@ loadDetectorGroupingFromNexus(const NXEntry &entry,
 std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   std::string mainFieldDirection = "Longitudinal"; // default
   try {
-    NXChar orientation =
-        entry.openNXChar("run/instrument/detector/orientation");
+    NXChar orientation = entry.openNXChar("instrument/detector_1/orientation");
     // some files have no data there
     orientation.load();
     if (orientation[0] == 't') {
