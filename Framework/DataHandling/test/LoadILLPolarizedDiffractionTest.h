@@ -72,8 +72,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "401800"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "401800"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
