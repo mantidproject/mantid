@@ -193,6 +193,23 @@ class DirectILLCollectDataTest(unittest.TestCase):
         E_i = inWS.run().getProperty('Ei').value
         self.assertEqual(eiWS.readY(0)[0], E_i)
 
+    def testIncidentEnergyPanther(self):
+        outWSName = 'outWS'
+        eiWSName = 'Ei'
+        algProperties = {
+            'Run': 'ILL/PANTHER/002687.nxs',
+            'OutputWorkspace': outWSName,
+            'IncidentEnergyCalibration': 'Energy Calibration ON',
+            'OutputIncidentEnergyWorkspace': eiWSName,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLCollectData', **algProperties)
+        self.assertTrue(mtd.doesExist(eiWSName))
+        eiWS = mtd[eiWSName]
+        outWS = mtd[outWSName]
+        E_i = outWS.run().getProperty('Ei').value
+        assert_almost_equal(eiWS.readY(0)[0], E_i, 2)
+        assert_almost_equal(E_i, 75.37, 2)
 
 if __name__ == '__main__':
     unittest.main()

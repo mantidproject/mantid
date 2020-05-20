@@ -28,7 +28,7 @@ getIndirectFitData(int const &numberOfSpectra) {
   Spectra const spec =
       Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
               MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
-                  static_cast<int>(workspace->getNumberHistograms() - 1)});
+                  workspace->getNumberHistograms() - 1});
   IndirectFitData data(workspace, spec);
   return std::make_unique<IndirectFitData>(data);
 }
@@ -50,7 +50,7 @@ public:
     Spectra const spec =
         Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
                 MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
-                    static_cast<int>(workspace->getNumberHistograms() - 1)});
+                    workspace->getNumberHistograms() - 1});
 
     workspace->setTitle("Test Title");
     IndirectFitData const data(workspace, spec);
@@ -107,6 +107,12 @@ public:
     TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
+  void test_erasing_non_existent_spectra_handled_gracefully() {
+    Spectra spectra = Spectra("7-8,10");
+    spectra.erase(IDA::WorkspaceIndex{9});
+    TS_ASSERT_EQUALS(Spectra("7-8,10"), spectra);
+  }
+
   void test_data_is_stored_in_the_ADS() {
     auto const data = getIndirectFitData(1);
     SetUpADSWithWorkspace ads("WorkspaceName", data->workspace());
@@ -147,13 +153,13 @@ public:
   void
   test_that_the_number_of_spectra_returned_matches_the_instantiated_value() {
     auto const data = getIndirectFitData(10);
-    TS_ASSERT_EQUALS(data->numberOfSpectra(), TableRowIndex{10});
+    TS_ASSERT_EQUALS(data->numberOfSpectra(), FitDomainIndex{10});
   }
 
   void test_that_getSpectrum_returns_the_expected_spectrum_numbers() {
     auto const data = getIndirectFitData(4);
 
-    for (auto i = TableRowIndex{0}; i < data->numberOfSpectra(); ++i) {
+    for (auto i = FitDomainIndex{0}; i < data->numberOfSpectra(); ++i) {
       MantidQt::CustomInterfaces::IDA::WorkspaceIndex const spectrumNum =
           data->getSpectrum(i);
       TS_ASSERT_EQUALS(spectrumNum.value, i.value);

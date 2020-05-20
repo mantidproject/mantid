@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import logger
 import numpy as np
-from AbinsModules import PowderData, AbinsTestHelpers
+from abins import PowderData
 
 
 class AbinsPowderDataTest(unittest.TestCase):
@@ -16,8 +15,7 @@ class AbinsPowderDataTest(unittest.TestCase):
 
         # wrong number of atoms
         with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            poor_tester = PowderData(num_atoms=-2)
+            _ = PowderData(num_atoms=-2)
 
     def test_set(self):
 
@@ -38,20 +36,18 @@ class AbinsPowderDataTest(unittest.TestCase):
 
         # hypothetical data for two atoms
         good_powder = {"a_tensors": {"0": np.asarray([[[0.01, 0.02, 0.03],
-                                                [0.01, 0.02, 0.03],
-                                               [0.01, 0.02, 0.03]],
-
-                                               [[0.01, 0.02, 0.03],
-                                                [0.01, 0.02, 0.03],
-                                                [0.01, 0.02, 0.03]]])},
+                                                       [0.01, 0.02, 0.03],
+                                                       [0.01, 0.02, 0.03]],
+                                                      [[0.01, 0.02, 0.03],
+                                                       [0.01, 0.02, 0.03],
+                                                       [0.01, 0.02, 0.03]]])},
 
                        "b_tensors": {"0": np.asarray([[[0.01, 0.02, 0.03],
-                                                 [0.01, 0.02, 0.03],
-                                                 [0.01, 0.02, 0.03]],
-
-                                                [[0.01, 0.02, 0.03],
-                                                 [0.01, 0.02, 0.03],
-                                                 [0.01, 0.02, 0.03]]])}}
+                                                       [0.01, 0.02, 0.03],
+                                                       [0.01, 0.02, 0.03]],
+                                                      [[0.01, 0.02, 0.03],
+                                                       [0.01, 0.02, 0.03],
+                                                       [0.01, 0.02, 0.03]]])}}
         good_tester = PowderData(num_atoms=2)
         good_tester.set(items=good_powder)
 
@@ -59,6 +55,7 @@ class AbinsPowderDataTest(unittest.TestCase):
         for key in good_powder:
             for k_point in good_powder[key]:
                 self.assertEqual(True, np.allclose(good_powder[key][k_point], extracted_data[key][k_point]))
+
 
 if __name__ == '__main__':
     unittest.main()

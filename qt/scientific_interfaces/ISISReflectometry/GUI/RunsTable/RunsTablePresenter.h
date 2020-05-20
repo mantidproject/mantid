@@ -37,6 +37,8 @@ public:
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void setTablePrecision(int &precision) override;
+  void resetTablePrecision() override;
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides
@@ -153,6 +155,8 @@ private:
   void setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath,
                             Item const &item);
   void updateProgressBar();
+
+  void notifyTableChanged();
 
   bool isProcessing() const;
   bool isAutoreducing() const;

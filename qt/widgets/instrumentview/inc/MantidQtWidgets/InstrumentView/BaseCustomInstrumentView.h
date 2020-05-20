@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
@@ -59,7 +59,7 @@ private:
   QWidget *generateLoadWidget();
   void warningBox(const QString &message);
   Observable *m_loadRunObservable;
-  API::MWRunFiles *m_files;
+  API::FileFinderWidget *m_files;
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QPushButton *m_help;

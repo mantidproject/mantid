@@ -15,7 +15,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace Mantid::DataHandling::ISISJournal;
+using Mantid::DataHandling::ISISJournal;
 using Mantid::Kernel::InternetHelper;
 using Mantid::Kernel::Exception::InternetError;
 using testing::_;

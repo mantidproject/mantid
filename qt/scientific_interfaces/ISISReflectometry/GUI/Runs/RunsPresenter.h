@@ -74,6 +74,8 @@ public:
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   int percentComplete() const override;
+  void setRoundPrecision(int &precision) override;
+  void resetRoundPrecision() override;
   void
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyResumeReductionRequested() override;
@@ -94,10 +96,13 @@ public:
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyTableChanged() override;
   void settingsChanged() override;
 
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isOverwritingTablePrevented() const override;
+  bool isOverwriteBatchPrevented() const override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;

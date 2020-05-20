@@ -91,11 +91,11 @@ WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const {
   return m_model->getActiveSpectrum();
 }
 
-TableRowIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
+FitDomainIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
   return m_view->getSelectedSpectrumIndex();
 }
 
-TableRowIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
+FitDomainIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
   return m_model->getActiveDomainIndex();
 }
 
@@ -396,10 +396,7 @@ void IndirectFitPlotPresenter::emitFWHMChanged(double minimum, double maximum) {
 
 void IndirectFitPlotPresenter::emitSelectedFitDataChanged() {
   const auto index = m_view->getSelectedDataIndex();
-  if (index.value >= 0)
-    emit selectedFitDataChanged(index);
-  else
-    emit noFitDataSelected();
+  emit selectedFitDataChanged(index);
 }
 
 } // namespace IDA
