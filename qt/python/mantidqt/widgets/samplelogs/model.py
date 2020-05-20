@@ -27,6 +27,7 @@ FilteredTimeSeriesProperties = (BoolFilteredTimeSeriesProperty,
 
 DEEP_RED = QColor.fromHsv(0, 180, 255)
 
+
 def get_type(log):
     """Convert type to something readable"""
     dtype_map = {'i': 'int', 'f': 'float', 's': 'string', 'b': 'bool'}
@@ -196,7 +197,7 @@ class SampleLogsModel(object):
                 saturation = 10 + (170 * (invalid_value_count/(log_size+invalid_value_count)))
                 item.setData(QColor.fromHsv(0, saturation, 255), Qt.BackgroundRole)
                 aux_verb = "is" if invalid_value_count == 1 else "are"
-                item.setToolTip(f"{invalid_value_count}/{log_size+invalid_value_count} of the values in the log" 
+                item.setToolTip(f"{invalid_value_count}/{log_size+invalid_value_count} of the values in the log"
                                 f" {aux_verb} marked invalid, and {aux_verb} filtered.")
             try:
                 item.setText(callable(*args))
