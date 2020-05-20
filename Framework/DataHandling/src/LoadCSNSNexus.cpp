@@ -472,7 +472,8 @@ void LoadCSNSNexus::loadEventData(
   workspace->initialize(pidNums, 1, 1);
   float m_tof;
   uint64_t m_pulseTime;
-  for (size_t i = 0; i != pidNums; i++) {
+  int endNum = static_cast<int>(pidNums);
+  for (auto i = 0; i != endNum; i++) {
     auto it = evtData.find(i);
     if (it != evtData.end()) {
       for (size_t j = 0; j != evtData.count(i); j++, it++) {
