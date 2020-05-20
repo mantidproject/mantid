@@ -106,7 +106,7 @@ class DrillModel(QObject):
             del params["CustomOptions"]
         # remove empty params
         for (k, v) in list(params.items()):
-            if v == '':
+            if v is None:
                 del params[k]
         # add the output workspace param
         if "OutputWorkspace" not in params:
