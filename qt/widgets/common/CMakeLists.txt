@@ -14,6 +14,7 @@ set(
   src/DropEventHelper.cpp
   src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
+  src/FileFinderWidget.cpp
   src/FilePropertyWidget.cpp
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
@@ -55,7 +56,6 @@ set(
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
-  src/FileFinderWidget.cpp
   src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
