@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from matplotlib.collections import PolyCollection
 from matplotlib.lines import Line2D
 
 from mantid.plots.legend import LegendProperties
@@ -187,35 +186,10 @@ class CurvesTabWidgetPresenter:
         if ax.legend_:
             self.legend_props = LegendProperties.from_legend(ax.legend_)
 
-        waterfall = False
-        if isinstance(ax, MantidAxes):
-            waterfall = ax.is_waterfall()
-
-        if waterfall:
-            # Waterfall plots are reset so they can be reconverted after the curve is removed.
-            x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-            ax.update_waterfall(0, 0)
-
-            # If the curves have a fill, the one which corresponds to the curve being removed also needs to be removed.
-            current_curve_index = self.view.select_curve_combo_box.currentIndex()
-            i = 0
-            for collection in ax.collections:
-                if isinstance(collection, PolyCollection):
-                    if current_curve_index == i:
-                        ax.collections.remove(collection)
-                        break
-                    i = i + 1
-
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
         self.set_apply_to_all_buttons_enabled()
-
-        # If there is now only one curve on a waterfall plot, the plot becomes non-waterfall.
-        if waterfall:
-            ax.update_waterfall(x, y)
-            if len(ax.get_lines()) <= 1:
-                ax.set_waterfall(False)
 
         ax = self.get_selected_ax()
         # Update the legend and redraw

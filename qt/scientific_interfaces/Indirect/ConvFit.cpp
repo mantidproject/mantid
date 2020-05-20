@@ -114,10 +114,7 @@ void ConvFit::setModelResolution(const std::string &resolutionName) {
 
 void ConvFit::setModelResolution(const std::string &resolutionName,
                                  TableDatasetIndex index) {
-  const auto resolution =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          resolutionName);
-  m_convFittingModel->setResolution(resolution, index);
+  m_convFittingModel->setResolution(resolutionName, index);
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
   m_uiForm->fitPropertyBrowser->setModelResolution(fitResolutions);
   setModelFitFunction();

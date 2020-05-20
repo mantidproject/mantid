@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
+from Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, FileFinder
@@ -44,6 +46,7 @@ class MuonContextTest(unittest.TestCase):
 
     def tearDown(self):
         ConfigService['MantidOptions.InvisibleWorkspaces'] = 'False'
+        self.context.ads_observer.unsubscribe()
 
     def populate_ADS(self):
         self.context.calculate_all_groups()
@@ -67,22 +70,24 @@ class MuonContextTest(unittest.TestCase):
         self.assertEquals(runs, [[19489]])
 
     def test_get_group_or_pair(self):
-         group_and_pair = self.context.get_group_and_pair("All")
-         self.assertEquals(group_and_pair,(["fwd","bwd"],["long"]))
+        group_and_pair = self.context.get_group_and_pair("All")
+        self.assertEquals(group_and_pair, (["fwd", "bwd"], ["long"]))
 
     def test_get_group(self):
-         group_and_pair = self.context.get_group_and_pair(" fwd , bwd ")
-         self.assertEquals(group_and_pair,(["fwd","bwd"],[]))
+        group_and_pair = self.context.get_group_and_pair(" fwd , bwd ")
+        self.assertEquals(group_and_pair, (["fwd", "bwd"], []))
 
     def test_get_pair(self):
-         group_and_pair = self.context.get_group_and_pair(" long ")
-         self.assertEquals(group_and_pair,([],["long"]))
+        group_and_pair = self.context.get_group_and_pair(" long ")
+        self.assertEquals(group_and_pair, ([], ["long"]))
 
     def test_reset_groups_and_pairs_to_default(self):
         self.assertEqual(self.group_pair_context.group_names, ['fwd', 'bwd'])
         self.assertEqual(self.group_pair_context.pair_names, ['long'])
 
     def test_calculate_group_calculates_group_for_given_run(self):
+        # Generate the pre_process_data workspace
+        run_pre_processing(self.context, [self.run_number], rebin=False)
         counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group('fwd',
                                                                                                           run=[19489])
 
@@ -91,6 +96,8 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(group_asymmetry_unormalised, '__EMU19489; Group; fwd; Asymmetry; MA_unnorm')
 
     def test_calculate_pair_calculates_pair_for_given_run(self):
+        # Generate the pre_process_data workspace
+        run_pre_processing(self.context, [self.run_number], rebin=False)
         pair_asymmetry = self.context.calculate_pair('long', run=[19489])
 
         self.assertEqual(pair_asymmetry, 'EMU19489; Pair Asym; long; MA')
@@ -99,10 +106,10 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_groups()
 
         self._assert_list_in_ADS(['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
-                                   '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
-                                   'EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                   'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
-                                   'EMU19489; Group; fwd; Counts; MA'])
+                                  '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
+                                  'EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                  'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
+                                  'EMU19489; Group; fwd; Counts; MA'])
 
     def test_that_show_all_calculates_and_shows_all_groups_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -111,14 +118,14 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_groups()
 
         self._assert_list_in_ADS(['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
-                                   '__EMU19489; Group; bwd; Asymmetry; Rebin; MA_unnorm',
-                                   '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
-                                   '__EMU19489; Group; fwd; Asymmetry; Rebin; MA_unnorm',
-                                   'EMU19489 MA',
-                                   'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
-                                   'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; bwd; Counts; Rebin; MA',
-                                   'EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; fwd; Asymmetry; Rebin; MA',
-                                   'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA'])
+                                  '__EMU19489; Group; bwd; Asymmetry; Rebin; MA_unnorm',
+                                  '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
+                                  '__EMU19489; Group; fwd; Asymmetry; Rebin; MA_unnorm',
+                                  'EMU19489 MA',
+                                  'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
+                                  'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; bwd; Counts; Rebin; MA',
+                                  'EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; fwd; Asymmetry; Rebin; MA',
+                                  'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA'])
 
     def test_show_all_pairs_calculates_and_shows_all_pairs(self):
         self.context.show_all_pairs()

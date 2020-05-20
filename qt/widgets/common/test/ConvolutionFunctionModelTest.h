@@ -256,7 +256,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -284,7 +284,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -313,7 +313,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -350,7 +350,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -386,7 +386,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -428,7 +428,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -457,7 +457,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -486,7 +486,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -509,7 +509,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
@@ -534,7 +534,7 @@ public:
     model.setNumberDomains(2);
     auto pair1 = std::make_pair<std::string, int>("abc", 1);
     auto pair2 = std::make_pair<std::string, int>("abc", 2);
-    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    auto fitResolutions = std::vector<std::pair<std::string, size_t>>();
     fitResolutions.emplace_back(pair1);
     fitResolutions.emplace_back(pair2);
 
