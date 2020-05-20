@@ -135,7 +135,7 @@ bool Quasi::validate() {
 
   // check fixed width file exists
   if (m_uiForm.chkFixWidth->isChecked() && !m_uiForm.mwFixWidthDat->isValid()) {
-    uiv.checkMWRunFilesIsValid("Width", m_uiForm.mwFixWidthDat);
+    uiv.checkFileFinderWidgetIsValid("Width", m_uiForm.mwFixWidthDat);
   }
 
   // check eMin and eMax values

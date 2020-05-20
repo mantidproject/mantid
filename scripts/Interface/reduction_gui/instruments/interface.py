@@ -36,7 +36,7 @@ class InstrumentInterface(object):
         ## List of widgets with associated observers
         self.widgets = []
 
-        # A handle to the live data button widget (usually an instance of MWRunFiles)
+        # A handle to the live data button widget (usually an instance of FileFinderWidget)
         self._livebuttonwidget = None
 
         # Scripter object to interface with Mantid

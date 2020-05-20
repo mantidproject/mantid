@@ -884,15 +884,15 @@ public:
 };
 
 // ---------------------------------
-// MWRunFiles
+// FileFinderWidget
 // ---------------------------------
-class MWRunFiles : QWidget
+class FileFinderWidget : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 %End
 public:
-    MWRunFiles(QWidget *parent = nullptr);
+    FileFinderWidget(QWidget *parent = nullptr) /KeywordArgs="All"/;
 
     QString getText();
     QString getFirstFilename() const;
@@ -920,4 +920,28 @@ signals:
     void liveButtonPressed(bool);
     void findingFiles();
     void filesFound();
+};
+
+// ---------------------------------
+// DataSelector
+// ---------------------------------
+class DataSelector : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/DataSelector.h"
+%End
+public:
+    DataSelector(QWidget *parent = nullptr) /KeywordArgs="All"/;
+};
+
+// ---------------------------------
+// WorkspaceSelector
+// ---------------------------------
+class WorkspaceSelector : QComboBox
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
+%End
+public:
+    WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
 };

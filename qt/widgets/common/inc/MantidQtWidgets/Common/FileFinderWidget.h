@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "ui_MWRunFiles.h"
+#include "ui_FileFinderWidget.h"
 #include <QComboBox>
 #include <QMessageBox>
 #include <QSettings>
@@ -35,7 +35,7 @@ to be specified.
 @date 24/02/2009
 */
 
-class EXPORT_OPT_MANTIDQT_COMMON MWRunFiles : public API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FileFinderWidget : public API::MantidWidget {
   Q_OBJECT
 
   Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
@@ -80,7 +80,7 @@ public:
   };
 
   /// Default constructor
-  MWRunFiles(QWidget *parent = nullptr);
+  FileFinderWidget(QWidget *parent = nullptr);
 
   // property accessors/modifiers
   bool isForRunFiles() const;
@@ -259,7 +259,7 @@ private:
   /// Whether validation red star is being shown
   bool m_showValidator;
   /// The Ui form
-  Ui::MWRunFiles m_uiForm;
+  Ui::FileFinderWidget m_uiForm;
   /// An array of valid file names derived from the entries in the leNumber
   /// LineEdit
   QStringList m_foundFiles;

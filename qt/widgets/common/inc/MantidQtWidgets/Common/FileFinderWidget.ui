@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MWRunFiles</class>
- <widget class="QWidget" name="MWRunFiles">
+ <class>FileFinderWidget</class>
+ <widget class="QWidget" name="FileFinderWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
