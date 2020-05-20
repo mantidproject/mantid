@@ -121,7 +121,7 @@ void LoadCSNSNexus::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("LoadBank", true, Direction::Input),
       "Default true: load bank data, false: load monitor data.");
-  
+
   declareProperty(
       std::make_unique<ArrayProperty<string>>("Bankname", Direction::Input),
       "Optional: A comma-separated list of bank/monitor to read");
@@ -149,7 +149,6 @@ void LoadCSNSNexus::init() {
   setPropertyGroup("LoadEvent", grp2);
   setPropertyGroup("StartT0", grp2);
   setPropertyGroup("EndT0", grp2);
-
 }
 
 /**
@@ -543,12 +542,12 @@ void LoadCSNSNexus::exec() {
     } else {
       throw std::runtime_error("Error in Banknames input!");
     }
-  }else{
+  } else {
 
     g_log.information() << "load monitor data " << endl;
     vector<int64_t> pid_mon = getPixelId(bankNames);
     vector<uint32_t> tof_mon = getTimeBin("monitor");
-    ws_hist =  WorkspaceFactory::Instance().create(
+    ws_hist = WorkspaceFactory::Instance().create(
         "Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1);
     std::vector<uint32_t> histData_mon = getHistData(bankNames);
     loadHistData(ws_hist, tof_mon, pid_mon.size(), histData_mon);
@@ -558,10 +557,10 @@ void LoadCSNSNexus::exec() {
   }
 
   if (m_loadEvent) {
-     setProperty("OutputWorkspace", ws_evt);
+    setProperty("OutputWorkspace", ws_evt);
   } else {
-     setProperty("OutputWorkspace", ws_hist);
- 	}
+    setProperty("OutputWorkspace", ws_hist);
+  }
 }
 
 } // namespace DataHandling
