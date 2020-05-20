@@ -25,6 +25,7 @@ FilteredTimeSeriesProperties = (BoolFilteredTimeSeriesProperty,
                                 FloatFilteredTimeSeriesProperty, Int32FilteredTimeSeriesProperty,
                                 Int64FilteredTimeSeriesProperty, StringFilteredTimeSeriesProperty)
 
+DEEP_RED = QColor.fromHsv(0, 180, 255)
 
 def get_type(log):
     """Convert type to something readable"""
@@ -189,16 +190,14 @@ class SampleLogsModel(object):
             item.setEditable(False)
             #format if there is invalid data entries
             if invalid_value_count == -1:
-                item.setData(QColor.fromHsv(0, 180, 255), Qt.BackgroundRole)
+                item.setData(DEEP_RED, Qt.BackgroundRole)
                 item.setToolTip("All of the values in the log are marked invalid, none of them are filtered.")
             elif invalid_value_count > 0:
                 saturation = 10 + (170 * (invalid_value_count/(log_size+invalid_value_count)))
                 item.setData(QColor.fromHsv(0, saturation, 255), Qt.BackgroundRole)
-                tooltip_string = ("{count}/{size} of the values in the log {aux_verb} marked invalid, "
-                                  "and {aux_verb} filtered.")
-                item.setToolTip(tooltip_string.format(count=invalid_value_count,
-                                                      size=log_size+invalid_value_count,
-                                                      aux_verb = "is" if invalid_value_count == 1 else "are"))
+                aux_verb = "is" if invalid_value_count == 1 else "are"
+                item.setToolTip(f"{invalid_value_count}/{log_size+invalid_value_count} of the values in the log" 
+                                f" {aux_verb} marked invalid, and {aux_verb} filtered.")
             try:
                 item.setText(callable(*args))
             except Exception as exc:
