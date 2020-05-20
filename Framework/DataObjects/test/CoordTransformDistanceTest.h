@@ -125,11 +125,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(ct.apply(in4, &out));
     TS_ASSERT_DELTA(out, 4.0, 1e-5);
 
-    coord_t in5[3] = {1, 2 + M_SQRT1_2, 3 - M_SQRT1_2};
+    coord_t in5[3] = {1, static_cast<coord_t>(2 + M_SQRT1_2),
+                      static_cast<coord_t>(3 - M_SQRT1_2)};
     TS_ASSERT_THROWS_NOTHING(ct.apply(in5, &out));
     TS_ASSERT_DELTA(out, 4.0, 1e-5);
 
-    coord_t in6[3] = {1, 2 + M_SQRT2, 3 - M_SQRT2};
+    coord_t in6[3] = {1, static_cast<coord_t>(2 + M_SQRT2),
+                      static_cast<coord_t>(3 - M_SQRT2)};
     TS_ASSERT_THROWS_NOTHING(ct.apply(in6, &out));
     TS_ASSERT_DELTA(out, 16.0, 1e-5);
   }

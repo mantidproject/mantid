@@ -140,7 +140,7 @@ public:
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", ";
     // add in eigenvects
-    for (int ivect = 0; ivect < eigvects.size(); ivect++) {
+    for (size_t ivect = 0; ivect < eigvects.size(); ivect++) {
       std::copy(eigvects[ivect].begin(), eigvects[ivect].end(),
                 std::ostream_iterator<double>(mess, ", "));
     }
@@ -170,7 +170,7 @@ public:
     std::ostringstream mess;
     mess << num;
     // add in eigenvects
-    for (int d = 0; d < range.size(); d++) {
+    for (size_t d = 0; d < range.size(); d++) {
       mess << ", " << range[d].first << ", " << range[d].second;
     }
 
@@ -482,7 +482,7 @@ public:
       bgOuterRadius =
           peakRadius * pow(2.0, 1.0 / 3.0); // twice vol of peak sphere
       std::vector<std::pair<double, double>> range;
-      for (int d = 0; d < eigenvals.size(); d++) {
+      for (size_t d = 0; d < eigenvals.size(); d++) {
         range.push_back(std::pair(Q[d] - bgOuterRadius, Q[d] + bgOuterRadius));
       }
       addUniform(static_cast<size_t>(2 * numEvents), range);
@@ -564,7 +564,7 @@ public:
         // axis is flipped
         angle = M_PI - angle;
       }
-      if (ivect == 0 & fixQAxis == true) {
+      if ((fixQAxis == true) & (ivect == 0)) {
         // first axis should be parallel to Q
         TS_ASSERT_EQUALS(isort[ivect], 0)
         TS_ASSERT_DELTA(radii[isort[ivect]], rad, 1E-10);

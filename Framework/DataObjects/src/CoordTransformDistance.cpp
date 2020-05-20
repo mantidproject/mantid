@@ -79,9 +79,11 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
         // do dot prod with eigenvector
         coord_t dist = 0.0;
         for (size_t dd = 0; dd < inD; dd++) {
-          dist += m_eigenvects[d][dd] * (inputVector[dd] - m_center[dd]);
+          dist += static_cast<coord_t>(m_eigenvects[d][dd]) *
+                  (inputVector[dd] - m_center[dd]);
         }
-        distanceSquared += (dist * dist) * m_maxEigenval / m_eigenvals[d];
+        distanceSquared += (dist * dist) *
+                           static_cast<coord_t>(m_maxEigenval / m_eigenvals[d]);
       }
     } else {
       // nd spherical transform

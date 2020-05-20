@@ -186,7 +186,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Kernel::Matrix<double> std(nd,
                              nd); // hold sqrt(eigenvals) standard devs on diag
   for (size_t n = 0; n < nd; n++) {
-    center[n] = m_ellipsoidParams[n + 1];
+    center[n] = static_cast<coord_t>(m_ellipsoidParams[n + 1]);
     // get row/col index for eigenvector matrix
     for (size_t d = 0; d < nd; d++) {
       Evec[d][n] = m_ellipsoidParams[1 + nd + n * nd + d];
@@ -244,7 +244,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
       // for a multivariate normal dist m-dist is distribute
       // as chi-squared pdf with nd degrees of freedom
-      signal = boost::math::pdf(chisq, sqrt(mdsq));
+      signal = static_cast<float>(boost::math::pdf(chisq, sqrt(mdsq)));
       errorSquared = signal;
     }
     // convert pos to coord_t and offset  by center

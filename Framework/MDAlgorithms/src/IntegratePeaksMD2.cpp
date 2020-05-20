@@ -430,8 +430,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           bgSignal = 0;
           bgErrorSquared = 0;
           ws->getBox()->integrateSphere(
-              getRadiusSq, pow(BackgroundOuterRadiusVector[i], 2), bgSignal,
-              bgErrorSquared, pow(BackgroundInnerRadiusVector[i], 2),
+              getRadiusSq,
+              static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)),
+              bgSignal, bgErrorSquared,
+              static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)),
               useOnePercentBackgroundCorrection);
           // correct bg signal by Vpeak/Vshell (same as previously
           // calculated for sphere)
@@ -736,9 +738,8 @@ void IntegratePeaksMD2::findEllipsoid(
   Matrix<double> Evec; // hold eigenvectors
   Matrix<double> Eval; // hold eigenvals in diag
   // get leaf-only iterators over all boxes in ws
-  auto function =
-      std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(
-          pos, radiusSquared);
+  auto function = std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(
+      pos, radiusSquared);
   MDBoxBase<MDE, nd> *baseBox = ws->getBox();
   MDBoxIterator<MDE, nd> MDiter(baseBox, 1000, true, function.get());
   if (!qAxisBool) {
@@ -765,11 +766,11 @@ void IntegratePeaksMD2::findEllipsoid(
             auto signal = (evnt.getSignal() - bg);
             w_sum += signal;
             // update mean
-            for (int d = 0; d < mean.size(); d++) {
+            for (size_t d = 0; d < mean.size(); d++) {
               mean[d] += (signal / w_sum) * (center[d] - mean[d]);
             }
-            for (int row = 0; row < cov_mat.numRows(); row++) {
-              for (int col = 0; col < cov_mat.numRows(); col++) {
+            for (size_t row = 0; row < cov_mat.numRows(); row++) {
+              for (size_t col = 0; col < cov_mat.numRows(); col++) {
                 // symmeteric matrix
                 if (row <= col) {
                   auto cov = signal * (center[row] - mean[row]) *
@@ -833,9 +834,11 @@ void IntegratePeaksMD2::findEllipsoid(
             auto signal = (evnt.getSignal() - bg);
             w_sum += signal;
             //  transfrom centre to basis Qhat,uhat,vhat)
-            auto cen = Pinv * V3D(center[0], center[1], center[2]);
+            auto cen = Pinv * V3D(static_cast<double>(center[0]),
+                                  static_cast<double>(center[1]),
+                                  static_cast<double>(center[2]));
             // update mean
-            for (int d = 0; d < mean.size(); d++) {
+            for (size_t d = 0; d < mean.size(); d++) {
               mean[d] += (signal / w_sum) * (cen[d] - mean[d]);
             }
             var_Qhat += signal * pow((cen[0] - mean[0]), 2);
