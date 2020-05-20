@@ -22,6 +22,7 @@ Cylinder parameters: *SampleRadius* for the sample, *ContainerInnerRadius* and *
 
 The location and orientation of the sample can be defined with *SampleCenter* and *SampleAngle*.
 
+When container is defined, the corrections are calculated for the inner and outer walls of the container and then they are multiplied together, which is an approximation.
 
 Workflow
 --------
@@ -44,7 +45,7 @@ Usage
     # Efixed is generally defined as part of the IDF for real data.
     # Fake it here
     inst_name = sample_ws.getInstrument().getName()
-    SetInstrumentParameter(sample_ws, ComponentName=inst_name, 
+    SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
     container_ws = CreateSampleWorkspace(Function="Quasielastic",

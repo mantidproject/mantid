@@ -12,7 +12,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 // The return variables here are needed in order for the code to compile.
-int SpectrumRoqIndexId = qRegisterMetaType<TableRowIndex>();
+int SpectrumRoqIndexId = qRegisterMetaType<FitDomainIndex>();
 int WorkspaceIndexId = qRegisterMetaType<WorkspaceIndex>();
 int GrouppIndexId = qRegisterMetaType<WorkspaceGroupIndex>();
 

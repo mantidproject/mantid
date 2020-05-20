@@ -27,19 +27,14 @@ public:
   ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);
 
 protected:
-  void addTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                     TableRowIndex row) override;
-  void updateTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
-                        TableRowIndex row) override;
+  void addTableEntry(FitDomainIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-  std::string getResolutionName(TableRowIndex row) const;
-
-  ConvFitModel *m_convFitModel;
+  std::string getResolutionName(FitDomainIndex row) const;
 };
 
 } // namespace IDA

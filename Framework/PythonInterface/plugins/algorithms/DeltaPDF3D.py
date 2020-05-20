@@ -10,7 +10,7 @@ from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion, Pr
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
 import numpy as np
-from scipy import ndimage, signal as ssignal
+from scipy import ndimage
 
 
 class DeltaPDF3D(PythonAlgorithm):
@@ -135,9 +135,8 @@ class DeltaPDF3D(PythonAlgorithm):
             issues["SphereMax"] = 'Must provide 1 or 3 diameters'
 
         if self.getProperty("WindowFunction").value == 'Tukey':
-            try:
-                ssignal.tukey
-            except AttributeError:
+            import scipy.signal
+            if not hasattr(scipy.signal, 'tukey'):
                 issues["WindowFunction"] = 'Tukey window requires scipy >= 0.16.0'
 
         return issues
@@ -357,9 +356,10 @@ class DeltaPDF3D(PythonAlgorithm):
 
         sigma is based on the dat being in a range 0 to 1
         """
-        return (ssignal.gaussian(width[0], sigma*width[0]).reshape((-1,1,1))
-                * ssignal.gaussian(width[1], sigma*width[1]).reshape((-1,1))
-                * ssignal.gaussian(width[2], sigma*width[2]))
+        from scipy.signal import gaussian
+        return (gaussian(width[0], sigma*width[0]).reshape((-1,1,1))
+                * gaussian(width[1], sigma*width[1]).reshape((-1,1))
+                * gaussian(width[2], sigma*width[2]))
 
     def _blackman_window(self, width):
         """
@@ -376,9 +376,10 @@ class DeltaPDF3D(PythonAlgorithm):
         alpha = 0 becomes rectangular
         alpha = 1 becomes a Hann window
         """
-        return (ssignal.tukey(width[0], alpha).reshape((-1,1,1))
-                * ssignal.tukey(width[1], alpha).reshape((-1,1))
-                * ssignal.tukey(width[2], alpha))
+        from scipy.signal import tukey
+        return (tukey(width[0], alpha).reshape((-1,1,1))
+                * tukey(width[1], alpha).reshape((-1,1))
+                * tukey(width[2], alpha))
 
     def _kaiser_window(self, width, beta):
         """

@@ -102,7 +102,8 @@ class FigureInteraction(object):
     def on_scroll(self, event):
         """Respond to scroll events: zoom in/out"""
         self.canvas.toolbar.push_current()
-        if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D):
+        if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D) or \
+                len(event.inaxes.images) == 0 and len(event.inaxes.lines) == 0:
             return
         zoom_factor = 1.05 + abs(event.step)/6
         if event.button == 'up':  # zoom in
@@ -766,9 +767,12 @@ class FigureInteraction(object):
         # not rescaled properly because the vertical marker artists were
         # included in the last computation of the data limits and
         # set_xscale/set_yscale only autoscale the view
-        ax.relim()
+        xlim = copy(ax.get_xlim())
+        ylim = copy(ax.get_ylim())
         ax.set_xscale(scale_types[0])
         ax.set_yscale(scale_types[1])
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
 
         self.canvas.draw_idle()
 

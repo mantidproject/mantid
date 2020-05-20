@@ -9,6 +9,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
@@ -40,6 +41,12 @@ namespace bpl = boost::python;
  */
 double getPropertyAsSingleValueWithDefaultStatistic(Run &self,
                                                     const std::string &name) {
+  //   Before calling the function we need to release the GIL,
+  //   drop the Python threadstate and reset anything installed
+  //   via PyEval_SetTrace while we execute the C++ code -
+  //   ReleaseGlobalInterpreter does this for us
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
+      releaseGlobalInterpreterLock;
   return self.getPropertyAsSingleValue(name);
 }
 

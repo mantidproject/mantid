@@ -50,6 +50,7 @@ private:
   void moveComponent(const std::string &, double);
   void moveSingleDetectors(NeXus::NXEntry &entry);
   void rotateTubes();
+  std::string getInstrumentFilePath();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
@@ -63,6 +64,9 @@ private:
   size_t m_numberOfMonitors{1};        // number of monitors
   std::set<int> m_activeSDIndices;     // set of Single Detector indices,
                                        // that were actually active
+  bool m_bats{false};                  // A flag marking the BATS mode
+  size_t m_firstTubeAngleRounded{
+      251}; // A flag holding the rounded angle of the first tube
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
   LoadHelper m_loader;
