@@ -50,6 +50,17 @@ void AddPeak::exec() {
   PeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
   MatrixWorkspace_sptr runWS = getProperty("RunWorkspace");
 
+  // Check the instruments match before attempting to add a peak.
+  auto runInst = runWS->getInstrument()->getName();
+  auto peakInst = peaksWS->getInstrument()->getName();
+  if (peaksWS->getNumberPeaks() > 0 && (runInst != peakInst)) {
+    throw std::runtime_error("The peak from " + runWS->getName() +
+                             " comes from a different instrument (" + runInst +
+                             ") to the peaks "
+                             "already in the table (" +
+                             peakInst + "). It could not be added.");
+  }
+
   const int detID = getProperty("DetectorID");
   double tof = getProperty("TOF");
   const double height = getProperty("Height");

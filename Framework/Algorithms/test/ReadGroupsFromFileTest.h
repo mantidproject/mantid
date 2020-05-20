@@ -96,7 +96,7 @@ public:
 
       Mantid::API::MatrixWorkspace_const_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+          ws = std::dynamic_pointer_cast<const MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(
                   "ReadGroupsFromFileTest_Workspace")););
       TS_ASSERT(ws);

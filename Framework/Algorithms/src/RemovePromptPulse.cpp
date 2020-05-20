@@ -36,13 +36,13 @@ const string RemovePromptPulse::category() const {
 void RemovePromptPulse::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "An input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "An output workspace.");
 
-  auto validator = boost::make_shared<BoundedValidator<double>>();
+  auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.0);
   declareProperty("Width", Mantid::EMPTY_DBL(), validator,
                   "The width of the time of flight (in microseconds) to remove "
@@ -71,7 +71,7 @@ double getMedian(const API::Run &run, const std::string &name) {
 void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin,
                  double &tmax) {
   DataObjects::EventWorkspace_const_sptr eventWksp =
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
   if (eventWksp == nullptr) {
     wksp->getXMinMax(tmin, tmax);
   } else {
@@ -119,7 +119,7 @@ void RemovePromptPulse::exec() {
                       "range (period = "
                    << period << ")\n";
     setProperty("OutputWorkspace",
-                boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+                std::const_pointer_cast<MatrixWorkspace>(inputWS));
     return;
   }
   g_log.information() << "Calculated prompt pulses at ";
@@ -138,12 +138,10 @@ void RemovePromptPulse::exec() {
     IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
     if (outputWS) {
       algo->setProperty<MatrixWorkspace_sptr>(
-          "InputWorkspace",
-          boost::const_pointer_cast<MatrixWorkspace>(outputWS));
+          "InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(outputWS));
     } else { // should only be first time
       algo->setProperty<MatrixWorkspace_sptr>(
-          "InputWorkspace",
-          boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+          "InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(inputWS));
       outputWS = this->getProperty("OutputWorkspace");
     }
     // always write to correct output workspace

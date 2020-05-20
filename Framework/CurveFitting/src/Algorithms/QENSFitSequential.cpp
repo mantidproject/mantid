@@ -59,7 +59,7 @@ MatrixWorkspace_sptr cloneWorkspace(const MatrixWorkspace_sptr &inputWorkspace,
                                     const std::string &outputName) {
   Workspace_sptr workspace = inputWorkspace->clone();
   AnalysisDataService::Instance().addOrReplace(outputName, workspace);
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 MatrixWorkspace_sptr
@@ -121,7 +121,7 @@ void extractFunctionNames(const CompositeFunction_sptr &composite,
 
 void extractFunctionNames(const IFunction_sptr &function,
                           std::vector<std::string> &names) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     extractFunctionNames(composite, names);
   else
@@ -139,7 +139,7 @@ void extractConvolvedNames(const CompositeFunction_sptr &composite,
 
 void extractConvolvedNames(const IFunction_sptr &function,
                            std::vector<std::string> &names) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite) {
     if (composite->name() == "Convolution" && composite->nFunctions() > 1 &&
         composite->getFunction(0)->name() == "Resolution")
@@ -165,6 +165,14 @@ std::vector<std::string> extractWorkspaceNames(const std::string &input) {
       boost::sregex_token_iterator(),
       [&v](const std::string &name) { v.emplace_back(name); });
   return v;
+}
+
+std::vector<std::string> getUniqueWorkspaceNames(const std::string &input) {
+  auto workspaceNames = extractWorkspaceNames(input);
+  std::set<std::string> uniqueNames(workspaceNames.begin(),
+                                    workspaceNames.end());
+  workspaceNames.assign(uniqueNames.begin(), uniqueNames.end());
+  return workspaceNames;
 }
 
 std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
@@ -364,7 +372,7 @@ void QENSFitSequential::init() {
       "The input workspace for the fit. This property will be ignored if "
       "'Input' is provided.");
 
-  auto boundedV = boost::make_shared<BoundedValidator<int>>();
+  auto boundedV = std::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
 
   declareProperty(
@@ -392,7 +400,7 @@ void QENSFitSequential::init() {
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
   declareProperty("ResultXAxisUnit", "MomentumTransfer",
-                  boost::make_shared<StringListValidator>(unitOptions),
+                  std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis of the result workspace, "
                   "defaults to MomentumTransfer");
 
@@ -439,7 +447,7 @@ void QENSFitSequential::init() {
   const std::vector<std::string> costFuncOptions =
       CostFunctionFactory::Instance().getKeys();
   declareProperty("CostFunction", "Least squares",
-                  boost::make_shared<StringListValidator>(costFuncOptions),
+                  std::make_shared<StringListValidator>(costFuncOptions),
                   "Cost functions to use for fitting. Cost functions available "
                   "are 'Least squares' and 'Ignore positive peaks'",
                   Direction::InOut);
@@ -549,8 +557,14 @@ void QENSFitSequential::exec() {
     const auto inputStringProp = getPropertyValue("Input");
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
                      extractWorkspaceNames(inputStringProp));
+    auto inputWorkspaceNames = getUniqueWorkspaceNames(inputStringProp);
+    renameWorkspaces(resultWs,
+                     std::vector<std::string>(inputWorkspaceNames.size(), ""),
+                     outputBaseName, "_Result", inputWorkspaceNames);
   } else {
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+    renameWorkspaces(resultWs, std::vector<std::string>({""}), outputBaseName,
+                     "_Result");
   }
 
   copyLogs(resultWs, workspaces);
@@ -564,7 +578,7 @@ void QENSFitSequential::exec() {
   deleteTemporaryWorkspaces(outputBaseName);
 
   addAdditionalLogs(resultWs);
-  copyLogs(boost::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
+  copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
            groupWs);
 
   setProperty("OutputWorkspace", resultWs);

@@ -45,7 +45,7 @@ public:
   /// the number of samples
   std::size_t size() const;
   /// Adds a sample to the list
-  void addSample(const boost::shared_ptr<Sample> &childSample);
+  void addSample(const std::shared_ptr<Sample> &childSample);
 
   /// Returns the name of the sample
   const std::string &getName() const;
@@ -116,13 +116,16 @@ public:
   /// Delete the oriented lattice
   void clearOrientedLattice();
 
+  bool operator==(const Sample &other) const;
+  bool operator!=(const Sample &other) const;
+
 private:
   /// The sample name
   std::string m_name;
   /// The sample shape object
   Geometry::IObject_sptr m_shape;
   /// An owned pointer to the SampleEnvironment object
-  boost::shared_ptr<Geometry::SampleEnvironment> m_environment;
+  std::shared_ptr<Geometry::SampleEnvironment> m_environment;
   /// Pointer to the OrientedLattice of the sample, NULL if not set.
   std::unique_ptr<Geometry::OrientedLattice> m_lattice;
 
@@ -130,7 +133,7 @@ private:
   std::unique_ptr<Geometry::CrystalStructure> m_crystalStructure;
 
   /// Vector of child samples
-  std::vector<boost::shared_ptr<Sample>> m_samples;
+  std::vector<std::shared_ptr<Sample>> m_samples;
 
   /// The sample geometry flag
   int m_geom_id;

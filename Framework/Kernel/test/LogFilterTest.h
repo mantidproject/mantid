@@ -339,8 +339,8 @@ public:
 private:
   /// Creates a test boolean filter
   /// @param type :: Which variant to create
-  boost::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {
-    boost::shared_ptr<TimeSeriesProperty<bool>> filter(
+  std::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {
+    std::shared_ptr<TimeSeriesProperty<bool>> filter(
         new TimeSeriesProperty<bool>("filter"));
     if (type == 1) {
       filter->addValue("2007-11-30T16:16:50", true);

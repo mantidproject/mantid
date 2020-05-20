@@ -29,6 +29,8 @@ set(SRC_FILES
     src/GroupDetectors2.cpp
     src/H5Util.cpp
     src/ISISDataArchive.cpp
+    src/ISISJournal.cpp
+    src/ISISJournalGetExperimentRuns.cpp
     src/ISISRunLogs.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
@@ -67,6 +69,7 @@ set(SRC_FILES
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
+    src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
     src/LoadInstrument.cpp
     src/LoadInstrumentFromNexus.cpp
@@ -235,6 +238,8 @@ set(INC_FILES
     inc/MantidDataHandling/GroupDetectors2.h
     inc/MantidDataHandling/H5Util.h
     inc/MantidDataHandling/ISISDataArchive.h
+    inc/MantidDataHandling/ISISJournal.h
+    inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
     inc/MantidDataHandling/ISISRunLogs.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
@@ -274,6 +279,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
+    inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
     inc/MantidDataHandling/LoadInstrument.h
     inc/MantidDataHandling/LoadInstrumentFromNexus.h
@@ -440,6 +446,8 @@ set(TEST_FILES
     GroupDetectorsTest.h
     H5UtilTest.h
     ISISDataArchiveTest.h
+    ISISJournalTest.h
+    ISISJournalGetExperimentRunsTest.h
     InstrumentRayTracerTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
@@ -612,6 +620,24 @@ if(UNITY_BUILD)
   enable_unity_build(DataHandling SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
+if(WIN32)
+  set(ENABLE_LIB3MF ON)
+endif()
+
+if(ENABLE_LIB3MF)
+  add_definitions(-DENABLE_LIB3MF)
+  list(APPEND
+    INC_FILES
+    inc/MantidDataHandling/Mantid3MFFileIO.h)
+  list(APPEND
+    SRC_FILES
+    src/Mantid3MFFileIO.cpp)
+  list(APPEND
+    TEST_FILES
+    Mantid3MFFileIOTest.h)
+  find_package(Lib3mf REQUIRED)
+endif()
+
 # Use a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
@@ -652,6 +678,11 @@ target_link_libraries(DataHandling
                       ${HDF5_HL_LIBRARIES}
                       ${JSONCPP_LIBRARIES}
                       Catalog)
+
+if(ENABLE_LIB3MF)
+  target_link_libraries(DataHandling LINK_PRIVATE 
+                        ${LIB3MF_LIBRARIES})
+endif()
 
 # Add the unit tests directory
 add_subdirectory(test)

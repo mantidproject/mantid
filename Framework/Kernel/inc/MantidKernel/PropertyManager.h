@@ -50,7 +50,9 @@ public:
                     const Types::Core::DateAndTime &stop) override;
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<PropertyManager *> outputs) const override;
-  void filterByProperty(const TimeSeriesProperty<bool> &filter) override;
+  void filterByProperty(const TimeSeriesProperty<bool> &filter,
+                        const std::vector<std::string> &excludedFromFiltering =
+                            std::vector<std::string>()) override;
 
   ~PropertyManager() override;
 
@@ -108,6 +110,9 @@ public:
   /// Return the property manager serialized as a json object.
   ::Json::Value asJson(bool withDefaultValues = false) const override;
 
+  bool operator==(const PropertyManager &other) const;
+  bool operator!=(const PropertyManager &other) const;
+
 protected:
   friend class PropertyManagerOwner;
 
@@ -132,7 +137,7 @@ private:
 };
 
 /// Typedef for a shared pointer to a PropertyManager
-using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+using PropertyManager_sptr = std::shared_ptr<PropertyManager>;
 
 /// Return the value of the PropertyManager as a Json::Value
 MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const PropertyManager &propMgr);

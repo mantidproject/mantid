@@ -60,7 +60,7 @@ void ResampleX::init() {
       std::make_unique<ArrayProperty<double>>("XMax"),
       "A comma separated list of the XMax for every spectrum. (Optional)");
 
-  auto min = boost::make_shared<BoundedValidator<int>>();
+  auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   declareProperty("NumberBins", 0, min,
                   "Number of bins to split up each spectrum into.");
@@ -141,7 +141,7 @@ string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
   double xmin_wksp = inputWS->getXMin();
   double xmax_wksp = inputWS->getXMax();
   EventWorkspace_const_sptr inputEventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS != nullptr && inputEventWS->getNumberEvents() > 0) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
@@ -337,7 +337,7 @@ void ResampleX::exec() {
 
   // start doing actual work
   EventWorkspace_const_sptr inputEventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS != nullptr) {
     if (m_preserveEvents) {
       if (inPlace) {
@@ -346,8 +346,7 @@ void ResampleX::exec() {
         g_log.debug() << "Rebinning event workspace out of place\n";
         outputWS = inputWS->clone();
       }
-      auto outputEventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      auto outputEventWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
       if (common_limits) {
         // get the delta from the first since they are all the same

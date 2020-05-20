@@ -78,7 +78,7 @@ public:
         do_createNexus(goofyWeights, std::move(barefilename));
 
     // Must get ready to load in the data
-    auto loader = boost::shared_ptr<API::IBoxControllerIO>(
+    auto loader = std::shared_ptr<API::IBoxControllerIO>(
         new BoxControllerNeXusIO(bc.get()));
     loader->setDataType(box.getCoordType(), box.getEventType());
 
@@ -199,7 +199,7 @@ public:
     MDBox<MDLeanEvent<3>, 3> c(sc.get());
     TS_ASSERT_EQUALS(c.getNPoints(), 0);
 
-    auto loader = boost::shared_ptr<API::IBoxControllerIO>(
+    auto loader = std::shared_ptr<API::IBoxControllerIO>(
         new MantidTestHelpers::BoxControllerDummyIO(sc.get()));
     loader->setDataType(c.getCoordType(), c.getEventType());
 
@@ -292,7 +292,7 @@ public:
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>, 3> c(&bc, 0);
-    auto loader = boost::shared_ptr<API::IBoxControllerIO>(
+    auto loader = std::shared_ptr<API::IBoxControllerIO>(
         new MantidTestHelpers::BoxControllerDummyIO(&bc));
     loader->setDataType(c.getCoordType(), c.getEventType());
     loader->setWriteBufferSize(10000);
@@ -809,9 +809,9 @@ public:
     // box controlled is owned by the workspace, so here we make shared pointer
     // from the box pointer as it is owned by this function
     BoxController_sptr spBc =
-        boost::shared_ptr<BoxController>(b->getBoxController());
+        std::shared_ptr<BoxController>(b->getBoxController());
 
-    auto fbc = boost::shared_ptr<API::IBoxControllerIO>(
+    auto fbc = std::shared_ptr<API::IBoxControllerIO>(
         new BoxControllerNeXusIO(spBc.get()));
     spBc->setSplitThreshold(100);
     spBc->setMaxDepth(4);

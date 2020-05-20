@@ -98,7 +98,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
   // If the input workspace is a TableWorkspace, insert it into the vector and
   // return it.
   TableWorkspace_sptr peakTable =
-      boost::dynamic_pointer_cast<TableWorkspace>(peakWorkspace);
+      std::dynamic_pointer_cast<TableWorkspace>(peakWorkspace);
   if (peakTable) {
     try {
       peakCollections.emplace_back(getPeakCollection(std::move(peakTable)));
@@ -112,12 +112,12 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
   // If it's a WorkspaceGroup there are multiple peak tables, make a collection
   // for each of them.
   WorkspaceGroup_sptr peakTables =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(peakWorkspace);
+      std::dynamic_pointer_cast<WorkspaceGroup>(peakWorkspace);
   if (peakTables) {
     for (size_t i = 0;
          i < static_cast<size_t>(peakTables->getNumberOfEntries()); ++i) {
       peakTable =
-          boost::dynamic_pointer_cast<TableWorkspace>(peakTables->getItem(i));
+          std::dynamic_pointer_cast<TableWorkspace>(peakTables->getItem(i));
 
       if (peakTable) {
         try {
@@ -144,7 +144,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
 PoldiPeakCollection_sptr
 PoldiFitPeaks2D::getPeakCollection(const TableWorkspace_sptr &peakTable) const {
   try {
-    return boost::make_shared<PoldiPeakCollection>(peakTable);
+    return std::make_shared<PoldiPeakCollection>(peakTable);
   } catch (...) {
     throw std::runtime_error("Could not initialize peak collection.");
   }
@@ -230,7 +230,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
   }
 
   PoldiPeakCollection_sptr integratedPeakCollection =
-      boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+      std::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
   integratedPeakCollection->setProfileFunctionName(profileFunctionName);
 
   // Preserve unit cell, point group
@@ -240,7 +240,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
     PoldiPeak_sptr peak = rawPeakCollection->peak(i);
 
     IPeakFunction_sptr profileFunction =
-        boost::dynamic_pointer_cast<IPeakFunction>(
+        std::dynamic_pointer_cast<IPeakFunction>(
             FunctionFactory::Instance().createFunction(profileFunctionName));
 
     profileFunction->setHeight(peak->intensity());
@@ -275,7 +275,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
   }
 
   PoldiPeakCollection_sptr normalizedPeakCollection =
-      boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+      std::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
   normalizedPeakCollection->setProfileFunctionName(
       peakCollection->getProfileFunctionName());
 
@@ -299,7 +299,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
 std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
     const API::IFunction_sptr &fitFunction) {
   Poldi2DFunction_sptr poldiFunction =
-      boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+      std::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
   if (!poldiFunction) {
     throw std::runtime_error("Can only extract peaks from Poldi2DFunction.");
@@ -307,7 +307,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
 
   // Covariance matrix - needs to be assigned to the member functions for error
   // calculation
-  boost::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
+  std::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
       poldiFunction->getCovarianceMatrix();
 
   std::vector<PoldiPeakCollection_sptr> countPeakCollections;
@@ -318,7 +318,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
     size_t nLocalParams = localFunction->nParams();
 
     // Assign local covariance matrix.
-    boost::shared_ptr<Kernel::DblMatrix> localCov =
+    std::shared_ptr<Kernel::DblMatrix> localCov =
         getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
     localFunction->setCovarianceMatrix(localCov);
 
@@ -359,7 +359,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getCountPeakCollection(
   }
 
   PoldiPeakCollection_sptr countPeakCollection =
-      boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+      std::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
   countPeakCollection->setProfileFunctionName(
       peakCollection->getProfileFunctionName());
 
@@ -386,8 +386,8 @@ PoldiPeak_sptr PoldiFitPeaks2D::getPeakFromPeakFunction(
 
   // Use EstimatePeakErrors to calculate errors of FWHM and so on
   IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
-  errorAlg->setProperty(
-      "Function", boost::dynamic_pointer_cast<IFunction>(profileFunction));
+  errorAlg->setProperty("Function",
+                        std::dynamic_pointer_cast<IFunction>(profileFunction));
   errorAlg->setPropertyValue("OutputWorkspace", "Errors");
   errorAlg->execute();
 
@@ -467,13 +467,13 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
     const std::string &profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
-  auto mdFunction = boost::make_shared<Poldi2DFunction>();
+  auto mdFunction = std::make_shared<Poldi2DFunction>();
 
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
 
-    boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
-        boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
+    std::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
+        std::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
             FunctionFactory::Instance().createFunction(
                 "PoldiSpectrumDomainFunction"));
 
@@ -485,7 +485,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
     peakFunction->setDecoratedFunction(profileFunctionName);
 
     IPeakFunction_sptr wrappedProfile =
-        boost::dynamic_pointer_cast<IPeakFunction>(
+        std::dynamic_pointer_cast<IPeakFunction>(
             peakFunction->getProfileFunction());
 
     if (wrappedProfile) {
@@ -520,10 +520,10 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
     const std::string &profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) {
-  auto mdFunction = boost::make_shared<Poldi2DFunction>();
+  auto mdFunction = std::make_shared<Poldi2DFunction>();
 
-  boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
-      boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+  std::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+      std::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
           FunctionFactory::Instance().createFunction(
               "PoldiSpectrumPawleyFunction"));
 
@@ -552,7 +552,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
   pawleyFunction->setUnitCell(getRefinedStartingCell(
       unitCellToStr(cell), latticeSystem, peakCollection));
 
-  IPeakFunction_sptr pFun = boost::dynamic_pointer_cast<IPeakFunction>(
+  IPeakFunction_sptr pFun = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(profileFunctionName));
 
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
@@ -611,7 +611,7 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(
   Geometry::UnitCell cell = Geometry::strToUnitCell(initialCell);
 
   ILatticeFunction_sptr latticeFunction =
-      boost::dynamic_pointer_cast<ILatticeFunction>(
+      std::dynamic_pointer_cast<ILatticeFunction>(
           FunctionFactory::Instance().createFunction("LatticeFunction"));
 
   latticeFunction->setLatticeSystem(latticeSystem);
@@ -635,7 +635,7 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(
 
   IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   fit->setProperty("Function",
-                   boost::static_pointer_cast<IFunction>(latticeFunction));
+                   std::static_pointer_cast<IFunction>(latticeFunction));
   fit->setProperty("InputWorkspace", peakTable);
   fit->setProperty("CostFunction", "Unweighted least squares");
   fit->execute();
@@ -722,7 +722,7 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
 PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
     const IFunction_sptr &fitFunction) {
   Poldi2DFunction_sptr poldi2DFunction =
-      boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+      std::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
   if (!poldi2DFunction) {
     throw std::invalid_argument(
@@ -730,16 +730,16 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
   }
 
   PoldiPeakCollection_sptr normalizedPeaks =
-      boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+      std::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
 
-  boost::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
+  std::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
       poldi2DFunction->getCovarianceMatrix();
 
   size_t offset = 0;
 
   for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
-    boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
-        boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+    std::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+        std::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
             poldi2DFunction->getFunction(i));
 
     // If it's a Pawley function, there are several peaks in one function.
@@ -749,7 +749,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
 
       if (pawleyFunction) {
         CompositeFunction_sptr decoratedFunction =
-            boost::dynamic_pointer_cast<CompositeFunction>(
+            std::dynamic_pointer_cast<CompositeFunction>(
                 pawleyFunction->getDecoratedFunction());
 
         offset = decoratedFunction->getFunction(0)->nParams();
@@ -759,7 +759,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
               pawleyFunction->getPeakFunction(j);
 
           size_t nLocalParams = profileFunction->nParams();
-          boost::shared_ptr<Kernel::DblMatrix> localCov =
+          std::shared_ptr<Kernel::DblMatrix> localCov =
               getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
           profileFunction->setCovarianceMatrix(localCov);
 
@@ -778,18 +778,18 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
     }
 
     // Otherwise, it's just one peak in this function.
-    boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
-        boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
+    std::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
+        std::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
             poldi2DFunction->getFunction(i));
 
     if (peakFunction) {
       IPeakFunction_sptr profileFunction =
-          boost::dynamic_pointer_cast<IPeakFunction>(
+          std::dynamic_pointer_cast<IPeakFunction>(
               peakFunction->getProfileFunction());
 
       // Get local covariance matrix
       size_t nLocalParams = profileFunction->nParams();
-      boost::shared_ptr<Kernel::DblMatrix> localCov =
+      std::shared_ptr<Kernel::DblMatrix> localCov =
           getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
       profileFunction->setCovarianceMatrix(localCov);
 
@@ -851,8 +851,8 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
     const API::MatrixWorkspace_sptr &workspace) const {
 
   // Check whether the function is of correct type
-  boost::shared_ptr<IPoldiFunction1D> poldiFunction =
-      boost::dynamic_pointer_cast<IPoldiFunction1D>(fitFunction);
+  std::shared_ptr<IPoldiFunction1D> poldiFunction =
+      std::dynamic_pointer_cast<IPoldiFunction1D>(fitFunction);
 
   if (!poldiFunction) {
     throw std::invalid_argument("Can only process Poldi2DFunctions.");
@@ -908,7 +908,7 @@ PoldiFitPeaks2D::getQSpectrum(const FunctionDomain1D &domain,
 ITableWorkspace_sptr PoldiFitPeaks2D::getRefinedCellParameters(
     const IFunction_sptr &fitFunction) const {
   Poldi2DFunction_sptr poldi2DFunction =
-      boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+      std::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
   if (!poldi2DFunction || poldi2DFunction->nFunctions() < 1) {
     throw std::invalid_argument(
@@ -924,8 +924,8 @@ ITableWorkspace_sptr PoldiFitPeaks2D::getRefinedCellParameters(
   latticeParameterTable->addColumn("double", "Error");
 
   // The first function should be PoldiSpectrumPawleyFunction
-  boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
-      boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+  std::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+      std::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
           poldi2DFunction->getFunction(0));
 
   if (!poldiPawleyFunction) {
@@ -935,12 +935,12 @@ ITableWorkspace_sptr PoldiFitPeaks2D::getRefinedCellParameters(
 
   // Get the actual PawleyFunction to extract parameters.
   IPawleyFunction_sptr pawleyFunction =
-      boost::dynamic_pointer_cast<IPawleyFunction>(
+      std::dynamic_pointer_cast<IPawleyFunction>(
           poldiPawleyFunction->getDecoratedFunction());
 
   if (pawleyFunction) {
     CompositeFunction_sptr pawleyParts =
-        boost::dynamic_pointer_cast<CompositeFunction>(
+        std::dynamic_pointer_cast<CompositeFunction>(
             pawleyFunction->getDecoratedFunction());
 
     // The first function in PawleyFunction contains the parameters
@@ -977,7 +977,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
       getNormalizedPeakCollections(peakCollections);
 
   // Create a Poldi2DFunction that collects all sub-functions
-  auto mdFunction = boost::make_shared<Poldi2DFunction>();
+  auto mdFunction = std::make_shared<Poldi2DFunction>();
 
   // Add one Poldi2DFunction for each peak collection
   for (auto &normalizedPeakCollection : normalizedPeakCollections) {
@@ -995,7 +995,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
   }
 
   fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<IFunction>(mdFunction));
+                   std::dynamic_pointer_cast<IFunction>(mdFunction));
   fit->setProperty("InputWorkspace", matrixWorkspace);
   fit->setProperty("CreateOutput", true);
 
@@ -1080,12 +1080,12 @@ void PoldiFitPeaks2D::addBackgroundTerms(
  * @param nParams :: Number of parameters of the local function.
  * @return
  */
-boost::shared_ptr<DblMatrix> PoldiFitPeaks2D::getLocalCovarianceMatrix(
-    const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
+std::shared_ptr<DblMatrix> PoldiFitPeaks2D::getLocalCovarianceMatrix(
+    const std::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
     size_t parameterOffset, size_t nParams) const {
   if (covarianceMatrix) {
-    boost::shared_ptr<Kernel::DblMatrix> localCov =
-        boost::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
+    std::shared_ptr<Kernel::DblMatrix> localCov =
+        std::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
     for (size_t j = 0; j < nParams; ++j) {
       for (size_t k = 0; k < nParams; ++k) {
         (*localCov)[j][k] =
@@ -1096,7 +1096,7 @@ boost::shared_ptr<DblMatrix> PoldiFitPeaks2D::getLocalCovarianceMatrix(
     return localCov;
   }
 
-  return boost::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
+  return std::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
 }
 
 void PoldiFitPeaks2D::setPoldiInstrument(
@@ -1112,7 +1112,7 @@ void PoldiFitPeaks2D::setPoldiInstrument(
  */
 void PoldiFitPeaks2D::setTimeTransformerFromInstrument(
     const PoldiInstrumentAdapter_sptr &poldiInstrument) {
-  setTimeTransformer(boost::make_shared<PoldiTimeTransformer>(poldiInstrument));
+  setTimeTransformer(std::make_shared<PoldiTimeTransformer>(poldiInstrument));
 }
 
 /**
@@ -1188,7 +1188,7 @@ void PoldiFitPeaks2D::init() {
                       "PoldiPeakWorkspace", "", Direction::Input),
                   "Table workspace with peak information.");
 
-  auto peakFunctionValidator = boost::make_shared<StringListValidator>(
+  auto peakFunctionValidator = std::make_shared<StringListValidator>(
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
   declareProperty("PeakProfileFunction", "Gaussian", peakFunctionValidator,
                   "Profile function to use for integrating the peak profiles "
@@ -1258,7 +1258,7 @@ void PoldiFitPeaks2D::exec() {
   MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
   setDeltaTFromWorkspace(ws);
 
-  setPoldiInstrument(boost::make_shared<PoldiInstrumentAdapter>(ws));
+  setPoldiInstrument(std::make_shared<PoldiInstrumentAdapter>(ws));
   setTimeTransformerFromInstrument(m_poldiInstrument);
 
   // If a profile function is selected, set it on the peak collections.
@@ -1295,7 +1295,7 @@ void PoldiFitPeaks2D::exec() {
     setProperty("RefinedPoldiPeakWorkspace",
                 integralPeaks.front()->asTableWorkspace());
   } else {
-    WorkspaceGroup_sptr peaksGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr peaksGroup = std::make_shared<WorkspaceGroup>();
 
     for (auto &integralPeak : integralPeaks) {
       peaksGroup->addWorkspace(integralPeak->asTableWorkspace());
@@ -1311,7 +1311,7 @@ void PoldiFitPeaks2D::exec() {
   bool isPawleyFit = getProperty("PawleyFit");
   if (isPawleyFit) {
     Poldi2DFunction_sptr poldi2DFunction =
-        boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+        std::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
     std::vector<ITableWorkspace_sptr> cells;
 
@@ -1329,7 +1329,7 @@ void PoldiFitPeaks2D::exec() {
       if (cells.size() == 1) {
         setProperty("RefinedCellParameters", cells.front());
       } else {
-        WorkspaceGroup_sptr cellsGroup = boost::make_shared<WorkspaceGroup>();
+        WorkspaceGroup_sptr cellsGroup = std::make_shared<WorkspaceGroup>();
 
         for (auto &cell : cells) {
           cellsGroup->addWorkspace(cell);

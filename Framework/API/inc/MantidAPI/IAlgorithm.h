@@ -21,8 +21,7 @@ template <class T> class ActiveResult;
 namespace Mantid {
 namespace API {
 
-/** As we have multiple interfaces to the same logical algorithm (Algorithm &
- * AlgorithmProxy)
+/** As we have multiple interfaces to the same logical algorithm
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */
@@ -132,6 +131,9 @@ public:
 
   /// True if the algorithm is running.
   virtual bool isRunning() const = 0;
+
+  /// True if the algorithm is ready for garbage collection.
+  virtual bool isReadyForGarbageCollection() const = 0;
 
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;

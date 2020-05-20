@@ -181,7 +181,7 @@ std::string ReflectometryReductionOneAuto2::getRunNumberForWorkspaceGroup(
     throw std::runtime_error("Cannot run algorithm on empty group");
 
   auto childWs = group->getItem(0);
-  auto childMatrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(childWs);
+  auto childMatrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(childWs);
 
   if (!childMatrixWs)
     throw std::runtime_error("Child workspace is not a MatrixWorkspace");
@@ -258,7 +258,7 @@ void ReflectometryReductionOneAuto2::init() {
   const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
                                               "MultiDetectorAnalysis"};
   auto analysisModeValidator =
-      boost::make_shared<StringListValidator>(analysisMode);
+      std::make_shared<StringListValidator>(analysisMode);
   declareProperty("AnalysisMode", analysisMode[0], analysisModeValidator,
                   "Analysis mode. This property is only used when "
                   "ProcessingInstructions is not set.",
@@ -287,11 +287,11 @@ void ReflectometryReductionOneAuto2::init() {
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
-  auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
+  auto correctionTypeValidator = std::make_shared<CompositeValidator>();
   correctionTypeValidator->add(
-      boost::make_shared<MandatoryValidator<std::string>>());
+      std::make_shared<MandatoryValidator<std::string>>());
   correctionTypeValidator->add(
-      boost::make_shared<StringListValidator>(correctionType));
+      std::make_shared<StringListValidator>(correctionType));
   declareProperty(
       "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
       "When correcting detector positions, this determines whether detectors"
@@ -322,7 +322,7 @@ void ReflectometryReductionOneAuto2::init() {
   // Polarization correction
   std::vector<std::string> propOptions = {"None", "PA", "PNR", "ParameterFile"};
   declareProperty("PolarizationAnalysis", "None",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Polarization analysis mode.");
   declareProperty(
       std::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
@@ -353,7 +353,7 @@ void ReflectometryReductionOneAuto2::init() {
   // Flood correction
   propOptions = {"Workspace", "ParameterFile"};
   declareProperty("FloodCorrection", "Workspace",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The way to apply flood correction: "
                   "Workspace - use FloodWorkspace property to get the flood "
                   "workspace, ParameterFile - use parameters in the parameter "
@@ -870,7 +870,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   if (!firstTrans.empty()) {
     auto firstTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
-    firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
+    firstTransG = std::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
     } else {
@@ -885,7 +885,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   if (!secondTrans.empty()) {
     auto secondTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
-    secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
+    secondTransG = std::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
     } else {
@@ -982,7 +982,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     const std::string IvsLamName = outputIvsLamNames[i];
 
     // Find the spectrum processing instructions for ws index 0
-    auto currentWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto currentWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(outputIvsLamNames[i]));
     auto newProcInst = convertToSpectrumNumber("0", currentWorkspace);
     alg->setProperty("ProcessingInstructions", newProcInst);

@@ -14,7 +14,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,7 +36,7 @@ public:
   TableDatasetIndex getActiveDataIndex() const;
   WorkspaceIndex getActiveSpectrum() const;
   TableDatasetIndex numberOfWorkspaces() const;
-  TableRowIndex getActiveDomainIndex() const;
+  FitDomainIndex getActiveDomainIndex() const;
   std::string getFitDataName(TableDatasetIndex index) const;
   std::string getFitDataName() const;
   std::string getLastFitDataName() const;

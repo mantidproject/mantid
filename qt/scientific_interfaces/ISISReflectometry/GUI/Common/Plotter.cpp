@@ -65,7 +65,7 @@ void Plotter::reflectometryPlot(
         Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::Workspace>(workspace);
     if (const auto workspaceGroup =
-            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
                 workspaceObject)) {
       for (auto index = 0u; index < workspaceGroup->size(); ++index) {
         actualWorkspaces.emplace_back(

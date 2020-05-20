@@ -8,8 +8,8 @@
 
 #include "DllOption.h"
 #include "FunctionModel.h"
-#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
+#include <memory>
 #include <vector>
 
 namespace MantidQt {
@@ -24,12 +24,12 @@ public:
   void setModel(const std::string &background, const std::string &workspace,
                 int workspaceIndex, const std::string &peaks,
                 bool hasDeltaFunction);
-  void
-  setModel(const std::string &background,
-           const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
-           const std::string &peaks, bool hasDeltaFunction,
-           const std::vector<double> &qValues, const bool isQDependent,
-           bool hasTempCorrection, double tempValue);
+  void setModel(
+      const std::string &background,
+      const std::vector<std::pair<std::string, size_t>> &resolutionWorkspaces,
+      const std::string &peaks, bool hasDeltaFunction,
+      const std::vector<double> &qValues, const bool isQDependent,
+      bool hasTempCorrection, double tempValue);
   boost::optional<QString> backgroundPrefix() const {
     return m_backgroundPrefix;
   }
@@ -64,7 +64,7 @@ private:
   createConvolutionFunction(IFunction_sptr resolutionFunction,
                             const IFunction_sptr &innerFunction);
   IFunction_sptr createResolutionFunction(const std::string &workspaceName,
-                                          int workspaceIndex);
+                                          size_t workspaceIndex);
   CompositeFunction_sptr addBackground(CompositeFunction_sptr domainFunction,
                                        const std::string &background);
   boost::optional<QString> m_backgroundPrefix;

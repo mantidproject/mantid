@@ -126,7 +126,7 @@ void FileEventDataListener::start(
   loadChunk();
 }
 
-boost::shared_ptr<Workspace> FileEventDataListener::extractData() {
+std::shared_ptr<Workspace> FileEventDataListener::extractData() {
   // Once the end of the file is reached, this method throws to stop the calling
   // algorithm.
   // This is equivalent to the end of the run - which we still need to figure

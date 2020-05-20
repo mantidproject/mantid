@@ -60,15 +60,15 @@ protected:
   void addWorkspaces();
   std::vector<std::string> getCostFunctionNames() const;
   void declareCostFunctionProperty();
-  boost::shared_ptr<CostFunctions::CostFuncFitting>
+  std::shared_ptr<CostFunctions::CostFuncFitting>
   getCostFunctionInitialized() const;
 
   /// Keep the domain type
   API::IDomainCreator::DomainType m_domainType{API::IDomainCreator::Simple};
   /// Pointer to the fitting function
-  boost::shared_ptr<API::IFunction> m_function;
+  std::shared_ptr<API::IFunction> m_function;
   /// Pointer to a domain creator
-  boost::shared_ptr<API::IDomainCreator> m_domainCreator;
+  std::shared_ptr<API::IDomainCreator> m_domainCreator;
   std::vector<std::string> m_workspacePropertyNames;
   std::vector<std::string> m_workspaceIndexPropertyNames;
 

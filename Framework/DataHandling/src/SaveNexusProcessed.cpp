@@ -20,7 +20,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <utility>
 
 using namespace Mantid::API;
@@ -124,9 +124,9 @@ void SaveNexusProcessed::init() {
                   "path");
 
   // Declare optional parameters (title now optional, was mandatory)
-  declareProperty("Title", "", boost::make_shared<NullValidator>(),
+  declareProperty("Title", "", std::make_shared<NullValidator>(),
                   "A title to describe the saved workspace");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
   declareProperty("WorkspaceIndexMin", 0, mustBePositive,
@@ -220,8 +220,8 @@ void SaveNexusProcessed::getWSIndexList(
 
 void SaveNexusProcessed::doExec(
     const Workspace_sptr &inputWorkspace,
-    boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
-    const bool keepFile, optional_size_t entryNumber) {
+    std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile, const bool keepFile,
+    optional_size_t entryNumber) {
   // TODO: Remove?
   NXMEnableErrorReporting();
 
@@ -232,15 +232,15 @@ void SaveNexusProcessed::doExec(
   const bool PreserveEvents = getProperty("PreserveEvents");
 
   MatrixWorkspace_const_sptr matrixWorkspace =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
   ITableWorkspace_const_sptr tableWorkspace =
-      boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
   PeaksWorkspace_const_sptr peaksWorkspace =
-      boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
   OffsetsWorkspace_const_sptr offsetsWorkspace =
-      boost::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
   MaskWorkspace_const_sptr maskWorkspace =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<const MaskWorkspace>(inputWorkspace);
   if (peaksWorkspace)
     g_log.debug("We have a peaks workspace");
   // check if inputWorkspace is something we know how to save
@@ -249,10 +249,10 @@ void SaveNexusProcessed::doExec(
     const std::string name = getProperty("InputWorkspace");
 
     // md workspaces should be saved using SaveMD
-    if (bool(boost::dynamic_pointer_cast<const IMDEventWorkspace>(
+    if (bool(std::dynamic_pointer_cast<const IMDEventWorkspace>(
             inputWorkspace)) ||
-        bool(boost::dynamic_pointer_cast<const IMDHistoWorkspace>(
-            inputWorkspace)))
+        bool(
+            std::dynamic_pointer_cast<const IMDHistoWorkspace>(inputWorkspace)))
       g_log.warning() << name << " can be saved using SaveMD\n";
 
     // standard error message
@@ -263,7 +263,7 @@ void SaveNexusProcessed::doExec(
     throw std::runtime_error(msg.str());
   }
   m_eventWorkspace =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
+      std::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
       (workspaceID.find("RebinnedOutput") == std::string::npos) &&
@@ -387,7 +387,7 @@ void SaveNexusProcessed::exec() {
   Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // Then immediately open the file
-  auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
+  auto nexusFile = std::make_shared<Mantid::NeXus::NexusFileIO>();
 
   // Perform the execution.
   doExec(inputWorkspace, nexusFile);
@@ -577,7 +577,7 @@ void SaveNexusProcessed::setOtherProperties(IAlgorithm *alg,
  */
 bool SaveNexusProcessed::processGroups() {
   // Then immediately open the file
-  auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
+  auto nexusFile = std::make_shared<Mantid::NeXus::NexusFileIO>();
 
   // If we have arrived here then a WorkspaceGroup was passed to the
   // InputWorkspace property. Pull out the unrolled workspaces and append an

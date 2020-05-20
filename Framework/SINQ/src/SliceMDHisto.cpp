@@ -45,7 +45,7 @@ void SliceMDHisto::exec() {
       IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
   m_rank = static_cast<unsigned int>(inWS->getNumDims());
   for (unsigned int i = 0; i < m_rank; i++) {
-    boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(i);
+    std::shared_ptr<const IMDDimension> arDim = inWS->getDimension(i);
     m_dim.emplace_back(static_cast<int>(arDim->getNBins()));
   }
 
@@ -79,12 +79,12 @@ void SliceMDHisto::exec() {
   // create the new dadaset
   std::vector<MDHistoDimension_sptr> dimensions;
   for (unsigned int k = 0; k < m_rank; ++k) {
-    boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(k);
+    std::shared_ptr<const IMDDimension> arDim = inWS->getDimension(k);
     dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         arDim->getName(), arDim->getName(), arDim->getMDFrame(),
         arDim->getX(start[k]), arDim->getX(end[k]), end[k] - start[k])));
   }
-  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto outWS = std::make_shared<MDHistoWorkspace>(dimensions);
 
   auto *sourceDim =
       reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
@@ -106,12 +106,12 @@ void SliceMDHisto::cutData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
                            std::vector<int> end, unsigned int dim) {
   int length;
 
-  boost::shared_ptr<const IMDDimension> inDim = inWS->getDimension(dim);
-  boost::shared_ptr<const IMDDimension> outDim = outWS->getDimension(dim);
+  std::shared_ptr<const IMDDimension> inDim = inWS->getDimension(dim);
+  std::shared_ptr<const IMDDimension> outDim = outWS->getDimension(dim);
   length = end[dim] - start[dim];
   if (dim == m_rank - 1) {
     MDHistoWorkspace_sptr outWSS =
-        boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
+        std::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
     for (int i = 0; i < length; i++) {
       sourceDim[dim] = inDim->getX(start[dim] + i);
       signal_t val = inWS->getSignalAtCoord(

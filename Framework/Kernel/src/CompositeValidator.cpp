@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/CompositeValidator.h"
+#include <algorithm>
 #include <sstream>
 #include <unordered_set>
 
@@ -57,8 +58,8 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
  * @return A newly constructed validator object. Each child is also cloned
  */
 Kernel::IValidator_sptr CompositeValidator::clone() const {
-  boost::shared_ptr<CompositeValidator> copy =
-      boost::make_shared<CompositeValidator>(m_relation);
+  std::shared_ptr<CompositeValidator> copy =
+      std::make_shared<CompositeValidator>(m_relation);
   for (const auto &itr : m_children) {
     copy->add(itr->clone());
   }

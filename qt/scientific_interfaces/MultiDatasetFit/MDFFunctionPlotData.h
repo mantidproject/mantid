@@ -8,7 +8,7 @@
 
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qwt_double_rect.h>
 
 // Forward declarations
@@ -30,7 +30,7 @@ namespace MDF {
  */
 class MDFFunctionPlotData {
 public:
-  MDFFunctionPlotData(boost::shared_ptr<Mantid::API::IFunction> fun,
+  MDFFunctionPlotData(const std::shared_ptr<Mantid::API::IFunction> &fun,
                       double startX, double endX,
                       size_t nX = g_defaultDomainSize);
   ~MDFFunctionPlotData();
@@ -48,7 +48,7 @@ private:
   MDFFunctionPlotData &operator=(const MDFFunctionPlotData &);
 
   /// The function
-  boost::shared_ptr<Mantid::API::IFunction> m_function;
+  std::shared_ptr<Mantid::API::IFunction> m_function;
   /// Curve object to plot the function.
   QwtPlotCurve *m_functionCurve;
 

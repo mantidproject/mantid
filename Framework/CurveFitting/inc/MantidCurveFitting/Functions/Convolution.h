@@ -11,8 +11,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include <boost/shared_array.hpp>
 #include <cmath>
+#include <memory>
 #include <vector>
 
 namespace Mantid {

@@ -56,7 +56,7 @@ Mantid::API::MatrixWorkspace_sptr reload(const std::string &filename) {
   loader.execute();
   Workspace_sptr out = loader.getProperty("OutputWorkspace");
   auto matrixWSOut =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
   return matrixWSOut;
 }
 

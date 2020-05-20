@@ -75,7 +75,7 @@ public:
     loader.execute();
     TS_ASSERT(loader.isExecuted());
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("PG3_EstimateDivergence"));
 
     return ws;

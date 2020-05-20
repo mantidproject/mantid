@@ -92,6 +92,14 @@ void Goniometer::setR(Kernel::DblMatrix rot) {
 /// Function reports if the goniometer is defined
 bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
 
+bool Goniometer::operator==(const Goniometer &other) const {
+  return this->R == other.R;
+}
+
+bool Goniometer::operator!=(const Goniometer &other) const {
+  return this->R != other.R;
+}
+
 /// Return information about axes.
 /// @return str :: string that contains on each line one motor information (axis
 /// name, direction, sense, angle)

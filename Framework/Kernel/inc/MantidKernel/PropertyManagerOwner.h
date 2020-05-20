@@ -111,7 +111,9 @@ public:
                    std::vector<PropertyManager *> /* outputs*/) const override {
     throw(std::runtime_error("Not yet implmented"));
   }
-  void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) override {
+  void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/,
+                        const std::vector<std::string> &
+                        /* excludedFromFiltering */) override {
     throw(std::runtime_error("Not yet implmented"));
   }
 
@@ -121,7 +123,7 @@ public:
 
 private:
   /// Shared pointer to the 'real' property manager
-  boost::shared_ptr<PropertyManager> m_properties;
+  std::shared_ptr<PropertyManager> m_properties;
 };
 
 } // namespace Kernel

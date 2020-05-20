@@ -84,7 +84,7 @@ void ConvertToMD::init() {
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
                                20 /*MaxRecursionDepth*/);
   // additional box controller settings property.
-  auto mustBeMoreThan1 = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeMoreThan1 = std::make_shared<BoundedValidator<int>>();
   mustBeMoreThan1->setLower(1);
 
   declareProperty(
@@ -122,8 +122,7 @@ void ConvertToMD::init() {
 
   std::vector<std::string> converterType{"Default", "Indexed"};
 
-  auto loadTypeValidator =
-      boost::make_shared<StringListValidator>(converterType);
+  auto loadTypeValidator = std::make_shared<StringListValidator>(converterType);
   declareProperty("ConverterType", "Default", loadTypeValidator,
                   "[Default, Indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
@@ -205,7 +204,7 @@ void ConvertToMD::exec() {
   // initiate class which would deal with any dimension workspaces requested by
   // algorithm parameters
   if (!m_OutWSWrapper)
-    m_OutWSWrapper = boost::make_shared<MDEventWSWrapper>();
+    m_OutWSWrapper = std::make_shared<MDEventWSWrapper>();
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
@@ -317,7 +316,7 @@ void ConvertToMD::exec() {
 
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
+              std::dynamic_pointer_cast<IMDEventWorkspace>(spws));
   // free the algorithm from the responsibility for the target workspace to
   // allow it to be deleted if necessary
   m_OutWSWrapper->releaseWorkspace();
@@ -777,7 +776,7 @@ void ConvertToMD::setupFileBackend(
   // create file-backed box controller
   auto boxControllerMem = outputWS->getBoxController();
   auto boxControllerIO =
-      boost::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+      std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
   boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
   outputWS->setFileBacked();
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);

@@ -82,8 +82,7 @@ public:
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_less_than_zero() {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionPositionCorrect>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionPositionCorrect>();
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty(
@@ -97,8 +96,7 @@ public:
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_outside_range() {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionPositionCorrect>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionPositionCorrect>();
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty(
@@ -113,8 +111,7 @@ public:
   }
 
   void test_throws_if_DetectorComponentName_unknown() {
-    IAlgorithm_sptr alg =
-        boost::make_shared<SpecularReflectionPositionCorrect>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionPositionCorrect>();
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty(

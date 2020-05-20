@@ -67,13 +67,13 @@ void FindPeaks::init() {
                                                         Direction::Input),
                   "Name of the workspace to search");
 
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBeNonNegative,
                   "If set, only this spectrum will be searched for peaks "
                   "(otherwise all are)");
 
-  auto min = boost::make_shared<BoundedValidator<int>>();
+  auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
   declareProperty(
@@ -100,17 +100,17 @@ void FindPeaks::init() {
   std::vector<std::string> peakNames =
       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty("PeakFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peakNames));
+                  std::make_shared<StringListValidator>(peakNames));
 
   std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
       "MinGuessedPeakWidth", 2, mustBePositive,
@@ -124,7 +124,7 @@ void FindPeaks::init() {
       "GuessedPeakWidthStep", 2, mustBePositive,
       "Step of guessed peak width. It is in unit of number of pixels.");
 
-  auto mustBePositiveDBL = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDBL = std::make_shared<BoundedValidator<double>>();
   declareProperty("PeakPositionTolerance", EMPTY_DBL(), mustBePositiveDBL,
                   "Tolerance on the found peaks' positions against the input "
                   "peak positions.  Non-positive value indicates that this "
@@ -290,7 +290,7 @@ void FindPeaks::processAlgorithmProperties() {
 /** Generate a table workspace for output peak parameters
  */
 void FindPeaks::generateOutputPeakParameterTable() {
-  m_outPeakTableWS = boost::make_shared<TableWorkspace>();
+  m_outPeakTableWS = std::make_shared<TableWorkspace>();
   m_outPeakTableWS->addColumn("int", "spectrum");
 
   if (m_rawPeaksTable) {
@@ -1486,7 +1486,7 @@ void FindPeaks::createFunctions() {
     // FlatBackground, LinearBackground, Quadratic
     backgroundposix = "Background";
   }
-  m_backgroundFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
+  m_backgroundFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
       API::FunctionFactory::Instance().createFunction(m_backgroundType +
                                                       backgroundposix));
   g_log.information() << "Background function (" << m_backgroundFunction->name()
@@ -1498,7 +1498,7 @@ void FindPeaks::createFunctions() {
   m_bkgdOrder = m_backgroundFunction->nParams() - 1;
 
   // Set up peak function
-  m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_peakFunction = std::dynamic_pointer_cast<IPeakFunction>(
       API::FunctionFactory::Instance().createFunction(m_peakFuncType));
   m_peakParameterNames = m_peakFunction->getParameterNames();
 }

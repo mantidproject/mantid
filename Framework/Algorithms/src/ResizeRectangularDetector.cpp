@@ -63,21 +63,20 @@ void ResizeRectangularDetector::init() {
 void ResizeRectangularDetector::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   DataObjects::PeaksWorkspace_sptr inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputW->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "MatrixWorkspace provided as input");
 
   } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputP->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
@@ -104,12 +103,12 @@ void ResizeRectangularDetector::exec() {
                              " was not found.");
 
   RectangularDetector_const_sptr det =
-      boost::dynamic_pointer_cast<const RectangularDetector>(comp);
+      std::dynamic_pointer_cast<const RectangularDetector>(comp);
   if (!det)
     throw std::runtime_error("Component with name " + ComponentName +
                              " is not a RectangularDetector.");
 
-  auto input = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  auto input = std::dynamic_pointer_cast<ExperimentInfo>(ws);
   Geometry::ParameterMap &pmap = input->instrumentParameters();
   auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
   auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));

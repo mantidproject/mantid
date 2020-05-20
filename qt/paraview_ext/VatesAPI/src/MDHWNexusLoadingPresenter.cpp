@@ -155,7 +155,7 @@ void MDHWNexusLoadingPresenter::loadWorkspace() {
   Workspace_sptr result =
       AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
   auto preTranspose =
-      boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+      std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
   // Perform any necessary transpose.
   MDHWLoadingPresenter::transposeWs(preTranspose, m_histoWs);
 }

@@ -97,6 +97,8 @@ public:
   void loadNexus(::NeXus::File *file, const std::string &group);
   /// the method reports if the goniometer was defined with some parameters
   bool isDefined() const;
+  bool operator==(const Goniometer &other) const;
+  bool operator!=(const Goniometer &other) const;
 
 private:
   /// Global rotation matrix of the goniometer

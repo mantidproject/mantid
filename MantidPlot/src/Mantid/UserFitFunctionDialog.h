@@ -11,7 +11,7 @@
 //----------------------------
 
 #include "ui_UserFitFunctionDialog.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qcheckbox.h>
 #include <qdialog.h>
 #include <qlineedit.h>

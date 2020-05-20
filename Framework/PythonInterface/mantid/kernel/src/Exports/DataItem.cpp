@@ -18,7 +18,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(DataItem)
 
 void export_DataItem() {
-  register_ptr_to_python<boost::shared_ptr<DataItem>>();
+  register_ptr_to_python<std::shared_ptr<DataItem>>();
 
   class_<DataItem, boost::noncopyable>("DataItem", no_init)
       .def("id", &DataItem::id, arg("self"), "The string ID of the class")

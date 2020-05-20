@@ -34,8 +34,8 @@ public:
 
   ~EnggDiffGSASFittingModel();
 
-  void setObserver(
-      boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
+  void
+  setObserver(std::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
 
   void doRefinements(
       const std::vector<GSASIIRefineFitPeaksParameters> &params) override;
@@ -101,7 +101,7 @@ private:
   RunMap<MAX_BANKS, double> m_rwpMap;
   RunMap<MAX_BANKS, double> m_sigmaMap;
 
-  boost::shared_ptr<IEnggDiffGSASFittingObserver> m_observer;
+  std::shared_ptr<IEnggDiffGSASFittingObserver> m_observer;
 
   std::unique_ptr<QThread> m_workerThread;
 

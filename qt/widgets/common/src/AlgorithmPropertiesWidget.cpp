@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IWorkspaceProperty.h"
@@ -30,7 +29,6 @@
 using namespace Mantid::Kernel;
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
-using Mantid::API::AlgorithmProxy;
 using Mantid::API::FrameworkManager;
 using Mantid::API::IWorkspaceProperty;
 
@@ -124,11 +122,10 @@ void AlgorithmPropertiesWidget::setAlgorithmName(QString name) {
   try {
     Algorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
-    auto algProxy = boost::make_shared<AlgorithmProxy>(alg);
-    algProxy->initialize();
+    alg->initialize();
 
     // Set the algorithm ptr. This will redo the layout
-    this->setAlgorithm(algProxy);
+    this->setAlgorithm(alg);
   } catch (std::runtime_error &) {
   }
 }

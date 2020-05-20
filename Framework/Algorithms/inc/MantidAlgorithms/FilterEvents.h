@@ -79,7 +79,7 @@ private:
   void processMatrixSplitterWorkspace();
 
   /// create event workspace
-  boost::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
+  std::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
   /// create output workspaces if the splitters are given in SplittersWorkspace
   void createOutputWorkspacesSplitters();
   /// create output workspaces in the case of using TableWorlspace for splitters

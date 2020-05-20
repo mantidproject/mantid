@@ -124,8 +124,12 @@ class SampleTest(unittest.TestCase):
     def test_deep_copyable(self):
         self.do_test_copyable(copy.deepcopy)
 
-
-
+    def test_equals(self):
+        a = Sample()
+        b = Sample()
+        self.assertEqual(a, b)
+        b.setThickness(10)
+        self.assertNotEqual(a, b)
 
 if __name__ == '__main__':
     unittest.main()

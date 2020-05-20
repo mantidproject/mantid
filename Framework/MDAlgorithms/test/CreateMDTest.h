@@ -250,8 +250,5 @@ public:
         "__CreateMDTest_mdworkspace");
     Mantid::API::AnalysisDataService::Instance().remove(
         "__CreateMDTest_mdworkspace_fb");
-
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
   }
 };

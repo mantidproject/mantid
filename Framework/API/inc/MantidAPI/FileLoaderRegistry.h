@@ -10,15 +10,16 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/SingletonHolder.h"
 
 #ifndef Q_MOC_RUN
 #include <type_traits>
 #endif
 
+#include <array>
 #include <map>
 #include <string>
-#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -41,7 +42,7 @@ DECLARE_ALGORITHM macro
 class MANTID_API_DLL FileLoaderRegistryImpl {
 public:
   /// Defines types of possible file
-  enum LoaderFormat { Nexus, Generic };
+  enum LoaderFormat { Nexus, Generic, NexusHDF5 };
 
 public:
   /// @returns the number of entries in the registry
@@ -72,7 +73,7 @@ public:
   void unsubscribe(const std::string &name, const int version = -1);
 
   /// Returns the name of an Algorithm that can load the given filename
-  const boost::shared_ptr<IAlgorithm>
+  const std::shared_ptr<IAlgorithm>
   chooseLoader(const std::string &filename) const;
   /// Checks whether the given algorithm can load the file
   bool canLoad(const std::string &algorithmName,
@@ -101,6 +102,17 @@ private:
               "API::IFileLoader<Kernel::NexusDescriptor>");
         }
         break;
+      case NexusHDF5:
+        if (!std::is_base_of<IFileLoader<Kernel::NexusHDF5Descriptor>,
+                             T>::value) {
+          throw std::runtime_error(
+              std::string("FileLoaderRegistryImpl::subscribe - Class '") +
+              typeid(T).name() +
+              "' registered as NexusHDF5 loader but it does not "
+              "inherit from "
+              "API::IFileLoader<Kernel::NexusHDF5Descriptor>");
+        }
+        break;
       case Generic:
         if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
           throw std::runtime_error(
@@ -122,8 +134,8 @@ private:
                        std::multimap<std::string, int> &typedLoaders);
 
   /// The list of names. The index pointed to by LoaderFormat defines a set for
-  /// that format
-  std::vector<std::multimap<std::string, int>> m_names;
+  /// that format. The length is equal to the length of the LoaderFormat enum
+  std::array<std::multimap<std::string, int>, 3> m_names;
   /// Total number of names registered
   size_t m_totalSize;
 

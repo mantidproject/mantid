@@ -50,7 +50,7 @@ void removeLayout(QWidget *widget) {
  * @param presenter : Proxy through which all information can be fetched.
  */
 void PeaksViewer::setPresenter(
-    const boost::shared_ptr<ProxyCompositePeaksPresenter> &presenter) {
+    const std::shared_ptr<ProxyCompositePeaksPresenter> &presenter) {
   m_presenter = presenter;
   m_presenter->registerView(this);
 
@@ -441,7 +441,7 @@ void PeaksViewer::performUpdate() {
 
 void PeaksViewer::updatePeaksWorkspace(
     const std::string &toName,
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) {
+    std::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) {
   /* Any widget with *toWorkspace*  peaks workspace being wrapped. Although, if
    *that's the case, we don't need to perform
    * a replacement, we only need to prompt the widget to update itself around
@@ -477,7 +477,7 @@ void PeaksViewer::updatePeaksWorkspace(
 }
 
 bool PeaksViewer::removePeaksWorkspace(
-    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &toRemove) {
+    const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &toRemove) {
   bool somethingToRemove = false;
   if (m_presenter) {
 

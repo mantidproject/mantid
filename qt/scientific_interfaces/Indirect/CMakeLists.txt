@@ -27,32 +27,23 @@ set(
         IndirectDataAnalysisTab.cpp
         IndirectDataReduction.cpp
         IndirectDataReductionTab.cpp
-        IndirectDataTablePresenterLegacy.cpp
         IndirectDataTablePresenter.cpp
         IndirectDataValidationHelper.cpp
         IndirectDiffractionReduction.cpp
         IndirectEditResultsDialog.cpp
-        IndirectFitAnalysisTabLegacy.cpp
         IndirectFitAnalysisTab.cpp
-        IndirectFitDataLegacy.cpp
-        IndirectFitDataPresenterLegacy.cpp
-        IndirectFitDataViewLegacy.cpp
-        IndirectFitOutputLegacy.cpp
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
         IndirectFitDataView.cpp
-        IndirectFitOutput.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
-        IndirectFitPlotModelLegacy.cpp
-        IndirectFitPlotPresenterLegacy.cpp
-        IndirectFitPlotViewLegacy.cpp
-        IndirectFittingModelLegacy.cpp
         IndirectFitPlotModel.cpp
         IndirectFitPlotPresenter.cpp
         IndirectFitPlotView.cpp
         IndirectFittingModel.cpp
+        IndirectFitDataModel.cpp
+        IndirectFitOutputModel.cpp
         IndirectInstrumentConfig.cpp
         IndirectInterface.cpp
         IndirectLoadILL.cpp
@@ -70,8 +61,6 @@ set(
         IndirectSettingsView.cpp
         IndirectSimulation.cpp
         IndirectSimulationTab.cpp
-        IndirectSpectrumSelectionPresenterLegacy.cpp
-        IndirectSpectrumSelectionViewLegacy.cpp
         IndirectSpectrumSelectionPresenter.cpp
         IndirectSpectrumSelectionView.cpp
         IndirectSqw.cpp
@@ -92,12 +81,9 @@ set(
         IndirectFunctionBrowser/IqtFunctionModel.cpp
         IndirectFunctionBrowser/IqtTemplateBrowser.cpp
         IndirectFunctionBrowser/IqtTemplatePresenter.cpp
-        IndirectFunctionBrowser/MSDFunctionModel.cpp
-        IndirectFunctionBrowser/MSDTemplateBrowser.cpp
-        IndirectFunctionBrowser/MSDTemplatePresenter.cpp
-        IndirectFunctionBrowser/FQFunctionModel.cpp
-        IndirectFunctionBrowser/FQTemplateBrowser.cpp
-        IndirectFunctionBrowser/FQTemplatePresenter.cpp
+        IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
+        IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
+        IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
         JumpFit.cpp
         JumpFitAddWorkspaceDialog.cpp
         JumpFitDataPresenter.cpp
@@ -119,17 +105,13 @@ set(
         DllConfig.h
         IndexTypes.h
         IndirectDataValidationHelper.h
-        IndirectFitDataLegacy.h
-        IndirectFitOutputLegacy.h
         IndirectFitData.h
-        IndirectFitOutput.h
         IndirectFitOutputOptionsModel.h
-        IndirectFitPlotModelLegacy.h
-        IndirectFitPlotPresenterLegacy.h
-        IndirectFittingModelLegacy.h
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
+        IndirectFitDataModel.h
+        IndirectFitOutputModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h
         IndirectToolsTab.h
@@ -137,7 +119,6 @@ set(
         IqtFitModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectFunctionBrowser/IqtFunctionModel.h
-        IndirectFunctionBrowser/MSDFunctionModel.h
         JumpFitModel.h
         MSDFitModel.h
         Notifier.h
@@ -160,10 +141,8 @@ set(
         Elwin.h
         FunctionTemplateBrowser.h
         IAddWorkspaceDialog.h
-        IIndirectFitDataViewLegacy.h
         IIndirectFitDataView.h
         IIndirectFitOutputOptionsView.h
-        IIndirectFitPlotViewLegacy.h
         IIndirectFitPlotView.h
         IIndirectSettingsView.h
         ILLEnergyTransfer.h
@@ -175,20 +154,14 @@ set(
         IndirectDataAnalysisTab.h
         IndirectDataReduction.h
         IndirectDataReductionTab.h
-        IndirectDataTablePresenterLegacy.h
         IndirectDataTablePresenter.h
         IndirectDiffractionReduction.h
         IndirectEditResultsDialog.h
-        IndirectFitAnalysisTabLegacy.h
         IndirectFitAnalysisTab.h
-        IndirectFitDataPresenterLegacy.h
-        IndirectFitDataViewLegacy.h
         IndirectFitDataPresenter.h
         IndirectFitDataView.h
         IndirectFitOutputOptionsPresenter.h
         IndirectFitOutputOptionsView.h
-        IndirectFitPlotPresenterLegacy.h
-        IndirectFitPlotViewLegacy.h
         IndirectFitPlotPresenter.h
         IndirectFitPlotView.h
         IndirectInstrumentConfig.h
@@ -205,8 +178,6 @@ set(
         IndirectSettingsView.h
         IndirectSimulation.h
         IndirectSimulationTab.h
-        IndirectSpectrumSelectionPresenterLegacy.h
-        IndirectSpectrumSelectionViewLegacy.h
         IndirectSpectrumSelectionPresenter.h
         IndirectSpectrumSelectionView.h
         IndirectSqw.h
@@ -221,10 +192,8 @@ set(
         IndirectFunctionBrowser/ConvTemplatePresenter.h
         IndirectFunctionBrowser/IqtTemplateBrowser.h
         IndirectFunctionBrowser/IqtTemplatePresenter.h
-        IndirectFunctionBrowser/MSDTemplateBrowser.h
-        IndirectFunctionBrowser/MSDTemplatePresenter.h
-        IndirectFunctionBrowser/FQTemplateBrowser.h
-        IndirectFunctionBrowser/FQTemplatePresenter.h
+        IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
+        IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
         IndirectFitPropertyBrowser.h
         Iqt.h
         ISISCalibration.h
@@ -259,7 +228,6 @@ set(
         IndirectDataReduction.ui
         IndirectDiffractionReduction.ui
         IndirectEditResultsDialog.ui
-        IndirectFitDataViewLegacy.ui
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui
         IndirectFitPreviewPlot.ui
@@ -357,32 +325,23 @@ set(
         IndirectDataReduction.cpp
         IndirectDataReductionTab.cpp
         IndirectDataTablePresenter.cpp
-        IndirectDataTablePresenterLegacy.cpp
         IndirectDataValidationHelper.cpp
         IndirectDiffractionReduction.cpp
         IndirectEditResultsDialog.cpp
         IndirectFitAnalysisTab.cpp
-        IndirectFitAnalysisTabLegacy.cpp
         IndirectFitData.cpp
-        IndirectFitDataLegacy.cpp
         IndirectFitDataPresenter.cpp
-        IndirectFitDataPresenterLegacy.cpp
         IndirectFitDataView.cpp
-        IndirectFitDataViewLegacy.cpp
-        IndirectFitOutput.cpp
-        IndirectFitOutputLegacy.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
         IndirectFitPropertyBrowser.cpp
         IndirectFitPlotModel.cpp
-        IndirectFitPlotModelLegacy.cpp
         IndirectFitPlotPresenter.cpp
-        IndirectFitPlotPresenterLegacy.cpp
         IndirectFitPlotView.cpp
-        IndirectFitPlotViewLegacy.cpp
         IndirectFittingModel.cpp
-        IndirectFittingModelLegacy.cpp
+        IndirectFitDataModel.cpp
+        IndirectFitOutputModel.cpp
         IndirectInstrumentConfig.cpp
         IndirectInterface.cpp
         IndirectLoadILL.cpp
@@ -401,9 +360,7 @@ set(
         IndirectSimulation.cpp
         IndirectSimulationTab.cpp
         IndirectSpectrumSelectionPresenter.cpp
-        IndirectSpectrumSelectionPresenterLegacy.cpp
         IndirectSpectrumSelectionView.cpp
-        IndirectSpectrumSelectionViewLegacy.cpp
         IndirectSqw.cpp
         IndirectSymmetrise.cpp
         IndirectTab.cpp
@@ -421,12 +378,9 @@ set(
         IndirectFunctionBrowser/IqtFunctionModel.cpp
         IndirectFunctionBrowser/IqtTemplateBrowser.cpp
         IndirectFunctionBrowser/IqtTemplatePresenter.cpp
-        IndirectFunctionBrowser/MSDFunctionModel.cpp
-        IndirectFunctionBrowser/MSDTemplateBrowser.cpp
-        IndirectFunctionBrowser/MSDTemplatePresenter.cpp
-        IndirectFunctionBrowser/FQFunctionModel.cpp
-        IndirectFunctionBrowser/FQTemplateBrowser.cpp
-        IndirectFunctionBrowser/FQTemplatePresenter.cpp
+        IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
+        IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
+        IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
         JumpFit.cpp
         JumpFitAddWorkspaceDialog.cpp
         JumpFitDataPresenter.cpp
@@ -459,10 +413,8 @@ set(
         ISISEnergyTransfer.h
         IAddWorkspaceDialog.h
         IIndirectFitDataView.h
-        IIndirectFitDataViewLegacy.h
         IIndirectFitOutputOptionsView.h
         IIndirectFitPlotView.h
-        IIndirectFitPlotViewLegacy.h
         IIndirectSettingsView.h
         IndirectAddWorkspaceDialog.h
         IndirectBayes.h
@@ -473,22 +425,16 @@ set(
         IndirectDataReduction.h
         IndirectDataReductionTab.h
         IndirectDataTablePresenter.h
-        IndirectDataTablePresenterLegacy.h
         IndirectDiffractionReduction.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
-        IndirectFitAnalysisTabLegacy.h
         IndirectFitDataPresenter.h
-        IndirectFitDataPresenterLegacy.h
         IndirectFitDataView.h
-        IndirectFitDataViewLegacy.h
         IndirectFitOutputOptionsPresenter.h
         IndirectFitOutputOptionsView.h
         IndirectFitPropertyBrowser.h
         IndirectFitPlotPresenter.h
-        IndirectFitPlotPresenterLegacy.h
         IndirectFitPlotView.h
-        IndirectFitPlotViewLegacy.h
         IndirectInstrumentConfig.h
         IndirectInterface.h
         IndirectLoadILL.h
@@ -504,9 +450,7 @@ set(
         IndirectSimulation.h
         IndirectSimulationTab.h
         IndirectSpectrumSelectionPresenter.h
-        IndirectSpectrumSelectionPresenterLegacy.h
         IndirectSpectrumSelectionView.h
-        IndirectSpectrumSelectionViewLegacy.h
         IndirectSqw.h
         IndirectSymmetrise.h
         IndirectTab.h
@@ -519,10 +463,8 @@ set(
         IndirectFunctionBrowser/ConvTemplatePresenter.h
         IndirectFunctionBrowser/IqtTemplateBrowser.h
         IndirectFunctionBrowser/IqtTemplatePresenter.h
-        IndirectFunctionBrowser/MSDTemplateBrowser.h
-        IndirectFunctionBrowser/MSDTemplatePresenter.h
-        IndirectFunctionBrowser/FQTemplateBrowser.h
-        IndirectFunctionBrowser/FQTemplatePresenter.h
+        IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
+        IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
         Iqt.h
         JumpFitAddWorkspaceDialog.h
         JumpFitDataPresenter.h
@@ -540,16 +482,12 @@ set(
         ConvFitModel.h
         IndirectDataValidationHelper.h
         IndirectFitData.h
-        IndirectFitDataLegacy.h
-        IndirectFitOutput.h
-        IndirectFitOutputLegacy.h
         IndirectFitOutputOptionsModel.h
         IndirectFitPlotModel.h
-        IndirectFitPlotModelLegacy.h
         IndirectFitPlotPresenter.h
-        IndirectFitPlotPresenterLegacy.h
         IndirectFittingModel.h
-        IndirectFittingModelLegacy.h
+        IndirectFitDataModel.h
+        IndirectFitOutputModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h
         IPythonRunner.h

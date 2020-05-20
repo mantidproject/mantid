@@ -72,28 +72,6 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{0});
   }
 
-  void
-  test_that_setFitType_will_change_the_fit_type_in_the_sequentialFitOutputName() {
-    Spectra const spectra = Spectra("0-1");
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "Name_HWHM_FofQFit_ChudleyElliots");
-  }
-
-  void
-  test_that_setFitType_will_change_the_fit_type_in_the_simultaneousFitOutputName() {
-    Spectra const spectra = Spectra("0-1");
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "Name_HWHM_FofQFit_ChudleyElliots");
-  }
-
   void test_that_zeroWidths_returns_false_if_the_workspace_contains_widths() {
     Spectra const spectra = Spectra("0-1");
 
@@ -157,10 +135,6 @@ public:
     addWorkspacesToModel(spectra, m_workspace, m_workspace);
 
     TS_ASSERT(!m_model->isMultiFit());
-  }
-
-  void test_that_getSpectrumDependentAttributes_returns_an_empty_vector() {
-    TS_ASSERT(m_model->getSpectrumDependentAttributes().empty());
   }
 
   void
@@ -260,56 +234,17 @@ public:
                      3);
   }
 
-  void
-  test_that_sequentialFitOutputName_returns_the_correct_name_for_a_multi_fit() {
-    Spectra const spectra = Spectra("0-1");
-    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
-    m_ads->addOrReplace("Name2", workspace2);
-
-    addWorkspacesToModel(spectra, m_workspace, workspace2);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->sequentialFitOutputName(),
-                     "MultiFofQFit_ChudleyElliot_Results");
-  }
-
-  void
-  test_that_simultaneousFitOutputName_returns_the_correct_name_for_a_multi_fit() {
-    Spectra const spectra = Spectra("0-1");
-    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
-    m_ads->addOrReplace("Name2", workspace2);
-
-    addWorkspacesToModel(spectra, m_workspace, workspace2);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->simultaneousFitOutputName(),
-                     "MultiFofQFit_ChudleyElliot_Results");
-  }
-
-  void
-  test_that_singleFitOutputName_returns_the_correct_name_for_a_single_data_set_fit() {
-    Spectra const spectra = Spectra("0-1");
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setFitType("ChudleyElliot");
-
-    TS_ASSERT_EQUALS(m_model->singleFitOutputName(
-                         TableDatasetIndex{0},
-                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
-                     "Name_HWHM_FofQFit_ChudleyElliot_s0_Results");
-  }
-
 private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,
                             Workspaces const &... workspaces) {
-    m_model->addWorkspace(workspace, spectra);
+    m_model->addWorkspace(workspace->getName());
     addWorkspacesToModel(spectra, workspaces...);
   }
 
-  void addWorkspacesToModel(Spectra const &spectra,
+  void addWorkspacesToModel(Spectra const &,
                             MatrixWorkspace_sptr const &workspace) {
-    m_model->addWorkspace(workspace, spectra);
+    m_model->addWorkspace(workspace->getName());
   }
 
   MatrixWorkspace_sptr m_workspace;

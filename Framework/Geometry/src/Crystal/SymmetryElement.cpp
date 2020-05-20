@@ -7,7 +7,7 @@
 #include "MantidGeometry/Crystal/SymmetryElement.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -21,7 +21,7 @@ SymmetryElementIdentity::SymmetryElementIdentity() : SymmetryElement("1") {}
 
 /// Returns a clone of the identity element.
 SymmetryElement_sptr SymmetryElementIdentity::clone() const {
-  return boost::make_shared<SymmetryElementIdentity>();
+  return std::make_shared<SymmetryElementIdentity>();
 }
 
 /// Constructor with inversion point, default is (0,0,0).
@@ -30,7 +30,7 @@ SymmetryElementInversion::SymmetryElementInversion(const V3R &inversionPoint)
 
 /// Returns a clone of the inversion element.
 SymmetryElement_sptr SymmetryElementInversion::clone() const {
-  return boost::make_shared<SymmetryElementInversion>(m_inversionPoint);
+  return std::make_shared<SymmetryElementInversion>(m_inversionPoint);
 }
 
 /// Constructor for SymmetryElementWithAxis.
@@ -59,7 +59,7 @@ SymmetryElementRotation::SymmetryElementRotation(
 
 /// Returns a clone of the symmetry element.
 SymmetryElement_sptr SymmetryElementRotation::clone() const {
-  return boost::make_shared<SymmetryElementRotation>(
+  return std::make_shared<SymmetryElementRotation>(
       m_hmSymbol, m_axis, m_translation, m_rotationSense);
 }
 
@@ -71,8 +71,8 @@ SymmetryElementMirror::SymmetryElementMirror(const std::string &symbol,
 
 /// Returns a clone of the mirror plane.
 SymmetryElement_sptr SymmetryElementMirror::clone() const {
-  return boost::make_shared<SymmetryElementMirror>(m_hmSymbol, m_axis,
-                                                   m_translation);
+  return std::make_shared<SymmetryElementMirror>(m_hmSymbol, m_axis,
+                                                 m_translation);
 }
 
 /// Constructor for translation element, requires translation vector.
@@ -81,7 +81,7 @@ SymmetryElementTranslation::SymmetryElementTranslation(const V3R &translation)
 
 /// Returns a clone of the translation.
 SymmetryElement_sptr SymmetryElementTranslation::clone() const {
-  return boost::make_shared<SymmetryElementTranslation>(m_translation);
+  return std::make_shared<SymmetryElementTranslation>(m_translation);
 }
 
 } // namespace Geometry

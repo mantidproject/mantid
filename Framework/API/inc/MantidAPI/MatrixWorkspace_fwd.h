@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace Mantid {
@@ -18,9 +17,9 @@ namespace API {
 /// forward declare of Mantid::API::MatrixWorkspace
 class MatrixWorkspace;
 /// shared pointer to Mantid::API::MatrixWorkspace
-using MatrixWorkspace_sptr = boost::shared_ptr<MatrixWorkspace>;
+using MatrixWorkspace_sptr = std::shared_ptr<MatrixWorkspace>;
 /// shared pointer to Mantid::API::MatrixWorkspace (const version)
-using MatrixWorkspace_const_sptr = boost::shared_ptr<const MatrixWorkspace>;
+using MatrixWorkspace_const_sptr = std::shared_ptr<const MatrixWorkspace>;
 /// unique pointer to Mantid::API::MatrixWorkspace
 using MatrixWorkspace_uptr = std::unique_ptr<MatrixWorkspace>;
 /// unique pointer to Mantid::API::MatrixWorkspace (const version)

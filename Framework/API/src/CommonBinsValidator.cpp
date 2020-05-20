@@ -12,7 +12,7 @@ namespace API {
 
 /// Clone the current state
 Kernel::IValidator_sptr CommonBinsValidator::clone() const {
-  return boost::make_shared<CommonBinsValidator>(*this);
+  return std::make_shared<CommonBinsValidator>(*this);
 }
 
 /** Checks that the bin boundaries of each histogram in the workspace are the

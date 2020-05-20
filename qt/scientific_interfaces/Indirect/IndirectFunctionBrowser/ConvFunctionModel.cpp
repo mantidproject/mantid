@@ -87,7 +87,7 @@ void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_hasTempCorrection = true;
-      if (boost::dynamic_pointer_cast<CompositeFunction>(
+      if (std::dynamic_pointer_cast<CompositeFunction>(
               innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else
@@ -279,7 +279,7 @@ void ConvFunctionModel::setResolution(std::string const &name,
 }
 
 void ConvFunctionModel::setResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_fitResolutions = fitResolutions;
   setModel();
 }
@@ -635,29 +635,35 @@ std::string ConvFunctionModel::buildLorentzianFunctionString() const {
 }
 
 std::string ConvFunctionModel::buildTeixeiraFunctionString() const {
-  return "name=TeixeiraWaterSQE";
+  return "name=TeixeiraWaterSQE, Height=1, DiffCoeff=2.3, Tau=1.25, Centre=0, "
+         "constraints=(Height>0, DiffCoeff>0, Tau>0)";
 }
 
 std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
-  return "name=StretchedExpFT";
+  return "name=StretchedExpFT, Height=0.1, Tau=100, Beta=1, Centre=0, "
+         "constraints=(Height>0, Tau>0)";
 }
 
 std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
-  return "name=ElasticDiffSphere";
+  return "name=ElasticDiffSphere, Height=1, Centre=0, Radius=2, "
+         "constraints=(Height>0, Radius>0)";
 }
 
 std::string ConvFunctionModel::buildInelasticDiffSphereFunctionString() const {
-  return "name=InelasticDiffSphere";
+  return "name=InelasticDiffSphere, Intensity=1, Radius=2, Diffusion=0.05, "
+         "Shift=0, constraints=(Intensity>0, Radius>0, Diffusion>0)";
 }
 
 std::string
 ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
-  return "name=InelasticDiffRotDiscreteCircle";
+  return "name=InelasticDiffRotDiscreteCircle, Intensity=1, Radius=1, Decay=1, "
+         "Shift=0, constraints=(Intensity>0, Radius>0)";
 }
 
 std::string
 ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
-  return "name=ElasticDiffRotDiscreteCircle";
+  return "name=ElasticDiffRotDiscreteCircle, Height=1, Centre=0, Radius=1, "
+         "constraints=(Height>0, Radius>0)";
 }
 
 std::string ConvFunctionModel::buildPeaksFunctionString() const {

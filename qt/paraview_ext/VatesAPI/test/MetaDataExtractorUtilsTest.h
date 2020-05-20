@@ -55,7 +55,7 @@ public:
     Mantid::API::Workspace_sptr workspace =
         WorkspaceFactory::Instance().createTable();
     Mantid::API::IMDHistoWorkspace_sptr histoWorkspace =
-        boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
+        std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
 
     MetaDataExtractorUtils extractor;
 

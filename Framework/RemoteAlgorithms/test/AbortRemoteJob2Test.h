@@ -34,8 +34,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<AbortRemoteJob2> a;
-    TS_ASSERT(a = boost::make_shared<AbortRemoteJob2>());
+    std::shared_ptr<AbortRemoteJob2> a;
+    TS_ASSERT(a = std::make_shared<AbortRemoteJob2>());
     // can cast to inherited interfaces and base classes
 
     TS_ASSERT(

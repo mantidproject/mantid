@@ -139,15 +139,15 @@ void CalculateDIFC::exec() {
   API::MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
 
   if ((!bool(inputWs == outputWs)) ||
-      (!bool(boost::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs)))) {
-    outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        boost::make_shared<SpecialWorkspace2D>(inputWs->getInstrument()));
+      (!bool(std::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs)))) {
+    outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(
+        std::make_shared<SpecialWorkspace2D>(inputWs->getInstrument()));
     outputWs->setTitle("DIFC workspace");
   }
 
   // convert to actual type being used
   DataObjects::SpecialWorkspace2D_sptr outputSpecialWs =
-      boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(outputWs);
+      std::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(outputWs);
 
   API::Progress progress(this, 0.0, 1.0, inputWs->getNumberHistograms());
   if (bool(calibWs)) {

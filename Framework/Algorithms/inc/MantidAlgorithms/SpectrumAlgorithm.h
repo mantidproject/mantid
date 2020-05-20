@@ -153,7 +153,7 @@ void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
     const DataObjects::EventWorkspace &workspace);
 
 /// Typedef for a shared pointer to a SpectrumAlgorithm
-using SpectrumAlgorithm_sptr = boost::shared_ptr<SpectrumAlgorithm>;
+using SpectrumAlgorithm_sptr = std::shared_ptr<SpectrumAlgorithm>;
 
 } // namespace Algorithms
 } // namespace Mantid

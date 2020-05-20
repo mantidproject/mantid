@@ -455,7 +455,7 @@ void FitDialog::createInputWorkspaceWidgets() {
   if (!fun)
     return;
   auto multid =
-      boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(fun);
+      std::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(fun);
   if (multid) {
     // number of domains that the function expects
     size_t nd = multid->getMaxIndex();
@@ -515,10 +515,10 @@ namespace {
  * @param fun :: Function to check
  */
 bool isFunctionMD(const Mantid::API::IFunction_sptr &fun) {
-  auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+  auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (!cf)
     return static_cast<bool>(
-        boost::dynamic_pointer_cast<Mantid::API::IFunctionMD>(fun));
+        std::dynamic_pointer_cast<Mantid::API::IFunctionMD>(fun));
   for (size_t i = 0; i < cf->nFunctions(); ++i) {
     bool yes = isFunctionMD(cf->getFunction(i));
     if (yes)

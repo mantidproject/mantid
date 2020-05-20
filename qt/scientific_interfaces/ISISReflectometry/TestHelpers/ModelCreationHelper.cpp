@@ -200,6 +200,19 @@ ReductionJobs oneGroupWithARowWithOutputQRangeModel() {
   return reductionJobs;
 }
 
+ReductionJobs oneGroupWithARowWithInputQRangeModelMixedPrecision() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  auto row =
+      Row({"12345"}, 0.555555, TransmissionRunPair({"Trans A", "Trans B"}),
+          RangeInQ(0.55567, 0.012, 0.9), boost::none, ReductionOptionsMap(),
+          ReductionWorkspaces({"12345"},
+                              TransmissionRunPair({"Trans A", "Trans B"})));
+  group1.appendRow(row);
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
 ReductionJobs oneGroupWithAnotherRowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
@@ -278,6 +291,51 @@ ReductionJobs twoGroupsWithTwoRowsModel() {
   return reductionJobs;
 }
 
+ReductionJobs twoGroupsWithTwoRowsAndOneEmptyGroupModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  group1.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(makeRow("22346", 0.8));
+  reductionJobs.appendGroup(std::move(group2));
+
+  reductionJobs.appendGroup(Group("Test group 3"));
+
+  return reductionJobs;
+}
+
+ReductionJobs twoGroupsWithOneRowAndOneInvalidRowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(boost::none);
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(boost::none);
+  reductionJobs.appendGroup(std::move(group2));
+
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(boost::none);
+  reductionJobs.appendGroup(std::move(group2));
+
+  return reductionJobs;
+}
+
 ReductionJobs twoGroupsWithMixedRowsModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
@@ -317,27 +375,27 @@ std::vector<PerThetaDefaults> makePerThetaDefaults() {
   auto perThetaDefaults =
       PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
                        RangeInQ(boost::none, boost::none, boost::none),
-                       boost::none, boost::none);
+                       boost::none, boost::none, boost::none);
   return std::vector<PerThetaDefaults>{std::move(perThetaDefaults)};
 }
 
 std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard() {
   return std::vector<PerThetaDefaults>{
       // wildcard row with no angle
-      PerThetaDefaults(boost::none, TransmissionRunPair("22345", "22346"),
-                       ProcessingInstructions("5-6"),
-                       RangeInQ(0.007, 0.01, 1.1), 0.7,
-                       ProcessingInstructions("1")),
+      PerThetaDefaults(
+          boost::none, TransmissionRunPair("22345", "22346"),
+          ProcessingInstructions("5-6"), RangeInQ(0.007, 0.01, 1.1), 0.7,
+          ProcessingInstructions("1"), ProcessingInstructions("3,7")),
       // two angle rows
       PerThetaDefaults(0.5, TransmissionRunPair("22347", ""), boost::none,
                        RangeInQ(0.008, 0.02, 1.2), 0.8,
-                       ProcessingInstructions("2-3")),
+                       ProcessingInstructions("2-3"), boost::none),
       PerThetaDefaults(
           2.3,
           TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
                               std::vector<std::string>{"22358", "22359"}),
           ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9,
-          ProcessingInstructions("4-6"))};
+          ProcessingInstructions("4-6"), ProcessingInstructions("2-3,7-8"))};
 }
 
 std::map<std::string, std::string> makeStitchOptions() {
@@ -347,6 +405,15 @@ std::map<std::string, std::string> makeStitchOptions() {
 
 std::map<std::string, std::string> makeEmptyStitchOptions() {
   return std::map<std::string, std::string>();
+}
+
+BackgroundSubtraction makeBackgroundSubtraction() {
+  return BackgroundSubtraction(true, BackgroundSubtractionType::Polynomial, 3,
+                               CostFunctionType::UnweightedLeastSquares);
+}
+
+BackgroundSubtraction makeEmptyBackgroundSubtraction() {
+  return BackgroundSubtraction();
 }
 
 PolarizationCorrections makePolarizationCorrections() {
@@ -374,14 +441,16 @@ TransmissionStitchOptions makeEmptyTransmissionStitchOptions() {
 Experiment makeExperiment() {
   return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample,
                     SummationType::SumInQ, true, true,
-                    makePolarizationCorrections(), makeFloodCorrections(),
-                    makeTransmissionStitchOptions(), makeStitchOptions(),
+                    makeBackgroundSubtraction(), makePolarizationCorrections(),
+                    makeFloodCorrections(), makeTransmissionStitchOptions(),
+                    makeStitchOptions(),
                     makePerThetaDefaultsWithTwoAnglesAndWildcard());
 }
 
 Experiment makeEmptyExperiment() {
   return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                     SummationType::SumInLambda, false, false,
+                    makeEmptyBackgroundSubtraction(),
                     PolarizationCorrections(PolarizationCorrectionType::None),
                     FloodCorrections(FloodCorrectionType::Workspace),
                     TransmissionStitchOptions(),

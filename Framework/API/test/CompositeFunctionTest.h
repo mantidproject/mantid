@@ -1222,7 +1222,7 @@ public:
 
   void test_local_name() {
     std::string funStr = "name=Linear;(name=Linear;(name=Linear;name=Linear))";
-    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto fun = std::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createInitialized(funStr));
     TS_ASSERT_EQUALS(fun->parameterLocalIndex(0), 0);
     TS_ASSERT_EQUALS(fun->parameterLocalIndex(2), 0);

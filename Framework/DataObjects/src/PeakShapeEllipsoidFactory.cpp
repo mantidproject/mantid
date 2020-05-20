@@ -85,7 +85,7 @@ PeakShapeEllipsoidFactory::create(const std::string &source) const {
  * @param successorFactory : successor
  */
 void PeakShapeEllipsoidFactory::setSuccessor(
-    boost::shared_ptr<const PeakShapeFactory> successorFactory) {
+    std::shared_ptr<const PeakShapeFactory> successorFactory) {
   this->m_successor = successorFactory;
 }
 

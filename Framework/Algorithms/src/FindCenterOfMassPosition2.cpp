@@ -32,7 +32,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void FindCenterOfMassPosition2::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
@@ -55,7 +55,7 @@ void FindCenterOfMassPosition2::init() {
       "center of mass "
       "of the scattering data will be computed by excluding the beam area.");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("BeamRadius", 0.0155, positiveDouble,
                   "Radius of the beam area, in meters, used the exclude the "
@@ -89,7 +89,7 @@ void FindCenterOfMassPosition2::exec() {
   Progress progress(this, 0.0, 1.0, max_iteration);
 
   EventWorkspace_const_sptr inputEventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWSWvl);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWSWvl);
   if (inputEventWS) {
     std::vector<double> y_values(numSpec);
     std::vector<double> e_values(numSpec);
@@ -263,7 +263,7 @@ void FindCenterOfMassPosition2::exec() {
     setPropertyValue("OutputWorkspace", output);
 
     Mantid::API::ITableWorkspace_sptr m_result =
-        boost::make_shared<TableWorkspace>();
+        std::make_shared<TableWorkspace>();
     m_result->addColumn("str", "Name");
     m_result->addColumn("double", "Value");
 
@@ -277,7 +277,7 @@ void FindCenterOfMassPosition2::exec() {
     // Store the results using an ArrayProperty
     if (!existsProperty("CenterOfMass"))
       declareProperty(std::make_unique<ArrayProperty<double>>(
-          "CenterOfMass", boost::make_shared<NullValidator>(),
+          "CenterOfMass", std::make_shared<NullValidator>(),
           Direction::Output));
     std::vector<double> center_of_mass;
     center_of_mass.emplace_back(center_x);

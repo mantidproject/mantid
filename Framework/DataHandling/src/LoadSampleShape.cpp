@@ -32,7 +32,7 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleShape::init() {
-  auto wsValidator = boost::make_shared<API::InstrumentValidator>();
+  auto wsValidator = std::make_shared<API::InstrumentValidator>();
   ;
 
   // input workspace
@@ -70,9 +70,9 @@ void LoadSampleShape::exec() {
 
   const std::string filetype = filename.substr(filename.size() - 3);
 
-  boost::shared_ptr<MeshObject> shape = nullptr;
+  std::shared_ptr<MeshObject> shape = nullptr;
   const std::string scaleProperty = getPropertyValue("Scale");
-  const ScaleUnits scaleType = getScaleType(scaleProperty);
+  const ScaleUnits scaleType = getScaleTypeFromStr(scaleProperty);
 
   if (filetype == "off") {
     auto offReader = LoadOff(filename, scaleType);

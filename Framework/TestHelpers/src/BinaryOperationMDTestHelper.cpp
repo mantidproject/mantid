@@ -11,6 +11,7 @@
  *********************************************************************************/
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -66,7 +67,7 @@ MDHistoWorkspace_sptr doTest(const std::string &algoName,
                              const std::string &otherPropValue) {
   setUpBinaryOperationMDTestHelper();
 
-  IAlgorithm *alg = FrameworkManager::Instance().createAlgorithm(algoName);
+  auto alg = AlgorithmManager::Instance().create(algoName);
   alg->initialize();
   alg->setPropertyValue("LHSWorkspace", lhs);
   alg->setPropertyValue("RHSWorkspace", rhs);
@@ -77,12 +78,12 @@ MDHistoWorkspace_sptr doTest(const std::string &algoName,
   if (succeeds) {
     if (!alg->isExecuted())
       throw std::runtime_error("Algorithm " + algoName + " did not succeed.");
-    IMDWorkspace_sptr out = boost::dynamic_pointer_cast<IMDWorkspace>(
+    IMDWorkspace_sptr out = std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve(outName));
     if (!out)
       throw std::runtime_error("Algorithm " + algoName +
                                " did not create the output workspace.");
-    return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
+    return std::dynamic_pointer_cast<MDHistoWorkspace>(out);
   } else {
     if (alg->isExecuted())
       throw std::runtime_error("Algorithm " + algoName +
@@ -110,7 +111,7 @@ MDHistoWorkspace_sptr doTest(const std::string &algoName,
   AnalysisDataService::Instance().addOrReplace("event", event);
   AnalysisDataService::Instance().addOrReplace("scalar", scalar);
 
-  IAlgorithm *alg = FrameworkManager::Instance().createAlgorithm(algoName);
+  auto alg = AlgorithmManager::Instance().create(algoName);
   alg->initialize();
   alg->setPropertyValue("InputWorkspace", inName);
   alg->setPropertyValue("OutputWorkspace", outName);
@@ -120,12 +121,12 @@ MDHistoWorkspace_sptr doTest(const std::string &algoName,
   if (succeeds) {
     if (!alg->isExecuted())
       throw std::runtime_error("Algorithm " + algoName + " did not succeed.");
-    IMDWorkspace_sptr out = boost::dynamic_pointer_cast<IMDWorkspace>(
+    IMDWorkspace_sptr out = std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve(outName));
     if (!out)
       throw std::runtime_error("Algorithm " + algoName +
                                " did not create the output workspace.");
-    return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
+    return std::dynamic_pointer_cast<MDHistoWorkspace>(out);
   } else {
     if (alg->isExecuted())
       throw std::runtime_error("Algorithm " + algoName +

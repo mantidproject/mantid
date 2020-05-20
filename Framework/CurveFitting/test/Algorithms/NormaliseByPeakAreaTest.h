@@ -23,7 +23,7 @@ createTwoSpectrumWorkspace(double x0 = 50, double x1 = 300, double dx = 0.5) {
 }
 
 Mantid::API::IAlgorithm_sptr createAlgorithm() {
-  Mantid::API::IAlgorithm_sptr alg = boost::make_shared<NormaliseByPeakArea>();
+  Mantid::API::IAlgorithm_sptr alg = std::make_shared<NormaliseByPeakArea>();
   alg->initialize();
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__UNUSED__");

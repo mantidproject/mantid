@@ -16,8 +16,6 @@
 #include <QSignalMapper>
 #include <QString>
 
-#include "MantidAPI/FrameworkManager.h"
-
 namespace MantidQt {
 namespace MantidWidgets {
 /**

@@ -58,7 +58,7 @@ public:
   ~SpectrumView() override;
   void renderWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &wksp);
   void renderWorkspace(const QString &wsName);
-  QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
+  QList<std::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
     return m_spectrumDisplay;
   }
 
@@ -90,10 +90,10 @@ protected:
   void resizeEvent(QResizeEvent *event) override;
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   void dragMoveEvent(QDragMoveEvent *de) override;
   void dragEnterEvent(QDragEnterEvent *de) override;
@@ -105,13 +105,13 @@ private:
   void saveSettings() const;
   bool replaceExistingWorkspace(
       const std::string &wsName,
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+      std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
   std::vector<MatrixWSDataSource_sptr> m_dataSource;
-  QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
-  boost::shared_ptr<GraphDisplay> m_hGraph;
-  boost::shared_ptr<GraphDisplay> m_vGraph;
-  boost::shared_ptr<SVConnections> m_svConnections;
+  QList<std::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
+  std::shared_ptr<GraphDisplay> m_hGraph;
+  std::shared_ptr<GraphDisplay> m_vGraph;
+  std::shared_ptr<SVConnections> m_svConnections;
 
   Ui::SpectrumViewer *m_ui;
   SliderHandler *m_sliderHandler;

@@ -87,8 +87,8 @@ public:
     for (size_t i = 0; i != 4; ++i) {
       const std::string wsName =
           m_outputWSName + std::string("_") + POL_DIRS[i];
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          outputWS->getItem(wsName));
+      MatrixWorkspace_sptr ws =
+          std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
       for (size_t j = 0; j != nHist; ++j) {
@@ -153,8 +153,8 @@ public:
     for (size_t i = 0; i != 4; ++i) {
       const auto &dir = POL_DIRS[i];
       const std::string wsName = m_outputWSName + std::string("_") + dir;
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          outputWS->getItem(wsName));
+      MatrixWorkspace_sptr ws =
+          std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
       for (size_t j = 0; j != nHist; ++j) {
@@ -233,8 +233,8 @@ public:
     for (size_t i = 0; i != 2; ++i) {
       const auto &dir = POL_DIRS[i];
       const std::string wsName = m_outputWSName + std::string("_") + dir;
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          outputWS->getItem(wsName));
+      MatrixWorkspace_sptr ws =
+          std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
       for (size_t j = 0; j != nHist; ++j) {
@@ -282,7 +282,7 @@ public:
     WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_++")));
     TS_ASSERT(ws)
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
@@ -406,13 +406,13 @@ public:
     const Eigen::Vector4d e{ws00->e(0).front(), ws01->e(0).front(),
                             ws10->e(0).front(), ws11->e(0).front()};
     const auto expectedError = error(y, e, F1, F1e, F2, F2e, P1, P1e, P2, P2e);
-    MatrixWorkspace_sptr ppWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ppWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_++")));
-    MatrixWorkspace_sptr pmWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr pmWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_+-")));
-    MatrixWorkspace_sptr mpWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr mpWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_-+")));
-    MatrixWorkspace_sptr mmWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr mmWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_--")));
     TS_ASSERT(ppWS)
     TS_ASSERT(pmWS)
@@ -512,9 +512,9 @@ public:
     const auto expected = correctionWithoutAnalyzer(y, F1, P1);
     const Eigen::Vector2d e{ws00->e(0).front(), ws11->e(0).front()};
     const auto expectedError = errorWithoutAnalyzer(y, e, F1, F1e, P1, P1e);
-    MatrixWorkspace_sptr ppWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ppWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_++")));
-    MatrixWorkspace_sptr mmWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr mmWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_--")));
     TS_ASSERT(ppWS)
     TS_ASSERT(mmWS)
@@ -583,7 +583,7 @@ public:
     const auto errorY = e * e * inverted * inverted;
     const auto expectedError =
         std::sqrt(errorP1 * errorP1 + errorP2 * errorP2 + errorY);
-    MatrixWorkspace_sptr ppWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ppWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_++")));
     TS_ASSERT(ppWS)
     TS_ASSERT_EQUALS(ppWS->getNumberHistograms(), nHist)
@@ -819,8 +819,8 @@ private:
     for (size_t i = 0; i != 4; ++i) {
       const auto &dir = POL_DIRS[i];
       const std::string wsName = m_outputWSName + std::string("_") + dir;
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          outputWS->getItem(wsName));
+      MatrixWorkspace_sptr ws =
+          std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
       for (size_t j = 0; j != nHist; ++j) {
@@ -935,13 +935,13 @@ private:
     const Eigen::Vector4d e{ws00->e(0).front(), ws01->e(0).front(),
                             ws10->e(0).front(), ws11->e(0).front()};
     const auto expectedError = error(y, e, F1, F1e, F2, F2e, P1, P1e, P2, P2e);
-    MatrixWorkspace_sptr ppWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ppWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_++")));
-    MatrixWorkspace_sptr pmWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr pmWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_+-")));
-    MatrixWorkspace_sptr mpWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr mpWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_-+")));
-    MatrixWorkspace_sptr mmWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr mmWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         outputWS->getItem(m_outputWSName + std::string("_--")));
     TS_ASSERT(ppWS)
     TS_ASSERT(pmWS)

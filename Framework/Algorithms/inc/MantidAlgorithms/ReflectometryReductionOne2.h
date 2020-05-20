@@ -158,7 +158,7 @@ private:
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
-  boost::shared_ptr<const Mantid::Geometry::ReferenceFrame> m_refFrame;
+  std::shared_ptr<const Mantid::Geometry::ReferenceFrame> m_refFrame;
   bool m_convertUnits;          // convert the input workspace to lambda
   bool m_normaliseMonitors;     // normalise by monitors and direct beam
   bool m_normaliseTransmission; // transmission or algorithmic correction

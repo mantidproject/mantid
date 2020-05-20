@@ -15,7 +15,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

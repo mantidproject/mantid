@@ -59,7 +59,7 @@ protected:
 };
 
 using BraggScattererInCrystalStructure_sptr =
-    boost::shared_ptr<BraggScattererInCrystalStructure>;
+    std::shared_ptr<BraggScattererInCrystalStructure>;
 
 /**
  * Helper class for validating unit cell strings.

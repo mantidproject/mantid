@@ -7,7 +7,7 @@
 #pragma once
 
 #include <boost/python/dict.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -17,7 +17,7 @@ namespace PythonInterface {
 namespace Registry {
 
 /// Create a C++ PropertyMananager from a Python dictionary
-boost::shared_ptr<Kernel::PropertyManager>
+std::shared_ptr<Kernel::PropertyManager>
 createPropertyManager(const boost::python::dict &mapping);
 } // namespace Registry
 } // namespace PythonInterface

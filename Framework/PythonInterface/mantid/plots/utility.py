@@ -199,3 +199,16 @@ def zoom(ax, x, y, factor):
         than 1 zooms out
     """
     return zoom_axis(ax, x, 'x', factor), zoom_axis(ax, y, 'y', factor)
+
+
+def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None, log_name=None):
+    if log_values is None:
+        if log_name in ["Workspace index", "Workspace", ""]:
+            return ws_index
+
+        return matrix_ws.run().getPropertyAsSingleValueWithTimeAveragedMean(log_name)
+    else:
+        if ws_index >= len(log_values):
+            return 0
+
+        return log_values[ws_index]

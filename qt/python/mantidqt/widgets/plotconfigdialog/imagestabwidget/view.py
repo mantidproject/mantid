@@ -115,7 +115,11 @@ class ImagesTabWidgetView(QWidget):
         return self.interpolation_combo_box.currentText()
 
     def set_interpolation(self, interpolation):
-        self.interpolation_combo_box.setCurrentText(interpolation)
+        index = self.interpolation_combo_box.findText(interpolation, flags=Qt.MatchFixedString)
+        if index >= 0:  # -1 indicates the value was not found.
+            self.interpolation_combo_box.setCurrentIndex(index)
+        else:
+            self.interpolation_combo_box.setCurrentIndex(0)
 
     def get_scale(self):
         return self.scale_combo_box.currentText()

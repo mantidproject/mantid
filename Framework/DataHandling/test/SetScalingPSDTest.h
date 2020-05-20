@@ -166,7 +166,7 @@ private:
     loader.execute();
     Workspace_sptr result =
         AnalysisDataService::Instance().retrieve(outputName);
-    return boost::dynamic_pointer_cast<Workspace2D>(result);
+    return std::dynamic_pointer_cast<Workspace2D>(result);
   }
 
   IAlgorithm_sptr createAlgorithm() {

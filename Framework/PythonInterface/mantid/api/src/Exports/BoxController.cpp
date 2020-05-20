@@ -17,7 +17,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(BoxController)
 
 void export_BoxController() {
-  register_ptr_to_python<boost::shared_ptr<BoxController>>();
+  register_ptr_to_python<std::shared_ptr<BoxController>>();
 
   class_<BoxController, boost::noncopyable>("BoxController", no_init)
       .def("getNDims", &BoxController::getNDims, arg("self"),

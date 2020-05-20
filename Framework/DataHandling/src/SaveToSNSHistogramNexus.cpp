@@ -21,8 +21,8 @@
 
 #include <Poco/File.h>
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 #include <numeric>
 
 #include <cstdlib>
@@ -425,7 +425,7 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
   IComponent_const_sptr det_comp =
       m_inputWorkspace->getInstrument()->getComponentByName(std::string(bank));
   RectangularDetector_const_sptr det =
-      boost::dynamic_pointer_cast<const RectangularDetector>(det_comp);
+      std::dynamic_pointer_cast<const RectangularDetector>(det_comp);
   if (!det) {
     g_log.information()
         << "Detector '" + bank +
@@ -729,7 +729,7 @@ void SaveToSNSHistogramNexus::exec() {
       this, 0.0, 1.0, m_inputWorkspace->getNumberHistograms() * 3);
 
   EventWorkspace_const_sptr eventWorkspace =
-      boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
+      std::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
   if (eventWorkspace) {
     eventWorkspace->sortAll(TOF_SORT, m_progress.get());
   }

@@ -38,7 +38,7 @@ std::string getFunctionString(std::string const &workspaceName) {
 MultiDomainFunction_sptr getFunction(std::string const &functionString) {
   auto fun = FunctionFactory::Instance().createInitialized(
       "composite=MultiDomainFunction;" + functionString + ";" + functionString);
-  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+  return std::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
 } // namespace
@@ -64,14 +64,6 @@ public:
     m_ads.reset();
     m_workspace.reset();
     m_model.reset();
-  }
-
-  void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = Spectra("0-1");
-
-    m_model->addWorkspace(m_workspace, spectra);
-
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   void test_that_addWorkspace_will_add_multiple_workspaces() {
@@ -136,46 +128,6 @@ public:
   }
 
   void
-  test_that_getResolution_will_return_the_a_nullptr_when_the_resolution_has_not_been_set() {
-    Spectra const spectra = Spectra("0-1");
-    auto const resolution = createWorkspace(5, 3);
-
-    addWorkspacesToModel(spectra, m_workspace);
-
-    TS_ASSERT(!m_model->getResolution(TableDatasetIndex{0}));
-  }
-
-  void test_that_getResolution_will_return_the_workspace_which_it_was_set_at() {
-    Spectra const spectra = Spectra("0-1");
-    auto const resolution = createWorkspace(6, 3);
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setResolution(resolution, TableDatasetIndex{0});
-
-    TS_ASSERT_EQUALS(m_model->getResolution(TableDatasetIndex{0}), resolution);
-  }
-
-  void
-  test_that_getResolution_will_return_the_a_nullptr_when_the_index_provided_is_out_of_range() {
-    Spectra const spectra = Spectra("0-1");
-    auto const resolution = createWorkspace(6, 3);
-
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setResolution(resolution, TableDatasetIndex{0});
-
-    TS_ASSERT(!m_model->getResolution(TableDatasetIndex{2}));
-  }
-
-  void test_that_getSpectrumDependentAttributes_returns_workspace_index() {
-    std::vector<std::string> attributes{"WorkspaceIndex"};
-
-    auto const spectrumDependentAttributes =
-        m_model->getSpectrumDependentAttributes();
-    for (auto i = 0u; i < spectrumDependentAttributes.size(); ++i)
-      TS_ASSERT_EQUALS(attributes[i], spectrumDependentAttributes[i]);
-  }
-
-  void
   test_that_removeWorkspace_will_remove_the_workspace_specified_from_the_model() {
     Spectra const spectra = Spectra("0-1");
 
@@ -193,30 +145,10 @@ public:
   }
 
   void
-  test_that_setResolution_will_set_the_resolution_when_provided_a_correct_workspace_name() {
-    m_model->setResolution("Name", TableDatasetIndex{0});
-    TS_ASSERT_EQUALS(m_model->getResolution(TableDatasetIndex{0}), m_workspace);
-  }
-
-  void
   test_that_setResolution_will_throw_when_provided_an_index_that_is_out_of_range() {
-    TS_ASSERT_THROWS(m_model->setResolution(m_workspace, TableDatasetIndex{5}),
-                     const std::out_of_range &);
-  }
-
-  void
-  test_that_get_resolution_for_fit_returns_correctly_for_single_workspace() {
-    Spectra const spectra = Spectra("0,5");
-    addWorkspacesToModel(spectra, m_workspace);
-    m_model->setResolution(m_workspace, TableDatasetIndex{0});
-
-    auto fitResolutions = m_model->getResolutionsForFit();
-
-    TS_ASSERT_EQUALS(fitResolutions.size(), 2);
-    TS_ASSERT_EQUALS(fitResolutions[0].first, "Name");
-    TS_ASSERT_EQUALS(fitResolutions[0].second, 0);
-    TS_ASSERT_EQUALS(fitResolutions[1].first, "Name");
-    TS_ASSERT_EQUALS(fitResolutions[1].second, 5);
+    TS_ASSERT_THROWS(
+        m_model->setResolution(m_workspace->getName(), TableDatasetIndex{5}),
+        const std::out_of_range &);
   }
 
   void
@@ -227,8 +159,8 @@ public:
     m_ads->addOrReplace("Workspace2", workspace2);
     Spectra const spectra2 = Spectra("1-2");
     addWorkspacesToModel(spectra2, workspace2);
-    m_model->setResolution(m_workspace, TableDatasetIndex{0});
-    m_model->setResolution(workspace2, TableDatasetIndex{1});
+    m_model->setResolution(m_workspace->getName(), TableDatasetIndex{0});
+    m_model->setResolution(workspace2->getName(), TableDatasetIndex{1});
 
     auto fitResolutions = m_model->getResolutionsForFit();
 

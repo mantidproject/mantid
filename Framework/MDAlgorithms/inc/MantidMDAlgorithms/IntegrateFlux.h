@@ -40,7 +40,7 @@ private:
   void init() override;
   void exec() override;
 
-  boost::shared_ptr<API::MatrixWorkspace>
+  std::shared_ptr<API::MatrixWorkspace>
   createOutputWorkspace(const API::MatrixWorkspace &inputWS, size_t nX) const;
   void integrateSpectra(const API::MatrixWorkspace &inputWS,
                         API::MatrixWorkspace &integrWS) const;

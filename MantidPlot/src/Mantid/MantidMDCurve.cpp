@@ -66,7 +66,7 @@ void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style,
                          bool multipleSpectra) {
   UNUSED_ARG(distr);
   UNUSED_ARG(multipleSpectra);
-  IMDWorkspace_const_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+  IMDWorkspace_const_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(m_wsName.toStdString()));
   if (!ws) {
     std::string message =
@@ -170,7 +170,7 @@ void MantidMDCurve::dataReset(const QString &wsName) {
   try {
     Mantid::API::Workspace_sptr base =
         Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
-    mws = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(base);
+    mws = std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(base);
   } catch (std::runtime_error &) {
     g_log.information() << "Workspace " << wsNameStd
                         << " could not be found - plotted curve(s) deleted\n";
@@ -210,7 +210,7 @@ QString MantidMDCurve::saveToString() {
 
 void MantidMDCurve::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   (void)ws;
 
   invalidateBoundingRect();

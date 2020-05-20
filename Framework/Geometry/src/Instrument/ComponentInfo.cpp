@@ -58,11 +58,11 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point,
  * */
 ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
-    boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+    std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
         componentIds,
-    boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
+    std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
         componentIdToIndexMap,
-    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
+    std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>>
         shapes)
     : m_componentInfo(std::move(componentInfo)),
       m_componentIds(std::move(componentIds)),

@@ -36,7 +36,7 @@ public:
 
   std::string name() const override { return "PoldiSpectrumLinearBackground"; }
 
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
   size_t getTimeBinCount() const;
 
   void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,

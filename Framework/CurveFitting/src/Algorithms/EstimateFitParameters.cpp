@@ -84,7 +84,7 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     bool fix = false;
     if (!base) {
       fun.setParameter(i, storedParam);
-      base = boost::make_shared<Functions::ChebfunBase>(
+      base = std::make_shared<Functions::ChebfunBase>(
           MAX_APPROX_SIZE, lBound, rBound, MIN_APPROX_TOLERANCE);
       P = base->fit(slice);
       A = base->calcA(P);

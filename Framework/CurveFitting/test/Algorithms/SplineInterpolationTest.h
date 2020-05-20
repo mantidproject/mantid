@@ -116,8 +116,7 @@ public:
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
       MatrixWorkspace_const_sptr derivsWs =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(
-              derivs->getItem(i));
+          std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
 
       NumericAxis *derivVAxis =
           dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));
@@ -202,8 +201,7 @@ public:
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
       MatrixWorkspace_const_sptr derivsWs =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(
-              derivs->getItem(i));
+          std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
 
       NumericAxis *derivVAxis =
           dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));

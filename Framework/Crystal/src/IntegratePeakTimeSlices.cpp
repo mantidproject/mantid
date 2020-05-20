@@ -228,11 +228,11 @@ void IntegratePeakTimeSlices::exec() {
 
   //------------------------------- Get Panel
   //--------------------------------------
-  boost::shared_ptr<const Geometry::IComponent> panel_const =
+  std::shared_ptr<const Geometry::IComponent> panel_const =
       peak.getInstrument()->getComponentByName(peak.getBankName());
 
-  boost::shared_ptr<Geometry::IComponent> panel =
-      boost::const_pointer_cast<Geometry::IComponent>(panel_const);
+  std::shared_ptr<Geometry::IComponent> panel =
+      std::const_pointer_cast<Geometry::IComponent>(panel_const);
 
   if (!panel || !panel_const) {
     g_log.error("Cannot get panel for a peak");
@@ -264,7 +264,7 @@ void IntegratePeakTimeSlices::exec() {
   // For quickly looking up workspace index from det id
   m_wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
 
-  TableWorkspace_sptr TabWS = boost::make_shared<TableWorkspace>(0);
+  TableWorkspace_sptr TabWS = std::make_shared<TableWorkspace>(0);
 
   //----------------------------- get Peak extents
   //------------------------------
@@ -334,7 +334,7 @@ void IntegratePeakTimeSlices::exec() {
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
               std::string("Workspace2D"), 3, NN, NN);
 
-          auto XXX = boost::make_shared<DataModeHandler>(
+          auto XXX = std::make_shared<DataModeHandler>(
               R, R, Centy, Centx, m_cellWidth, m_cellHeight,
               getProperty("CalculateVariances"), NBadEdgeCells,
               m_NCOLS - NBadEdgeCells, NBadEdgeCells, m_NROWS - NBadEdgeCells);
@@ -391,8 +391,8 @@ void IntegratePeakTimeSlices::exec() {
     // Set from attributes replace by m_R0
     m_R0 = -1;
     int LastTableRow = -1;
-    auto origAttributeList = boost::make_shared<DataModeHandler>();
-    auto lastAttributeList = boost::make_shared<DataModeHandler>();
+    auto origAttributeList = std::make_shared<DataModeHandler>();
+    auto lastAttributeList = std::make_shared<DataModeHandler>();
 
     for (int dir = 1; dir >= -1; dir -= 2) {
       bool done = false;
@@ -495,8 +495,7 @@ void IntegratePeakTimeSlices::exec() {
               chanMax = xchan + 1;
               if (dir < 0)
                 chanMax++;
-              auto XXX =
-                  boost::make_shared<DataModeHandler>(*m_AttributeValues);
+              auto XXX = std::make_shared<DataModeHandler>(*m_AttributeValues);
               m_AttributeValues = XXX;
               if (!X.empty())
                 m_AttributeValues->setTime((X[chanMax] + X[chanMin]) / 2.0);
@@ -509,8 +508,7 @@ void IntegratePeakTimeSlices::exec() {
               if (lastAttributeList->case4)
                 chanMax++;
 
-              auto XXX =
-                  boost::make_shared<DataModeHandler>(*lastAttributeList);
+              auto XXX = std::make_shared<DataModeHandler>(*lastAttributeList);
               m_AttributeValues = XXX;
 
               m_AttributeValues->setTime((time + m_AttributeValues->time) /
@@ -580,7 +578,7 @@ void IntegratePeakTimeSlices::exec() {
                 LastTableRow = -1;
 
             } else {
-              auto XXX = boost::make_shared<DataModeHandler>();
+              auto XXX = std::make_shared<DataModeHandler>();
               lastAttributeList = XXX;
             }
             done = true;
@@ -658,7 +656,7 @@ void IntegratePeakTimeSlices::exec() {
  * the center may be included.
  */
 bool IntegratePeakTimeSlices::getNeighborPixIDs(
-    const boost::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D &Center,
+    const std::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D &Center,
     double &Radius, int *&ArryofID) {
 
   int N = ArryofID[1];
@@ -697,7 +695,7 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
     return true;
   ;
 
-  auto det = boost::dynamic_pointer_cast<Geometry::Detector>(comp);
+  auto det = std::dynamic_pointer_cast<Geometry::Detector>(comp);
 
   if (det) {
     V3D pos = det->getPos() - Center;
@@ -711,7 +709,7 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
   }
 
   auto Assembly =
-      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
+      std::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
 
   if (!Assembly)
     return true;
@@ -733,7 +731,7 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
  * @param neighborRadius  old the new neighborhood radius
  */
 bool IntegratePeakTimeSlices::updateNeighbors(
-    boost::shared_ptr<Geometry::IComponent> &comp, V3D CentPos, V3D oldCenter,
+    std::shared_ptr<Geometry::IComponent> &comp, V3D CentPos, V3D oldCenter,
     double NewRadius, double &neighborRadius) {
   double DD = (CentPos - oldCenter).norm();
   bool changed = false;
@@ -865,8 +863,8 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
   center.setY(detPos.Y());
   center.setZ(detPos.Z());
 
-  boost::shared_ptr<const Detector> dett =
-      boost::dynamic_pointer_cast<const Detector>(det);
+  std::shared_ptr<const Detector> dett =
+      std::dynamic_pointer_cast<const Detector>(det);
 
   pixWidthx = dett->getWidth();
   pixHeighty = dett->getHeight();
@@ -892,11 +890,11 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
   Geometry::Instrument_const_sptr inst = peak.getInstrument();
   if (!inst)
     throw std::invalid_argument("No instrument for peak");
-  boost::shared_ptr<const IComponent> panel =
+  std::shared_ptr<const IComponent> panel =
       inst->getComponentByName(peak.getBankName());
 
-  boost::shared_ptr<const RectangularDetector> ddet =
-      boost::dynamic_pointer_cast<const RectangularDetector>(panel);
+  std::shared_ptr<const RectangularDetector> ddet =
+      std::dynamic_pointer_cast<const RectangularDetector>(panel);
 
   if (ddet) {
     std::pair<int, int> CR = ddet->getXYForDetectorID(det->getID());
@@ -918,9 +916,9 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
 
   if (!panel)
     return;
-  boost::shared_ptr<const Component> compPanel =
-      boost::dynamic_pointer_cast<const Component>(panel);
-  boost::shared_ptr<IComponent> panel1(compPanel->base()->clone());
+  std::shared_ptr<const Component> compPanel =
+      std::dynamic_pointer_cast<const Component>(panel);
+  std::shared_ptr<IComponent> panel1(compPanel->base()->clone());
   BoundingBox B;
 
   Quat rot = panel1->getRotation();
@@ -1418,7 +1416,7 @@ void DataModeHandler::setHeightHalfWidthInfo(
  */
 void IntegratePeakTimeSlices::SetUpData(
     MatrixWorkspace_sptr &Data, MatrixWorkspace_const_sptr const &inpWkSpace,
-    const boost::shared_ptr<Geometry::IComponent> &comp, const int chanMin,
+    const std::shared_ptr<Geometry::IComponent> &comp, const int chanMin,
     const int chanMax, double CentX, double CentY, Kernel::V3D &CentNghbr,
     double &neighborRadius, // from CentDetspec
     double Radius, string &spec_idList) {
@@ -1428,7 +1426,7 @@ void IntegratePeakTimeSlices::SetUpData(
 
   int NBadEdgeCells = getProperty("NBadEdgePixels");
 
-  auto X = boost::make_shared<DataModeHandler>(
+  auto X = std::make_shared<DataModeHandler>(
       Radius, Radius, CentY, CentX, m_cellWidth, m_cellHeight,
       getProperty("CalculateVariances"), NBadEdgeCells, m_NCOLS - NBadEdgeCells,
       NBadEdgeCells, m_NROWS - NBadEdgeCells);
@@ -1475,7 +1473,7 @@ void IntegratePeakTimeSlices::SetUpData(
     neighborRadius -= DD;
 
   // if( changed) CentNghbr = CentPos.
-  auto X1 = boost::make_shared<DataModeHandler>(
+  auto X1 = std::make_shared<DataModeHandler>(
       Radius, NewRadius, CentY, CentX, m_cellWidth, m_cellHeight,
       getProperty("CalculateVariances"), NBadEdgeCells, m_NCOLS - NBadEdgeCells,
       NBadEdgeCells, m_NROWS - NBadEdgeCells);
@@ -1508,8 +1506,8 @@ void IntegratePeakTimeSlices::SetUpData1(
     return;
   }
   std::vector<double> StatBase(NAttributes);
-  boost::shared_ptr<Workspace2D> ws =
-      boost::dynamic_pointer_cast<Workspace2D>(Data);
+  std::shared_ptr<Workspace2D> ws =
+      std::dynamic_pointer_cast<Workspace2D>(Data);
 
   int NBadEdges = getProperty("NBadEdgePixels");
   spec_idList.clear();

@@ -34,7 +34,7 @@ void DeleteLog::init() {
       "In/out workspace containing the logs. The workspace is "
       "modified in place");
   declareProperty("Name", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(), "",
+                  std::make_shared<MandatoryValidator<std::string>>(), "",
                   Direction::Input);
 }
 

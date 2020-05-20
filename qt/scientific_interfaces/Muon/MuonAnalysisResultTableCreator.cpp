@@ -239,7 +239,7 @@ MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
           return name.find("_Parameters") != std::string::npos;
         });
     if (found != wsNames.cend()) {
-      return boost::dynamic_pointer_cast<ITableWorkspace>(
+      return std::dynamic_pointer_cast<ITableWorkspace>(
           wsGroup->getItem(*found));
     }
     throw std::runtime_error("Could not retrieve parameters table for label " +

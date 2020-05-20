@@ -52,7 +52,7 @@ void CreateLogPropertyTable::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Name of the Input Workspaces from which to get log properties.");
 
   // Output workspace
@@ -64,19 +64,19 @@ void CreateLogPropertyTable::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "LogPropertyNames",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the log properties to place in table.");
 
   // How to handle time series logs
   const std::set<std::string> statisticNames = getAllStatisticTypeNames();
   declareProperty("TimeSeriesStatistic", "Mean",
-                  boost::make_shared<StringListValidator>(statisticNames),
+                  std::make_shared<StringListValidator>(statisticNames),
                   "The statistic to use when adding a time series log.");
 
   // How to handle workspace groups
   const std::set<std::string> groupPolicies = getAllGroupPolicyNames();
   declareProperty("GroupPolicy", "First",
-                  boost::make_shared<StringListValidator>(groupPolicies),
+                  std::make_shared<StringListValidator>(groupPolicies),
                   "The policy by which to handle GroupWorkspaces.  \"All\" "
                   "will include all children in the table, \"First\" will "
                   "include "
@@ -113,7 +113,7 @@ void CreateLogPropertyTable::exec() {
   }
 
   // Set up output table.
-  auto outputTable = boost::make_shared<DataObjects::TableWorkspace>();
+  auto outputTable = std::make_shared<DataObjects::TableWorkspace>();
   // One column for each property.
   for (const auto &propName : propNames)
     outputTable->addColumn("str", propName);
@@ -180,9 +180,9 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
   for (const auto &wsName : wsNames) {
 
     WorkspaceGroup_sptr wsGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(ADS.retrieve(wsName));
+        std::dynamic_pointer_cast<WorkspaceGroup>(ADS.retrieve(wsName));
     MatrixWorkspace_sptr matrixWs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(wsName));
+        std::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(wsName));
 
     if (wsGroup) {
       const std::vector<std::string> childNames = wsGroup->getNames();

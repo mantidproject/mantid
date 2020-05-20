@@ -108,7 +108,7 @@ void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName) {
     if (grp) {
       int maxIndex = std::numeric_limits<int>::max();
       for (auto ws : grp->getAllItems()) {
-        mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        mws = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
         if (mws) {
           maxIndex = std::min(maxIndex,
                               static_cast<int>(mws->getNumberHistograms()) - 1);
@@ -129,7 +129,7 @@ void AddWorkspaceDialog::accept() {
   QString indexInput = m_uiForm.leWSIndices->text();
   if (!m_workspaceName.isEmpty() && !indexInput.isEmpty()) {
     auto validator =
-        boost::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>(
+        std::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>(
             0, m_maxIndex);
     Mantid::Kernel::ArrayProperty<int> prop("Indices", validator);
     std::string err = prop.setValue(indexInput.toStdString());

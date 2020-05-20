@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateSlits.h"
 
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {

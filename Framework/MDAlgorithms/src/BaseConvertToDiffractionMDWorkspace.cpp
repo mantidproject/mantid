@@ -81,7 +81,7 @@ void BaseConvertToDiffractionMDWorkspace::init() {
   frameOptions.emplace_back("HKL");
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
-      boost::make_shared<StringListValidator>(frameOptions),
+      std::make_shared<StringListValidator>(frameOptions),
       "What will be the dimensions of the output workspace?\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
       "  Q (sample frame): Wave-vector change of the lattice in the frame of "

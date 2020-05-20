@@ -20,7 +20,7 @@ SingleCountValidator::SingleCountValidator(const bool &mustBeSingleCount)
 
 /// Clone the current state
 Kernel::IValidator_sptr SingleCountValidator::clone() const {
-  return boost::make_shared<SingleCountValidator>(*this);
+  return std::make_shared<SingleCountValidator>(*this);
 }
 
 /** Checks if the workspace contains a single counts when it should not and

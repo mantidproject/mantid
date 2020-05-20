@@ -11,9 +11,12 @@ from isis_powder.polaris_routines.polaris_enums import POLARIS_CHOPPER_MODES
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
+    ParamMapEntry(ext_name="bw_order", int_name="bw_order", optional=True),
     ParamMapEntry(ext_name="calibration_directory", int_name="calibration_dir"),
     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
     ParamMapEntry(ext_name="config_file", int_name="config_file"),
+    ParamMapEntry(ext_name="delta_r", int_name="delta_r", optional=True),
+    ParamMapEntry(ext_name="delta_q", int_name="delta_q", optional=True),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
     ParamMapEntry(ext_name="do_van_normalisation", int_name="do_van_normalisation"),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),
@@ -23,6 +26,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="freq_params", int_name="freq_params", optional=True),
     ParamMapEntry(ext_name="grouping_file_name", int_name="grouping_file_name"),
     ParamMapEntry(ext_name="input_mode", int_name="input_mode", enum_class=INPUT_BATCHING),
+    ParamMapEntry(ext_name="lorch_filter", int_name="lorch_filter", optional=True),
     ParamMapEntry(ext_name="merge_banks", int_name="merge_banks", optional=True),
     ParamMapEntry(ext_name="mode", int_name="mode", enum_class=POLARIS_CHOPPER_MODES,
                   optional=True),
@@ -35,7 +39,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="sample_empty_scale", int_name="sample_empty_scale"),
     ParamMapEntry(ext_name="suffix", int_name="suffix", optional=True),
     ParamMapEntry(ext_name="spline_coefficient", int_name="spline_coeff"),
-    ParamMapEntry(ext_name="output_binning", int_name="output_binning", optional=True),
     ParamMapEntry(ext_name="output_directory", int_name="output_dir"),
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_cropping_values", int_name="van_crop_values"),

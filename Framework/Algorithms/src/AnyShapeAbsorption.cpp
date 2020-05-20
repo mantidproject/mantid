@@ -27,7 +27,7 @@ AnyShapeAbsorption::AnyShapeAbsorption()
     : AbsorptionCorrection(), m_cubeSide(0.0) {}
 
 void AnyShapeAbsorption::defineProperties() {
-  auto moreThanZero = boost::make_shared<BoundedValidator<double>>();
+  auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero,
                   "The size of one side of an integration element cube in mm");
@@ -51,7 +51,7 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
   // First, check if a 'gauge volume' has been defined. If not, it's the same as
   // the sample.
   auto integrationVolume =
-      boost::shared_ptr<const IObject>(m_sampleObject->clone());
+      std::shared_ptr<const IObject>(m_sampleObject->clone());
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
     integrationVolume = constructGaugeVolume();
   }
@@ -68,15 +68,14 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
   m_elementVolumes = std::move(raster.volume);
 }
 
-boost::shared_ptr<const Geometry::IObject>
+std::shared_ptr<const Geometry::IObject>
 AnyShapeAbsorption::constructGaugeVolume() {
   g_log.information("Calculating scattering within the gauge volume defined on "
                     "the input workspace");
 
   // Retrieve and create the gauge volume shape
-  boost::shared_ptr<const Geometry::IObject> volume =
-      ShapeFactory().createShape(
-          m_inputWS->run().getProperty("GaugeVolume")->value());
+  std::shared_ptr<const Geometry::IObject> volume = ShapeFactory().createShape(
+      m_inputWS->run().getProperty("GaugeVolume")->value());
 
   return volume;
 }

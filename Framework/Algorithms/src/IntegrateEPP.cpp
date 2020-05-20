@@ -63,13 +63,13 @@ void IntegrateEPP::init() {
                       PropertyNames::EPP_WORKSPACE, "", Direction::Input),
                   "Table containing information on the elastic peaks.");
   const auto mandatoryDouble =
-      boost::make_shared<Kernel::MandatoryValidator<double>>();
+      std::make_shared<Kernel::MandatoryValidator<double>>();
   const auto positiveDouble =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+      std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   positiveDouble->setLowerExclusive(true);
   const auto mandatoryPositiveDouble =
-      boost::make_shared<Kernel::CompositeValidator>();
+      std::make_shared<Kernel::CompositeValidator>();
   mandatoryPositiveDouble->add(mandatoryDouble);
   mandatoryPositiveDouble->add(positiveDouble);
   declareProperty(PropertyNames::WIDTH, 5.0, mandatoryPositiveDouble,

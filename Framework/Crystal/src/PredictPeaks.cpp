@@ -80,7 +80,7 @@ void PredictPeaks::init() {
                   "This will calculate the goniometer rotation (around y-axis "
                   "only) for a constant wavelength.");
 
-  auto nonNegativeDbl = boost::make_shared<BoundedValidator<double>>();
+  auto nonNegativeDbl = std::make_shared<BoundedValidator<double>>();
   nonNegativeDbl->setLower(0);
   declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
                   "Wavelength to use when calculating goniometer angle");
@@ -109,7 +109,7 @@ void PredictPeaks::init() {
                  std::back_inserter(propOptions),
                  [](const auto &condition) { return condition->getName(); });
   declareProperty("ReflectionCondition", "Primitive",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Which reflection condition applies to this crystal, "
                   "reducing the number of expected HKL peaks?");
 
@@ -156,7 +156,7 @@ void PredictPeaks::init() {
                   " instrument) to predict peaks which do not fall onto any"
                   "detector. This may produce a very high number of results.");
 
-  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  auto nonNegativeInt = std::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
   declareProperty("EdgePixels", 0, nonNegativeInt,
                   "Remove peaks that are at pixels this close to edge. ");
@@ -170,14 +170,14 @@ void PredictPeaks::exec() {
   m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
-      boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
+      std::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
 
   MatrixWorkspace_sptr matrixWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(rawInputWorkspace);
+      std::dynamic_pointer_cast<MatrixWorkspace>(rawInputWorkspace);
   PeaksWorkspace_sptr peaksWS =
-      boost::dynamic_pointer_cast<PeaksWorkspace>(rawInputWorkspace);
+      std::dynamic_pointer_cast<PeaksWorkspace>(rawInputWorkspace);
   MultipleExperimentInfos_sptr mdWS =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(rawInputWorkspace);
+      std::dynamic_pointer_cast<MultipleExperimentInfos>(rawInputWorkspace);
 
   std::vector<DblMatrix> gonioVec;
   if (matrixWS) {
@@ -252,7 +252,7 @@ void PredictPeaks::exec() {
   checkBeamDirection();
 
   // Create the output
-  m_pw = boost::make_shared<PeaksWorkspace>();
+  m_pw = std::make_shared<PeaksWorkspace>();
 
   // Copy instrument, sample, etc.
   m_pw->copyExperimentInfoFrom(inputExperimentInfo.get());
@@ -449,7 +449,7 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
   // --- Reflection condition ----
   // Use the primitive by default
   ReflectionCondition_sptr refCond =
-      boost::make_shared<ReflectionConditionPrimitive>();
+      std::make_shared<ReflectionConditionPrimitive>();
   // Get it from the property
   const std::string refCondName = getPropertyValue("ReflectionCondition");
   const auto found = std::find_if(m_refConds.crbegin(), m_refConds.crend(),
@@ -461,9 +461,8 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
   }
 
   HKLGenerator gen(orientedLattice, dMin);
-  auto filter =
-      boost::make_shared<HKLFilterCentering>(refCond) &
-      boost::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax);
+  auto filter = std::make_shared<HKLFilterCentering>(refCond) &
+                std::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax);
 
   V3D hklMin = *(gen.begin());
 
@@ -588,7 +587,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
         m_inst->getComponentByName("extended-detector-space");
     // Check that the component is valid
     const auto component =
-        boost::dynamic_pointer_cast<const ObjComponent>(returnedComponent);
+        std::dynamic_pointer_cast<const ObjComponent>(returnedComponent);
     if (!component)
       throw std::runtime_error("PredictPeaks: user requested use of a extended "
                                "detector space to predict peaks but there is no"

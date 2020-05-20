@@ -107,7 +107,7 @@ MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::createEfficiencies(
     loader->setPropertyValue("Filename", getPropertyValue(propName));
     loader->execute();
     Workspace_sptr output = loader->getProperty("OutputWorkspace");
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (!ws) {
       throw std::invalid_argument("File " + propName +
                                   " cannot be loaded into a MatrixWorkspace.");

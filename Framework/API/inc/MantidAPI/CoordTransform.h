@@ -13,7 +13,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -65,10 +65,10 @@ protected:
 };
 
 // Helper typedef for a shared pointer of this type.
-using CoordTransform_sptr = boost::shared_ptr<CoordTransform>;
+using CoordTransform_sptr = std::shared_ptr<CoordTransform>;
 
 // Helper typdef for a const shared pointer of this type.
-using CoordTransform_const_sptr = boost::shared_ptr<const CoordTransform>;
+using CoordTransform_const_sptr = std::shared_ptr<const CoordTransform>;
 
 } // namespace API
 } // namespace Mantid

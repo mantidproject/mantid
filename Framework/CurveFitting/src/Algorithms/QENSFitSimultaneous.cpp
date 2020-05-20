@@ -39,7 +39,7 @@ void extractFunctionNames(const CompositeFunction_sptr &composite,
 
 void extractFunctionNames(const IFunction_sptr &function,
                           std::vector<std::string> &names) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     extractFunctionNames(composite, names);
   else
@@ -57,7 +57,7 @@ void extractConvolvedNames(const CompositeFunction_sptr &composite,
 
 void extractConvolvedNames(const IFunction_sptr &function,
                            std::vector<std::string> &names) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite) {
     if (composite->name() == "Convolution" && composite->nFunctions() > 1 &&
         composite->getFunction(0)->name() == "Resolution")
@@ -159,14 +159,14 @@ void setMultiDataProperties(
 }
 
 IFunction_sptr convertToSingleDomain(IFunction_sptr function) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite && composite->getNumberDomains() > 1)
     return composite->getFunction(0);
   return function;
 }
 
 WorkspaceGroup_sptr makeGroup(const Workspace_sptr &workspace) {
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   if (group)
     return group;
   group = WorkspaceGroup_sptr(new WorkspaceGroup);
@@ -212,6 +212,14 @@ NumericAxis const *getNumericAxis(const MatrixWorkspace &workspace,
 TextAxis const *getTextAxis(const MatrixWorkspace &workspace,
                             std::size_t axisIndex) {
   return dynamic_cast<TextAxis const *>(workspace.getAxis(axisIndex));
+}
+
+std::vector<std::string>
+getUniqueWorkspaceNames(std::vector<std::string> &&workspaceNames) {
+  std::set<std::string> uniqueNames(workspaceNames.begin(),
+                                    workspaceNames.end());
+  workspaceNames.assign(uniqueNames.begin(), uniqueNames.end());
+  return workspaceNames;
 }
 
 auto getNumericAxisValueReader(std::size_t axisIndex) {
@@ -343,7 +351,7 @@ void QENSFitSimultaneous::initConcrete() {
       "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
@@ -352,7 +360,7 @@ void QENSFitSimultaneous::initConcrete() {
   std::vector<std::string> minimizerOptions =
       API::FuncMinimizerFactory::Instance().getKeys();
   Kernel::IValidator_sptr minimizerValidator =
-      boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
+      std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
 
   declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator,
                   "Minimizer to use for fitting.");
@@ -374,7 +382,7 @@ void QENSFitSimultaneous::initConcrete() {
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
   declareProperty("ResultXAxisUnit", "MomentumTransfer",
-                  boost::make_shared<StringListValidator>(unitOptions),
+                  std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis of the result workspace, "
                   "defaults to MomentumTransfer");
 
@@ -400,14 +408,14 @@ void QENSFitSimultaneous::initConcrete() {
       API::CostFunctionFactory::Instance().getKeys();
   // select only CostFuncFitting variety
   for (auto &costFuncOption : costFuncOptions) {
-    auto costFunc = boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+    auto costFunc = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
         API::CostFunctionFactory::Instance().create(costFuncOption));
     if (!costFunc) {
       costFuncOption = "";
     }
   }
   Kernel::IValidator_sptr costFuncValidator =
-      boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
+      std::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
   declareProperty(
       "CostFunction", "Least squares", costFuncValidator,
       "The cost function to be used for the fit, default is Least squares",
@@ -439,10 +447,19 @@ void QENSFitSimultaneous::execConcrete() {
   const auto groupWs = makeGroup(fitResult.second);
   const auto resultWs = processIndirectFitParameters(
       parameterWs, createDatasetGrouping(workspaces));
+  AnalysisDataService::Instance().addOrReplace(
+      getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces)) {
     renameWorkspaces(groupWs, getWorkspaceIndices(), outputBaseName,
                      "_Workspace", getWorkspaceNames());
+    auto inputWorkspaceNames = getUniqueWorkspaceNames(getWorkspaceNames());
+    renameWorkspaces(resultWs,
+                     std::vector<std::string>(inputWorkspaceNames.size(), ""),
+                     outputBaseName, "_Result", inputWorkspaceNames);
+  } else {
+    renameWorkspaces(resultWs, std::vector<std::string>({""}), outputBaseName,
+                     "_Result");
   }
 
   copyLogs(resultWs, workspaces);
@@ -452,7 +469,7 @@ void QENSFitSimultaneous::execConcrete() {
     extractMembers(groupWs, workspaces, outputBaseName + "_Members");
 
   addAdditionalLogs(resultWs);
-  copyLogs(boost::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
+  copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
            groupWs);
 
   setProperty("OutputWorkspace", resultWs);
@@ -517,9 +534,8 @@ void QENSFitSimultaneous::copyLogs(
     const std::vector<MatrixWorkspace_sptr> &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   for (auto &&result : *resultWorkspace) {
-    logCopier->setProperty(
-        "OutputWorkspace",
-        boost::dynamic_pointer_cast<MatrixWorkspace>(result));
+    logCopier->setProperty("OutputWorkspace",
+                           std::dynamic_pointer_cast<MatrixWorkspace>(result));
     for (const auto &workspace : workspaces) {
       logCopier->setProperty("InputWorkspace", workspace);
       logCopier->executeAsChildAlg();
@@ -535,7 +551,7 @@ void QENSFitSimultaneous::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
   for (const auto &workspace : *resultGroup) {
     logCopier->setProperty(
         "OutputWorkspace",
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
     logCopier->executeAsChildAlg();
   }
 }
@@ -614,7 +630,7 @@ std::vector<MatrixWorkspace_sptr> QENSFitSimultaneous::getWorkspaces() const {
   for (const auto &propertyName : m_workspacePropertyNames) {
     Workspace_sptr workspace = getProperty(propertyName);
     workspaces.emplace_back(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
   }
   return workspaces;
 }
@@ -713,9 +729,18 @@ void QENSFitSimultaneous::renameWorkspaces(
         inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
     return workspaceName;
   };
-  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup),
-                                   outputBaseName, endOfSuffix + "s",
-                                   getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
+}
+
+void QENSFitSimultaneous::renameWorkspaces(
+    const API::WorkspaceGroup_sptr &outputGroup,
+    std::vector<std::string> const &spectra, std::string const &outputBaseName,
+    std::string const &endOfSuffix) {
+  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
 } // namespace Algorithms

@@ -11,8 +11,8 @@
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
-#include <boost/make_shared.hpp>
 #include <json/json.h>
+#include <memory>
 
 namespace {
 using namespace Mantid::Geometry;

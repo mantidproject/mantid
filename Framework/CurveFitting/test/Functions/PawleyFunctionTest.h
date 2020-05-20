@@ -320,7 +320,7 @@ public:
     PawleyFunction fn;
     fn.initialize();
 
-    TS_ASSERT(boost::dynamic_pointer_cast<CompositeFunction>(
+    TS_ASSERT(std::dynamic_pointer_cast<CompositeFunction>(
         fn.getDecoratedFunction()));
 
     // The base parameters of PawleyParameterFunction

@@ -74,7 +74,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        out_ws = boost::dynamic_pointer_cast<EventWorkspace>(
+        out_ws = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve(out_ws_name)));
     TS_ASSERT(out_ws);
     if (!out_ws)

@@ -48,7 +48,7 @@ public:
     loader.setPropertyValue("OutputWorkspace", WSName);
     // Execute and fetch the workspace
     loader.execute();
-    m_masterPeaks = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    m_masterPeaks = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve(WSName));
   }
 

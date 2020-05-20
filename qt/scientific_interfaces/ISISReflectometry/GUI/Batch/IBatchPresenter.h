@@ -41,6 +41,8 @@ public:
   virtual void notifyInstrumentChanged(const std::string &instrumentName) = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;
   virtual void notifySettingsChanged() = 0;
+  virtual void notifySetRoundPrecision(int &precision) = 0;
+  virtual void notifyResetRoundPrecision() = 0;
   virtual void notifyAnyBatchReductionResumed() = 0;
   virtual void notifyAnyBatchReductionPaused() = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
@@ -52,10 +54,13 @@ public:
   virtual bool isAutoreducing() const = 0;
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
+  virtual bool isWarnDiscardChangesChecked() const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 
+  virtual bool isBatchUnsaved() const = 0;
+  virtual void setBatchUnsaved(bool isUnsaved = true) = 0;
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;
 };

@@ -23,6 +23,14 @@ class FigureManagerWorkbenchTest(unittest.TestCase):
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertNotEqual(fig_mgr, None)
 
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_window_title(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        fig = MagicMock()
+        canvas = FigureCanvasQTAgg(fig)
+        fig_mgr = FigureManagerWorkbench(canvas, 1)
+        self.assertEqual(fig_mgr.get_window_title(), "Figure 1")
+
 
 if __name__ == "__main__":
     unittest.main()

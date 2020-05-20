@@ -28,7 +28,7 @@ void DefineGaugeVolume::init() {
                                             Kernel::Direction::InOut),
       "The workspace with which to associate the defined gauge volume");
   declareProperty("ShapeXML", "",
-                  boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
+                  std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "The XML that describes the shape of the gauge volume");
 }
 

@@ -67,8 +67,7 @@ void ParDomain::additiveCostFunctionValDerivHessian(
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
     getDomainAndValues(i, domain, values);
-    auto simpleValues =
-        boost::dynamic_pointer_cast<API::FunctionValues>(values);
+    auto simpleValues = std::dynamic_pointer_cast<API::FunctionValues>(values);
     if (!simpleValues) {
       throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }

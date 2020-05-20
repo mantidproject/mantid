@@ -26,8 +26,7 @@ void DisplayNormalizationSetter::
 operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
            const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
            bool isQ, const Mantid::Kernel::DeltaEMode::Type &mode) {
-  if (boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-          mdWorkspace)) {
+  if (std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(mdWorkspace)) {
     setNormalizationMDEvent(mdWorkspace, underlyingWorkspace, isQ, mode);
   } else {
     throw std::runtime_error("Setting the display normaliztion is currently "
@@ -49,7 +48,7 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(
     const Mantid::Kernel::DeltaEMode::Type &mode) {
 
   auto isEventWorkspace = static_cast<bool>(
-      boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+      std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           underlyingWorkspace));
   Mantid::API::MDNormalization displayNormalization(
       Mantid::API::MDNormalization::VolumeNormalization);
@@ -92,7 +91,7 @@ void DisplayNormalizationSetter::applyNormalizationMDEvent(
     Mantid::API::MDNormalization displayNormalization,
     Mantid::API::MDNormalization displayNormalizationHisto) {
   auto ws =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(mdWorkspace);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(mdWorkspace);
   ws->setDisplayNormalization(displayNormalization);
   ws->setDisplayNormalizationHisto(displayNormalizationHisto);
 }

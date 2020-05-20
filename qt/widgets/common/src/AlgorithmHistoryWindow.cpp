@@ -202,7 +202,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
 }
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
-    QWidget *parent, const boost::shared_ptr<const Workspace> &wsptr)
+    QWidget *parent, const std::shared_ptr<const Workspace> &wsptr)
     : QDialog(parent), m_algHist(wsptr->getHistory()),
       m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),

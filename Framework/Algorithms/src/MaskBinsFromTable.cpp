@@ -38,7 +38,7 @@ MaskBinsFromTable::MaskBinsFromTable()
 void MaskBinsFromTable::init() {
   this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "InputWorkspace", "", Direction::Input,
-                            boost::make_shared<HistogramValidator>()),
+                            std::make_shared<HistogramValidator>()),
                         "Input Workspace to mask bins. ");
   this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "OutputWorkspace", "", Direction::Output),

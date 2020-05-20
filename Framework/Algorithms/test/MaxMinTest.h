@@ -71,7 +71,7 @@ public:
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 4)
@@ -104,7 +104,7 @@ public:
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 3)
@@ -135,7 +135,7 @@ public:
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 3)
@@ -166,7 +166,7 @@ public:
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 4)

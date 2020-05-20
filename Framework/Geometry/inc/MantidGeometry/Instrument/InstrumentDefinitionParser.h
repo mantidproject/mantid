@@ -63,12 +63,11 @@ public:
   };
 
   /// Parse XML contents
-  boost::shared_ptr<Instrument>
-  parseXML(Kernel::ProgressBase *progressReporter);
+  std::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *progressReporter);
 
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
-  void setComponentLinks(boost::shared_ptr<Geometry::Instrument> &instrument,
+  void setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument,
                          Poco::XML::Element *pRootElem,
                          Kernel::ProgressBase *progress = nullptr);
 
@@ -350,8 +349,7 @@ private:
    */
   std::map<std::string, bool> isTypeAssembly;
   /// map which maps the type name to a shared pointer to a geometric shape
-  std::map<std::string, boost::shared_ptr<Geometry::IObject>>
-      mapTypeNameToShape;
+  std::map<std::string, std::shared_ptr<Geometry::IObject>> mapTypeNameToShape;
   /// Container to hold all detectors and monitors added to the instrument. Used
   /// for 'facing' these to component specified under \<defaults\>. NOTE: Seems
   /// unused, ever.
@@ -365,7 +363,7 @@ private:
   std::map<std::string, Poco::XML::Element *> getTypeElement;
 
   /// For convenience added pointer to instrument here
-  boost::shared_ptr<Geometry::Instrument> m_instrument;
+  std::shared_ptr<Geometry::Instrument> m_instrument;
 
   /// Flag to indicate whether offsets given in spherical coordinates are to be
   /// added to the current

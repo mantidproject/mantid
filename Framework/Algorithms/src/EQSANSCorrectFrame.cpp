@@ -34,7 +34,7 @@ EQSANSCorrectFrame::EQSANSCorrectFrame() : API::Algorithm() {}
 void EQSANSCorrectFrame::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
   declareProperty("PulsePeriod", 1.0E6 / 60.0,
                   "Period of the neutron pulse, in micro-seconds",

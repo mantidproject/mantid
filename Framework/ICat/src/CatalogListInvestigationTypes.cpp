@@ -18,7 +18,7 @@ void CatalogListInvestigationTypes::init() {
                   "The session information of the catalog to use.");
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       "InvestigationTypes", std::vector<std::string>(),
-                      boost::make_shared<Kernel::NullValidator>(),
+                      std::make_shared<Kernel::NullValidator>(),
                       Kernel::Direction::Output),
                   "A list containing investigation types.");
 }

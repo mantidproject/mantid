@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IIndirectFitData.h"
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
@@ -118,6 +119,7 @@ protected slots:
   void updateFitBrowserParameterValuesFromAlg();
   void updateDataReferences();
   void updateResultOptions();
+  void respondToFunctionChanged();
 
 private slots:
   void plotSelectedSpectra();
@@ -133,7 +135,6 @@ private slots:
   void respondToPlotSpectrumChanged(WorkspaceIndex);
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double);
-  void respondToFunctionChanged();
 
 private:
   void setup() override;
@@ -162,6 +163,7 @@ private:
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
   TableDatasetIndex m_currentTableDatasetIndex;
+  WorkspaceIndex m_singleFitWorkspaceIndex;
 };
 
 } // namespace IDA

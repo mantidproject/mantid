@@ -81,6 +81,22 @@ void updateTransmissionStitchProperties(
                               properties);
 }
 
+void updateBackgroundSubtractionProperties(
+    AlgorithmRuntimeProps &properties,
+    BackgroundSubtraction const &subtraction) {
+  AlgorithmProperties::update("SubtractBackground",
+                              subtraction.subtractBackground(), properties);
+  AlgorithmProperties::update(
+      "BackgroundCalculationMethod",
+      backgroundSubtractionTypeToString(subtraction.subtractionType()),
+      properties);
+  AlgorithmProperties::update("DegreeOfPolynomial",
+                              subtraction.degreeOfPolynomial(), properties);
+  AlgorithmProperties::update(
+      "CostFunction", costFunctionTypeToString(subtraction.costFunction()),
+      properties);
+}
+
 void updatePolarizationCorrectionProperties(
     AlgorithmRuntimeProps &properties,
     PolarizationCorrections const &corrections) {
@@ -117,6 +133,8 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
                               experiment.includePartialBins(), properties);
   updateTransmissionStitchProperties(properties,
                                      experiment.transmissionStitchOptions());
+  updateBackgroundSubtractionProperties(properties,
+                                        experiment.backgroundSubtraction());
   updatePolarizationCorrectionProperties(properties,
                                          experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
@@ -138,6 +156,9 @@ void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
   AlgorithmProperties::update("ProcessingInstructions",
                               perThetaDefaults->processingInstructions(),
                               properties);
+  AlgorithmProperties::update(
+      "BackgroundProcessingInstructions",
+      perThetaDefaults->backgroundProcessingInstructions(), properties);
 }
 
 void updateWavelengthRangeProperties(
@@ -284,7 +305,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   auto properties = createAlgorithmRuntimeProps(model, row);
 
   // Return the configured algorithm
-  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
+  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(
       alg, properties, updateRowFromOutputProperties, &row);
   return jobAlgorithm;
 }

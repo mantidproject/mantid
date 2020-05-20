@@ -66,7 +66,7 @@ private:
                const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
-  boost::shared_ptr<DataObjects::Peak>
+  std::shared_ptr<DataObjects::Peak>
   createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
              const Geometry::InstrumentRayTracer &tracer);
 

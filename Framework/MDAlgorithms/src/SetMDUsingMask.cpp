@@ -102,18 +102,18 @@ void SetMDUsingMask::exec() {
     IAlgorithm_sptr clone =
         this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace",
-                       boost::dynamic_pointer_cast<IMDWorkspace>(inIWS));
+                       std::dynamic_pointer_cast<IMDWorkspace>(inIWS));
     clone->executeAsChildAlg();
     IMDWorkspace_sptr temp = clone->getProperty("OutputWorkspace");
-    outIWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+    outIWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
   }
 
   MDHistoWorkspace_sptr outWS =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(outIWS);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(outIWS);
   MDHistoWorkspace_sptr maskWS =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(maskIWS);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(maskIWS);
   MDHistoWorkspace_sptr valueWS =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(valueIWS);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(valueIWS);
 
   if (!outWS || !maskWS)
     throw std::runtime_error("Error creating output workspace.");

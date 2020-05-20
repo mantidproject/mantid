@@ -170,10 +170,19 @@ void PropertyManager::splitByTime(
  * all time
  * series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each property on
+ * @param excludedFromFiltering :: A string list of properties that
+ * will be excluded from filtering
  */
 void PropertyManager::filterByProperty(
-    const Kernel::TimeSeriesProperty<bool> &filter) {
+    const Kernel::TimeSeriesProperty<bool> &filter,
+    const std::vector<std::string> &excludedFromFiltering) {
   for (auto &orderedProperty : m_orderedProperties) {
+    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(),
+                  orderedProperty->name()) != excludedFromFiltering.cend()) {
+      // this log should be excluded from filtering
+      continue;
+    }
+
     Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
@@ -581,6 +590,22 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   }
 
   return jsonMap;
+}
+
+bool PropertyManager::operator==(const PropertyManager &other) const {
+  if (other.m_properties.size() != m_properties.size())
+    return false;
+  for (const auto &[key, value] : m_properties) {
+    if (other.m_properties.count(key) != 1)
+      return false;
+    if (*other.m_properties.at(key) != *value)
+      return false;
+  }
+  return true;
+}
+
+bool PropertyManager::operator!=(const PropertyManager &other) const {
+  return !this->operator==(other);
 }
 
 //-----------------------------------------------------------------------------------------------

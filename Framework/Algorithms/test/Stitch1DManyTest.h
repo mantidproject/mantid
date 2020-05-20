@@ -330,7 +330,7 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
@@ -399,7 +399,7 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -482,7 +482,7 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -538,7 +538,7 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    const auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    const auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -622,10 +622,10 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1);
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -693,12 +693,12 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -719,7 +719,7 @@ public:
     TS_ASSERT_DELTA(stitched->e(1)[16], 1.79063, 0.00001);
 
     // Second item in the output group
-    stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -790,12 +790,12 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -816,7 +816,7 @@ public:
     TS_ASSERT_DELTA(stitched->e(1)[16], 0.72456, 0.00001);
 
     // Second item in the output group
-    stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -888,12 +888,12 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -919,7 +919,7 @@ public:
     TS_ASSERT_DELTA(stitched->e(1)[24], 1.1068, 0.00001);
 
     // Second item in the output group
-    stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -1005,12 +1005,12 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -1035,7 +1035,7 @@ public:
     TS_ASSERT_DELTA(stitched->e(1)[24], 0.98821, 0.00001);
 
     // Second item in the output group
-    stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -1133,12 +1133,12 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws)
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1)
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     // First spectrum, Y values
@@ -1247,7 +1247,7 @@ public:
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
@@ -1306,7 +1306,7 @@ public:
     auto group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
@@ -1355,13 +1355,13 @@ public:
     const auto &y1 = Mantid::HistogramData::Counts({56., 77., 48.});
     Mantid::HistogramData::Histogram histogram1(x1, y1);
     histogram1.setPointStandardDeviations(std::vector<double>{2., 1., 3.589});
-    auto ws1 = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws1 = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws1->initialize(1, std::move(histogram1));
     const auto &x2 = Mantid::HistogramData::Points({0.23, 1.3, 2.6});
     const auto &y2 = Mantid::HistogramData::Counts({1.1, 2., 3.7});
     Mantid::HistogramData::Histogram histogram2(x2, y2);
     histogram2.setPointStandardDeviations(std::vector<double>{1.34, 1.4, 3.1});
-    auto ws2 = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws2 = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws2->initialize(1, std::move(histogram2));
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws2", ws2);
@@ -1377,7 +1377,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    const auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    const auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     const std::vector<double> x_values{0.2, 0.23, 0.9, 1.3, 1.6, 2.6};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
     const std::vector<double> y_values{56., 1.1, 77., 2., 48., 3.7};

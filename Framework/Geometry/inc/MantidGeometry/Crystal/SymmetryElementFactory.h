@@ -12,8 +12,8 @@
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/SingletonHolder.h"
 
-#include <boost/make_shared.hpp>
 #include <map>
+#include <memory>
 #include <unordered_set>
 
 namespace Mantid {
@@ -47,7 +47,7 @@ public:
 };
 
 using AbstractSymmetryElementGenerator_sptr =
-    boost::shared_ptr<AbstractSymmetryElementGenerator>;
+    std::shared_ptr<AbstractSymmetryElementGenerator>;
 
 /** @class SymmetryElementIdentityGenerator
 
@@ -180,7 +180,7 @@ protected:
     std::cout << element->hmSymbol() << '\n';
 
     SymmetryElementMirror_sptr mirrorElement =
-            boost::dynamic_pointer_cast<SymmetryElementMirror>(element);
+            std::dynamic_pointer_cast<SymmetryElementMirror>(element);
 
     // Prints [0,0,1]
     std::cout << mirrorElement->getAxis() << '\n';
@@ -214,7 +214,7 @@ public:
   template <typename T>
   void
   subscribeSymmetryElementGenerator(const std::string &generatorClassName) {
-    AbstractSymmetryElementGenerator_sptr generator = boost::make_shared<T>();
+    AbstractSymmetryElementGenerator_sptr generator = std::make_shared<T>();
 
     if (isSubscribed(generatorClassName)) {
       throw std::runtime_error("A generator with name '" + generatorClassName +

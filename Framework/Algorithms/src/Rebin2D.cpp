@@ -53,7 +53,7 @@ void Rebin2D::init() {
       "this can be followed by a comma and more widths and last boundary "
       "pairs. "
       "Negative width values indicate logarithmic binning.";
-  auto rebinValidator = boost::make_shared<RebinParamsValidator>();
+  auto rebinValidator = std::make_shared<RebinParamsValidator>();
   declareProperty(
       std::make_unique<ArrayProperty<double>>("Axis1Binning", rebinValidator),
       docString);
@@ -102,7 +102,7 @@ void Rebin2D::exec() {
   // But if the input is RebinnedOutput, useFractionalArea=true is forced to
   // give correct signal/errors. It is kept for compatibility with old scripts.
   bool useFractionalArea = getProperty("UseFractionalArea");
-  auto inputHasFA = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
+  auto inputHasFA = std::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   // For MatrixWorkspace, only UseFractionalArea=False makes sense.
   if (useFractionalArea && !inputHasFA) {
     g_log.warning(
@@ -122,7 +122,7 @@ void Rebin2D::exec() {
 
   auto outputWS =
       createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
-  auto outputRB = boost::dynamic_pointer_cast<RebinnedOutput>(outputWS);
+  auto outputRB = std::dynamic_pointer_cast<RebinnedOutput>(outputWS);
 
   // Progress reports & cancellation
   const auto nreports(static_cast<size_t>(numYBins));

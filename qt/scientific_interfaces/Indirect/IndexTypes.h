@@ -23,8 +23,10 @@ namespace IDA {
  * the same type.
  */
 template <int Class> struct IndexType {
-  using IntImplementationType = int;
+  using IntImplementationType = size_t;
   IntImplementationType value = 0;
+  IndexType() noexcept : value(0) {}
+  IndexType(IntImplementationType data) noexcept : value(data) {}
   IndexType operator+(IndexType index) const {
     return IndexType{value + index.value};
   }
@@ -52,15 +54,15 @@ template <int Class> struct IndexType {
   template <class T> static IndexType cast(const T &i) {
     return IndexType<Class>{static_cast<IntImplementationType>(i)};
   }
-}; // namespace IDA
+};
 
-// Used to index table rows in the GUI
-using TableRowIndex = IndexType<0>;
+// The index of the fitting Domain, i.e. ignores workspaces and spectra
+using FitDomainIndex = IndexType<0>;
 // Used to index spectra in workspaces
 using WorkspaceIndex = IndexType<1>;
 // Used to index worspaces in workspace groups
 using WorkspaceGroupIndex = IndexType<2>;
-// Used to index
+// Used to index data by workspace
 using TableDatasetIndex = IndexType<3>;
 
 /** A class which wraps a vector so that you supply not only the value
@@ -129,6 +131,6 @@ operator<<(std::ostream &out,
   return out;
 }
 
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::TableRowIndex)
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::FitDomainIndex)
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceIndex)
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceGroupIndex)

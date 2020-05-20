@@ -30,7 +30,7 @@ void HRPDSlabCanAbsorption::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output));
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleAttenuationXSection", EMPTY_DBL(), mustBePositive,
                   "The ABSORPTION cross-section for the sample material in "
@@ -46,7 +46,7 @@ void HRPDSlabCanAbsorption::init() {
                   "The thickness of the sample in cm. Common values are 0.2, "
                   "0.5, 1.0, 1.5");
 
-  auto positiveInt = boost::make_shared<BoundedValidator<int64_t>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
   declareProperty(
       "NumberOfWavelengthPoints", int64_t(EMPTY_INT()), positiveInt,
@@ -55,12 +55,11 @@ void HRPDSlabCanAbsorption::init() {
 
   std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
-      "ExpMethod", "Normal",
-      boost::make_shared<StringListValidator>(exp_options),
+      "ExpMethod", "Normal", std::make_shared<StringListValidator>(exp_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
-  auto moreThanZero = boost::make_shared<BoundedValidator<double>>();
+  auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero,
                   "The size of one side of an integration element cube in mm");
@@ -163,7 +162,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-    auto shape = boost::shared_ptr<IObject>(
+    auto shape = std::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInSphericalAbsorption", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);

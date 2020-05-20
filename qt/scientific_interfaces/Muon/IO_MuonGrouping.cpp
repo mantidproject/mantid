@@ -20,8 +20,8 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
 
-#include <boost/shared_ptr.hpp>
 #include <fstream>
+#include <memory>
 
 //-----------------------------------------------------------------------------
 using namespace Mantid;

@@ -331,6 +331,13 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyMainPresenterSettingsChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, setBatchUnsaved(true));
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
 private:
   SavePresenter makePresenter() {
     auto asciiSaver = std::make_unique<NiceMock<MockAsciiSaver>>();
@@ -370,7 +377,7 @@ private:
   void createWorkspaceGroup(const std::string &groupName,
                             const std::vector<std::string> &workspaceNames) {
     AnalysisDataService::Instance().add(groupName,
-                                        boost::make_shared<WorkspaceGroup>());
+                                        std::make_shared<WorkspaceGroup>());
     createWorkspaces(workspaceNames);
     for (auto name : workspaceNames)
       AnalysisDataService::Instance().addToGroup(groupName, name);

@@ -70,7 +70,7 @@ public:
 
     // make sure that the profile is correct
     IPeakFunction_sptr profile =
-        boost::dynamic_pointer_cast<IPeakFunction>(peakFunction);
+        std::dynamic_pointer_cast<IPeakFunction>(peakFunction);
     TS_ASSERT(profile);
 
     TS_ASSERT_EQUALS(profile->centre(), m_testPeak->q());

@@ -46,8 +46,7 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function,
   if (function->category() == category && function->hasParameter(parameterName))
     return function;
 
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     return firstFunctionWithParameter(composite, category, parameterName);
   return nullptr;
@@ -97,7 +96,7 @@ void setFunctionParameters(const IFunction_sptr &function,
   if (function->category() == category && function->hasParameter(parameterName))
     function->setParameter(parameterName, value);
 
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     setFunctionParameters(composite, category, parameterName, value);
 }
@@ -116,7 +115,7 @@ void setFirstBackground(IFunction_sptr function, double value) {
 }
 
 MatrixWorkspace_sptr castToMatrixWorkspace(const Workspace_sptr &workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 } // namespace
@@ -202,11 +201,11 @@ TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
   return m_fittingModel->numberOfWorkspaces();
 }
 
-TableRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
-  TableRowIndex index{0};
+FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
+  FitDomainIndex index{0};
   for (TableDatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
     if (iws < m_activeIndex) {
-      index += TableRowIndex{m_fittingModel->getNumberOfSpectra(iws)};
+      index += FitDomainIndex{m_fittingModel->getNumberOfSpectra(iws)};
     } else {
       auto const spectra = m_fittingModel->getSpectra(iws);
       try {
@@ -224,7 +223,7 @@ TableRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
 std::string
 IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const {
   if (m_fittingModel->getWorkspace(index))
-    return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
+    return m_fittingModel->createDisplayName(index);
   return "";
 }
 
@@ -276,8 +275,7 @@ bool IndirectFitPlotModel::canCalculateGuess() const {
   if (!function)
     return false;
 
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   const auto isEmptyModel = composite && composite->nFunctions() == 0;
   return getWorkspace() && !isEmptyModel;
 }
@@ -306,8 +304,8 @@ MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
     const MatrixWorkspace_sptr &guessWorkspace) const {
   const auto range = getGuessRange();
   return createInputAndGuessWorkspace(getWorkspace(), std::move(guessWorkspace),
-                                      m_activeSpectrum.value, range.first,
-                                      range.second);
+                                      static_cast<int>(m_activeSpectrum.value),
+                                      range.first, range.second);
 }
 
 std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
@@ -354,8 +352,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
   createWsAlg->execute();
   Workspace_sptr outputWorkspace = createWsAlg->getProperty("OutputWorkspace");
   return extractSpectra(
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          outputWorkspace),
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWorkspace),
       1, 1, startX, endX);
 }
 

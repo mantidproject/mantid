@@ -17,10 +17,6 @@
 #include "MantidKernel/cow_ptr.h"
 #include <gsl/gsl_fft_complex.h>
 
-namespace boost {
-template <typename T> class shared_array;
-}
-
 namespace Mantid {
 
 namespace HistogramData {
@@ -64,13 +60,13 @@ private:
   void createUnitsLabels(double &df);
 
   // Perform forward transformation
-  void transformForward(boost::shared_array<double> &data, const int xSize,
+  void transformForward(std::vector<double> &data, const int xSize,
                         const int ySize, const int dys,
                         const bool addPositiveOnly, const bool centerShift,
                         const bool isComplex, const int iReal, const int iImag,
                         const double df, const double dx);
   // Perform backward transformation
-  void transformBackward(boost::shared_array<double> &data, const int xSize,
+  void transformBackward(std::vector<double> &data, const int xSize,
                          const int ySize, const int dys, const bool centerShift,
                          const bool isComplex, const int iReal, const int iImag,
                          const double df);
