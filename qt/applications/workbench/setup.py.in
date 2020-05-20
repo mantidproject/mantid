@@ -2,8 +2,8 @@
 #  This file is part of the mantid workbench.
 #
 #
-
 from setuptools import find_packages, setup
+
 
 @SETUPTOOLS_BUILD_COMMANDS_DEF@
 
