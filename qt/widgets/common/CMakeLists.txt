@@ -81,7 +81,6 @@ set(
   src/SequentialFitDialog.cpp
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
-  src/SliceViewerCoordConversion.cpp
   src/SlitCalculator.cpp
   src/TextPropertyWidget.cpp
   src/TSVSerialiser.cpp
@@ -245,7 +244,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
-	inc/MantidQtWidgets/Common/CoordinateConversion.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
@@ -269,7 +267,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
-	inc/MantidQtWidgets/Common/SliceViewerCoordConversion.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
     inc/MantidQtWidgets/Common/WorkspaceIcons.h
@@ -467,7 +464,6 @@ set(
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
   src/SequentialFitDialog.cpp
-  src/SliceViewerCoordConversion.cpp
   src/SlicingAlgorithmDialog.cpp
   src/SlitCalculator.cpp
   src/TrackedAction.cpp
@@ -622,7 +618,6 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/Configurable.h
-  inc/MantidQtWidgets/Common/CoordinateConversion.h
   inc/MantidQtWidgets/Common/DllOption.h
   inc/MantidQtWidgets/Common/DropEventHelper.h
   inc/MantidQtWidgets/Common/FileDialogHandler.h
@@ -652,7 +647,6 @@ set(
   inc/MantidQtWidgets/Common/QStringUtils.h
   inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
-  inc/MantidQtWidgets/Common/SliceViewerCoordConversion.h
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/SignalBlocker.h
   inc/MantidQtWidgets/Common/UserSubWindowFactory.h

@@ -10,8 +10,8 @@
 from mantidqt.utils.qt import import_qt
 
 from qtpy.QtWidgets import QVBoxLayout, QCheckBox, QWidget
+from qtpy.QtCore import Qt
 
-SliceViewerCoordConversion = import_qt('.._common', 'mantidqt.widgets', 'SliceViewerCoordConversion')
 ImageInfoWidget_cpp = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 
@@ -24,8 +24,7 @@ class ImageInfoWidget(QWidget):
         self.workspace = workspace
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setChecked(True)
-        self.display_type = SliceViewerCoordConversion()
-        self.table_widget = ImageInfoWidget_cpp(workspace, self.display_type, self)
-        layout.addWidget(self.track_cursor)
+        self.table_widget = ImageInfoWidget_cpp(workspace, self)
+        layout.addWidget(self.track_cursor, 0, Qt.AlignRight)
         layout.addWidget(self.table_widget)
         self.setLayout(layout)

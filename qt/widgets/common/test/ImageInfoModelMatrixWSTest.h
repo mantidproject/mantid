@@ -8,7 +8,6 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidQtWidgets/Common/CoordinateConversion.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -16,14 +15,6 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::DataObjects;
-
-class FakeCoordinateConversion : public CoordinateConversion {
-public:
-  std::tuple<double, double> toDataCoord(const double x,
-                                         const double y) const override {
-    return std::tuple<double, double>(x, y);
-  };
-};
 
 class ImageInfoModelMatrixWSTest : public CxxTest::TestSuite {
 public:
@@ -38,17 +29,14 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    FakeCoordinateConversion coordConvert;
-    TS_ASSERT_THROWS_NOTHING(
-        ImageInfoModelMatrixWS model(workspace, coordConvert))
+    TS_ASSERT_THROWS_NOTHING(ImageInfoModelMatrixWS model(workspace))
   }
 
   void test_getInfoList() {
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    FakeCoordinateConversion coordConvert;
-    ImageInfoModelMatrixWS model(workspace, coordConvert);
+    ImageInfoModelMatrixWS model(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -68,8 +56,7 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, false);
     workspace->getAxis(0)->setUnit("TOF");
-    FakeCoordinateConversion coordConvert;
-    ImageInfoModelMatrixWS model(workspace, coordConvert);
+    ImageInfoModelMatrixWS model(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
@@ -84,8 +71,7 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    FakeCoordinateConversion coordConvert;
-    ImageInfoModelMatrixWS model(workspace, coordConvert);
+    ImageInfoModelMatrixWS model(workspace);
 
     auto list1 = model.getInfoList(-1, 4, 7);
     auto list2 = model.getInfoList(10, 4, 7);
@@ -98,8 +84,7 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    FakeCoordinateConversion coordConvert;
-    ImageInfoModelMatrixWS model(workspace, coordConvert);
+    ImageInfoModelMatrixWS model(workspace);
     auto list1 = model.getInfoList(2, -1, 7);
     auto list2 = model.getInfoList(2, 10, 7);
     TS_ASSERT_EQUALS(0, list1.size())

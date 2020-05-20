@@ -47,6 +47,7 @@ class SliceViewerDataView(QWidget):
         self.line_plots = False
         self.can_normalise = can_normalise
         self.nonortho_tr = None
+        self.ws_type = dims_info[0]['type']
 
         # Dimension widget
         self.dimensions_layout = QHBoxLayout()
@@ -58,6 +59,12 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0,0,0,0)
         self.colorbar_layout.setSpacing(0)
+
+        self.image_info_widget = ImageInfoWidget(workspace, self)
+        if self.ws_type == 'MDE':
+            self.colorbar_layout.addWidget(self.image_info_widget, 0, Qt.AlignCenter)
+        else:
+            self.dimensions_layout.addWidget(self.image_info_widget, 0, Qt.AlignRight)
 
         # normalization options
         if can_normalise:
@@ -73,9 +80,6 @@ class SliceViewerDataView(QWidget):
             self.colorbar_layout.addLayout(self.norm_layout)
 
         # MPL figure + colorbar
-        mpl_layout = QHBoxLayout()
-        mpl_layout.setContentsMargins(0,0,0,0)
-        mpl_layout.setSpacing(0)
         self.fig = Figure()
         self.ax = None
         self.axx, self.axy = None, None
@@ -87,14 +91,13 @@ class SliceViewerDataView(QWidget):
         self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
         self.canvas.mpl_connect('button_press_event', self.mouse_click)
         self.create_axes_orthogonal()
-        mpl_layout.addWidget(self.canvas)
+
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
         self.colorbar = ColorbarWidget(self)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.colorbarChanged.connect(self.update_line_plot_limits)
-        mpl_layout.addLayout(self.colorbar_layout)
 
         # MPL toolbar
         self.toolbar_layout = QHBoxLayout()
@@ -106,17 +109,13 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
-        self.image_info_widget = ImageInfoWidget(workspace, self)
-        self.dimensions.axesChanged.connect(self.image_info_widget.display_type.changeDimensions)
-        self.toolbar_layout.addStretch(1)
-        self.toolbar_layout.addWidget(self.image_info_widget)
-
         # layout
         layout = QGridLayout(self)
         layout.setSpacing(1)
-        layout.addLayout(self.dimensions_layout, 0, 0)
-        layout.addLayout(self.toolbar_layout, 1, 0)
-        layout.addLayout(mpl_layout, 2, 0)
+        layout.addLayout(self.dimensions_layout, 0, 0, 1, 2)
+        layout.addLayout(self.toolbar_layout, 1, 0, 1, 2)
+        layout.addWidget(self.canvas, 2, 0, 1, 1)
+        layout.addLayout(self.colorbar_layout, 1, 1, 2, 1)
 
     @property
     def grid_on(self):
@@ -396,11 +395,8 @@ class SliceViewerDataView(QWidget):
 
     def mouse_move(self, event):
         if event.inaxes == self.ax:
-            data = self.image.get_cursor_data(event)
-            if data is not None and self.image_info_widget.track_cursor.checkState() == Qt.Checked:
-                self.image_info_widget.table_widget.updateTable(event.xdata, event.ydata, data)
-            if self.line_plots:
-                self.update_line_plots(event.xdata, event.ydata)
+            data = self.update_image_data(event.xdata, event.ydata, self.line_plots)
+            self.update_image_table_widget(event.xdata, event.ydata, data)
 
     def mouse_outside_image(self, _):
         """
@@ -414,9 +410,14 @@ class SliceViewerDataView(QWidget):
     def mouse_click(self, event):
         if self.image_info_widget.track_cursor.checkState() == Qt.Unchecked \
                 and event.inaxes == self.ax and event.button == 1:
-            data = self.image.get_cursor_data(event)
-            if data is not None and self.image_info_widget.track_cursor.checkState() == Qt.Unchecked:
-                self.image_info_widget.table_widget.updateTable(event.xdata, event.ydata, data)
+            self.update_image_table_widget(event)
+
+    def update_image_table_widget(self, xdata, ydata, value):
+        if value is not None and self.image_info_widget.track_cursor.checkState() == Qt.Checked:
+            if self.dimensions.transpose and self.ws_type == "MATRIX":
+                self.image_info_widget.table_widget.updateTable(ydata, xdata, value)
+            else:
+                self.image_info_widget.table_widget.updateTable(xdata, ydata, value)
 
     def plot_x_line(self, x, y):
         try:
@@ -456,7 +457,7 @@ class SliceViewerDataView(QWidget):
         except AttributeError:
             pass
 
-    def update_line_plots(self, x, y):
+    def update_image_data(self, x, y, update_line_plot=False):
         xmin, xmax, ymin, ymax = self.image.get_extent()
         arr = self.image.get_array()
         data_extent = Bbox([[ymin, xmin], [ymax, xmax]])
@@ -466,10 +467,18 @@ class SliceViewerDataView(QWidget):
         if any(np.isnan(point)):
             return
         i, j = point.astype(int)
-        if 0 <= i < arr.shape[0]:
-            self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
-        if 0 <= j < arr.shape[1]:
-            self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
+
+        if update_line_plot:
+            if 0 <= i < arr.shape[0]:
+                self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
+            if 0 <= j < arr.shape[1]:
+                self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
+
+        # Clip the coordinates at array bounds
+        if not (0 <= i < arr.shape[0]) or not (0 <= j < arr.shape[1]):
+            return None
+        else:
+            return arr[i, j]
 
     def set_normalization(self, ws, **kwargs):
         normalize_by_bin_width, _ = get_normalize_by_bin_width(ws, self.ax, **kwargs)

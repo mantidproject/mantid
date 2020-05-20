@@ -10,7 +10,6 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidQtWidgets/Common/CoordinateConversion.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 
 namespace Mantid {
@@ -30,11 +29,15 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMatrixWS
     : public ImageInfoModel {
 
 public:
-  ImageInfoModelMatrixWS(const Mantid::API::MatrixWorkspace_sptr &ws,
-                         CoordinateConversion &coordConversion);
+  ImageInfoModelMatrixWS(const Mantid::API::MatrixWorkspace_sptr &ws);
 
-  // Creates a list containing pairs of strings with information about the
-  // coordinates in the workspace.
+  /** Creates a list containing pairs of strings with information about the
+  coordinates in the workspace.
+  @param x : The x data coordinate.
+  @param y : The y data coordinate.
+  @param z : The value at x, y.
+  @return A vector containing pairs of strings.
+  */
   std::vector<std::string> getInfoList(const double x, const double y,
                                        const double z) override;
 
@@ -44,7 +47,6 @@ private:
   std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_source;
   std::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
-  CoordinateConversion &m_coordConversion;
   double m_xMin;
   double m_xMax;
   double m_yMax;

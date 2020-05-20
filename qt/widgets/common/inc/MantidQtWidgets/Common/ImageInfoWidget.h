@@ -9,7 +9,6 @@
 
 #include "DllOption.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtWidgets/Common/CoordinateConversion.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
 
 #include <QTableWidget>
@@ -26,14 +25,12 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public QTableWidget {
 
 public:
   ImageInfoWidget(const Mantid::API::Workspace_sptr &ws,
-                  CoordinateConversion &coordConversion,
                   QWidget *parent = nullptr);
 
   void updateTable(const double x, const double y, const double z);
 
 private:
-  void createImageInfoModel(const Mantid::API::Workspace_sptr &ws,
-                            CoordinateConversion &coordConversion);
+  void createImageInfoModel(const Mantid::API::Workspace_sptr &ws);
 
   std::unique_ptr<ImageInfoModel> m_model;
 };

@@ -925,16 +925,6 @@ signals:
 // ---------------------------------
 // ImageInformationWidget
 // ---------------------------------
-class CoordinateConversion {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/CoordinateConversion.h"
-%End
-public:
-  virtual ~CoordinateConversion();
-private:
-  CoordinateConversion(const CoordinateConversion&);
-};
-
 class ImageInfoWidget : public QTableWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/ImageInfoWidget.h"
@@ -943,11 +933,11 @@ class ImageInfoWidget : public QTableWidget {
 #include <boost/python/handle.hpp>
 %End
 public:
-    ImageInfoWidget(SIP_PYOBJECT ws, CoordinateConversion& coordConversion, QWidget *parent = nullptr) [(const Mantid::API::Workspace_sptr&, CoordinateConversion&,QWidget*=nullptr)];
+    ImageInfoWidget(SIP_PYOBJECT ws, QWidget *parent = nullptr) [(const Mantid::API::Workspace_sptr&, QWidget*=nullptr)];
     %MethodCode
     try {
       auto extractor = Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(boost::python::object(boost::python::handle<>(a0)));
-      sipCpp = new sipImageInfoWidget(extractor(), *a1, a2);
+      sipCpp = new sipImageInfoWidget(extractor(), a1);
     } catch(...) {
       sipRaiseUnknownException();
       return NULL;
@@ -956,22 +946,6 @@ public:
 	void updateTable(const double x, const double y, const double z);
   private:
   ImageInfoWidget(const ImageInfoWidget&);
-};
-
-class SliceViewerCoordConversion : public CoordinateConversion {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/SliceViewerCoordConversion.h"
-#include <boost/python/object.hpp>
-#include <boost/python/tuple.hpp>
-%End
-public:
-    SliceViewerCoordConversion();
-    SIP_PYOBJECT toDataCoord(double x, double y) const;
-    %MethodCode
-      auto cppTuple = sipCpp->SliceViewerCoordConversion::toDataCoord(a0,a1);
-      return boost::python::incref(boost::python::tuple(cppTuple).ptr());
-    %End
-	void changeDimensions(const int xAxisState, const int yAxisState);
 };
 
 // ---------------------------------

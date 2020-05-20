@@ -28,9 +28,8 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(
-    const MatrixWorkspace_sptr &ws, CoordinateConversion &coordConversion)
-    : m_workspace(ws), m_coordConversion(coordConversion) {
+ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(const MatrixWorkspace_sptr &ws)
+    : m_workspace(ws) {
 
   m_workspace->getXMinMax(m_xMin, m_xMax);
   m_yMax = static_cast<double>(m_workspace->getNumberHistograms());
@@ -54,15 +53,9 @@ ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(
 // Creates a list containing pairs of strings with information about the
 // coordinates in the workspace.
 std::vector<std::string>
-ImageInfoModelMatrixWS::getInfoList(const double xDisplayCoord,
-                                    const double yDisplayCoord,
+ImageInfoModelMatrixWS::getInfoList(const double x, const double y,
                                     const double value) {
   std::vector<std::string> list;
-
-  const auto dataCoords =
-      m_coordConversion.toDataCoord(xDisplayCoord, yDisplayCoord);
-  const auto x = std::get<0>(dataCoords);
-  const auto y = std::get<1>(dataCoords);
 
   if (x >= m_xMax || x <= m_xMin || y >= m_yMax || y < 0)
     return list;

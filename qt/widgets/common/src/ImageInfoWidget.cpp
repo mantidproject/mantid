@@ -21,18 +21,18 @@ namespace MantidWidgets {
  * Constructor
  */
 ImageInfoWidget::ImageInfoWidget(const Mantid::API::Workspace_sptr &workspace,
-                                 CoordinateConversion &coordConversion,
                                  QWidget *parent)
     : QTableWidget(2, 0, parent) {
-  createImageInfoModel(workspace, coordConversion);
+  createImageInfoModel(workspace);
   horizontalHeader()->hide();
   verticalHeader()->hide();
 
-  int height = 20;
+  int height = 2;
   for (int i = 0; i < rowCount(); i++)
     height += rowHeight(i);
 
   setFixedHeight(height);
+  setFixedWidth(110);
 }
 
 void ImageInfoWidget::updateTable(const double x, const double y,
@@ -61,15 +61,14 @@ void ImageInfoWidget::updateTable(const double x, const double y,
     int table_width = 2;
     for (int i = 0; i < static_cast<int>(info.size()) / 2; i++)
       table_width += columnWidth(i);
-    setMaximumWidth(table_width);
+    setFixedWidth(table_width);
   }
 }
 
 void ImageInfoWidget::createImageInfoModel(
-    const Mantid::API::Workspace_sptr &ws,
-    CoordinateConversion &coordConversion) {
+    const Mantid::API::Workspace_sptr &ws) {
   if (auto matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws))
-    m_model = std::make_unique<ImageInfoModelMatrixWS>(matWS, coordConversion);
+    m_model = std::make_unique<ImageInfoModelMatrixWS>(matWS);
   else if (auto MDWS =
                std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws)) {
     m_model = std::make_unique<ImageInfoModelMD>(MDWS);
