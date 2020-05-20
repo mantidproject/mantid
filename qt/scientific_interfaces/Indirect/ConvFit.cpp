@@ -46,11 +46,15 @@ ConvFit::ConvFit(QWidget *parent)
   IndirectFitPlotView *fitPlotView = new IndirectFitPlotView();
   plotViewArea->setWidget(fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable);
-  m_fitPropertyBrowser->setBaseSize(plotViewArea->baseSize());
-  m_fitPropertyBrowser->setSizePolicy(plotViewArea->sizePolicy());
+  // m_fitPropertyBrowser->setBaseSize(plotViewArea->baseSize());
+  // m_fitPropertyBrowser->setSizePolicy(plotViewArea->sizePolicy());
   m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea,
                                     m_fitPropertyBrowser);
   m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  m_uiForm->dockArea->resizeDocks({m_fitPropertyBrowser, plotViewArea},
+                                  {20, 20}, Qt::Horizontal);
+#endif
   // m_uiForm->dockArea->setCentralWidget(fitPlotView);
   // fitPlotView->show();
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
