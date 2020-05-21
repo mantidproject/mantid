@@ -37,7 +37,20 @@ public:
 
     auto list = model.getInfoList(2, 4, 7);
 
-    const std::string expectList[]{"x", "2", "y", "4", "Value", "7"};
+    const std::string expectList[]{"x", "2", "y", "4", "Signal", "7"};
+    for (size_t i = 0; i < list.size(); ++i) {
+      TS_ASSERT_EQUALS(expectList[i], list[i]);
+    }
+  }
+
+  void test_getInfoList_returns_dashes_when_includeValues_is_false() {
+    IMDWorkspace_sptr workspace =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    ImageInfoModelMD model(workspace);
+
+    auto list = model.getInfoList(2, 4, 7, false);
+
+    const std::string expectList[]{"x", "-", "y", "-", "Signal", "-"};
     for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
     }

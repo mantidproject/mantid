@@ -32,7 +32,6 @@ ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(const MatrixWorkspace_sptr &ws)
     : m_workspace(ws) {
 
   m_workspace->getXMinMax(m_xMin, m_xMax);
-  m_yMax = static_cast<double>(m_workspace->getNumberHistograms());
   m_spectrumInfo = &m_workspace->spectrumInfo();
   m_instrument = m_workspace->getInstrument();
   if (m_instrument) {
@@ -53,32 +52,38 @@ ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(const MatrixWorkspace_sptr &ws)
 // Creates a list containing pairs of strings with information about the
 // coordinates in the workspace.
 std::vector<std::string>
-ImageInfoModelMatrixWS::getInfoList(const double x, const double y,
-                                    const double value) {
+ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
+                                    const double signal, bool includeValues) {
   std::vector<std::string> list;
+  const int spectrumNumber = static_cast<int>(specNum);
+  size_t wsIndex;
+  try {
+    wsIndex = m_workspace->getIndexFromSpectrumNumber(spectrumNumber);
+  } catch (std::runtime_error) {
+    if (includeValues)
+      return list;
+    wsIndex = 0;
+  }
 
-  if (x >= m_xMax || x <= m_xMin || y >= m_yMax || y < 0)
+  if (includeValues && (x >= m_xMax || x <= m_xMin))
     return list;
 
-  addNameAndValue("Value", value, 4, list);
+  addNameAndValue("Signal", signal, 4, list, includeValues);
 
-  int row = (int)y;
-  const auto &spec = m_workspace->getSpectrum(row);
-
-  double spec_num = spec.getSpectrumNo();
-  addNameAndValue("Spec Num", spec_num, 0, list);
+  const auto &spec = m_workspace->getSpectrum(wsIndex);
+  addNameAndValue("Spec Num", spectrumNumber, 0, list, includeValues);
 
   std::string x_label = "";
   const auto &old_unit = m_workspace->getAxis(0)->unit();
   if (old_unit) {
     x_label = old_unit->caption();
-    addNameAndValue(x_label, x, 3, list);
+    addNameAndValue(x_label, x, 3, list, includeValues);
   }
 
   const auto &ids = spec.getDetectorIDs();
   if (!ids.empty()) {
-    auto id = *(ids.begin());
-    addNameAndValue("Det ID", id, 0, list);
+    const auto id = *(ids.begin());
+    addNameAndValue("Det ID", id, 0, list, includeValues);
   }
 
   /* Cannot get any more information if we do not have a instrument, source and
@@ -92,22 +97,25 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double y,
     return list;
   }
 
-  if (!m_spectrumInfo->hasDetectors(row)) {
-    g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace\n";
+  if (!m_spectrumInfo->hasDetectors(wsIndex)) {
+    g_log.debug() << "No DETECTOR for wsIndex " << wsIndex
+                  << " in MatrixWorkspace\n";
     return list;
   }
 
-  double l1 = m_spectrumInfo->l1();
-  double l2 = m_spectrumInfo->l2(row);
-  double two_theta = m_spectrumInfo->twoTheta(row);
-  double azi = m_spectrumInfo->detector(row).getPhi();
-  if (m_spectrumInfo->isMonitor(row)) {
-    two_theta = 0.0;
-    azi = 0.0;
+  const double l1 = m_spectrumInfo->l1();
+  const double l2 = m_spectrumInfo->l2(wsIndex);
+  double two_theta(0.0);
+  double azi(0.0);
+  if (!m_spectrumInfo->isMonitor(wsIndex)) {
+    two_theta = m_spectrumInfo->twoTheta(wsIndex);
+    azi = m_spectrumInfo->detector(wsIndex).getPhi();
   }
-  addNameAndValue("L2", l2, 4, list);
-  addNameAndValue("TwoTheta", two_theta * Mantid::Geometry::rad2deg, 2, list);
-  addNameAndValue("Azimuthal", azi * Mantid::Geometry::rad2deg, 2, list);
+  addNameAndValue("L2", l2, 4, list, includeValues);
+  addNameAndValue("TwoTheta", two_theta * Mantid::Geometry::rad2deg, 2, list,
+                  includeValues);
+  addNameAndValue("Azimuthal", azi * Mantid::Geometry::rad2deg, 2, list,
+                  includeValues);
 
   int emode(0);
   double efixed(0.0), delta(0.0);
@@ -130,11 +138,11 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double y,
   // If it did not get emode & efixed, try getting indirect geometry information
   // from the detector object
   if (efixed == 0) {
-    const auto &det = m_spectrumInfo->detector(row);
-    if (!(m_spectrumInfo->isMonitor(row) && det.hasParameter("Efixed"))) {
+    const auto &det = m_spectrumInfo->detector(wsIndex);
+    if (!(m_spectrumInfo->isMonitor(wsIndex) && det.hasParameter("Efixed"))) {
       try {
         const ParameterMap &pmap = m_workspace->constInstrumentParameters();
-        Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
+        const Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
         if (par) {
           efixed = par->value<double>();
           emode = 2;
@@ -150,45 +158,45 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double y,
   if (efixed == 0)
     emode = 0;
 
-  double tof =
+  const double tof =
       old_unit->convertSingleToTOF(x, l1, l2, two_theta, emode, efixed, delta);
-  if (!(x_label == "Time-of-flight")) {
-    addNameAndValue("Time-of-flight", tof, 1, list);
+  if (x_label != "Time-of-flight") {
+    addNameAndValue("Time-of-flight", tof, 1, list, includeValues);
   }
 
-  if (!(x_label == "Wavelength")) {
+  if (x_label != "Wavelength") {
     const auto wl_unit = UnitFactory::Instance().create("Wavelength");
-    double wavelength = wl_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                      emode, efixed, delta);
-    addNameAndValue("Wavelength", wavelength, 4, list);
+    const double wavelength = wl_unit->convertSingleFromTOF(
+        tof, l1, l2, two_theta, emode, efixed, delta);
+    addNameAndValue("Wavelength", wavelength, 4, list, includeValues);
   }
 
-  if (!(x_label == "Energy")) {
+  if (x_label != "Energy") {
     const auto e_unit = UnitFactory::Instance().create("Energy");
-    double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
-                                                 efixed, delta);
-    addNameAndValue("Energy", energy, 4, list);
-  }
-
-  if ((!(x_label == "d-Spacing")) && (two_theta != 0.0) && (emode == 0)) {
-    const auto d_unit = UnitFactory::Instance().create("dSpacing");
-    double d_spacing = d_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                    emode, efixed, delta);
-    addNameAndValue("d-Spacing", d_spacing, 4, list);
-  }
-
-  if ((!(x_label == "q")) && (two_theta != 0.0)) {
-    const auto q_unit = UnitFactory::Instance().create("MomentumTransfer");
-    double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
-                                                efixed, delta);
-    addNameAndValue("|Q|", mag_q, 4, list);
-  }
-
-  if ((!(x_label == "DeltaE")) && (two_theta != 0.0) && (emode != 0)) {
-    const auto deltaE_unit = UnitFactory::Instance().create("DeltaE");
-    double delta_E = deltaE_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
+    const double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                        emode, efixed, delta);
-    addNameAndValue("DeltaE", delta_E, 4, list);
+    addNameAndValue("Energy", energy, 4, list, includeValues);
+  }
+
+  if (x_label != "d-Spacing" && ((two_theta != 0.0 && emode == 0) || !includeValues)) {
+    const auto d_unit = UnitFactory::Instance().create("dSpacing");
+    const double d_spacing = d_unit->convertSingleFromTOF(
+        tof, l1, l2, two_theta, emode, efixed, delta);
+    addNameAndValue("d-Spacing", d_spacing, 4, list, includeValues);
+  }
+
+  if (x_label != "q" && (two_theta != 0.0 || !includeValues)) {
+    const auto q_unit = UnitFactory::Instance().create("MomentumTransfer");
+    const double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
+                                                      emode, efixed, delta);
+    addNameAndValue("|Q|", mag_q, 4, list, includeValues);
+  }
+
+  if (x_label != "DeltaE" && (two_theta != 0.0 && emode != 0)) {
+    const auto deltaE_unit = UnitFactory::Instance().create("DeltaE");
+    const double delta_E = deltaE_unit->convertSingleFromTOF(
+        tof, l1, l2, two_theta, emode, efixed, delta);
+    addNameAndValue("DeltaE", delta_E, 4, list, includeValues);
   }
   return list;
 }

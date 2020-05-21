@@ -15,9 +15,12 @@ namespace MantidWidgets {
 
 void ImageInfoModel::addNameAndValue(const std::string &label,
                                      const double value, const int precision,
-                                     std::vector<std::string> &list) {
+                                     std::vector<std::string> &list, bool includeValues) {
   std::ostringstream valueString;
-  valueString << std::setprecision(precision) << value;
+  if (includeValues)
+    valueString << std::setprecision(precision) << value;
+  else
+    valueString << "-";
   list.emplace_back(label);
   list.emplace_back(valueString.str());
 }

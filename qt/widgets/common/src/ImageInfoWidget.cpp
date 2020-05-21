@@ -22,22 +22,22 @@ namespace MantidWidgets {
  */
 ImageInfoWidget::ImageInfoWidget(const Mantid::API::Workspace_sptr &workspace,
                                  QWidget *parent)
-    : QTableWidget(2, 0, parent) {
+    : QTableWidget(0, 0, parent) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+  setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+#endif
+  setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+
   createImageInfoModel(workspace);
   horizontalHeader()->hide();
   verticalHeader()->hide();
 
-  int height = 2;
-  for (int i = 0; i < rowCount(); i++)
-    height += rowHeight(i);
-
-  setFixedHeight(height);
-  setFixedWidth(110);
+  updateTable(0, 0, 0, false);
 }
 
 void ImageInfoWidget::updateTable(const double x, const double y,
-                                  const double z) {
-  auto info = m_model->getInfoList(x, y, z);
+                                  const double z, bool includeValues) {
+  auto info = m_model->getInfoList(x, y, z, includeValues);
 
   if (info.empty())
     return;
@@ -56,13 +56,8 @@ void ImageInfoWidget::updateTable(const double x, const double y,
       row = 0;
       column++;
     }
-
-    resizeColumnsToContents();
-    int table_width = 2;
-    for (int i = 0; i < static_cast<int>(info.size()) / 2; i++)
-      table_width += columnWidth(i);
-    setFixedWidth(table_width);
   }
+  resizeColumnsToContents();
 }
 
 void ImageInfoWidget::createImageInfoModel(

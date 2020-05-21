@@ -19,7 +19,7 @@ from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 import numpy as np
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.MPLwidgets import FigureCanvas
@@ -50,21 +50,25 @@ class SliceViewerDataView(QWidget):
         self.ws_type = dims_info[0]['type']
 
         # Dimension widget
-        self.dimensions_layout = QHBoxLayout()
+        self.dimensions_layout = QGridLayout()
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
-        self.dimensions_layout.addWidget(self.dimensions)
+        self.dimensions_layout.addWidget(self.dimensions, 0, 0, 2, 1)
 
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0,0,0,0)
         self.colorbar_layout.setSpacing(0)
 
         self.image_info_widget = ImageInfoWidget(workspace, self)
+        self.track_cursor = QCheckBox("Track Cursor", self)
         if self.ws_type == 'MDE':
-            self.colorbar_layout.addWidget(self.image_info_widget, 0, Qt.AlignCenter)
+            self.colorbar_layout.addWidget(self.image_info_widget, alignment=Qt.AlignCenter)
+            self.colorbar_layout.addWidget(self.track_cursor, alignment=Qt.AlignCenter)
         else:
-            self.dimensions_layout.addWidget(self.image_info_widget, 0, Qt.AlignRight)
+            self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
+            self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
+        self.track_cursor.setChecked(True)
 
         # normalization options
         if can_normalise:
@@ -116,6 +120,7 @@ class SliceViewerDataView(QWidget):
         layout.addLayout(self.toolbar_layout, 1, 0, 1, 2)
         layout.addWidget(self.canvas, 2, 0, 1, 1)
         layout.addLayout(self.colorbar_layout, 1, 1, 2, 1)
+        layout.setRowStretch(2, 1)
 
     @property
     def grid_on(self):
@@ -395,8 +400,9 @@ class SliceViewerDataView(QWidget):
 
     def mouse_move(self, event):
         if event.inaxes == self.ax:
-            data = self.update_image_data(event.xdata, event.ydata, self.line_plots)
-            self.update_image_table_widget(event.xdata, event.ydata, data)
+            signal = self.update_image_data(event.xdata, event.ydata, self.line_plots)
+            if self.track_cursor.checkState() == Qt.Checked:
+                self.update_image_table_widget(event.xdata, event.ydata, signal)
 
     def mouse_outside_image(self, _):
         """
@@ -408,16 +414,17 @@ class SliceViewerDataView(QWidget):
             self.canvas.draw_idle()
 
     def mouse_click(self, event):
-        if self.image_info_widget.track_cursor.checkState() == Qt.Unchecked \
+        if self.track_cursor.checkState() == Qt.Unchecked \
                 and event.inaxes == self.ax and event.button == 1:
-            self.update_image_table_widget(event)
+            signal = self.update_image_data(event.xdata, event.ydata)
+            self.update_image_table_widget(event.xdata, event.ydata, signal)
 
-    def update_image_table_widget(self, xdata, ydata, value):
-        if value is not None and self.image_info_widget.track_cursor.checkState() == Qt.Checked:
+    def update_image_table_widget(self, xdata, ydata, signal):
+        if signal is not None:
             if self.dimensions.transpose and self.ws_type == "MATRIX":
-                self.image_info_widget.table_widget.updateTable(ydata, xdata, value)
+                self.image_info_widget.updateTable(ydata, xdata, signal)
             else:
-                self.image_info_widget.table_widget.updateTable(xdata, ydata, value)
+                self.image_info_widget.updateTable(xdata, ydata, signal)
 
     def plot_x_line(self, x, y):
         try:

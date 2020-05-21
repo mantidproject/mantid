@@ -15,16 +15,7 @@ from qtpy.QtCore import Qt
 ImageInfoWidget_cpp = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 
-class ImageInfoWidget(QWidget):
+class ImageInfoWidget(ImageInfoWidget_cpp):
 
     def __init__(self, workspace, parent):
-        super(QWidget, self).__init__(parent)
-
-        layout = QVBoxLayout()
-        self.workspace = workspace
-        self.track_cursor = QCheckBox("Track Cursor", self)
-        self.track_cursor.setChecked(True)
-        self.table_widget = ImageInfoWidget_cpp(workspace, self)
-        layout.addWidget(self.track_cursor, 0, Qt.AlignRight)
-        layout.addWidget(self.table_widget)
-        self.setLayout(layout)
+        super(ImageInfoWidget, self).__init__(workspace, parent)

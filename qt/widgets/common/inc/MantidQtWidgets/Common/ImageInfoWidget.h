@@ -27,7 +27,8 @@ public:
   ImageInfoWidget(const Mantid::API::Workspace_sptr &ws,
                   QWidget *parent = nullptr);
 
-  void updateTable(const double x, const double y, const double z);
+  void updateTable(const double x, const double y, const double z,
+                   bool includeValues = true);
 
 private:
   void createImageInfoModel(const Mantid::API::Workspace_sptr &ws);
