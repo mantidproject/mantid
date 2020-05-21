@@ -99,6 +99,10 @@ KG2AMU_DECOMPOSITION = math.frexp(KG2AMU)
 # here we divide by 100 because we need relation between hertz and inverse cm
 HZ2INV_CM = constants.codata.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
 HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
+
+# Conversion factor from VASP internal units
+VASP_FREQ_TO_THZ = 15.633302
+
 #
 # u = H_BAR [J s ]/ ( 2 m [kg] omega [s^-1]) = CONSTANT / ( m [amu] nu [cm^-1])
 #
@@ -136,7 +140,8 @@ NUM_ZERO = 10e-15
 
 MAX_ORDER = 4  # max quantum order event
 
-ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN"]
+ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "VASP"]
+AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
 ONE_DIMENSIONAL_SPECTRUM = 1

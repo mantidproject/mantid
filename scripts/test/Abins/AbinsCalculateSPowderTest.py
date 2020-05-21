@@ -9,8 +9,10 @@ import json
 import numpy as np
 
 import abins
+import abins.input
 from abins.constants import FUNDAMENTALS
 import abins.instruments
+
 
 class SCalculatorFactoryPowderTest(unittest.TestCase):
     """

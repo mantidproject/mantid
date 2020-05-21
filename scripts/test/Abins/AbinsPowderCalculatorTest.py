@@ -9,7 +9,7 @@ import numpy as np
 import json
 
 import abins
-from mantid.simpleapi import logger
+import abins.input
 
 
 class PowderCalculatorTest(unittest.TestCase):
