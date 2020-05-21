@@ -250,9 +250,7 @@ set(
         IndirectTransmission.ui
         IndirectTransmissionCalc.ui
         Iqt.ui
-        JumpFit.ui
         JumpFitAddWorkspaceDialog.ui
-        MSDFit.ui
         Quasi.ui
         ResNorm.ui
         Stretch.ui
@@ -544,9 +542,7 @@ set(
         IndirectTransmission.ui
         IndirectTransmissionCalc.ui
         Iqt.ui
-        JumpFit.ui
         JumpFitAddWorkspaceDialog.ui
-        MSDFit.ui
         Quasi.ui
         ResNorm.ui
         Stretch.ui
