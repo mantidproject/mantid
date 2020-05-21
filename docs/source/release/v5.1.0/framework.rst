@@ -19,7 +19,16 @@ Algorithms
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
    cost of cloning the inputWorkspace.
 - Adjusted :ref:`AddPeak <algm-AddPeak>` to only allow peaks from the same instrument as the peaks worksapce to be added to that workspace.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Bug fixed where setting ResimulateTracksForDifferentWavelengths parameter to True was being ignored
+- :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` has received a number of updates:
+
+  - The algorithm now checks all of the data bins for each spectrum of a workspace, previously it only checked the first bin.
+  - A new Operator option has been added `NotFinite` that allows you to mask detectors that contain infinite or `NaN <https://en.wikipedia.org/wiki/NaN>`_ values.
+
 - Added an algorithm, :ref:`ISISJournalGetExperimentRuns <algm-ISISJournalGetExperimentRuns>`, which returns run information for a particular experiment from ISIS journal files.
+- Enhanced :ref:`LoadNGEM <algm-LoadNGEM>` to handle partially written events in the data file. 
+   When such incomplete data is encountered, it is skipped until the next valid data is encountered and a 
+   warning is printed at algorithm completion of the total number of data bytes discarded.
 
 Data Handling
 -------------

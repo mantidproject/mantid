@@ -7,6 +7,10 @@
 from typing import NamedTuple, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import MUON_ANALYSIS_GUESS_WS, \
+    FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
+
+FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
 
 class WorkspacePlotInformation(NamedTuple):
@@ -60,7 +64,10 @@ class PlottingCanvasModel(object):
         workspace_plot_information = []
         for workspace_name, index in zip(input_workspace_names, input_indices):
             axis = self._get_workspace_plot_axis(workspace_name)
-            workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors)]
+            if not self._is_guess_workspace(workspace_name):
+                workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors)]
+            else:
+                workspace_plot_information += [self.create_plot_information_for_guess_ws(workspace_name)]
 
         return workspace_plot_information
 
@@ -96,13 +103,13 @@ class PlottingCanvasModel(object):
     def create_plot_information_for_guess_ws(self, guess_ws_name: str) -> WorkspacePlotInformation:
         """
         Creates a workspacePlotInformation instance for the fit_guess
-        By default this is plotted on the zero'th axis.
         :param guess_ws_name: The workspace name for the fit function guess
         :return: A WorkspacePlotInformation instance describing the data to be plotted
         """
-        return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=0,
+        axis = self._get_workspace_plot_axis(guess_ws_name)
+        return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=axis,
                                         normalised=self._normalised,
-                                        errors=False, label="Fit function guess")
+                                        errors=False, label=FIT_FUNCTION_GUESS_LABEL)
 
     def create_axes_titles(self):
         if not self._is_tiled:
@@ -160,3 +167,9 @@ class PlottingCanvasModel(object):
                 workspace_type = 'Diff'
             label = ''.join([';', fit_function_name, ';', workspace_type])
         return label
+
+    def _is_guess_workspace(self, workspace_name):
+        if MUON_ANALYSIS_GUESS_WS in workspace_name or FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS in workspace_name:
+            return True
+        else:
+            return False

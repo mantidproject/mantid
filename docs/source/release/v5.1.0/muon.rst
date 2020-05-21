@@ -35,5 +35,8 @@ Improvements
 - Improved the plotting code the Muon Analysis interface, with a significant amount of redundant code removed.
   This code improvement will lead to more maintainable code, which will be more stable and
   easier to add new functionality in the future.
+- Improved the maintainability of the fitting code in the Muon Analysis interface by removing redundant and duplicated code.
+  These changes will make the addition of new functionality in the future easier.
+- The plot guess option within the fitting tab will now update when a parameter is changed.
 
 :ref:`Release 5.1.0 <v5.1.0>`

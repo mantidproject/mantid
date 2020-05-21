@@ -929,7 +929,7 @@ void AlgorithmDialog::setOptionalMessage(const QString &message) {
  *
  * The function needs to know about the types of widgets
  * that are being used. Currently it knows about QComboBox, QLineEdit, QCheckBox
- * and MWRunFiles
+ * and FileFinderWidget
  * @param widget :: A pointer to the widget
  */
 QString AlgorithmDialog::getValue(QWidget *widget) {

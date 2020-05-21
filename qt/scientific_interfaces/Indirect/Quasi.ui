@@ -140,7 +140,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="MantidQt::API::MWRunFiles" name="mwFixWidthDat" native="true">
+         <widget class="MantidQt::API::FileFinderWidget" name="mwFixWidthDat" native="true">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -543,9 +543,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

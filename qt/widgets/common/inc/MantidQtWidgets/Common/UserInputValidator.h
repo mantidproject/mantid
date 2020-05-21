@@ -8,10 +8,10 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
-using MantidQt::API::MWRunFiles;
+using MantidQt::API::FileFinderWidget;
 using MantidQt::MantidWidgets::DataSelector;
 using MantidQt::MantidWidgets::WorkspaceSelector;
 
@@ -46,8 +46,9 @@ public:
   /// Check that the given WorkspaceSelector is not empty.
   bool checkWorkspaceSelectorIsNotEmpty(const QString &name,
                                         WorkspaceSelector *workspaceSelector);
-  /// Check that the given MWRunFiles widget has valid files.
-  bool checkMWRunFilesIsValid(const QString &name, MWRunFiles *widget);
+  /// Check that the given FileFinderWidget widget has valid files.
+  bool checkFileFinderWidgetIsValid(const QString &name,
+                                    FileFinderWidget *widget);
   /// Check that the given DataSelector widget has valid input.
   bool checkDataSelectorIsValid(const QString &name, DataSelector *widget,
                                 bool silent = false);

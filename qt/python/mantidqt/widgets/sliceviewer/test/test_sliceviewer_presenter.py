@@ -123,6 +123,22 @@ class SliceViewerTest(unittest.TestCase):
         self.view.data_view.plot_matrix.assert_called_with(
             self.model.get_ws(), normalize=mantid.api.MDNormalization.VolumeNormalization)
 
+    def peaks_button_disabled_if_model_cannot_support_it(self):
+        self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
+        self.model.can_support_peaks_overlay.return_value = False
+
+        SliceViewer(None, model=self.model, view=self.view)
+
+        self.view.data_view.disable_peaks_button.assert_called_once()
+
+    def peaks_button_not_disabled_if_model_can_support_it(self):
+        self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
+        self.model.can_support_peaks_overlay.return_value = True
+
+        SliceViewer(None, model=self.model, view=self.view)
+
+        self.view.data_view.disable_peaks_button.assert_not_called()
+
     def test_non_orthogonal_axes_toggled_on(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
         data_view_mock = self.view.data_view

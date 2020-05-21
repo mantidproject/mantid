@@ -92,8 +92,8 @@ public:
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
-  void
-  setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setResolution(
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setQValues(const std::vector<double> &qValues);
 
   QMap<ParamID, double> getCurrentValues() const;
@@ -146,7 +146,7 @@ private:
   BackgroundSubType m_backgroundSubtype;
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
-  std::vector<std::pair<std::string, int>> m_fitResolutions;
+  std::vector<std::pair<std::string, size_t>> m_fitResolutions;
   std::vector<double> m_qValues;
   bool m_isQDependentFunction = false;
 };
