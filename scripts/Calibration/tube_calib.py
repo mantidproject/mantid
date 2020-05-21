@@ -223,8 +223,7 @@ def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False
             peak_index = fit_edges(fit_params, i, get_points_ws, calib_points_ws)
         else:
             peak_index = fit_gaussian(fit_params, i, get_points_ws, calib_points_ws)
-
-        peak_centre = mtd[calib_points_ws + '_Parameters'].row(peak_index).items()[1][1]
+        peak_centre = tuple(mtd[calib_points_ws + '_Parameters'].row(peak_index).items())[1][1]
         results.append(peak_centre)
 
         if show_plot:
@@ -349,7 +348,7 @@ def correct_tube_to_ideal_tube(tube_points, ideal_tube_points, n_detectors, test
     c = [r['Value'] for r in param_q_f][:-1]
 
     # Modify the output array by the fitted quadratic
-    x_result = numpy.polynomial.polynomial.polyval(range(n_detectors), c)
+    x_result = numpy.polynomial.polynomial.polyval(list(range(n_detectors)), c)
 
     # In test mode, shove the pixels that are closest to the reckoned peaks
     # to the position of the first detector so that the resulting gaps can be seen.
