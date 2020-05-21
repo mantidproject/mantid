@@ -244,7 +244,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
     def doPlotImage(self, ax, ws):
         spectra = ws.getNumberHistograms()
-        if spectra > 10:
+        number_of_lines = spectra if len(self.visibleSpectra) <= 0 else len(self.visibleSpectra)
+        if number_of_lines > 10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
         prog_reporter = mantid.api.Progress(self, start=0.0, end=1.0,
                                             nreports=spectra)
@@ -262,7 +263,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             ax.set_ylabel(ylabel)
             prog_reporter.report("Processing")
 
-        if 1 < spectra <= 10:
+        if 1 < number_of_lines <= 10:
             ax.legend()
 
 
