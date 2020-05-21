@@ -218,7 +218,6 @@ set(
         ApplyAbsorptionCorrections.ui
         CalculatePaalmanPings.ui
         ContainerSubtraction.ui
-        ConvFit.ui
         ConvFitAddWorkspaceDialog.ui
         DensityOfStates.ui
         Elwin.ui
@@ -234,6 +233,7 @@ set(
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui
         IndirectFitPreviewPlot.ui
+        IndirectFitTab.ui
         IndirectInterfaceSettings.ui
         IndirectInstrumentConfig.ui
         IndirectLoadILL.ui
@@ -509,7 +509,6 @@ set(
         ApplyAbsorptionCorrections.ui
         CalculatePaalmanPings.ui
         ContainerSubtraction.ui
-        ConvFit.ui
         ConvFitAddWorkspaceDialog.ui
         DensityOfStates.ui
         Elwin.ui
@@ -528,6 +527,7 @@ set(
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui
         IndirectFitPreviewPlot.ui
+        IndirectFitTab.ui
         IndirectInstrumentConfig.ui
         IndirectInterfaceSettings.ui
         IndirectLoadILL.ui

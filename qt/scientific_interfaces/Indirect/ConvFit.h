@@ -13,7 +13,7 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_ConvFit.h"
+#include "ui_IndirectFitTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,11 +46,10 @@ private:
 
   std::string fitTypeString() const;
 
-  std::unique_ptr<Ui::ConvFit> m_uiForm;
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   // ShortHand Naming for fit functions
   std::unordered_map<std::string, std::string> m_fitStrings;
   ConvFitModel *m_convFittingModel;
-  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
 };
 
 } // namespace IDA

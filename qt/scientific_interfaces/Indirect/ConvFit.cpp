@@ -37,28 +37,17 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
-      m_uiForm(new Ui::ConvFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
-  m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
-  QDockWidget *plotViewArea = new QDockWidget();
-  IndirectFitPlotView *fitPlotView = new IndirectFitPlotView();
-  plotViewArea->setWidget(fitPlotView);
-  plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable);
-  m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea,
-                                    m_fitPropertyBrowser);
-  m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_uiForm->dockArea->resizeDocks({m_fitPropertyBrowser, plotViewArea},
-                                  {20, 20}, Qt::Horizontal);
-#endif
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
-  setPlotView(fitPlotView);
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
-  setFitPropertyBrowser(m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      new ConvTemplateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   auto dataPresenter = std::make_unique<ConvFitDataPresenter>(
-      m_convFittingModel, m_uiForm->dockArea->m_uiForm->centralwidget);
+      m_convFittingModel, m_uiForm->dockArea->m_fitDataView);
   connect(
       dataPresenter.get(),
       SIGNAL(

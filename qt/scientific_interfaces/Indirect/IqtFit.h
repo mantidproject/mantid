@@ -11,7 +11,7 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_ConvFit.h"
+#include "ui_IndirectFitTab.h"
 
 #include <memory>
 
@@ -51,9 +51,8 @@ private:
   EstimationDataSelector getEstimationDataSelector() const override;
 
   IqtFitModel *m_iqtFittingModel;
-  std::unique_ptr<Ui::ConvFit> m_uiForm;
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   QString m_tiedParameter;
-  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

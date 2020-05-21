@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
-#include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 #include "IndirectFitPlotView.h"
+#include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -35,29 +35,18 @@ namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
     : IndirectFitAnalysisTab(new IqtFitModel, parent),
-      m_uiForm(new Ui::ConvFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
-  m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
-  QDockWidget *plotViewArea = new QDockWidget();
-  IndirectFitPlotView *fitPlotView = new IndirectFitPlotView();
-  plotViewArea->setWidget(fitPlotView);
-  plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable);
-  m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea,
-                                    m_fitPropertyBrowser);
-  m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_uiForm->dockArea->resizeDocks({m_fitPropertyBrowser, plotViewArea},
-                                  {20, 20}, Qt::Horizontal);
-#endif
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
   setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
-      m_iqtFittingModel, m_uiForm->dockArea->m_uiForm->centralwidget));
-  setPlotView(fitPlotView);
+      m_iqtFittingModel, m_uiForm->dockArea->m_fitDataView));
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto templateBrowser = new IqtTemplateBrowser;
-  m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      templateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
 
   setEditResultVisible(true);
 }
