@@ -43,7 +43,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item row="0" column="1" colspan="2">
      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample" native="true">
       <property name="autoLoad" stdset="0">
        <bool>true</bool>
@@ -56,14 +56,27 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
+    <item row="1" column="0">
      <widget class="QLabel" name="lbResolution">
       <property name="text">
        <string>Resolution</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
+    <item row="1" column="1" colspan="2">
+     <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
+      <property name="autoLoad" stdset="0">
+       <bool>true</bool>
+      </property>
+      <property name="ShowGroups" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="showLoad" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
      <widget class="QWidget" name="wgtStartEnd" native="true">
       <property name="enabled">
        <bool>true</bool>
@@ -131,18 +144,81 @@
       </layout>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
-      <property name="autoLoad" stdset="0">
-       <bool>true</bool>
+    <item row="2" column="2">
+     <layout class="QHBoxLayout" name="loParameterSelection">
+      <property name="spacing">
+       <number>6</number>
       </property>
-      <property name="ShowGroups" stdset="0">
-       <bool>false</bool>
+      <property name="bottomMargin">
+       <number>0</number>
       </property>
-      <property name="showLoad" stdset="0">
-       <bool>false</bool>
-      </property>
-     </widget>
+      <item>
+       <widget class="QLabel" name="lbParameterType">
+        <property name="text">
+         <string>Fit Parameter:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbParameterType">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <item>
+         <property name="text">
+          <string>Width</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>EISF</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="hspParameter">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbParameter">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Width: </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbParameter">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

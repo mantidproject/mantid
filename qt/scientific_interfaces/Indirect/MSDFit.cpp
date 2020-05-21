@@ -39,18 +39,18 @@ auto msdFunctionStrings = std::map<std::string, std::string>(
 
 MSDFit::MSDFit(QWidget *parent)
     : IndirectFitAnalysisTab(new MSDFitModel, parent),
-      m_uiForm(new Ui::MSDFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
   setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
-      m_msdFittingModel, m_uiForm->fitDataView));
-  setPlotView(m_uiForm->pvFitPlotView);
+      m_msdFittingModel, m_uiForm->dockArea->m_fitDataView));
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto templateBrowser = new SingleFunctionTemplateBrowser(msdFunctionStrings);
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
 
   setEditResultVisible(false);
   respondToFunctionChanged();
