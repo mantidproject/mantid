@@ -52,9 +52,9 @@ uint64_t swapUint64(uint64_t word) {
  * @param bigEndian The big endian formatted event.
  * @param smallEndian The resulting small endian formatted event.
  */
-void correctForBigEndian(EventUnion *&bigEndian, EventUnion &smallEndian) {
-  smallEndian.splitWord.words[0] = swapUint64(bigEndian->splitWord.words[1]);
-  smallEndian.splitWord.words[1] = swapUint64(bigEndian->splitWord.words[0]);
+void correctForBigEndian(EventUnion &bigEndian, EventUnion &smallEndian) {
+  smallEndian.splitWord.words[0] = swapUint64(bigEndian.splitWord.words[1]);
+  smallEndian.splitWord.words[1] = swapUint64(bigEndian.splitWord.words[0]);
 }
 
 /**
@@ -276,20 +276,29 @@ void LoadNGEM::loadSingleFile(
   if (!file.is_open()) {
     throw std::runtime_error("File could not be found.");
   }
-  std::array<char, 16> buffer;
 
   const size_t totalNumEvents = verifyFileSize(file) / 16;
+  constexpr size_t SKIP_WORD_SIZE = 4;
   size_t numProcessedEvents = 0;
+  size_t numWordsSkipped = 0;
 
-  while (!file.eof()) {
+  while (true) {
     // Load an event into the variable.
-    file.read(buffer.data(), 16);
-    auto eventBigEndian = reinterpret_cast<EventUnion *>(buffer.data());
-
-    // Correct for the big endian format.
-    EventUnion event;
-    correctForBigEndian(eventBigEndian, event);
-
+    // Occasionally we may get a file where the first event has been chopped,
+    // so we seek to the start of a valid event.
+    // Chopping only seems to occur on a 4 byte word, hence seekg() of 4
+    EventUnion event, eventBigEndian;
+    do {
+      file.read(reinterpret_cast<char *>(&eventBigEndian),
+                sizeof(eventBigEndian));
+      // Correct for the big endian format of nGEM datafile.
+      correctForBigEndian(eventBigEndian, event);
+    } while (!event.generic.check() &&
+             !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof() &&
+             ++numWordsSkipped);
+    if (file.eof()) {
+      break; // we have either not read an event, or only read part of one
+    }
     if (event.coincidence.check()) { // Check for coincidence event.
       ++eventCountInFrame;
       uint64_t pixel = event.coincidence.getPixel();
@@ -313,9 +322,17 @@ void LoadNGEM::loadSingleFile(
                                        fileCount)) {
         return;
       }
-    } else { // Catch all other events and notify.
-      g_log.warning() << "Unexpected event type loaded.\n";
+    } else if (event.generic.check()) { // match all other events and notify.
+      g_log.warning() << "Unexpected event type ID=" << event.generic.id
+                      << " loaded.\n";
+    } else { // if we were to get to here, must be a corrupt event
+      g_log.warning() << "Corrupt event detected.\n";
     }
+  }
+  if (numWordsSkipped > 0) {
+    g_log.warning()
+        << SKIP_WORD_SIZE * numWordsSkipped
+        << " bytes of file data were skipped when locating valid events.\n";
   }
   g_log.information() << "Finished loading a file.\n";
   ++fileCount;
