@@ -7,7 +7,6 @@
 #pylint: disable=no-init,invalid-name,redefined-builtin
 import mantid
 from mantid.kernel import Direction, IntArrayProperty, StringArrayProperty, StringListValidator
-import sys
 import importlib
 
 
@@ -221,8 +220,6 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         if len(ok2run) > 0:
             raise RuntimeError(ok2run)
 
-        matplotlib = sys.modules['matplotlib']
-        matplotlib.use('agg')
         import matplotlib.pyplot as plt
 
         if isinstance(self._wksp, mantid.api.WorkspaceGroup):
