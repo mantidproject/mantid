@@ -214,7 +214,8 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
   g_log.debug("Histo capture finished");
 }
 
-void KafkaHistoStreamDecoder::initLocalCaches(const RunStartStruct &runStartData) {
+void KafkaHistoStreamDecoder::initLocalCaches(
+    const RunStartStruct &runStartData) {
   m_runId = runStartData.runId;
 
   const auto jsonGeometry = runStartData.nexusStructure;
