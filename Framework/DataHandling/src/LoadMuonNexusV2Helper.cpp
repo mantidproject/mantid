@@ -13,6 +13,19 @@ namespace Mantid {
 namespace DataHandling {
 namespace LoadMuonNexusV2Helper {
 
+namespace NeXusEntry {
+const std::string GOODFRAMES{"good_frames"};
+const std::string DETECTOR{"instrument/detector_1"};
+const std::string PERIOD{"periods"};
+const std::string ORIENTATON{"instrument/detector_1/orientation"};
+const std::string RESOLUTION{"resolution"};
+const std::string GROUPING{"grouping"};
+const std::string DEADTIME{"dead_time"};
+const std::string COUNTS{"counts"};
+const std::string FIRSTGOODBIN{"first_good_bin"};
+const std::string TIMEZERO{"time_zero"};
+} // namespace NeXusEntry
+
 using namespace NeXus;
 using namespace Kernel;
 using namespace API;
@@ -27,7 +40,7 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
 
   if (!isFileMultiPeriod) {
     try {
-      NXInt goodFrames = entry.openNXInt("good_frames");
+      NXInt goodFrames = entry.openNXInt(NeXusEntry::GOODFRAMES);
       goodFrames.load();
       return goodFrames;
     } catch (std::runtime_error) {
@@ -36,9 +49,9 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
     }
   } else {
     try {
-      NXClass periodClass = entry.openNXGroup("periods");
+      NXClass periodClass = entry.openNXGroup(NeXusEntry::PERIOD);
       // For multiperiod datasets, read raw_data_1/periods/good_frames
-      NXInt goodFrames = periodClass.openNXInt("good_frames");
+      NXInt goodFrames = periodClass.openNXInt(NeXusEntry::GOODFRAMES);
       goodFrames.load();
       return goodFrames;
     } catch (std::runtime_error) {
@@ -55,9 +68,9 @@ loadDetectorGroupingFromNexus(const NXEntry &entry,
 
   std::vector<detid_t> grouping;
   // Open nexus entry
-  NXClass detectorGroup = entry.openNXGroup("instrument/detector_1");
-  if (detectorGroup.containsDataSet("grouping")) {
-    NXInt groupingData = detectorGroup.openNXInt("grouping");
+  NXClass detectorGroup = entry.openNXGroup(NeXusEntry::DETECTOR);
+  if (detectorGroup.containsDataSet(NeXusEntry::GROUPING)) {
+    NXInt groupingData = detectorGroup.openNXInt(NeXusEntry::GROUPING);
     groupingData.load();
     if (!isFileMultiPeriod) {
       for (const auto &detectorNumber : detectorsLoaded) {
@@ -70,7 +83,7 @@ loadDetectorGroupingFromNexus(const NXEntry &entry,
 std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   std::string mainFieldDirection = "Longitudinal"; // default
   try {
-    NXChar orientation = entry.openNXChar("instrument/detector_1/orientation");
+    NXChar orientation = entry.openNXChar(NeXusEntry::ORIENTATON);
     // some files have no data there
     orientation.load();
     if (orientation[0] == 't') {
@@ -88,9 +101,9 @@ loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
 
   std::vector<double> deadTimes;
   // Open detector nexus entry
-  NXClass detectorGroup = entry.openNXGroup("instrument/detector_1");
-  if (detectorGroup.containsDataSet("dead_time")) {
-    NXFloat deadTimesData = detectorGroup.openNXFloat("dead_time");
+  NXClass detectorGroup = entry.openNXGroup(NeXusEntry::DETECTOR);
+  if (detectorGroup.containsDataSet(NeXusEntry::DEADTIME)) {
+    NXFloat deadTimesData = detectorGroup.openNXFloat(NeXusEntry::DEADTIME);
     deadTimesData.load();
     if (!isFileMultiPeriod) {
       // Simplest case - one grouping entry per detector
@@ -104,17 +117,20 @@ loadDeadTimesFromNexus(const NeXus::NXEntry &entry,
 
 double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry) {
   try {
-    NXClass detectorEntry = entry.openNXGroup("instrument/detector_1");
-    NXInfo infoResolution = detectorEntry.getDataSetInfo("resolution");
-    NXInt counts = detectorEntry.openNXInt("counts");
-    std::string firstGoodBin = counts.attributes("first_good_bin");
+    NXClass detectorEntry = entry.openNXGroup(NeXusEntry::DETECTOR);
+    NXInfo infoResolution =
+        detectorEntry.getDataSetInfo(NeXusEntry::RESOLUTION);
+    NXInt counts = detectorEntry.openNXInt(NeXusEntry::COUNTS);
+    std::string firstGoodBin = counts.attributes(NeXusEntry::FIRSTGOODBIN);
     double resolution;
     switch (infoResolution.type) {
     case NX_FLOAT32:
-      resolution = static_cast<double>(detectorEntry.getFloat("resolution"));
+      resolution =
+          static_cast<double>(detectorEntry.getFloat(NeXusEntry::RESOLUTION));
       break;
     case NX_INT32:
-      resolution = static_cast<double>(detectorEntry.getInt("resolution"));
+      resolution =
+          static_cast<double>(detectorEntry.getInt(NeXusEntry::RESOLUTION));
       break;
     default:
       throw std::runtime_error("Unsupported data type for resolution");
@@ -129,8 +145,9 @@ double loadFirstGoodDataFromNexus(const NeXus::NXEntry &entry) {
 
 double loadTimeZeroFromNexusFile(const NeXus::NXEntry &entry) {
   try {
-    NXClass detectorEntry = entry.openNXGroup("instrument/detector_1");
-    double timeZero = static_cast<double>(detectorEntry.getFloat("time_zero"));
+    NXClass detectorEntry = entry.openNXGroup(NeXusEntry::DETECTOR);
+    double timeZero =
+        static_cast<double>(detectorEntry.getFloat(NeXusEntry::TIMEZERO));
     return timeZero;
   } catch (std::runtime_error) {
     throw std::runtime_error("Could not load time zero, check Nexus file");

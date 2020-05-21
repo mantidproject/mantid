@@ -9,15 +9,16 @@
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidNexus/NexusClasses.h"
 #include <vector>
 
 namespace Mantid {
 namespace DataHandling {
 
 // Constructor
-LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log,
-                                   const std::string &filename)
-    : m_logger(g_log), m_filename(filename) {}
+LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename)
+    : m_logger(g_log), m_filename(std::move(filename)) {}
 
 /**
  * Creates Detector Grouping Table .
@@ -31,7 +32,6 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDetectorGroupingTable(
   auto detectorGroupingTable =
       std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
           API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
-
   detectorGroupingTable->addColumn("vector_int", "Detectors");
 
   std::map<detid_t, std::vector<detid_t>> groupingMap;

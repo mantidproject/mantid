@@ -31,6 +31,12 @@ using namespace HistogramData;
 using std::size_t;
 using namespace DataObjects;
 
+namespace NeXusEntry {
+const std::string RAWDATA{"/raw_data_1"};
+const std::string DEFINITION{"/raw_data_1/definition"};
+const std::string PERIOD{"/periods"};
+} // namespace NeXusEntry
+
 /// Empty default constructor
 LoadMuonNexusV2::LoadMuonNexusV2()
     : m_filename(), m_entrynumber(0), m_isFileMultiPeriod(false),
@@ -44,15 +50,14 @@ LoadMuonNexusV2::LoadMuonNexusV2()
  */
 int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
   // Without this entry we cannot use LoadISISNexus
-  if (!descriptor.isEntry("/raw_data_1", "NXentry")) {
+  if (!descriptor.isEntry(NeXusEntry::RAWDATA, "NXentry")) {
     return 0;
   }
-  const std::string root = "/raw_data_1";
   // Check if Muon source in definition entry
-  if (!descriptor.isEntry(root + "/definition"))
+  if (!descriptor.isEntry(NeXusEntry::DEFINITION))
     return 0;
   ::NeXus::File file(descriptor.getFilename());
-  file.openPath(root + "/definition");
+  file.openPath(NeXusEntry::DEFINITION);
   std::string def = file.getStrData();
   if (def == "muonTD" || def == "pulsedTD") {
     return 82; // have to return 82 to "beat" the LoadMuonNexus2 algorithm,
@@ -114,25 +119,26 @@ void LoadMuonNexusV2::init() {
                   "detector grouping.");
 }
 void LoadMuonNexusV2::execLoader() {
-  this->setRethrows(true);
+  // this->setRethrows(true);
   // prepare nexus entry
   m_entrynumber = getProperty("EntryNumber");
   m_filename = getPropertyValue("Filename");
   NXRoot root(m_filename);
-  NXEntry entry = root.openEntry("raw_data_1");
+  NXEntry entry = root.openEntry(NeXusEntry::RAWDATA);
+  isEntryMultiPeriod(entry);
+  if (m_isFileMultiPeriod) {
+    throw std::invalid_argument(
+        "Multiperiod nexus files not yet supported by LoadMuonNexusV2");
+  }
 
   // Execute child algorithm LoadISISNexus2 and load Muon specific properties
-  runLoadISISNexus();
+  auto outWS = runLoadISISNexus();
   loadMuonProperties(entry);
 
   // Check if single or multi period file and create appropriate loading
   // strategy
-  isEntryMultiPeriod(entry);
-  Workspace_sptr outWS = getProperty("OutputWorkspace");
   if (m_multiPeriodsLoaded) {
-    WorkspaceGroup_sptr wksp_grp =
-        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
-    g_log.warning("Multi period files not yet supported by LoadMuonNexusV2");
+    // Currently not implemented
     return;
   } else {
     // we just have a single workspace
@@ -162,7 +168,7 @@ void LoadMuonNexusV2::execLoader() {
  * If multi period the function determines whether multi periods are loaded
  */
 void LoadMuonNexusV2::isEntryMultiPeriod(const NXEntry &entry) {
-  NXClass periodClass = entry.openNXGroup("periods");
+  NXClass periodClass = entry.openNXGroup(NeXusEntry::PERIOD);
   int numberOfPeriods = periodClass.getInt("number");
   if (numberOfPeriods > 1) {
     m_isFileMultiPeriod = true;
@@ -177,8 +183,9 @@ void LoadMuonNexusV2::isEntryMultiPeriod(const NXEntry &entry) {
 /**
  * Runs the child algorithm LoadISISNexus, which loads data into an output
  * workspace
+ * @returns :: Workspace loaded by runLoadISISNexus
  */
-void LoadMuonNexusV2::runLoadISISNexus() {
+Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
   // Here we explicit set the number of OpenMP threads, as by default
   // LoadISISNexus spawns up a large number of threads,
   // which is unnecessary for the size (~100 spectra) of workspaces seen here.
@@ -206,6 +213,8 @@ void LoadMuonNexusV2::runLoadISISNexus() {
   ISISLoader->copyPropertiesFrom(*this);
   ISISLoader->execute();
   this->copyPropertiesFrom(*ISISLoader);
+  Workspace_sptr outWS = getProperty("OutputWorkspace");
+  return outWS;
 }
 /**
  * Loads Muon specific data from the nexus entry

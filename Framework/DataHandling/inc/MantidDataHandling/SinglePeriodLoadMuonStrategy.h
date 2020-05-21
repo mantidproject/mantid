@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidDataHandling/LoadMuonStrategy.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -13,7 +15,7 @@ class SinglePeriodLoadMuonStrategy : public LoadMuonStrategy {
 public:
   // Constructor
   SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log,
-                               const std::string &filename,
+                               const std::string filename,
                                NeXus::NXEntry &entry,
                                DataObjects::Workspace2D_sptr workspace,
                                int entryNumber, bool isFileMultiPeriod);

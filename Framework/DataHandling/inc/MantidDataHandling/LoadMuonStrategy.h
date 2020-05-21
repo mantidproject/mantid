@@ -6,19 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
-
 class DLLExport LoadMuonStrategy {
 public:
   // Constructor
-  LoadMuonStrategy(Kernel::Logger &g_log, const std::string &filename);
+  LoadMuonStrategy(Kernel::Logger &g_log, std::string filename);
   // Virtual destructor
   virtual ~LoadMuonStrategy() {}
   // Load muon log data
@@ -44,7 +41,7 @@ protected:
   // Logger
   Kernel::Logger &m_logger;
   // Filename, used for running child algorithms
-  const std::string &m_filename;
+  const std::string m_filename;
 };
 } // namespace DataHandling
 } // namespace Mantid

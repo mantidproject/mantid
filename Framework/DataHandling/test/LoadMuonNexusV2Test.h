@@ -12,6 +12,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMuonNexusV2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
@@ -242,17 +243,17 @@ public:
     TS_ASSERT_EQUALS(*detectorgroup.begin(), specMax);
   }
 
-  void testLoadThrowsIfEntryNumberOutOfRange() {
+  void testLoadFailsIfEntryNumberOutOfRange() {
     LoadMuonNexusV2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("EntryNumber", "10");
 
-    TS_ASSERT_THROWS(ld.execute(), const std::invalid_argument &)
+    TS_ASSERT(!ld.isExecuted())
   }
 
-  void testLoadThrowsIfInvalidSpectraProperties() {
+  void testLoadFailsIfInvalidSpectraProperties() {
     std::vector<int> spectraIntegerList = {1, 123, 157};
     auto spectraList = createSpectraList(spectraIntegerList);
     LoadMuonNexusV2 ld;
@@ -261,7 +262,7 @@ public:
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("SpectrumList", spectraList);
 
-    TS_ASSERT_THROWS(ld.execute(), const std::invalid_argument &)
+    TS_ASSERT(!ld.isExecuted())
   }
 
   void testMaxThreadsRestoredWhenAlgorithmFinished() {

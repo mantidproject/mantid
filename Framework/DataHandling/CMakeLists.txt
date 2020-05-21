@@ -505,6 +505,7 @@ set(TEST_FILES
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
     LoadMuonNexusV2Test.h
+    LoadNGEMTest.h
     LoadNXSPETest.h
     LoadNXcanSASTest.h
     LoadNexusLogsTest.h

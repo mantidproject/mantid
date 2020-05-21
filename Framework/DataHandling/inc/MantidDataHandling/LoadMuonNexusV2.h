@@ -34,6 +34,7 @@ OutputWorkspace_PeriodNo)
 
 @author Stephen Smith, ISIS
 */
+// Forward declare Muon Load Strategy
 class DLLExport LoadMuonNexusV2 : public API::NexusFileLoader {
 public:
   // Default constructor
@@ -62,8 +63,8 @@ private:
   void execLoader() override;
   // Determines whether entry contains multi period data
   void isEntryMultiPeriod(const NeXus::NXEntry &entry);
-  // Run child algorithm LoadISISNexus3
-  void runLoadISISNexus();
+  // Run child algorithm LoadISISNexus2
+  API::Workspace_sptr runLoadISISNexus();
   // Load Muon specific properties
   void loadMuonProperties(const NeXus::NXEntry &entry);
   /// The name and path of the input file
