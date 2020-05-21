@@ -42,22 +42,24 @@ class LRReductionWithRefrenceTest(systemtesting.MantidSystemTest):
             LowResNormAxisPixelRangeFlag=True,
             LowResNormAxisPixelRange=[98, 158],
             TOFRange=[29623.0, 42438.0],
-            IncidentMediumSelected='2InDiamSi',
-            GeometryCorrectionFlag=False,
+            TOFRangeFlag=True,
             QMin=0.005,
             QStep=0.01,
             AngleOffset=0.009,
             AngleOffsetError=0.001,
+            OutputWorkspace='reflectivity_119814_with_reference',
             ApplyScalingFactor=False,
             ScalingFactorFile=scaling_factor_file,
+            SlitTolerance=0.02,
             SlitsWidthFlag=True,
+            IncidentMediumSelected='2InDiamSi',
+            GeometryCorrectionFlag=False,
             CropFirstAndLastPoints=False,
-            Refl1DModelParameters=refl1d_model_json,
-            OutputWorkspace='reflectivity_119814_no_scaling')
+            Refl1DModelParameters=refl1d_model_json)
 
     def validate(self):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        return "reflectivity_119814_no_scaling", 'REFL_119814_combined_data_no_scaling.nxs'
+        return "reflectivity_119814_with_reference", 'REFL_119814_combined_data_with_reference.nxs'
