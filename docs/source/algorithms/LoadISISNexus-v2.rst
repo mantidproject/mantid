@@ -29,7 +29,7 @@ The contents of ``isis_vms_compat`` are a legacy from an older ISIS format. If t
 present, an equivalent entry in the file is used.
 
 In the tables below, descriptions of the relevant nexus entries are given. If applicable, the location within the
-vms_block and an alternative location to read the entry from is given. In these tables ``/group`` refers to an group under
+vms_block and an alternative location to read the entry from is given. In these tables ``/group`` refers to a group under
 the main entry, i.e ``/group`` is equivalent to ``raw_data_1/group``.
 
 +------------------------------+-------------------------------------------+-------------------------------------+
