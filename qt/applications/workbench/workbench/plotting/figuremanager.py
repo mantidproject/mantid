@@ -11,13 +11,12 @@
 import copy
 import sys
 from functools import wraps
-
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.collections import QuadMesh
+from matplotlib.collections import LineCollection, QuadMesh
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
@@ -26,10 +25,8 @@ from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableW
 from mantid.kernel import logger
 from mantid.plots import datafunctions, MantidAxes
 from mantidqt.io import open_a_file_dialog
-from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
-from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
@@ -98,14 +95,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 to_redraw = ax.remove_workspace_artists(workspace)
             else:
                 to_redraw = False
-            # We check for axes type below as a pseudo check for an axes being
-            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
-            # to a workspace, the other a colorbar. Deleting the workspace
-            # deletes the colorfill, but the plot remains open due to the
-            # non-empty colorbar. This solution seems to work for the majority
-            # of cases but could lead to unmanaged figures only containing an
-            # Axes object being closed.
-            if type(ax) is not Axes:
+            if type(ax) is not Axes:  # Solution for filtering out colorbar axes. Works most of the time.
                 empty_axes.append(MantidAxes.is_empty(ax))
             redraw = redraw | to_redraw
 
@@ -227,6 +217,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_fill_area_triggered.connect(
                 self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
+            self.toolbar.sig_change_line_collection_colour_triggered.connect(self.change_line_collection_colour)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -296,24 +287,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar] \
-                or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
-            self._set_fit_enabled(False)
 
-        # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
-        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
-        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes(
-        )[0].is_waterfall():
-            self.toolbar.set_generate_plot_script_enabled(False)
-
-        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
-        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or \
-                not self.canvas.figure.get_axes()[0].is_waterfall():
-            self.toolbar.set_waterfall_options_enabled(False)
-
-        if datafunctions.figure_contains_only_3d_plots(self.canvas.figure):
-            self.toolbar.adjust_for_3d_plots()
+        if self.toolbar:
+            self.toolbar.set_buttons_visiblity(self.canvas.figure)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -396,11 +372,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
-    def _set_fit_enabled(self, on):
-        action = self.toolbar._actions['toggle_fit']
-        action.setEnabled(on)
-        action.setVisible(on)
-
     def generate_plot_script_clipboard(self):
         script = generate_script(self.canvas.figure, exclude_headers=True)
         QApplication.clipboard().setText(script)
@@ -466,6 +437,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def update_toolbar_waterfall_plot(self, is_waterfall):
         self.toolbar.set_waterfall_options_enabled(is_waterfall)
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
+
+    def change_line_collection_colour(self, colour):
+        for col in self.canvas.figure.get_axes()[0].collections:
+            if isinstance(col, LineCollection):
+                col.set_color(colour.name())
+
+        self.canvas.draw()
 
 
 # -----------------------------------------------------------------------------

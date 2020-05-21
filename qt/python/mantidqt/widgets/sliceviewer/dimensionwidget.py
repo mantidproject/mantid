@@ -36,7 +36,6 @@ class DimensionWidget(QWidget):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dims_info, parent=None):
         super().__init__(parent)
 
@@ -105,22 +104,6 @@ class DimensionWidget(QWidget):
             d.name.setMinimumWidth(max_name_width)
             d.units.setMinimumWidth(max_unit_width)
 
-    def get_indices(self):
-        """
-        :return: a list of 3 elements, [X, Y, Z], where X,Y,Z give the index that is set as that dimension.
-        """
-        xdim, ydim, zdim = None, None, None
-        for index, dimension in enumerate(self.dims):
-            state = dimension.get_state()
-            if state == State.X:
-                xdim = index
-            elif state == State.Y:
-                ydim = index
-            elif state == State.NONE:
-                zdim = index
-
-        return [xdim, ydim, zdim]
-
     def get_slicepoint(self):
         """:return: a list of 3 elements where None indicates a non-slice dimension and a
           float indicates the current slice point in that dimension.
@@ -165,7 +148,6 @@ class Dimension(QWidget):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
         super().__init__(parent)
 
@@ -299,7 +281,6 @@ class DimensionMDE(Dimension):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
 
         # hack in a number_of_bins for MDEventWorkspace

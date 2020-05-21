@@ -345,7 +345,7 @@ void Elwin::checkForELTWorkspace() {
 bool Elwin::validate() {
   UserInputValidator uiv;
 
-  uiv.checkMWRunFilesIsValid("Input", m_uiForm.dsInputFiles);
+  uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
 
   auto rangeOne =
       std::make_pair(m_dblManager->value(m_properties["IntegrationStart"]),

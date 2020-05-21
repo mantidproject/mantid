@@ -17,6 +17,7 @@ from functools import partial
 
 # third party imports
 from matplotlib.container import ErrorbarContainer
+from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
@@ -233,7 +234,7 @@ class FigureInteraction(object):
                     move_and_show(YAxisEditor(canvas, ax))
                 else:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
-            if hasattr(ax, 'zaxis'):
+            elif hasattr(ax, 'zaxis'):
                 if ax.zaxis.label.contains(event)[0]:
                     move_and_show(LabelEditor(canvas, ax.zaxis.label))
                 elif (ax.zaxis.contains(event)[0]
@@ -295,12 +296,14 @@ class FigureInteraction(object):
 
         menu = QMenu()
 
-        if fig_type == FigureType.Image:
+        if fig_type == FigureType.Image or fig_type == FigureType.Contour:
             if isinstance(event.inaxes, MantidAxes):
                 self._add_axes_scale_menu(menu, event.inaxes)
                 self._add_normalization_option_menu(menu, event.inaxes)
                 self._add_colorbar_axes_scale_menu(menu, event.inaxes)
-        else:
+        elif fig_type == FigureType.Surface:
+            self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+        elif fig_type != FigureType.Wireframe:
             if self.fit_browser.tool is not None:
                 self.fit_browser.add_to_menu(menu)
                 menu.addSeparator()
@@ -688,6 +691,9 @@ class FigureInteraction(object):
 
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
+            if arg_set['function'] == 'contour':
+                continue
+
             if arg_set['workspaces'] in ax.tracked_workspaces:
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
@@ -705,12 +711,24 @@ class FigureInteraction(object):
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))
                 # 2D plots have no spec number so remove it
-                if figure_type(self.canvas.figure) == FigureType.Image:
+                if figure_type(self.canvas.figure) in [FigureType.Image, FigureType.Contour]:
                     arg_set_copy.pop('specNum')
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
                     if ws_artist.spec_num == arg_set.get('specNum'):
                         ws_artist.is_normalized = not is_normalized
-                        ws_artist.replace_data(workspace, arg_set_copy)
+
+                        # This check is to prevent the contour lines being re-plotted using the colorfill plot args.
+                        if isinstance(ws_artist._artists[0], QuadContourSet):
+                            contour_line_colour = ws_artist._artists[0].collections[0].get_color()
+
+                            ws_artist.replace_data(workspace, None)
+
+                            # Re-apply the contour line colour
+                            for col in ws_artist._artists[0].collections:
+                                col.set_color(contour_line_colour)
+                        else:
+                            ws_artist.replace_data(workspace, arg_set_copy)
+
         if ax.lines:  # Relim causes issues with colour plots, which have no lines.
             ax.relim()
 
@@ -767,9 +785,12 @@ class FigureInteraction(object):
         # not rescaled properly because the vertical marker artists were
         # included in the last computation of the data limits and
         # set_xscale/set_yscale only autoscale the view
-        ax.relim()
+        xlim = copy(ax.get_xlim())
+        ylim = copy(ax.get_ylim())
         ax.set_xscale(scale_types[0])
         ax.set_yscale(scale_types[1])
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
 
         self.canvas.draw_idle()
 

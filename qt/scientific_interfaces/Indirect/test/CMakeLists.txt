@@ -4,14 +4,14 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
-  IndirectDataTablePresenterTest.h
   IndirectDataValidationHelperTest.h
+  IndirectDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
+  IndirectFitDataModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
-  IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
   IndirectFittingModelTest.h

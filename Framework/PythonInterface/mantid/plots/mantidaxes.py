@@ -285,6 +285,51 @@ class MantidAxes(Axes):
         return tracked_artists
 
     def remove_workspace_artists(self, workspace):
+        if self.is_waterfall():
+            return self._remove_workspace_artists_waterfall(workspace=workspace)
+        else:
+            return self._remove_workspace_artists(workspace)
+
+    def remove_artists_if(self, unary_predicate):
+        if self.is_waterfall():
+            return self._remove_workspace_artists_waterfall(predicate=unary_predicate)
+        else:
+            return self._remove_artists_if(unary_predicate)
+
+    def _remove_workspace_artists_waterfall(self, workspace=None, predicate=None):
+        """
+        Perform the steps necessary to maintain waterfall plot settings before removing
+        the artists. Output is based on the inner function.
+        If workspace is set, uses _remove_workspace_artists()
+        otherwise if predicate is set, uses _remove_artists_if()
+        otherwise raises a RuntimeError.
+        :param workspace: A Workspace object
+        :param predicate: A unary predicate used to select artists.
+        :return: The output of the inner function.
+        """
+        waterfall_x_offset = copy.copy(self.waterfall_x_offset)
+        waterfall_y_offset = copy.copy(self.waterfall_y_offset)
+        has_fills = self.waterfall_has_fill()
+
+        self.update_waterfall(0, 0)
+
+        if workspace is not None:
+            output = self._remove_workspace_artists(workspace)
+        elif predicate is not None:
+            output = self._remove_artists_if(predicate)
+        else:
+            raise RuntimeError("A workspace or predicate is required.")
+
+        self.update_waterfall(waterfall_x_offset, waterfall_y_offset)
+
+        if len(self.lines) == 1:  # Can't have waterfall plots with only one line.
+            self.set_waterfall(False)
+        elif has_fills:
+            datafunctions.waterfall_update_fill(self)
+
+        return output
+
+    def _remove_workspace_artists(self, workspace):
         """
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
@@ -302,7 +347,7 @@ class MantidAxes(Axes):
 
         return True
 
-    def remove_artists_if(self, unary_predicate):
+    def _remove_artists_if(self, unary_predicate):
         """
         Remove any artists which satisfy the predicate and return True
         if the axes is then empty
@@ -502,7 +547,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.plot`.
         """
-        if datafunctions.validate_args(*args):
+        if datafunctions.validate_args(*args,**kwargs):
             logger.debug('using plotfunctions')
 
             autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
@@ -1134,9 +1179,13 @@ class MantidAxes3D(Axes3D):
         # it interfering with double-clicking on the axes.
         self.figure.canvas.mpl_disconnect(self._cids[1])
 
+    def set_title(self, *args, **kwargs):
+        # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called
+        # instead.
+        return Axes.set_title(self, *args, **kwargs)
+
     def set_xlim3d(self, *args):
         min, max = super().set_xlim3d(*args)
-
         self._set_overflowing_data_to_nan(min, max, 0)
 
     def set_ylim3d(self, *args):

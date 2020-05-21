@@ -33,14 +33,32 @@ class SampleLogsView(QSplitter):
         self.setWindowFlags(Qt.Window)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        # left hand side
+        self.frame_left = QFrame()
+        layout_left = QVBoxLayout()
+
+        # add a spin box for MD workspaces
+        if isMD:
+            layout_mult_expt_info = QHBoxLayout()
+            layout_mult_expt_info.addWidget(QLabel("Experiment Info #"))
+            self.experimentInfo = QSpinBox()
+            self.experimentInfo.setMaximum(noExp-1)
+            self.experimentInfo.valueChanged.connect(self.presenter.changeExpInfo)
+            layout_mult_expt_info.addWidget(self.experimentInfo)
+            layout_mult_expt_info.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Expanding))
+            layout_left.addLayout(layout_mult_expt_info)
+
         # Create sample log table
         self.table = QTableView()
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.doubleClicked.connect(self.presenter.doubleClicked)
         self.table.contextMenuEvent = self.tableMenu
-        self.addWidget(self.table)
+        layout_left.addWidget(self.table)
+        self.frame_left.setLayout(layout_left)
+        self.addWidget(self.frame_left)
 
-        frame_right = QFrame()
+        #right hand side
+        self.frame_right = QFrame()
         layout_right = QVBoxLayout()
 
         #Add full_time and experimentinfo options
@@ -91,9 +109,9 @@ class SampleLogsView(QSplitter):
         layout_stats.addRow('Std Dev:', self.stats_widgets["standard_deviation"])
         layout_stats.addRow('Duration:', self.stats_widgets["duration"])
         layout_right.addLayout(layout_stats)
-        frame_right.setLayout(layout_right)
+        self.frame_right.setLayout(layout_right)
 
-        self.addWidget(frame_right)
+        self.addWidget(self.frame_right)
         self.setStretchFactor(0,1)
 
         self.resize(1200,800)
@@ -120,11 +138,35 @@ class SampleLogsView(QSplitter):
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
         self.table.selectionModel().selectionChanged.connect(self.presenter.update)
 
+    def show_plot_and_stats(self, show_plot_and_stats):
+        """sets wether the plot and stats section should be visible"""
+        if self.frame_right.isVisible() != show_plot_and_stats:
+            # the desired state is nor the current state
+            self.setUpdatesEnabled(False)
+            current_width = self.frame_right.width()
+            if current_width:
+                self.last_width = current_width
+            else:
+                current_width = self.last_width
+
+            if show_plot_and_stats:
+                self.resize(self.width() + current_width, self.height())
+            else:
+                self.resize(self.width() - current_width, self.height())
+            self.frame_right.setVisible(show_plot_and_stats)
+            self.setUpdatesEnabled(True)
+
     def plot_selected_logs(self, ws, exp, rows):
         """Update the plot with the selected rows"""
-        self.ax.clear()
-        self.create_ax_by_rows(self.ax, ws, exp, rows)
-        self.fig.canvas.draw()
+        if self.frame_right.isVisible():
+            self.ax.clear()
+            self.create_ax_by_rows(self.ax, ws, exp, rows)
+            try:
+                self.fig.canvas.draw()
+            except ValueError as ve:
+                #this can throw an error if the plot has recently been hidden, but the error does not matter
+                if not str(ve).startswith("Image size of"):
+                    raise
 
     def new_plot_selected_logs(self, ws, exp, rows):
         """Create a new plot, in a separate window for selected rows"""

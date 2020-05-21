@@ -38,7 +38,6 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
-
     def __init__(self, peaks_ws, fg_color, bg_color):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -129,10 +128,9 @@ def create_peaksviewermodel(peaks_ws_name):
     :return: A new PeaksViewerModel object
     :raises ValueError: if the workspace referred to by the name is not a PeaksWorkspace
     """
-    return PeaksViewerModel(
-        _get_peaksworkspace(peaks_ws_name),
-        fg_color=next(FG_COLORS)['fg_color'],
-        bg_color=DEFAULT_BG_COLOR)
+    return PeaksViewerModel(_get_peaksworkspace(peaks_ws_name),
+                            fg_color=next(FG_COLORS)['fg_color'],
+                            bg_color=DEFAULT_BG_COLOR)
 
 
 # Private
