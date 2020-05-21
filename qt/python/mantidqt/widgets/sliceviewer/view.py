@@ -83,9 +83,9 @@ class SliceViewerDataView(QWidget):
         # MPL toolbar
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
-        self.mpl_toolbar.linePlotsClicked.connect(self.line_plots_toggle)
+        self.mpl_toolbar.linePlotsClicked.connect(self.on_line_plots_toggle)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
-        self.mpl_toolbar.nonOrthogonalClicked.connect(self.non_orthogonal_axes_toggle)
+        self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
 
         # layout
         self.layout = QGridLayout(self)
@@ -253,11 +253,11 @@ class SliceViewerDataView(QWidget):
             self.image.set_data(data.T)
         self.colorbar.update_clim()
 
-    def line_plots_toggle(self, state):
+    def on_line_plots_toggle(self, state):
         self.presenter.line_plots(state)
         self.line_plots = state
 
-    def non_orthogonal_axes_toggle(self, state):
+    def on_non_orthogonal_axes_toggle(self, state):
         """
         Switch state of the non-orthognal axes on/off
         """
@@ -287,11 +287,17 @@ class SliceViewerDataView(QWidget):
         """
         self.mpl_toolbar.set_action_enabled(ToolItemText.OVERLAYPEAKS, False)
 
+    def enable_nonorthogonal_axes_button(self):
+        """
+        Enables access to non-orthogonal axes functionality
+        """
+        self.mpl_toolbar.set_action_enabled(ToolItemText.NONORTHOGONAL_AXES, True)
+
     def disable_nonorthogonal_axes_button(self):
         """
         Disables non-orthorognal axes functionality
         """
-        self.mpl_toolbar.set_action_enabled(ToolItemText.NONORTHOGONAL_AXES, False)
+        self.mpl_toolbar.set_action_enabled(ToolItemText.NONORTHOGONAL_AXES, state=False)
 
     def clear_line_plots(self):
         try:  # clear old plots

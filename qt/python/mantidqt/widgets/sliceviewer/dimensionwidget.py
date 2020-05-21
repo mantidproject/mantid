@@ -40,8 +40,9 @@ class DimensionWidget(QWidget):
         super().__init__(parent)
 
         self.layout = QVBoxLayout(self)
-        self.dims = []
+        self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
+            self.qflags.append(dim['qdim'])
             if dim['type'] == 'MDE':
                 self.dims.append(DimensionMDE(dim, number=n, parent=self))
             else:
@@ -105,16 +106,20 @@ class DimensionWidget(QWidget):
             d.units.setMinimumWidth(max_unit_width)
 
     def get_slicepoint(self):
-        """:return: a list of 3 elements where None indicates a non-slice dimension and a
+        """:return: A list of elements where None indicates a non-slice dimension and a
           float indicates the current slice point in that dimension.
         """
         return [None if d.get_state() in (State.X, State.Y) else d.get_value() for d in self.dims]
 
     def get_slicerange(self):
-        for d in self.dims:
-            if d.get_state() == State.NONE:
-                spinbox = d.spinbox
-                return (spinbox.minimum(), spinbox.maximum())
+        """
+        :return: A list of enumerating the range in each slice dimension. None indicates a non-slice
+        dimension and are in the same positions as the list returned from get_slicepoint
+        """
+        return [
+            None if d.get_state() in (State.X, State.Y) else
+            (d.spinbox.minimum(), d.spinbox.maximum()) for d in self.dims
+        ]
 
     def get_bin_params(self):
         return [
@@ -122,13 +127,14 @@ class DimensionWidget(QWidget):
             for d in self.dims
         ]
 
-    def set_slicevalue(self, value):
+    def set_slicepoint(self, point):
         """
-        Set the value of the slice point in the slice dimension
+        Set the value of the slice point
+        :param point: New value of the slice point
         """
-        for d in self.dims:
-            if d.get_state() == State.NONE:
-                d.set_value(value)
+        for index, value in enumerate(point):
+            if value is not None:
+                self.dims[index].set_value(value)
 
 
 class Dimension(QWidget):

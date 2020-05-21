@@ -19,6 +19,42 @@ from numpy.testing import assert_equal, assert_allclose
 import numpy as np
 
 
+def _create_mock_workspace(ws_type, units, has_oriented_lattice, ndims=2):
+    ws = MagicMock(spec=ws_type)
+    if hasattr(ws, 'getExperimentInfo'):
+        ws.getNumDims.return_value = ndims
+        ws.getSpecialCoordinateSystem.return_value = units
+        ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]
+        expt_info = MagicMock()
+        sample = MagicMock()
+        sample.hasOrientedLattice.return_value = has_oriented_lattice
+        expt_info.sample.return_value = sample
+        ws.getExperimentInfo.return_value = expt_info
+    elif hasattr(ws, 'getNumberHistograms'):
+        ws.getNumDims.return_value = 2
+        ws.getNumberHistograms.return_value = 3
+        mock_dimension = MagicMock()
+        mock_dimension.getNBins.return_value = 3
+        ws.getDimension.return_value = mock_dimension
+
+    return ws
+
+
+def _add_dimensions(mock_ws, info):
+    def create_dimension(name, is_q):
+        dimension = MagicMock()
+        dimension.name = name
+        mdframe = MagicMock()
+        mdframe.isQ.return_value = is_q
+        dimension.getMDFrame.return_value = mdframe
+        return dimension
+
+    dimensions = [create_dimension(name, is_q) for name, is_q in info]
+    mock_ws.getDimension.side_effect = dimensions
+
+    return mock_ws
+
+
 class ArraysEqual:
     def __init__(self, expected):
         self._expected = expected
@@ -89,6 +125,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['name'], 'Dim1')
         self.assertEqual(dim_info['units'], 'MomentumTransfer')
         self.assertEqual(dim_info['type'], 'MDH')
+        self.assertEqual(dim_info['qdim'], False)
 
         dim_infos = model.get_dimensions_info()
         self.assertEqual(len(dim_infos), 3)
@@ -101,6 +138,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['name'], 'Dim3')
         self.assertEqual(dim_info['units'], 'Angstrom')
         self.assertEqual(dim_info['type'], 'MDH')
+        self.assertEqual(dim_info['qdim'], False)
 
     def test_model_MDE(self):
         model = SliceViewerModel(self.ws_MDE_3D)
@@ -117,6 +155,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['name'], 'h')
         self.assertEqual(dim_info['units'], 'rlu')
         self.assertEqual(dim_info['type'], 'MDE')
+        self.assertEqual(dim_info['qdim'], False)
 
         dim_infos = model.get_dimensions_info()
         self.assertEqual(len(dim_infos), 3)
@@ -129,6 +168,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['name'], 'l')
         self.assertEqual(dim_info['units'], 'rlu')
         self.assertEqual(dim_info['type'], 'MDE')
+        self.assertEqual(dim_info['qdim'], False)
 
         mdh = model.get_ws((None, 0, None), (3, 0.001, 3))
         assert_allclose(mdh.getSignalArray().squeeze(),
@@ -170,6 +210,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['name'], 'Wavelength')
         self.assertEqual(dim_info['units'], 'Angstrom')
         self.assertEqual(dim_info['type'], 'MATRIX')
+        self.assertEqual(dim_info['qdim'], False)
 
         dim_infos = model.get_dimensions_info()
         self.assertEqual(len(dim_infos), 2)
@@ -182,6 +223,48 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['name'], 'Energy transfer')
         self.assertEqual(dim_info['units'], 'meV')
         self.assertEqual(dim_info['type'], 'MATRIX')
+        self.assertEqual(dim_info['qdim'], False)
+
+    def test_qflags_for_qlab_coordinates_detected(self):
+        mock_q3d = _create_mock_workspace(IMDEventWorkspace,
+                                          units=SpecialCoordinateSystem.QLab,
+                                          has_oriented_lattice=False)
+        mock_q3d = _add_dimensions(mock_q3d, (('Q_lab_x', True), ('Q_lab_y', True),
+                                              ('Q_lab_z', True), ('DeltaE', False)))
+
+        model = SliceViewerModel(mock_q3d)
+
+        for i in range(3):
+            dim_info = model.get_dim_info(i)
+            self.assertTrue(dim_info['qdim'], msg=f'Dimension {i} not spatial as expected')
+        self.assertFalse(model.get_dim_info(3)['qdim'])
+
+    def test_qflags_for_qsample_coordinates_detected(self):
+        mock_q3d = _create_mock_workspace(IMDEventWorkspace,
+                                          units=SpecialCoordinateSystem.QSample,
+                                          has_oriented_lattice=False)
+        mock_q3d = _add_dimensions(mock_q3d, (('Q_sample_x', True), ('Q_sample_y', True),
+                                              ('Q_sample_z', True), ('DeltaE', False)))
+
+        model = SliceViewerModel(mock_q3d)
+
+        for i in range(3):
+            dim_info = model.get_dim_info(i)
+            self.assertTrue(dim_info['qdim'], msg=f'Dimension {i} not spatial as expected')
+        self.assertFalse(model.get_dim_info(3)['qdim'])
+
+    def test_qflags_for_hkl_coordinates_detected(self):
+        mock_q3d = _create_mock_workspace(IMDEventWorkspace,
+                                          units=SpecialCoordinateSystem.HKL,
+                                          has_oriented_lattice=False)
+        mock_q3d = _add_dimensions(mock_q3d, (('[H,0,0]', True), ('[0,K,0]', True),
+                                              ('[0,0,L]', True), ('DeltaE', False)))
+        model = SliceViewerModel(mock_q3d)
+
+        for i in range(3):
+            dim_info = model.get_dim_info(i)
+            self.assertTrue(dim_info['qdim'], msg=f'Dimension {i} not spatial as expected')
+        self.assertFalse(model.get_dim_info(3)['qdim'])
 
     def test_matrix_workspace_can_be_normalized_if_not_a_distribution(self):
         ws2d = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
@@ -269,17 +352,17 @@ class SliceViewerModelTest(unittest.TestCase):
 
     def test_create_non_orthogonal_transform_raises_error_if_not_supported(self):
         model = SliceViewerModel(
-            self._create_mock_workspace(MatrixWorkspace,
-                                        SpecialCoordinateSystem.QLab,
-                                        has_oriented_lattice=False))
+            _create_mock_workspace(MatrixWorkspace,
+                                   SpecialCoordinateSystem.QLab,
+                                   has_oriented_lattice=False))
 
         self.assertRaises(RuntimeError, model.create_nonorthogonal_transform, (0, 1, 2))
 
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
     def test_create_non_orthogonal_transform_uses_W_if_avilable(self, mock_nonortho_trans):
-        ws = self._create_mock_workspace(IMDEventWorkspace,
-                                         SpecialCoordinateSystem.HKL,
-                                         has_oriented_lattice=True)
+        ws = _create_mock_workspace(IMDEventWorkspace,
+                                    SpecialCoordinateSystem.HKL,
+                                    has_oriented_lattice=True)
         w_prop = MagicMock()
         w_prop.value = [0, 1, 1, 0, 0, 1, 1, 0, 0]
         run = MagicMock()
@@ -299,9 +382,9 @@ class SliceViewerModelTest(unittest.TestCase):
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
     def test_create_non_orthogonal_transform_uses_identity_if_W_unavilable(
             self, mock_nonortho_trans):
-        ws = self._create_mock_workspace(IMDEventWorkspace,
-                                         SpecialCoordinateSystem.HKL,
-                                         has_oriented_lattice=True)
+        ws = _create_mock_workspace(IMDEventWorkspace,
+                                    SpecialCoordinateSystem.HKL,
+                                    has_oriented_lattice=True)
         lattice = MagicMock()
         ws.getExperimentInfo().sample().getOrientedLattice.return_value = lattice
         run = MagicMock()
@@ -319,36 +402,16 @@ class SliceViewerModelTest(unittest.TestCase):
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, units,
                                              has_oriented_lattice):
-        model = SliceViewerModel(self._create_mock_workspace(ws_type, units, has_oriented_lattice))
+        model = SliceViewerModel(_create_mock_workspace(ws_type, units, has_oriented_lattice))
         self.assertEqual(expectation, model.can_support_nonorthogonal_axes())
 
     def _assert_supports_peaks_overlay(self, expectation, ws_type, ndims=2):
-        ws = self._create_mock_workspace(ws_type,
-                                         units=SpecialCoordinateSystem.QLab,
-                                         has_oriented_lattice=False,
-                                         ndims=ndims)
+        ws = _create_mock_workspace(ws_type,
+                                    units=SpecialCoordinateSystem.QLab,
+                                    has_oriented_lattice=False,
+                                    ndims=ndims)
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_peaks_overlays())
-
-    def _create_mock_workspace(self, ws_type, units, has_oriented_lattice, ndims=2):
-        ws = MagicMock(spec=ws_type)
-        if hasattr(ws, 'getExperimentInfo'):
-            ws.getNumDims.return_value = ndims
-            ws.getSpecialCoordinateSystem.return_value = units
-            ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]
-            expt_info = MagicMock()
-            sample = MagicMock()
-            sample.hasOrientedLattice.return_value = has_oriented_lattice
-            expt_info.sample.return_value = sample
-            ws.getExperimentInfo.return_value = expt_info
-        elif hasattr(ws, 'getNumberHistograms'):
-            ws.getNumDims.return_value = 2
-            ws.getNumberHistograms.return_value = 3
-            mock_dimension = MagicMock()
-            mock_dimension.getNBins.return_value = 3
-            ws.getDimension.return_value = mock_dimension
-
-        return ws
 
 
 if __name__ == '__main__':

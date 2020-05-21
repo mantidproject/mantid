@@ -73,22 +73,21 @@ class PeaksViewerModelTest(unittest.TestCase):
 
         mock_painter.remove.assert_called_once()
 
-    def test_slice_center_transforms_center_to_correct_frame_and_order(self):
+    def test_slicepoint_transforms_center_to_correct_frame_and_order(self):
         peak_center = (1, 2, 3)
         model = create_peaks_viewer_model(centers=[peak_center], fg_color="red")
         slice_info = MagicMock()
-        slice_info.transform.side_effect = lambda p: [
-            peak_center[2], peak_center[1], peak_center[0]
-        ]
+        slice_info.slicepoint = [0.5, None, None]
+        slice_info.z_index = 0
         slice_info.frame = SpecialCoordinateSystem.QSample
 
-        slice_center = model.slice_center(0, slice_info)
+        slicepoint = model.slicepoint(0, slice_info)
 
         peak0 = model.ws.getPeak(0)
         peak0.getQSampleFrame.assert_called_once()
         peak0.getQLabFrame.assert_not_called()
         peak0.getHKL.assert_not_called()
-        self.assertEqual(peak_center[0], slice_center)
+        self.assertEqual([1, None, None], slicepoint)
 
     def test_zoom_to(self):
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)

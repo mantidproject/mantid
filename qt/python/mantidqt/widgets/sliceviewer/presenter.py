@@ -74,30 +74,42 @@ class SliceViewer(object):
 
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
-        data_view = self.view.data_view
+        dimensions = self.view.data_view.dimensions
         return SliceInfo(frame=self.model.get_frame(),
-                         point=data_view.dimensions.get_slicepoint(),
-                         transpose=data_view.dimensions.transpose,
-                         range=data_view.dimensions.get_slicerange())
+                         point=dimensions.get_slicepoint(),
+                         transpose=dimensions.transpose,
+                         range=dimensions.get_slicerange(),
+                         qflags=dimensions.qflags)
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
            None indicates that dimension is being displayed"""
         return self.view.data_view.dimensions.get_slicepoint()
 
-    def set_slicevalue(self, value):
-        """Set the value within the slicing dimension
+    def set_slicepoint(self, value):
+        """Set the slicepoint
         :param value: The value of the slice point
         """
-        self.view.data_view.dimensions.set_slicevalue(value)
+        self.view.data_view.dimensions.set_slicepoint(value)
 
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
         data_view = self.view.data_view
+        sliceinfo = self.get_sliceinfo()
         if data_view.nonorthogonal_mode:
-            # axes need to be recreated to have the correct transform associated
-            data_view.create_axes_nonorthogonal(
-                self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            if sliceinfo.can_support_nonorthogonal_axes():
+                # axes need to be recreated to have the correct transform associated
+                data_view.create_axes_nonorthogonal(
+                    self.model.create_nonorthogonal_transform(sliceinfo))
+            else:
+                data_view.disable_nonorthogonal_axes_button()
+                data_view.create_axes_orthogonal()
+        else:
+            if sliceinfo.can_support_nonorthogonal_axes():
+                data_view.enable_nonorthogonal_axes_button()
+            else:
+                data_view.disable_nonorthogonal_axes_button()
+
         self.new_plot()
         self._peaks_view_presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
