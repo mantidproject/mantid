@@ -16,6 +16,7 @@ from unittest import TestCase, main
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
+import numpy as np
 
 # local imports
 from mantidqt.plotting.figuretype import figure_type, FigureType
@@ -44,6 +45,24 @@ class FigureTypeTest(TestCase):
         ax = plt.subplot(111)
         ax.imshow([[1], [1]])
         self.assertEqual(FigureType.Image, figure_type(ax.figure))
+
+    def test_surface_plot_returns_surface(self):
+        a = np.array([[1]])
+        ax = plt.subplot(111, projection='3d')
+        ax.plot_surface(a, a, a)
+        self.assertEqual(FigureType.Surface, figure_type(ax.figure))
+
+    def test_wireframe_plot_returns_wireframe(self):
+        a = np.array([[1]])
+        ax = plt.subplot(111, projection='3d')
+        ax.plot_wireframe(a, a, a)
+        self.assertEqual(FigureType.Wireframe, figure_type(ax.figure))
+
+    def test_contour_plot_returns_contour(self):
+        ax = plt.subplot(111)
+        ax.imshow([[1], [1]])
+        ax.contour([[1, 1], [1, 1]])
+        self.assertEqual(FigureType.Contour, figure_type(ax.figure))
 
 
 if __name__ == '__main__':

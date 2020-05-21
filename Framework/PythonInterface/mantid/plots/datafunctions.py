@@ -14,7 +14,6 @@ from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
-from mpl_toolkits.mplot3d.axes3d import Axes3D
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -1028,6 +1027,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
         mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
     image.set_norm(scale(vmin=vmin, vmax=vmax))
+
     if image.colorbar:
         image.colorbar.remove()
         locator = None
@@ -1039,7 +1039,3 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                                              "as the range between min value and max value is too large")
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
         figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
-
-
-def figure_contains_only_3d_plots(fig) -> bool:
-    return all(isinstance(ax, Axes3D) for ax in fig.get_axes())

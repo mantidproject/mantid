@@ -12,11 +12,14 @@ Description
 The algorithm transforms a single spectrum workspace containing 
 spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]` 
 (as a function of **MomentumTransfer** or **dSpacing** :ref:`units <Unit Factory>`) to a PDF 
-(pair distribution function) as described below. The available output types are the reduced pair
-distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, and the radial distribution
-function :math:`RDF(r)`.
+(pair distribution function) as described below and also the reverse. The available PDF types are the
+reduced pair distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, and the
+radial distribution function :math:`RDF(r)`.
 
-The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) :ref:`units <Unit Factory>` .
+The output from this algorithm will have an x-range between 0.0 and the maximum parameter of the output,
+i.e. if converting from `g(r)` to `S(Q)` the output will be between 0.0 and `Qmax`.
+
+The spectrum density should be in the Q-space (\ **MomentumTransfer**\ ) :ref:`units <Unit Factory>` .
 (d-spacing is not supported any more. Contact development team to fix that and enable **dSpacing** again)
 
 References
@@ -30,17 +33,17 @@ References
 .. The algorithm itself is able to identify the unit.  -- not any more. TODO:  should be investigated why this has been disabled
 
 
-Output Options
+PDF Options
 --------------
 
-**G(r)**
+**g(r)**
 ########
 
 .. raw:: html
 
    <center>
 
-:math:`G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]\sin(Qr)dQ`
+:math:`g(r) = \rho(r)/\rho_0 = 1+\frac{1}{2\pi^2\rho_0r} \int_{0}^{\infty} Q[S(Q)-1]\sin(Qr)dQ`
 
 .. raw:: html
 
@@ -52,12 +55,11 @@ and in this algorithm, it is implemented as
 
    <center>
 
-:math:`G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]\sin(Qr) M(Q,Q_{max}) \Delta Q`
+:math:`g(r)-1 =  \frac{1}{2\pi \rho_0 r^3} \sum_{Q_{min}}^{Q_{max}} M(Q,Q_{max})(S(Q)-1)[\sin(Qr) - Qr\cos(Qr)]^{right bin}_{left bin}`
 
 .. raw:: html
 
    </center>
-
 
 where :math:`M(Q,Q_{max})` is an optional filter function. If Filter
 property is set (true) then
@@ -84,8 +86,7 @@ otherwise
 
    </center>
 
-
-**g(r)**
+**G(r)**
 ########
 
 .. raw:: html
@@ -97,20 +98,6 @@ otherwise
 .. raw:: html
 
    </center>
-
-
-transforms to
-
-.. raw:: html
-
-   <center>
-
-:math:`g(r) = \frac{G(r)}{4 \pi \rho_0 r} + 1`
-
-.. raw:: html
-
-   </center>
-
 
 **RDF(r)**
 ##########
@@ -125,19 +112,7 @@ transforms to
 
    </center>
 
-transforms to
-
-.. raw:: html
-
-   <center>
-
-:math:`RDF(r) = r G(r) + 4 \pi \rho_0 r^2`
-
-.. raw:: html
-
-   </center>
-   
-**Note:** All output forms except :math:`G(r)` are calculated by transforming :math:`G(r)`.   
+**Note:** All output forms are calculated by transforming :math:`g(r)-1`.
 
 Usage
 -----
@@ -151,7 +126,7 @@ Usage
     xx = np.array(range(0,100))*0.1
     yy = np.exp(-(2.0 * xx)**2)
     ws = CreateWorkspace(DataX=xx, DataY=yy, UnitX='MomentumTransfer')
-    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)', Version=1)
+    Rt = PDFFourierTransform(ws, SofQType='S(Q)', PDFType='g(r)')
 
     # Look at sample results:
     print('part of S(Q) and its correlation function')
@@ -169,17 +144,16 @@ Usage
 .. testoutput:: ExPDFFourierTransform
 
    part of S(Q) and its correlation function
-   ! 0.00 ! 1.000000 ! 0.317333 ! -3.977330 !
-   ! 0.10 ! 0.960789 ! 0.634665 ! 2.247452 !
-   ! 0.20 ! 0.852144 ! 0.951998 ! 0.449677 !
-   ! 0.30 ! 0.697676 ! 1.269330 ! 1.313403 !
-   ! 0.40 ! 0.527292 ! 1.586663 ! 0.803594 !
-   ! 0.50 ! 0.367879 ! 1.903996 ! 1.140167 !
-   ! 0.60 ! 0.236928 ! 2.221328 ! 0.900836 !
-   ! 0.70 ! 0.140858 ! 2.538661 ! 1.079278 !
-   ! 0.80 ! 0.077305 ! 2.855993 ! 0.940616 !
-   ! 0.90 ! 0.039164 ! 3.173326 ! 1.050882 !
-
+   ! 0.00 ! 1.000000 ! 0.317333 ! -3.977042 !
+   ! 0.10 ! 0.960789 ! 0.634665 ! 2.248558 !
+   ! 0.20 ! 0.852144 ! 0.951998 ! 0.449916 !
+   ! 0.30 ! 0.697676 ! 1.269330 ! 1.314437 !
+   ! 0.40 ! 0.527292 ! 1.586663 ! 0.803744 !
+   ! 0.50 ! 0.367879 ! 1.903996 ! 1.141098 !
+   ! 0.60 ! 0.236928 ! 2.221328 ! 0.900872 !
+   ! 0.70 ! 0.140858 ! 2.538661 ! 1.080090 !
+   ! 0.80 ! 0.077305 ! 2.855993 ! 0.940530 !
+   ! 0.90 ! 0.039164 ! 3.173326 ! 1.051576 !
    
 
 .. categories::

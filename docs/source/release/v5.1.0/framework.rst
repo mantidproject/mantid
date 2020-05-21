@@ -26,6 +26,9 @@ Algorithms
   - A new Operator option has been added `NotFinite` that allows you to mask detectors that contain infinite or `NaN <https://en.wikipedia.org/wiki/NaN>`_ values.
 
 - Added an algorithm, :ref:`ISISJournalGetExperimentRuns <algm-ISISJournalGetExperimentRuns>`, which returns run information for a particular experiment from ISIS journal files.
+- Enhanced :ref:`LoadNGEM <algm-LoadNGEM>` to handle partially written events in the data file. 
+   When such incomplete data is encountered, it is skipped until the next valid data is encountered and a 
+   warning is printed at algorithm completion of the total number of data bytes discarded.
 
 Data Handling
 -------------
