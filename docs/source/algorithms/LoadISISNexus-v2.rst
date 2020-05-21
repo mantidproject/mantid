@@ -16,19 +16,31 @@ Data loaded from Nexus File
 
 Not all of the nexus file is loaded. This section tells you what is loaded and where it goes in the workspace.
 
-The nexus file must have ``raw_data_1`` as its main group and
-contain a ``/isis_vms_compat`` group to be loaded.
+The nexus file must have a ``raw_data_1`` top-level entry to be loaded.
 
 The workspace data is loaded from ``raw_data_1/Detector_1``.
 
 Instrument information is loaded from ``raw_data_1/Instrument`` if available in file, 
 otherwise :ref:`instrument information <InstrumentDefinitionFile>` is read from a MantidInstall instrument directory.
 
-Also the ``NSP1``, ``UDET``, ``SPEC``, ``HDR``, ``IRPB``, ``RRPB``, ``SPB`` and ``RSPB`` sections of
-``raw_data_1/isis_vms_compat`` are read. The contents of ``isis_vms_compat`` are a legacy from an older ISIS format.
+If the main entry contains a ``/isis_vms_compat`` the following entries will be read by the Algorithm:
+``NSP1``, ``UDET``, ``SPEC``, ``HDR``, ``IRPB``, ``RRPB``, ``SPB`` and ``RSPB``.
+The contents of ``isis_vms_compat`` are a legacy from an older ISIS format. If the legacy vms_compat block is not
+present, an equivalent entry in the file is used.
 
+In the tables below, descriptions of the relevant nexus entries are given. If applicable, the location within the
+vms_block and an alternative location to read the entry from is given. In these tables ``/group`` refers to an group under
+the main entry, i.e ``/group`` is equivalent to ``raw_data_1/group``.
 
-Here are some tables that show it in more detail:
++------------------------------+-------------------------------------------+-------------------------------------+
+| Description of entry         | vms_compat entry                          | Alternative Location                |
++==============================+===========================================+=====================================+
+| Spectra-Detector mapping     | ``NSP1``, ``UDET`` and ``SPEC``           | /detector_1/spectrum_index          |
+|                              | within ``isis_vms_compat``                | (assumes 1-1 mapping)               |
++------------------------------+-------------------------------------------+-------------------------------------+
+| Sample                       | ``SPB`` and ``RSPB`` within               | /sample group                       |
+|                              | ``isis_vms_compat``                       |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
 
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Description of Data          | Found in Nexus file                       | Placed in Workspace (Workspace2D)   |
@@ -41,14 +53,8 @@ Here are some tables that show it in more detail:
 |                              | (all detectors in one group)              |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Instrument                   | group ``Instrument``                      | Workspace instrument                |
-+------------------------------+-------------------------------------------+-------------------------------------+ 
-| Spectrum of each detector ID | ``NSP1``, ``UDET`` and ``SPEC``           | Spectra-Detector mapping            |
-|                              | within ``isis_vms_compat``                |                                     |
-+------------------------------+-------------------------------------------+-------------------------------------+  
-| Run                          | various places as shown below             | Run object                          |
 +------------------------------+-------------------------------------------+-------------------------------------+
-| Sample                       | ``SPB`` and ``RSPB`` within               | Sample Object                       | 
-|                              | ``isis_vms_compat``                       |                                     |
+| Run                          | various places as shown below             | Run object                          |
 +------------------------------+-------------------------------------------+-------------------------------------+
 
 Run Object
@@ -59,59 +65,33 @@ into the ``proton_charge_by_period`` property of the workspace run object.
 
 Properties of the workspace :ref:`Run <Run>` object are loaded as follows:
 
-+----------------+-------------------------------------------------+
-| Nexus          | Workspace run object                            |
-+================+=================================================+
-| ``HDR``        | ``run_header`` (spaces inserted between fields) |
-+----------------+-------------------------------------------------+
-| ``title``      | ``run_title``                                   |
-+----------------+-------------------------------------------------+
-| ``start_time`` | ``run_start``                                   |
-+----------------+-------------------------------------------------+
-| ``end_time``   | ``run_end``                                     |
-+----------------+-------------------------------------------------+
-| (data)         | ``nspectra``                                    |
-+----------------+-------------------------------------------------+
-| (data)         | ``nchannels``                                   |
-+----------------+-------------------------------------------------+
-| (data)         | ``nperiods``                                    |
-+----------------+-------------------------------------------------+
-| ``IRPB[0]``    | ``dur``                                         |
-+----------------+-------------------------------------------------+
-| ``IRPB[1]``    | ``durunits``                                    |
-+----------------+-------------------------------------------------+
-| ``IRPB[2]``    | ``dur_freq``                                    |
-+----------------+-------------------------------------------------+
-| ``IRPB[3]``    | ``dmp``                                         |
-+----------------+-------------------------------------------------+
-| ``IRPB[4]``    | ``dmp_units``                                   |
-+----------------+-------------------------------------------------+
-| ``IRPB[5]``    | ``dmp_freq``                                    |
-+----------------+-------------------------------------------------+
-| ``IRPB[6]``    | ``freq``                                        |
-+----------------+-------------------------------------------------+
-| ``IRPB[7]``    | ``gd_prtn_chrg``                                |
-+----------------+-------------------------------------------------+
-| ``RRPB[9]``    | ``goodfrm``                                     |
-+----------------+-------------------------------------------------+
-| ``RRPB[10]``   | ``rawfrm``                                      |
-+----------------+-------------------------------------------------+
-| ``RRPB[11]``   | ``dur_wanted``                                  |
-+----------------+-------------------------------------------------+
-| ``RRPB[12]``   | ``dur_secs``                                    |
-+----------------+-------------------------------------------------+
-| ``RRPB[13]``   | ``mon_sum1``                                    |
-+----------------+-------------------------------------------------+
-| ``RRPB[14]``   | ``mon_sum2``                                    |
-+----------------+-------------------------------------------------+
-| ``RRPB[15]``   | ``mon_sum3``                                    |
-+----------------+-------------------------------------------------+
-| ``RRPB[21]``   | ``rb_proposal``                                 |
-+----------------+-------------------------------------------------+
++----------------+---------------------------------+-----------------------+
+| vms_compat     | Alternative location            | Workspace run object  |
++================+=================================+=======================+
+| ``title``      |  ``/title``                     | ``run_title``         |
++----------------+---------------------------------+-----------------------+
+| ``start_time`` | ``/start_time``                 | ``run_start``         |
++----------------+---------------------------------+-----------------------+
+| ``end_time``   | ``/end_time``                   | ``run_end``           |
++----------------+---------------------------------+-----------------------+
+| (data)         | (data)                          | ``nspectra``          |
++----------------+---------------------------------+-----------------------+
+| (data)         | (data)                          | ``nchannels``         |
++----------------+---------------------------------+-----------------------+
+| (data)         | (data)                          | ``nperiods``          |
++----------------+---------------------------------+-----------------------+
+| ``IRPB[6]``    | ``/instrument/source/frequency``| ``freq``              |
++----------------+---------------------------------+-----------------------+
+| ``IRPB[7]``    |``/proton_charge``               | ``gd_prtn_chrg``      |
++----------------+---------------------------------+-----------------------+
+| ``RRPB[9]``    |``good_frames``                  | ``goodfrm``           |
++----------------+---------------------------------+-----------------------+
+| ``RRPB[10]``   |``/raw_frames``                  |  ``rawfrm``           |
++----------------+---------------------------------+-----------------------+
+| ``RRPB[21]``   |``/experiment_identifier``       |  ``rb_proposal``      |
++----------------+---------------------------------+-----------------------+
 
-In the Nexus column, names of groups in capitals are in ``raw_data_1/isis_vms_compat`` and the other groups are in ``raw_data_1``.
-
-(data) indicates that the number is got from the histogram data in an appropriate manner.
+The group (data) indicates that the number is obtained from the histogram data in an appropriate manner.
 
 ``IRPB`` and ``RRPB`` point to the same data. In ``IRPB``, the data is seen as 32-bit integer 
 and in RRPB it is seen as 32-bit floating point (same 32 bits).
@@ -125,20 +105,17 @@ Sample Object
 
 Properties of the workspace sample object are loaded as follows:
 
-+-------------+-------------------------+
-| Nexus       | Workspace sample object |
-+=============+=========================+
-| ``SPB[2]``  | Geometry flag           |
-+-------------+-------------------------+
-| ``RSPB[3]`` | Thickness               |
-+-------------+-------------------------+
-| ``RSPB[4]`` | Height                  |
-+-------------+-------------------------+
-| ``RSPB[5]`` | Width                   |
-+-------------+-------------------------+
-
-Nexus groups are found in ``raw_data_1/isis_vms_compat``. Other indices of ``SPB`` & ``RSPB`` are not read.
-
++-------------+-------------------------+-------------------------+
+| vms_compat  | Alternative location    | Workspace sample object |
++=============+=========================+=========================+
+| ``SPB[2]``  | ``/sample/id``          | Geometry flag           |
++-------------+-------------------------+-------------------------+
+| ``RSPB[3]`` | ``/sample/thickness``   | Thickness               |
++-------------+-------------------------+-------------------------+
+| ``RSPB[4]`` | ``/sample/height``      | Height                  |
++-------------+-------------------------+-------------------------+
+| ``RSPB[5]`` | ``/sample/width``       | Width                   |
++-------------+-------------------------+-------------------------+
 
 Usage
 -----
