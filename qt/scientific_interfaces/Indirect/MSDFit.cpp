@@ -49,7 +49,8 @@ MSDFit::MSDFit(QWidget *parent)
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto templateBrowser = new SingleFunctionTemplateBrowser(msdFunctionStrings);
-  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
 
   setEditResultVisible(false);
