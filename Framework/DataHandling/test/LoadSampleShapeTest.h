@@ -235,8 +235,11 @@ private:
   }
 
   const MeshObject *getMeshObject(LoadSampleShape &alg) {
-    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
-    const auto &s(ws->sample());
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto ei = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+    if (!ei)
+      throw std::invalid_argument("Wrong type of input workspace");
+    const auto &s(ei->sample());
     auto &obj = s.getShape();
     auto mObj = dynamic_cast<const MeshObject *>(&obj);
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
