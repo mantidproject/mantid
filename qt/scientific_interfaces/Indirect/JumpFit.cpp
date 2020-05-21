@@ -50,7 +50,6 @@ JumpFit::JumpFit(QWidget *parent)
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(false);
-  m_uiForm->fitDataView->setStartAndEndHidden(false);
 }
 
 void JumpFit::setupFitTab() {

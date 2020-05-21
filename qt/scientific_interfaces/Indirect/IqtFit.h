@@ -49,11 +49,11 @@ private:
   std::string fitTypeString() const;
   void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
-  void setStartAndEndHidden(bool hidden);
 
   IqtFitModel *m_iqtFittingModel;
-  std::unique_ptr<Ui::IqtFit> m_uiForm;
+  std::unique_ptr<Ui::ConvFit> m_uiForm;
   QString m_tiedParameter;
+  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -40,14 +40,10 @@ ConvFit::ConvFit(QWidget *parent)
       m_uiForm(new Ui::ConvFit) {
   m_uiForm->setupUi(parent);
   m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
-  /*m_uiForm->dockArea->addDockWidget(Qt::RightDockWidgetArea,
-                                    m_fitPropertyBrowser);*/
   QDockWidget *plotViewArea = new QDockWidget();
   IndirectFitPlotView *fitPlotView = new IndirectFitPlotView();
   plotViewArea->setWidget(fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable);
-  // m_fitPropertyBrowser->setBaseSize(plotViewArea->baseSize());
-  // m_fitPropertyBrowser->setSizePolicy(plotViewArea->sizePolicy());
   m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea,
                                     m_fitPropertyBrowser);
   m_uiForm->dockArea->addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
@@ -55,8 +51,6 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm->dockArea->resizeDocks({m_fitPropertyBrowser, plotViewArea},
                                   {20, 20}, Qt::Horizontal);
 #endif
-  // m_uiForm->dockArea->setCentralWidget(fitPlotView);
-  // fitPlotView->show();
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
   setPlotView(fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
@@ -74,7 +68,6 @@ ConvFit::ConvFit(QWidget *parent)
   setFitDataPresenter(std::move(dataPresenter));
 
   setEditResultVisible(true);
-  setStartAndEndHidden(false);
 }
 
 void ConvFit::setupFitTab() {
@@ -136,10 +129,6 @@ void ConvFit::setModelResolution(const std::string &resolutionName,
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
   m_fitPropertyBrowser->setModelResolution(fitResolutions);
   setModelFitFunction();
-}
-
-void ConvFit::setStartAndEndHidden(bool hidden) {
-  m_uiForm->dockArea->m_uiForm->centralwidget->setStartAndEndHidden(hidden);
 }
 
 void ConvFit::fitFunctionChanged() {

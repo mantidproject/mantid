@@ -100,10 +100,6 @@ void IqtFit::setRunIsRunning(bool running) {
 
 void IqtFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
-void IqtFit::setStartAndEndHidden(bool hidden) {
-  m_uiForm->fitDataView->setStartAndEndHidden(hidden);
-}
-
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -53,7 +53,6 @@ MSDFit::MSDFit(QWidget *parent)
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(false);
-  m_uiForm->fitDataView->setStartAndEndHidden(false);
   respondToFunctionChanged();
   fitFunctionChanged();
 }
