@@ -10,6 +10,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/StringTokenizer.h"
 
@@ -36,6 +37,31 @@ const std::string createKey(const std::string &name) {
 }
 } // namespace
 
+const std::string PropertyManager::INVALID_VALUES_SUFFIX = "_invalid_values";
+/// Gets the correct log name for the matching invalid values log for a given
+/// log name
+std::string
+PropertyManager::getInvalidValuesFilterLogName(const std::string &logName) {
+  return logName + PropertyManager::INVALID_VALUES_SUFFIX;
+}
+std::string
+PropertyManager::getLogNameFromInvalidValuesFilter(const std::string &logName) {
+  std::string retVal = "";
+  if (PropertyManager::isAnInvalidValuesFilterLog(logName)) {
+    retVal = logName.substr(
+        0, logName.size() - PropertyManager::INVALID_VALUES_SUFFIX.size());
+  }
+  return retVal;
+}
+bool PropertyManager::isAnInvalidValuesFilterLog(const std::string &logName) {
+  const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
+  if (logName.length() >= ending.length()) {
+    return (0 == logName.compare(logName.length() - ending.length(),
+                                 ending.length(), ending));
+  } else {
+    return false;
+  }
+}
 //-----------------------------------------------------------------------------------------------
 /// Default constructor
 PropertyManager::PropertyManager() : m_properties(), m_orderedProperties() {}
@@ -186,9 +212,29 @@ void PropertyManager::filterByProperty(
     Property *currentProp = orderedProperty;
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
-      std::unique_ptr<Property> filtered =
-          std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries,
-                                                               filter);
+      // don't filter the invalid values filters
+      if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
+        break;
+      std::unique_ptr<Property> filtered(nullptr);
+      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(
+              currentProp->name()))) {
+        // add the filter to the passed in filters
+        auto logFilter = std::make_unique<LogFilter>(filter);
+        auto filterProp =
+            getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(
+                currentProp->name()));
+        auto tspFilterProp =
+            dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
+        if (!tspFilterProp)
+          break;
+        logFilter->addFilter(*tspFilterProp);
+
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+            doubleSeries, *logFilter->filter());
+      } else {
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+            doubleSeries, filter);
+      }
       orderedProperty = filtered.get();
       // Now replace in the map
       this->m_properties[createKey(currentProp->name())] = std::move(filtered);
