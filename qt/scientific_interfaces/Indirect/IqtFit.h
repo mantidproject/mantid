@@ -11,7 +11,7 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_IqtFit.h"
+#include "ui_ConvFit.h"
 
 #include <memory>
 
