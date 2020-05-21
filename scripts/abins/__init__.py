@@ -11,10 +11,8 @@
 from . import parameters
 from . import constants
 from . import test_helpers
-from . import input
 
 from .io import IO
-from .input.tester import Tester
 
 # Frequency generator
 from .frequencypowdergenerator import FrequencyPowderGenerator
