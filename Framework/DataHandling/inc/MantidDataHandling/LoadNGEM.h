@@ -24,6 +24,7 @@ struct GenericEvent {
   uint64_t reserved1 : 56; // Reserved for non-generics
   uint64_t id : 8;         // Event ID
   bool check() const {
+    // as id is 8 bit, we can do a simple AND to check
     return (id & EVENT_ID_MASK) != 0 && contin == CONTIN_ID_VALUE;
   }
 };
