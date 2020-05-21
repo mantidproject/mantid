@@ -9,7 +9,6 @@ import math
 
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
-from mantid.kernel import logger
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
@@ -82,7 +81,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
                     sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
-                    freq_params=None, bw_order=None):
+                    freq_params=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -110,13 +109,13 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
-        fast_fourier_filter(merged_ws, freq_params=freq_params, bw_order=bw_order)
+        fast_fourier_filter(merged_ws, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
     else:
         for ws in focused_ws:
-            fast_fourier_filter(ws, freq_params=freq_params, bw_order=bw_order)
+            fast_fourier_filter(ws, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
@@ -200,39 +199,20 @@ def _determine_chopper_mode(ws):
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
 
 
-def fast_fourier_filter(ws, freq_params=None, bw_order=None):
-    if not freq_params:
-        if bw_order:
-            logger.warning('bw_order set but no freq_params, freq_params must be set for filter to be performed.')
-        return
-    # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
-    # subtracting that from the merged WS
-    x_range = ws.dataX(0)
-    # The param p in FFTSmooth defined such that if the input ws has Nx bins then in the fourier space ws it will cut of
-    # all frequencies in bins nk=Nk/p and above, calculated by p = pi/(k_c*dQ) when k_c is the cutoff frequency desired.
-    # The input ws of FFTSmooth has binning [x_min, dx, x_max], with Nx bins.
-    # FFTSmooth doubles the length of the input ws and preforms an FFT with output ws binning
-    # [0, dk, k_max]=[0, 1/2*(x_max-x_min), 1/(2*dx)], and Nk=Nx bins.
-    # k_max/k_c = Nk/nk
-    # 1/(k_c*2*dx) = p
-    # because FFT uses sin(2*pi*k*x) while PDFFourierTransform uses sin(Q*r) we need to include a factor of 2*pi
-    # p = pi/(k_c*dQ)
-    lower_freq_param = round(np.pi / (freq_params[0] * (x_range[1] - x_range[0])))
-    # This is giving the FFTSmooth the data in the form of S(Q)-1, later we use PDFFourierTransform with Q(S(Q)-1)
-    # it does not matter which we use in this case.
-    if bw_order:
-        tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Butterworth", Params=str(lower_freq_param)+','+str(bw_order),
-                               StoreInADS=False, IgnoreXBins=True)
-    else:
-        tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
-                               IgnoreXBins=True)
-    mantid.Minus(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws)
-
-    if len(freq_params) > 1:
-        upper_freq_param = round(np.pi / (freq_params[1] * (x_range[1] - x_range[0])))
-        if bw_order:
-            mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Butterworth",
-                             Params=str(upper_freq_param)+','+str(bw_order), IgnoreXBins=True)
+def fast_fourier_filter(ws, freq_params=None):
+    if freq_params:
+        x_range = ws.dataX(0)
+        q_max = x_range[-1]
+        q_delta = (x_range[1] - x_range[0])
+        r_min = freq_params[0]
+        # If no maximum r is given a high r_max prevents loss of detail on the output.
+        if len(freq_params) > 1:
+            r_max = min(freq_params[1], 1000)
         else:
-            mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
-                             Params=str(upper_freq_param), IgnoreXBins=True)
+            r_max = 1000
+        ws_name = str(ws)
+        mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
+                                   Filter=True, DeltaR=0.01, Rmax=r_max, Direction='Forward')
+        mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
+                                   Filter=True, Qmax=q_max, deltaQ=q_delta, Rmin=r_min, Rmax=r_max,
+                                   Direction='Backward')

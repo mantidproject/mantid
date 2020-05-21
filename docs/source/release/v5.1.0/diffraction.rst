@@ -11,14 +11,19 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
-
+Improvements
+^^^^^^^^^^^^
 - Polaris.create_total_scattering_pdf output workspaces now have the run number in the names.
 - Polaris.create_total_scattering_pdf no longer takes `output_binning` as a parameter, instead binning of the output pdf can be controlled with `delta_r`.
 - Polaris.create_total_scattering_pdf can rebin the Q space workspace before calculating the PDF by being given an input `delta_q`.
-- Polaris.create_total_scattering_pdf fourier filter can be performed using the butterworth filter by calling with `bw_order`.
 - SampleDetails.set_materials now differentiates between sample density and crystal density for converting between pdf types.
 - :ref:`LoadWAND <algm-LoadWAND>` now adds `duration` log to the workspace
 - Polaris.create_total_scattering_pdf now no longer calculates the PDF with the Lorch filter enabled by default and must be enabled.
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been updated to allow for the algorithm to be run on a PDF to obtain a spectrum density function.
+
+Bugfixes
+^^^^^^^^
+- The fourier filter on Polaris.create_total_scattering_pdf no longer produces a jagged mark at the cut off point.
 
 Engineering Diffraction
 -----------------------
