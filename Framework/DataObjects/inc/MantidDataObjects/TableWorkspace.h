@@ -13,23 +13,12 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/TableColumn.h"
+#include "MantidDataObjects/TableWorkspace_fwd.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/V3D.h"
 #include <boost/tuple/tuple.hpp>
+
 #include <memory>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
 #include <utility>
 
 namespace Mantid {
@@ -427,11 +416,5 @@ private:
   /// properties.
   API::LogManager_sptr m_LogManager;
 };
-
-/// Typedef for a shared pointer to \c TableWorkspace
-using TableWorkspace_sptr = std::shared_ptr<TableWorkspace>;
-/// Typedef for a shared pointer to \c const \c TableWorkspace
-using TableWorkspace_const_sptr = std::shared_ptr<const TableWorkspace>;
-
 } // namespace DataObjects
 } // namespace Mantid
