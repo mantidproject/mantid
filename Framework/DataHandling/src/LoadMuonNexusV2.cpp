@@ -139,7 +139,8 @@ void LoadMuonNexusV2::execLoader() {
   // strategy
   if (m_multiPeriodsLoaded) {
     // Currently not implemented
-    return;
+    throw std::invalid_argument(
+        "Multiperiod nexus files not yet supported by LoadMuonNexusV2");
   } else {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =
