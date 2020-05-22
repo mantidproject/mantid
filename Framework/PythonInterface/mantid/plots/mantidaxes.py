@@ -470,9 +470,6 @@ class MantidAxes(Axes):
             # if it is a sample log plot
             if spec_num is None:
                 new_artist = self.plot(workspace, **kwargs)[0]
-                self.track_workspace_artist(workspace, new_artist, log_name=kwargs['LogName'],
-                                            filtered=kwargs.get('Filtered', None),
-                                            expt_info_index=kwargs.get('ExperimentInfo', None))
             else:
                 new_artist = self.plot(workspace, **kwargs)[0]
         return new_artist
