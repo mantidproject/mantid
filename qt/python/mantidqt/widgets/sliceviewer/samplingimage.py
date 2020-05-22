@@ -12,7 +12,9 @@ import numpy as np
 
 
 class SamplingImage(mimage.AxesImage):
-    def __init__(self, ax, workspace,
+    def __init__(self,
+                 ax,
+                 workspace,
                  transpose=False,
                  cmap=None,
                  norm=None,
@@ -24,21 +26,21 @@ class SamplingImage(mimage.AxesImage):
                  resample=False,
                  normalize=mantid.api.MDNormalization.NoNormalization,
                  **kwargs):
-        super().__init__(
-            ax,
-            cmap=cmap,
-            norm=norm,
-            interpolation=interpolation,
-            origin=origin,
-            extent=extent,
-            filternorm=filternorm,
-            filterrad=filterrad,
-            resample=resample,
-            **kwargs)
+        super().__init__(ax,
+                         cmap=cmap,
+                         norm=norm,
+                         interpolation=interpolation,
+                         origin=origin,
+                         extent=extent,
+                         filternorm=filternorm,
+                         filterrad=filterrad,
+                         resample=resample,
+                         **kwargs)
         self.ws = workspace
         self.transpose = transpose
         self.normalization = normalize
-        self._resize_cid, self._xlim_cid , self._ylim_cid = None, None, None
+        self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
+        self._resample_required = True
 
     def connect_events(self):
         axes = self.axes
@@ -52,35 +54,43 @@ class SamplingImage(mimage.AxesImage):
         axes.callbacks.disconnect(self._xlim_cid)
         axes.callbacks.disconnect(self._ylim_cid)
 
+    def draw(self, renderer, *args, **kwargs):
+        if self._resample_required:
+            self._resample_image()
+            self._resample_required = False
+
+        super().draw(renderer, *args, **kwargs)
+
     def remove(self):
         self.disconnect_events()
         super().remove()
 
     def _xlim_changed(self, ax):
         if self._update_extent():
-            self._resample_image()
+            self._resample_required = True
 
     def _ylim_changed(self, ax):
         if self._update_extent():
-            self._resample_image()
+            self._resample_required = True
 
     def _resize(self, canvas):
-        self._resample_image()
+        self._resample_required = True
 
     def _resample_image(self, xbins=None, ybins=None):
         extent = self.get_extent()
         if xbins is None or ybins is None:
-            bbox=self.get_window_extent().transformed(self.axes.get_figure().dpi_scale_trans.inverted())
+            bbox = self.get_window_extent().transformed(
+                self.axes.get_figure().dpi_scale_trans.inverted())
             dpi = self.axes.get_figure().dpi
-            xbins = np.ceil(bbox.width*dpi)
-            ybins = np.ceil(bbox.height*dpi)
-        x=np.linspace(extent[0], extent[1], int(xbins))
-        y=np.linspace(extent[2], extent[3], int(ybins))
-        X,Y = np.meshgrid(x,y)
+            xbins = np.ceil(bbox.width * dpi)
+            ybins = np.ceil(bbox.height * dpi)
+        x = np.linspace(extent[0], extent[1], int(xbins))
+        y = np.linspace(extent[2], extent[3], int(ybins))
+        X, Y = np.meshgrid(x, y)
         if self.transpose:
-            xy = np.vstack((Y.ravel(),X.ravel())).T
+            xy = np.vstack((Y.ravel(), X.ravel())).T
         else:
-            xy = np.vstack((X.ravel(),Y.ravel())).T
+            xy = np.vstack((X.ravel(), Y.ravel())).T
         data = self.ws.getSignalAtCoord(xy, self.normalization).reshape(X.shape)
         self.set_data(data)
 
@@ -97,10 +107,24 @@ class SamplingImage(mimage.AxesImage):
             return False
 
 
-def imshow_sampling(axes, workspace, cmap=None, norm=None, aspect=None,
-                    interpolation=None, alpha=None, vmin=None, vmax=None,
-                    origin=None, extent=None, shape=None, filternorm=1,
-                    filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
+def imshow_sampling(axes,
+                    workspace,
+                    cmap=None,
+                    norm=None,
+                    aspect=None,
+                    interpolation=None,
+                    alpha=None,
+                    vmin=None,
+                    vmax=None,
+                    origin=None,
+                    extent=None,
+                    shape=None,
+                    filternorm=1,
+                    filterrad=4.0,
+                    imlim=None,
+                    resample=None,
+                    url=None,
+                    **kwargs):
     """Copy of imshow but replaced AxesImage with SamplingImage and added
     callbacks and Mantid Workspace stuff.
 
@@ -117,28 +141,33 @@ def imshow_sampling(axes, workspace, cmap=None, norm=None, aspect=None,
 
     _setLabels2D(axes, workspace, transpose=transpose, xscale='linear')
     if not extent:
-        extent = (workspace.getDimension(0).getMinimum(),
-                  workspace.getDimension(0).getMaximum(),
-                  workspace.getDimension(1).getMinimum(),
-                  workspace.getDimension(1).getMaximum())
+        extent = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
+                  workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
     if transpose:
         e1, e2, e3, e4 = extent
         extent = e3, e4, e1, e2
 
     # from matplotlib.axes.Axes.imshow
     if norm is not None and not isinstance(norm, matplotlib.colors.Normalize):
-        raise ValueError(
-            "'norm' must be an instance of 'mcolors.Normalize'")
+        raise ValueError("'norm' must be an instance of 'mcolors.Normalize'")
     if aspect is None:
         aspect = matplotlib.rcParams['image.aspect']
     axes.set_aspect(aspect)
-    im = SamplingImage(axes, workspace, transpose, cmap, norm, interpolation, origin, extent,
-                       filternorm=filternorm, filterrad=filterrad,
-                       resample=resample, **kwargs)
-
-    im.set_extent(im.get_extent())
+    im = SamplingImage(axes,
+                       workspace,
+                       transpose,
+                       cmap,
+                       norm,
+                       interpolation,
+                       origin,
+                       extent,
+                       filternorm=filternorm,
+                       filterrad=filterrad,
+                       resample=resample,
+                       **kwargs)
     im._resample_image(100, 100)
     im.set_alpha(alpha)
+    im.set_url(url)
     if im.get_clip_path() is None:
         # image does not already have clipping set, clip to axes patch
         im.set_clip_path(axes.patch)
@@ -146,7 +175,6 @@ def imshow_sampling(axes, workspace, cmap=None, norm=None, aspect=None,
         im.set_clim(vmin, vmax)
     else:
         im.autoscale_None()
-    im.set_url(url)
 
     # update ax.dataLim, and, if autoscaling, set viewLim
     # to tightly fit the image, regardless of dataLim.
