@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadSampleShape.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
@@ -97,6 +98,22 @@ public:
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
     TS_ASSERT_DELTA(cube->volume(), 0.000001, 0.000001);
+  }
+
+  void test_peak_workspace() {
+    LoadSampleShape alg;
+    alg.initialize();
+    const int npeaks(10);
+    PeaksWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(npeaks);
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
+    alg.setProperty("OutputWorkspace", inputWS);
+    alg.setPropertyValue("Filename", "cube.stl");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    getMeshObject(alg);
   }
 
   void test_fail_off_invalid_first_line() {

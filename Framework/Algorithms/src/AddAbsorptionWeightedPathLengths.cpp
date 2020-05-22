@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -95,9 +95,14 @@ void AddAbsorptionWeightedPathLengths::exec() {
   auto instrument = inputWS->getInstrument();
   auto beamProfile = createBeamProfile(*instrument, inputWS->sample());
 
+  const auto npeaks = inputWS->getNumberPeaks();
+
+  // Configure progress
+  Progress prog(this, 0.0, 1.0, npeaks);
+  prog.setNotifyStep(0.01);
+  const std::string reportMsg = "Computing path lengths";
+
   // Configure strategy
-  /*MCAbsorptionWeightedPathStrategy strategy(
-   *beamProfile, inputWS->sample(), nevents, maxScatterPtAttempts, g_log);*/
   const int nlambda = 1;
   MCAbsorptionStrategy strategy(*beamProfile, inputWS->sample(),
                                 DeltaEMode::Elastic, nevents,
@@ -106,7 +111,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
   const int seed = getProperty("SeedValue");
   MersenneTwister rng(seed);
 
-  for (int i = 0; i < inputWS->getNumberPeaks(); ++i) {
+  for (int i = 0; i < npeaks; ++i) {
     IPeak &peak = inputWS->getPeak(i);
     auto peakWavelength = peak.getWavelength();
 
@@ -119,6 +124,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
         peakWavelength);                                               // m-1
     double absWeightedPathLength = -log(absFactors[0]) / mu;           // metres
     peak.setAbsorptionWeightedPathLength(absWeightedPathLength * 100); // cm
+
+    prog.report(reportMsg);
   }
 }
 

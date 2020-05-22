@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -19,8 +19,8 @@ class Instrument;
 }
 namespace Algorithms {
 
-/** Takes an existing sample log, and calculates its first or second
- * derivative, and adds it as a new log.
+/** Calculates the absorption weighted path length for each peak
+ * in a peaks workspace and saves it to the tbar column in the workspace.
 
   @author Danny Hindson
   @date 2020-05-07

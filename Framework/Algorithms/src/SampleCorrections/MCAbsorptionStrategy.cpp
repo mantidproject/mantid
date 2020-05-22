@@ -68,7 +68,7 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
   for (size_t i = 0; i < m_nevents; ++i) {
     Geometry::Track beforeScatter;
     Geometry::Track afterScatter;
-    for (int j = 0; j < nbins; j++) {
+    for (int j = 0; j < nbins; ++j) {
       size_t attempts(0);
       do {
         bool success = false;
