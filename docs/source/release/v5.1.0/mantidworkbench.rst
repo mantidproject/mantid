@@ -54,5 +54,6 @@ Bugfixes
 - Changing the axis scale on a colourfill plot now has the same result if it is done from either the context menu or figure options.
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
+- The SavePlot1D algorithm can now be run in Workbench.
 
 :ref:`Release 5.1.0 <v5.1.0>`
