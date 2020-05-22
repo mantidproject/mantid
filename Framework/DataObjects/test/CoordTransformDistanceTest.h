@@ -36,8 +36,10 @@ public:
     const std::vector<bool> usedDims = ct.getDimensionsUsed();
     // Contents are good
     compare(4, center, ct.getCenter());
-    for (size_t i = 0; i < 4; i++)
-      TS_ASSERT_EQUALS(used[i], usedDims[i]);
+    for (size_t i = 0; i < 4; i++) {
+      const bool dimUsed = usedDims[i];
+      TS_ASSERT_EQUALS(used[i], dimUsed);
+    }
   }
 
   /** Clone then apply */
