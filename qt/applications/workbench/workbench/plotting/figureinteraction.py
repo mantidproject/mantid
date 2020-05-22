@@ -689,6 +689,41 @@ class FigureInteraction(object):
 
             ax.update_waterfall(0, 0)
 
+        # The colorbar can get screwed up with ragged workspaces and log scales as they go
+        # through the normalisation toggle.
+        # Set it to Linear and change it back after if necessary, since there's no reason
+        # to duplicate the handling.
+        colorbar_log = False
+        if ax.images:
+            colorbar_log = isinstance(ax.images[-1].norm, LogNorm)
+            if colorbar_log:
+                self._change_colorbar_axes(Normalize)
+
+        self._change_plot_normalization(ax)
+
+        if ax.lines:  # Relim causes issues with colour plots, which have no lines.
+            ax.relim()
+
+        if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
+            colorbar_min = np.nanmin(ax.images[-1].get_array())
+            colorbar_max = np.nanmax(ax.images[-1].get_array())
+            for image in ax.images:
+                image.set_clim(colorbar_min, colorbar_max)
+            if colorbar_log:  # If it had a log scaled colorbar before, put it back.
+                self._change_colorbar_axes(LogNorm)
+
+        ax.autoscale()
+
+        datafunctions.set_initial_dimensions(ax)
+        if waterfall:
+            ax.update_waterfall(x, y)
+
+            if has_fill:
+                ax.set_waterfall_fill(True, fill_colour)
+
+        self.canvas.draw()
+
+    def _change_plot_normalization(self, ax):
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
             if arg_set['function'] == 'contour':
@@ -728,26 +763,6 @@ class FigureInteraction(object):
                                 col.set_color(contour_line_colour)
                         else:
                             ws_artist.replace_data(workspace, arg_set_copy)
-
-        if ax.lines:  # Relim causes issues with colour plots, which have no lines.
-            ax.relim()
-
-        if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
-            colorbar_min = np.nanmin(ax.images[-1].get_array())
-            colorbar_max = np.nanmax(ax.images[-1].get_array())
-            for image in ax.images:
-                image.set_clim(colorbar_min, colorbar_max)
-
-        ax.autoscale()
-
-        datafunctions.set_initial_dimensions(ax)
-        if waterfall:
-            ax.update_waterfall(x, y)
-
-            if has_fill:
-                ax.set_waterfall_fill(True, fill_colour)
-
-        self.canvas.draw()
 
     def _can_toggle_normalization(self, ax):
         """
