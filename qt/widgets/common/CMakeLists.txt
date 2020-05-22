@@ -37,6 +37,7 @@ set(
   src/ImageInfoModel.cpp
   src/ImageInfoModelMatrixWS.cpp
   src/ImageInfoModelMD.cpp
+  src/ImageInfoPresenter.cpp
   src/ImageInfoWidget.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
@@ -164,6 +165,7 @@ set(
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/IFunctionView.h
+  inc/MantidQtWidgets/Common/IImageInfoWidget.h
   inc/MantidQtWidgets/Common/ImageInfoWidget.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
@@ -255,6 +257,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModel.h
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
+    inc/MantidQtWidgets/Common/ImageInfoPresenter.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -335,6 +338,7 @@ set(
   src/ImageInfoModel.cpp
   src/ImageInfoModelMatrixWS.cpp
   src/ImageInfoModelMD.cpp
+  src/ImageInfoPresenter.cpp
   src/ImageInfoWidget.cpp
   src/InterfaceManager.cpp
   src/ListPropertyWidget.cpp
@@ -554,6 +558,7 @@ set(
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
+  inc/MantidQtWidgets/Common/IImageInfoWidget.h
   inc/MantidQtWidgets/Common/ImageInfoWidget.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/InputController.h
@@ -630,6 +635,7 @@ set(
   inc/MantidQtWidgets/Common/ImageInfoModel.h
   inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
   inc/MantidQtWidgets/Common/ImageInfoModelMD.h
+  inc/MantidQtWidgets/Common/ImageInfoPresenter.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/IProjectSerialisable.h
   inc/MantidQtWidgets/Common/LogValueFinder.h
@@ -992,6 +998,7 @@ set(
   test/LogValueFinderTest.h
   test/ImageInfoModelMatrixWSTest.h
   test/ImageInfoModelMDTest.h
+  test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
   test/NonOrthogonalTest.h
   test/ParseKeyValueStringTest.h
@@ -1063,6 +1070,7 @@ set(
   test/FitPropertyBrowserTest.h
   test/ImageInfoModelMatrixWSTest.h
   test/ImageInfoModelMDTest.h
+  test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h

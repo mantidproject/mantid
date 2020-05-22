@@ -8,9 +8,8 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
-#include "MantidQtWidgets/Common/ImageInfoPresenter.h"
+#include "MantidQtWidgets/Common/ImageInfoModel.h"
 
 #include <QTableWidget>
 
@@ -21,18 +20,22 @@ namespace MantidWidgets {
  * A table widget containing information about the pixel the mouse is over in
  * an image
  */
-class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public IImageInfoWidget {
-  Q_OBJECT
+class EXPORT_OPT_MANTIDQT_COMMON ImageInfoPresenter {
 
 public:
-  ImageInfoWidget(const Mantid::API::Workspace_sptr &ws,
-                  QWidget *parent = nullptr);
+  ImageInfoPresenter(IImageInfoWidget *view);
 
-  void updateTable(const double x, const double y, const double z,
-                   bool includeValues = true) override;
+  std::vector<std::string> getInfoList(const double x, const double y,
+                                       const double z,
+                                       bool includeValues = true);
+
+  void createImageInfoModel(const Mantid::API::Workspace_sptr &ws);
+
+  std::shared_ptr<ImageInfoModel> getModel() { return m_model; }
 
 private:
-  std::unique_ptr<ImageInfoPresenter> m_presenter;
+  std::shared_ptr<ImageInfoModel> m_model;
+  IImageInfoWidget *m_view;
 };
 
 } // namespace MantidWidgets

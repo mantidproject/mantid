@@ -943,7 +943,7 @@ public:
       return NULL;
     }
     %End
-	void updateTable(const double x, const double y, const double z);
+	void updateTable(const double x, const double y, const double z, bool includeValues = true);
   private:
   ImageInfoWidget(const ImageInfoWidget&);
 };

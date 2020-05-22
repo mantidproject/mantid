@@ -7,8 +7,6 @@
 
 #include "MantidQtWidgets/Common/ImageInfoWidget.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtWidgets/Common/ImageInfoModelMD.h"
-#include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 
 #include <QAbstractScrollArea>
 #include <QHeaderView>
@@ -22,22 +20,23 @@ namespace MantidWidgets {
  */
 ImageInfoWidget::ImageInfoWidget(const Mantid::API::Workspace_sptr &workspace,
                                  QWidget *parent)
-    : QTableWidget(0, 0, parent) {
+    : IImageInfoWidget(parent),
+      m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
+
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 #endif
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-
-  createImageInfoModel(workspace);
   horizontalHeader()->hide();
   verticalHeader()->hide();
 
+  m_presenter->createImageInfoModel(workspace);
   updateTable(0, 0, 0, false);
 }
 
 void ImageInfoWidget::updateTable(const double x, const double y,
                                   const double z, bool includeValues) {
-  auto info = m_model->getInfoList(x, y, z, includeValues);
+  auto info = m_presenter->getInfoList(x, y, z, includeValues);
 
   if (info.empty())
     return;
@@ -59,16 +58,6 @@ void ImageInfoWidget::updateTable(const double x, const double y,
   }
   resizeColumnsToContents();
 }
-
-void ImageInfoWidget::createImageInfoModel(
-    const Mantid::API::Workspace_sptr &ws) {
-  if (auto matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws))
-    m_model = std::make_unique<ImageInfoModelMatrixWS>(matWS);
-  else if (auto MDWS =
-               std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws)) {
-    m_model = std::make_unique<ImageInfoModelMD>(MDWS);
-  }
-}
-
 } // namespace MantidWidgets
+
 } // namespace MantidQt
