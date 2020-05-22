@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 
-from qtpy.QtWidgets import QDialogButtonBox
-
 from mantidqt.widgets.saveprojectdialog.view import ProjectSaveDialogView
 from workbench.config import CONF
 
@@ -26,11 +24,11 @@ class ProjectSaveDialogPresenter:
 
         self.view.set_save_altered_workspaces_only(project.save_altered_workspaces_only)
         self.view.set_location(project.last_project_location)
-        self.view.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.view.get_location() != "")
+        self.view.set_ok_enabled(self.view.get_location() != "")
         self.view.exec()
 
     def location_selected(self):
-        self.view.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+        self.view.set_ok_enabled(True)
 
     def browse_button_clicked(self):
         filename = self.project._save_file_dialog()

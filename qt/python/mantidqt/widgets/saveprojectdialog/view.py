@@ -8,7 +8,7 @@
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialog
+from qtpy.QtWidgets import QDialog, QDialogButtonBox
 
 from mantidqt.utils.qt import load_ui
 
@@ -34,3 +34,6 @@ class ProjectSaveDialogView(QDialog):
 
     def get_save_altered_workspaces_only(self):
         return self.save_altered_workspaces_only_radio_button.isChecked()
+
+    def set_ok_enabled(self, enable):
+        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(enable)
