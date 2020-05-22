@@ -467,11 +467,7 @@ class MantidAxes(Axes):
         if errorbars:
             new_artist = self.errorbar(workspace, **kwargs)
         else:
-            # if it is a sample log plot
-            if spec_num is None:
-                new_artist = self.plot(workspace, **kwargs)[0]
-            else:
-                new_artist = self.plot(workspace, **kwargs)[0]
+            new_artist = self.plot(workspace, **kwargs)[0]
         return new_artist
 
     def relim(self, visible_only=True):
