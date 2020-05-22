@@ -204,9 +204,14 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Kernel::Matrix<double> invCov(nd, nd);
   if (doCounts > 0) {
     auto var = std * std;
-    invCov = Evec * var * Evec.Invert(); // covar mat
-    // invert in place
-    auto det = invCov.Invert();
+    // copy Evec to a matrix to hold inverse
+    Kernel::Matrix<double> invEvec(Evec.getVector()); // hold eigenvectors
+    // invert Evec matrix
+    invEvec.Invert();
+    // find covariance matrix to invert
+    invCov = Evec * var * invEvec; // covar mat
+    // invert covar matrix
+    invCov.Invert();
   }
   // get chi-squared boost function
   boost::math::chi_squared chisq(nd);
