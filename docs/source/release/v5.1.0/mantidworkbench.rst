@@ -20,6 +20,11 @@ Improvements
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
+
+.. figure:: ../../images/wb_invalid_log_shading.png
+   :align: right
+
+- Logs that contain invalid data indicated by NeXus log alarm states are now shaded in red, and a tool tip will tell you how many values are invalid.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 - The Help Menu now has an About screen that will pop up automatically on startup to provide links to the release notes and various other resources, and allow you to set some important setting such as Facility, instrument and accept usage tracing.
   You can choose to hide it until the next release.
