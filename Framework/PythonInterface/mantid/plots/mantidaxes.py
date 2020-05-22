@@ -1433,7 +1433,7 @@ class _WorkspaceArtists(object):
         :param workspace_name: String. The name of the associated workspace
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         :param is_spec: True if spec_num represents a spectrum rather than a bin
-        :param log_name: string. The name of the plotted log, the
+        :param log_name: string. The name of the plotted log
         :param filtered: bool. True if log plotted was filtered, and False if unfiltered.
             This only has meaning if log_name is not None.
         :param expt_info_index: Integer. The index of the experiment info for this plotted log.
