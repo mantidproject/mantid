@@ -273,15 +273,6 @@ class ProjectTest(unittest.TestCase):
 
         self.assertEqual(len(filtered_figure_managers), 1)
 
-    def test_calling_save_when_remember_workspace_saving_option_is_false_opens_save_dialog(self):
-        self.project.last_project_location = "location"
-        self.project.remember_workspace_saving_option = False
-        self.project.open_project_save_dialog = mock.Mock()
-
-        self.project.save()
-
-        self.project.open_project_save_dialog.assert_called_once()
-
     def test_saving_project_with_save_altered_workspaces_only_calls_filter_functions(self):
         self.project.save_altered_workspaces_only = True
         self.project._filter_plots_with_unaltered_workspaces = mock.Mock()

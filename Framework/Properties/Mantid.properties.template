@@ -233,12 +233,6 @@ projectRecovery.numberOfCheckpoints = 5
 # 10 GB = 10737418240 bytes
 projectSaving.warningSize = 10737418240
 
-# Whether to not save workspaces which have been loaded only when saving a project.
-projectSaving.saveAlteredWorkspacesOnly = False
-
-# Whether to remember if unaltered workspaces should be saved when saving a project or ask every time.
-projectSaving.rememberWorkspaceSavingOption = False
-
 # Whether to show titles on plots
 plots.ShowTitle = On
 

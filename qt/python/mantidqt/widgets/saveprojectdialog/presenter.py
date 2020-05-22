@@ -9,6 +9,7 @@
 from qtpy.QtWidgets import QDialogButtonBox
 
 from mantidqt.widgets.saveprojectdialog.view import ProjectSaveDialogView
+from workbench.config import CONF
 
 
 class ProjectSaveDialogPresenter:
@@ -24,7 +25,6 @@ class ProjectSaveDialogPresenter:
         self.view.rejected.connect(self.cancel)
 
         self.view.set_save_altered_workspaces_only(project.save_altered_workspaces_only)
-        self.view.set_remember_selection(project.remember_workspace_saving_option)
         self.view.set_location(project.last_project_location)
         self.view.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.view.get_location() != "")
         self.view.exec()
@@ -39,9 +39,8 @@ class ProjectSaveDialogPresenter:
             self.view.set_location(filename)
 
     def save_as(self):
-        self.project.remember_workspace_saving_option = self.view.get_remember_selection()
         self.project.save_altered_workspaces_only = self.view.get_save_altered_workspaces_only()
-        self.project.set_saving_settings()
+        CONF.set('project/save_altered_workspaces_only', self.view.get_save_altered_workspaces_only())
         self.project.save_as(path=self.view.get_location())
 
     def cancel(self):

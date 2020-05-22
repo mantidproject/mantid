@@ -34,9 +34,3 @@ class ProjectSaveDialogView(QDialog):
 
     def get_save_altered_workspaces_only(self):
         return self.save_altered_workspaces_only_radio_button.isChecked()
-
-    def set_remember_selection(self, check):
-        self.remember_selection_check_box.setChecked(check)
-
-    def get_remember_selection(self):
-        return self.remember_selection_check_box.isChecked()

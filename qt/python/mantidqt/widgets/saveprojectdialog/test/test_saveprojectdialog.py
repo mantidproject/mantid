@@ -9,9 +9,9 @@
 import unittest
 from unittest.mock import Mock
 
-from mantid.kernel import ConfigService
 from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresenter
 from mantidqt.project.project import Project
+from workbench.config import CONF
 
 
 class SaveProjectDialogTest(unittest.TestCase):
@@ -20,20 +20,6 @@ class SaveProjectDialogTest(unittest.TestCase):
         self.project = Project(Mock(), Mock())
         self.project.save_as = Mock()
         self.presenter = ProjectSaveDialogPresenter(self.project, Mock())
-
-    def test_checking_remember_selection_checkbox_sets_project_attribute_to_true(self):
-        self.presenter.view.get_remember_selection.return_value = True
-
-        self.presenter.save_as()
-
-        self.assertTrue(self.project.remember_workspace_saving_option)
-
-    def test_unchecking_remember_selection_checkbox_sets_project_attribute_to_false(self):
-        self.presenter.view.get_remember_selection.return_value = False
-
-        self.presenter.save_as()
-
-        self.assertFalse(self.project.remember_workspace_saving_option)
 
     def test_selecting_save_altered_workspaces_only_sets_project_attribute_to_true(self):
         self.presenter.view.get_save_altered_workspaces_only.return_value = True
@@ -49,11 +35,9 @@ class SaveProjectDialogTest(unittest.TestCase):
 
         self.assertFalse(self.project.save_altered_workspaces_only)
 
-    def test_correct_settings_are_set(self):
+    def test_correct_setting_is_set(self):
         self.presenter.view.get_save_altered_workspaces_only.return_value = True
-        self.presenter.view.get_remember_selection.return_value = True
 
         self.presenter.save_as()
 
-        self.assertEqual(ConfigService.getString('projectSaving.saveAlteredWorkspacesOnly'), "True")
-        self.assertEqual(ConfigService.getString('projectSaving.rememberWorkspaceSavingOption'), "True")
+        self.assertEqual(CONF.get('project', 'save_altered_workspaces_only'), True)

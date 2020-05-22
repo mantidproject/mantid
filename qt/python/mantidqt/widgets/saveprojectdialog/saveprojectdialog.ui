@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>651</width>
-    <height>258</height>
+    <height>226</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -77,16 +77,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="remember_selection_check_box">
-        <property name="text">
-         <string>Remember my selection</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>

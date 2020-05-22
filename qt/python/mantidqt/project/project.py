@@ -38,11 +38,7 @@ class Project(AnalysisDataServiceObserver):
         self.last_project_location = None
 
         # whether to discard workspaces that have only been loaded when saving the project
-        self.save_altered_workspaces_only = \
-            ConfigService.getString('projectSaving.saveAlteredWorkspacesOnly') == 'True'
-        # whether to remember which workspaces to save or ask every time
-        self.remember_workspace_saving_option = \
-            ConfigService.getString('projectSaving.rememberWorkspaceSavingOption') == 'True'
+        self.save_altered_workspaces_only = False
 
         self.observeAll(True)
 
@@ -59,6 +55,7 @@ class Project(AnalysisDataServiceObserver):
 
     def load_settings_from_config(self, config):
         self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
+        self.save_altered_workspaces_only = config.get('project', 'save_altered_workspaces_only')
 
     @property
     def saved(self):
@@ -77,7 +74,7 @@ class Project(AnalysisDataServiceObserver):
         The function that is called if the save button is clicked on the mainwindow
         :return: True; if the user cancels
         """
-        if self.last_project_location is None or not self.remember_workspace_saving_option:
+        if self.last_project_location is None:
             return self.open_project_save_dialog()
         else:
             # Offer an are you sure? overwriting GUI
@@ -107,11 +104,6 @@ class Project(AnalysisDataServiceObserver):
         self.last_project_location = path
         task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
         task.start()
-
-    def set_saving_settings(self):
-        ConfigService.setString('projectSaving.saveAlteredWorkspacesOnly', str(self.save_altered_workspaces_only))
-        ConfigService.setString('projectSaving.rememberWorkspaceSavingOption',
-                                str(self.remember_workspace_saving_option))
 
     @staticmethod
     def _offer_overwriting_gui():
