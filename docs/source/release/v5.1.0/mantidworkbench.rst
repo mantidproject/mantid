@@ -53,5 +53,6 @@ Bugfixes
 - The correct interpolation now appears in the plot figure options for colorfill plots.
 - Changing the axis scale on a colourfill plot now has the same result if it is done from either the context menu or figure options.
 - `plt.show()` now shows the most recently created figure.
+- The SavePlot1D algorithm can now be run in Workbench.
 
 :ref:`Release 5.1.0 <v5.1.0>`
