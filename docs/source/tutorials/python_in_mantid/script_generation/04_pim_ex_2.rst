@@ -14,8 +14,9 @@ Use the dialog functions to make the script more general for future runs.
     :local:
 
 
-Using ISIS Data
-===============
+
+A - Processing ISIS Data
+========================
 
 Running an analysis Manually
 ----------------------------
@@ -41,44 +42,47 @@ Once you have performed an analysis you can easily save it out as a script
 #. Delete all the entries in the Workspace Toolbox
 #. Run the script to check it works!
 
+One step further
+----------------
 
-Using ILL Data
-==============
+#. Extract the selected filename from the Load command and print it to the screen with logger.information("message")
+#. Extract the binning params from the first Rebin, print them using the logger, AND use them as the input for the second Rebin
+#. Add comments to your script to explain what it does!
+
+
+B - Plotting ILL Data
+=====================
+
+Load and Plot
+-------------
+
+#. :ref:`algm-Load` the file `164198.nxs`
+#. Double-click on the main data workspace *164198*
+#. Produce a normal plot of the spectrum numbers: 50,100,200,300
+
+Edit in Options Menu
+--------------------
+
+#. Click on the Gear icon to open the :ref:`Options menu <06_formatting_plots>`
+#. In the Axes tab... Change the title to "My Beautiful Plot"
+#. Set the **x-limits** to 3000-4000, the **y-scale** to `log` and the **y-limits** to 1-2000
+#. In the Curves tab... Select spectrum 50 and give this curve "a funky label"
+#. ... for the re-labelled curve, un-hide the error bars and set Capsize = 1.0
+#. ... Select spectrum 300 and change the line color to black
+#. Click Apply
+
+Generating a script from a plot
+-------------------------------
+
+#. Click the generate a script button |GenerateAScript.png| and copy&paste the script into the script editor
+#. Close your beautiful plot and run the script to re-generate it!
+
+
+C - Processing and Plotting SNS Data
+====================================
 
 Running an analysis Manually
 ----------------------------
-
-Here you are going to perform a number of steps in the MantidPlot user interface to correct some IN6 data by the incident beam monitor. For more information in a specific algorithm, click on its name.
-
-#. :ref:`algm-Load` - Use the 164198.nxs file, set the OutputWorkspace to data.
-#. :ref:`algm-Integration` - Use WorkspaceIndex=0 on the data workspace to pull out the 1st monitor spectrum and integrate it over time.
-#. :ref:`algm-Divide` - Run divide with LHSWorkspace as the data workspace & RHSWorkspace as the monitor, into an OutputWorkspace called data_norm.
-#. :ref:`algm-ConvertUnits` - Convert the units for both the monitor and detector workspaces to DeltaE.
-#. :ref:`algm-Rebin` - Rebin the workspaces in wavelength from -50 to 3 in linear steps of 0.1.
-
-Generating a script from a workspace
-------------------------------------
-
-Once you have performed an analysis you can easily save it out as a script
-
-#. Right-Click on the final result workspace, then select **Show History**
-#. Click on the `Script to Clipboard` button
-#. Paste the code into the Script Editor
-
-Generalizing the Script
------------------------
-
-#. Extract the selected filename from the LoadILL command and print it to the screen with logger.information("message").
-#. Print the Rebin binning to the screen with logger.information("message").
-
-
-Using SNS Data
-==============
-
-Running an analysis Manually
-----------------------------
-
-Here you are going to perform a number of steps in the MantidPlot user interface to display the beam profile of EQ SANS
 
 #. :ref:`algm-Load` - Load the file EQSANS_6071_event.nxs.
 #. :ref:`algm-ConvertUnits` - Convert the units for both the monitor and detector workspaces to wavelength
@@ -90,15 +94,32 @@ Generating a script from a workspace
 ------------------------------------
 Once you have performed an analysis you can easily save it out as a script.
 
-#. Right-Click on the final result workspace, then select **Show History**
+#. Right-Click on the final result workspace *normalized*, then select **Show History**
 #. Click on the `Script to File` button and save the file somewhere useful!
 #. Open the script by selecting `File > Open Script` or use the keyboard shortcut Ctrl+O (or Cmd+O)
 #. Delete all workspaces and Run the script to check it works!
 
-Extra
------
+Plot and Edit
+-------------
 
-#. Extract the selected filename from the LoadNexus command (Hint: `.value` will return the value held by that property.) and print it to the screen with `logger.information("message")`.
-#. Since rebin is performed twice, extract the parameters from the first rebin and use them in the second rebin.
+#. Double-click on the *normalized* spectrum to plot it
+#. Right-click on *run_monitors_lambda_rebinned* and select Plot > Overplot Spectrum..
+#. Also, overplot with *run_lambda_summed* 
+#. In the Options menu (Gear icon)
+#. Set the **x-upper-limit** to 4.5
+#. Set the **y-limits** to 0.1-350000
+#. Set the **y-scale** to log
+#. Click Apply
+
+Generating a script from a plot
+-------------------------------
+
+#. Click the generate a script button |GenerateAScript.png| and select `Script to Clipboard`
+#. Paste the code on the end of the script for processing the data
+
+#. **Delete all workspaces and plots and run the script to reprocess and plot the data**
 
 
+
+.. |GenerateAScript.png| image:: /images/GenerateAScript.png  
+   :width: 30px
