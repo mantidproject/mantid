@@ -27,7 +27,7 @@ public:
   @return a vector containing pairs of strings
   */
   virtual std::vector<std::string> getInfoList(const double x, const double y,
-                                               const double z,
+                                               const double signal,
                                                bool includeValues = true) = 0;
 
 protected:

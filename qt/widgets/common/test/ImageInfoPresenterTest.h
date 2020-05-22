@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
@@ -18,6 +19,8 @@
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::DataObjects;
 using namespace testing;
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockImageInfoView : public IImageInfoWidget {
 public:
@@ -32,6 +35,8 @@ public:
 private:
   std::shared_ptr<ImageInfoPresenter> m_presenter;
 };
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class ImageInfoPresenterTest : public CxxTest::TestSuite {
 public:

@@ -15,7 +15,8 @@ namespace MantidWidgets {
 
 void ImageInfoModel::addNameAndValue(const std::string &label,
                                      const double value, const int precision,
-                                     std::vector<std::string> &list, bool includeValues) {
+                                     std::vector<std::string> &list,
+                                     bool includeValues) {
   std::ostringstream valueString;
   if (includeValues)
     valueString << std::setprecision(precision) << value;

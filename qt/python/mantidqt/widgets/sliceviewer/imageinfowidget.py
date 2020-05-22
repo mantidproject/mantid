@@ -9,9 +9,6 @@
 #
 from mantidqt.utils.qt import import_qt
 
-from qtpy.QtWidgets import QVBoxLayout, QCheckBox, QWidget
-from qtpy.QtCore import Qt
-
 ImageInfoWidget_cpp = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 

@@ -178,7 +178,8 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
     addNameAndValue("Energy", energy, 4, list, includeValues);
   }
 
-  if (x_label != "d-Spacing" && ((two_theta != 0.0 && emode == 0) || !includeValues)) {
+  if (x_label != "d-Spacing" &&
+      ((two_theta != 0.0 && emode == 0) || !includeValues)) {
     const auto d_unit = UnitFactory::Instance().create("dSpacing");
     const double d_spacing = d_unit->convertSingleFromTOF(
         tof, l1, l2, two_theta, emode, efixed, delta);
