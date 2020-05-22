@@ -12,6 +12,15 @@ Running an analysis Manually
 
 .. code-block:: python
 
+
+Load(Filename='/Users/danielmurphy/Desktop/Data/TrainingCourseData/LOQ48097.raw', OutputWorkspace='Small_Angle', LoadMonitors='Separate')
+ConvertUnits(InputWorkspace='Small_Angle_monitors', OutputWorkspace='Small_Angle_monitors', Target='Wavelength')
+ConvertUnits(InputWorkspace='Small_Angle', OutputWorkspace='Small_Angle', Target='Wavelength')
+Rebin(InputWorkspace='Small_Angle_monitors', OutputWorkspace='Small_Angle_monitors', Params='2.2,-0.035,10')
+Rebin(InputWorkspace='Small_Angle', OutputWorkspace='Small_Angle', Params='2.2,-0.035,10')
+ExtractSingleSpectrum(InputWorkspace='Small_Angle_monitors', OutputWorkspace='Small_Angle_monitors', WorkspaceIndex=1)
+Divide(LHSWorkspace='Small_Angle', RHSWorkspace='Small_Angle_monitors', OutputWorkspace='Corrected_data')
+
     # ----------------------------------------------------------------------------
     #  Python Training Exercise 2 Solution with syntax style
     # A generalized script

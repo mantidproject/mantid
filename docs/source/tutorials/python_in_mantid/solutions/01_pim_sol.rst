@@ -61,3 +61,22 @@ Using SNS Data
     compressed = CompressEvents(InputWorkspace=focused)
     nevents = compressed.getNumberEvents()
     logger.notice(str(nevents))
+
+Using ILL Data
+==============
+
+.. code-block:: python
+
+    for i in range(164198,164201):
+        print( '{}.nxs'.format(i))
+        Load(Filename = '{}.nxs'.format(i), OutputWorkspace = str(i))
+
+    mtd.importAll()
+    data_merged = MergeRuns([164198,164199,164200])
+    bad_spectra = [1,2,3,4,5,6,11,14,30,69,90,93,95,97,175,184,190,215,216,217,251,252,253,255,289,317,335,337]
+    MaskDetectors(Workspace = data_merged, SpectraList = bad_spectra)
+    scaled = MultiplyRange(data_merged, Factor = 0.95)
+    ws = ConvertUnits(scaled, Target = 'DeltaE', EFixed = 4.7728189558864003, EMode = 'Direct')
+    wsCorrected = DetectorEfficiencyCorUser(converted_to_energy)
+
+    print("The correct value in spectrum number {}, bin {} is {:.2f} compared to {:.2f}".format(6,3,wsCorrected.readY(6)[3],ws.readY(6)[3]))

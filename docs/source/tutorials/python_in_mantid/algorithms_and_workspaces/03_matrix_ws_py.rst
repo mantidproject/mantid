@@ -9,6 +9,8 @@ MatrixWorkspace with Python
 
 .. figure:: /images/MatrixWorkspaceHierachy.png
    :alt: MatrixWorkspaceHierachy
+   :align: center
+
 
 
 Working with MatrixWorkspaces
@@ -68,6 +70,7 @@ Rebinning EventWorkspaces
 
 .. figure:: /images/Binning_example.png
    :alt: Binning_example
+   :align: center
 
 .. code-block:: python
 

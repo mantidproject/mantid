@@ -20,15 +20,15 @@ Using ISIS Data
 Running an analysis Manually
 ----------------------------
 
-Here you are going to perform a number of steps in the MantidPlot user interface to correct some LOQ data by the incident beam monitor. For more information in a specific algorithm, click on its name.
+Here you are going to perform a number of steps in the Mantid user interface to correct some LOQ data by the incident beam monitor. For more information in a specific algorithm, click on its name.
 
-#. :ref:`algm-Load` - Use the LOQ48097.raw file, set the OutputWorkspace to small_angle and set LoadMonitors to Separate, being careful to pass in string arguments where necessary.
+#. :ref:`algm-Load` - Use the LOQ48097.raw file, set the OutputWorkspace to `Small_Angle` and set LoadMonitors to Separate.
 #. :ref:`algm-ConvertUnits` - Convert the units for the Monitor workspace to wavelength with EMode=Elastic.
 #. :ref:`algm-ConvertUnits` - Do the same for the small_angle data with EMode=Elastic.
 #. :ref:`algm-Rebin` - Rebin the monitor from 2.2 to 10 in log steps of 0.035. To achieve this, the rebin params string will be "2.2,-0.035,10.0".
 #. :ref:`algm-Rebin` - Do the same for the small_angle data.
-#. :ref:`algm-ExtractSingleSpectrum` - Use WorkspaceIndex=1 on the small_angle_Monitors workspace to pull out the 2nd monitor spectrum, putting the answer back in to the input workspace.
-#. :ref:`algm-Divide` - Run divide with LHSWorkspace as the small_angle data workspace & RHSWorkspace as the monitor, into an OutputWorkspace called Corrected data.
+#. :ref:`algm-ExtractSingleSpectrum` - Use WorkspaceIndex=1 on the Small_Angle_monitors workspace to pull out the 2nd monitor spectrum, putting the answer back in to the input workspace.
+#. :ref:`algm-Divide` - Run divide with LHSWorkspace as the small_angle data workspace & RHSWorkspace as the monitor, into an OutputWorkspace called Corrected_data.
 
 Generating a script from a workspace
 ------------------------------------

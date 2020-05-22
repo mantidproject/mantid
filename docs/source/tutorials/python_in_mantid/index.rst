@@ -1,8 +1,8 @@
 .. _pim_intro:
 
-===================
-Python Introduction
-===================
+================
+Python In Mantid
+================
 
 .. toctree::
    :hidden:

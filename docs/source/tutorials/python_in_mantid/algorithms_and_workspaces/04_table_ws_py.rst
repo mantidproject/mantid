@@ -10,6 +10,8 @@ TableWorkspaces are a type of :ref:`workspace <02_ws_types>` designed to handle 
 
 .. figure:: /images/ITableWorkspaceHierachy.png
    :alt: ITableWorkspaceHierachy
+   :align: center
+   :scale: 60%
 
 Creating a TableWorkspace
 =========================
