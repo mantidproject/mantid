@@ -228,7 +228,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // sample uniform normal distribution
     std::vector<double> pos;
-    for (int n = 0; n < nd; n++) {
+    for (size_t n = 0; n < nd; n++) {
       pos.push_back(d(rng));
     }
     // apply affine transformation
@@ -244,7 +244,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // md = sqrt(pos.T * invCov * pos)
       auto tmp = invCov * pos;
       double mdsq = 0.0;
-      for (int n = 0; n < nd; n++) {
+      for (size_t n = 0; n < nd; n++) {
         mdsq += pos[n] * tmp[n];
       }
       // for a multivariate normal dist m-dist is distribute
@@ -254,7 +254,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
     // convert pos to coord_t and offset  by center
     coord_t eventCenter[nd];
-    for (int n = 0; n < nd; n++) {
+    for (size_t n = 0; n < nd; n++) {
       eventCenter[n] = static_cast<coord_t>(pos[n] + center[n]);
     }
 
