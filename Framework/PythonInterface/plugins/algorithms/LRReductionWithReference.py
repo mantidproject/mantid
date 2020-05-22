@@ -94,10 +94,6 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         norm_kwargs['ApplyScalingFactor'] = False
         norm_wksp = LiquidsReflectometryReduction(**norm_kwargs)
 
-        print("Norm:", len(norm_wksp.readX(0)))
-        for x, y in zip(norm_wksp.readX(0), norm_wksp.readY(0)):
-            print('  ', x, y)
-
         # Calculate the theoretical reflectivity for normalization using Refl1D
         q = norm_wksp.readX(0)
         model_json = self.getProperty("Refl1DModelParameters").value
@@ -110,16 +106,8 @@ class LRReductionWithReference(DataProcessorAlgorithm):
             DataE=np.zeros(len(q)),
             UnitX=norm_wksp.getAxis(0).getUnit().unitID())
 
-        print("Model:", len(model_wksp.readX(0)))
-        for x, y in zip(model_wksp.readX(0), model_wksp.readY(0)):
-            print('  ', x, y)
-
         # Calculate the incident flux ( measured / model) for reference
         incident_flux = Divide(norm_wksp, model_wksp)
-
-        print("Incident Flux:", len(incident_flux.readX(0)))
-        for x, y in zip(incident_flux.readX(0), incident_flux.readY(0)):
-            print('  ', x, y)
 
         # Process the sample run(s)
         sample_kwargs = copy.deepcopy(kwargs)
@@ -128,86 +116,7 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         sample_wksp = LiquidsReflectometryReduction(**sample_kwargs)
 
         # Normalize using the incident flux
-        #incident_flux = RebinToWorkspace(incident_flux, sample_wksp)
-        print("Sample:", len(sample_wksp.readX(0)))
-        for x, y in zip(sample_wksp.readX(0), sample_wksp.readY(0)):
-            print('  ', x, y)
-
-        print("Sample | Inciden Flux:")
-        for x1, y1, x2, y2 in zip(sample_wksp.readX(0), sample_wksp.readY(0), incident_flux.readX(0), incident_flux.readY(0)):
-            print('  ', x1, y1, ' | ', x2, y2)
-
         out_wksp = Divide(sample_wksp, incident_flux)
-
-        import matplotlib.pyplot as plt
-        from mantid import plots
-        from matplotlib.backends.backend_pdf import PdfPages
-
-
-        with PdfPages('lr_reduction_with_reference.pdf') as pdf:
-            fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
-            ax.set_title('Norm Workspace')
-            ax.plot(norm_wksp, label="Normalization", distribution=False)
-            ax.legend()
-            pdf.savefig(fig)
-
-            fig_model, ax_model = plt.subplots(subplot_kw={'projection':'mantid'})
-            ax_model.set_title('Refl1D Model Workspace')
-            ax_model.plot(model_wksp, label="Refl1D Model")
-            ax_model.legend()
-            pdf.savefig(fig_model)
-
-            ax.set_title('Norm + Refl1D Model')
-            ax.plot(model_wksp, label="Refl1D Model")
-            ax.legend()
-            pdf.savefig(fig)
-
-            fig_flux, ax_flux = plt.subplots(subplot_kw={'projection':'mantid'})
-            ax_flux.set_title('Incident Flux ( Norm / Model )  Workspace')
-            ax_flux.plot(incident_flux, label="Incident Flux")
-            ax_flux.legend()
-            pdf.savefig(fig_flux)
-
-            ax.set_title('Norm + Refl1D Model + Incident Flux')
-            ax.plot(incident_flux, label="Incident Flux")
-            ax.legend()
-            pdf.savefig(fig)
-
-            fig_sample, ax_sample = plt.subplots(subplot_kw={'projection':'mantid'})
-            ax_sample.set_title('Sample Workspace')
-            ax_sample.plot(sample_wksp, label="Sample")
-            ax_sample.legend()
-            pdf.savefig(fig_sample)
-
-            ax.set_title('Norm + Refl1D Model + Incident Flux + Sample')
-            ax.plot(sample_wksp, label="Sample")
-            ax.legend()
-            pdf.savefig(fig)
-
-            fig_out, ax_out = plt.subplots(subplot_kw={'projection':'mantid'})
-            ax_out.set_title('Output Workspace')
-            ax_out.plot(out_wksp, label="Output")
-            ax_out.legend()
-            pdf.savefig(fig_out)
-
-            ax.set_title('Norm + Refl1D Model + Incident Flux + Sample + Output')
-            ax.plot(out_wksp, label="Output")
-            ax.legend()
-            pdf.savefig(fig)
-
-            fig_compare, ax_compare = plt.subplots(subplot_kw={'projection':'mantid'})
-            ax_compare.set_title('Output Workspace')
-            ax_compare.plot(model_wksp, label="Model")
-            ax_compare.plot(out_wksp, label="Output")
-            ax_compare.legend()
-            pdf.savefig(fig_compare)
-
-
-        print("\n\nOutputWorkspace # of histograms:", out_wksp.getNumberHistograms())
-        print("OutputWorkspace:")
-        for x, y in zip(out_wksp.readX(0), out_wksp.readY(0)):
-            print('  ', x, y)
-
         self.setProperty('OutputWorkspace', out_wksp)
 
     def calculate_reflectivity(self, model_description, q, q_resolution=0.025):
@@ -238,9 +147,10 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         dq = q_resolution * q
         # The QProbe object represents the beam
         probe = QProbe(q, dq, data=(zeros, zeros))
-        sample = Slab(material=SLD(name='back',
-                                   rho=model_description['back_sld']),
-                                   interface=model_description['back_roughness'])
+        sample = Slab(
+            material=SLD(name='back', rho=model_description['back_sld']),
+            interface=model_description['back_roughness'])
+
         # Add each layer
         for i, layer in enumerate(model_description['layers']):
             sample = sample | Slab(material=SLD(name='layer%s' % i,
