@@ -440,7 +440,7 @@ class MantidAxes(Axes):
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
 
-        #check if it is a sample log plot
+        # check if it is a sample log plot
         if spec_num is None:
             #error bars never make sense for sample log plots
             sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
