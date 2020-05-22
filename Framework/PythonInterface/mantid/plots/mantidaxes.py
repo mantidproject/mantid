@@ -242,7 +242,7 @@ class MantidAxes(Axes):
             This can be from either a distribution workspace or a workspace being
             plotted as a distribution
         :param is_spec: bool. True if spec_num represents a spectrum, and False if it is a bin index
-        :param log_name: string. The name of the plotted log, the
+        :param log_name: string. The name of the plotted log
         :param filtered: bool. True if log plotted was filtered, and False if unfiltered.
             This only has meaning if log_name is not None.
         :param expt_info_index: Integer. The index of the experiment info for this plotted log.
