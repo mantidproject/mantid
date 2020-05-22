@@ -442,7 +442,6 @@ class MantidAxes(Axes):
 
         # check if it is a sample log plot
         if spec_num is None:
-            #error bars never make sense for sample log plots
             sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
             kwargs['LogName'] = sample_log_plot_details[0]
             if sample_log_plot_details[1] is not None:
