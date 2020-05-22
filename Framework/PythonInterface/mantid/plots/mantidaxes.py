@@ -450,7 +450,7 @@ class MantidAxes(Axes):
             if sample_log_plot_details[2] is not None:
                 kwargs['ExperimentInfo'] = sample_log_plot_details[2]
             # error bar plots do not make sense for log plots
-            errorbars=False
+            errorbars = False
             # neither does distribution
             if 'distribution' in kwargs.keys():
                     del kwargs['distribution']
