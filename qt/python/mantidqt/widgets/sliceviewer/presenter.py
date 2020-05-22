@@ -111,11 +111,12 @@ class SliceViewer(object):
                 data_view.disable_nonorthogonal_axes_button()
 
         self.new_plot()
-        self._peaks_view_presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)
+        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
-        self._peaks_view_presenter.notify(PeaksViewerPresenter.Event.SlicePointChanged)
+        self._call_peaks_presenter_if_created("notify",
+                                              PeaksViewerPresenter.Event.SlicePointChanged)
         self.update_plot_data()
 
     def update_plot_data_MDH(self):
@@ -191,18 +192,27 @@ class SliceViewer(object):
             # cancelled
             return
         if names_to_overlay or names_overlayed:
-            self._peaks_view_presenter.overlay_peaksworkspaces(names_to_overlay)
+            self._create_peaks_presenter_if_necessary().overlay_peaksworkspaces(names_to_overlay)
         else:
             self.view.peaks_view.hide()
 
     # private api
-    @property
-    def _peaks_view_presenter(self):
+    def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
             self._peaks_presenter = \
                 PeaksViewerCollectionPresenter(self.view.peaks_view)
 
         return self._peaks_presenter
+
+    def _call_peaks_presenter_if_created(self, attr, *args, **kwargs):
+        """
+        Call a method on the peaks presenter if it has been created
+        :param attr: The attribute to call
+        :param *args: Positional-arguments to pass to call
+        :param **kwargs Keyword-arguments to pass to call
+        """
+        if self._peaks_presenter is not None:
+            getattr(self._peaks_presenter, attr)(*args, **kwargs)
 
     def _overlayed_peaks_workspaces(self):
         """
