@@ -44,7 +44,7 @@ public:
   void testExec() {
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
 
     TS_ASSERT_THROWS_NOTHING(ld.execute());
@@ -60,7 +60,7 @@ public:
 
     const Mantid::API::Run &run = output2D->run();
     int goodfrm = run.getPropertyAsIntegerValue("goodfrm");
-    TS_ASSERT_EQUALS(goodfrm, 36197);
+    TS_ASSERT_EQUALS(goodfrm, 14320);
     double firstGoodData = ld.getProperty("FirstGoodData");
     TS_ASSERT_EQUALS(firstGoodData, 0.384);
     double timeZero = ld.getProperty("TimeZero");
@@ -79,16 +79,16 @@ public:
 
     // Check that sample temp and field set
     double temperature = run.getPropertyAsSingleValue("sample_temp");
-    TS_ASSERT_EQUALS(100.0, temperature);
+    TS_ASSERT_EQUALS(10.0, temperature);
     double field = run.getPropertyAsSingleValue("sample_magn_field");
-    TS_ASSERT_EQUALS(0.0, field);
+    TS_ASSERT_EQUALS(20.0, field);
   }
 
   void testExecWithDeadtimeTable() {
 
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     const std::string deadTimeWSName = "LoadMuonNexusV2Test_DeadTimes";
     ld.setPropertyValue("DeadTimeTable", deadTimeWSName);
@@ -125,7 +125,7 @@ public:
 
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     const std::string groupingWSName = "LoadMuonNexusV2Test_Grouping";
     ld.setPropertyValue("DetectorGroupingTable", groupingWSName);
@@ -170,7 +170,7 @@ public:
 
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("SpectrumList", spectraList);
     const std::string deadTimeWSName = "LoadMuonNexusV2Test_DeadTimes";
@@ -217,7 +217,7 @@ public:
     int specMax = 24;
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("SpectrumMax", "24");
     const std::string deadTimeWSName = "LoadMuonNexusV2Test_DeadTimes";
@@ -246,7 +246,7 @@ public:
   void testLoadFailsIfEntryNumberOutOfRange() {
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("EntryNumber", "10");
 
@@ -258,7 +258,7 @@ public:
     auto spectraList = createSpectraList(spectraIntegerList);
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("SpectrumList", spectraList);
 
@@ -269,7 +269,7 @@ public:
     int maxThreads = PARALLEL_GET_MAX_THREADS;
     LoadMuonNexusV2 ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     ld.setPropertyValue("OutputWorkspace", "outWS");
 
     ld.execute();
@@ -286,7 +286,7 @@ class LoadMuonNexusV2TestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     loader.initialize();
-    loader.setPropertyValue("Filename", "EMU00103638.nxs_v2");
+    loader.setPropertyValue("Filename", "EMU00102347.nxs_v2");
     loader.setPropertyValue("OutputWorkspace", "ws");
   }
 

@@ -92,7 +92,7 @@ Usage
 .. testcode:: LoadMuonNexusV2OnePeriod
 
    # Load MUSR dataset
-   ws = LoadMuonNexusV2(Filename="EMU00103638.nxs_v2")
+   ws = LoadMuonNexusV2(Filename="EMU00102347.nxs_v2")
    print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
@@ -106,7 +106,7 @@ Output:
 .. testcode:: ExLoadMuonNexusV2SomeSpectra
 
    # Load some spectra
-   ws = LoadMuonNexusV2(Filename="EMU00103638.nxs_v2",SpectrumMin=5,SpectrumMax=10)
+   ws = LoadMuonNexusV2(Filename="EMU00102347.nxs_v2",SpectrumMin=5,SpectrumMax=10)
    print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
@@ -120,7 +120,7 @@ Output:
 .. testcode:: ExLoadDeadTimeTable
 
    # Load some spectra
-   ws = LoadMuonNexusV2(Filename="EMU00103638.nxs_v2",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
+   ws = LoadMuonNexusV2(Filename="EMU00102347.nxs_v2",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
    tab = mtd['deadTimeTable']
    for i in range(0,tab.rowCount()):
        print("{} {:.12f}".format(tab.cell(i,0), tab.cell(i,1)))
