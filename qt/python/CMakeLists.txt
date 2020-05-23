@@ -17,31 +17,31 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   endif()
   add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 
-  # Configure resources data in place for ease of development. The output file
-  # is added to the toplevel gitignore
-  set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-  set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
-  configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
-  add_custom_command(
-    OUTPUT ${_output_res_py}
-    COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
-    COMMENT "Generating mantidqt resources module"
-    DEPENDS ${_qrc_file}
-  )
-  add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
-
   # Now add any compiled sip targets
   add_subdirectory(mantidqt)
 
   # Setup dependency chain
-  add_dependencies(mantidqt mantidqt_resources PythonInterface)
+  add_dependencies(mantidqt PythonInterface)
 
   if(ENABLE_MANTIDPLOT)
     add_dependencies(mantidqt mantidqt_commonqt4 mantidqt_iconsqt4)
   endif()
   if(ENABLE_WORKBENCH)
+    # Configure resources data in place for ease of development. The output file
+    # is added to the toplevel gitignore
+    set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
+    set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
+    configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
+    add_custom_command(
+      OUTPUT ${_output_res_py}
+      COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
+      COMMENT "Generating mantidqt resources module"
+      DEPENDS ${_qrc_file}
+    )
+    add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
+
     add_dependencies(
-      mantidqt mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5
+      mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5
     )
     if(MSVC)
       # Debug builds need libraries that are linked with MSVC debug runtime
