@@ -5,9 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QHeaderView, QPushButton, QStyle, \
-                           QStyleOptionButton, QStyleOptionHeader
+from qtpy.QtWidgets import QHeaderView, QStyle, QStyleOptionToolButton
 from qtpy.QtCore import *
+
 
 class DrillHeaderView(QHeaderView):
     """
@@ -17,7 +17,7 @@ class DrillHeaderView(QHeaderView):
     """
     BUTTON_TEXT_FOLDED = "+"    # push button text when the section is folded
     BUTTON_TEXT_UNFOLDED = "-"  # push button text when the section is unfolded
-    BUTTON_MARGIN = 2           # margin around the push button
+    BUTTON_SIZE = 15            # size of the squared folding button
 
     def __init__(self, parent=None):
         super(DrillHeaderView, self).__init__(Qt.Horizontal, parent)
@@ -29,9 +29,28 @@ class DrillHeaderView(QHeaderView):
         self.buttonPressed = None     # currently pressed button, used for release
 
         # set the minimum section size
-        margin = self.style().pixelMetric(QStyle.PM_FocusFrameHMargin, None, self)
-        minSize = self.fontMetrics().width("....") + 2 * margin
-        self.setMinimumSectionSize(minSize)
+        cellMargin = self.style().pixelMetric(QStyle.PM_FocusFrameHMargin,
+                                              None, self)
+        minCellSize = self.fontMetrics().width("....") + 2 * cellMargin + 1
+        headerMargin = self.style().pixelMetric(QStyle.PM_HeaderMargin,
+                                                None, self)
+        minHeaderSize = self.BUTTON_SIZE + 2 * headerMargin + 1
+        self.setMinimumSectionSize(max(minCellSize, minHeaderSize))
+
+    def sizeHint(self):
+        """
+        Override QHeaderView::sizeHint. Returns a size hint for the header
+        taking into account the button if it is bigger than the text.
+
+        Returns:
+            (Qsize): header size hint in pixels
+        """
+        size = super(DrillHeaderView, self).sizeHint()
+        margin = self.style().pixelMetric(QStyle.PM_HeaderMargin, None, self)
+        buttonHeight = self.BUTTON_SIZE + 2 * margin + 1
+        if size.height() < buttonHeight:
+            size.setHeight(buttonHeight)
+        return size
 
     def reset(self):
         """
@@ -93,68 +112,60 @@ class DrillHeaderView(QHeaderView):
             (QSize): section size
         """
         size = super(DrillHeaderView, self).sectionSizeFromContents(li)
-        buttonSize = size.height() - 2 * self.BUTTON_MARGIN
-        size.setWidth(size.width() + buttonSize + 2 * self.BUTTON_MARGIN)
+        margin = self.style().pixelMetric(QStyle.PM_HeaderMargin, None, self)
+        size.setWidth(size.width() + self.BUTTON_SIZE + margin + 1)
         return size
 
     def paintSection(self, painter, rect, logicalIndex):
         """
         Overriding of QTableView::paintSection. This function is called for
-        each section drawing.
+        each section drawing. It calls QTableView::paintSection and then draws
+        the folding button.
 
         Args:
             painter (QPainter): painter
             rect (QRect): section rectangle
             logicalIndex (int): section logical index
         """
-        # button shape, get the size from the header height
-        buttonSize = rect.height() - 2 * self.BUTTON_MARGIN
-        self.buttonsRectangles[logicalIndex] = QRect(0, 0,
-                                                    buttonSize, buttonSize)
-        self.buttonsRectangles[logicalIndex].moveCenter(rect.center())
-        # if the section is not folded, the button is right aligned
-        if not self.isSectionFolded(logicalIndex):
-            self.buttonsRectangles[logicalIndex].moveRight(
-                    rect.right() - self.BUTTON_MARGIN)
-        buttonOption = QStyleOptionButton()
-        buttonOption.rect = self.buttonsRectangles[logicalIndex]
-        buttonOption.features = QStyleOptionButton.AutoDefaultButton
-
-        # button state
-        if self.isButtonPressed(logicalIndex):
-            buttonOption.state = QStyle.State_On
-        else:
-            buttonOption.state = QStyle.State_Off
-
-        # section state
-        if not self.isSectionFolded(logicalIndex):
-            buttonOption.text = self.BUTTON_TEXT_UNFOLDED
-        else:
-            buttonOption.text = self.BUTTON_TEXT_FOLDED
-
-        # button background, only if the section is unfolded
-        if not self.isSectionFolded(logicalIndex):
-            buttonBackOption = QStyleOptionHeader()
-            self.initStyleOption(buttonBackOption)
-            buttonBackOption.rect = rect
-            buttonBackOption.rect.setWidth(
-                   buttonSize + 2 * self.BUTTON_MARGIN)
-            buttonBackOption.rect.moveCenter(buttonOption.rect.center())
-
         # call QTableView function
         painter.save()
         super(DrillHeaderView, self).paintSection(painter, rect, logicalIndex)
         painter.restore()
 
-        # paint the push button background, only if the section is unfoled
-        if not self.isSectionFolded(logicalIndex):
-            painter.save()
-            self.style().drawControl(QStyle.CE_Header,
-                                     buttonBackOption, painter)
-            painter.restore()
+        # button
+        margin = self.style().pixelMetric(QStyle.PM_HeaderMargin, None, self)
+        self.buttonsRectangles[logicalIndex] = QRect(0, 0,
+                                                     self.BUTTON_SIZE,
+                                                     self.BUTTON_SIZE)
+        if (self.BUTTON_SIZE % 2) == 0:
+            self.buttonsRectangles[logicalIndex].moveCenter(rect.center()
+                                                            - QPoint(1, 1))
+        else:
+            self.buttonsRectangles[logicalIndex].moveCenter(rect.center())
 
-        # paint the push button
-        self.style().drawControl(QStyle.CE_PushButton, buttonOption, painter)
+        # if the section is not folded, the button is right aligned
+        if not self.isSectionFolded(logicalIndex):
+            self.buttonsRectangles[logicalIndex].moveRight(
+                    rect.right() - margin - 1)
+
+        opt = QStyleOptionToolButton()
+        opt.rect = self.buttonsRectangles[logicalIndex]
+        opt.features = QStyleOptionToolButton.None_
+        opt.arrowType = Qt.NoArrow
+        opt.subControls = QStyle.SC_ToolButton
+        opt.state = QStyle.State_Enabled
+
+        if self.isButtonPressed(logicalIndex):
+            opt.state |= (QStyle.State_On | QStyle.State_Sunken)
+        else:
+            opt.state |= QStyle.State_Raised
+
+        if self.isSectionFolded(logicalIndex):
+            opt.text = self.BUTTON_TEXT_FOLDED
+        else:
+            opt.text = self.BUTTON_TEXT_UNFOLDED
+
+        self.style().drawComplexControl(QStyle.CC_ToolButton, opt, painter)
 
     def mousePressEvent(self, event):
         """
