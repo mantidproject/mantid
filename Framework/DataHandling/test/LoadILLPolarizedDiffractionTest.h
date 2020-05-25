@@ -71,7 +71,8 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "401800"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
@@ -128,17 +129,17 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_outWS"))
+        alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-//    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    //    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
     WorkspaceGroup_sptr outputWS = std::shared_ptr<Mantid::API::WorkspaceGroup>(
-                alg.getProperty("OutputWorkspace"));
+        alg.getProperty("OutputWorkspace"));
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     MatrixWorkspace_sptr workspaceEntry1 =
@@ -204,7 +205,8 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "ILL/D7/395850.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Filename", "ILL/D7/395850.nxs"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(
@@ -314,7 +316,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("Filename", "ILL/D7/401800+401801.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -334,7 +337,7 @@ public:
     TS_ASSERT(!workspaceEntry1->isDistribution())
 
     TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(),
-                             "Wavelength")
+                     "Wavelength")
     TS_ASSERT_EQUALS(workspaceEntry1->YUnitLabel(), "Counts")
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 2.84, 0.01)
@@ -373,7 +376,8 @@ public:
     LoadILLPolarizedDiffraction alg;
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "Nexus"))
@@ -429,11 +433,13 @@ public:
     LoadILLPolarizedDiffraction alg;
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Filename", "ILL/D7/401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "YIGFile"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("YIGFilename", "ILL/D7/YIG_IPF.xml"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("YIGFilename", "ILL/D7/YIG_IPF.xml"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
