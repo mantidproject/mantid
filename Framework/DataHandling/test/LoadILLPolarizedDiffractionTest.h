@@ -81,7 +81,7 @@ public:
 
     WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
-    TS_ASSERT_EQUALS(outputWS->isGroup(), 1)
+    TS_ASSERT(outputWS->isGroup())
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     MatrixWorkspace_sptr workspaceEntry1 =
         std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
