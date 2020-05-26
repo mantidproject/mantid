@@ -150,6 +150,9 @@ public:
     // doCounts
     mess << doCounts;
 
+    std::ostringstream seed;
+    seed << 77;
+
     FakeMDEventData algF;
     TS_ASSERT_THROWS_NOTHING(algF.initialize())
     TS_ASSERT(algF.isInitialized())
@@ -157,6 +160,8 @@ public:
         algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(
         algF.setProperty("EllipsoidParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("RandomSeed", seed.str().c_str()));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
   }
@@ -467,7 +472,7 @@ public:
     eigenvals.push_back(0.03);
     eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
     eigenvals.push_back(0.02);
-    size_t numEvents = 10000;
+    size_t numEvents = 20000;
     addEllipsoid(numEvents, Q[0], Q[1], Q[2], eigenvects, eigenvals, doCounts);
 
     // radius for integration (4 stdevs of principal axis)
@@ -485,7 +490,7 @@ public:
       for (size_t d = 0; d < eigenvals.size(); d++) {
         range.push_back(std::pair(Q[d] - bgOuterRadius, Q[d] + bgOuterRadius));
       }
-      addUniform(static_cast<size_t>(2 * numEvents), range);
+      addUniform(static_cast<size_t>(numEvents), range);
     }
 
     // Make a fake instrument - doesn't matter, we won't use it really
