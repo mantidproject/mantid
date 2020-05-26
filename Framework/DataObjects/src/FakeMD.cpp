@@ -172,7 +172,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (m_ellipsoidParams.empty())
     return;
 
-  if (m_ellipsoidParams.size() != 2 + 2 * nd + pow(nd, 2))
+  if (m_ellipsoidParams.size() != 2 + 2 * nd + nd * nd)
     throw std::invalid_argument(
         "EllipsoidParams: incorrect number of parameters.");
   if (m_ellipsoidParams[0] <= 0)

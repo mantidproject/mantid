@@ -524,11 +524,11 @@ public:
         // use slightly more lenient tolerance
         TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
                         static_cast<double>(numEvents),
-                        ceil(0.005 * numEvents));
+                        ceil(0.005 * static_cast<double>(numEvents)));
       } else {
         TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
                         static_cast<double>(numEvents),
-                        ceil(0.002 * numEvents));
+                        ceil(0.002 * static_cast<double>(numEvents)));
       }
     } else {
       // sum = 0.2175*Npts (for 3D from simulation regardless of covar etc.)

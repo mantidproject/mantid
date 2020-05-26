@@ -90,8 +90,9 @@ public:
     auto Npts = fakeData->getNPoints();
     TS_ASSERT_EQUALS(fakeData->getNPoints(), Npts);
     // avg of counts converges to 0.2175 for 3D multivariate gaussian
-    TS_ASSERT_DELTA(fakeData->getBox()->getSignal(), Npts * 0.2175,
-                    Npts * 0.0015);
+    TS_ASSERT_DELTA(fakeData->getBox()->getSignal(),
+                    static_cast<double>(Npts) * 0.2175,
+                    static_cast<double>(Npts) * 0.0015);
   }
 
   void test_exec_randomizeSignal() {
