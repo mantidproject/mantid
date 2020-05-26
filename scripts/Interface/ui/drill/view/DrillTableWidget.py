@@ -234,6 +234,7 @@ class DrillTableWidget(QTableWidget):
             row (int): the row index
             color (str): the RBG or ARGB string color
         """
+        self.blockSignals(True)
         brush = QBrush(QColor(color))
         if (row >= self.rowCount()):
             return
@@ -244,4 +245,5 @@ class DrillTableWidget(QTableWidget):
                 self.setItem(row, c, item)
 
             self.item(row, c).setBackground(brush)
+        self.blockSignals(False)
 
