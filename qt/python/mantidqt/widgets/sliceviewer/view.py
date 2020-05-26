@@ -235,6 +235,9 @@ class SliceViewerDataView(QWidget):
                                      transpose=self.dimensions.transpose,
                                      norm=self.colorbar.get_norm(),
                                      **kwargs)
+        extent = self.image.get_extent()
+        self.ax.set_xlim(extent[0], extent[1])
+        self.ax.set_ylim(extent[2], extent[3])
         self.draw_plot()
 
     def clear_image(self):
