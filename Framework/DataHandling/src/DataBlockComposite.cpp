@@ -280,8 +280,8 @@ int DataBlockComposite::getNumberOfPeriods() const {
   return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfPeriods();
 }
 
-DataBlockComposite
-DataBlockComposite::operator+(const DataBlockComposite &other) {
+DataBlockComposite DataBlockComposite::
+operator+(const DataBlockComposite &other) {
   DataBlockComposite output;
   output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
                              std::begin(m_dataBlocks), std::end(m_dataBlocks));

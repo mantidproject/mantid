@@ -109,11 +109,12 @@ void LoadISISNexus2::init() {
 
   auto mustBePositiveSpectrum = std::make_shared<BoundedValidator<specnum_t>>();
   mustBePositiveSpectrum->setLower(0);
-  declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositiveSpectrum);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0),
+                  mustBePositiveSpectrum);
   declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()),
                   mustBePositiveSpectrum);
   declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"));
-  auto mustBePositive= std::make_shared<BoundedValidator<int64_t>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "

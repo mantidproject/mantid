@@ -17,8 +17,7 @@ DataBlockGenerator::DataBlockGenerator(
     const std::vector<spectrumPair> &intervals)
     : m_intervals(intervals) {
   // We need to sort the data items.
-  auto comparison = [](const spectrumPair &el1,
-                       const spectrumPair &el2) {
+  auto comparison = [](const spectrumPair &el1, const spectrumPair &el2) {
     return el1.first < el2.first;
   };
   std::sort(m_intervals.begin(), m_intervals.end(), comparison);

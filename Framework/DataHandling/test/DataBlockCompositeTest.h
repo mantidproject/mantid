@@ -13,9 +13,9 @@
 #include "MantidDataHandling/DataBlockGenerator.h"
 #include <memory>
 
+using Mantid::specnum_t;
 using Mantid::DataHandling::DataBlock;
 using Mantid::DataHandling::DataBlockComposite;
-using Mantid::specnum_t; 
 
 class DataBlockCompositeTest : public CxxTest::TestSuite {
 public:
@@ -58,7 +58,7 @@ public:
 
     // Assert
     std::vector<specnum_t> expected = {2,  3,  4,  5,  6,  7,  8,  23, 24,
-                                     25, 26, 27, 45, 46, 47, 48, 49};
+                                       25, 26, 27, 45, 46, 47, 48, 49};
     auto index = 0;
     for (; !generator->isDone(); generator->next(), ++index) {
       TSM_ASSERT_EQUALS("Should take elements out of the DataBlock interval",

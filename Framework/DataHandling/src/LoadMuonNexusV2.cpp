@@ -91,7 +91,8 @@ void LoadMuonNexusV2::init() {
 
   auto mustBePositiveSpectra = std::make_shared<BoundedValidator<specnum_t>>();
   mustBePositiveSpectra->setLower(0);
-  declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositiveSpectra);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0),
+                  mustBePositiveSpectra);
   declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()),
                   mustBePositiveSpectra);
   declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"));

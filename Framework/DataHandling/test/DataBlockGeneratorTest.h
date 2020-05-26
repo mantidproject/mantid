@@ -9,7 +9,7 @@
 #include "MantidDataHandling/DataBlockGenerator.h"
 #include <cxxtest/TestSuite.h>
 
-using Mantid::specnum_t; 
+using Mantid::specnum_t;
 
 class DataBlockGeneratorTest : public CxxTest::TestSuite {
 public:
@@ -37,7 +37,8 @@ public:
     // Arrange
     specnum_t min = 2;
     specnum_t max = 8;
-    std::vector<std::pair<specnum_t, specnum_t>> interval{std::make_pair(min, max)};
+    std::vector<std::pair<specnum_t, specnum_t>> interval{
+        std::make_pair(min, max)};
     Mantid::DataHandling::DataBlockGenerator generator(interval);
 
     // Act + Assert
@@ -70,7 +71,7 @@ public:
         std::make_pair(min1, max1), std::make_pair(min2, max2),
         std::make_pair(min3, max3)};
     std::vector<specnum_t> expectedOutput = {2,  3,  4,  5,  8,  9,  10,
-                                           11, 12, 15, 16, 17, 18, 19};
+                                             11, 12, 15, 16, 17, 18, 19};
 
     // Act + Assert
     do_test_interval(interval, expectedOutput);
@@ -91,7 +92,7 @@ public:
         std::make_pair(min1, max1), std::make_pair(min2, max2),
         std::make_pair(min3, max3)};
     std::vector<specnum_t> expectedOutput = {2,  3,  4,  5,  8,  9,  10,
-                                           11, 12, 15, 16, 17, 18, 19};
+                                             11, 12, 15, 16, 17, 18, 19};
 
     // Act + Assert
     do_test_interval(interval, expectedOutput);

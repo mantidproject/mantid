@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {

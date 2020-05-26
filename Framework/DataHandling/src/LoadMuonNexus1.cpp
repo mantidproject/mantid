@@ -356,10 +356,9 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(
-          specToLoad.end(),
-          boost::counting_iterator<specnum_t>(m_spec_min),
-          boost::counting_iterator<specnum_t>(m_spec_max));
+      specToLoad.insert(specToLoad.end(),
+                        boost::counting_iterator<specnum_t>(m_spec_min),
+                        boost::counting_iterator<specnum_t>(m_spec_max));
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
                         m_spec_list.end());
     } else {
@@ -464,10 +463,9 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(
-          specToLoad.end(),
-          boost::counting_iterator<specnum_t>(m_spec_min),
-          boost::counting_iterator<specnum_t>(m_spec_max));
+      specToLoad.insert(specToLoad.end(),
+                        boost::counting_iterator<specnum_t>(m_spec_min),
+                        boost::counting_iterator<specnum_t>(m_spec_max));
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
                         m_spec_list.end());
     } else {

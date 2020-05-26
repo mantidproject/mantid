@@ -11,8 +11,8 @@
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
 
-using Mantid::DataHandling::DataBlock;
 using Mantid::specnum_t;
+using Mantid::DataHandling::DataBlock;
 
 class DataBlockTest : public CxxTest::TestSuite {
 public:
