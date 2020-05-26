@@ -35,7 +35,7 @@ QGroupBox:title {
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="FileFinder" name="finder_save" native="true"/>
+       <widget class="FileFinderWidget" name="finder_save" native="true"/>
       </item>
      </layout>
     </widget>
@@ -54,7 +54,7 @@ QGroupBox:title {
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="FileFinder" name="finder_fullCalib" native="true"/>
+       <widget class="FileFinderWidget" name="finder_fullCalib" native="true"/>
       </item>
      </layout>
     </widget>
@@ -128,9 +128,9 @@ QGroupBox:title {
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FileFinder</class>
+   <class>FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>mantidqt.widgets.filefinder</header>
+   <header>mantidqt.widgets.filefinderwidget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

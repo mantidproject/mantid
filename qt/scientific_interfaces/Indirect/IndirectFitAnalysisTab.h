@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IIndirectFitData.h"
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
@@ -162,6 +163,7 @@ private:
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
   TableDatasetIndex m_currentTableDatasetIndex;
+  WorkspaceIndex m_singleFitWorkspaceIndex;
 };
 
 } // namespace IDA

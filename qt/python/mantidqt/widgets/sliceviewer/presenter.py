@@ -47,6 +47,10 @@ class SliceViewer(object):
         if self.model.can_normalize_workspace():
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
             self.view.data_view.set_normalization(ws)
+        if not self.model.can_support_peaks_overlays():
+            self.view.data_view.disable_peaks_button()
+        if not self.model.can_support_nonorthogonal_axes():
+            self.view.data_view.disable_nonorthogonal_axes_button()
 
         self.new_plot()
 
@@ -61,9 +65,8 @@ class SliceViewer(object):
         Tell the view to display a new plot of an MDEventWorkspace
         """
         self.view.data_view.plot_MDH(
-            self.model.get_ws(
-                slicepoint=self.get_slicepoint(),
-                bin_params=self.view.data_view.dimensions.get_bin_params()))
+            self.model.get_ws(slicepoint=self.get_slicepoint(),
+                              bin_params=self.view.data_view.dimensions.get_bin_params()))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
@@ -71,25 +74,42 @@ class SliceViewer(object):
 
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
-        return SliceInfo(
-            indices=self.view.data_view.dimensions.get_indices(),
-            frame=self.model.get_frame(),
-            point=self.view.data_view.dimensions.get_slicepoint(),
-            range=self.view.data_view.dimensions.get_slicerange())
+        dimensions = self.view.data_view.dimensions
+        return SliceInfo(frame=self.model.get_frame(),
+                         point=dimensions.get_slicepoint(),
+                         transpose=dimensions.transpose,
+                         range=dimensions.get_slicerange(),
+                         qflags=dimensions.qflags)
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
            None indicates that dimension is being displayed"""
         return self.view.data_view.dimensions.get_slicepoint()
 
-    def set_slicevalue(self, value):
-        """Set the value within the slicing dimension
+    def set_slicepoint(self, value):
+        """Set the slicepoint
         :param value: The value of the slice point
         """
-        self.view.data_view.dimensions.set_slicevalue(value)
+        self.view.data_view.dimensions.set_slicepoint(value)
 
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
+        data_view = self.view.data_view
+        sliceinfo = self.get_sliceinfo()
+        if data_view.nonorthogonal_mode:
+            if sliceinfo.can_support_nonorthogonal_axes():
+                # axes need to be recreated to have the correct transform associated
+                data_view.create_axes_nonorthogonal(
+                    self.model.create_nonorthogonal_transform(sliceinfo))
+            else:
+                data_view.disable_nonorthogonal_axes_button()
+                data_view.create_axes_orthogonal()
+        else:
+            if sliceinfo.can_support_nonorthogonal_axes():
+                data_view.enable_nonorthogonal_axes_button()
+            else:
+                data_view.disable_nonorthogonal_axes_button()
+
         self.new_plot()
         self._peaks_view_presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
@@ -110,10 +130,9 @@ class SliceViewer(object):
         Update the view to display an updated MDEventWorkspace slice/cut
         """
         self.view.data_view.update_plot_data(
-            self.model.get_data(
-                self.get_slicepoint(),
-                bin_params=self.view.data_view.dimensions.get_bin_params(),
-                transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(self.get_slicepoint(),
+                                bin_params=self.view.data_view.dimensions.get_bin_params(),
+                                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -128,6 +147,25 @@ class SliceViewer(object):
             self.view.data_view.add_line_plots()
         else:
             self.view.data_view.remove_line_plots()
+
+    def nonorthogonal_axes(self, state: bool):
+        """
+        Toggle non-orthogonal axes on current view
+        :param state: If true a request is being made to turn them on, else they should be turned off
+        """
+        data_view = self.view.data_view
+        data_view.remove_line_plots()
+        if state:
+            data_view.disable_lineplots_button()
+            data_view.disable_peaks_button()
+            data_view.create_axes_nonorthogonal(
+                self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            self.new_plot()
+        else:
+            data_view.create_axes_orthogonal()
+            data_view.enable_lineplots_button()
+            data_view.enable_peaks_button()
+            self.new_plot()
 
     def normalization_changed(self, norm_type):
         """

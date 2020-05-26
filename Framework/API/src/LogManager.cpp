@@ -95,7 +95,6 @@ bool convertPropertyToDouble(const Property *property, double &value,
 /// Name of the log entry containing the proton charge when retrieved using
 /// getProtonCharge
 const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
-
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
@@ -552,6 +551,33 @@ void LogManager::loadNexus(::NeXus::File *file,
  * Clear the logs.
  */
 void LogManager::clearLogs() { m_manager->clear(); }
+
+/// Gets the correct log name for the matching invalid values log for a given
+/// log name
+std::string
+LogManager::getInvalidValuesFilterLogName(const std::string &logName) {
+  return PropertyManager::getInvalidValuesFilterLogName(logName);
+}
+
+/// returns true if the log has a matching invalid values log filter
+bool LogManager::hasInvalidValuesFilter(const std::string &logName) const {
+  return hasProperty(getInvalidValuesFilterLogName(logName));
+}
+
+/// returns the invalid values log if the log has a matching invalid values log
+/// filter
+Kernel::TimeSeriesProperty<bool> *
+LogManager::getInvalidValuesFilter(const std::string &logName) const {
+  try {
+    auto log = getLogData(getInvalidValuesFilterLogName(logName));
+    if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
+      return tsp;
+    }
+  } catch (Exception::NotFoundError &) {
+    // do nothing, just drop through tto the return line below
+  }
+  return nullptr;
+}
 
 bool LogManager::operator==(const LogManager &other) const {
   return *m_manager == *(other.m_manager);

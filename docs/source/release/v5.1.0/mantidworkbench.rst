@@ -20,9 +20,15 @@ Improvements
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
+
+.. figure:: ../../images/wb_invalid_log_shading.png
+   :align: right
+
+- Logs that contain invalid data indicated by NeXus log alarm states are now shaded in red, and a tool tip will tell you how many values are invalid.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 - The Help Menu now has an About screen that will pop up automatically on startup to provide links to the release notes and various other resources, and allow you to set some important setting such as Facility, instrument and accept usage tracing.
   You can choose to hide it until the next release.
+- There is now an option to create a 3D plot (surface, wireframe, contour) when you right-click a workspace.
 - The Sample Logs Dialog now lets you view the complete log data as well as filtered data which only includes values for the current period, the running status, and with invalid values removed.  Just click the "Filtered Data" checkbox to swap between them.
 - The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
 - The "Show sample logs" dialog will now hide the plot and statistics display if there are no suitable logs in the workspace that need it.  This is particularly applicable for some of the reactor based instruments.
@@ -31,6 +37,7 @@ Improvements
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 
 - Surface plots no longer spill over the axes when their limits are reduced.
+- The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
 
 Bugfixes
 ########
@@ -47,5 +54,11 @@ Bugfixes
 - Fixed the default axis scale settings applying to the wrong axis.
 - Performing an overplot by dragging workspaces onto colorfill plots now correctly replaces the workspace.
 - Removed gridlines from the colorbar on colorfill plots.
+- The Instrument View now passes through useful error messages to the workbench if it fails to start, for example if your data contains NaN or infinite values.
+- The correct interpolation now appears in the plot figure options for colorfill plots.
+- Changing the axis scale on a colourfill plot now has the same result if it is done from either the context menu or figure options.
+- `plt.show()` now shows the most recently created figure.
+- Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
+- The SavePlot1D algorithm can now be run in Workbench.
 
 :ref:`Release 5.1.0 <v5.1.0>`

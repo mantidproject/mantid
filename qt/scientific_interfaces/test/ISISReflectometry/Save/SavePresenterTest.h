@@ -331,6 +331,13 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyMainPresenterSettingsChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, setBatchUnsaved(true));
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
 private:
   SavePresenter makePresenter() {
     auto asciiSaver = std::make_unique<NiceMock<MockAsciiSaver>>();

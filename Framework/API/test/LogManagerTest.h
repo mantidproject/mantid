@@ -9,6 +9,7 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -52,6 +53,21 @@ public:
 private:
   std::string m_value = "Nothing";
 };
+
+void addTestTimeSeriesFilter(LogManager &run, const std::string &name) {
+  auto timeSeries = new TimeSeriesProperty<bool>(name);
+  timeSeries->addValue("2012-07-19T16:17:00", true);
+  timeSeries->addValue("2012-07-19T16:17:10", true);
+  timeSeries->addValue("2012-07-19T16:17:20", true);
+  timeSeries->addValue("2012-07-19T16:17:30", true);
+  timeSeries->addValue("2012-07-19T16:17:40", false);
+  timeSeries->addValue("2012-07-19T16:17:50", false);
+  timeSeries->addValue("2012-07-19T16:18:00", true);
+  timeSeries->addValue("2012-07-19T16:18:10", true);
+  timeSeries->addValue("2012-07-19T16:19:20", true);
+  timeSeries->addValue("2012-07-19T16:19:20", true);
+  run.addProperty(timeSeries);
+}
 
 template <typename T>
 void addTestTimeSeries(LogManager &run, const std::string &name) {
@@ -577,6 +593,50 @@ public:
     b.addProperty(std::move(prop2));
     TS_ASSERT_DIFFERS(a, b);
     TS_ASSERT(!(a == b));
+  }
+
+  void test_has_invalid_values_filter() {
+    LogManager runInfo;
+    const std::string name = "test_has_invalid_values_filter";
+    const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
+    TSM_ASSERT("The filter name should start with the log name",
+               filterName.rfind(name, 0) == 0);
+    addTestTimeSeries<double>(runInfo, name);
+
+    TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), false);
+    addTestTimeSeriesFilter(runInfo, filterName);
+
+    TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), true);
+  }
+
+  void test_get_invalid_values_filter() {
+    LogManager runInfo;
+    const std::string name = "test_get_invalid_values_filter";
+    const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
+    addTestTimeSeries<double>(runInfo, name);
+    auto *filterfail = runInfo.getInvalidValuesFilter(name);
+    TSM_ASSERT("The filter was returned correrctly as NULL",
+               filterfail == nullptr);
+    addTestTimeSeriesFilter(runInfo, filterName);
+
+    auto *filter = runInfo.getInvalidValuesFilter(name);
+    TSM_ASSERT("The filter was returned incorrectly as NULL", filter);
+    TS_ASSERT_THROWS_NOTHING(filter->firstTime());
+
+    // check it can be used to filter the log
+    auto *log = runInfo.getProperty(name);
+    auto *tsLog = dynamic_cast<TimeSeriesProperty<double> *>(log);
+    TS_ASSERT(tsLog);
+    if (tsLog) {
+      auto filtered =
+          std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog, *filter);
+      TS_ASSERT_DELTA(filtered->nthValue(0), 2, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(1), 3, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(2), 4, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(3), 5, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(4), 21, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(5), 22, 1e-5);
+    }
   }
 
 private:

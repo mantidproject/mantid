@@ -23,14 +23,21 @@ New Features
 - Addition of an external plotting button to the Muon Analysis 2 GUI.
   This allows the user to create a standalone Workbench (or MantidPlot) plot of the displayed data.
   The user may then perform standard operations on the plot, e.g drag and drop workspaces onto the figure.
+- The loading in the Muon and Frequency domain interfaces has been sped up by reducing the number of calls made to algorithms.
+  On average, this should result in a 50% decrease in load times. This reduction in the number of algorithms also improves
+  the clarity of the workspace history, as the number of algorithms present in the history is now reduced.
 - On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
 - Addition of background correction algorithm (PSIBackgroundCorrection) to remove the background present in
   PSI bin data loaded using LoadPSIMuonBin.
+- Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
 
 Improvements
 -------------
 - Improved the plotting code the Muon Analysis interface, with a significant amount of redundant code removed.
   This code improvement will lead to more maintainable code, which will be more stable and
   easier to add new functionality in the future.
+- Improved the maintainability of the fitting code in the Muon Analysis interface by removing redundant and duplicated code.
+  These changes will make the addition of new functionality in the future easier.
+- The plot guess option within the fitting tab will now update when a parameter is changed.
 
 :ref:`Release 5.1.0 <v5.1.0>`

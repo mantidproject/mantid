@@ -15,7 +15,6 @@ from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayVi
 
 class PeaksWorkspaceTableView(TableWorkspaceDisplayView):
     """Specialization of a table view to display peaks"""
-
     def keyPressEvent(self, event):
         QTableWidget.keyPressEvent(self, event)
 
@@ -73,7 +72,7 @@ class PeaksViewerView(QWidget):
         Set the slice point to the given value
         :param value: Float giving the current slice value
         """
-        self._sliceinfo_provider.set_slicevalue(value)
+        self._sliceinfo_provider.set_slicepoint(value)
 
     def set_title(self, name):
         """
@@ -140,7 +139,6 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
-
     def __init__(self, painter, sliceinfo_provider, parent=None):
         """
         :param painter: An object responsible for draw the peaks representations

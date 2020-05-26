@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
-#
-#
 
 from mantidqt.MPLwidgets import NavigationToolbar2QT
 from mantidqt.icons import get_icon
@@ -14,25 +12,42 @@ from qtpy.QtCore import Signal, Qt, QSize
 from qtpy.QtWidgets import QLabel, QSizePolicy
 
 
+class ToolItemText:
+    HOME = 'Home'
+    PAN = 'Pan'
+    ZOOM = 'Zoom'
+    GRID = 'Grid'
+    LINEPLOTS = 'LinePlots'
+    OVERLAYPEAKS = 'OverlayPeaks'
+    NONORTHOGONAL_AXES = 'NonOrthogonalAxes'
+    SAVE = 'Save'
+    CUSTOMIZE = 'Customize'
+
+
 class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
     gridClicked = Signal()
     linePlotsClicked = Signal(bool)
+    nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
     plotOptionsChanged = Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'home', None),
-        ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'home', None),
+        (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
+         False),
+        (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
-        ('Grid', 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
-        ('LinePlots', 'Toggle lineplots on/off', 'mdi.chart-bell-curve', 'linePlotsClicked', False),
-        ('OverlayPeaks', 'Add peaks overlays on/off', 'mdi.chart-bubble', 'peaksOverlayClicked',
-         None),
-        ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
+        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
+        (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
+         'linePlotsClicked', False),
+        (ToolItemText.OVERLAYPEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
+         'peaksOverlayClicked', None),
+        (ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
+         'nonOrthogonalClicked', False),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
+        (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None),
+        (ToolItemText.CUSTOMIZE, 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
     )
 
     def _init_toolbar(self):
@@ -67,3 +82,16 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     def edit_parameters(self):
         NavigationToolbar2QT.edit_parameters(self)
         self.plotOptionsChanged.emit()
+
+    def set_action_enabled(self, text: str, state: bool):
+        """
+        Sets the enabled/disabled state of action with the given text
+        :param text: Text on the action
+        :param state: Enabled if True else it is disabled
+        """
+        actions = self.actions()
+        for action in actions:
+            if action.text() == text:
+                if action.isChecked() and not state:
+                    action.trigger()  # ensure view reacts appropriately
+                action.setEnabled(state)

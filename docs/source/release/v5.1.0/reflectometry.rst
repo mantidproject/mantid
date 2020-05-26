@@ -24,6 +24,7 @@ New
   *Background subtraction on the ISIS Reflectometry Interface*
 
 - Background subtraction options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+- The **Options** dialog can now be accessed from the Tools menu, controlling the display of warnings and rounding precision.
 
 Improvements
 ------------
@@ -38,5 +39,9 @@ Bug fixes
 
   - A bug has been fixed where creating a new Batch would result in the Experiment/Instrument settings of all batches being reset to their defaults.
   - A bug has been fixed where clicking Restore Defaults on an Experiment/Instrument tab would cause all Experiment and Instrument tabs in every batch to be reset to defaults. Now, only the tab where you click Restore Defaults is changed.
+
+Improvements
+------------
+- Sample waviness term is removed from resolution calculation in incoherent mode in :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 
 :ref:`Release 5.1.0 <v5.1.0>`
