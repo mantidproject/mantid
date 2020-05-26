@@ -1376,8 +1376,8 @@ public:
     TS_ASSERT_EQUALS(fitStatus, "success");
 
     IFunction_sptr func = fit.getProperty("Function");
-    TS_ASSERT_DELTA(func->getParameter("TOF_h"), 55175.79, 1.0E-8);
-    TS_ASSERT_DELTA(func->getParameter("Height"), 96000, 100);
+    TS_ASSERT_DELTA(func->getParameter("X0"), 55175.79, 1.0E-8);
+    TS_ASSERT_DELTA(func->getParameter("Intensity"), 96000, 100);
   }
 
   void test_function_Gaussian_LMMinimizer() {
