@@ -8,7 +8,8 @@
 import os
 
 from qtpy.QtWidgets import QMainWindow, QFileDialog, QHeaderView, \
-                           QAbstractItemView, QTableWidgetItem, QMessageBox
+                           QAbstractItemView, QTableWidgetItem, QMessageBox, \
+                           QDialog
 from qtpy.QtGui import QIcon
 from qtpy.QtCore import *
 from qtpy import uic
@@ -142,6 +143,19 @@ class DrillView(QMainWindow):
                 self.data_changed.emit(row, column,
                                        self.table.getCellContents(row, column))
                 )
+
+    def closeEvent(self, event):
+        """
+        Override QWidget::closeEvent. Called when the drill view is closed.
+        Close all QDialog child.
+
+        Args:
+            event (QCloseEvent): the close event
+        """
+        children = self.findChildren(QDialog)
+        for child in children:
+            child.close()
+        super(DrillView, self).closeEvent(event)
 
     ###########################################################################
     # actions                                                                 #

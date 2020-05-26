@@ -10,6 +10,7 @@ import mock
 import sys
 
 from qtpy.QtWidgets import QApplication
+from qtpy.QtGui import QCloseEvent
 from qtpy.QtCore import *
 from qtpy.QtTest import *
 
@@ -37,6 +38,17 @@ class DrillViewTest(unittest.TestCase):
 
         self.view = DrillView()
         self.view.table = mock.Mock()
+
+    def test_closeEvent(self):
+        self.view.findChildren = mock.Mock()
+        c1 = mock.Mock()
+        c2 = mock.Mock()
+        c3 = mock.Mock()
+        self.view.findChildren.return_value = [c1, c2]
+        self.view.closeEvent(QCloseEvent())
+        c1.close.assert_called_once()
+        c2.close.assert_called_once()
+        c3.close.assert_not_called()
 
     def test_copySelectedRows(self):
         self.assertEqual(self.view.buffer, list())
