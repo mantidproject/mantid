@@ -24,6 +24,9 @@ class DrillPresenter:
 
         self.update_view_from_model()
 
+    def show(self):
+        self.view.show()
+
     def connect_view_signals(self):
         self.view.instrument_changed.connect(self.on_instrument_changed)
         self.view.technique_changed.connect(self.on_technique_changed)
