@@ -234,6 +234,8 @@ set(
   TEST_FILES
   test/InstrumentWidgetDecoderTest.h
   test/InstrumentWidgetEncoderTest.h
+  test/BaseCustomInstrumentPresenterTest.h
+  test/PlotFitAnalysisPanePresenterTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
@@ -265,5 +267,6 @@ mtd_add_qt_tests(
     MantidQtWidgetsCommon
     MantidQtWidgetsInstrumentView
     MantidQtWidgetsMplCpp
+    MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES GUITests
 )
