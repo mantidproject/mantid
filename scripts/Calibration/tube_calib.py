@@ -17,6 +17,7 @@ Users should not need to directly call any other function other than :func:`getC
 ## Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
 
 import numpy
+from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import *
 from mantid.kernel import *
 from tube_spec import TubeSpec
@@ -223,11 +224,11 @@ def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False
             peak_index = fit_edges(fit_params, i, get_points_ws, calib_points_ws)
         else:
             peak_index = fit_gaussian(fit_params, i, get_points_ws, calib_points_ws)
-        peak_centre = tuple(mtd[calib_points_ws + '_Parameters'].row(peak_index).items())[1][1]
+        peak_centre = tuple(ADS.retrieve(calib_points_ws + '_Parameters').row(peak_index).items())[1][1]
         results.append(peak_centre)
 
         if show_plot:
-            ws = mtd[calib_points_ws + '_Workspace']
+            ws = ADS.retrieve(calib_points_ws + '_Workspace')
             fitt_y_values.append(copy.copy(ws.dataY(1)))
             fitt_x_values.append(copy.copy(ws.dataX(1)))
 
@@ -341,7 +342,7 @@ def correct_tube_to_ideal_tube(tube_points, ideal_tube_points, n_detectors, test
         print("Fit failed")
         return []
 
-    param_q_f = mtd['QF_Parameters']
+    param_q_f = ADS.retrieve('QF_Parameters')
 
     # get the coefficients, get the Value from every row, and exclude the last one because it is the error
     # rowErr is the last one, it could be used to check accuracy of fit
