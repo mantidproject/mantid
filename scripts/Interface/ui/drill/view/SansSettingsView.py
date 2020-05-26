@@ -25,6 +25,9 @@ class SansSettingsView(QDialog):
         uic.loadUi(os.path.join(self.here, self.ui_filename), self)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
+        self.applyButton.clicked.connect(
+                lambda : self.accepted.emit()
+                )
 
         # keep parameters accessing functions
         self.params = {
