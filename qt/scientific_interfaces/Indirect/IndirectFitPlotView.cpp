@@ -56,14 +56,6 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   // Create a Splitter and place two plots within the splitter layout
   createSplitterWithPlots();
 
-  // Avoids squished plots for >qt5
-  //#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  //  char const *const overrideLabel = "";
-  //  m_topPlot->setOverrideAxisLabel(AxisID::XBottom, overrideLabel);
-  //  m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, overrideLabel);
-  //  m_plotForm->dwMiniPlots->setFeatures(QDockWidget::NoDockWidgetFeatures);
-  //#endif
-
   m_plotForm->cbDataSelection->hide();
   addFitRangeSelector();
   addBackgroundRangeSelector();
