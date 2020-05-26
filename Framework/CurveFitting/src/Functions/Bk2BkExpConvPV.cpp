@@ -6,9 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -37,7 +40,7 @@ Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0) {}
  */
 void Bk2BkExpConvPV::init() {
   declareParameter("X0", -0.0);
-  declareParameter("Intensity", 1.0);
+  declareParameter("Intensity", 0.0);
   declareParameter("Alpha", 1.0);
   declareParameter("Beta", 1.0);
   declareParameter("Sigma2", 1.0);
@@ -98,6 +101,19 @@ void Bk2BkExpConvPV::setCentre(const double c) { setParameter("X0", c); }
 /** Center
  */
 double Bk2BkExpConvPV::centre() const { return getParameter("X0"); }
+
+void Bk2BkExpConvPV::setMatrixWorkspace(
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
+  if (workspace) {
+    // convert alpha and beta to correct units so inital guess is resonable
+    auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    const auto scaleFactor = convertValue(1, tof, workspace, wi);
+    setParameter("Alpha", getParameter("Alpha") * scaleFactor);
+    setParameter("Beta", getParameter("Beta") * scaleFactor);
+  }
+  IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
+}
 
 /** Implement the peak calculating formula
  */
@@ -165,7 +181,7 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha,
 
   // 2. Calculate
   double omega1 = (1 - eta) * N *
-                  (exp(u + log(gsl_sf_erfc(y))) + exp(v + log(gsl_sf_erfc(z))));
+                  (exp(u + gsl_sf_log_erfc(y)) + exp(v + gsl_sf_log_erfc(z)));
   double omega2;
   if (eta < 1.0E-8) {
     omega2 = 0.0;
