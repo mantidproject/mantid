@@ -35,6 +35,8 @@ namespace {
 
 constexpr int DEFAULT_NEVENTS = 1000;
 constexpr int DEFAULT_SEED = 123456789;
+constexpr int NLAMBDA = 1;
+
 } // namespace
 
 //----------------------------------------------------------------------------------------------
@@ -103,7 +105,6 @@ void AddAbsorptionWeightedPathLengths::exec() {
   const std::string reportMsg = "Computing path lengths";
 
   // Configure strategy
-  const int nlambda = 1;
   MCAbsorptionStrategy strategy(*beamProfile, inputWS->sample(),
                                 DeltaEMode::Elastic, nevents,
                                 maxScatterPtAttempts, true, g_log);
@@ -115,8 +116,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
     IPeak &peak = inputWS->getPeak(i);
     auto peakWavelength = peak.getWavelength();
 
-    std::vector<double> lambdas{peakWavelength}, absFactors(nlambda),
-        absFactorErrors(nlambda);
+    std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA),
+        absFactorErrors(NLAMBDA);
 
     strategy.calculate(rng, peak.getDetectorPosition(), lambdas, peakWavelength,
                        absFactors, absFactorErrors);
