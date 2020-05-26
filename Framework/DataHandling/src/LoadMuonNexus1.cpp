@@ -151,7 +151,7 @@ void LoadMuonNexus1::exec() {
   checkOptionalProperties();
   // Calculate the size of a workspace, given its number of periods & spectra to
   // read
-  int64_t total_specs;
+  size_t total_specs;
   if (m_interval || m_list) {
     // Remove from list possible duplicate specs
     for (auto it = m_spec_list.begin(); it != m_spec_list.end();) {
@@ -239,10 +239,10 @@ void LoadMuonNexus1::exec() {
     addGoodFrames(localWorkspace, period, nxload.t_nper);
 
     size_t counter = 0;
-    for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
+    for (auto i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
       auto histToRead = static_cast<specnum_t>(i - 1 + period * nxload.t_nsp1);
-      auto specNo = static_cast<specnum_t>(i);
+      auto specNo = i;
       loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
@@ -358,8 +358,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
       // Load only selected spectra
       specToLoad.insert(
           specToLoad.end(),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
+          boost::counting_iterator<specnum_t>(m_spec_min),
+          boost::counting_iterator<specnum_t>(m_spec_max));
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
                         m_spec_list.end());
     } else {
@@ -466,8 +466,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
       // Load only selected spectra
       specToLoad.insert(
           specToLoad.end(),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
+          boost::counting_iterator<specnum_t>(m_spec_min),
+          boost::counting_iterator<specnum_t>(m_spec_max));
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
                         m_spec_list.end());
     } else {
