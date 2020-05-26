@@ -35,6 +35,7 @@ namespace NeXusEntry {
 const std::string RAWDATA{"/raw_data_1"};
 const std::string DEFINITION{"/raw_data_1/definition"};
 const std::string PERIOD{"/periods"};
+const std::string BEAMLINE{"/raw_data_1/beamline"};
 } // namespace NeXusEntry
 
 /// Empty default constructor
@@ -53,9 +54,16 @@ int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
   if (!descriptor.isEntry(NeXusEntry::RAWDATA, "NXentry")) {
     return 0;
   }
+
+  // Check if beamline entry exists beneath raw_data_1 - /raw_data_1/beamline
+  // Necessary to differentiate between ISIS and PSI nexus files.
+  if (!descriptor.isEntry(NeXusEntry::BEAMLINE))
+    return 0;
+
   // Check if Muon source in definition entry
   if (!descriptor.isEntry(NeXusEntry::DEFINITION))
     return 0;
+
   ::NeXus::File file(descriptor.getFilename());
   file.openPath(NeXusEntry::DEFINITION);
   std::string def = file.getStrData();
