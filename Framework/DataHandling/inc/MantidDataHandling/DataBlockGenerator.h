@@ -6,10 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidDataHandling/DllConfig.h"
+#include "MantidDataHandling/DataBlock.h"
 #include <boost/optional.hpp>
-#include <memory>
-#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,7 +20,7 @@ class DataBlock;
 */
 class DLLExport DataBlockGenerator {
 public:
-  DataBlockGenerator(const std::vector<std::pair<int64_t, int64_t>> &intervals);
+  DataBlockGenerator(const std::vector<spectrumPair> &intervals);
   class DataBlock;
   DataBlockGenerator &operator++();
   DataBlockGenerator operator++(int);
@@ -31,7 +29,7 @@ public:
   void next();
 
 public:
-  std::vector<std::pair<int64_t, int64_t>> m_intervals;
+  std::vector<spectrumPair> m_intervals;
   int64_t m_currentSpectrum;
 
   boost::optional<size_t> m_currentIntervalIndex;

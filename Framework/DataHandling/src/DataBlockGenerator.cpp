@@ -14,11 +14,11 @@ namespace DataHandling {
 // DataBlock Generator
 // -------------------------------------------------------------
 DataBlockGenerator::DataBlockGenerator(
-    const std::vector<std::pair<int64_t, int64_t>> &intervals)
+    const std::vector<spectrumPair> &intervals)
     : m_intervals(intervals) {
   // We need to sort the data items.
-  auto comparison = [](const std::pair<int64_t, int64_t> &el1,
-                       const std::pair<int64_t, int64_t> &el2) {
+  auto comparison = [](const spectrumPair &el1,
+                       const spectrumPair &el2) {
     return el1.first < el2.first;
   };
   std::sort(m_intervals.begin(), m_intervals.end(), comparison);

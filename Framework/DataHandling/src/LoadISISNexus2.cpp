@@ -107,12 +107,13 @@ void LoadISISNexus2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "OutputWorkspace", "", Direction::Output));
 
-  auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
-  mustBePositive->setLower(0);
-  declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
-  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive);
-  declareProperty(std::make_unique<ArrayProperty<int64_t>>("SpectrumList"));
+  auto mustBePositiveSpectrum = std::make_shared<BoundedValidator<specnum_t>>();
+  mustBePositiveSpectrum->setLower(0);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositiveSpectrum);
+  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()),
+                  mustBePositiveSpectrum);
+  declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"));
+  auto mustBePositive= std::make_shared<BoundedValidator<int64_t>>();
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
@@ -206,7 +207,7 @@ void LoadISISNexus2::exec() {
       NXInt index =
           entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
       index.load();
-      int64_t ind = *index();
+      specnum_t ind = static_cast<specnum_t>(*index());
       // Spectrum index of 0 means no spectrum associated with that monitor,
       // so only count those with index > 0
       if (ind > 0) {
@@ -431,21 +432,6 @@ void LoadISISNexus2::exec() {
   m_monitors.clear();
   m_wsInd2specNum_map.clear();
 }
-
-// Function object for remove_if STL algorithm
-namespace {
-// Check the numbers supplied are not in the range and erase the ones that are
-struct range_check {
-  range_check(int64_t min, int64_t max) : m_min(min), m_max(max) {}
-
-  bool operator()(int64_t x) { return (x >= m_min && x <= m_max); }
-
-private:
-  int64_t m_min;
-  int64_t m_max;
-};
-} // namespace
-
 /**
 Check for a set of synthetic logs associated with multi-period log data. Raise
 warnings where necessary.
@@ -477,8 +463,8 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   bool range_supplied(false);
 
   // Get the spectrum selection which were specfied by the user
-  int64_t spec_min = getProperty("SpectrumMin");
-  int64_t spec_max = getProperty("SpectrumMax");
+  specnum_t spec_min = getProperty("SpectrumMin");
+  specnum_t spec_max = getProperty("SpectrumMax");
 
   // If spearate monitors or excluded monitors is selected then we
   // need to build up a wsIndex to spectrum number map as well,
@@ -530,7 +516,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   }
 
   // Did the user provide a spectrum list
-  std::vector<int64_t> spec_list = getProperty("SpectrumList");
+  std::vector<specnum_t> spec_list = getProperty("SpectrumList");
   auto hasSpecList = false;
 
   if (!spec_list.empty()) {
@@ -585,7 +571,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     if (range_supplied) {
       // First remove all entries which are inside of the min and max spectrum,
       // to avoid duplicates
-      auto isInRange = [&spec_min, &spec_max](int64_t x) {
+      auto isInRange = [&spec_min, &spec_max](specnum_t x) {
         return (spec_min <= x) && (x <= spec_max);
       };
 
@@ -593,12 +579,10 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
                       spec_list.end());
 
       // The spec_min - spec_max range needs to be added to the spec list
-      for (int64_t i = spec_min; i < spec_max + 1; ++i) {
-        auto spec_num = static_cast<specnum_t>(i);
-        spec_list.emplace_back(spec_num);
-        std::sort(spec_list.begin(), spec_list.end());
-        // supplied range converted into the list, so no more supplied range
+      for (auto i = spec_min; i < spec_max + 1; ++i) {
+        spec_list.emplace_back(i);
       }
+      std::sort(spec_list.begin(), spec_list.end());
     }
 
     auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
@@ -696,12 +680,12 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
  * @return :: Number of spectra to load.
  */
 size_t
-LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
+LoadISISNexus2::prepareSpectraBlocks(std::map<specnum_t, std::string> &monitors,
                                      DataBlockComposite &LoadBlock) {
-  std::vector<int64_t> includedMonitors;
+  std::vector<specnum_t> includedMonitors;
   // Setup the SpectraBlocks based on the DataBlocks
   auto dataBlocks = LoadBlock.getDataBlocks();
-  auto isMonitor = [&monitors](int64_t spectrumNumber) {
+  auto isMonitor = [&monitors](specnum_t spectrumNumber) {
     return monitors.find(spectrumNumber) != monitors.end();
   };
   for (const auto &dataBlock : dataBlocks) {
@@ -1046,8 +1030,8 @@ double LoadISISNexus2::dblSqrt(double in) { return sqrt(in); }
  *
  */
 bool LoadISISNexus2::findSpectraDetRangeInFile(
-    NXEntry &entry, std::vector<int> &spectrum_index, int64_t ndets,
-    int64_t n_vms_compat_spectra, std::map<int64_t, std::string> &monitors,
+    NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
+    int64_t n_vms_compat_spectra, std::map<specnum_t, std::string> &monitors,
     bool excludeMonitors, bool separateMonitors) {
   size_t nmons = monitors.size();
 
@@ -1056,7 +1040,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
 
     // Iterate over each monitor and create a data block for each monitor
     for (const auto &monitor : monitors) {
-      auto monID = static_cast<int64_t>(monitor.first);
+      auto monID = monitor.first;
       auto monTemp = DataBlock(chans);
       monTemp.setMinSpectrumID(monID);
       monTemp.setMaxSpectrumID(monID);
