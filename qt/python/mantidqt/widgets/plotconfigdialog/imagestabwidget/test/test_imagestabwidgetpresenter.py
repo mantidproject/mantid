@@ -207,5 +207,6 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
             self.assertEqual(2, image.norm.vmax)
             self.assertTrue(isinstance(image.norm, Normalize))
 
+
 if __name__ == '__main__':
     unittest.main()

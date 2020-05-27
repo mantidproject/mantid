@@ -20,8 +20,6 @@ try:
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
 
-from matplotlib.colors import Normalize
-
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
@@ -216,10 +214,10 @@ def pcolormesh(workspaces, fig=None):
 
     # Colour bar limits are wrong if workspace is ragged. Set them manually.
     # If there are multiple plots limits are the min and max of all the plots
-    colorbar_min = min(np.nanmin(plot.get_array()) for plot in plots)
-    colorbar_max = max(np.nanmax(plot.get_array()) for plot in plots)
-    for plot in plots:
-        plot.set_clim(colorbar_min, colorbar_max)
+    colorbar_min = min(np.nanmin(pt.get_array()) for pt in plots)
+    colorbar_max = max(np.nanmax(pt.get_array()) for pt in plots)
+    for pt in plots:
+        pt.set_clim(colorbar_min, colorbar_max)
 
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)

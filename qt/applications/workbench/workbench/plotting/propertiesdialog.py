@@ -13,9 +13,7 @@
 from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
-from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm, Normalize
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
