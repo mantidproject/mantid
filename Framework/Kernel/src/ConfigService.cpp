@@ -136,7 +136,7 @@ ConfigServiceImpl::ConfigServiceImpl()
 #else
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
-      m_dataSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
+      m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(),
       m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new Poco::Util::SystemConfiguration();

@@ -61,7 +61,7 @@ GNU_DIAG_OFF("conversion")
 // Overload generator for getInstrument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 1, 2)
 // Overload generator for getString
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStringOverload,
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload,
                                        ConfigServiceImpl::getString, 1, 2)
 
 GNU_DIAG_ON("conversion")
