@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -32,7 +33,6 @@
 
 #include <cmath>
 #include <numeric>
-#include <MantidDataHandling\LoadMuonNexusV2.h>
 
 using Mantid::Types::Core::DateAndTime;
 

@@ -151,7 +151,7 @@ void LoadMuonNexus1::exec() {
   checkOptionalProperties();
   // Calculate the size of a workspace, given its number of periods & spectra to
   // read
-  size_t total_specs;
+  int64_t total_specs;
   if (m_interval || m_list) {
     // Remove from list possible duplicate specs
     for (auto it = m_spec_list.begin(); it != m_spec_list.end();) {

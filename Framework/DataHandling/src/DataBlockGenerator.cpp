@@ -81,6 +81,6 @@ void DataBlockGenerator::next() { ++(*this); }
 
 bool DataBlockGenerator::isDone() { return !m_currentIntervalIndex; }
 
-int64_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
+specnum_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
 } // namespace DataHandling
 } // namespace Mantid

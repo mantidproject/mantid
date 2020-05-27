@@ -25,12 +25,12 @@ public:
   DataBlockGenerator &operator++();
   DataBlockGenerator operator++(int);
   bool isDone();
-  int64_t getValue();
+  specnum_t getValue();
   void next();
 
 public:
   std::vector<spectrumPair> m_intervals;
-  int64_t m_currentSpectrum;
+  specnum_t m_currentSpectrum;
 
   boost::optional<size_t> m_currentIntervalIndex;
 };
