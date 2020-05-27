@@ -1,0 +1,4 @@
+
+
+class SampleTransmissionCalculatorModel(object):
+    pass
