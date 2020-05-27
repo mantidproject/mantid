@@ -645,8 +645,6 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
   fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
   fitAlgorithm->setProperty("MaxIterations",
                             m_fitPropertyBrowser->maxIterations());
-  fitAlgorithm->setProperty("ConvolveMembers",
-                            m_fitPropertyBrowser->convolveMembers());
   fitAlgorithm->setProperty("PeakRadius",
                             m_fitPropertyBrowser->getPeakRadius());
   fitAlgorithm->setProperty("CostFunction",
@@ -657,8 +655,13 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
                             m_fitPropertyBrowser->fitEvaluationType());
   fitAlgorithm->setProperty("PeakRadius",
                             m_fitPropertyBrowser->getPeakRadius());
-  fitAlgorithm->setProperty("OutputCompositeMembers",
-                            m_fitPropertyBrowser->outputCompositeMembers());
+  if (m_fitPropertyBrowser->convolveMembers()) {
+    fitAlgorithm->setProperty("ConvolveMembers", true);
+    fitAlgorithm->setProperty("OutputCompositeMembers", true);
+  } else {
+    fitAlgorithm->setProperty("OutputCompositeMembers",
+                              m_fitPropertyBrowser->outputCompositeMembers());
+  }
 
   if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
     fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
