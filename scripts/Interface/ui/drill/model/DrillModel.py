@@ -16,6 +16,8 @@ from mantid.api import AlgorithmObserver
 from .specifications import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
+from .ParameterController import Parameter, ParameterController
+
 
 class DrillException(Exception):
     """
@@ -36,6 +38,8 @@ class DrillModel(QObject):
     process_error = Signal(int)
     processing_done = Signal()
     progress_update = Signal(int)
+    param_ok = Signal(int, int)
+    param_error = Signal(int, int, str)
 
     def __init__(self):
         super(DrillModel, self).__init__()
@@ -164,6 +168,18 @@ class DrillModel(QObject):
         self.technique = RundexSettings.TECHNIQUES[self.instrument][technique]
         self.columns = RundexSettings.COLUMNS[self.technique]
         self.algorithm = RundexSettings.ALGORITHMS[self.technique]
+        self.controller = ParameterController(self.algorithm)
+        self.controller.signals.okParam.connect(
+                lambda p : self.param_ok.emit(
+                    p.sample, self.columns.index(p.name)
+                    )
+                )
+        self.controller.signals.wrongParam.connect(
+                lambda p : self.param_error.emit(
+                    p.sample, self.columns.index(p.name), p.errorMsg
+                    )
+                )
+        self.controller.start()
 
     def get_columns(self):
         return self.columns if self.columns is not None else list()
@@ -194,6 +210,9 @@ class DrillModel(QObject):
             self.samples[row][self.columns[column]] = options
         else:
             self.samples[row][self.columns[column]] = contents
+            self.controller.addParameter(Parameter(self.columns[column],
+                                                   contents,
+                                                   row))
 
     def set_rundex_data(self, filename):
         with open(filename) as json_file:

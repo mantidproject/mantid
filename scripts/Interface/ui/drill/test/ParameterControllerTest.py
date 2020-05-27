@@ -1,0 +1,43 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+
+import unittest
+import mock
+
+from Interface.ui.drill.model.ParameterController import ParameterController, \
+                                                         ControllerSignals, \
+                                                         Parameter
+
+
+class ParameterControllerTest(unittest.TestCase):
+
+    def setUp(self):
+        # mock sapi
+        patch = mock.patch('Interface.ui.drill.model.ParameterController.sapi')
+        self.mSapi = patch.start()
+        self.addCleanup(patch.stop)
+
+        self.controller = ParameterController("test")
+
+    def test_signals(self):
+        self.assertTrue(isinstance(self.controller.signals, ControllerSignals))
+
+    def test_addParameter(self):
+        p = Parameter("name", "value", 0)
+        self.controller.addParameter(p)
+        pGet = self.controller._paramQueue.get()
+        self.assertEqual(p, pGet)
+
+    def test_stop(self):
+        pass
+
+    def test_run(self):
+        pass
+
+
+if __name__ == "__main__":
+    unittest.main()

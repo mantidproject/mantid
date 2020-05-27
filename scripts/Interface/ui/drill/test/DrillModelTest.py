@@ -35,6 +35,13 @@ class DrillModelTest(unittest.TestCase):
             }
 
     def setUp(self):
+        # mock parameter controller
+        patch = mock.patch(
+                'Interface.ui.drill.model.DrillModel.ParameterController'
+                )
+        self.mController = patch.start()
+        self.addCleanup(patch.stop)
+
         # mock config
         patch = mock.patch('Interface.ui.drill.model.DrillModel.config')
         self.mConfig = patch.start()

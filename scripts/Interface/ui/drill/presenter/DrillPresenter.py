@@ -21,6 +21,8 @@ class DrillPresenter:
         self.model.process_error.connect(self.on_process_error)
         self.model.progress_update.connect(self.on_progress)
         self.model.processing_done.connect(self.on_processing_done)
+        self.model.param_ok.connect(self.on_param_ok)
+        self.model.param_error.connect(self.on_param_error)
 
         self.update_view_from_model()
 
@@ -111,6 +113,12 @@ class DrillPresenter:
     def on_processing_done(self):
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
+
+    def on_param_ok(self, row, column):
+        self.view.set_cell_ok(row, column)
+
+    def on_param_error(self, row, column, msg):
+        self.view.set_cell_error(row, column, msg)
 
     def update_view_from_model(self):
         self.view.set_available_techniques(

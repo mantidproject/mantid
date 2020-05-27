@@ -247,3 +247,41 @@ class DrillTableWidget(QTableWidget):
             self.item(row, c).setBackground(brush)
         self.blockSignals(False)
 
+    def setCellBackground(self, row, column, color):
+        """
+        Set the background color of an existing cell. If the cell does not
+        contain item, it will be created by this method.
+
+        Args:
+            row (int): row index
+            column (int): column index
+            color (str): the RBG or ARGB color string
+        """
+        self.blockSignals(True)
+        brush = QBrush(QColor(color))
+        if (row >= self.rowCount()) or (column >= self.columnCount()):
+            return
+        item = self.item(row, column)
+        if not item:
+            item = QTableWidgetItem()
+
+        self.item(row, column).setBackground(brush)
+        self.blockSignals(False)
+
+    def setCellToolTip(self, row, column, contents):
+        """
+        Set a tooltip associated with a cell. If the cell does not contain
+        item, it will be created by this method.
+
+        Args:
+            row (int): row index
+            column (int): column index
+            contents (str): tooltip contents
+        """
+        self.blockSignals(True)
+        item = self.item(row, column)
+        if not item:
+            item = QTableWidgetItem()
+
+        self.item(row, column).setToolTip(contents)
+        self.blockSignals(False)

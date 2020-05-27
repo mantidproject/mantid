@@ -33,6 +33,7 @@ class DrillView(QMainWindow):
     show_settings = Signal()
 
     # colors for the table rows
+    WHITE = "#FFFFFF"
     OK_COLOR = "#3f00ff00"
     ERROR_COLOR = "#3fff0000"
     PROCESSING_COLOR = "#3fffff00"
@@ -48,6 +49,7 @@ class DrillView(QMainWindow):
         self.setup_table()
 
         self.buffer = list()  # for row cut-copy-paste
+        self.invalidCells = set()
 
     def setup_header(self):
         """
@@ -237,20 +239,32 @@ class DrillView(QMainWindow):
 
     def process_selected_rows(self):
         """
-        Ask for the processing of the selected rows.
+        Ask for the processing of the selected rows. If the selected rows
+        contain invalid values, this function display an error message dialog.
         """
         rows = self.table.getSelectedRows()
         if not rows:
             rows = self.table.getRowsFromSelectedCells()
         if rows:
+            for cell in self.invalidCells:
+                if cell[0] in rows:
+                    QMessageBox.warning(self, "Error", "Please check the " +
+                                        "parameters value before processing")
+                return
             self.process.emit(rows)
 
     def process_all_rows(self):
         """
-        Ask for the processing of all the rows.
+        Ask for the processing of all the rows. If the rows contain invalid
+        values, this function display an error message dialog.
         """
         rows = self.table.getAllRows()
         if rows:
+            for cell in self.invalidCells:
+                if cell[0] in rows:
+                    QMessageBox.warning(self, "Error", "Please check the " +
+                                        "parameters value before processing")
+                    return
             self.process.emit(rows)
 
     def load_rundex(self):
@@ -488,6 +502,34 @@ class DrillView(QMainWindow):
             row (int): the row index
         """
         self.table.setRowBackground(row, self.ERROR_COLOR)
+
+    def set_cell_ok(self, row, column):
+        """
+        Set a cell as OK. Remove it from the invalid cells set, change its
+        color and remove the tooltip itf it exists.
+
+        Args:
+            row (int): row index
+            column (int): column index
+        """
+        self.table.setCellBackground(row, column, self.WHITE)
+        self.table.setCellToolTip(row, column, "")
+        self.invalidCells.discard((row, column))
+
+    def set_cell_error(self, row, column, msg):
+        """
+        Set a cell a containing an invalid value. Change its colors, add a
+        tooltip containing the provided message and add it to the set of
+        invalid cells.
+
+        Args:
+            row (int): row index
+            column (int): column index
+            msg (str): the error message
+        """
+        self.table.setCellBackground(row, column, self.ERROR_COLOR)
+        self.table.setCellToolTip(row, column, msg)
+        self.invalidCells.add((row, column))
 
     def processing_error(self, elements):
         """
