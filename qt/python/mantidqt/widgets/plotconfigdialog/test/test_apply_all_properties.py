@@ -29,8 +29,8 @@ AX_VIEW = 'mantidqt.widgets.plotconfigdialog.axestabwidget.presenter.AxesTabWidg
 CURVE_VIEW = 'mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter.CurvesTabWidgetView'
 IMAGE_VIEW = 'mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter.ImagesTabWidgetView'
 LEGEND_VIEW = 'mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter.LegendTabWidgetView'
-
 new_ax_view_props = {
+
     'title': 'New Title',
     'xlim': [0.1, 10],
     'xlabel': 'New X Label',
@@ -270,11 +270,6 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          not any([err_set.get_visible()
                                   for err_sets in self.new_curve[1:]
                                   for err_set in err_sets]))
-
-    def test_apply_properties_on_figure_with_curve_sets_error_every(self):
-        self.assertEqual(1, len(self.new_curve[2][0].get_segments()))
-        self.assertEqual(new_curve_view_props['errorevery'],
-                         self.new_curve.errorevery)
 
     def test_apply_properties_on_figure_with_curve_sets_cap_size(self):
         self.assertEqual(new_curve_view_props['capsize'],
