@@ -346,9 +346,9 @@ const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
 
 void QENSFitSimultaneous::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")->setDocumentation(
-      "Math expressions defining ties between parameters of "
-      "the fitting function.");
+  getPointerToProperty("Ties")
+      ->setDocumentation("Math expressions defining ties between parameters of "
+                         "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
@@ -378,6 +378,9 @@ void QENSFitSimultaneous::initConcrete() {
                   "If true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
+  declareProperty("OutputCompositeMembers", false,
+                  "If true and CreateOutput is true then the value of each "
+                  "member of a Composite Function is also output.");
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
@@ -483,6 +486,7 @@ QENSFitSimultaneous::performFit(
     const std::string &output) {
   IFunction_sptr function = getProperty("Function");
   const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   const bool calcErrors = getProperty("CalcErrors");
 
@@ -499,7 +503,7 @@ QENSFitSimultaneous::performFit(
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
   fit->setProperty("CalcErrors", calcErrors);
-  fit->setProperty("OutputCompositeMembers", true);
+  fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
   fit->setProperty("Output", output);

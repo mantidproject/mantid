@@ -423,15 +423,13 @@ void QENSFitSequential::init() {
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
-  declareProperty("StartX", EMPTY_DBL(),
-                  "A value of x in, or on the low x "
-                  "boundary of, the first bin to "
-                  "include in\n"
-                  "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(),
-                  "A value in, or on the high x boundary "
-                  "of, the last bin the fitting range\n"
-                  "(default the highest value of x)");
+  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
+                                         "boundary of, the first bin to "
+                                         "include in\n"
+                                         "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
+                                       "of, the last bin the fitting range\n"
+                                       "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
@@ -470,6 +468,10 @@ void QENSFitSequential::init() {
       ", into their own workspace. These workspaces will have a histogram"
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
+
+  declareProperty("OutputCompositeMembers", false,
+                  "If true and CreateOutput is true then the value of each "
+                  "member of a Composite Function is also output.");
 
   declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "ConvolveMembers", false),
@@ -758,6 +760,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
   const std::vector<double> exclude = getProperty("Exclude");
   const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   IFunction_sptr inputFunction = getProperty("Function");
@@ -773,7 +776,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("IgnoreInvalidData", ignoreInvalidData);
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
-  plotPeaks->setProperty("OutputCompositeMembers", true);
+  plotPeaks->setProperty("OutputCompositeMembers", outputCompositeMembers);
   plotPeaks->setProperty("ConvolveMembers", convolveMembers);
   plotPeaks->setProperty("MaxIterations", getPropertyValue("MaxIterations"));
   plotPeaks->setProperty("Minimizer", getPropertyValue("Minimizer"));

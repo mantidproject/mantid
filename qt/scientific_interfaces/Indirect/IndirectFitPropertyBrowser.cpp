@@ -246,6 +246,11 @@ bool IndirectFitPropertyBrowser::convolveMembers() const {
          "0";
 }
 
+bool IndirectFitPropertyBrowser::outputCompositeMembers() const {
+  return m_fitOptionsBrowser->getProperty("OutputCompositeMembers")
+             .toStdString() != "0";
+}
+
 std::string IndirectFitPropertyBrowser::fitEvaluationType() const {
   return m_fitOptionsBrowser->getProperty("EvaluationType").toStdString();
 }

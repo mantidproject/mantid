@@ -93,9 +93,8 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
   connect(m_dataPresenter.get(),
           SIGNAL(excludeRegionChanged(const std::string &, TableDatasetIndex,
                                       WorkspaceIndex)),
-          this,
-          SLOT(tableExcludeChanged(const std::string &, TableDatasetIndex,
-                                   WorkspaceIndex)));
+          this, SLOT(tableExcludeChanged(const std::string &, TableDatasetIndex,
+                                         WorkspaceIndex)));
   connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(startXChanged(double)));
   connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this,
@@ -658,6 +657,8 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
                             m_fitPropertyBrowser->fitEvaluationType());
   fitAlgorithm->setProperty("PeakRadius",
                             m_fitPropertyBrowser->getPeakRadius());
+  fitAlgorithm->setProperty("OutputCompositeMembers",
+                            m_fitPropertyBrowser->outputCompositeMembers());
 
   if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
     fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());

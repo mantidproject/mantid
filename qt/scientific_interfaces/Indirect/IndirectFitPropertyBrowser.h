@@ -51,6 +51,7 @@ public:
   int getPeakRadius() const;
   std::string costFunction() const;
   bool convolveMembers() const;
+  bool outputCompositeMembers() const;
   std::string fitEvaluationType() const;
   std::string fitType() const;
   bool ignoreInvalidData() const;
