@@ -64,7 +64,7 @@ Changes
 
   - :doc:`MantidPlot <mantidplot>`
 
-  - :doc:`MantidWorkbench <mantidworkbench>`
+  - :doc:`Workbench <workbench>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
 - Low Q

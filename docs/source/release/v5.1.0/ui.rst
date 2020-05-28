@@ -17,12 +17,10 @@ MantidPlot
 
 See :doc:`mantidplot`.
 
-MantidWorkbench
----------------
+Workbench
+---------
 
-See :doc:`mantidworkbench`.
+See :doc:`workbench`.
 
-SliceViewer and Vates Simple Interface
---------------------------------------
 
 :ref:`Release 5.1.0 <v5.1.0>`

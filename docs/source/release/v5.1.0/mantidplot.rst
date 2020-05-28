@@ -10,7 +10,7 @@ The Final Release of MantidPlot
    :width: 385px
    :align: right
 
-.. image:: ../../images/EndOFLife.png
+.. image:: ../../images/EndOfLife.png
    :width: 50px
    :align: left
 

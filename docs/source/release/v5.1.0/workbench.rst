@@ -1,6 +1,6 @@
-=======================
-MantidWorkbench Changes
-=======================
+=================
+Workbench Changes
+=================
 
 .. contents:: Table of Contents
    :local:
