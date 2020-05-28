@@ -417,11 +417,13 @@ void IkedaCarpenterPV::setMatrixWorkspace(
     // convert inital parameters that depend on x axis to correct units so
     // inital guess is reasonable
     auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    const auto scaleFactor = convertValue(1, tof, workspace, wi);
-
-    setParameter("Alpha0", getParameter("Alpha0") / scaleFactor);
-    setParameter("Alpha1", getParameter("Alpha1") / scaleFactor);
-    setParameter("Beta0", getParameter("Beta0") / scaleFactor);
+    const auto centre = getParameter("X0");
+    const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
+    if (scaleFactor != 0) {
+      setParameter("Alpha0", getParameter("Alpha0") * scaleFactor);
+      setParameter("Alpha1", getParameter("Alpha1") * scaleFactor);
+      setParameter("Beta0", getParameter("Beta0") * scaleFactor);
+    }
   }
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }

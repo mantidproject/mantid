@@ -108,9 +108,12 @@ void Bk2BkExpConvPV::setMatrixWorkspace(
   if (workspace) {
     // convert alpha and beta to correct units so inital guess is resonable
     auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    const auto scaleFactor = convertValue(1, tof, workspace, wi);
-    setParameter("Alpha", getParameter("Alpha") * scaleFactor);
-    setParameter("Beta", getParameter("Beta") * scaleFactor);
+    const auto centre = getParameter("X0");
+    const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
+    if (scaleFactor != 0) {
+      setParameter("Alpha", getParameter("Alpha") / scaleFactor);
+      setParameter("Beta", getParameter("Beta") / scaleFactor);
+    }
   }
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }

@@ -438,7 +438,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
         self.setPeakFwhmOf(fun, fwhm)
-        self.setPeakHeightOf(fun, height)
+        if height != 0:
+            self.setPeakHeightOf(fun, height)
         self.peak_ids[peak_id] = fun
 
     @Slot(int, float, float)
