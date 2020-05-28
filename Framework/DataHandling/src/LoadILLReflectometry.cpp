@@ -809,18 +809,18 @@ void LoadILLReflectometry::initPixelWidth() {
     widthInLogs = mmToMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-      m_log.warning() << "NeXus pixel width (mppx) " << widthInLogs
-                      << " differs from the IDF. Using the IDF value "
-                      << m_pixelWidth << '\n';
+      m_log.information() << "NeXus pixel width (mppx) " << widthInLogs
+                          << " differs from the IDF. Using the IDF value "
+                          << m_pixelWidth << '\n';
     }
   } else {
     m_pixelWidth = std::abs(detector->ystep());
     widthInLogs = mmToMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-      m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs
-                      << " differs from the IDF. Using the IDF value "
-                      << m_pixelWidth << '\n';
+      m_log.information() << "NeXus pixel width (mppy) " << widthInLogs
+                          << " differs from the IDF. Using the IDF value "
+                          << m_pixelWidth << '\n';
     }
   }
 }
@@ -983,13 +983,20 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     double pairCentre;
     double pairSeparation;
     try {
-      pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
-      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
+      pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp"); // in [m]
+      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100; // in [m]
+      m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap",
+                                                 pairSeparation, "meter", true);
     } catch (std::runtime_error &) {
       try {
-        pairCentre = mmToMeter(
-            doubleFromRun("VirtualChopper.MidChopper_Sample_distance"));
-        pairSeparation = doubleFromRun("Distance.ChopperGap");
+        pairCentre = mmToMeter(doubleFromRun(
+            "VirtualChopper.MidChopper_Sample_distance"));     // in [m]
+        pairSeparation = doubleFromRun("Distance.ChopperGap"); // in [m]
+        m_localWorkspace->mutableRun().addProperty(
+            "Distance.ChopperGap", pairSeparation, "meter", true);
+        m_localWorkspace->mutableRun().addProperty(
+            "VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
+            true);
       } catch (std::runtime_error &) {
         throw std::runtime_error(
             "Unable to extract chopper to sample distance");
