@@ -129,11 +129,13 @@ void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) {
 void ConvTemplateBrowser::addDeltaFunction() {
   ScopedFalse _boolBlock(m_emitBoolChange);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
+  m_deltaFunctionOn->addSubProperty(m_deltaFunctionCenter);
   m_boolManager->setValue(m_deltaFunctionOn, true);
 }
 
 void ConvTemplateBrowser::removeDeltaFunction() {
   m_deltaFunctionOn->removeSubProperty(m_deltaFunctionHeight);
+  m_deltaFunctionOn->removeSubProperty(m_deltaFunctionCenter);
   ScopedFalse _false(m_emitBoolChange);
   m_boolManager->setValue(m_deltaFunctionOn, false);
 }
@@ -308,6 +310,14 @@ void ConvTemplateBrowser::createDeltaFunctionProperties() {
                                      "Delta Function Height");
   m_parameterMap[m_deltaFunctionHeight] = ParamID::DELTA_HEIGHT;
   m_parameterReverseMap[ParamID::DELTA_HEIGHT] = m_deltaFunctionHeight;
+
+  m_deltaFunctionCenter =
+      m_parameterManager->addProperty("DeltaFunctionCenter");
+  m_parameterManager->setDecimals(m_deltaFunctionCenter, 6);
+  m_parameterManager->setDescription(m_deltaFunctionCenter,
+                                     "Delta Function Height");
+  m_parameterMap[m_deltaFunctionCenter] = ParamID::DELTA_CENTER;
+  m_parameterReverseMap[ParamID::DELTA_CENTER] = m_deltaFunctionCenter;
 }
 
 void ConvTemplateBrowser::createTempCorrectionProperties() {
