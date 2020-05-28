@@ -326,6 +326,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   connect(m_appWindow, SIGNAL(configModified(void)), this,
           SLOT(configModified(void)));
   init();
+  g_log.warning("Please upgrade to Workbench which is replacing MantidPlot.\n"
+                "Future releases will not include MantidPlot.\n");
 }
 
 // Should it be moved to the constructor?
