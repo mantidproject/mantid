@@ -208,16 +208,16 @@ public:
 
   void setUp() override {
     ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
-    PDFFourierTransform pdfft;
-
-    pdfft.setProperty("InputWorkspace", ws);
-    pdfft.setProperty("OutputWorkspace", "outputWS");
-    pdfft.setProperty("InputSofQType", "S(Q)");
-    pdfft.setProperty("Rmax", 20.0);
-    pdfft.setProperty("DeltaR", 0.01);
-    pdfft.setProperty("Qmin", 0.0);
-    pdfft.setProperty("Qmax", 30.0);
-    pdfft.setProperty("PDFType", "G(r)");
+    pdfft = std::make_shared<PDFFourierTransform>();
+    pdfft->initialize();
+    pdfft->setProperty("InputWorkspace", ws);
+    pdfft->setProperty("OutputWorkspace", "outputWS");
+    pdfft->setProperty("InputSofQType", "S(Q)");
+    pdfft->setProperty("Rmax", 20.0);
+    pdfft->setProperty("DeltaR", 0.01);
+    pdfft->setProperty("Qmin", 0.0);
+    pdfft->setProperty("Qmax", 30.0);
+    pdfft->setProperty("PDFType", "G(r)");
   }
 
   void tearDown() override {

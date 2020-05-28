@@ -93,6 +93,7 @@ QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
   map.insert(QString("comboSearchInstrument"),
              QVariant(gui->m_ui.comboSearchInstrument->currentIndex()));
   map.insert(QString("textSearch"), QVariant(gui->m_ui.textSearch->text()));
+  map.insert(QString("textCycle"), QVariant(gui->m_ui.textCycle->text()));
   return map;
 }
 

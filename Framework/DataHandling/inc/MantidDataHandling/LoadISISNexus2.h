@@ -140,39 +140,31 @@ private:
   std::string m_instrument_name;
   /// The sample name read from Nexus
   std::string m_samplename;
-
   // the description of the data block in the file to load.
   // the description of single time-range data block, obtained from detectors
   DataBlockComposite m_detBlockInfo;
-
   // the description of single time-range data block, obtained from monitors
   DataBlockComposite m_monBlockInfo;
-
   // description of the block to be loaded may include monitors and detectors
   // with the same time binning if the detectors and monitors are loaded
   // together
   // in single workspace or equal to the detectorBlock if monitors are excluded
   // or monBlockInfo if only monitors are loaded.
   DataBlockComposite m_loadBlockInfo;
-
   /// Is there a detector block
   bool m_have_detector;
-
   // Is there a VMS block
   bool m_hasVMSBlock;
-
   /// if true, a spectra list or range of spectra is supplied
   bool m_load_selected_spectra;
   /// map of workspace Index to spectra Number (spectraID)
   std::map<int64_t, specnum_t> m_wsInd2specNum_map;
   /// spectra Number to detector ID (multi)map
   API::SpectrumDetectorMapping m_spec2det_map;
-
   /// The number of the input entry
   int64_t m_entrynumber;
   /// List of disjoint data blocks to load
   std::vector<SpectraBlock> m_spectraBlocks;
-
   /// Time channels
   std::shared_ptr<HistogramData::HistogramX> m_tof_data;
   /// Spectra numbers
@@ -181,16 +173,12 @@ private:
   const int *m_spec_end;
   /// Monitors, map spectrum index to monitor group name
   std::map<int64_t, std::string> m_monitors;
-
   /// A pointer to the ISISRunLogs creator
   boost::scoped_ptr<ISISRunLogs> m_logCreator;
-
   /// Progress reporting object
   std::shared_ptr<API::Progress> m_progress;
-
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
-
   // Handle to the NeXus file
   // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_nexusFile;

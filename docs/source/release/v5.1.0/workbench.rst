@@ -20,6 +20,11 @@ Improvements
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
+
+.. figure:: ../../images/wb_invalid_log_shading.png
+   :align: right
+
+- Logs that contain invalid data indicated by NeXus log alarm states are now shaded in red, and a tool tip will tell you how many values are invalid.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 - The Help Menu now has an About screen that will pop up automatically on startup to provide links to the release notes and various other resources, and allow you to set some important setting such as Facility, instrument and accept usage tracing.
   You can choose to hide it until the next release.
@@ -29,6 +34,7 @@ Improvements
 - The "Show sample logs" dialog will now hide the plot and statistics display if there are no suitable logs in the workspace that need it.  This is particularly applicable for some of the reactor based instruments.
 - The plot toolbar now shows the correct buttons for 3D plots.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
+- Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 
 - Surface plots no longer spill over the axes when their limits are reduced.
@@ -40,6 +46,7 @@ Bugfixes
 - Fixed new tab names not incrementing correctly on KDE display environments (i.e. KUbuntu).
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly.
 - Fixed a crash when you selected a spectra to plot that was not present in a workspace.
+- Fixed a crash when opening the plot options for a sample logs plot.
 - Fixed a crash when you defined a new Fit Function after deleting a plot.
 - Fixed a crash when plotting the logs from a multi-dimensional workspace, that combines several different original workspaces.
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
@@ -54,5 +61,7 @@ Bugfixes
 - The correct interpolation now appears in the plot figure options for colorfill plots.
 - Changing the axis scale on a colourfill plot now has the same result if it is done from either the context menu or figure options.
 - `plt.show()` now shows the most recently created figure.
+- Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
+- The SavePlot1D algorithm can now be run in Workbench.
 
 :ref:`Release 5.1.0 <v5.1.0>`

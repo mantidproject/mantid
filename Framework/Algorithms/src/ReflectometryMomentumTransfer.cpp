@@ -282,9 +282,9 @@ double ReflectometryMomentumTransfer::angularResolutionSquared(
       }
     }
   } else { // SumType::LAMBDA
+    // Sample waviness removed as in cosmos
     const auto angularResolution =
-        (pow<2>(beam.incidentAngularSpread) + pow<2>(beam.sampleWaviness)) /
-        pow<2>(braggAngle);
+        pow<2>(beam.incidentAngularSpread) / pow<2>(braggAngle);
     // In case foreground width is smaller than incoming angular resolution
     const auto foregroundWidth =
         static_cast<double>(setup.foregroundEnd - setup.foregroundStart + 1) *

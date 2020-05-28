@@ -23,7 +23,7 @@ Improvements
   against data from CASTEP and found to give fairly similar
   frequencies and intensities.
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work also for ILL fixed window scan reduced data, in which case the correction will be calculated for elastic wavelength.
-
+- The centre parameter has been added to delta function in the ConvFit tab of Indirect Data Analysis.
 
 Bug Fixes
 #########
