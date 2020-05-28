@@ -149,6 +149,48 @@ class DrillModel(QObject):
         """
         self.tasksPool.abortProcessing()
 
+    def importRundexData(self, filename):
+        """
+        Import data contained in a Json rundex file.
+
+        Args:
+            filename(str): rundex file path
+        """
+        with open(filename) as json_file:
+            json_data = json.load(json_file)
+
+        self.set_instrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
+
+        # global settings
+        self.settings = json_data[RundexSettings.SETTINGS_JSON_KEY]
+
+        # samples
+        self.samples = list()
+        for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
+            self.samples.append(sample)
+
+    def exportRundexData(self, filename):
+        """
+        Export the data in a Json rundex file.
+
+        Args:
+            filename(str): rundex file path
+        """
+        json_data = dict()
+        json_data[RundexSettings.INSTRUMENT_JSON_KEY] = self.instrument
+        json_data[RundexSettings.TECHNIQUE_JSON_KEY] = self.technique
+
+        # global settings
+        json_data[RundexSettings.SETTINGS_JSON_KEY] = self.settings
+
+        # samples
+        json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
+        for sample in self.samples:
+            json_data[RundexSettings.SAMPLES_JSON_KEY].append(sample)
+
+        with open(filename, 'w') as json_file:
+            json.dump(json_data, json_file, indent=4)
+
     def set_instrument(self, instrument):
         self.samples = list()
         if (instrument in RundexSettings.TECHNIQUES):
@@ -213,32 +255,6 @@ class DrillModel(QObject):
             self.controller.addParameter(Parameter(self.columns[column],
                                                    contents,
                                                    row))
-
-    def set_rundex_data(self, filename):
-        with open(filename) as json_file:
-            json_data = json.load(json_file)
-
-        self.samples = list()
-        self.set_instrument(json_data["Instrument"])
-
-        for sample in json_data["Samples"]:
-            self.samples.append(sample)
-
-    def export_rundex_data(self, filename):
-        json_data = dict()
-        # header TODO: to be continued
-        json_data["Instrument"] = self.instrument
-        json_data["Technique"] = self.technique
-
-        # TODO: add settings here
-
-        # samples
-        json_data["Samples"] = list()
-        for sample in self.samples:
-            json_data["Samples"].append(sample)
-
-        with open(filename, 'w') as json_file:
-            json.dump(json_data, json_file, indent=4)
 
     def get_rows_contents(self):
         rows = list()

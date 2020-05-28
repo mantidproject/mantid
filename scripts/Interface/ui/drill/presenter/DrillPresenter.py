@@ -84,11 +84,11 @@ class DrillPresenter:
         self.update_view_from_model()
 
     def on_rundex_loaded(self, filename):
-        self.model.set_rundex_data(filename)
+        self.model.importRundexData(filename)
         self.update_view_from_model()
 
     def on_rundex_saved(self, filename):
-        self.model.export_rundex_data(filename)
+        self.model.exportRundexData(filename)
 
     def on_settings_window(self):
         sw = SansSettingsView(self.view)

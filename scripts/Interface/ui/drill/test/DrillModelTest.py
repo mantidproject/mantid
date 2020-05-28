@@ -35,6 +35,16 @@ class DrillModelTest(unittest.TestCase):
             }
 
     def setUp(self):
+        # mock open
+        patch = mock.patch('Interface.ui.drill.model.DrillModel.open')
+        self.mOpen = patch.start()
+        self.addCleanup(patch.stop)
+
+        # mock json
+        patch = mock.patch('Interface.ui.drill.model.DrillModel.json')
+        self.mJson = patch.start()
+        self.addCleanup(patch.stop)
+
         # mock parameter controller
         patch = mock.patch(
                 'Interface.ui.drill.model.DrillModel.ParameterController'
@@ -151,6 +161,37 @@ class DrillModelTest(unittest.TestCase):
     def test_stopProcess(self):
         self.model.stopProcess()
         self.model.tasksPool.abortProcessing.assert_called_once()
+
+    def test_importRundexData(self):
+        self.mJson.load.return_value = {
+                "Instrument": "i1",
+                "Technique": "t1",
+                "GlobalSettings": {},
+                "Samples": []
+                }
+        self.model.importRundexData("test")
+        self.mOpen.assert_called_once_with("test")
+        self.mJson.load.assert_called_once()
+        self.assertEqual(self.model.settings, dict())
+        self.assertEqual(self.model.samples, list())
+
+        self.mJson.load.return_value.update({
+            "GlobalSettings": self.SETTINGS
+            })
+        self.model.importRundexData("test")
+        self.assertEqual(self.model.settings, self.SETTINGS)
+
+    def test_exportRundexData(self):
+        self.model.exportRundexData("test")
+        self.mOpen.assert_called_once_with("test", 'w')
+        self.mJson.dump.assert_called_once()
+        written = self.mJson.dump.call_args[0][0]
+        self.assertEquals(written, {
+            "Instrument": "i1",
+            "Technique": "t1",
+            "GlobalSettings": self.SETTINGS["t1"],
+            "Samples": []
+            })
 
 
 if __name__ == "__main__":
