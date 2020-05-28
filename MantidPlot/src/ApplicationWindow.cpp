@@ -343,7 +343,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   m_sharedMenuBar = new QMenuBar(nullptr);
   m_sharedMenuBar->setNativeMenuBar(true);
 #endif
-  setWindowTitle(tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
+  setWindowTitle(
+      tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
   setObjectName("main application");
   initGlobalConstants();
   QPixmapCache::setCacheLimit(20 * QPixmapCache::cacheLimit());
@@ -1081,7 +1082,8 @@ void ApplicationWindow::initToolBars() {
 
 void ApplicationWindow::insertTranslatedStrings() {
   if (projectname == "untitled")
-    setWindowTitle(tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
+    setWindowTitle(
+        tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
 
   QStringList labels;
   labels << "Name"
@@ -9713,7 +9715,8 @@ void ApplicationWindow::newProject(const bool doNotSave) {
   folders->blockSignals(false);
 
   // Reset everything else
-  setWindowTitle(tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
+  setWindowTitle(
+      tr("MantidPlot (End of Life, use Workbench) - untitled")); // Mantid
   projectname = "untitled";
 
   if (actionSaveProject)
@@ -13598,7 +13601,8 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
     if (newProject)
       app = new ApplicationWindow(factorySettings);
 
-    app->setWindowTitle("MantidPlot (End of Life, use Workbench) - " + filename); // Mantid
+    app->setWindowTitle("MantidPlot (End of Life, use Workbench) - " +
+                        filename); // Mantid
     app->restoreApplicationGeometry();
     app->projectname = filename;
     app->recentProjects.removeAll(filename);
