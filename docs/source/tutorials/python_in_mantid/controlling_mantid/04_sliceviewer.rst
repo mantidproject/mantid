@@ -1,4 +1,4 @@
-.. _03_sliceviewer:
+.. _04_sliceviewer:
 
 ===================
 Sliceviewer Control

@@ -1,4 +1,4 @@
-.. _02_instrument_view:
+.. _03_instrument_view:
 
 =======================
 Instrument View Control

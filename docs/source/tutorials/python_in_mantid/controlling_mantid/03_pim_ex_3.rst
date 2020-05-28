@@ -11,60 +11,50 @@ Python in Mantid: Exercise 3
 Using ISIS Data
 ===============
 
-Graphing
---------
-
-#. Load the GEM data set - GEM40979.raw using SpectrumMin=431 & SpectrumMax=750
+#. Load the GEM data set - `GEM40979.raw` using SpectrumMin=431 & SpectrumMax=750
 #. Convert units to dSpacing
 #. Smooth the data using :ref:<algm-SmoothData> using NPoints=20
-#. Plot workspace indices 0,1,2
-#. Rescale x-axis to range to 4 < x < 6
-#. Rescale y-axis to range to 0 < y < 5e3
-#. Plot workspace index 5
-#. Merge this plot with the previous
-#. Change the title of the X axis
-#. Change the title of the Y axis
+
+#. Using `plotSpectrum()`, plot workspace indices 0,1,2
+#. Set the x-axis limits to 4 < x < 6
+#. Set the y-axis limits to 0 < y < 5e3
+
+#. Again using `plotSpectrum()`, plot workspace index 5 on the same plot window
+#. Change the label of the Y axis
+#. Give the plot a legend with labels for each curve
+#. Give the plot a title
 
 
 Using SNS Data
 ==============
 
-Graphing
---------
-
 #. Load the processed CNCS data file Training_Exercise3a_SNS.nxs
-#. Plot workspace index 0
-#. Merge the plot from index 1 with the first graph created
-#. Merge index 2 with the first graph also
-#. Rescale x-axis to range to -1.5 < x < 1.8
+#. Directly using MPL (eg. axes.plot() ), plot the first 5 spectra
+#. Optionally set labels and colors for each spectrum
+
+#. Again directly in MPL, plot the final spectrum with errorbars
+#. Optionally, set a capsize > 0, and choose a color and label
+
+#. Rescale x-axis limits to -1.5 < x < 1.8
 #. Change the y-axis to have a log scale
+#. Give the plot a title, legend and don't forget to show the plot
 
-Instrument view
----------------
-
-#. Load ARCS example data set (Training_Exercise3b_SNS.nxs)
-#. Get the instrument view
-#. Change the color map to BlackBodyRadiation.map (All of the colourmap files can be found in C:\MantidInstall\colormaps)
-#. Set the colour map range to (0,2000)
-#. Show the window
 
 Using ILL Data
 ==============
 
-Graphing
---------
+#. Load the IN6 file : in6_data.nxs
+#. :ref:<algm-ExtractSpectra> using X range 3100-3300 and WorkspaceIndex range 199-209. Use this region of interest for plotting.
 
-#. Load the IN6 file : 164198.nxs
-#. Plot workspace index 205
-#. Merge the plot from index 209 with the first graph created
-#. Rescale x-axis to range to 4400 < x < 5000 us.
-#. Change the y-axis to have a log scale
+#. Produce a 2D colorfill plot, using the imshow method, remembering to include the mantid projection when defining the figure and axes
+#. Set the colormap to `jet` and aspect='auto'
+#. Set the title to '2D - Colorfill'
+#. Add a colorbar to this figure
+#. Set the colorbar label to 'Counts ($\mu s$)$^{-1}$' 
 
-Instrument view
----------------
+#. Get another figure and axes for subplots with ncols=3, nrows=1, and using the mantid3d projection and also set figsize = (12,3)
+#. Add a Contour, Surface and Wireframe plot to the subplot axes respectively (indexed as axes[0], axes[1], axes[2])
+#. Set the colormaps for the contour and surface plots to 'spring' and 'summer' and the color for the wireframe to 'darkmagenta'
+#. Set the title for each of the 3D plot axes, explaining their plot type (eg. Contour)
 
-#. Load D33 data set : D33041421_tof.nxs
-#. Get the instrument view
-#. Change the color map to BlackBodyRadiation.map (All of the colourmap files can be found in C:\MantidInstall\colormaps or /opt/Mantid/colormaps)
-#. Set the colour map range to (0,500)
-#. Show the window
+#. Remember to show the plots

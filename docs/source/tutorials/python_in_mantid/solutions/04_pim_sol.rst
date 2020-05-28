@@ -12,6 +12,11 @@ Part One
 
 .. code-block:: python
 
+    # import mantid algorithms, numpy and matplotlib
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+
     ws = Load(Filename="HRP39182.RAW")
     ws = Rebin(InputWorkspace=ws, Params=1e4) 
     nbins = ws.blocksize()
@@ -51,7 +56,7 @@ Part One
     new_y = []
     for i in range(ws.getNumberHistograms()):
         y = ws.readY(i)
-        maxY = numpy.max(y)
+        maxY = np.max(y)
         new_y.append(maxY)
         
     solution_3 = CreateWorkspace(DataY=new_y, DataX=xRange, NSpec=ws.getNumberHistograms())
