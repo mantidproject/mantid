@@ -19,12 +19,17 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.axes = fig.add_subplot(111)
         self.plot_frame_2 = FigureCanvas(fig)
         self.outputLayout.addWidget(self.plot_frame_2)
-        self.draw()
-        #self.plot_frame = FigureCanvas(self.figure)
 
-    def draw(self):
-        ax = self.axes
-        ax.clear()
-        ax.set_xlabel("time ($s$)")
-        ax.set_ylabel("$f(t)$")
-        return ax
+    def get_input_key(self):
+        input_key = {
+            'binning_type': self.cbBinningType.currentIndex(),
+            'single_low': self.spSingleLow.value(),
+            'single_width': self.spSingleWidth.value(),
+            'single_high': self.spSingleHigh.value(),
+            'multiple_bin': self.leMultiple.text(),
+            'chemical_formula': self.leChemicalFormula.text(),
+            'density_type': self.cbDensity.currentText(),
+            'density': self.spDensity.value(),
+            'thickness': self.spThickness.value()
+        }
+        return input_key

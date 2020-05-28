@@ -27,7 +27,7 @@
        <number>0</number>
       </property>
       <item row="0" column="1">
-       <widget class="QComboBox" name="cbBinningType_2">
+       <widget class="QComboBox" name="cbBinningType">
         <item>
          <property name="text">
           <string>Single</string>
@@ -41,14 +41,14 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="lbBinningType_2">
+       <widget class="QLabel" name="lbBinningType">
         <property name="text">
          <string>Type:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QStackedWidget" name="swBinningTypes_2">
+       <widget class="QStackedWidget" name="swBinningTypes">
         <property name="baseSize">
          <size>
           <width>0</width>
@@ -58,17 +58,17 @@
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="pgSingle_2">
+        <widget class="QWidget" name="pgSingle">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QLabel" name="lbSingleLow_2">
+           <widget class="QLabel" name="lbSingleLow">
             <property name="text">
              <string>Low:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="spSingleLow_2">
+           <widget class="QDoubleSpinBox" name="spSingleLow">
             <property name="decimals">
              <number>3</number>
             </property>
@@ -81,14 +81,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="lbSingleWidth_2">
+           <widget class="QLabel" name="lbSingleWidth">
             <property name="text">
              <string>Width:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="spSingleWidth_2">
+           <widget class="QDoubleSpinBox" name="spSingleWidth">
             <property name="decimals">
              <number>3</number>
             </property>
@@ -101,14 +101,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="lbSingleHigh_2">
+           <widget class="QLabel" name="lbSingleHigh">
             <property name="text">
              <string>High:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="spSingleHigh_2">
+           <widget class="QDoubleSpinBox" name="spSingleHigh">
             <property name="decimals">
              <number>3</number>
             </property>
@@ -122,13 +122,13 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="pgMultiple_2">
+        <widget class="QWidget" name="pgMultiple">
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <widget class="QLineEdit" name="leMultiple_2"/>
+           <widget class="QLineEdit" name="leMultiple"/>
           </item>
           <item>
-           <widget class="QLabel" name="valMultiple_2">
+           <widget class="QLabel" name="valMultiple">
             <property name="text">
              <string/>
             </property>
@@ -148,21 +148,21 @@
      </property>
      <layout class="QGridLayout" name="loSampleDetails_2">
       <item row="2" column="2">
-       <widget class="QLabel" name="valThickness_2">
+       <widget class="QLabel" name="valThickness">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="lbThickness_2">
+       <widget class="QLabel" name="lbThickness">
         <property name="text">
          <string>Thickness</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="spDensity_2">
+       <widget class="QDoubleSpinBox" name="spDensity">
         <property name="suffix">
          <string notr="true"/>
         </property>
@@ -178,14 +178,14 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLabel" name="valDensity_2">
+       <widget class="QLabel" name="valDensity">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="spThickness_2">
+       <widget class="QDoubleSpinBox" name="spThickness">
         <property name="suffix">
          <string> cm</string>
         </property>
@@ -201,21 +201,21 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="valChemicalFormula_2">
+       <widget class="QLabel" name="valChemicalFormula">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="lbChemicalFormula_2">
+       <widget class="QLabel" name="lbChemicalFormula">
         <property name="text">
          <string>Chemical Formula</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QComboBox" name="cbDensity_2">
+       <widget class="QComboBox" name="cbDensity">
         <item>
          <property name="text">
           <string>Mass Density</string>
@@ -229,7 +229,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="leChemicalFormula_2"/>
+       <widget class="QLineEdit" name="leChemicalFormula"/>
       </item>
      </layout>
     </widget>
@@ -243,7 +243,7 @@
       <item>
        <layout class="QHBoxLayout" name="outputLayout" stretch="1">
         <item>
-         <widget class="QTreeWidget" name="twResults_2">
+         <widget class="QTreeWidget" name="twResults">
           <column>
            <property name="text">
             <string>Property</string>
@@ -262,9 +262,9 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <layout class="QHBoxLayout" name="loActionButtons_2">
+    <layout class="QHBoxLayout" name="loActionButtons">
      <item>
-      <widget class="QPushButton" name="pbHelp_2">
+      <widget class="QPushButton" name="pbHelp">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -292,7 +292,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="sActionButtons_2">
+      <spacer name="sActionButtons">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -305,7 +305,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pbCalculate_2">
+      <widget class="QPushButton" name="pbCalculate">
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Runs the sample transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -319,5 +319,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cbBinningType</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swBinningTypes</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>95</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>358</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
