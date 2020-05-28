@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidPythonInterface/core/Testing/PythonInterpreterGlobalFixture.h"
 #include "MantidQtWidgets/Common/Testing/QApplicationGlobalFixture.h"
 
 //------------------------------------------------------------------------------
@@ -15,5 +14,4 @@
 // We rely on cxxtest only including this file once so that the following
 // statements do not cause multiple-definition errors.
 //------------------------------------------------------------------------------
-static PythonInterpreterGlobalFixture PYTHON_INTERPRETER;
 static QApplicationGlobalFixture MAIN_QAPPLICATION;
