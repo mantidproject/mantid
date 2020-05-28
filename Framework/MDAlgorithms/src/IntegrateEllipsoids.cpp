@@ -316,6 +316,9 @@ void IntegrateEllipsoids::init() {
   declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
                   "Half-length of major axis for outer ellipsoidal surface of "
                   "satellite background region");
+
+  declareProperty("GetUBFromPeaksWorkspace", false,
+                  "If true, UB is taken from peak workspace.");
 }
 
 //---------------------------------------------------------------------
@@ -361,6 +364,14 @@ void IntegrateEllipsoids::exec() {
   double adaptiveQBackgroundMultiplier = 0.0;
   bool useOnePercentBackgroundCorrection =
       getProperty("UseOnePercentBackgroundCorrection");
+  bool getUB = getProperty("GetUBFromPeaksWorkspace");
+
+  // getUB only valid if peak workspace has a UB matrix
+  if (!(in_peak_ws->sample().hasOrientedLattice()) & getUB) {
+    throw std::runtime_error("Peaks workspace needs a oriented lattice for "
+                             "GetUBFromPeaksWorkspace is true");
+  }
+
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   if (!integrateEdge) {
@@ -414,32 +425,44 @@ void IntegrateEllipsoids::exec() {
     }
   }
 
-  if (indexed_count < 3)
-    throw std::runtime_error(
-        "At least three linearly independent indexed peaks are needed.");
-
   // Get UB using indexed peaks and
   // lab-Q vectors
   Matrix<double> UB(3, 3, false);
   Matrix<double> modUB(3, 3, false);
   Matrix<double> modHKL(3, 3, false);
-  Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
-                                         ModDim, peak_q_list);
-
   int maxOrder = 0;
   bool CT = false;
-  if (peak_ws->sample().hasOrientedLattice()) {
+  if (getUB & peak_ws->sample().hasOrientedLattice()) {
+    if (indexed_count < 1)
+      throw std::runtime_error("At least one indexed peak required.");
     OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
-    lattice.setUB(UB);
-    lattice.setModUB(modUB);
+    auto goniometerMatrix = peak_ws->run().getGoniometerMatrix();
+    // get UB etc. and rotate by goniometer matrix
+    UB = goniometerMatrix * lattice.getUB();
+    modUB = goniometerMatrix *
+            lattice.getModUB(); // what happedn when this is empty
     modHKL = lattice.getModHKL();
     maxOrder = lattice.getMaxOrder();
     CT = lattice.getCrossTerm();
+  } else {
+    if (indexed_count < 3)
+      throw std::runtime_error(
+          "At least three linearly independent indexed peaks are needed.");
+    Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
+                                           ModDim, peak_q_list);
+    if (peak_ws->sample().hasOrientedLattice()) {
+      OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
+      lattice.setUB(UB);
+      lattice.setModUB(modUB);
+      modHKL = lattice.getModHKL();
+      maxOrder = lattice.getMaxOrder();
+      CT = lattice.getCrossTerm();
+    }
   }
 
   Matrix<double> UBinv(UB);
   UBinv.Invert();
-  UBinv *= (1.0 / (2.0 * M_PI));
+  UBinv *= (1.0 / (2.0 * M_PI)); // if loaded is it already in these units?
 
   std::vector<double> PeakRadiusVector(n_peaks, peak_radius);
   std::vector<double> BackgroundInnerRadiusVector(n_peaks, back_inner_radius);
