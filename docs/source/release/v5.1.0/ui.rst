@@ -19,7 +19,6 @@ See :doc:`mantidplot`.
 
 MantidWorkbench
 ---------------
-- Fixed new tab names not incrementing correctly on KDE display environments (i.e. KUbuntu).
 
 See :doc:`mantidworkbench`.
 
