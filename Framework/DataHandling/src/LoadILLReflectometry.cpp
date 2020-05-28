@@ -987,6 +987,8 @@ double LoadILLReflectometry::sourceSampleDistance() const {
       pairSeparation = doubleFromRun("Distance.ChopperGap") / 100; // in [m]
       m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap",
                                                  pairSeparation, "meter", true);
+      m_localWorkspace->mutableRun().addProperty(
+          "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
     } catch (std::runtime_error &) {
       try {
         pairCentre = mmToMeter(doubleFromRun(
