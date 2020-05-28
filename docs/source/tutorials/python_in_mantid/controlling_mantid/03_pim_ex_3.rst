@@ -44,17 +44,33 @@ Using ILL Data
 ==============
 
 #. Load the IN6 file : in6_data.nxs
-#. :ref:<algm-ExtractSpectra> using X range 3100-3300 and WorkspaceIndex range 199-209. Use this region of interest for plotting.
+#. :ref:<algm-ExtractSpectra> using X range 470-490 and WorkspaceIndex range 199-209. Use this region of interest for plotting.
 
-#. Produce a 2D colorfill plot, using the imshow method, remembering to include the mantid projection when defining the figure and axes
-#. Set the colormap to `jet` and aspect='auto'
-#. Set the title to '2D - Colorfill'
+#. Produce a figure and axes for subplots with ncols=2, nrows=1, using the mantid projection and also set the figsize = (6,4)
+#. Produce a 2D colorfill plot, using the imshow method, on both subplots (indexed as axes[0] and axes[1])
+#. For both set the colormap to `jet` and aspect='auto'
+#. Overlay contour lines on the second subplot (axes[1]), colored white and with alpha = 0.5
+#. Set the title to 'Colorfill' for axes[0] and 'Contour' for axes[1]
 #. Add a colorbar to this figure
 #. Set the colorbar label to 'Counts ($\mu s$)$^{-1}$' 
 
-#. Get another figure and axes for subplots with ncols=3, nrows=1, and using the mantid3d projection and also set figsize = (12,3)
-#. Add a Contour, Surface and Wireframe plot to the subplot axes respectively (indexed as axes[0], axes[1], axes[2])
-#. Set the colormaps for the contour and surface plots to 'spring' and 'summer' and the color for the wireframe to 'darkmagenta'
-#. Set the title for each of the 3D plot axes, explaining their plot type (eg. Contour)
+#. Get another figure and axes for subplots with ncols=2, nrows=1, using the mantid3d projection and also set figsize = (8,3)
+#. Add a Surface and Wireframe plot to the subplot axes respectively (indexed as axes[0] and axes[1])
+#. Set the colormap for the surface plot to 'summer' and the color for the wireframe to 'darkmagenta'
+#. Set the title for each subplot as 'Surface' and 'Wireframe'
 
 #. Remember to show the plots
+
+
+    # Get a different set of figure and axes with 3 subplots for 3D plotting
+    fig3d,ax3d = plt.subplots(ncols=2, subplot_kw={'projection':'mantid3d'}, figsize = (8,3))
+
+    # 3D plot the data, and choose colormaps and colors
+    ax3d[0].plot_surface(data, cmap='summer')
+    ax3d[1].plot_wireframe(data, color='darkmagenta')
+
+    # Add titles to the 3D plots
+    ax3d[0].set_title("Surface")
+    ax3d[1].set_title("Wireframe")
+
+    #plt.show()# uncomment to show the plots

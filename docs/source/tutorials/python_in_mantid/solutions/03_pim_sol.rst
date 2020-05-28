@@ -94,46 +94,56 @@ B - Direct Matplotlib with SNS Data
 C - 2D and 3D Plot ILL Data
 ===========================
 
+.. plot::
+   :include-source:
 
-# import mantid algorithms, numpy and matplotlib
-from mantid.simpleapi import *
-import matplotlib.pyplot as plt
+    # import mantid algorithms, numpy and matplotlib
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
 
-# Load the data and extract the region of interest
-in6=Load('164198.nxs')
-in6=ExtractSpectra(in6, XMin=3100, XMax=3300, StartWorkspaceIndex=199, EndWorkspaceIndex=209)
+    # Load the data and extract the region of interest
+    data=Load('164198.nxs')
+    data=ExtractSpectra(data, XMin=470, XMax=490, StartWorkspaceIndex=199, EndWorkspaceIndex=209)
 
-'''2D Colorfill Plotting'''
+    '''2D Plotting - Colorfill and Contour'''
 
-# Get a figure and axes 
-figC,axesC = plt.subplots(subplot_kw={'projection':'mantid'})
+    # Get a figure and axes for 
+    figC,axC = plt.subplots(ncols=2, subplot_kw={'projection':'mantid'}, figsize = (6,4))
 
-# Plot the data as a 2D colorfill
-c=axesC.imshow(in6,cmap='jet', aspect='auto')
+    # Plot the data as a 2D colorfill
+    c=axC[0].imshow(data,cmap='jet', aspect='auto')
 
-# Change the title
-axesC.set_title("2D - Colorfill")
+    # Change the title
+    axC[0].set_title("Colorfill")
 
-# Add a Colorbar with a label
-cbar=figC.colorbar(c)
-cbar.set_label('Counts ($\mu s$)$^{-1}$')
+    # Plot the data as a 2D colorfill
+    c=axC[1].imshow(data,cmap='jet', aspect='auto')
 
-'''3D Plotting - Contour, Surface and Wireframe'''
+    # Overlay Contour lines
+    axC[1].contour(data, levels=np.linspace(0, 10000, 7), colors='white', alpha=0.5)
 
-# Get a different set of figure and axes with 3 subplots for 3D plotting
-fig,axes = plt.subplots(ncols=3, subplot_kw={'projection':'mantid3d'}, figsize = (12,3))
+    # Change the title
+    axC[1].set_title("Contour")
 
-# 3D plot the data, and choose colormaps and colors
-axes[0].contour(in6, cmap = 'spring')
-axes[1].plot_surface(in6, cmap='summer')
-axes[2].plot_wireframe(in6, color='darkmagenta')
+    # Add a Colorbar with a label
+    cbar=figC.colorbar(c)
+    cbar.set_label('Counts ($\mu s$)$^{-1}$')
 
-# Add titles to the 3D plots
-axes[0].set_title("Contour")
-axes[1].set_title("Surface")
-axes[2].set_title("Wireframe")
+    '''3D Plotting - Surface and Wireframe'''
 
-#plt.show # uncomment to show the plots
+    # Get a different set of figure and axes with 3 subplots for 3D plotting
+    fig3d,ax3d = plt.subplots(ncols=2, subplot_kw={'projection':'mantid3d'}, figsize = (8,3))
+
+    # 3D plot the data, and choose colormaps and colors
+    ax3d[0].plot_surface(data, cmap='summer')
+    ax3d[1].plot_wireframe(data, color='darkmagenta')
+
+    # Add titles to the 3D plots
+    ax3d[0].set_title("Surface")
+    ax3d[1].set_title("Wireframe")
+
+    #plt.show()# uncomment to show the plots
 
 
 
