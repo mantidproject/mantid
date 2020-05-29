@@ -262,7 +262,8 @@ public:
 
   void test_GetUBFromPeaksWorkspace() {
 
-    // integrate peak table without getting UB from lattice
+    // integrate peak table having altered the UB
+    // should find a new UB and overwrite it with the found UB (same as initial)
     OrientedLattice lattice = m_peaksWS->mutableSample().getOrientedLattice();
     auto initialUB = lattice.getUB();
     // make tmp UB identity
@@ -317,6 +318,18 @@ public:
     const auto &peak = integratedPeaksWS->getPeak(0);
     const auto &peak_getUB = integratedPeaksWS_getUB->getPeak(0);
     TS_ASSERT_DELTA(peak.getIntensity(), peak_getUB.getIntensity(), 1e-15);
+
+    // clear the UB and re-run (should throw error)
+    tmp_peaksWS->mutableSample().clearOrientedLattice();
+    IntegrateEllipsoids alg_noUB;
+    alg_noUB.setChild(true);
+    alg_noUB.setRethrows(true);
+    alg_noUB.initialize();
+    alg_noUB.setProperty("InputWorkspace", m_eventWS);
+    alg_noUB.setProperty("PeaksWorkspace", tmp_peaksWS);
+    alg_noUB.setProperty("GetUBFromPeaksWorkspace", true);
+    alg_noUB.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS(alg_noUB.execute(), std::runtime_error);
   }
 
   void test_execution_events() {

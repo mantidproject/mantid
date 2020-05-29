@@ -367,7 +367,7 @@ void IntegrateEllipsoids::exec() {
   bool getUB = getProperty("GetUBFromPeaksWorkspace");
 
   // getUB only valid if peak workspace has a UB matrix
-  if (!(in_peak_ws->sample().hasOrientedLattice()) & getUB) {
+  if (!(in_peak_ws->sample().hasOrientedLattice()) && getUB) {
     throw std::runtime_error("Peaks workspace needs a oriented lattice for "
                              "GetUBFromPeaksWorkspace is true");
   }
@@ -439,8 +439,7 @@ void IntegrateEllipsoids::exec() {
     auto goniometerMatrix = peak_ws->run().getGoniometerMatrix();
     // get UB etc. and rotate by goniometer matrix
     UB = goniometerMatrix * lattice.getUB();
-    modUB = goniometerMatrix *
-            lattice.getModUB(); // what happedn when this is empty
+    modUB = goniometerMatrix * lattice.getModUB();
     modHKL = lattice.getModHKL();
     maxOrder = lattice.getMaxOrder();
     CT = lattice.getCrossTerm();
