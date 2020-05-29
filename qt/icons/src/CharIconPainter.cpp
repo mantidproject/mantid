@@ -8,6 +8,7 @@
 #include "MantidQtIcons/Icon.h"
 #include <QVariant>
 #include <cmath>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace Icons {
