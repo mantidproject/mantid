@@ -1,6 +1,7 @@
 set(TEST_PY_FILES
   DrillTableWidgetTest.py
   DrillModelTest.py
+  DrillPresenterTest.py
   DrillViewTest.py
   DrillTest.py
   ParameterControllerTest.py

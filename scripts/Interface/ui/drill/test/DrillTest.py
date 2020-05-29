@@ -24,7 +24,7 @@ class DrillTest(unittest.TestCase):
         self.model = DrillModel()
         self.presenter = DrillPresenter(self.model, self.view)
         # select a supported instrument
-        self.presenter.on_instrument_changed("D22")
+        self.presenter.instrumentChanged("D22")
 
     def select_cell(self, row, column, modifier):
         # find the middle of the cell
@@ -69,13 +69,13 @@ class DrillTest(unittest.TestCase):
     ###########################################################################
 
     def test_sans_instrument(self):
-        self.presenter.on_instrument_changed("D22")
+        self.presenter.instrumentChanged("D22")
         self.assertEqual(self.model.acquisitionMode, "SANS")
         self.assertEqual(self.view.table.columnCount(),
                          len(self.model.columns))
 
     def test_add_rows(self):
-        self.presenter.on_instrument_changed("D22")
+        self.presenter.instrumentChanged("D22")
         self.assertEqual(self.view.table.rowCount(), 1)
         self.assertEqual(len(self.model.samples), 1)
         # add through the icon
@@ -86,7 +86,7 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(len(self.model.samples), 3)
 
     def test_del_rows(self):
-        self.presenter.on_instrument_changed("D22")
+        self.presenter.instrumentChanged("D22")
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
@@ -117,7 +117,7 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(len(self.model.samples), 0)
 
     def test_cell_modification(self):
-        self.presenter.on_instrument_changed("D22")
+        self.presenter.instrumentChanged("D22")
 
         # edit the first cell
         self.edit_cell(0, 0)
@@ -138,7 +138,7 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.model.samples[0]["SampleRuns"], "test")
 
     def test_erase_row(self):
-        self.presenter.on_instrument_changed("D22")
+        self.presenter.instrumentChanged("D22")
 
         self.view.table.addRow(0)
         # add contents (last column has a special treatment !)
@@ -167,7 +167,7 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(len(self.model.samples[1]), 0)
 
     def test_cut_copy_paste(self):
-        self.presenter.on_instrument_changed("D22")
+        self.presenter.instrumentChanged("D22")
 
         # add contents
         for i in range(self.view.table.columnCount() - 1):
