@@ -77,6 +77,7 @@ class SliceViewerDataView(QWidget):
         self.fig.set_tight_layout(True)
         self.ax = None
         self.axx, self.axy = None, None
+        self.image = None
         self._grid_on = False
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = FigureCanvas(self.fig)
@@ -96,7 +97,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
         self.mpl_toolbar.linePlotsClicked.connect(self.on_line_plots_toggle)
-        self.mpl_toolbar.homeClicked.connect(self.reset_image_view_to_data_limits)
+        self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
 
@@ -207,6 +208,10 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
+        extent = self.image.get_extent()
+        self.ax.set_xlim(extent[0], extent[1])
+        self.ax.set_ylim(extent[2], extent[3])
+
         self.draw_plot()
 
     def plot_MDH_nonorthogonal(self, ws, **kwargs):
@@ -224,8 +229,16 @@ class SliceViewerDataView(QWidget):
 
     def plot_matrix(self, ws, **kwargs):
         """
-        clears the plot and creates a new one using a MatrixWorkspace
+        clears the plot and creates a new one using a MatrixWorkspace keeping
+        the axes limits that have already been set
         """
+        old_extent = None
+        if self.image is not None:
+            old_extent = self.image.get_extent()
+            if self.image.transpose != self.dimensions.transpose:
+                e1, e2, e3, e4 = old_extent
+                old_extent = e3, e4, e1, e2
+
         self.clear_image()
         self.image = imshow_sampling(self.ax,
                                      ws,
@@ -234,10 +247,9 @@ class SliceViewerDataView(QWidget):
                                      interpolation='none',
                                      transpose=self.dimensions.transpose,
                                      norm=self.colorbar.get_norm(),
+                                     extent=old_extent,
                                      **kwargs)
-        extent = self.image.get_extent()
-        self.ax.set_xlim(extent[0], extent[1])
-        self.ax.set_ylim(extent[2], extent[3])
+
         self.draw_plot()
 
     def clear_image(self):
@@ -266,12 +278,9 @@ class SliceViewerDataView(QWidget):
         self.update_line_plot_labels()
         self.canvas.draw_idle()
 
-    def reset_image_view_to_data_limits(self):
-        """Reset the image view limits to encompass all of the data"""
-        lim = self.ax.dataLim
-        self.ax.set_xlim(*lim.intervalx)
-        self.ax.set_ylim(*lim.intervaly)
-        self.canvas.draw_idle()
+    def on_home_clicked(self):
+        """Reset the view to encompass all of the data"""
+        self.presenter.show_all_data_requested()
 
     def update_plot_data(self, data):
         """
@@ -340,6 +349,16 @@ class SliceViewerDataView(QWidget):
             del self.yfig
         except AttributeError:
             pass
+
+    def set_axes_limits(self, xlim, ylim):
+        """
+        Set the view limits on the image axes to the given extents
+        :param xlim: 2-tuple of (xmin, xmax)
+        :param ylim: 2-tuple of (ymin, ymax)
+        """
+        self.ax.set_xlim(xlim)
+        self.ax.set_ylim(ylim)
+        self.canvas.draw_idle()
 
     def set_grid_on(self):
         """

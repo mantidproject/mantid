@@ -399,6 +399,56 @@ class SliceViewerModelTest(unittest.TestCase):
             x_proj=ArraysEqual(np.array([0, 1, 0])),
             y_proj=ArraysEqual(np.array([0, 0, 1])))
 
+    def test_get_dim_limits_returns_limits_for_display_dimensions_for_matrix(self):
+        model = SliceViewerModel(self.ws2d_histo)
+        data_limits = ((10, 30), (4, 8))
+
+        limits = model.get_dim_limits(slicepoint=(None, None), transpose=False)
+        self.assertEqual(data_limits, limits)
+        limits = model.get_dim_limits(slicepoint=(None, None), transpose=True)
+        self.assertEqual((data_limits[1], data_limits[0]), limits)
+
+    def test_get_dim_limits_returns_limits_for_display_dimensions_for_md(self):
+        model = SliceViewerModel(self.ws_MDE_3D)
+        data_limits = ((-3, 3), (-4, 4), (-5, 5))
+
+        limits = model.get_dim_limits(slicepoint=(None, None, 0), transpose=False)
+        self.assertEqual(data_limits[:2], limits)
+        limits = model.get_dim_limits(slicepoint=(None, None, 0), transpose=True)
+        self.assertEqual((data_limits[1], data_limits[0]), limits)
+        limits = model.get_dim_limits(slicepoint=(None, 0, None), transpose=False)
+        self.assertEqual((data_limits[0], data_limits[2]), limits)
+        limits = model.get_dim_limits(slicepoint=(None, 0, None), transpose=True)
+        self.assertEqual((data_limits[2], data_limits[0]), limits)
+
+    def test_get_dim_limits_raises_error_num_display_dims_ne_2(self):
+        model = SliceViewerModel(self.ws_MDE_3D)
+
+        self.assertRaises(AssertionError,
+                          model.get_dim_limits,
+                          slicepoint=(0, 0, 0),
+                          transpose=False)
+        self.assertRaises(AssertionError,
+                          model.get_dim_limits,
+                          slicepoint=(None, 0, 0),
+                          transpose=False)
+        self.assertRaises(AssertionError,
+                          model.get_dim_limits,
+                          slicepoint=(None, None, None),
+                          transpose=False)
+
+    def test_get_dim_limits_raises_if_slicepoint_length_ne_ndims(self):
+        model = SliceViewerModel(self.ws_MDE_3D)
+
+        self.assertRaises(AssertionError,
+                          model.get_dim_limits,
+                          slicepoint=(None, None),
+                          transpose=False)
+        self.assertRaises(AssertionError,
+                          model.get_dim_limits,
+                          slicepoint=(None, None, 0, 0),
+                          transpose=False)
+
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, units,
                                              has_oriented_lattice):

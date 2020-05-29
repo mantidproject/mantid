@@ -143,9 +143,9 @@ def imshow_sampling(axes,
     if not extent:
         extent = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
                   workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
-    if transpose:
-        e1, e2, e3, e4 = extent
-        extent = e3, e4, e1, e2
+        if transpose:
+            e1, e2, e3, e4 = extent
+            extent = e3, e4, e1, e2
 
     # from matplotlib.axes.Axes.imshow
     if norm is not None and not isinstance(norm, matplotlib.colors.Normalize):
@@ -181,6 +181,9 @@ def imshow_sampling(axes,
     im.set_extent(im.get_extent())
 
     axes.add_image(im)
-    im.connect_events()
+    if extent:
+        axes.set_xlim(extent[0], extent[1])
+        axes.set_ylim(extent[2], extent[3])
 
+    im.connect_events()
     return im

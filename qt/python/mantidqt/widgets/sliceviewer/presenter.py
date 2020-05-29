@@ -119,6 +119,11 @@ class SliceViewer(object):
                                               PeaksViewerPresenter.Event.SlicePointChanged)
         self.update_plot_data()
 
+    def show_all_data_requested(self):
+        """Instructs the view to show all data"""
+        self.view.data_view.set_axes_limits(*self.model.get_dim_limits(
+            self.get_slicepoint(), self.view.data_view.dimensions.transpose))
+
     def update_plot_data_MDH(self):
         """
         Update the view to display an updated MDHistoWorkspace slice/cut
