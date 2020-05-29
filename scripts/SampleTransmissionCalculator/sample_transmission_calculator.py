@@ -19,8 +19,8 @@ class SampleTransmissionCalculator(QtWidgets.QMainWindow):
         self.window = QtWidgets.QMainWindow()
         view = SampleTransmissionCalculatorView(parent=self)
         self.setCentralWidget(view)
+        model = SampleTransmissionCalculatorModel()
 
-        model = SampleTransmissionCalculatorModel
         self.presenter = SampleTransmissionCalculatorPresenter(view, model)
         self.setWindowTitle("Sample Transmission Calculator")
 
