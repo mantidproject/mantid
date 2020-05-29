@@ -35,6 +35,7 @@ from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
+from workbench.plotting.plothelppages import PlotHelpPages
 
 
 def _catch_exceptions(func):
@@ -205,6 +206,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
+            self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
             self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
                 self.generate_plot_script_clipboard)
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
@@ -322,6 +324,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def launch_plot_help(self):
+        PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
 
     def grid_toggle(self, on):
         """Toggle grid lines on/off"""

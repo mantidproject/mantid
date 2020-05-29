@@ -332,6 +332,16 @@ public:
   void closeHelpWindow();
 };
 
+class HelpWindow {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/HelpWindow.h"
+using namespace MantidQt::API;
+%End
+public:
+  static void showPage(QWidget * parent, const QString &url);
+};
+
+
 // ---------------------------------
 // WorkspaceWidget and dependencies
 // ---------------------------------

@@ -39,6 +39,7 @@ Improvements
 
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
+- Plots now have a Help button on the toolbar, which will direct the user to a relevant documentation page informing them about that type of plot.
 
 Bugfixes
 ########
