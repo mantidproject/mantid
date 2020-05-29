@@ -87,7 +87,7 @@ const std::string LoadILLPolarizedDiffraction::summary() const {
  * Constructor
  */
 LoadILLPolarizedDiffraction::LoadILLPolarizedDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_instNames({"D7"}) {}
+    : IFileLoader<NexusDescriptor>() {}
 
 /**
  * Initialize the algorithm's properties.
@@ -99,8 +99,8 @@ void LoadILLPolarizedDiffraction::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  std::vector<std::string> positionCalibrationOptions{"None", "Nexus",
-                                                      "YIGFile"};
+  const std::vector<std::string> positionCalibrationOptions{"None", "Nexus",
+                                                            "YIGFile"};
   declareProperty(
       "PositionCalibration", "None",
       std::make_shared<StringListValidator>(positionCalibrationOptions),
@@ -117,6 +117,18 @@ void LoadILLPolarizedDiffraction::init() {
                           "PositionCalibration", IS_EQUAL_TO, "YIGFile"));
 }
 
+std::map<std::string, std::string>
+LoadILLPolarizedDiffraction::validateInputs() {
+  std::map<std::string, std::string> issues;
+  if (getPropertyValue("PositionCalibration") == "YIGFile" &&
+      getPropertyValue("YIGFilename") == "") {
+    issues["PositionCalibration"] =
+        "YIG-based position calibration of detectors requested but "
+        "the file was not provided.";
+  }
+  return issues;
+}
+
 /**
  * Executes the algorithm.
  */
@@ -124,16 +136,16 @@ void LoadILLPolarizedDiffraction::exec() {
 
   Progress progress(this, 0, 1, 2);
 
-  m_filename = getPropertyValue("Filename");
-
-  m_outputWorkspace = std::make_shared<API::WorkspaceGroup>();
-  setProperty("OutputWorkspace", m_outputWorkspace);
+  m_fileName = getPropertyValue("Filename");
+  m_outputWorkspaceGroup = std::make_shared<API::WorkspaceGroup>();
 
   progress.report("Loading the detector polarization analysis data");
   loadData();
 
   progress.report("Loading the metadata");
   loadMetaData();
+
+  setProperty("OutputWorkspace", m_outputWorkspaceGroup);
 }
 
 /**
@@ -143,7 +155,7 @@ void LoadILLPolarizedDiffraction::exec() {
 void LoadILLPolarizedDiffraction::loadData() {
 
   // open the root entry
-  NXRoot dataRoot(m_filename);
+  NXRoot dataRoot(m_fileName);
 
   // read each entry
   for (auto entryNumber = 0;
@@ -166,8 +178,10 @@ void LoadILLPolarizedDiffraction::loadData() {
       auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
       m_numberOfChannels = size_t(timeOfFlightInfo[1]);
       auto tofDelay = timeOfFlightInfo[2];
-      for (auto channel_no = 0; channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
-        axis.push_back(static_cast<double>(tofDelay + channel_no * channelWidth));
+      for (auto channel_no = 0;
+           channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
+        axis.push_back(
+            static_cast<double>(tofDelay + channel_no * channelWidth));
       }
     } else {
       m_numberOfChannels = 1;
@@ -188,15 +202,13 @@ void LoadILLPolarizedDiffraction::loadData() {
 
     // Set x axis units
     if (acquisitionMode[0] == TOF_MODE_ON) {
-      std::shared_ptr<Kernel::Units::Label> lblUnit =
-          std::dynamic_pointer_cast<Kernel::Units::Label>(
-              UnitFactory::Instance().create("Label"));
+      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
+          UnitFactory::Instance().create("Label"));
       lblUnit->setLabel("Time", Units::Symbol::Microsecond);
       workspace->getAxis(0)->unit() = lblUnit;
     } else {
-      std::shared_ptr<Kernel::Units::Label> lblUnit =
-          std::dynamic_pointer_cast<Kernel::Units::Label>(
-              UnitFactory::Instance().create("Label"));
+      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
+          UnitFactory::Instance().create("Label"));
       lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
       workspace->getAxis(0)->unit() = lblUnit;
     }
@@ -216,9 +228,9 @@ void LoadILLPolarizedDiffraction::loadData() {
       auto &errors = workspace->mutableE(pixel_no);
       for (auto channel_no = 0;
            channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
-        unsigned int y = data(pixel_no, 0, channel_no);
-        spectrum[channel_no] = y;
-        errors[channel_no] = sqrt(y);
+        unsigned int counts = data(pixel_no, 0, channel_no);
+        spectrum[channel_no] = counts;
+        errors[channel_no] = std::sqrt(counts);
       }
       workspace->mutableX(pixel_no) = axis;
     }
@@ -236,22 +248,22 @@ void LoadILLPolarizedDiffraction::loadData() {
       auto &errors = workspace->mutableE(monitor_no);
       for (auto channel_no = 0;
            channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
-        unsigned int y = monitorData(0, 0, channel_no);
-        spectrum[channel_no] = y;
-        errors[channel_no] = sqrt(y);
+        unsigned int counts = monitorData(0, 0, channel_no);
+        spectrum[channel_no] = counts;
+        errors[channel_no] = std::sqrt(counts);
       }
       workspace->mutableX(monitor_no) = axis;
     }
 
     // load the instrument if it has not been created
-    if (m_outputWorkspace->getNumberOfEntries() == 0) {
+    if (m_outputWorkspaceGroup->getNumberOfEntries() == 0) {
       loadInstrument(workspace);
       // rotate detectors to their position during measurement if position
       // calibration is requested
       moveTwoTheta(entry, workspace);
     }
     // adds the current entry workspace to the output group
-    m_outputWorkspace->addWorkspace(workspace);
+    m_outputWorkspaceGroup->addWorkspace(workspace);
 
     entry.close();
   }
@@ -259,20 +271,21 @@ void LoadILLPolarizedDiffraction::loadData() {
 }
 
 /**
- * Dumps the metadata from the whole file to SampleLogs
+ * Dumps the metadata from the file for each entry separately
  */
 void LoadILLPolarizedDiffraction::loadMetaData() {
 
   // Open NeXus file
   NXhandle nxHandle;
-  NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
+  NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
     for (auto workspaceId = 0;
-         workspaceId < m_outputWorkspace->getNumberOfEntries(); workspaceId++) {
+         workspaceId < m_outputWorkspaceGroup->getNumberOfEntries();
+         ++workspaceId) {
       MatrixWorkspace_sptr workspace =
           std::dynamic_pointer_cast<API::MatrixWorkspace>(
-              m_outputWorkspace->getItem(workspaceId));
+              m_outputWorkspaceGroup->getItem(workspaceId));
       auto const entryName = std::string("entry" + std::to_string(workspaceId));
       m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(),
                                          entryName);
@@ -293,22 +306,23 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace() {
 
   API::MatrixWorkspace_sptr workspace;
 
-  if (m_outputWorkspace->getNumberOfEntries() == 0) {
+  if (m_outputWorkspaceGroup->getNumberOfEntries() == 0) {
     workspace = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
   } else {
-    API::Workspace_sptr tmp = (m_outputWorkspace->getItem(0))->clone();
+    API::Workspace_sptr tmp = (m_outputWorkspaceGroup->getItem(0))->clone();
     workspace = std::dynamic_pointer_cast<API::MatrixWorkspace>(tmp);
   }
   return workspace;
 }
 /**
  * Runs LoadInstrument as child to link the instrument to workspace
+ * @param workspace : workspace with data from the first entry
  */
 void LoadILLPolarizedDiffraction::loadInstrument(
-    API::MatrixWorkspace_sptr &workspace) {
+    API::MatrixWorkspace_sptr workspace) {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
+  loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
@@ -322,7 +336,7 @@ void LoadILLPolarizedDiffraction::loadInstrument(
  * @return : vector of pixel 2theta positions in the chosen bank
  */
 std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
-    const API::MatrixWorkspace_sptr &workspace, const NXEntry &entry,
+    const API::MatrixWorkspace_sptr workspace, const NXEntry &entry,
     int bankId) {
 
   std::vector<double> twoTheta(static_cast<int>(D7_NUMBER_PIXELS_BANK));
@@ -363,7 +377,7 @@ auto pixel = instrument->getDetector(
  * @param workspace : workspace containing the instrument being moved
  */
 void LoadILLPolarizedDiffraction::moveTwoTheta(
-    const NXEntry &entry, API::MatrixWorkspace_sptr &workspace) {
+    const NXEntry &entry, API::MatrixWorkspace_sptr workspace) {
 
   Instrument_const_sptr instrument = workspace->getInstrument();
 
@@ -390,7 +404,8 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
             bank_no * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no + 1);
         const auto pixelIndex = componentInfo.indexOf(pixel->getComponentID());
         V3D position = pixel->getPos();
-        double const radius = sqrt(pow(position[0], 2) + pow(position[2], 2));
+        double const radius =
+            std::sqrt(pow(position[0], 2) + pow(position[2], 2));
         position = V3D(
             radius *
                 sin(DEG_TO_RAD * (twoThetaPixels[pixel_no] - twoThetaBank[0])),
@@ -401,20 +416,6 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
       }
     }
   }
-}
-
-/**
- * Makes up the full path of the relevant IDF
- * @param instName : the name of the instrument
- * @return : the full path to the corresponding IDF
- */
-std::string LoadILLPolarizedDiffraction::getInstrumentFilePath(
-    const std::string &instName) const {
-
-  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
-  Poco::Path file(instName + "_Definition.xml");
-  Poco::Path fullPath(directory, file);
-  return fullPath.toString();
 }
 
 } // namespace DataHandling
