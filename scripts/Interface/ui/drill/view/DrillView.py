@@ -428,6 +428,7 @@ class DrillView(QMainWindow):
             columns (list(str)): list of columns titles
         """
         self.table.clear()
+        self.invalidCells = set()
         self.table.setRowCount(0)
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
