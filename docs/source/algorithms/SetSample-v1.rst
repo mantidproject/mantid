@@ -29,13 +29,18 @@ respective argument.
 Environment
 ###########
 
-Specifies the sample environment kit to be used. There are two keywords:
+Specifies the sample environment kit to be used. There are two possibilities:
+
+Environment Definition File
+---------------------------
+
+In this case the environment kit must be defined in the XML format. See :ref:`SampleEnvironment` concept page for further details on how the creating
+a definition file.
+
+Two keywords must be specified in the ``Environment`` dictionary:
 
 - ``Name``: The name of the predefined kit (required)
 - ``Container``: The id of the container within the predefined kit. (required if there is more than one container defined for the kit).
-
-See :ref:`SampleEnvironment` concept page for further details on how the creating
-a definition file.
 
 The name of a kit is must be unique for a given instrument. The following
 procedure is used when trying to find a named definition, e.g ``CRYO-01``:
@@ -63,14 +68,20 @@ procedure is used when trying to find a named definition, e.g ``CRYO-01``:
 
   - repeat for the facility directories if not found in for the specific instrument
 
+Container Geometry and Material
+-------------------------------
+
+You can specify the geometry and the material of a single container directly with the ``ContainerGeometry`` and ``ContainerMaterial`` dictionaries.
+See the sections below for the available keywords to configure those.
+
 Geometry
 ########
 
-Specifies the shape of the sample. This can be specified in the following ways:
+Specifies the shape of the sample (and container). This can be specified in the following ways:
 
 - a sample geometry can be defined in the environment definition file using either CSG or Mesh geometry.
   If this approach is taken then the Geometry property can be left blank
-- if an environment is specified that already knows the geometry of the sample and that geometry 
+- if an environment is specified that already knows the geometry of the sample and that geometry
   is defined using a CSG shape (ie non-mesh shape) then the fields of the known geometry container
   can be customized. See :ref:`SampleEnvironment` concept page for further details
 - a full definition of the shape can be supplied in this property.
@@ -82,11 +93,13 @@ be in centimeters):
 - ``FlatPlate``: Width, Height, Thick, Center, Angle
 - ``Cylinder``: Height, Radius, Center
 - ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center
-- ``CSG``: Value is a string containing any generic shape as detailed in
-  :ref:`HowToDefineGeometricShape`
+- ``FlatPlateHolder``: Width, Height, Thick, Center, Angle, FrontThick, BackThick. This is a ``CSG`` union of 2 ``FlatPlate``s tightly wrapping a ``FlatPlate`` sample.
+- ``HollowCylinderHolder``: Height, InnerRadius, InnerOuterRadius, OuterInnerRadius, OuterRadius, Center. This is a ``CSG`` union of 2 ``HollowCylinder``s tightly wrapping a ``HollowCylinder`` sample.
+- ``CSG``: Value is a string containing any generic shape as detailed in :ref:`HowToDefineGeometricShape`
 
 The ``Center`` key is expected to be a list of three values indicating the :python:`[X,Y,Z]`
-position of the center. The reference frame of the defined instrument is used to
+position of the center, which would be the geometrical center of the shape.
+The reference frame of the defined instrument is used to
 set the coordinate system for the shape.
 
 The ``Angle`` argument for a flat plate shape is expected to be in degrees and is defined as
@@ -189,6 +202,57 @@ used for the dictionary parameters.
    # Set sample geometry of workspace to this CSG object Sphere
    SetSample(ws, Geometry={'Shape': 'CSG', 'Value': sphere_xml})
 
+**Example - Flat sample in a container**
+
+.. testcode:: Ex5
+
+   # A fake host workspace, replace this with your real one.
+   ws = CreateSampleWorkspace()
+   SetSample(ws,
+           Geometry={'Shape': 'FlatPlate', 'Height': 4.0,
+                     'Width': 2.0, 'Thick': 1.0,
+                     'Center': [0.,0.,0.]},
+           Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                     'SampleNumberDensity': 0.1},
+           ContainerGeometry={'Shape': 'FlatPlateHolder', 'Height': 4.0,
+                     'Width': 2.0, 'Thick': 1.0, 'FrontThick': 0.3, 'BackThick': 0.4,
+                     'Center': [0.,0.,0.]},
+           ContainerMaterial={'ChemicalFormula': 'Al',
+                     'SampleNumberDensity': 0.01})
+
+**Example - Cylinder sample in a hollow cylinder container**
+
+.. testcode:: Ex6
+
+   # A fake host workspace, replace this with your real one.
+   ws = CreateSampleWorkspace()
+   SetSample(ws,
+           Geometry={'Shape': 'Cylinder', 'Height': 4.0,
+                     'Radius': 2.0, 'Center': [0.,0.,0.]},
+           Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                     'SampleNumberDensity': 0.1},
+           ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0,
+                     'InnerRadius': 2.0, 'OuterRadius': 2.3,
+                     'Center': [0.,0.,0.]},
+           ContainerMaterial={'ChemicalFormula': 'Al',
+                     'SampleNumberDensity': 0.01})
+
+**Example - Hollow cylinder sample in a hollow cylinder holder container**
+
+.. testcode:: Ex7
+
+  # A fake host workspace, replace this with your real one.
+  ws = CreateSampleWorkspace()
+  SetSample(ws,
+          Geometry={'Shape': 'HollowCylinder', 'Height': 4.0,
+                    'InnerRadius': 2.0, 'OuterRadius': 3.0, 'Center': [0.,0.,0.]},
+          Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                    'SampleNumberDensity': 0.1},
+          ContainerGeometry={'Shape': 'HollowCylinderHolder', 'Height': 4.0,
+                    'InnerRadius': 1.5, 'InnerOuterRadius': 2.0, 'OuterInnerRadius': 3.0, 'OuterRadius': 4.0,
+                    'Center': [0.,0.,0.]},
+          ContainerMaterial={'ChemicalFormula': 'Al',
+                    'SampleNumberDensity': 0.01})
 
 .. categories::
 
