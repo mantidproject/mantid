@@ -22,7 +22,7 @@ class DrillView(QMainWindow):
 
     # Signals that the view can send and data that they include
     instrument_changed = Signal(str)       # the instrument
-    technique_changed = Signal(int)        # the technique index
+    acquisition_mode_changed = Signal(str) # the acquisition mode
     row_added = Signal(int)                # the row index
     row_deleted = Signal(int)              # the row index
     data_changed = Signal(int, int, str)   # the row and column indexes and the contents
@@ -77,8 +77,8 @@ class DrillView(QMainWindow):
                 lambda i : self.instrument_changed.emit(i)
                 )
 
-        self.techniqueSelector.activated.connect(
-                lambda t : self.technique_changed.emit(t)
+        self.modeSelector.currentTextChanged.connect(
+                lambda a : self.acquisition_mode_changed.emit(a)
                 )
 
         self.datadirs.setIcon(icons.get_icon("mdi.folder"))
@@ -399,18 +399,26 @@ class DrillView(QMainWindow):
         """
         self.instrumentselector.setTechniques(techniques)
 
-    def set_available_techniques(self, techniques):
+    def set_available_modes(self, modes):
         """
-        Set the available techniques in the comboxbox.
+        Set the available acquisition modes in the comboxbox.
 
         Args:
-            techniques (list(str)): list of techniques
+            modes (list(str)): list of acquisition modes
         """
-        self.techniqueSelector.clear()
-        self.techniqueSelector.addItems(techniques)
+        self.modeSelector.blockSignals(True)
+        self.modeSelector.clear()
+        self.modeSelector.addItems(modes)
+        self.modeSelector.blockSignals(False)
 
-    def set_technique(self, technique):
-        self.techniqueSelector.setCurrentIndex(technique)
+    def set_acquisition_mode(self, mode):
+        """
+        Set the current acquisition mode in the combobox.
+
+        Args:
+            mode (str): acquisition mode
+        """
+        self.modeSelector.setCurrentText(mode)
 
     def set_table(self, columns):
         """
@@ -432,6 +440,8 @@ class DrillView(QMainWindow):
         Args:
             rows_contents (list(list(str))): list of rows contents
         """
+        if (not self.table.columnCount()):
+            return
         if rows_contents:
             self.blockSignals(True)
             self.table.setRowCount(len(rows_contents))

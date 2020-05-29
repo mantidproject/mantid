@@ -60,7 +60,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QComboBox" name="techniqueSelector">
+       <widget class="QComboBox" name="modeSelector">
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToContents</enum>
         </property>
@@ -382,7 +382,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

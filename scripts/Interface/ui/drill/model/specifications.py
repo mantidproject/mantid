@@ -7,23 +7,47 @@
 
 class RundexSettings(object):
 
-    # techniques names
+    # instruments
+    D11 =    "D11"
+    D16 =    "D16"
+    D22 =    "D22"
+    D33 =    "D33"
+    D17 =    "D17"
+    FIGARO = "FIGARO"
+
+    # techniques
     SANS = "SANS"
     REFL = "Reflectometry"
 
-    # correspondance between instruments and technique(s)
-    TECHNIQUES = {
-            'D11':    [SANS],
-            'D16':    [SANS],
-            'D22':    [SANS],
-            'D33':    [SANS],
-            'D17':    [REFL],
-            'FIGARO': [REFL]
+    # acquisition modes
+    SANS_ACQ =   "SANS"
+    OMEGA_SCAN = "Omega Scan"
+    REFL_POL =   "Polarized"
+    REFL_NPOL =  "Unpolarized"
+
+    # correspondance between instrument and technique
+    TECHNIQUE = {
+            D11:    SANS,
+            D16:    SANS,
+            D22:    SANS,
+            D33:    SANS,
+            D17:    REFL,
+            FIGARO: REFL
             }
 
-    # parameters for each techniques
+    # correspondance between instrument and acquisition mode
+    ACQUISITION_MODES = {
+            D11:    [SANS_ACQ],
+            D16:    [SANS_ACQ, OMEGA_SCAN],
+            D22:    [SANS_ACQ],
+            D33:    [SANS_ACQ],
+            D17:    [REFL_POL, REFL_NPOL],
+            FIGARO: [REFL_NPOL]
+            }
+
+    # parameters for each acquisition mode
     COLUMNS = {
-            SANS: [
+            SANS_ACQ: [
                 "SampleRuns",
                 "SampleTransmissionRuns",
                 "AbsorberRuns",
@@ -38,22 +62,29 @@ class RundexSettings(object):
                 "OutputWorkspace",
                 "CustomOptions"
                 ],
-            REFL: [
+            OMEGA_SCAN: [
+                ],
+            REFL_POL: [
                 "DirectBeam",
                 "ReflectedBeam",
                 "AngleOption",
                 "Method"
+                ],
+            REFL_NPOL: [
                 ]
             }
 
-    # algo name for each techniques
-    ALGORITHMS = {
-            SANS: "SANSILLAutoProcess",
-            REFL: "ReflectometryILLAutoProcess"
+    # algo name for each acquisition mode
+    ALGORITHM = {
+            SANS_ACQ:   "SANSILLAutoProcess",
+            OMEGA_SCAN: None,
+            REFL_POL:   "ReflectometryILLAutoProcess",
+            REFL_NPOL:  "ReflectometryILLAutoProcess"
             }
 
+    # settings for each acquisition mode
     SETTINGS = {
-            SANS: {
+            SANS_ACQ : {
                 "ThetaDependent": True,
                 "SensitivityMaps": None,
                 "DefaultMaskFile": None,
@@ -75,6 +106,12 @@ class RundexSettings(object):
                 "DeltaQ": 0,
                 "IQxQyLogBinning": False,
                 "PanelOutputWorkspaces": None
+                },
+            OMEGA_SCAN : {
+                },
+            REFL_POL : {
+                },
+            REFL_NPOL : {
                 }
             }
 

@@ -70,7 +70,7 @@ class DrillTest(unittest.TestCase):
 
     def test_sans_instrument(self):
         self.presenter.on_instrument_changed("D22")
-        self.assertEqual(self.model.technique, "SANS")
+        self.assertEqual(self.model.acquisitionMode, "SANS")
         self.assertEqual(self.view.table.columnCount(),
                          len(self.model.columns))
 

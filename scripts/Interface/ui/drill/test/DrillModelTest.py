@@ -13,24 +13,33 @@ from Interface.ui.drill.model.DrillModel import DrillModel, DrillException
 
 class DrillModelTest(unittest.TestCase):
 
-    TECHNIQUES = {
-            "i1": ["t1"]
+    TECHNIQUE = {
+            "i1" : "t1"
+            }
+
+    ACQUISITION_MODES = {
+            "i1": ["a1", "a2"]
             }
 
     COLUMNS = {
-            "t1": ["c1", "c2"]
+            "a1": ["c1", "c2"],
+            "a2": ["c3", "c4"]
             }
 
-    ALGORITHMS = {
-            "t1": "a1"
+    ALGORITHM = {
+            "a1": "a1",
+            "a2": "a2"
             }
 
     SETTINGS = {
-            "t1": {
+            "a1": {
                 "str": "test",
                 "int": 1,
                 "float": "0.9",
                 "bool": False
+                },
+            "a2": {
+                "test": "test"
                 }
             }
 
@@ -60,29 +69,36 @@ class DrillModelTest(unittest.TestCase):
 
         # mock specifications
         patch = mock.patch.dict(
-                'Interface.ui.drill.model.DrillModel.RundexSettings.TECHNIQUES',
-                self.TECHNIQUES
+                'Interface.ui.drill.model.DrillModel.RundexSettings.TECHNIQUE',
+                self.TECHNIQUE, clear=True
                 )
         self.mTechniques = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
+                'Interface.ui.drill.model.DrillModel.RundexSettings.ACQUISITION_MODES',
+                self.ACQUISITION_MODES, clear=True
+                )
+        self.mAcq = patch.start()
+        self.addCleanup(patch.stop)
+
+        patch = mock.patch.dict(
                 'Interface.ui.drill.model.DrillModel.RundexSettings.COLUMNS',
-                self.COLUMNS
+                self.COLUMNS, clear=True
                 )
         self.mColumns = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.model.DrillModel.RundexSettings.ALGORITHMS',
-                self.ALGORITHMS
+                'Interface.ui.drill.model.DrillModel.RundexSettings.ALGORITHM',
+                self.ALGORITHM, clear=True
                 )
         self.mAlgo = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
                 'Interface.ui.drill.model.DrillModel.RundexSettings.SETTINGS',
-                self.SETTINGS
+                self.SETTINGS, clear=True
                 )
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
@@ -101,22 +117,96 @@ class DrillModelTest(unittest.TestCase):
 
         self.model = DrillModel()
 
+    def test_setInstrument(self):
+        # invalid instrument
+        self.mController.reset_mock()
+        self.model.setInstrument("test")
+        self.assertIsNone(self.model.instrument)
+        self.assertIsNone(self.model.acquisitionMode)
+        self.assertEqual(self.model.columns, list())
+        self.assertIsNone(self.model.algorithm)
+        self.assertEqual(self.model.settings, dict())
+        self.mController.assert_not_called()
+
+        # valid instrument
+        self.mController.reset_mock()
+        self.model.setInstrument("i1")
+        self.assertEqual(self.model.instrument, "i1")
+        self.assertEqual(self.model.acquisitionMode,
+                         self.ACQUISITION_MODES["i1"][0])
+        self.assertEqual(self.model.columns, self.COLUMNS["a1"])
+        self.assertEqual(self.model.algorithm, self.ALGORITHM["a1"])
+        self.mController.assert_called_once()
+
+    def test_getInstrument(self):
+        self.assertEqual(self.model.getInstrument(), self.model.instrument)
+
+    def test_getAvailableTechniques(self):
+        self.assertEqual(self.model.getAvailableTechniques(), ["t1"])
+
+    def test_setAcquisitionMode(self):
+        # invalid aquisition mode
+        self.mController.reset_mock()
+        ac = self.model.acquisitionMode
+        al = self.model.algorithm
+        co = self.model.columns
+        se = self.model.settings
+        self.model.setAcquisitionMode("test_invalid")
+        self.assertEqual(self.model.acquisitionMode, ac)
+        self.assertEqual(self.model.algorithm, al)
+        self.assertEqual(self.model.columns, co)
+        self.assertEqual(self.model.settings, se)
+        self.mController.assert_not_called()
+
+        # valide acquisition mode
+        self.mController.reset_mock()
+        self.model.setAcquisitionMode("a2")
+        self.assertNotEqual(self.model.acquisitionMode, ac)
+        self.assertEqual(self.model.acquisitionMode, "a2")
+        self.assertNotEqual(self.model.algorithm, al)
+        self.assertEqual(self.model.algorithm, self.ALGORITHM["a2"])
+        self.assertNotEqual(self.model.columns, co)
+        self.assertEqual(self.model.columns, self.COLUMNS["a2"])
+        self.assertNotEqual(self.model.settings, se)
+        self.assertEqual(self.model.settings, self.SETTINGS["a2"])
+        self.mController.assert_called_once()
+
+    def test_getAcquisitionMode(self):
+        self.assertEqual(self.model.getAcquisitionMode(),
+                         self.model.acquisitionMode)
+
+    def test_getAvailableAcquisitionModes(self):
+        self.model.setInstrument("i1")
+        self.assertEqual(self.model.getAvailableAcquisitionModes(),
+                         ["a1", "a2"])
+        self.model.setInstrument("test")
+        self.assertEqual(self.model.getAvailableAcquisitionModes(), [])
+
+    def test_initController(self):
+        self.mController.reset_mock()
+        self.model.algorithm = None
+        self.model._initController()
+        self.mController.assert_not_called()
+        self.model.algorithm = "a1"
+        self.model._initController()
+        self.mController.assert_called_once_with("a1")
+
     def test_setSettings(self):
-        self.assertEqual(self.model.settings, self.SETTINGS["t1"])
+        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
         self.model.setSettings({"str": "test2"})
-        self.assertNotEqual(self.model.settings, self.SETTINGS["t1"])
+        self.assertNotEqual(self.model.settings, self.SETTINGS["a1"])
         self.model.setSettings({"str": "test"})
-        self.assertEqual(self.model.settings, self.SETTINGS["t1"])
+        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
         self.model.setSettings({"str2": "test"})
-        self.assertEqual(self.model.settings, self.SETTINGS["t1"])
+        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
 
     def test_getSettings(self):
-        self.assertEqual(self.model.getSettings(), self.SETTINGS["t1"])
+        self.assertEqual(self.model.getSettings(), self.SETTINGS["a1"])
         self.assertEqual(self.model.getSettings(), self.model.settings)
 
     def test_getProcessingParameters(self):
         params = dict()
-        params.update(self.SETTINGS["t1"])
+        params.update(self.SETTINGS["a1"])
         params["OutputWorkspace"] = "sample_1"
         self.model.samples = [{}]
         self.assertEqual(self.model.getProcessingParameters(0), params)
@@ -165,7 +255,7 @@ class DrillModelTest(unittest.TestCase):
     def test_importRundexData(self):
         self.mJson.load.return_value = {
                 "Instrument": "i1",
-                "Technique": "t1",
+                "Technique": "a1",
                 "GlobalSettings": {},
                 "Samples": []
                 }
@@ -176,10 +266,10 @@ class DrillModelTest(unittest.TestCase):
         self.assertEqual(self.model.samples, list())
 
         self.mJson.load.return_value.update({
-            "GlobalSettings": self.SETTINGS
+            "GlobalSettings": self.ACQUISITION_MODES
             })
         self.model.importRundexData("test")
-        self.assertEqual(self.model.settings, self.SETTINGS)
+        self.assertEqual(self.model.settings, self.ACQUISITION_MODES)
 
     def test_exportRundexData(self):
         self.model.exportRundexData("test")
@@ -188,8 +278,8 @@ class DrillModelTest(unittest.TestCase):
         written = self.mJson.dump.call_args[0][0]
         self.assertEquals(written, {
             "Instrument": "i1",
-            "Technique": "t1",
-            "GlobalSettings": self.SETTINGS["t1"],
+            "Technique": "a1",
+            "GlobalSettings": self.SETTINGS["a1"],
             "Samples": []
             })
 

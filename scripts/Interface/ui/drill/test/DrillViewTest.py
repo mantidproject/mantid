@@ -232,17 +232,17 @@ class DrillViewTest(unittest.TestCase):
         self.view.instrumentselector.setTechniques.assert_called_once_with(
                 "test")
 
-    def test_setAvailableTechniques(self):
-        self.view.techniqueSelector = mock.Mock()
-        self.view.set_available_techniques(["test", "test"])
-        self.view.techniqueSelector.clear.assert_called_once()
-        self.view.techniqueSelector.addItems.assert_called_once_with(
+    def test_setAvailableModes(self):
+        self.view.modeSelector = mock.Mock()
+        self.view.set_available_modes(["test", "test"])
+        self.view.modeSelector.clear.assert_called_once()
+        self.view.modeSelector.addItems.assert_called_once_with(
                 ["test", "test"])
 
-    def test_setTechnique(self):
-        self.view.techniqueSelector = mock.Mock()
-        self.view.set_technique("test")
-        self.view.techniqueSelector.setCurrentIndex.assert_called_once_with(
+    def test_setAcquisitionMode(self):
+        self.view.modeSelector = mock.Mock()
+        self.view.set_acquisition_mode("test")
+        self.view.modeSelector.setCurrentText.assert_called_once_with(
                 "test")
 
     def test_setTable(self):

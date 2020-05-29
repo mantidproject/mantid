@@ -12,7 +12,7 @@ class DrillPresenter:
     def __init__(self, model, view):
         self.model = model
         self.view = view
-        self.view.set_available_instruments(self.model.get_supported_techniques())
+        self.view.set_available_instruments(self.model.getAvailableTechniques())
 
         # signals connections
         self.connect_view_signals()
@@ -31,7 +31,7 @@ class DrillPresenter:
 
     def connect_view_signals(self):
         self.view.instrument_changed.connect(self.on_instrument_changed)
-        self.view.technique_changed.connect(self.on_technique_changed)
+        self.view.acquisition_mode_changed.connect(self.on_acquisition_mode_changed)
         self.view.row_added.connect(self.on_add_row)
         self.view.row_deleted.connect(self.on_del_row)
         self.view.data_changed.connect(self.on_data_changed)
@@ -43,7 +43,7 @@ class DrillPresenter:
 
     def disconnect_view_signals(self):
         self.view.instrument_changed.disconnect()
-        self.view.technique_changed.disconnect()
+        self.view.acquisition_mode_changed.disconnect()
         self.view.row_added.disconnect()
         self.view.row_deleted.disconnect()
         self.view.data_changed.disconnect()
@@ -76,12 +76,14 @@ class DrillPresenter:
         self.view.set_progress(0, 100)
 
     def on_instrument_changed(self, instrument):
-        self.model.set_instrument(instrument)
+        self.model.setInstrument(instrument)
         self.update_view_from_model()
 
-    def on_technique_changed(self, technique):
-        self.model.set_technique(technique)
-        self.update_view_from_model()
+    def on_acquisition_mode_changed(self, mode):
+        self.model.setAcquisitionMode(mode)
+        self.view.set_table(self.model.get_columns())
+        rows_contents = self.model.get_rows_contents()
+        self.view.fill_table(self.model.get_rows_contents())
 
     def on_rundex_loaded(self, filename):
         self.model.importRundexData(filename)
@@ -121,13 +123,10 @@ class DrillPresenter:
         self.view.set_cell_error(row, column, msg)
 
     def update_view_from_model(self):
-        self.view.set_available_techniques(
-                self.model.get_available_techniques())
-        self.view.set_technique(self.model.get_technique())
+        self.view.set_available_modes(
+                self.model.getAvailableAcquisitionModes())
+        self.view.set_acquisition_mode(self.model.getAcquisitionMode())
         # set table
         self.view.set_table(self.model.get_columns())
         rows_contents = self.model.get_rows_contents()
         self.view.fill_table(self.model.get_rows_contents())
-
-        self.view.set_technique(self.model.get_technique())
-

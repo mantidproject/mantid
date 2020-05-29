@@ -43,12 +43,16 @@ class DrillModel(QObject):
 
     def __init__(self):
         super(DrillModel, self).__init__()
-        self.set_instrument(config['default.instrument'])
+        self.instrument = None
+        self.acquisitionMode = None
+        self.algorithm = None
         self.samples = list()
-        # read default settings
         self.settings = dict()
-        for (k, v) in RundexSettings.SETTINGS[self.technique].items():
-            self.settings[k] = v
+        self.controller = None
+
+        # set the instrument and default acquisition mode
+        self.setInstrument(config['default.instrument'])
+
         self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(
@@ -66,6 +70,112 @@ class DrillModel(QObject):
         self.tasksPool.signals.processingDone.connect(
                 lambda : self.processing_done.emit()
                 )
+
+    def setInstrument(self, instrument):
+        """
+        Set the instrument. This methods change the current instrument and all
+        the associated parameters (acquisition mode, algorithm, parameters). It
+        also empty the sample list and the settings.
+
+        Args:
+            instrument (str): instrument name
+        """
+        self.samples = list()
+
+        if (instrument in RundexSettings.ACQUISITION_MODES):
+            config['default.instrument'] = instrument
+            self.instrument = instrument
+            self.acquisitionMode = \
+                RundexSettings.ACQUISITION_MODES[instrument][0]
+            self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
+            self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
+            self.settings.update(
+                    RundexSettings.SETTINGS[self.acquisitionMode])
+            self._initController()
+        else:
+            logger.error('Instrument {0} is not supported yet.'
+                         .format(instrument))
+            self.instrument = None
+            self.acquisitionMode = None
+            self.columns = list()
+            self.algorithm = None
+            self.settings = dict()
+
+    def getInstrument(self):
+        """
+        Get the current instrument.
+
+        Returns:
+            str: the instrument name
+        """
+        return self.instrument
+
+    def getAvailableTechniques(self):
+        """
+        Get the list of techniques available.
+
+        Returns:
+            list(str): list of techniques
+        """
+        return [technique for (instrument, technique)
+                              in RundexSettings.TECHNIQUE.items()]
+
+    def setAcquisitionMode(self, mode):
+        """
+        Set the acquisition mode. The acquisition mode is modified only if it
+        corresponds to the current used instrument. If success, the parameters
+        controller is also setup.
+
+        Args:
+            mode (str): aquisition mode name
+        """
+        if ((self.instrument is None)
+                or (mode not in RundexSettings.ACQUISITION_MODES[
+                    self.instrument])):
+            return
+        self.samples = list()
+        self.acquisitionMode = mode
+        self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
+        self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
+        self.settings = dict()
+        self.settings.update(RundexSettings.SETTINGS[self.acquisitionMode])
+        self._initController()
+
+    def getAcquisitionMode(self):
+        """
+        Get the current acquisition mode.
+
+        Returns:
+            str: the acquisition mode
+        """
+        return self.acquisitionMode
+
+    def getAvailableAcquisitionModes(self):
+        """
+        Get the list of acquisition mode available for the current instrument.
+        """
+        if (self.instrument is None):
+            return list()
+        return RundexSettings.ACQUISITION_MODES[self.instrument]
+
+    def _initController(self):
+        """
+        Initialize the parameter controller.
+        """
+        if (self.algorithm is None):
+            return
+        self.controller = ParameterController(self.algorithm)
+        self.controller.signals.okParam.connect(
+                lambda p : self.param_ok.emit(
+                    p.sample, self.columns.index(p.name)
+                    )
+                )
+        self.controller.signals.wrongParam.connect(
+                lambda p : self.param_error.emit(
+                    p.sample, self.columns.index(p.name), p.errorMsg
+                    )
+                )
+        self.controller.start()
 
     def setSettings(self, settings):
         """
@@ -159,7 +269,7 @@ class DrillModel(QObject):
         with open(filename) as json_file:
             json_data = json.load(json_file)
 
-        self.set_instrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
+        self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
 
         # global settings
         self.settings = json_data[RundexSettings.SETTINGS_JSON_KEY]
@@ -178,7 +288,7 @@ class DrillModel(QObject):
         """
         json_data = dict()
         json_data[RundexSettings.INSTRUMENT_JSON_KEY] = self.instrument
-        json_data[RundexSettings.TECHNIQUE_JSON_KEY] = self.technique
+        json_data[RundexSettings.TECHNIQUE_JSON_KEY] = self.acquisitionMode
 
         # global settings
         json_data[RundexSettings.SETTINGS_JSON_KEY] = self.settings
@@ -191,46 +301,8 @@ class DrillModel(QObject):
         with open(filename, 'w') as json_file:
             json.dump(json_data, json_file, indent=4)
 
-    def set_instrument(self, instrument):
-        self.samples = list()
-        if (instrument in RundexSettings.TECHNIQUES):
-            config['default.instrument'] = instrument
-            self.instrument = instrument
-            self.set_technique(0)
-        else:
-            logger.error('Instrument {0} is not supported yet.'
-                    .format(instrument))
-            self.instrument = None
-            self.technique = None
-            self.columns = None
-            self.algorithm = None
-
-    def set_technique(self, technique):
-        self.samples = list()
-        self.technique = RundexSettings.TECHNIQUES[self.instrument][technique]
-        self.columns = RundexSettings.COLUMNS[self.technique]
-        self.algorithm = RundexSettings.ALGORITHMS[self.technique]
-        self.controller = ParameterController(self.algorithm)
-        self.controller.signals.okParam.connect(
-                lambda p : self.param_ok.emit(
-                    p.sample, self.columns.index(p.name)
-                    )
-                )
-        self.controller.signals.wrongParam.connect(
-                lambda p : self.param_error.emit(
-                    p.sample, self.columns.index(p.name), p.errorMsg
-                    )
-                )
-        self.controller.start()
-
     def get_columns(self):
         return self.columns if self.columns is not None else list()
-
-    def get_technique(self):
-        return RundexSettings.TECHNIQUES[self.instrument].index(self.technique)
-
-    def get_available_techniques(self):
-        return RundexSettings.TECHNIQUES[self.instrument]
 
     def add_row(self, position):
         self.samples.insert(position, dict())
@@ -272,7 +344,4 @@ class DrillModel(QObject):
                 row.append(','.join(options))
             rows.append(row)
         return rows
-
-    def get_supported_techniques(self):
-        return [technique for technique in RundexSettings.ALGORITHMS]
 
