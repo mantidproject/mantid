@@ -18,7 +18,6 @@
 #include "MantidKernel/Utils.h"
 
 #include "boost/math/distributions.hpp"
-// #include "boost/math/distributions/chi_squared.hpp"
 
 namespace Mantid {
 namespace DataObjects {
@@ -45,8 +44,8 @@ FakeMD::FakeMD(const std::vector<double> &uniformParams,
       m_randomizeSignal(randomizeSignal), m_detIDs(), m_randGen(1),
       m_uniformDist() {
   if (uniformParams.empty() && peakParams.empty() && ellipsoidParams.empty()) {
-    throw std::invalid_argument(
-        "You must specify at least one of peakParams or uniformParams");
+    throw std::invalid_argument("You must specify at least one of peakParams, "
+                                "ellipsoidParams or uniformParams");
   }
 }
 
@@ -183,27 +182,27 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   auto numEvents = size_t(m_ellipsoidParams[0]);
   coord_t center[nd];
   Kernel::Matrix<double> Evec(nd, nd); // hold eigenvectors
-  Kernel::Matrix<double> std(nd,
-                             nd); // hold sqrt(eigenvals) standard devs on diag
+  Kernel::Matrix<double> stds(nd,
+                              nd); // hold sqrt(eigenvals) standard devs on diag
   for (size_t n = 0; n < nd; n++) {
     center[n] = static_cast<coord_t>(m_ellipsoidParams[n + 1]);
     // get row/col index for eigenvector matrix
     for (size_t d = 0; d < nd; d++) {
       Evec[d][n] = m_ellipsoidParams[1 + nd + n * nd + d];
     }
-    std[n][n] =
+    stds[n][n] =
         sqrt(m_ellipsoidParams[m_ellipsoidParams.size() - (1 + nd) + n]);
   }
   auto doCounts = m_ellipsoidParams[m_ellipsoidParams.size() - 1];
 
   // get affine transformation that maps unit variance spherical
   // normal dist to ellipsoid
-  auto A = Evec * std;
+  auto A = Evec * stds;
 
   // calculate inverse of covariance matrix (if necassary)
   Kernel::Matrix<double> invCov(nd, nd);
   if (doCounts > 0) {
-    auto var = std * std;
+    auto var = stds * stds;
     // copy Evec to a matrix to hold inverse
     Kernel::Matrix<double> invEvec(Evec.getVector()); // hold eigenvectors
     // invert Evec matrix

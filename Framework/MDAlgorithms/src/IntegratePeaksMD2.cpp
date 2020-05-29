@@ -208,8 +208,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (BackgroundInnerRadius < PeakRadius)
     BackgroundInnerRadius = PeakRadius;
   // Ellipsoid
-  bool ellipseBool = getProperty("Ellipsoid");
-  bool qAxisBool = getProperty("FixQAxis");
+  bool isEllipse = getProperty("Ellipsoid");
+  bool qAxisIsFixed = getProperty("FixQAxis");
   /// Cylinder Length to use around peaks for cylinder
   double cylinderLength = getProperty("CylinderLength");
   Workspace2D_sptr wsProfile2D, wsFit2D, wsDiff2D;
@@ -353,7 +353,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     signal_t errorSquared = 0;
     signal_t bgSignal = 0;
     signal_t bgErrorSquared = 0;
-    double background_total = 0.0; // Don't know what this is used for
+    double background_total = 0.0;
     if (!cylinderBool) {
       // modulus of Q
       coord_t lenQpeak = 0.0;
@@ -409,7 +409,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
       // if ellipsoid find covariance and centroid in spherical region
       // using one-pass algorithm from https://doi.org/10.1145/359146.359153
-      if (ellipseBool) {
+      if (isEllipse) {
         // flat bg to subtract
         const auto bgDensity =
             bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
@@ -417,7 +417,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         std::vector<double> eigenvals;
         findEllipsoid<MDE, nd>(
             ws, getRadiusSq, pos,
-            static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisBool,
+            static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
             bgDensity, eigenvects, eigenvals);
 
         // transform ellispoid onto sphere of radius = R
@@ -722,7 +722,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *  @param getRadiusSq    Coord transfrom for sphere
  *  @param pos            V3D of peak centre
  *  @param radiusSquared  radius that defines spherical region for covarariance
- *  @param qAxisBool      bool to fix an eigenvector along direction pos
+ *  @param qAxisIsFixed      bool to fix an eigenvector along direction pos
  *  @param bgDensity      background counts per unit volume
  *  @param eigenvects     eigenvectors of covariance matrix of spherical region
  *  @param eigenvals      eigenvectors of covariance matrix of spherical region
@@ -731,7 +731,7 @@ template <typename MDE, size_t nd>
 void IntegratePeaksMD2::findEllipsoid(
     typename MDEventWorkspace<MDE, nd>::sptr ws,
     const CoordTransform &getRadiusSq, const V3D &pos,
-    const coord_t &radiusSquared, const bool &qAxisBool,
+    const coord_t &radiusSquared, const bool &qAxisIsFixed,
     const double &bgDensity, std::vector<V3D> &eigenvects,
     std::vector<double> &eigenvals) {
   double w_sum = 0.0;  // sum of weights
@@ -742,7 +742,7 @@ void IntegratePeaksMD2::findEllipsoid(
       pos, radiusSquared);
   MDBoxBase<MDE, nd> *baseBox = ws->getBox();
   MDBoxIterator<MDE, nd> MDiter(baseBox, 1000, true, function.get());
-  if (!qAxisBool) {
+  if (!qAxisIsFixed) {
     // generalise for nd?
     // calculate 3x3 covariance matrix
     Matrix<double> cov_mat(3, 3);
@@ -769,8 +769,8 @@ void IntegratePeaksMD2::findEllipsoid(
             for (size_t d = 0; d < mean.size(); d++) {
               mean[d] += (signal / w_sum) * (center[d] - mean[d]);
             }
-            for (size_t row = 0; row < cov_mat.numRows(); row++) {
-              for (size_t col = 0; col < cov_mat.numRows(); col++) {
+            for (size_t row = 0; row < cov_mat.numRows(); ++row) {
+              for (size_t col = 0; col < cov_mat.numRows(); ++col) {
                 // symmeteric matrix
                 if (row <= col) {
                   auto cov = signal * (center[row] - mean[row]) *

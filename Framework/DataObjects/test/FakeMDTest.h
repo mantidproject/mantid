@@ -88,7 +88,7 @@ public:
     faker.fill(fakeData);
 
     auto Npts = fakeData->getNPoints();
-    TS_ASSERT_EQUALS(fakeData->getNPoints(), Npts);
+    TS_ASSERT_EQUALS(Npts, ellipsoidParams[0]);
     // avg of counts converges to 0.2175 for 3D multivariate gaussian
     TS_ASSERT_DELTA(fakeData->getBox()->getSignal(),
                     static_cast<double>(Npts) * 0.2175,
