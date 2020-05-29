@@ -586,10 +586,10 @@ class MainWindow(QMainWindow):
         QAppThreadCall(self.editor.open_script_in_new_tab)(script)
 
     def save_project(self):
-        self.project.save()
+        self.project.save(CONF)
 
     def save_project_as(self):
-        self.project.open_project_save_dialog()
+        self.project.open_project_save_dialog(CONF)
 
     def load_project(self):
         self.project.load()

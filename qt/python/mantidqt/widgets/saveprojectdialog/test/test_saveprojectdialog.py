@@ -11,7 +11,6 @@ from unittest.mock import Mock
 
 from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresenter
 from mantidqt.project.project import Project
-from workbench.config import CONF
 
 
 class SaveProjectDialogTest(unittest.TestCase):
@@ -19,7 +18,12 @@ class SaveProjectDialogTest(unittest.TestCase):
     def setUp(self):
         self.project = Project(Mock(), Mock())
         self.project.save_as = Mock()
-        self.presenter = ProjectSaveDialogPresenter(self.project, Mock())
+
+        self.mock_conf = Mock()
+        self.mock_conf.set = lambda x, y: setattr(self.mock_conf, x, y)
+        self.mock_conf.get = lambda x: getattr(self.mock_conf, x)
+
+        self.presenter = ProjectSaveDialogPresenter(project=self.project, conf=self.mock_conf, view=Mock())
 
     def test_selecting_save_altered_workspaces_only_sets_project_attribute_to_true(self):
         self.presenter.view.get_save_altered_workspaces_only.return_value = True
@@ -40,4 +44,4 @@ class SaveProjectDialogTest(unittest.TestCase):
 
         self.presenter.save_as()
 
-        self.assertEqual(CONF.get('project', 'save_altered_workspaces_only'), True)
+        self.assertEqual(self.mock_conf.get('project/save_altered_workspaces_only'), True)

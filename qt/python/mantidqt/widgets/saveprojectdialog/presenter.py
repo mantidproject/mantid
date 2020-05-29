@@ -7,15 +7,15 @@
 #  This file is part of the mantid workbench
 
 from mantidqt.widgets.saveprojectdialog.view import ProjectSaveDialogView
-from workbench.config import CONF
 
 
 class ProjectSaveDialogPresenter:
 
-    def __init__(self, project, view=None):
+    def __init__(self, project, conf=None, view=None):
         self.view = view if view else ProjectSaveDialogView()
 
         self.project = project
+        self.conf = conf
 
         self.view.browse_push_button.clicked.connect(self.browse_button_clicked)
         self.view.location_line_edit.textChanged.connect(self.location_selected)
@@ -38,7 +38,10 @@ class ProjectSaveDialogPresenter:
 
     def save_as(self):
         self.project.save_altered_workspaces_only = self.view.get_save_altered_workspaces_only()
-        CONF.set('project/save_altered_workspaces_only', self.view.get_save_altered_workspaces_only())
+
+        if self.conf:
+            self.conf.set('project/save_altered_workspaces_only', self.view.get_save_altered_workspaces_only())
+
         self.project.save_as(path=self.view.get_location())
 
     def cancel(self):

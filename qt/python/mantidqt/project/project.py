@@ -69,13 +69,13 @@ class Project(AnalysisDataServiceObserver):
     def is_loading(self):
         return self.__is_loading
 
-    def save(self):
+    def save(self, conf=None):
         """
         The function that is called if the save button is clicked on the mainwindow
         :return: True; if the user cancels
         """
         if self.last_project_location is None:
-            return self.open_project_save_dialog()
+            return self.open_project_save_dialog(conf)
         else:
             # Offer an are you sure? overwriting GUI
             answer = self._offer_overwriting_gui()
@@ -86,18 +86,18 @@ class Project(AnalysisDataServiceObserver):
                 task.start()
             elif answer == QMessageBox.No:
                 # Save with a new name
-                return self.open_project_save_dialog()
+                return self.open_project_save_dialog(conf)
             else:
                 # Cancel clicked
                 return True
 
-    def open_project_save_dialog(self):
+    def open_project_save_dialog(self, conf=None):
         """
         The function that is called if the save as... button is clicked on the mainwindow
         :return: True; if the user cancels.
         """
         self.saving_cancelled = False
-        ProjectSaveDialogPresenter(self)
+        ProjectSaveDialogPresenter(self, conf)
         return self.saving_cancelled
 
     def save_as(self, path):

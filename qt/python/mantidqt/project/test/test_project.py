@@ -12,13 +12,13 @@ import unittest
 import shutil
 import warnings
 
-import matplotlib.pyplot as plt
 from qtpy.QtWidgets import QMessageBox
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
-from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, Load, Rebin, RenameWorkspace, UnGroupWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
 from unittest import mock
+from mantid.plots.mantidaxes import MantidAxes
 from mantidqt.project.project import Project
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -245,31 +245,55 @@ class ProjectTest(unittest.TestCase):
                                  plots_to_save="mocked_figs",
                                  interfaces_to_save="mocked_interfaces")
 
-    def test_filter_unaltered_workspaces_function_removes_workspaces_that_have_only_been_loaded(self):
-        unaltered_workspace = Load('ENGINX00228061')
-        Rebin(unaltered_workspace, OutputWorkspace="altered_workspace", Params=50)
+    @staticmethod
+    def create_altered_and_unaltered_mock_workspaces():
+        # Create a mock unaltered workspace so it's history only contains Load.
+        unaltered_workspace = mock.Mock()
+        unaltered_workspace_history = mock.Mock()
+        unaltered_workspace.getHistory.return_value = unaltered_workspace_history
+        unaltered_workspace_history.size.return_value = 1
+        unaltered_workspace_history.getAlgorithm(0).name.return_value = "Load"
 
-        altered_workspaces = self.project._filter_unaltered_workspaces(["unaltered_workspace", "altered_workspace"])
+        # Create a mock altered workspaces with history length > 1.
+        altered_workspace = mock.Mock()
+        altered_workspace.name.return_value = "altered_workspace"
+        altered_workspace_history = mock.Mock()
+        altered_workspace.getHistory.return_value = altered_workspace_history
+        altered_workspace_history.size.return_value = 2
+
+        return [altered_workspace, unaltered_workspace]
+
+    @mock.patch('mantidqt.project.project.AnalysisDataService')
+    def test_filter_unaltered_workspaces_function_removes_workspaces_that_have_only_been_loaded(self, mock_ads):
+        workspaces = self.create_altered_and_unaltered_mock_workspaces()
+
+        # When retrieveWorkspaces is called just return what is passed in.
+        mock_ads.retrieveWorkspaces = lambda x: x
+
+        altered_workspaces = self.project._filter_unaltered_workspaces(workspaces)
 
         self.assertEqual(len(altered_workspaces), 1)
         self.assertEqual(altered_workspaces[0], "altered_workspace")
 
-    def test_filter_plots_removes_plots_that_use_unaltered_workspaces(self):
-        unaltered_workspace = Load('ENGINX00228061')
-        altered_workspace = Rebin(unaltered_workspace, Params=50)
+    @mock.patch('mantidqt.project.project.AnalysisDataService')
+    def test_filter_plots_removes_plots_that_use_unaltered_workspaces(self, mock_ads):
+        workspaces = self.create_altered_and_unaltered_mock_workspaces()
 
+        # When retrieveWorkspaces is called just return what is passed in.
+        mock_ads.retrieveWorkspaces = lambda x: x
+
+        # Create a plot for each workspace
         figure_managers = {}
-        for i, ws in enumerate([unaltered_workspace, altered_workspace]):
-            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-            ax.plot(ws, specNum=1)
-
+        for i, ws in enumerate(workspaces):
             fig_manager = mock.Mock()
-            fig_manager.canvas.figure.axes = [ax]
+            mock_ax = mock.Mock(spec=MantidAxes)
+            mock_ax.tracked_workspaces = [ws]
+            fig_manager.canvas.figure.axes = [mock_ax]
 
             figure_managers[i] = fig_manager
 
         filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(
-            plots=figure_managers, workspaces=["altered_workspace"])
+            plots=figure_managers, workspaces=[workspaces[0]])
 
         self.assertEqual(len(filtered_figure_managers), 1)
 
