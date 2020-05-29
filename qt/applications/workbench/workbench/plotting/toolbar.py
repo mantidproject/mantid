@@ -200,9 +200,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # if any of the lines are a sample log plot disable fitting
         for ax in fig.get_axes():
             for artist in ax.get_lines():
-                if ax.get_artists_sample_log_plot_details(artist) is not None:
-                    self._set_fit_enabled(False)
-                    break
+                try:
+                    if ax.get_artists_sample_log_plot_details(artist) is not None:
+                        self._set_fit_enabled(False)
+                        break
+                except ValueError:
+                    #The artist is not tracked - ignore this one and check the rest
+                    continue
 
         # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
