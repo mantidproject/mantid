@@ -798,6 +798,7 @@ QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
 
 void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
   QPointF to_center = pos - m_center;
+  double newAngle;
   switch (i) {
   case 0:
     m_outerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
@@ -806,14 +807,27 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
     m_innerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
     break;
   case 2:
-    m_startAngle = atan2(to_center.x(), to_center.y());
-    if (m_startAngle < 0)
-      m_startAngle += 2 * M_PI;
+    newAngle = atan2(to_center.x(), to_center.y());
+    if (newAngle < 0)
+      newAngle += 2 * M_PI;
+    if (m_startAngle < m_endAngle && newAngle >= m_endAngle) {
+      newAngle = m_endAngle - 0.00001;
+    } else if (m_startAngle > m_endAngle && newAngle <= m_endAngle) {
+      newAngle = m_endAngle + 0.0001;
+    }
+    m_startAngle = newAngle;
     break;
+
   case 3:
-    m_endAngle = atan2(to_center.x(), to_center.y());
-    if (m_endAngle < 0)
-      m_endAngle += 2 * M_PI;
+    newAngle = atan2(to_center.x(), to_center.y());
+    if (newAngle < 0)
+      newAngle += 2 * M_PI;
+    if (m_endAngle < m_startAngle && newAngle >= m_startAngle) {
+      newAngle = m_startAngle - 0.00001;
+    } else if (m_endAngle > m_startAngle && newAngle <= m_startAngle) {
+      newAngle = m_startAngle + 0.0001;
+    }
+    m_endAngle = newAngle;
     break;
   }
   refit();
@@ -829,6 +843,7 @@ QStringList Shape2DSector::getDoubleNames() const {
 }
 
 double Shape2DSector::getDouble(const QString &prop) const {
+  double to_degrees = 180 * M_PI;
   if (prop == "outerRadius") {
     return m_outerRadius;
   }
@@ -836,15 +851,16 @@ double Shape2DSector::getDouble(const QString &prop) const {
     return m_innerRadius;
   }
   if (prop == "startAngle") {
-    return m_startAngle;
+    return m_startAngle * to_degrees;
   }
   if (prop == "endAngle") {
-    return m_endAngle;
+    return m_endAngle * to_degrees;
   }
   return 0.0;
 }
 
 void Shape2DSector::setDouble(const QString &prop, double value) {
+  double to_radians = M_PI / 180;
   if (prop == "outerRadius") {
     m_outerRadius = value;
     refit();
@@ -852,10 +868,10 @@ void Shape2DSector::setDouble(const QString &prop, double value) {
     m_innerRadius = value;
     refit();
   } else if (prop == "startAngle") {
-    m_startAngle = value;
+    m_startAngle = value * to_radians;
     refit();
   } else if (prop == "endAngle") {
-    m_endAngle = value;
+    m_endAngle = value * to_radians;
     refit();
   }
 }
