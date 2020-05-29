@@ -79,9 +79,9 @@ class IndirectCommonTests(unittest.TestCase):
         self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
 
     def test_getDefaultWorkingDirectory(self):
-        config['defaultsave.directory'] = os.path.expanduser('~')
+        config['defaultsave.directory'] = os.path.expanduser('~/')
         workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEqual(os.path.expanduser('~'), workdir,
+        self.assertEqual(os.path.expanduser('~/'), workdir,
                           "The working directory does not match the expected one")
 
     def test_getDefaultWorkingDirectory_failure(self):

@@ -370,6 +370,8 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
     def test_that_if_output_directory_is_empty_default_save_directory_is_used_instead(self):
         default_dir = os.path.join("default", "save", "directory")
         ConfigService["defaultsave.directory"] = default_dir
+        # ConfigService returns an absolute path when called.
+        default_dir = os.path.join(os.getcwd(), default_dir, "")
 
         output_dir = self.presenter.set_output_directory("")
         ConfigService["defaultsave.directory"] = ""
