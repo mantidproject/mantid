@@ -45,6 +45,8 @@ constexpr size_t D7_NUMBER_PIXELS_BANK = 44;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
 constexpr size_t NUMBER_MONITORS = 2;
+// This defines Time Of Flight measurement mode switch value
+constexpr size_t TOF_MODE_ON = 1;
 // The conversion factor from radian to degree
 constexpr double DEG_TO_RAD = M_PI / 180.;
 } // namespace
@@ -78,7 +80,7 @@ const std::string LoadILLPolarizedDiffraction::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadILLPolarizedDiffraction::summary() const {
-  return "Loads ILL polarized diffraction nexus files.";
+  return "Loads ILL D7 instrument polarized diffraction nexus files.";
 }
 
 /**
@@ -157,15 +159,15 @@ void LoadILLPolarizedDiffraction::loadData() {
     std::vector<double> axis;
     NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
     acquisitionMode.load();
-    if (acquisitionMode[0] == 1) {
+    if (acquisitionMode[0] == TOF_MODE_ON) {
       NXFloat timeOfFlightInfo =
           entry.openNXFloat("D7/Detector/time_of_flight");
       timeOfFlightInfo.load();
       auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
       m_numberOfChannels = size_t(timeOfFlightInfo[1]);
       auto tofDelay = timeOfFlightInfo[2];
-      for (auto ii = 0; ii <= static_cast<int>(m_numberOfChannels); ii++) {
-        axis.push_back(static_cast<double>(tofDelay + ii * channelWidth));
+      for (auto channel_no = 0; channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
+        axis.push_back(static_cast<double>(tofDelay + channel_no * channelWidth));
       }
     } else {
       m_numberOfChannels = 1;
@@ -185,7 +187,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
 
     // Set x axis units
-    if (acquisitionMode[0] == 1) {
+    if (acquisitionMode[0] == TOF_MODE_ON) {
       std::shared_ptr<Kernel::Units::Label> lblUnit =
           std::dynamic_pointer_cast<Kernel::Units::Label>(
               UnitFactory::Instance().create("Label"));
@@ -208,35 +210,37 @@ void LoadILLPolarizedDiffraction::loadData() {
     data.load();
 
     // Assign detector counts
-    for (auto ii = 0; ii < static_cast<int>(D7_NUMBER_PIXELS); ++ii) {
-      auto &spectrum = workspace->mutableY(ii);
-      auto &errors = workspace->mutableE(ii);
-      const auto pixelNumber = ii;
-      for (auto jj = 0; jj < static_cast<int>(m_numberOfChannels); ++jj) {
-        unsigned int y =
-            data(static_cast<int>(pixelNumber), 0, static_cast<int>(jj));
-        spectrum[jj] = y;
-        errors[jj] = sqrt(y);
+    for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS);
+         ++pixel_no) {
+      auto &spectrum = workspace->mutableY(pixel_no);
+      auto &errors = workspace->mutableE(pixel_no);
+      for (auto channel_no = 0;
+           channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
+        unsigned int y = data(pixel_no, 0, channel_no);
+        spectrum[channel_no] = y;
+        errors[channel_no] = sqrt(y);
       }
-      workspace->mutableX(ii) = axis;
+      workspace->mutableX(pixel_no) = axis;
     }
 
     // load and assign monitor data
-    for (auto ii = static_cast<int>(D7_NUMBER_PIXELS);
-         ii < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS); ii++) {
+    for (auto monitor_no = static_cast<int>(D7_NUMBER_PIXELS);
+         monitor_no < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS);
+         monitor_no++) {
       NXUInt monitorData = entry.openNXDataSet<unsigned int>(
           "monitor" +
-          std::to_string(ii + 1 - static_cast<int>(D7_NUMBER_PIXELS)) +
+          std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) +
           "/data");
       monitorData.load();
-      auto &spectrum = workspace->mutableY(ii);
-      auto &errors = workspace->mutableE(ii);
-      for (auto jj = 0; jj < static_cast<int>(m_numberOfChannels); jj++) {
-        unsigned int y = monitorData(0, 0, static_cast<int>(jj));
-        spectrum[jj] = y;
-        errors[jj] = sqrt(y);
+      auto &spectrum = workspace->mutableY(monitor_no);
+      auto &errors = workspace->mutableE(monitor_no);
+      for (auto channel_no = 0;
+           channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
+        unsigned int y = monitorData(0, 0, channel_no);
+        spectrum[channel_no] = y;
+        errors[channel_no] = sqrt(y);
       }
-      workspace->mutableX(ii) = axis;
+      workspace->mutableX(monitor_no) = axis;
     }
 
     // load the instrument if it has not been created
@@ -285,7 +289,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
  * @return : workspace with the correct data dimensions
  */
 API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace() {
-  size_t nSpectra = D7_NUMBER_PIXELS + NUMBER_MONITORS;
+  const size_t nSpectra = D7_NUMBER_PIXELS + NUMBER_MONITORS;
 
   API::MatrixWorkspace_sptr workspace;
 
@@ -327,8 +331,8 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     NXFloat twoThetaPixels = entry.openNXFloat(
         "D7/Detector/bank" + std::to_string(bankId) + "_offset");
     twoThetaPixels.load();
-    for (auto pixelId = 0; pixelId < twoThetaPixels.size(); pixelId++) {
-      twoTheta[pixelId] = twoThetaPixels[pixelId];
+    for (auto pixel_no = 0; pixel_no < twoThetaPixels.size(); pixel_no++) {
+      twoTheta[pixel_no] = twoThetaPixels[pixel_no];
     }
   } else {
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadParameterFile");
@@ -338,14 +342,16 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
 
     auto instrumentMap = workspace->instrumentParameters();
     Instrument_const_sptr instrument = workspace->getInstrument();
+    IComponent_const_sptr currentBank = instrument->getComponentByName(
+        std::string("bank" + std::to_string(bankId)));
 
-    for (auto ii = 0; ii < static_cast<int>(D7_NUMBER_PIXELS_BANK); ii++) {
-      auto pixel = instrument->getDetector(ii + 1);
-      std::vector<double> twoThetaRead =
-          (pixel->parameterMap())
-              .getDouble(pixel->getName(),
-                         std::string("twoTheta_bank" + std::to_string(bankId)));
-      twoTheta[ii] = twoThetaRead[0];
+    for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK);
+         pixel_no++) { /*
+auto pixel = instrument->getDetector(
+(bankId-2) * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no + 1);*/
+      std::string twoThetaRead = currentBank->getParameterAsString(
+          std::string("twoTheta_pixel_" + std::to_string(pixel_no + 1)));
+      twoTheta[pixel_no] = std::stod(twoThetaRead);
     }
   }
   return twoTheta;
@@ -362,31 +368,35 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
   Instrument_const_sptr instrument = workspace->getInstrument();
 
   auto &componentInfo = workspace->mutableComponentInfo();
-  for (auto ii = 0; ii < static_cast<int>(D7_NUMBER_BANKS); ii++) {
+  for (auto bank_no = 0; bank_no < static_cast<int>(D7_NUMBER_BANKS);
+       bank_no++) {
     NXFloat twoThetaBank = entry.openNXFloat(
         "D7/2theta/actual_bank" +
-        std::to_string(ii + 2)); // detector bank IDs start at 2
+        std::to_string(bank_no + 2)); // detector bank IDs start at 2
     twoThetaBank.load();
     if (getPropertyValue("PositionCalibration").compare("None") == 0) {
       Quat rotation(-twoThetaBank[0], V3D(0, 1, 0));
       IComponent_const_sptr currentBank = instrument->getComponentByName(
-          std::string("bank" + std::to_string(ii + 2)));
+          std::string("bank" + std::to_string(bank_no + 2)));
       const auto componentIndex =
           componentInfo.indexOf(currentBank->getComponentID());
       componentInfo.setRotation(componentIndex, rotation);
     } else {
       std::vector<double> twoThetaPixels =
-          loadTwoThetaDetectors(workspace, entry, ii + 2);
-      for (auto jj = 0; jj < static_cast<int>(D7_NUMBER_PIXELS_BANK); jj++) {
+          loadTwoThetaDetectors(workspace, entry, bank_no + 2);
+      for (auto pixel_no = 0;
+           pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK); pixel_no++) {
         IComponent_const_sptr pixel = instrument->getDetector(
-            ii * static_cast<int>(D7_NUMBER_PIXELS_BANK) + jj + 1);
+            bank_no * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no + 1);
         const auto pixelIndex = componentInfo.indexOf(pixel->getComponentID());
         V3D position = pixel->getPos();
         double const radius = sqrt(pow(position[0], 2) + pow(position[2], 2));
         position = V3D(
-            radius * sin(DEG_TO_RAD * (twoThetaPixels[jj] - twoThetaBank[0])),
+            radius *
+                sin(DEG_TO_RAD * (twoThetaPixels[pixel_no] - twoThetaBank[0])),
             position[1],
-            radius * cos(DEG_TO_RAD * (twoThetaPixels[jj] - twoThetaBank[0])));
+            radius *
+                cos(DEG_TO_RAD * (twoThetaPixels[pixel_no] - twoThetaBank[0])));
         componentInfo.setPosition(pixelIndex, position);
       }
     }
