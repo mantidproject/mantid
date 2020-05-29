@@ -243,13 +243,19 @@ class SliceViewerDataView(QWidget):
     def clear_image(self):
         """Removes any image from the axes"""
         if self.image is not None:
+            if self.line_plots:
+                self.delete_line_plot_lines()
             self.image.remove()
             self.image = None
 
     def clear_figure(self):
         """Removes everything from the figure"""
+        if self.line_plots:
+            self.delete_line_plot_lines()
+            self.axx, self.axy = None, None
         self.image = None
         self.fig.clf()
+        self.ax = None
 
     def draw_plot(self):
         self.ax.set_title('')
@@ -325,11 +331,14 @@ class SliceViewerDataView(QWidget):
 
     def delete_line_plot_lines(self):
         try:  # clear old plots
-            self.xfig.remove()
-            self.yfig.remove()
+            try:
+                self.xfig.remove()
+                self.yfig.remove()
+            except ValueError:
+                pass
             del self.xfig
             del self.yfig
-        except (AttributeError):
+        except AttributeError:
             pass
 
     def set_grid_on(self):
