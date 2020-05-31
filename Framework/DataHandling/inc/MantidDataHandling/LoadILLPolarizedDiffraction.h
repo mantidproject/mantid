@@ -53,10 +53,10 @@ private:
 
   size_t m_numberOfChannels; // number of channels data
 
-  std::string m_instName;            ///< instrument name to load the IDF
-  std::string m_fileName;            ///< file name to load
+  std::string m_instName; ///< instrument name to load the IDF
+  std::string m_fileName; ///< file name to load
 
-  LoadHelper m_loadHelper;                    ///< a helper for metadata
+  LoadHelper m_loadHelper;                         ///< a helper for metadata
   API::WorkspaceGroup_sptr m_outputWorkspaceGroup; ///< output workspace
 };
 

@@ -360,9 +360,7 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
         std::string("bank" + std::to_string(bankId)));
 
     for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK);
-         pixel_no++) { /*
-auto pixel = instrument->getDetector(
-(bankId-2) * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no + 1);*/
+         pixel_no++) {
       std::string twoThetaRead = currentBank->getParameterAsString(
           std::string("twoTheta_pixel_" + std::to_string(pixel_no + 1)));
       twoTheta[pixel_no] = std::stod(twoThetaRead);
