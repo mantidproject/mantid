@@ -12,6 +12,11 @@ Reflectometry Changes
 Algorithms
 ##########
 
+New
+----
+
+- Added new :ref:`algm-LRReductionWithReference` to use a measured standard with a model reflectivity curve calculated by the `refl1d` package to produce a normalization curve for a sample reduction. Requires `refl1d` to be installed seperately. 
+
 Improvements
 ------------
 
