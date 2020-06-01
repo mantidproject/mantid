@@ -21,6 +21,7 @@
         <file>replace.png</file>
         <file>mantid.png</file>
         <file>mantid_smaller.png</file>
+        <file>end-of-life.png</file>
     </qresource>
     <qresource prefix="/win">
         <file>folder-remote.png</file>
