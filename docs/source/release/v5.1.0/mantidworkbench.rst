@@ -45,8 +45,8 @@ Improvements
 - The gray and plasma colormaps have been added to the instrument view.
 - The x-axis tick labels on colorfill plots are now horizontal.
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
-
 - The figure options menu now has a help button which opens the documentation for the menu.
+- Added a profiling option to the workbench launch script, allowing for timing of startup and other internal processes.
 
 Bugfixes
 ########
