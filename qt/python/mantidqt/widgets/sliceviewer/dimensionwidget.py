@@ -167,7 +167,6 @@ class Dimension(QWidget):
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0,0,0,0)
 
-
         self.name = QLabel(dim_info['name'])
         self.units = QLabel(dim_info['units'])
 
