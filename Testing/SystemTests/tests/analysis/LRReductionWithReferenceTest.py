@@ -14,6 +14,16 @@ from mantid.simpleapi import *
 
 
 class LRReductionWithRefrenceTest(systemtesting.MantidSystemTest):
+    """
+        Test the reflectivity reduction with a reference algorithm
+    """
+    def skipTests(self):
+        try:
+            import refl1d
+        except ImportError:
+            return True
+        return False
+
     def runTest(self):
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
 

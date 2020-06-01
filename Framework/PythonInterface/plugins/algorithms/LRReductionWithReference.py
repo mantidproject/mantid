@@ -9,21 +9,12 @@ import copy
 import json
 import numpy as np
 
-from refl1d.names import \
-    Experiment, \
-    Parameter, \
-    QProbe, \
-    Slab, \
-    SLD
-
+from mantid.api import DataProcessorAlgorithm
 from mantid.simpleapi import \
     AlgorithmFactory, \
     CreateWorkspace, \
     Divide, \
     LiquidsReflectometryReduction
-
-from mantid.api import \
-    DataProcessorAlgorithm
 
 # Unable to generate this props list in PyInit using AlgorithmManager
 # from LiquidsReflectometryReduction to copy properties here
@@ -63,6 +54,7 @@ PROPS_TO_COPY = [
     'ApplyPrimaryFraction',
     'PrimaryFractionRange']
 
+
 class LRReductionWithReference(DataProcessorAlgorithm):
     def category(self):
         return "Reflectometry\\SNS"
@@ -79,9 +71,15 @@ class LRReductionWithReference(DataProcessorAlgorithm):
     def PyInit(self):
         self.copyProperties(LR_ALG_FOR_PROPS, PROPS_TO_COPY)
         self.declareProperty("Refl1DModelParameters", "",
-            doc="JSON string for Refl1D theoretical model paramters")
+                             doc="JSON string for Refl1D theoretical model paramters")
 
     def PyExec(self):
+        try:
+            import refl1d # noqa: F401
+        except ImportError:
+            err_msg = 'Refl1D not installed, unable to run this algorithm'
+            raise RuntimeError(err_msg)
+
         # Get properties we copied to run LiquidsReflectometryReduction algorithms
         kwargs = dict()
         for prop in PROPS_TO_COPY:
@@ -147,6 +145,13 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         :param q_resolution: Momentum transfer resolution to multiply by Q
         :return: Calculate reflectivity of the theoretical model
         """
+        from refl1d.names import \
+            Experiment, \
+            Parameter, \
+            QProbe, \
+            Slab, \
+            SLD
+
         zeros = np.zeros(len(q))
         dq = q_resolution * q
         # The QProbe object represents the beam
@@ -160,13 +165,14 @@ class LRReductionWithReference(DataProcessorAlgorithm):
             sample = sample | Slab(material=SLD(name='layer%s' % i,
                                                 rho=layer['sld'],
                                                 irho=layer['isld']),
-                                                thickness=layer['thickness'],
-                                                interface=layer['roughness'])
+                                   thickness=layer['thickness'],
+                                   interface=layer['roughness'])
         sample = sample | Slab(material=SLD(name='front',
                                             rho=model_description['front_sld']))
         probe.background = Parameter(value=model_description['background'], name='background')
         expt = Experiment(probe=probe, sample=sample)
         q, r = expt.reflectivity()
         return model_description['scale'] * r
+
 
 AlgorithmFactory.subscribe(LRReductionWithReference)
