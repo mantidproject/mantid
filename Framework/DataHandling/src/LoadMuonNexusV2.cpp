@@ -89,12 +89,15 @@ void LoadMuonNexusV2::init() {
       "algorithm. For multiperiod files, one workspace will be\n"
       "generated for each period");
 
+  auto mustBePositiveSpectra = std::make_shared<BoundedValidator<specnum_t>>();
+  mustBePositiveSpectra->setLower(0);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0),
+                  mustBePositiveSpectra);
+  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()),
+                  mustBePositiveSpectra);
+  declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"));
   auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
-  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive);
-  declareProperty(std::make_unique<ArrayProperty<int64_t>>("SpectrumList"));
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
@@ -127,7 +130,6 @@ void LoadMuonNexusV2::init() {
                   "detector grouping.");
 }
 void LoadMuonNexusV2::execLoader() {
-  // this->setRethrows(true);
   // prepare nexus entry
   m_entrynumber = getProperty("EntryNumber");
   m_filename = getPropertyValue("Filename");
