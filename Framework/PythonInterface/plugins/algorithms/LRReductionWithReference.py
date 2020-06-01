@@ -16,10 +16,14 @@ from refl1d.names import \
     Slab, \
     SLD
 
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.simpleapi import \
+    AlgorithmFactory, \
+    CreateWorkspace, \
+    Divide, \
+    LiquidsReflectometryReduction
 
+from mantid.api import \
+    DataProcessorAlgorithm
 
 # Unable to generate this props list in PyInit using AlgorithmManager
 # from LiquidsReflectometryReduction to copy properties here
