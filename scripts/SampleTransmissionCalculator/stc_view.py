@@ -18,33 +18,37 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         fig = Figure()
         self.axes = fig.add_subplot(111)
         self.plot_frame = FigureCanvas(fig)
-        self.outputLayout.replaceWidget(self.placeholder_widget, self.plot_frame)
+        self.output_layout.replaceWidget(self.placeholder_widget, self.plot_frame)
         self.validation_label.setStyleSheet("QLabel { color : red; }")
+        self.histogram_err.setStyleSheet("QLabel { color : red; }")
+        self.chemical_formula_err.setStyleSheet("QLabel { color : red; }")
+        self.density_err.setStyleSheet("QLabel { color : red; }")
+        self.thickness_err.setStyleSheet("QLabel { color : red; }")
 
     def get_input_dict(self):
         input_dict = {
-            'binning_type': self.cbBinningType.currentIndex(),
-            'single_low': self.spSingleLow.value(),
-            'single_width': self.spSingleWidth.value(),
-            'single_high': self.spSingleHigh.value(),
-            'multiple_bin': self.leMultiple.text(),
-            'chemical_formula': self.leChemicalFormula.text(),
-            'density_type': self.cbDensity.currentText(),
-            'density': self.spDensity.value(),
-            'thickness': self.spThickness.value()
+            'binning_type': self.binning_type_combo_box.currentIndex(),
+            'single_low': self.single_low_spin_box.value(),
+            'single_width': self.single_width_spin_box.value(),
+            'single_high': self.single_high_spin_box.value(),
+            'multiple_bin': self.multiple_line_edit.text(),
+            'chemical_formula': self.chemical_formula_line_edit.text(),
+            'density_type': self.density_combo_box.currentText(),
+            'density': self.density_spin_box.value(),
+            'thickness': self.thickness_spin_box.value()
         }
         return input_dict
 
     def set_output_table(self, output_dict, statistics):
-        self.twResults.clear()
+        self.results_tree.clear()
         scattering_item = QtWidgets.QTreeWidgetItem()
         scattering_item.setText(0, 'Scattering')
         scattering_item.setText(1, str(statistics))
-        self.twResults.addTopLevelItem(scattering_item)
+        self.results_tree.addTopLevelItem(scattering_item)
 
         transmission_item = QtWidgets.QTreeWidgetItem()
         transmission_item.setText(0, "Transmission")
-        self.twResults.addTopLevelItem(transmission_item)
+        self.results_tree.addTopLevelItem(transmission_item)
         transmission_item.setExpanded(True)
 
         for key in output_dict:
@@ -60,3 +64,13 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
 
     def set_validation_label(self, warning_text=''):
         self.validation_label.setText(warning_text)
+
+    def clear_error_indicator(self):
+        getattr(self, 'histogram_err').setText('')
+        getattr(self, 'chemical_formula_err').setText('')
+        getattr(self, 'density_err').setText('')
+        getattr(self, 'thickness_err').setText('')
+
+    def set_error_indicator(self, error_key):
+        getattr(self, error_key+'_err').setText('*')
+

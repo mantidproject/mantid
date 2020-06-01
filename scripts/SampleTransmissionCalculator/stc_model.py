@@ -49,17 +49,33 @@ class SampleTransmissionCalculatorModel(object):
     @staticmethod
     def validate(input_dict):
         validation = {}
-
         if input_dict['binning_type'] == 0:
             # single binning
             bin_list = [input_dict['single_low'], input_dict['single_width'], input_dict['single_high']]
+            if bin_list[0] < 0.0 or bin_list[1] <= 0.0 or bin_list[2] <= 0.0:
+                validation['histogram'] = 'Histogram must be greater than zero.'
+            if bin_list[2] <= bin_list[0]:
+                validation['histogram'] = 'Upper histogram edge must be greater than the lower bin.'
         if input_dict['binning_type'] == 1:
             # multiple binning
             bin_list = input_dict['multiple_bin'].split(',')
-        if bin_list[0] < 0.0 or bin_list[1] <= 0.0 or bin_list[2] <= 0.0:
-            validation['histogram'] = 'Histogram must be greater that zero.'
-        if bin_list[2] <= bin_list[0]:
-            validation['histogram'] = 'Upper histogram edge must be greater than the lower bin.'
+            if bin_list:
+                print(bin_list)
+                try:
+                    bin_list = [float(i) for i in bin_list]
+                    if len(bin_list) == 3:
+                        if bin_list[0] < 0.0 or bin_list[1] <= 0.0 or bin_list[2] <= 0.0:
+                            validation['histogram'] = 'Histogram must be greater than zero.'
+                        if bin_list[2] <= bin_list[0]:
+                            validation['histogram'] = 'Upper histogram edge must be greater than the lower bin.'
+                    else:
+                        validation['histogram'] = 'Histogram requires 3 values.'
+                except ValueError:
+                    validation['histogram'] = 'Histogram string not readable'
         if not input_dict['chemical_formula']:
             validation['chemical_formula'] = 'Chemical formula has been left blank.'
+        if input_dict['density'] == 0.0:
+            validation['density'] = 'Density can not be zero.'
+        if input_dict['thickness'] == 0.0:
+            validation['thickness'] = 'Thickness can not be zero.'
         return validation

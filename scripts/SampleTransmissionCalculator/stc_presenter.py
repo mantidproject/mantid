@@ -17,10 +17,11 @@ class SampleTransmissionCalculatorPresenter(object):
         self.set_connections()
 
     def set_connections(self):
-        self.view.pbCalculate.clicked.connect(self.calculate)
+        self.view.calculate_button.clicked.connect(self.calculate)
 
     def calculate(self):
         input_dict = self.view.get_input_dict()
+        self.view.clear_error_indicator()
         validations = self.model.validate(input_dict)
         if not validations:
             output = self.model.calculate(input_dict)
@@ -31,5 +32,6 @@ class SampleTransmissionCalculatorPresenter(object):
         else:
             warning = ''
             for key in validations:
+                self.view.set_error_indicator(key)
                 warning += validations[key] + ' '
             self.view.set_validation_label(warning)
