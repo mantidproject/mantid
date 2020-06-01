@@ -17,8 +17,8 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.setupUi(self)
         fig = Figure()
         self.axes = fig.add_subplot(111)
-        self.plot_frame_2 = FigureCanvas(fig)
-        self.outputLayout.addWidget(self.plot_frame_2)
+        self.plot_frame = FigureCanvas(fig)
+        self.outputLayout.replaceWidget(self.placeholder_widget, self.plot_frame)
         self.validation_label.setStyleSheet("QLabel { color : red; }")
 
     def get_input_dict(self):
@@ -56,7 +56,7 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
     def plot(self, x, y):
         self.axes.cla()
         self.axes.plot(x, y)
-        self.plot_frame_2.draw()
+        self.plot_frame.draw()
 
     def set_validation_label(self, warning_text=''):
         self.validation_label.setText(warning_text)
