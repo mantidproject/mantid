@@ -19,7 +19,7 @@ class LRReductionWithRefrenceTest(systemtesting.MantidSystemTest):
     """
     def skipTests(self):
         try:
-            import refl1d
+            import refl1d # noqa: F401
         except ImportError:
             return True
         return False
