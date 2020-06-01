@@ -240,8 +240,6 @@ def pcolormesh_on_axis(ax, ws):
         pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
     else:
         pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
-    for lbl in ax.get_xticklabels():
-        lbl.set_rotation(45)
 
     return pcm
 
