@@ -72,6 +72,7 @@ class Project(AnalysisDataServiceObserver):
     def save(self, conf=None):
         """
         The function that is called if the save button is clicked on the mainwindow
+        :param: conf: an optional UserConfig to which the user's input will be saved (if the save dialog is shown).
         :return: True; if the user cancels
         """
         if self.last_project_location is None:
@@ -94,6 +95,7 @@ class Project(AnalysisDataServiceObserver):
     def open_project_save_dialog(self, conf=None):
         """
         The function that is called if the save as... button is clicked on the mainwindow
+        :param: conf: an optional UserConfig to which the user's input will be saved.
         :return: True; if the user cancels.
         """
         self.saving_cancelled = False
@@ -186,7 +188,7 @@ class Project(AnalysisDataServiceObserver):
         """
         :param plots: a dictionary of figure managers.
         :param workspaces: a list of workspace names.
-        :return: a dictionary of figure managers containing plots that only uses the workspaces in workspaces.
+        :return: a dictionary of figure managers containing plots that only use the workspaces in workspaces.
         """
         plots_copy = plots.copy()
         for i, plot in plots_copy.items():
