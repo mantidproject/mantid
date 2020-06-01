@@ -14,31 +14,25 @@ class SampleTransmissionCalculatorModel(object):
         pass
 
     def calculate(self, input_dict):
-        validations = self.validate(input_dict)
         output_key = {}
-        if not validations:
-            if input_dict['binning_type'] == 0:
-                # single binning
-                binning = str(input_dict['single_low']) + ',' + str(input_dict['single_width']) + ',' + \
-                          str(input_dict['single_high'])
-            if input_dict['binning_type'] == 1:
-                # multiple binning
-                binning = input_dict['multiple_bin']
+        if input_dict['binning_type'] == 0:
+            # single binning
+            binning = str(input_dict['single_low']) + ',' + str(input_dict['single_width']) + ',' + \
+                      str(input_dict['single_high'])
+        if input_dict['binning_type'] == 1:
+            # multiple binning
+            binning = input_dict['multiple_bin']
 
-            transmission_ws = CalculateSampleTransmission(
-                WavelengthRange=binning,
-                ChemicalFormula=input_dict['chemical_formula'],
-                DensityType=input_dict['density_type'],
-                density=input_dict['density'],
-                thickness=input_dict['thickness'],
-            )
-            output_key['x'] = transmission_ws.dataX(0)
-            output_key['y'] = transmission_ws.dataY(0)
-            output_key['scattering'] = transmission_ws.dataY(1)[0]
-        else:
-            print('Invalid inputs found:')
-            for key in validations:
-                print(validations[key])
+        transmission_ws = CalculateSampleTransmission(
+            WavelengthRange=binning,
+            ChemicalFormula=input_dict['chemical_formula'],
+            DensityType=input_dict['density_type'],
+            density=input_dict['density'],
+            thickness=input_dict['thickness'],
+        )
+        output_key['x'] = transmission_ws.dataX(0)
+        output_key['y'] = transmission_ws.dataY(0)
+        output_key['scattering'] = transmission_ws.dataY(1)[0]
         return output_key
 
     @staticmethod

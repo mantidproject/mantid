@@ -21,8 +21,9 @@ class SampleTransmissionCalculatorPresenter(object):
 
     def calculate(self):
         input_dict = self.view.get_input_dict()
-        output = self.model.calculate(input_dict)
-        if output:
+        validations = self.model.validate(input_dict)
+        if not validations:
+            output = self.model.calculate(input_dict)
             statistics = self.model.calculate_statistics(output['y'])
             self.view.set_output_table(statistics, output['scattering'])
             self.view.plot(output['x'], output['y'])

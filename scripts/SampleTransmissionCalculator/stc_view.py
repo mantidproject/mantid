@@ -53,4 +53,8 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
             transmission_item.addChild(item)
 
     def plot(self, x, y):
-        pass
+        print(x)
+        print(y)
+        self.axes.cla()
+        self.axes.plot(x, y)
+        self.plot_frame_2.draw()
