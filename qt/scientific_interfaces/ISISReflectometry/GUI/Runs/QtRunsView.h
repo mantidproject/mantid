@@ -73,6 +73,7 @@ public:
   std::string getSearchInstrument() const override;
   void setSearchInstrument(std::string const &instrumentName) override;
   std::string getSearchString() const override;
+  std::string getSearchCycle() const override;
   int getLiveDataUpdateInterval() const override;
 
   std::shared_ptr<MantidQt::API::AlgorithmRunner>

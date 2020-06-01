@@ -8,7 +8,6 @@
 
 #include "Common/DllConfig.h"
 #include "ISearchModel.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "SearchResult.h"
 #include <QAbstractTableModel>
 #include <map>
@@ -19,16 +18,21 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-/** QtSearchModel : Provides a QAbstractTableModel for a Mantid
-ITableWorkspace of Reflectometry search results.
+/** @class QtSearchModel
+
+Provides a QAbstractTableModel for the search results widget on the QtRunsView.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtSearchModel : public QAbstractTableModel,
                                                      public ISearchModel {
   Q_OBJECT
 public:
   QtSearchModel();
-  void addDataFromTable(Mantid::API::ITableWorkspace_sptr tableWorkspace,
-                        const std::string &instrument) override;
+  // ISearchModel overrides
+  void mergeNewResults(SearchResults const &source) override;
+  virtual SearchResult const &getRowData(int index) const override;
+  void clear() override;
+
+  // QAbstractTableModel overrides
   // row and column counts
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -40,23 +44,13 @@ public:
                       int role) const override;
   // get flags for a cell
   Qt::ItemFlags flags(const QModelIndex &index) const override;
-  /// clear the model
-  void clear() override;
-  bool knownFileType(std::string const &filename) const;
-  /// Add details of an error
-  std::vector<SearchResult> const &results() const;
-
-  virtual SearchResult const &getRowData(int index) const override;
-
-  void setError(int index, std::string const &error) override;
 
 protected:
-  // map of run numbers to search result details
-  std::vector<SearchResult> m_runDetails;
+  // Details about each run returned from the search
+  SearchResults m_runDetails;
 
 private:
   bool runHasError(const SearchResult &run) const;
-  void mergeNewResults(std::vector<SearchResult> const &source);
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

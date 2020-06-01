@@ -135,6 +135,8 @@ class QSequentialTableModel(QAbstractTableModel):
 
     def set_fit_workspaces(self, runs, group_and_pairs):
         self.clear_fit_workspaces()
+        if not runs or not group_and_pairs:
+            return
         self.beginInsertRows(QModelIndex(), 0, len(runs) - 1)
         for i in range(len(runs)):
             self._defaultData.insert(i, [runs[i], group_and_pairs[i], default_fit_status, default_chi_squared])

@@ -59,6 +59,7 @@ enum class ParamID {
   TW_TAU,
   TW_CENTRE,
   DELTA_HEIGHT,
+  DELTA_CENTER,
   TEMPERATURE,
   SE_HEIGHT,
   SE_TAU,

@@ -201,6 +201,18 @@ class MantidAxes(Axes):
                         return ads.retrieve(ws_name), ws_artists.spec_num
         raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
+    def get_artists_sample_log_plot_details(self, artist):
+        """Retrieve the sample log plot details of the given artist"""
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        if ws_artists.log_name is not None:
+                            return (ws_artists.log_name, ws_artists.filtered, ws_artists.expt_info_index)
+                        else:
+                            return None
+        raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
+
     def get_artist_normalization_state(self, artist):
         for ws_name, ws_artists_list in self.tracked_workspaces.items():
             for ws_artists in ws_artists_list:
@@ -214,7 +226,10 @@ class MantidAxes(Axes):
                                data_replace_cb=None,
                                spec_num=None,
                                is_normalized=None,
-                               is_spec=True):
+                               is_spec=True,
+                               log_name=None,
+                               filtered=True,
+                               expt_info_index=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -227,6 +242,11 @@ class MantidAxes(Axes):
             This can be from either a distribution workspace or a workspace being
             plotted as a distribution
         :param is_spec: bool. True if spec_num represents a spectrum, and False if it is a bin index
+        :param log_name: string. The name of the plotted log
+        :param filtered: bool. True if log plotted was filtered, and False if unfiltered.
+            This only has meaning if log_name is not None.
+        :param expt_info_index: Integer. The index of the experiment info for this plotted log.
+            This only has meaning if log_name is not None.
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -240,7 +260,8 @@ class MantidAxes(Axes):
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
             artist_info.append(
-                _WorkspaceArtists(artists, data_replace_cb, is_normalized, name, spec_num, is_spec))
+                _WorkspaceArtists(artists, data_replace_cb, is_normalized, name, spec_num, is_spec,
+                                  log_name, filtered, expt_info_index))
             self.check_axes_distribution_consistency()
         return artists
 
@@ -269,7 +290,7 @@ class MantidAxes(Axes):
         if artist.axes.creation_args[0].get('axis', None) == MantidAxType.BIN:
             if any([workspace.readE(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
                 return True
-        else:
+        elif spec_num is not None:
             workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
             if any(workspace.readE(workspace_index) != 0):
                 return True
@@ -418,17 +439,34 @@ class MantidAxes(Axes):
         """
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
-        self.remove_artists_if(lambda art: art == artist)
-        if kwargs.get('axis', None) == MantidAxType.BIN:
-            workspace_index = spec_num
-        else:
-            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-        self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
 
-        if errorbars:
-            new_artist = self.errorbar(workspace, wkspIndex=workspace_index, **kwargs)
+        # check if it is a sample log plot
+        if spec_num is None:
+            sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
+            kwargs['LogName'] = sample_log_plot_details[0]
+            if sample_log_plot_details[1] is not None:
+                kwargs['Filtered'] = sample_log_plot_details[1]
+            if sample_log_plot_details[2] is not None:
+                kwargs['ExperimentInfo'] = sample_log_plot_details[2]
+            # error bar plots do not make sense for log plots
+            errorbars = False
+            # neither does distribution
+            if 'distribution' in kwargs.keys():
+                    del kwargs['distribution']
         else:
-            new_artist = self.plot(workspace, wkspIndex=workspace_index, **kwargs)
+            if kwargs.get('axis', None) == MantidAxType.BIN:
+                workspace_index = spec_num
+            else:
+                workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+
+            self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
+            kwargs['wkspIndex'] = workspace_index
+
+        self.remove_artists_if(lambda art: art == artist)
+        if errorbars:
+            new_artist = self.errorbar(workspace, **kwargs)
+        else:
+            new_artist = self.plot(workspace, **kwargs)[0]
         return new_artist
 
     def relim(self, visible_only=True):
@@ -595,7 +633,10 @@ class MantidAxes(Axes):
                                                      axesfunctions.plot(self, normalize_by_bin_width = is_normalized,
                                                                         *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
+                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
+                                                     kwargs.get('LogName', None),
+                                                     kwargs.get('Filtered', None),
+                                                     kwargs.get('ExperimentInfo', None))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -1379,7 +1420,10 @@ class _WorkspaceArtists(object):
                  is_normalized,
                  workspace_name=None,
                  spec_num=None,
-                 is_spec=True):
+                 is_spec=True,
+                 log_name=None,
+                 filtered=True,
+                 expt_info_index=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
@@ -1388,6 +1432,11 @@ class _WorkspaceArtists(object):
         :param workspace_name: String. The name of the associated workspace
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         :param is_spec: True if spec_num represents a spectrum rather than a bin
+        :param log_name: string. The name of the plotted log
+        :param filtered: bool. True if log plotted was filtered, and False if unfiltered.
+            This only has meaning if log_name is not None.
+        :param expt_info_index: Integer. The index of the experiment info for this plotted log.
+            This only has meaning if log_name is not None.
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
@@ -1396,6 +1445,9 @@ class _WorkspaceArtists(object):
         self.is_spec = is_spec
         self.workspace_index = self._get_workspace_index()
         self.is_normalized = is_normalized
+        self.log_name = log_name
+        self.filtered = filtered
+        self.expt_info_index = expt_info_index
 
     def _get_workspace_index(self):
         """Get the workspace index (spectrum or bin index) of the workspace artist"""

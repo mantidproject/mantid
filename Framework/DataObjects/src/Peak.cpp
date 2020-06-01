@@ -34,10 +34,11 @@ namespace DataObjects {
 Peak::Peak()
     : m_detectorID(-1), m_H(0), m_K(0), m_L(0), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_initialEnergy(0.),
-      m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
-      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
+      m_finalEnergy(0.), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
+      m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -55,9 +56,10 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
            const Mantid::Kernel::V3D &QLabFrame,
            boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -82,9 +84,10 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
            const Mantid::Kernel::Matrix<double> &goniometer,
            boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_GoniometerMatrix(goniometer),
-      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -105,9 +108,10 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
            double m_Wavelength)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -127,9 +131,10 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
            double m_Wavelength, const Mantid::Kernel::V3D &HKL)
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
-      m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -151,9 +156,10 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
            double m_Wavelength, const Mantid::Kernel::V3D &HKL,
            const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
-      m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
-      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -174,9 +180,10 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
            double m_Wavelength)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
+      m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -199,6 +206,7 @@ Peak::Peak(const Peak &other)
       m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
       m_initialEnergy(other.m_initialEnergy),
       m_finalEnergy(other.m_finalEnergy),
+      m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
       m_GoniometerMatrix(other.m_GoniometerMatrix),
       m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
       m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount),
@@ -221,6 +229,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_binCount(ipeak.getBinCount()),
       m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()),
+      m_absorptionWeightedPathLength(ipeak.getAbsorptionWeightedPathLength()),
       m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_runNumber(ipeak.getRunNumber()),
@@ -1000,6 +1009,8 @@ double Peak::getValueByColName(const std::string &name_in) const {
     return this->getCol();
   else if (name == "peaknumber")
     return double(this->getPeakNumber());
+  else if (name == "tbar")
+    return this->getAbsorptionWeightedPathLength();
   else
     throw std::runtime_error(
         "Peak::getValueByColName() unknown column or column is not a number: " +
@@ -1061,6 +1072,7 @@ Peak &Peak::operator=(const Peak &other) {
     m_intMNP = other.m_intMNP;
     convention = other.convention;
     m_peakShape.reset(other.m_peakShape->clone());
+    m_absorptionWeightedPathLength = other.m_absorptionWeightedPathLength;
   }
   return *this;
 }
@@ -1082,6 +1094,21 @@ Mantid::Kernel::V3D Peak::getDetectorPosition() const {
     throw Mantid::Kernel::Exception::NullPointerException("Peak", "Detector");
   }
   return getDetector()->getPos();
+}
+
+/**
+ * @brief Set the absorption weighted path length
+ * @param pathLength : Desired path length
+ */
+void Peak::setAbsorptionWeightedPathLength(double pathLength) {
+  m_absorptionWeightedPathLength = pathLength;
+}
+
+/**
+ * Gets the absorption weighted path length
+ */
+double Peak::getAbsorptionWeightedPathLength() const {
+  return m_absorptionWeightedPathLength;
 }
 
 Mantid::Kernel::Logger Peak::g_log("PeakLogger");

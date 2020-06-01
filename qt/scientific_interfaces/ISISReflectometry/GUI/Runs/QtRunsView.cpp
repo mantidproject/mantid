@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsView.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
@@ -139,6 +138,7 @@ void QtRunsView::setInstrumentComboEnabled(bool enabled) {
 void QtRunsView::setSearchTextEntryEnabled(bool enabled) {
 
   m_ui.textSearch->setEnabled(enabled);
+  m_ui.textCycle->setEnabled(enabled);
 }
 
 /**
@@ -227,7 +227,7 @@ ISearchModel const &QtRunsView::searchResults() { return m_searchModel; }
 ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
 
 /**
-This slot notifies the presenter that the ICAT search was completed
+This slot notifies the presenter that the search was completed
 */
 void QtRunsView::onSearchComplete() {
   m_searchNotifyee->notifySearchComplete();
@@ -362,6 +362,14 @@ Get the string the user wants to search for.
 */
 std::string QtRunsView::getSearchString() const {
   return m_ui.textSearch->text().toStdString();
+}
+
+/**
+Get the string the user wants to search for.
+@returns The search string
+*/
+std::string QtRunsView::getSearchCycle() const {
+  return m_ui.textCycle->text().toStdString();
 }
 
 /**

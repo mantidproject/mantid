@@ -15,7 +15,6 @@
 #include <boost/optional/optional.hpp>
 
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -126,7 +125,7 @@ public:
   /// Returns a list of all full keys in the config
   std::vector<std::string> keys() const;
   /// Removes the value from a selected keyName
-  void remove(const std::string &rootName) const;
+  void remove(const std::string &rootName);
   /// Checks to see whether a key has a value assigned to it
   bool hasProperty(const std::string &rootName) const;
   /// Checks to see whether the target passed is an executable file
@@ -285,12 +284,10 @@ private:
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
 
-  // Forward declaration of inner class
-  template <class T> class WrappedObject;
   /// the POCO file config object
-  std::unique_ptr<WrappedObject<Poco::Util::PropertyFileConfiguration>> m_pConf;
+  Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> m_pConf;
   /// the POCO system Config Object
-  std::unique_ptr<WrappedObject<Poco::Util::SystemConfiguration>> m_pSysConfig;
+  Poco::AutoPtr<Poco::Util::SystemConfiguration> m_pSysConfig;
 
   /// A set of property keys that have been changed
   mutable std::set<std::string> m_changed_keys;

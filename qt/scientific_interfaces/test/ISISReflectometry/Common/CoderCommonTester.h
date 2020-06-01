@@ -158,6 +158,8 @@ private:
                      map[QString("comboSearchInstrument")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.textSearch->text(),
                      map[QString("textSearch")].toString())
+    TS_ASSERT_EQUALS(gui->m_ui.textCycle->text(),
+                     map[QString("textCycle")].toString())
   }
 
   void testRunsTable(const QtRunsTableView *gui, const ReductionJobs *redJobs,

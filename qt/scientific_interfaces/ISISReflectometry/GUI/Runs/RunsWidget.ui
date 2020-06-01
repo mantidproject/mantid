@@ -139,7 +139,51 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="labelCycle">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>&amp;Cycle:</string>
+           </property>
+           <property name="buddy">
+            <cstring>textCycle</cstring>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="1">
+          <widget class="QLineEdit" name="textCycle">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>40</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>The cycle the investigation is in e.g. 19_4. If provided, this avoids requiring an ICat login and uses journal search instead.</string>
+           </property>
+           <property name="whatsThis">
+            <string>Specifies the cycle that you are searching for runs from, e.g. 19_4. If this is provided, then the search will use the journal files, which is the most reliable method. If omitted, the search will use ICat instead. This requires an ICat login and can be less reliable, so we recommend that you always provide the cycle if it is known.</string>
+           </property>
+           <property name="inputMethodHints">
+            <set>Qt::ImhDigitsOnly</set>
+           </property>
+           <property name="cursorPosition">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
           <widget class="QPushButton" name="buttonSearch">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -158,7 +202,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QPushButton" name="buttonAutoreduce">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -177,7 +221,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="4" column="1">
           <widget class="QPushButton" name="buttonAutoreducePause">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -470,6 +514,22 @@
   </connection>
   <connection>
    <sender>textSearch</sender>
+   <signal>returnPressed()</signal>
+   <receiver>actionSearch</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textCycle</sender>
    <signal>returnPressed()</signal>
    <receiver>actionSearch</receiver>
    <slot>trigger()</slot>

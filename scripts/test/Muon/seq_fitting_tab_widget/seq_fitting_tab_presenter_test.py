@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
 from mantid.api import FunctionFactory, MultiDomainFunction
+from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
@@ -27,13 +29,17 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.view = mock.MagicMock()
         self.view.fit_table = mock.MagicMock()
         self.model = mock.MagicMock()
-        self.presenter = SeqFittingTabPresenter(self.view, self.model, self.context)
-
+        self.widget = SeqFittingTabWidget(context=self.context, model=self.model, parent=None, view=self.view)
+        self.presenter = self.widget.seq_fitting_tab_presenter
         self.view.is_plotting_checked.return_value = False
         self.view.use_initial_values_for_fits.return_value = False
         self.presenter.create_thread = mock.MagicMock()
 
         self.view.fit_table.get_workspace_info_from_row = mock.MagicMock(return_value=["2224;2225", "bwd;fwd;top"])
+
+    def tearDown(self):
+        self.context.ads_observer.unsubscribe()
+        self.context = None
 
     def _setup_test_fit_function(self, values):
         self.presenter.fitting_calculation_model = mock.MagicMock()
@@ -187,6 +193,16 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.presenter.get_workspaces_for_row_in_fit_table.assert_has_calls([mock.call(0),
                                                                              mock.call(2),
                                                                              mock.call(5)])
+
+    def test_workspace_deleted_in_ads_updates_fit_table(self):
+        self.presenter.model.get_runs_groups_and_pairs_for_fits = mock.MagicMock(
+            return_value=[[], []])
+
+        workspace = CreateSampleWorkspace(OutputWorkspace="test")
+        DeleteWorkspace(workspace)
+
+        self.model.get_runs_groups_and_pairs_for_fits.assert_called_once()
+        self.view.fit_table.set_fit_workspaces.assert_called_once()
 
 
 if __name__ == '__main__':

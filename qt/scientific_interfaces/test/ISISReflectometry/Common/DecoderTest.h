@@ -292,6 +292,7 @@ const static QString BATCH_JSON_STRING{
     "                }"
     "            ]"
     "        },"
+    "        \"textCycle\": \"11_3\","
     "        \"textSearch\": \"1120015\""
     "    },"
     "    \"saveView\": {"
@@ -389,6 +390,7 @@ const static QString EMPTY_BATCH_JSON_STRING{
     "                }"
     "            ]"
     "        },"
+    "        \"textCycle\": \"\","
     "        \"textSearch\": \"\""
     "    },"
     "    \"saveView\": {"
@@ -411,37 +413,6 @@ const static QString MAINWINDOW_JSON_STRING{
     EMPTY_BATCH_JSON_STRING + QString("], ") +
     QString("\"tag\": \"ISIS Reflectometry\"}")};
 } // namespace
-
-/**
- * QApplication
- *
- * Uses setUpWorld/tearDownWorld to initialize & finalize
- * QApplication object
- */
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    m_app = new QApplication(m_argc, m_argv);
-
-    qRegisterMetaType<std::string>("StdString");
-    qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
-
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-  int m_argc = 1;
-  GNU_DIAG_OFF("pedantic")
-  char *m_argv[1] = {"DecoderTest"};
-  GNU_DIAG_ON("pedantic")
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
 
 namespace MantidQt {
 namespace CustomInterfaces {
