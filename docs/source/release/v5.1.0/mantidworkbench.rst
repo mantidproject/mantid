@@ -39,6 +39,7 @@ Improvements
 
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
+- The gray and plasma colormaps have been added to the instrument view. 
 
 Bugfixes
 ########

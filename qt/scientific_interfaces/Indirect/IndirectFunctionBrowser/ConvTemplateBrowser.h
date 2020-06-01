@@ -92,6 +92,7 @@ private:
 
   QtProperty *m_deltaFunctionOn;
   QtProperty *m_deltaFunctionHeight;
+  QtProperty *m_deltaFunctionCenter;
 
   QtProperty *m_tempCorrectionOn;
   QtProperty *m_temperature;

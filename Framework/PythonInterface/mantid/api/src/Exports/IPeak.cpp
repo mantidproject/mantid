@@ -195,6 +195,10 @@ void export_IPeak() {
       .def("setSigmaIntensity", &IPeak::setSigmaIntensity,
            (arg("self"), arg("sigma_intensity")),
            "Set the error on the integrated peak intensity")
+      .def("setAbsorptionWeightedPathLength",
+           &IPeak::setAbsorptionWeightedPathLength,
+           (arg("self"), arg("pathLength")),
+           "Set the absorption weighted path length")
       .def("getBinCount", &IPeak::getBinCount, arg("self"),
            "Return the # of counts in the bin at its peak")
       .def("setBinCount", &IPeak::setBinCount, (arg("self"), arg("bin_count")),
@@ -224,5 +228,8 @@ void export_IPeak() {
       .def("getL2", &IPeak::getL2, arg("self"),
            "Return the L2 flight path length (:class:`~mantid.api.Sample` to "
            ":class:`~mantid.geometry.Detector`), in meters.")
-      .def("getPeakShape", getPeakShape, arg("self"), "Get the peak shape");
+      .def("getPeakShape", getPeakShape, arg("self"), "Get the peak shape")
+      .def("getAbsorptionWeightedPathLength",
+           &IPeak::getAbsorptionWeightedPathLength, arg("self"),
+           "Get the absorption weighted path length");
 }

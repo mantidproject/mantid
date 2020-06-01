@@ -58,6 +58,10 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         IndirectILLEnergyTransfer(**args)
 
         self._check_workspace_group(mtd['red'], 2, 18, 1017)
+        deltaE = mtd['red'][0].readX(0)
+        bsize = mtd['red'][0].blocksize()
+        self.assertAlmostEquals(deltaE[bsize//2], 0, 4)
+        self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_QENS(self):
         # tests one wing QENS with PSD range
@@ -65,6 +69,11 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
                 'ManualPSDIntegrationRange': [20,100]}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1024)
+
+        deltaE = res[0].readX(0)
+        bsize = res[0].blocksize()
+        self.assertEquals(deltaE[bsize//2], 0)
+        self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_EFWS(self):
         args = {'Run': self._runs['one_wing_EFWS']}

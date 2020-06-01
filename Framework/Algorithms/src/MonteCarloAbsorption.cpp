@@ -20,7 +20,6 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -262,8 +261,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
 
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), efixed.emode(),
-                                nevents, nlambda, maxScatterPtAttempts,
-                                useSparseInstrument, interpolateOpt,
+                                nevents, maxScatterPtAttempts,
                                 resimulateTracksForDiffWavelengths, g_log);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
@@ -285,10 +283,53 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
-    const auto lambdas = simulationWS.points(i);
+    const auto lambdas = simulationWS.points(i).rawData();
 
-    strategy.calculate(rng, detPos, lambdas, lambdaFixed,
-                       simulationWS.getSpectrum(i));
+    const auto nbins = lambdas.size();
+    const size_t lambdaStepSize = nbins / nlambda;
+
+    std::vector<double> packedLambdas;
+    std::vector<double> packedAttFactors;
+    std::vector<double> packedAttFactorErrors;
+
+    for (size_t j = 0; j < nbins; j += lambdaStepSize) {
+      packedLambdas.push_back(lambdas[j]);
+      packedAttFactors.push_back(0);
+      packedAttFactorErrors.push_back(0);
+      // Ensure we have the last point for the interpolation
+      if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins && j + 1 != nbins) {
+        j = nbins - lambdaStepSize - 1;
+      }
+    }
+
+    strategy.calculate(rng, detPos, packedLambdas, lambdaFixed,
+                       packedAttFactors, packedAttFactorErrors);
+
+    for (size_t j = 0; j < packedLambdas.size(); j++) {
+      simulationWS.getSpectrum(i)
+          .dataY()[simulationWS.yIndexOfX(packedLambdas[j])] =
+          packedAttFactors[j];
+
+      simulationWS.getSpectrum(i)
+          .dataE()[simulationWS.yIndexOfX(packedLambdas[j])] =
+          packedAttFactorErrors[j];
+    }
+
+    // Interpolate through points not simulated. Simulation WS only has
+    // reduced X values if using sparse instrument so no interpolation required
+
+    if (!useSparseInstrument && lambdaStepSize > 1) {
+      auto histnew = simulationWS.histogram(i);
+
+      if (lambdaStepSize < nbins) {
+        interpolateOpt.applyInplace(histnew, lambdaStepSize);
+      } else {
+        std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
+                  histnew.y()[0]);
+      }
+      outputWS->setHistogram(i, histnew);
+    }
+
     prog.report(reportMsg);
 
     if (!useSparseInstrument) {
