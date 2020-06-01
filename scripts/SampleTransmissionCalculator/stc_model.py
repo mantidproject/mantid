@@ -59,7 +59,7 @@ class SampleTransmissionCalculatorModel(object):
         if bin_list[0] < 0.0 or bin_list[1] <= 0.0 or bin_list[2] <= 0.0:
             validation['histogram'] = 'Histogram must be greater that zero.'
         if bin_list[2] <= bin_list[0]:
-            validation['histogram'] = 'Upper histogram edge must be greater than the lower bin'
+            validation['histogram'] = 'Upper histogram edge must be greater than the lower bin.'
         if not input_dict['chemical_formula']:
             validation['chemical_formula'] = 'Chemical formula has been left blank.'
         return validation

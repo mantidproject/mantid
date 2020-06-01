@@ -27,3 +27,9 @@ class SampleTransmissionCalculatorPresenter(object):
             statistics = self.model.calculate_statistics(output['y'])
             self.view.set_output_table(statistics, output['scattering'])
             self.view.plot(output['x'], output['y'])
+            self.view.set_validation_label()
+        else:
+            warning = ''
+            for key in validations:
+                warning += validations[key] + ' '
+            self.view.set_validation_label(warning)

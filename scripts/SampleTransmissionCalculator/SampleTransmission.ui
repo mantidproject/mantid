@@ -262,7 +262,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <layout class="QHBoxLayout" name="loActionButtons">
+    <layout class="QHBoxLayout" name="loActionButtons" stretch="0,1,0">
      <item>
       <widget class="QPushButton" name="pbHelp">
        <property name="sizePolicy">
@@ -292,17 +292,11 @@
       </widget>
      </item>
      <item>
-      <spacer name="sActionButtons">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QLabel" name="validation_label">
+       <property name="text">
+        <string/>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pbCalculate">
