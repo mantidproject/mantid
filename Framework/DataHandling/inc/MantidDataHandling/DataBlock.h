@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-using spectrumPair = std::pair<specnum_t, specnum_t>;
+using SpectrumPair = std::pair<specnum_t, specnum_t>;
 
 class DataBlockGenerator;
 

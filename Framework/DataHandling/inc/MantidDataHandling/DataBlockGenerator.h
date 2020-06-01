@@ -20,7 +20,7 @@ class DataBlock;
 */
 class DLLExport DataBlockGenerator {
 public:
-  DataBlockGenerator(const std::vector<spectrumPair> &intervals);
+  DataBlockGenerator(const std::vector<SpectrumPair> &intervals);
   class DataBlock;
   DataBlockGenerator &operator++();
   DataBlockGenerator operator++(int);
@@ -29,7 +29,7 @@ public:
   void next();
 
 public:
-  std::vector<spectrumPair> m_intervals;
+  std::vector<SpectrumPair> m_intervals;
   specnum_t m_currentSpectrum;
 
   boost::optional<size_t> m_currentIntervalIndex;

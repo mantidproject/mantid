@@ -12,8 +12,8 @@
 namespace {
 
 using Mantid::specnum_t;
-const specnum_t invalidIntervalValue = std::numeric_limits<specnum_t>::min();
-using Mantid::DataHandling::spectrumPair;
+const specnum_t INVALIDINTERVALVALUE = std::numeric_limits<specnum_t>::min();
+using Mantid::DataHandling::SpectrumPair;
 /**
  * Gets all removal intervals which have an overlap with the original interval.
  * This can be either
@@ -23,13 +23,13 @@ using Mantid::DataHandling::spectrumPair;
  * 3. remove interval contains original interval: check start value of original
  * in range
  */
-std::vector<spectrumPair>
+std::vector<SpectrumPair>
 getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
-    const spectrumPair &original,
-    const std::vector<spectrumPair> &removeIntervals) {
+    const SpectrumPair &original,
+    const std::vector<SpectrumPair> &removeIntervals) {
 
-  auto hasOverlap = [](const spectrumPair &original,
-                       const spectrumPair &toRemove) {
+  auto hasOverlap = [](const SpectrumPair &original,
+                       const SpectrumPair &toRemove) {
     return ((original.first <= toRemove.first) &&
             (toRemove.first <= original.second)) ||
            ((original.first <= toRemove.second) &&
@@ -38,7 +38,7 @@ getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
             (original.first <= toRemove.second));
   };
 
-  std::vector<spectrumPair> overlaps;
+  std::vector<SpectrumPair> overlaps;
   for (auto &removeInterval : removeIntervals) {
     if (hasOverlap(original, removeInterval)) {
       overlaps.emplace_back(removeInterval);
@@ -55,8 +55,8 @@ getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
          cut             |---....
          return: NONE
 */
-void handleLeftHandSideOverlap(spectrumPair &original,
-                               const spectrumPair &toRemove) {
+void handleLeftHandSideOverlap(SpectrumPair &original,
+                               const SpectrumPair &toRemove) {
   original.first = toRemove.second + 1;
 }
 
@@ -68,11 +68,11 @@ void handleLeftHandSideOverlap(spectrumPair &original,
         cut     we are at the end, set interval to invalid
      return     ...-|
 */
-spectrumPair handleRightHandSideOverlap(spectrumPair &original,
-                                        const spectrumPair &toRemove) {
+SpectrumPair handleRightHandSideOverlap(SpectrumPair &original,
+                                        const SpectrumPair &toRemove) {
   auto newInterval = std::make_pair(original.first, toRemove.first - 1);
-  original.first = invalidIntervalValue;
-  original.second = invalidIntervalValue;
+  original.first = INVALIDINTERVALVALUE;
+  original.second = INVALIDINTERVALVALUE;
   return newInterval;
 }
 
@@ -84,20 +84,20 @@ spectrumPair handleRightHandSideOverlap(spectrumPair &original,
        cut                  |---...
     return      ...--|
 */
-spectrumPair handleFullyContained(spectrumPair &original,
-                                  const spectrumPair &toRemove) {
+SpectrumPair handleFullyContained(SpectrumPair &original,
+                                  const SpectrumPair &toRemove) {
   // It is important to first creat the new pair and then perform the cut
   auto newPair = std::make_pair(original.first, toRemove.first - 1);
   original.first = toRemove.second + 1;
   return newPair;
 }
 
-std::vector<spectrumPair>
-getSlicedIntervals(spectrumPair original,
-                   const std::vector<spectrumPair> &removeIntervals) {
+std::vector<SpectrumPair>
+getSlicedIntervals(SpectrumPair original,
+                   const std::vector<SpectrumPair> &removeIntervals) {
   // If there is nothing to remove return the original
   if (removeIntervals.empty()) {
-    return std::vector<spectrumPair>{original};
+    return std::vector<SpectrumPair>{original};
   }
 
   // There are several overlap scenarios.
@@ -114,30 +114,30 @@ getSlicedIntervals(spectrumPair original,
   //    original :  ...-------...
   //    toRemove:       |---|
 
-  auto isFullOverlap = [](const spectrumPair &original,
-                          const spectrumPair &toRemove) {
+  auto isFullOverlap = [](const SpectrumPair &original,
+                          const SpectrumPair &toRemove) {
     return (toRemove.first <= original.first) &&
            (original.first <= toRemove.second) &&
            (toRemove.first <= original.second) &&
            (original.second <= toRemove.second);
   };
 
-  auto isLeftHandSideOverlap = [](const spectrumPair &original,
-                                  const spectrumPair &toRemove) {
+  auto isLeftHandSideOverlap = [](const SpectrumPair &original,
+                                  const SpectrumPair &toRemove) {
     return (toRemove.first <= original.first) &&
            (original.first <= toRemove.second) &&
            (toRemove.second < original.second);
   };
 
-  auto isRightHandSideOverlap = [](const spectrumPair &original,
-                                   const spectrumPair &toRemove) {
+  auto isRightHandSideOverlap = [](const SpectrumPair &original,
+                                   const SpectrumPair &toRemove) {
     return (original.first < toRemove.first) &&
            (toRemove.first <= original.second) &&
            (original.second <= toRemove.second);
   };
 
-  auto isFullyContained = [](const spectrumPair &original,
-                             const spectrumPair &toRemove) {
+  auto isFullyContained = [](const SpectrumPair &original,
+                             const SpectrumPair &toRemove) {
     return (original.first < toRemove.first) &&
            (toRemove.first < original.second) &&
            (original.first < toRemove.second) &&
@@ -146,7 +146,7 @@ getSlicedIntervals(spectrumPair original,
 
   // Use that removeIntervals has oredred, non-overlapping intervals
   // Subtract all the removeIntervals
-  std::vector<spectrumPair> newIntervals;
+  std::vector<SpectrumPair> newIntervals;
   for (auto &removeInterval : removeIntervals) {
 
     if (isFullOverlap(original, removeInterval)) {
@@ -160,8 +160,8 @@ getSlicedIntervals(spectrumPair original,
       // Set the remainder of the original to invalid, such that we don't
       // pick
       // it up at the very end
-      original.first = invalidIntervalValue;
-      original.second = invalidIntervalValue;
+      original.first = INVALIDINTERVALVALUE;
+      original.second = INVALIDINTERVALVALUE;
       break;
     } else if (isRightHandSideOverlap(original, removeInterval)) {
       auto newInterval = handleRightHandSideOverlap(original, removeInterval);
@@ -181,8 +181,8 @@ getSlicedIntervals(spectrumPair original,
   // wasn't
   // a full overlap removal
   // or no righ-hand-side overlap of a removal interval
-  if ((original.first != invalidIntervalValue) &&
-      (original.second != invalidIntervalValue)) {
+  if ((original.first != INVALIDINTERVALVALUE) &&
+      (original.second != INVALIDINTERVALVALUE)) {
     newIntervals.emplace_back(original);
   }
 
@@ -202,9 +202,9 @@ template <typename T> void sortDataBlocks(T &dataBlcokCollection) {
             comparison);
 }
 
-std::vector<spectrumPair> spectrumIDIntervals(
+std::vector<SpectrumPair> spectrumIDIntervals(
     const std::vector<Mantid::DataHandling::DataBlock> &blocks) {
-  std::vector<spectrumPair> intervals;
+  std::vector<SpectrumPair> intervals;
   intervals.reserve(blocks.size());
 
   std::transform(blocks.begin(), blocks.end(), std::back_inserter(intervals),
@@ -424,7 +424,7 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
 
   // Now create the new intervals which don't include the removeInterval
   // values
-  std::vector<spectrumPair> newIntervals;
+  std::vector<SpectrumPair> newIntervals;
   for (auto &originalInterval : originalIntervals) {
     // Find all relevant remove intervals. In principal this could
     // be made more efficient.

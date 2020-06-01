@@ -52,7 +52,7 @@ int DataBlock::getNumberOfPeriods() const { return m_numberOfPeriods; }
 size_t DataBlock::getNumberOfChannels() const { return m_numberOfChannels; }
 
 std::unique_ptr<DataBlockGenerator> DataBlock::getGenerator() const {
-  std::vector<spectrumPair> interval{
+  std::vector<SpectrumPair> interval{
       std::make_pair(m_minSpectraID, m_maxSpectraID)};
   return std::make_unique<DataBlockGenerator>(interval);
 }
