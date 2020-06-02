@@ -42,14 +42,15 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr initStaticWorkspace();
+  API::MatrixWorkspace_sptr initStaticWorkspace(const NeXus::NXEntry &);
 
   void loadData();
   void loadMetaData();
   void loadInstrument(API::MatrixWorkspace_sptr);
   std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr,
-                                            const NeXus::NXEntry &, int);
+                                            const NeXus::NXEntry &, const int);
   void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr);
+  std::vector<double> prepareAxes(const NeXus::NXEntry &);
 
   size_t m_numberOfChannels; // number of channels data
 

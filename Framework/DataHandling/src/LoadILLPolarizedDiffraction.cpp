@@ -167,54 +167,12 @@ void LoadILLPolarizedDiffraction::loadData() {
     std::string start_time = entry.getString("start_time");
     start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
 
-    // check the mode of measurement and prepare axes for data
-    std::vector<double> axis;
-    NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
-    acquisitionMode.load();
-    if (acquisitionMode[0] == TOF_MODE_ON) {
-      NXFloat timeOfFlightInfo =
-          entry.openNXFloat("D7/Detector/time_of_flight");
-      timeOfFlightInfo.load();
-      auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
-      m_numberOfChannels = size_t(timeOfFlightInfo[1]);
-      auto tofDelay = timeOfFlightInfo[2];
-      for (auto channel_no = 0;
-           channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
-        axis.push_back(
-            static_cast<double>(tofDelay + channel_no * channelWidth));
-      }
-    } else {
-      m_numberOfChannels = 1;
-      NXFloat wavelength = entry.openNXFloat("D7/monochromator/wavelength");
-      wavelength.load();
-      axis.push_back(static_cast<double>(wavelength[0] * 0.9));
-      axis.push_back(static_cast<double>(wavelength[0] * 1.1));
-    }
+    // prepare axes for data
+    std::vector<double> axis = prepareAxes(entry);
 
     // init the workspace with proper number of histograms and number of
     // channels
-    auto workspace = initStaticWorkspace();
-
-    // check the polarization direction and set the workspace title
-    std::string polDirection = entry.getString("D7/POL/actual_state");
-    std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
-    workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
-
-    // Set x axis units
-    if (acquisitionMode[0] == TOF_MODE_ON) {
-      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Time", Units::Symbol::Microsecond);
-      workspace->getAxis(0)->unit() = lblUnit;
-    } else {
-      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
-      workspace->getAxis(0)->unit() = lblUnit;
-    }
-
-    // Set y axis unit
-    workspace->setYUnit("Counts");
+    auto workspace = initStaticWorkspace(entry);
 
     // load data from file
     std::string dataName = "data/Detector_data";
@@ -301,7 +259,8 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
  * of the workspace from the first entry
  * @return : workspace with the correct data dimensions
  */
-API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace() {
+API::MatrixWorkspace_sptr
+LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   const size_t nSpectra = D7_NUMBER_PIXELS + NUMBER_MONITORS;
 
   API::MatrixWorkspace_sptr workspace;
@@ -309,9 +268,32 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace() {
   if (m_outputWorkspaceGroup->getNumberOfEntries() == 0) {
     workspace = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
+
+    // check the polarization direction and set the workspace title
+    std::string polDirection = entry.getString("D7/POL/actual_state");
+    std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
+    workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
+
+    // Set x axis units
+    NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
+    acquisitionMode.load();
+    if (acquisitionMode[0] == TOF_MODE_ON) {
+      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
+          UnitFactory::Instance().create("Label"));
+      lblUnit->setLabel("Time", Units::Symbol::Microsecond);
+      workspace->getAxis(0)->unit() = lblUnit;
+    } else {
+      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
+          UnitFactory::Instance().create("Label"));
+      lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
+      workspace->getAxis(0)->unit() = lblUnit;
+    }
+
+    // Set y axis unit
+    workspace->setYUnit("Counts");
   } else {
     API::Workspace_sptr tmp = (m_outputWorkspaceGroup->getItem(0))->clone();
-    workspace = std::dynamic_pointer_cast<API::MatrixWorkspace>(tmp);
+    workspace = std::static_pointer_cast<API::MatrixWorkspace>(tmp);
   }
   return workspace;
 }
@@ -397,23 +379,50 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
       std::vector<double> twoThetaPixels =
           loadTwoThetaDetectors(workspace, entry, bank_no + 2);
       for (auto pixel_no = 0;
-           pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK); pixel_no++) {
+           pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK); ++pixel_no) {
         IComponent_const_sptr pixel = instrument->getDetector(
-            bank_no * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no + 1);
+            bank_no * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no);
         const auto pixelIndex = componentInfo.indexOf(pixel->getComponentID());
         V3D position = pixel->getPos();
-        double const radius =
-            std::sqrt(pow(position[0], 2) + pow(position[2], 2));
-        position = V3D(
-            radius *
-                sin(DEG_TO_RAD * (twoThetaPixels[pixel_no] - twoThetaBank[0])),
-            position[1],
-            radius *
-                cos(DEG_TO_RAD * (twoThetaPixels[pixel_no] - twoThetaBank[0])));
+        double radius, theta, phi;
+        position.getSpherical(radius, theta, phi);
+        position.spherical(radius, twoThetaPixels[pixel_no] + twoThetaBank[0], phi);
         componentInfo.setPosition(pixelIndex, position);
       }
     }
   }
+}
+
+/**
+ * Prepares values for bin edges depending of measurement type
+ * @param entry : entry from which the number of channels and measurement type
+ * will be read
+ * @return : returns vector with bin edges
+ */
+std::vector<double>
+LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
+  // check the mode of measurement and prepare axes for data
+  std::vector<double> axes;
+  NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
+  acquisitionMode.load();
+  if (acquisitionMode[0] == TOF_MODE_ON) {
+    NXFloat timeOfFlightInfo = entry.openNXFloat("D7/Detector/time_of_flight");
+    timeOfFlightInfo.load();
+    auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
+    m_numberOfChannels = size_t(timeOfFlightInfo[1]);
+    auto tofDelay = timeOfFlightInfo[2];
+    for (auto channel_no = 0;
+         channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
+      axes.push_back(static_cast<double>(tofDelay + channel_no * channelWidth));
+    }
+  } else {
+    m_numberOfChannels = 1;
+    NXFloat wavelength = entry.openNXFloat("D7/monochromator/wavelength");
+    wavelength.load();
+    axes.push_back(static_cast<double>(wavelength[0] * 0.9));
+    axes.push_back(static_cast<double>(wavelength[0] * 1.1));
+  }
+  return axes;
 }
 
 } // namespace DataHandling
