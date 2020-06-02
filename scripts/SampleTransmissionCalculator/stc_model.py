@@ -28,7 +28,7 @@ class SampleTransmissionCalculatorModel(object):
             ChemicalFormula=input_dict['chemical_formula'],
             DensityType=input_dict['density_type'],
             density=input_dict['density'],
-            thickness=input_dict['thickness'],
+            thickness=input_dict['thickness']
         )
         output_key['x'] = transmission_ws.dataX(0)
         output_key['y'] = transmission_ws.dataY(0)
@@ -60,7 +60,6 @@ class SampleTransmissionCalculatorModel(object):
             # multiple binning
             bin_list = input_dict['multiple_bin'].split(',')
             if bin_list:
-                print(bin_list)
                 try:
                     bin_list = [float(i) for i in bin_list]
                     if len(bin_list) == 3:
@@ -71,7 +70,7 @@ class SampleTransmissionCalculatorModel(object):
                     else:
                         validation['histogram'] = 'Histogram requires 3 values.'
                 except ValueError:
-                    validation['histogram'] = 'Histogram string not readable'
+                    validation['histogram'] = 'Histogram string not readable.'
         if not input_dict['chemical_formula']:
             validation['chemical_formula'] = 'Chemical formula has been left blank.'
         if input_dict['density'] == 0.0:
