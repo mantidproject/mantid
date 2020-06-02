@@ -37,7 +37,7 @@ Improvements
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
-- We have neatened up the dimension selection section at the top of the slice viewer, to reduce the amount of wasted space and devote more to the data view itself.
+- We have neatened up the the slice viewer user interface, to reduce the amount of wasted space and devote more to the data view itself.
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
 - The gray and plasma colormaps have been added to the instrument view.
