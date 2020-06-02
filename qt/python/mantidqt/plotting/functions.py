@@ -295,7 +295,6 @@ def plot_contour(workspaces, fig=None):
                    colors=DEFAULT_CONTOUR_COLOUR,
                    linewidths=DEFAULT_CONTOUR_WIDTH)
 
-        ax.set_title(ws.name())
         fig.show()
 
     return fig
