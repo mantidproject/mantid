@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.plotconfigdialog import curve_in_figure, image_in_figure, legend_in_figure
 from mantidqt.widgets.plotconfigdialog.view import PlotConfigDialogView
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
@@ -54,6 +55,7 @@ class PlotConfigDialogPresenter:
         self.view.ok_button.clicked.connect(self.apply_properties_and_exit)
         self.view.apply_button.clicked.connect(self.apply_properties)
         self.view.cancel_button.clicked.connect(self.exit)
+        self.view.help_button.clicked.connect(self.open_help_window)
 
     def _add_tab_widget_views(self):
         for tab_view in self.tab_widget_views:
@@ -72,3 +74,8 @@ class PlotConfigDialogPresenter:
 
     def exit(self):
         self.view.close()
+
+    def open_help_window(self):
+        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/'
+                                        'loading_and_displaying_data/'
+                                        '06_formatting_plots.html#figureoptionsgear-png-ptions-menu')
