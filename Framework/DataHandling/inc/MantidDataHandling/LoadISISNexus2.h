@@ -99,7 +99,7 @@ private:
   bool checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor);
 
   /// Prepare a vector of SpectraBlock structures to simplify loading
-  size_t prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
+  size_t prepareSpectraBlocks(std::map<specnum_t, std::string> &monitors,
                               DataBlockComposite &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);
@@ -168,11 +168,11 @@ private:
   /// Time channels
   std::shared_ptr<HistogramData::HistogramX> m_tof_data;
   /// Spectra numbers
-  std::vector<int> m_spec;
+  std::vector<specnum_t> m_spec;
   /// Pointer to one-past-the-end of spectrum number array (m_spec)
-  const int *m_spec_end;
+  const specnum_t *m_spec_end;
   /// Monitors, map spectrum index to monitor group name
-  std::map<int64_t, std::string> m_monitors;
+  std::map<specnum_t, std::string> m_monitors;
   /// A pointer to the ISISRunLogs creator
   boost::scoped_ptr<ISISRunLogs> m_logCreator;
   /// Progress reporting object
@@ -185,9 +185,9 @@ private:
   // clang-format on
 
   bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,
-                                 std::vector<int> &spectrum_index,
+                                 std::vector<specnum_t> &spectrum_index,
                                  int64_t ndets, int64_t n_vms_compat_spectra,
-                                 std::map<int64_t, std::string> &monitors,
+                                 std::map<specnum_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);
 
   /// Check if is the file is a multiple time regime file

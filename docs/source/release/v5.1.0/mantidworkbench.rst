@@ -17,6 +17,7 @@ Improvements
    :align: right
 
 - The plot selection dialog now correctly shows the full range of valid spectra to plot, not just the min to max range.
+- We have added a Copy to Clipboard button to the plot window.
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
@@ -39,7 +40,8 @@ Improvements
 
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
-- The gray and plasma colormaps have been added to the instrument view. 
+- The gray and plasma colormaps have been added to the instrument view.
+- The x-axis tick labels on colorfill plots are now horizontal.
 
 Bugfixes
 ########

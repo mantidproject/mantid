@@ -25,6 +25,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_copy_to_clipboard_triggered = QtCore.Signal()
     sig_plot_options_triggered = QtCore.Signal()
     sig_generate_plot_script_file_triggered = QtCore.Signal()
     sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
@@ -43,6 +44,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Zoom', 'Zoom \n In: L-click+drag \n Out: R-click+drag', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
+        ('Copy', 'Copy image to clipboard', 'mdi.content-copy', 'copy_to_clipboard', None),
         ('Save', 'Save image file', 'mdi.content-save', 'save_figure', None),
         ('Print', 'Print image', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
@@ -102,6 +104,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+
+    def copy_to_clipboard(self):
+        self.sig_copy_to_clipboard_triggered.emit()
 
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
