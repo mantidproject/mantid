@@ -386,7 +386,7 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
         V3D position = pixel->getPos();
         double radius, theta, phi;
         position.getSpherical(radius, theta, phi);
-        position.spherical(radius, twoThetaPixels[pixel_no] + twoThetaBank[0],
+        position.spherical(radius, twoThetaBank[0] - twoThetaPixels[pixel_no],
                            phi);
         componentInfo.setPosition(pixelIndex, position);
       }
