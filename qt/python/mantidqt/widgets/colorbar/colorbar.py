@@ -29,7 +29,7 @@ class ColorbarWidget(QWidget):
         super(ColorbarWidget, self).__init__(parent)
 
         self.setWindowTitle("Colorbar")
-        self.setMaximumWidth(200)
+        self.setMaximumWidth(100)
 
         self.cmap = QComboBox()
         self.cmap.addItems(sorted(cm.cmap_d.keys()))
@@ -88,6 +88,8 @@ class ColorbarWidget(QWidget):
 
         # layout
         self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(2)
         self.layout.addWidget(self.cmap)
         self.layout.addLayout(self.cmax_layout)
         self.layout.addWidget(self.canvas, stretch=1)

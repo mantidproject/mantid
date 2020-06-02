@@ -52,10 +52,14 @@ class SliceViewerDataView(QWidget):
         self.dimensions_layout.addWidget(self.dimensions)
 
         self.colorbar_layout = QVBoxLayout()
+        self.colorbar_layout.setContentsMargins(0,0,0,0)
+        self.colorbar_layout.setSpacing(0)
 
         # normalization options
         if can_normalise:
             self.norm_layout = QHBoxLayout()
+            self.norm_layout.setContentsMargins(0, 0, 0, 0)
+            self.norm_layout.setSpacing(0)
             self.norm_label = QLabel("Normalization =")
             self.norm_layout.addWidget(self.norm_label)
             self.norm_opts = QComboBox()
@@ -66,6 +70,8 @@ class SliceViewerDataView(QWidget):
 
         # MPL figure + colorbar
         self.mpl_layout = QHBoxLayout()
+        self.mpl_layout.setContentsMargins(0,0,0,0)
+        self.mpl_layout.setSpacing(0)
         self.fig = Figure()
         self.ax = None
         self._grid_on = False
@@ -89,6 +95,7 @@ class SliceViewerDataView(QWidget):
 
         # layout
         self.layout = QGridLayout(self)
+        self.layout.setSpacing(1)
         self.layout.addLayout(self.dimensions_layout, 0, 0)
         self.layout.addWidget(self.mpl_toolbar, 1, 0)
         self.layout.addLayout(self.mpl_layout, 2, 0)
