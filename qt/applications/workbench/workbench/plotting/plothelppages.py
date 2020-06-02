@@ -25,7 +25,6 @@ HELP_PAGES = {FigureType.Other: BASE_URL + INDEX_PAGE,
               FigureType.Wireframe: BASE_URL + PLOT3D_PAGE,
               FigureType.Surface: BASE_URL + PLOT3D_PAGE,
               FigureType.Image: BASE_URL + COLORFILL_PAGE,
-              FigureType.Colorfill: BASE_URL + COLORFILL_PAGE,
               FigureType.Contour: BASE_URL + COLORFILL_PAGE}
 
 

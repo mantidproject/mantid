@@ -41,8 +41,6 @@ class FigureType(Enum):
     Wireframe = 6
     # A contour plot
     Contour = 7
-    # A colorfill plot
-    Colorfill = 8
     # Any other type of plot
     Other = 100
 
