@@ -72,8 +72,7 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
@@ -140,8 +139,7 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "395850.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850.nxs"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(
@@ -241,8 +239,7 @@ public:
 
     Load alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "401800+401801"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800+401801"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
@@ -298,8 +295,7 @@ public:
 
     Load alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "401800,401801"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800,401801"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
@@ -387,8 +383,7 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "401800"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
@@ -444,8 +439,7 @@ public:
     LoadILLPolarizedDiffraction alg;
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "Nexus"))
@@ -504,13 +498,11 @@ public:
     LoadILLPolarizedDiffraction alg;
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "401800.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "YIGFile"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("YIGFilename", "YIG_IPF.xml"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("YIGFilename", "YIG_IPF.xml"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -561,39 +553,38 @@ public:
                     0.01)
   }
 
-  void do_test_general_features(WorkspaceGroup_sptr outputWS, std::string measurementMode) {
-      for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-           entry_no++) {
-        MatrixWorkspace_sptr workspaceEntry =
-            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                outputWS->getItem(entry_no));
-        TS_ASSERT(workspaceEntry)
-        TS_ASSERT_EQUALS(workspaceEntry->getNumberHistograms(), 134)
-        TS_ASSERT(workspaceEntry->detectorInfo().isMonitor(132))
-        TS_ASSERT(workspaceEntry->detectorInfo().isMonitor(133))
-        TS_ASSERT(workspaceEntry->isHistogramData())
-        TS_ASSERT(!workspaceEntry->isDistribution())
-        TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
-        if (measurementMode == "monochromatic") {
-          TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
+  void do_test_general_features(WorkspaceGroup_sptr outputWS,
+                                std::string measurementMode) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
+         entry_no++) {
+      MatrixWorkspace_sptr workspaceEntry =
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+              outputWS->getItem(entry_no));
+      TS_ASSERT(workspaceEntry)
+      TS_ASSERT_EQUALS(workspaceEntry->getNumberHistograms(), 134)
+      TS_ASSERT(workspaceEntry->detectorInfo().isMonitor(132))
+      TS_ASSERT(workspaceEntry->detectorInfo().isMonitor(133))
+      TS_ASSERT(workspaceEntry->isHistogramData())
+      TS_ASSERT(!workspaceEntry->isDistribution())
+      TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
+      if (measurementMode == "monochromatic") {
+        TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
+        TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
+                         "Wavelength")
+      } else if (measurementMode == "TOF") {
+        {
           TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
-                           "Wavelength")
-        } else if (measurementMode == "TOF") {
-          {
-            TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
-                             "Time")
-            TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512)
-          }
+                           "Time")
+          TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512)
+        }
       }
-
+    }
   }
-}
+
 private:
   const double RAD_2_DEG = 180.0 / M_PI;
   std::string m_oldFacility;
   std::string m_oldInstrument;
-
-
 };
 
 class LoadILLPolarizedDiffractionTestPerformance : public CxxTest::TestSuite {
