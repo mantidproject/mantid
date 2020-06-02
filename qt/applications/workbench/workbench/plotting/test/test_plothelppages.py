@@ -6,11 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 import unittest
-from unittest.mock import ANY, patch
+from unittest.mock import patch
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 import numpy as np
-from plotting.plothelppages import *
+from workbench.plotting.plothelppages import *
 from matplotlib.pyplot import figure
 
 
@@ -28,7 +28,7 @@ class PlotHelpPagesTest(unittest.TestCase):
         Z = zs.reshape(X.shape)
         return X, Y, Z
 
-    @patch("workbench.plotting.plothelppages.HelpWindow.showPage")
+    @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
     def test_show_help_page_returns_correctly_for_1d_plots(self, mock_show_page):
         fig = figure()
         ax = fig.add_subplot(111, projection='mantid')
@@ -37,15 +37,15 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_any_call(ANY, BASE_URL + PLOT1D_PAGE)
+        mock_show_page.assert_any_call(BASE_URL + PLOT1D_PAGE)
 
         ax.set_waterfall(True)
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_any_call(ANY, BASE_URL + WATERFALL_PAGE)
+        mock_show_page.assert_any_call(BASE_URL + WATERFALL_PAGE)
 
-    @patch("workbench.plotting.plothelppages.HelpWindow.showPage")
+    @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
     def test_show_help_page_returns_plotting_index_if_plot_type_unrecongised(self, mock_show_page):
         fig = figure()
         ax = fig.add_subplot(111, projection='mantid')
@@ -53,9 +53,9 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_called_once_with(ANY, BASE_URL + INDEX_PAGE)
+        mock_show_page.assert_called_once_with(BASE_URL + INDEX_PAGE)
 
-    @patch("workbench.plotting.plothelppages.HelpWindow.showPage")
+    @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
     def test_show_help_page_correctly_returns_3D_plot_page(self, mock_show_page):
         fig = figure()
         ax = fig.add_subplot(111, projection='mantid3d')
@@ -64,9 +64,9 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_called_once_with(ANY, BASE_URL + PLOT3D_PAGE)
+        mock_show_page.assert_called_once_with(BASE_URL + PLOT3D_PAGE)
 
-    @patch("workbench.plotting.plothelppages.HelpWindow.showPage")
+    @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
     def test_show_help_page_correctly_returns_colorfill_plot_page(self, mock_show_page):
         fig = figure()
         ax = fig.add_subplot(111, projection='mantid')
@@ -75,7 +75,7 @@ class PlotHelpPagesTest(unittest.TestCase):
 
         PlotHelpPages.show_help_page_for_figure(fig)
 
-        mock_show_page.assert_called_once_with(ANY, BASE_URL + COLORFILL_PAGE)
+        mock_show_page.assert_called_once_with(BASE_URL + COLORFILL_PAGE)
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ Provides facilities to check plot types
 # third party
 from enum import Enum
 from matplotlib.axes import Axes
-from matplotlib.collections import LineCollection, QuadMesh
+from matplotlib.collections import LineCollection
 from matplotlib.container import ErrorbarContainer
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
@@ -75,8 +75,6 @@ def axes_type(ax):
             axtype = FigureType.Contour
         else:
             axtype = FigureType.Image
-    elif any(isinstance(col, QuadMesh) for col in ax.collections):
-        axtype = FigureType.Colorfill
 
     return axtype
 

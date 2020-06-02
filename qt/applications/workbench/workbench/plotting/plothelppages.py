@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.helpwindow import HelpWindow
+from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.plotting.figuretype import figure_type, FigureType
 
 BASE_URL = "qthelp://org.mantidproject/doc/plotting/"
@@ -34,7 +34,4 @@ class PlotHelpPages(object):
     def show_help_page_for_figure(cls, figure):
         fig_type = figure_type(figure)
         doc_url = HELP_PAGES[fig_type]
-        # We set the parent of this showPage as None.
-        # If we set the parent and then when we close the plot window it will cause a seg fault
-        # when we reopen the help window.
-        HelpWindow.showPage(None, doc_url)
+        InterfaceManager().showHelpPage(doc_url)
