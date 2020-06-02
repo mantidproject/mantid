@@ -330,7 +330,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
-    
+
     def copy_to_clipboard(self):
         """Copy the current figure image to clipboard"""
         # store the image in a buffer using savefig(), this has the
