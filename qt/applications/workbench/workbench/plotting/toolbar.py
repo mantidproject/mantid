@@ -292,6 +292,12 @@ class ToolbarStateManager(object):
         """
         return self.is_pan_active() or self.is_zoom_active()
 
+    def is_fit_active(self):
+        """
+        Check if the fit button is checked
+        """
+        return self._toolbar._actions['toggle_fit'].isChecked()
+
     def toggle_fit_button_checked(self):
         fit_action = self._toolbar._actions['toggle_fit']
         if fit_action.isChecked():

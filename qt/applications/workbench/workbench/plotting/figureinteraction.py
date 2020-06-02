@@ -637,7 +637,8 @@ class FigureInteraction(object):
 
     def motion_event(self, event):
         """ Move the marker if the mouse is moving and in range """
-        if self.toolbar_manager.is_tool_active() or event is None:
+        if self.toolbar_manager.is_tool_active() or self.toolbar_manager.is_fit_active() \
+                or event is None:
             return
 
         x = event.xdata
