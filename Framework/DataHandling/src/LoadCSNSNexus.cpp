@@ -496,6 +496,5 @@ void LoadCSNSNexus::exec() {
     setProperty("OutputWorkspace", ws_hist);
   }
 }
-
 } // namespace DataHandling
 } // namespace Mantid
