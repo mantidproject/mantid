@@ -1504,7 +1504,7 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   if (!isInDataSearchList(dirPath.toString())) {
     auto newSearchString = Strings::join(std::begin(m_dataSearchDirs),
                                          std::end(m_dataSearchDirs), ";");
-    newSearchString.append(path);
+    newSearchString.append(";" + path);
     setString("datasearch.directories", newSearchString);
   }
 }

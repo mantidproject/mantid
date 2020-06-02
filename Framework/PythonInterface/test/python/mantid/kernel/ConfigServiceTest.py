@@ -1,4 +1,5 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -109,12 +110,13 @@ class ConfigServiceTest(unittest.TestCase):
     def test_appending_paths(self):
         new_path_list = self._setup_test_areas()
         try:
+            num_of_dirs = len(config.getDataSearchDirs())
             config.appendDataSearchDir(str(new_path_list[0]))
             updated_paths = config.getDataSearchDirs()
         finally:
             self._clean_up_test_areas()
 
-        self.assertEqual(4, len(updated_paths))
+        self.assertEqual(num_of_dirs+1, len(updated_paths))
 
     def test_setting_log_channel_levels(self):
         testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
@@ -153,7 +155,7 @@ class ConfigServiceTest(unittest.TestCase):
                            'loading.multifile', 'loading.multifilelimit',
                            'maskFiles.directory',
                            'pythonalgorithms.refresh.allowed',
-                           'sliceviewer.nonorthogonal'
+                           'sliceviewer.nonorthogonal',
 
                            ########## TODO should these be documented?
                            'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
