@@ -257,6 +257,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
  * If there are multiple entries in the file and the current entry
  * is not the first one, the returned workspace is a clone
  * of the workspace from the first entry
+ * @param entry : entry linked with the returned workspace
  * @return : workspace with the correct data dimensions
  */
 API::MatrixWorkspace_sptr
@@ -268,11 +269,6 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   if (m_outputWorkspaceGroup->getNumberOfEntries() == 0) {
     workspace = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
-
-    // check the polarization direction and set the workspace title
-    std::string polDirection = entry.getString("D7/POL/actual_state");
-    std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
-    workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
 
     // Set x axis units
     NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
@@ -288,13 +284,16 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
       lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
       workspace->getAxis(0)->unit() = lblUnit;
     }
-
     // Set y axis unit
     workspace->setYUnit("Counts");
   } else {
     API::Workspace_sptr tmp = (m_outputWorkspaceGroup->getItem(0))->clone();
     workspace = std::static_pointer_cast<API::MatrixWorkspace>(tmp);
   }
+  // check the polarization direction and set the workspace title
+  std::string polDirection = entry.getString("D7/POL/actual_state");
+  std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
+  workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
   return workspace;
 }
 /**
