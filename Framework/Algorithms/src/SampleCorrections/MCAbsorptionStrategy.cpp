@@ -24,12 +24,7 @@ namespace Algorithms {
  * @param sample A reference to the object defining details of the sample
  * @param EMode The energy mode of the instrument
  * @param nevents The number of Monte Carlo events used in the simulation
- * @param nlambda The number of steps to use across the wavelength range
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
- * @param useSparseInstrument Whether a sparse instrument representation is
- * being used
- * @param interpolateOpt Method to be used to interpolate between wavelength
- * points
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
  * @param logger Logger from parent algorithm to write logging info
@@ -37,17 +32,14 @@ namespace Algorithms {
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(
     const IBeamProfile &beamProfile, const API::Sample &sample,
-    DeltaEMode::Type EMode, const size_t nevents, const int nlambda,
-    const size_t maxScatterPtAttempts, const bool useSparseInstrument,
-    const InterpolationOption &interpolateOpt,
-    const bool regenerateTracksForEachLambda, Kernel::Logger &logger)
+    DeltaEMode::Type EMode, const size_t nevents,
+    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
+    Kernel::Logger &logger)
     : m_beamProfile(beamProfile),
       m_scatterVol(MCInteractionVolume(
           sample, beamProfile.defineActiveRegion(sample), logger)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
-      m_error(1.0 / std::sqrt(m_nevents)), m_EMode(EMode), m_nlambda(nlambda),
-      m_useSparseInstrument(useSparseInstrument),
-      m_interpolateOpt(interpolateOpt),
+      m_error(1.0 / std::sqrt(m_nevents)), m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
 
 /**
@@ -59,22 +51,24 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
  * @param lambdas Set of wavelength values from the input workspace
  * @param lambdaFixed Efixed value for a detector ID converted to wavelength, in
  * \f$\\A^-1\f$
- * @param attenuationFactorsSpectrum A spectrum containing the correction
- * factors and associated errors
+ * @param attenuationFactors A vector containing the calculated correction
+ * factors
+ * @param attFactorErrors A vector containing the calculated correction factor
+ * errors
  */
-void MCAbsorptionStrategy::calculate(
-    Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &finalPos,
-    const Mantid::HistogramData::Points &lambdas, double lambdaFixed,
-    Mantid::API::ISpectrum &attenuationFactorsSpectrum) {
+void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
+                                     const Kernel::V3D &finalPos,
+                                     const std::vector<double> &lambdas,
+                                     double lambdaFixed,
+                                     std::vector<double> &attenuationFactors,
+                                     std::vector<double> &attFactorErrors) {
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   const auto nbins = static_cast<int>(lambdas.size());
-  const int lambdaStepSize = nbins / m_nlambda;
-  auto &attenuationFactors = attenuationFactorsSpectrum.mutableY();
 
   for (size_t i = 0; i < m_nevents; ++i) {
     Geometry::Track beforeScatter;
     Geometry::Track afterScatter;
-    for (int j = 0; j < nbins; j += lambdaStepSize) {
+    for (int j = 0; j < nbins; ++j) {
       size_t attempts(0);
       do {
         bool success = false;
@@ -101,12 +95,6 @@ void MCAbsorptionStrategy::calculate(
               beforeScatter, afterScatter, lambdaIn, lambdaOut);
           attenuationFactors[j] += wgt;
 
-          // Ensure we have the last point for the interpolation
-          if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins &&
-              j + 1 != nbins) {
-            j = nbins - lambdaStepSize - 1;
-          }
-
           break;
         }
         if (attempts == m_maxScatterAttempts) {
@@ -123,27 +111,12 @@ void MCAbsorptionStrategy::calculate(
 
   m_scatterVol.generateScatterPointStats();
 
-  attenuationFactors = attenuationFactors / static_cast<double>(m_nevents);
+  std::transform(attenuationFactors.begin(), attenuationFactors.end(),
+                 attenuationFactors.begin(),
+                 std::bind(std::divides<double>(), std::placeholders::_1,
+                           static_cast<double>(m_nevents)));
 
-  // Interpolate through points not simulated. Simulation WS only has
-  // reduced X values if using sparse instrument so no interpolation required
-  auto attenuationFactorsHist = attenuationFactorsSpectrum.histogram();
-
-  if (!m_useSparseInstrument && lambdaStepSize > 1) {
-    if (lambdaStepSize < nbins) {
-      m_interpolateOpt.applyInplace(attenuationFactorsHist, lambdaStepSize);
-    } else {
-      std::fill(attenuationFactorsHist.mutableY().begin() + 1,
-                attenuationFactorsHist.mutableY().end(),
-                attenuationFactorsHist.y()[0]);
-    }
-  }
-
-  std::fill(attenuationFactorsHist.mutableE().begin(),
-            attenuationFactorsHist.mutableE().end(), m_error);
-  // ISpectrum::histogram() returns a value rather than reference so need to
-  // reapply
-  attenuationFactorsSpectrum.setHistogram(attenuationFactorsHist);
+  std::fill(attFactorErrors.begin(), attFactorErrors.end(), m_error);
 }
 
 } // namespace Algorithms

@@ -29,6 +29,7 @@ New Features
 - On the fitting tab, only one fit object (fit output and input workspaces) will be shown at a time.
 - Addition of background correction algorithm (PSIBackgroundCorrection) to remove the background present in
   PSI bin data loaded using LoadPSIMuonBin.
+- Addition of a LoadMuonNexusV2 algorithm to load the new Muon V2 files, see :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>`.
 
 Improvements
 -------------

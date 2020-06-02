@@ -199,9 +199,9 @@ bool ISISDiagnostics::validate() {
   UserInputValidator uiv;
 
   // Check raw input
-  uiv.checkMWRunFilesIsValid("Input", m_uiForm.dsInputFiles);
+  uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
   if (m_uiForm.ckUseCalibration->isChecked())
-    uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.dsInputFiles);
+    uiv.checkFileFinderWidgetIsValid("Calibration", m_uiForm.dsInputFiles);
 
   // Check peak range
   auto rangeOne = std::make_pair(m_dblManager->value(m_properties["PeakStart"]),

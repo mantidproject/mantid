@@ -92,4 +92,6 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         actions = self.actions()
         for action in actions:
             if action.text() == text:
+                if action.isChecked() and not state:
+                    action.trigger()  # ensure view reacts appropriately
                 action.setEnabled(state)

@@ -9,8 +9,8 @@ from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import Seq
 
 
 class SeqFittingTabWidget(object):
-    def __init__(self, context, model, parent):
-        self.seq_fitting_tab_view = SeqFittingTabView(parent)
+    def __init__(self, context, model, parent, view=None):
+        self.seq_fitting_tab_view = view if view else SeqFittingTabView(parent)
         self.seq_fitting_tab_model = model
 
         self.seq_fitting_tab_presenter = SeqFittingTabPresenter(self.seq_fitting_tab_view, self.seq_fitting_tab_model,
@@ -29,3 +29,5 @@ class SeqFittingTabWidget(object):
 
         self.seq_fitting_tab_view.fit_table.set_slot_for_key_up_down_pressed(
             self.seq_fitting_tab_presenter.handle_fit_selected_in_table)
+
+        context.deleted_plots_notifier.add_subscriber(self.seq_fitting_tab_presenter.selected_workspaces_observer)

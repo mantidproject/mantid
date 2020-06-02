@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import abins
-import abins.input
+from abins.generaldata import GeneralData
 
 
-class AbinsData(abins.GeneralData):
+class AbinsData(GeneralData):
     """
     Class for storing input DFT data.
     """
@@ -29,9 +29,12 @@ class AbinsData(abins.GeneralData):
         :param ab_initio_program: Program which generated data file; this should be a key in AbinsData.ab_initio_loaders
         :type ab_initio_program: str
         """
+        import abins.input  # Defer import to avoid loops when abins.__init__ imports AbinsData
+
         # This should live closer to the Loaders but for now it is the only place the dict is used.
         ab_initio_loaders = {"CASTEP": abins.input.CASTEPLoader, "CRYSTAL": abins.input.CRYSTALLoader,
-                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader}
+                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader,
+                             "VASP": abins.input.VASPLoader}
 
         if ab_initio_program.upper() not in ab_initio_loaders:
             raise ValueError("No loader available for {}: unknown program. "

@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
    AbinsLoadCRYSTALTest.py
    AbinsLoadDMOL3Test.py
    AbinsLoadGAUSSIANTest.py
+   AbinsLoadVASPTest.py
    AbinsPowderDataTest.py
    AbinsSDataTest.py
   )

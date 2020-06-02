@@ -7,6 +7,10 @@
 #  This file is part of the mantidqt package
 #
 #
-from mantidqt.utils.qt import import_qt
+from mantidqt.widgets.filefinderwidget import FileFinderWidget
 
-FileFinder = import_qt('..._common', 'mantidqt.widgets.filefinder', 'MWRunFiles')
+
+def FileFinder(*args, **kwargs):
+    from warnings import warn
+    warn("The name FileFinder is deprecated, please use FileFinderWidget instead.")
+    return FileFinderWidget(*args, **kwargs)

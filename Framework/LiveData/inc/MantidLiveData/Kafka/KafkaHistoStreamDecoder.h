@@ -28,7 +28,7 @@ public:
                           const std::string &spDetTopic,
                           const std::string &sampleEnvTopic,
                           const std::string &chopperTopic);
-  ~KafkaHistoStreamDecoder();
+  ~KafkaHistoStreamDecoder() override;
   // Disable copies since multiple subscribers will cause problems
   KafkaHistoStreamDecoder(const KafkaHistoStreamDecoder &) = delete;
   KafkaHistoStreamDecoder &operator=(const KafkaHistoStreamDecoder &) = delete;
@@ -43,8 +43,7 @@ private:
   void captureImplExcept() override;
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
-  void initLocalCaches(const std::string &rawMsgBuffer,
-                       const RunStartStruct &runStartData) override;
+  void initLocalCaches(const RunStartStruct &runStartData) override;
 
   void sampleDataFromMessage(const std::string &buffer) override;
 

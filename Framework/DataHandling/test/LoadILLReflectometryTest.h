@@ -240,7 +240,7 @@ public:
     const auto chopperCentre =
         run.getPropertyValueAsType<double>("VirtualChopper.dist_chop_samp");
     const auto chopperSeparation =
-        run.getPropertyValueAsType<double>("Distance.ChopperGap") / 100.;
+        run.getPropertyValueAsType<double>("Distance.ChopperGap");
     const auto sourceSample = chopperCentre - 0.5 * chopperSeparation;
     const auto &spectrumInfo = output->spectrumInfo();
     const auto l1 = spectrumInfo.l1();
@@ -254,8 +254,8 @@ public:
     TS_ASSERT_EQUALS(sourcePos.Y(), 0.)
     TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
     TS_ASSERT_EQUALS(run.getProperty("VirtualChopper.dist_chop_samp")->units(),
-                     "")
-    TS_ASSERT_EQUALS(run.getProperty("Distance.ChopperGap")->units(), "")
+                     "meter")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.ChopperGap")->units(), "meter")
     AnalysisDataService::Instance().clear();
   }
 
@@ -684,7 +684,7 @@ public:
     } else {
       v8 = loader.doubleFromRun("VirtualChopper.dist_chop_samp");
       TS_ASSERT_EQUALS(
-          run.getProperty("VirtualChopper.dist_chop_samp")->units(), "")
+          run.getProperty("VirtualChopper.dist_chop_samp")->units(), "meter")
     }
     TS_ASSERT_EQUALS(v7, v8)
     AnalysisDataService::Instance().clear();

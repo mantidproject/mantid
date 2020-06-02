@@ -59,10 +59,9 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(new FakeHistoSubscriber()))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
 
     KafkaHistoStreamDecoder testInstance(mockBroker, "", "", "", "", "");
     KafkaTestThreadHelper<KafkaHistoStreamDecoder> testHolder(

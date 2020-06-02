@@ -40,7 +40,7 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
 def chopperPairDistance(sampleLogs, instrumentName):
     """Return the gap between the two choppers."""
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
+        return sampleLogs.getProperty('Distance.ChopperGap').value # in [m]
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 

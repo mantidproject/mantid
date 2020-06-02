@@ -16,6 +16,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #endif
+#include <stdexcept>
 
 namespace {
 MantidQt::Icons::IconicFont &iconFontInstance() {

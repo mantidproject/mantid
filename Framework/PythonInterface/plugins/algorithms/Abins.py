@@ -55,16 +55,18 @@ class Abins(PythonAlgorithm):
 
     def PyInit(self):
         # Declare all properties
+        from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ALL_SAMPLE_FORMS
+
         self.declareProperty(name="AbInitioProgram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN", "VASP"]),
                              doc="An ab initio program which was used for vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("VibrationalOrPhononFile", "",
                                           action=FileAction.Load,
                                           direction=Direction.Input,
-                                          extensions=["phonon", "out", "outmol", "log", "LOG"]),
+                                          extensions=AB_INITIO_FILE_EXTENSIONS),
                              doc="File with the data from a vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -86,14 +88,14 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="SampleForm",
                              direction=Direction.Input,
                              defaultValue="Powder",
-                             validator=StringListValidator(abins.constants.ALL_SAMPLE_FORMS),
+                             validator=StringListValidator(ALL_SAMPLE_FORMS),
                              # doc="Form of the sample: SingleCrystal or Powder.")
                              doc="Form of the sample: Powder.")
 
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
-                             validator=StringListValidator(abins.constants.ALL_INSTRUMENTS),
+                             validator=StringListValidator(ALL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -128,7 +130,8 @@ class Abins(PythonAlgorithm):
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
                                  "CRYSTAL": self._validate_crystal_input_file,
                                  "DMOL3": self._validate_dmol3_input_file,
-                                 "GAUSSIAN": self._validate_gaussian_input_file}
+                                 "GAUSSIAN": self._validate_gaussian_input_file,
+                                 "VASP": self._validate_vasp_input_file}
 
         issues = dict()
 
@@ -169,6 +172,7 @@ class Abins(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+        from abins.constants import ATOM_PREFIX
 
         # 0) Create reporter to report progress
         steps = 9
@@ -208,7 +212,7 @@ class Abins(PythonAlgorithm):
         else:  # case selected atoms
             # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
             # A regular expression match is used to make the underscore separator optional and check the index format
-            prefix = abins.constants.ATOM_PREFIX
+            prefix = ATOM_PREFIX
             atom_symbols = [item for item in self._atoms if item[:len(prefix)] != prefix]
             if len(atom_symbols) != len(set(atom_symbols)):  # only different types
                 raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
@@ -367,16 +371,16 @@ class Abins(PythonAlgorithm):
         :returns: mantid workspaces of S for atom (total) and individual quantum orders
         :returntype: list of Workspace2D
         """
+        from abins.constants import ATOM_PREFIX, FUNDAMENTALS, S_LAST_INDEX
+
         atom_workspaces = []
         s_atom_data.fill(0.0)
         internal_atom_label = "atom_%s" % (atom_number - 1)
-        output_atom_label = "%s_%d" % (abins.constants.ATOM_PREFIX, atom_number)
+        output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
         symbol = self._extracted_ab_initio_data[internal_atom_label]["symbol"]
         z_number = Atom(symbol=symbol).z_number
 
-        for i, order in enumerate(range(abins.constants.FUNDAMENTALS,
-                                        self._num_quantum_order_events + abins.constants.S_LAST_INDEX)):
-
+        for i, order in enumerate(range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX)):
             s_atom_data[i] = s_data_extracted[internal_atom_label]["s"]["order_%s" % order]
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
@@ -404,7 +408,7 @@ class Abins(PythonAlgorithm):
             information but is used in-place to save on time instantiating large arrays.
         :param substitution: True if isotope substitution and False otherwise
         """
-        from abins.constants import MASS_EPS
+        from abins.constants import FUNDAMENTALS, MASS_EPS, PYTHON_INDEX_SHIFT, S_LAST_INDEX
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
@@ -417,9 +421,8 @@ class Abins(PythonAlgorithm):
 
                 temp_s_atom_data.fill(0.0)
 
-                for order in range(abins.constants.FUNDAMENTALS,
-                                   self._num_quantum_order_events + abins.constants.S_LAST_INDEX):
-                    order_indx = order - abins.constants.PYTHON_INDEX_SHIFT
+                for order in range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX):
+                    order_indx = order - PYTHON_INDEX_SHIFT
                     temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
                     temp_s_atom_data[order_indx] = temp_s_order
 
@@ -479,15 +482,17 @@ class Abins(PythonAlgorithm):
         :param protons_number: number of protons in the given type fo atom
         :param nucleons_number: number of nucleons in the given type of atom
         """
-        if self._instrument.get_name() in abins.constants.ONE_DIMENSIONAL_INSTRUMENTS:
+        from abins.constants import FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS, ONE_DIMENSIONAL_SPECTRUM
+
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             # only FUNDAMENTALS
-            if s_points.shape[0] == abins.constants.FUNDAMENTALS:
+            if s_points.shape[0] == FUNDAMENTALS:
 
                 self._fill_s_1d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
 
             # total workspaces
-            elif len(s_points.shape) == abins.constants.ONE_DIMENSIONAL_SPECTRUM:
+            elif len(s_points.shape) == ONE_DIMENSIONAL_SPECTRUM:
 
                 self._fill_s_1d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
@@ -564,6 +569,7 @@ class Abins(PythonAlgorithm):
         :param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
         :returns: workspace with total S from partial_workspaces
                 """
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
         total_workspace = self._out_ws_name + "_total"
 
         if isinstance(mtd[partial_workspaces[0]], WorkspaceGroup):
@@ -581,7 +587,7 @@ class Abins(PythonAlgorithm):
 
             # collect all S
             for partial_ws in local_partial_workspaces:
-                if self._instrument.get_name() in abins.constants.ONE_DIMENSIONAL_INSTRUMENTS:
+                if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
                     s_atoms += mtd[partial_ws].dataY(0)
 
             # create workspace with S
@@ -828,6 +834,20 @@ class Abins(PythonAlgorithm):
         return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
                                                        expected_file_extension=".out")
 
+    def _validate_vasp_input_file(self, filename_full_path=None):
+        logger.information("Validate VASP file with vibrational or phonon data.")
+
+        if 'OUTCAR' in os.path.basename(filename_full_path):
+            return dict(Invalid=False, Comment="")
+        else:
+            output = self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                             expected_file_extension=".xml")
+            if output["Invalid"]:
+                output["Comment"] = ("Invalid filename {}. Expected OUTCAR, *.OUTCAR or"
+                                     " *.xml for VASP calculation output. Please rename your file and try again. "
+                                     .format(filename_full_path))
+        return output
+
     def _validate_castep_input_file(self, filename_full_path=None):
         """
         Check if ab initio input vibrational or phonon file has been produced by CASTEP. Currently the crucial
@@ -898,7 +918,6 @@ class Abins(PythonAlgorithm):
         Loads all properties to object's attributes.
         """
         from abins.constants import ALL_INSTRUMENTS, FLOAT_TYPE
-
         self._ab_initio_program = self.getProperty("AbInitioProgram").value
         self._vibrational_or_phonon_data_file = self.getProperty("VibrationalOrPhononFile").value
         self._experimental_file = self.getProperty("ExperimentalFile").value

@@ -9,6 +9,7 @@
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 import copy
+import io
 import sys
 from functools import wraps
 import matplotlib
@@ -16,19 +17,18 @@ from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.collections import QuadMesh
+from matplotlib.collections import LineCollection, QuadMesh
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
+from qtpy.QtGui import QImage
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
 from mantid.plots import datafunctions, MantidAxes
 from mantidqt.io import open_a_file_dialog
-from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
-from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
@@ -206,6 +206,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
                 self.generate_plot_script_clipboard)
@@ -219,6 +220,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_fill_area_triggered.connect(
                 self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
+            self.toolbar.sig_change_line_collection_colour_triggered.connect(self.change_line_collection_colour)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -288,24 +290,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar] \
-                or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
-            self._set_fit_enabled(False)
 
-        # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
-        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
-        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes(
-        )[0].is_waterfall():
-            self.toolbar.set_generate_plot_script_enabled(False)
-
-        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
-        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or \
-                not self.canvas.figure.get_axes()[0].is_waterfall():
-            self.toolbar.set_waterfall_options_enabled(False)
-
-        if datafunctions.figure_contains_only_3d_plots(self.canvas.figure):
-            self.toolbar.adjust_for_3d_plots()
+        if self.toolbar:
+            self.toolbar.set_buttons_visiblity(self.canvas.figure)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -338,6 +325,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def copy_to_clipboard(self):
+        """Copy the current figure image to clipboard"""
+        # store the image in a buffer using savefig(), this has the
+        # advantage of applying all the default savefig parameters
+        # such as background color; those would be ignored if you simply
+        # grab the canvas using Qt
+        buf = io.BytesIO()
+        self.canvas.figure.savefig(buf)
+        QApplication.clipboard().setImage(QImage.fromData(buf.getvalue()))
+        buf.close()
 
     def grid_toggle(self, on):
         """Toggle grid lines on/off"""
@@ -387,11 +385,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         class so that it can be wrapped in a QAppThreadCall.
         """
         Gcf.figure_visibility_changed(self.num)
-
-    def _set_fit_enabled(self, on):
-        action = self.toolbar._actions['toggle_fit']
-        action.setEnabled(on)
-        action.setVisible(on)
 
     def generate_plot_script_clipboard(self):
         script = generate_script(self.canvas.figure, exclude_headers=True)
@@ -458,6 +451,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def update_toolbar_waterfall_plot(self, is_waterfall):
         self.toolbar.set_waterfall_options_enabled(is_waterfall)
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
+
+    def change_line_collection_colour(self, colour):
+        for col in self.canvas.figure.get_axes()[0].collections:
+            if isinstance(col, LineCollection):
+                col.set_color(colour.name())
+
+        self.canvas.draw()
 
 
 # -----------------------------------------------------------------------------

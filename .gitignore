@@ -98,9 +98,12 @@ build/
 *.vspscc
 .builds
 *.egg-info/
-qt/python/mantidqt/utils/qt/plugins.py
+Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
+Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
 qt/python/mantidqt/resources.py
 qt/applications/workbench/workbench/app/resources.py
+qt/applications/workbench/setup.py
+qt/python/setup.py
 
 # Visual C++ cache files
 ipch/
@@ -177,12 +180,6 @@ XDG_CACHE_HOME/
 # Ctags index files
 .tags
 .tags_sorted_by_file
-
-# Dynamically created files
-Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
-Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
-qt/applications/workbench/setup.py
-qt/python/setup.py
 
 # Make sure Third_Party doesn't get checked into the main repository
 Third_Party/

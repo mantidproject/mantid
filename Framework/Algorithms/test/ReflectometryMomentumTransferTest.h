@@ -404,8 +404,7 @@ private:
 
   static double err_ray_SumInLambda(const double angle_bragg,
                                     const LogValues &values) {
-    using namespace boost::math;
-    return std::sqrt(pow<2>(values.da) + pow<2>(values.om_fwhm)) / angle_bragg;
+    return values.da / angle_bragg;
   }
 
   static double err_ray(const std::vector<int> &foreground, const double l2,

@@ -4,15 +4,22 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import abins
 import json
 import numpy as np
+
+import abins
+from abins.input import AbInitioLoader
 
 
 class Tester(object):
     """Base class for testing Abins input loaders"""
 
-    _loaders_extensions = {"CASTEPLoader": "phonon", "CRYSTALLoader": "out", "DMOL3Loader": "outmol", "GAUSSIANLoader": "log"}
+    _loaders_extensions = {"CASTEPLoader": "phonon",
+                           "CRYSTALLoader": "out",
+                           "DMOL3Loader": "outmol",
+                           "GAUSSIANLoader": "log",
+                           "VASPLoader": "xml",
+                           "VASPOUTCARLoader": "OUTCAR"}
 
     @staticmethod
     def _prepare_data(seedname):
@@ -46,7 +53,6 @@ class Tester(object):
         return correct_data
 
     def _check_reader_data(self, correct_data=None, data=None, filename=None, extension=None):
-
         # check data
         correct_k_points = correct_data["datasets"]["k_points_data"]
         items = data["datasets"]["k_points_data"]
@@ -121,9 +127,18 @@ class Tester(object):
             self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
                                                atoms["atom_%s" % item]["coord"]))
 
-    def check(self, name=None, loader=None):
+    def check(self, *,
+              name: str,
+              loader: AbInitioLoader,
+              extension: str = None):
+        """Run loader and compare output with reference files
 
-        extension = self._loaders_extensions[str(loader)]
+        Args:
+            name: prefix for test files (e.g. 'ethane_LoadVASP')
+
+        """
+        if extension is None:
+            extension = self._loaders_extensions[str(loader)]
 
         # get calculated data
         data = self._read_ab_initio(loader=loader, filename=name, extension=extension)

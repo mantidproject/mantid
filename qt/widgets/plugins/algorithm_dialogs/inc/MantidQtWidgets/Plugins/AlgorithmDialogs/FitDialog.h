@@ -23,7 +23,7 @@ namespace MantidQt {
 // Mantid Forward declarations
 //------------------------------------------------------------------------------
 namespace MantidWidgets {
-class MWRunFiles;
+class FileFinderWidget;
 }
 
 namespace CustomDialogs {

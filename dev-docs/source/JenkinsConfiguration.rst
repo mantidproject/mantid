@@ -152,7 +152,7 @@ exception for ``builder``::
     Defaults!/bin/cp        !requiretty
     Defaults!/bin/rm        !requiretty
 
-In order to run the MantidPlot tests, which require a connection to the windowing system, the user that is running the jenkins slave must
+In order to run the Qt tests, which require a connection to the windowing system, the user that is running the jenkins slave must
 have logged in. This is most easily done by VNC - connect, log in,
 then disconnect. If you see errors such as::
 
@@ -160,6 +160,12 @@ then disconnect. If you see errors such as::
     _CGSDefaultConnection() is NULL.
 
 then no one is logged in to the system.
+
+Finally, disable saved application states that cause a dialog to be raised after a program crash
+resulting in a test hanging waiting for a user to click ok on a dialog::
+
+    defaults write org.python.python NSQuitAlwaysKeepsWindows -bool false
+    defaults write org.mantidproject.MantidPlot NSQuitAlwaysKeepsWindows -bool false
 
 Linux/Mac Connection Notes
 --------------------------

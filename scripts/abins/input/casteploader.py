@@ -265,8 +265,6 @@ class CASTEPLoader(AbInitioLoader):
                           "atomic_displacements": disp
                           })
 
-        self._recover_symmetry_points(data=file_data)
-
         # save stuff to hdf file
         data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
         data = {}

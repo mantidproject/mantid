@@ -49,6 +49,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _reduction_type = None
     _mirror_sense = None
     _doppler_energy = None
+    _doppler_speed = None
     _velocity_profile = None
     _instrument_name = None
     _instrument = None
@@ -262,28 +263,30 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
     def _convert_to_energy(self, ws):
         """
-        Converts the x-axis from raw channel number to energy transfer
+        Converts the x-axis from raw channel number to energy transfer for Doppler mode
         @param ws :: input workspace name
         """
+        from scipy.constants import physical_constants
+        c = physical_constants['speed of light in vacuum'][0]
+        nm = physical_constants['neutron mass energy equivalent in MeV'][0]
 
-        x = mtd[ws].readX(0)
-        size = mtd[ws].blocksize()
-        mid = (x[-1] + x[0])/ 2.
-        scale = 0.001  # from micro ev to mili ev
-
-        factor = size / (size - 1)
-
-        # minus sign is needed
+        bsize = mtd[ws].blocksize()
         if self._doppler_energy != 0:
-            formula = '-(x/{0} - 1)*{1}'.format(mid, self._doppler_energy * scale * factor)
+            # the doppler channels are linear in velocity (not time, neither deltaE)
+            # so we perform 2-step conversion, first linear to v, then quadratic to deltaE
+            efixed = mtd[ws].getInstrument().getNumberParameter('Efixed')[0]
+            vfixed = math.sqrt(2 * efixed * c**2 / (nm * 1E+9))
+            vformula = '-2/({0}-1)*{1}*(x-{0}/2)+{2}'.format(bsize, self._doppler_speed, vfixed)
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=vformula)
+            nmass = nm * 1E+9 / c**2 # mev / (m/s)**2
+            eformula = '{0}*x*x/2 - {1}'.format(nmass, efixed)
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=eformula, AxisUnits='DeltaE')
         else:
             # Center the data for elastic fixed window scan, for integration over the elastic peak
-            formula = '-(x-{0})*{1}'.format(mid-0.5, 1. / scale)
-            self.log().notice('The only energy value is 0 meV. Ignore the x-axis.')
-
-        self.log().information('Energy conversion formula is: {0}'.format(formula))
-
-        ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits = 'DeltaE')
+            # Here all that matters is that the center is at 0 deltaE, but there is no real meaning of the axis extent
+            formula = '-(x-{0})*{1}'.format(bsize / 2 - 0.5, 1E+3)
+            self.log().debug('The only energy value is 0 meV. Ignore the x-axis.')
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits='DeltaE')
 
     @staticmethod
     def _monitor_max_range(ws):
@@ -333,6 +336,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self._doppler_energy = run.getLogData('Doppler.maximum_delta_energy').value
         else:
             raise RuntimeError('Maximum delta energy '+ message)
+
+        if run.hasProperty('Doppler.doppler_speed'):
+            self._doppler_speed = run.getLogData('Doppler.doppler_speed').value
+        else:
+            raise RuntimeError('Doppler speed '+ message)
 
         if run.hasProperty('Doppler.velocity_profile'):
             self._velocity_profile = run.getLogData('Doppler.velocity_profile').value

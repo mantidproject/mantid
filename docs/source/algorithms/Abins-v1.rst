@@ -22,7 +22,7 @@ Abins is a plugin for Mantid which allows scientists to compare experimental and
 scattering spectra (INS).
 
 Abins requires a file with the ab-initio phonon data to perform INS analysis. Currently output data from CASTEP
-(.phonon), CRYSTAL (.out), GAUSSIAN (.log) or DMOL3 (.outmol) DFT programs can be used to perform analysis.
+(.phonon), CRYSTAL (.out), GAUSSIAN (.log), DMOL3 (.outmol) or VASP (.xml) DFT programs can be used to perform analysis.
 Optionally, a user can provide an experimental file with measured dynamical structure factor S in order to directly
 compare theoretical and experimental spectra.
 A user can produce one dimensional INS spectrum which can be compared against TOSCA and TOSCA-like instruments;

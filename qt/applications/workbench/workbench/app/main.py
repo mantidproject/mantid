@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 import argparse
+import atexit
 import importlib
 import os
 import sys
@@ -15,14 +16,22 @@ from functools import partial
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
 from mantid.utils import is_required_version
-from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION
-from workbench.plugins.exception_handler import exception_logger
-from workbench.widgets.about.presenter import AboutPresenter
+from mantidqt.utils.qt import plugins
 
-from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QApplication
-from qtpy.QtCore import QCoreApplication, Qt, qVersion
+# Find Qt plugins for development builds on some platforms
+plugins.setup_library_paths()
 
+from qtpy.QtGui import QIcon  # noqa
+from qtpy.QtWidgets import QApplication  # noqa
+from qtpy.QtCore import QCoreApplication, Qt, qVersion  # noqa
+# Importing resources loads the data in. This must be imported before the
+# QApplication is created or paths to Qt's resources will not be set up correctly
+from workbench.app.resources import qCleanupResources  # noqa
+from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa
+from workbench.plugins.exception_handler import exception_logger  # noqa
+from workbench.widgets.about.presenter import AboutPresenter  # noqa
+
+# Constants
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
@@ -163,6 +172,9 @@ def main():
     # Set the global figure manager in matplotlib. Very important this happens first.
     from workbench.plotting.config import init_mpl_gcf
     init_mpl_gcf()
+
+    # cleanup static resources at exit
+    atexit.register(qCleanupResources)
 
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')

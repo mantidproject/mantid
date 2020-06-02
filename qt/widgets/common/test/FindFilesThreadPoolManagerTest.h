@@ -13,8 +13,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using MantidQt::API::FakeFileFinderWidget;
 using MantidQt::API::FakeFindFilesThread;
-using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesThreadPoolManager;
@@ -32,7 +32,7 @@ public:
 
   void test_find_single_file() {
     // Arrange
-    auto *widget = new FakeMWRunFiles();
+    auto *widget = new FakeFileFinderWidget();
 
     // The parameters of the search
     FindFilesSearchParameters parameters;
@@ -71,7 +71,7 @@ public:
 
   void test_starting_new_search_cancels_currently_running_search() {
     // Arrange
-    FakeMWRunFiles widget;
+    FakeFileFinderWidget widget;
 
     // The parameters of the search
     FindFilesSearchParameters parameters;

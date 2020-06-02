@@ -85,12 +85,10 @@ protected:
   std::string m_instrument_name;
   /// The sample name read from Nexus
   std::string m_samplename;
-
   /// The number of the input entry
   int64_t m_entrynumber;
-
   /// The number of spectra in the raw file
-  int64_t m_numberOfSpectra;
+  specnum_t m_numberOfSpectra;
   /// The number of periods in the raw file
   int64_t m_numberOfPeriods;
   /// Has the spectrum_list property been set?
@@ -100,11 +98,11 @@ protected:
   /// The value of the spectrum_list property
   std::vector<specnum_t> m_spec_list;
   /// The value of the spectrum_min property
-  int64_t m_spec_min;
+  specnum_t m_spec_min;
   /// The value of the spectrum_max property
-  int64_t m_spec_max;
+  specnum_t m_spec_max;
   /// The group which each detector belongs to in order
-  std::vector<specnum_t> m_groupings;
+  std::vector<detid_t> m_groupings;
 
 private:
   /// Overwrites Algorithm method.
