@@ -65,5 +65,6 @@ Bugfixes
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
+- Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 
 :ref:`Release 5.1.0 <v5.1.0>`
