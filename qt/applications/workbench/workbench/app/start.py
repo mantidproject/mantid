@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-import argparse
 import atexit
 import importlib
 import os
@@ -207,4 +206,3 @@ def start(options):
         exit_value = -1
     finally:
         ORIGINAL_SYS_EXIT(exit_value)
-
