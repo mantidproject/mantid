@@ -242,7 +242,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
          workspaceId < m_outputWorkspaceGroup->getNumberOfEntries();
          ++workspaceId) {
       MatrixWorkspace_sptr workspace =
-          std::dynamic_pointer_cast<API::MatrixWorkspace>(
+          std::static_pointer_cast<API::MatrixWorkspace>(
               m_outputWorkspaceGroup->getItem(workspaceId));
       auto const entryName = std::string("entry" + std::to_string(workspaceId));
       m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(),
@@ -319,17 +319,17 @@ void LoadILLPolarizedDiffraction::loadInstrument(
  */
 std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
     const API::MatrixWorkspace_sptr workspace, const NXEntry &entry,
-    int bankId) {
+    const int bankId) {
 
   std::vector<double> twoTheta(static_cast<int>(D7_NUMBER_PIXELS_BANK));
 
-  if (getPropertyValue("PositionCalibration").compare("Nexus") == 0) {
+  if (getPropertyValue("PositionCalibration") == "Nexus") {
     NXFloat twoThetaPixels = entry.openNXFloat(
         "D7/Detector/bank" + std::to_string(bankId) + "_offset");
     twoThetaPixels.load();
-    for (auto pixel_no = 0; pixel_no < twoThetaPixels.size(); pixel_no++) {
-      twoTheta[pixel_no] = twoThetaPixels[pixel_no];
-    }
+    float *twoThetaDataStart = twoThetaPixels();
+    float *twoThetaDataEnd = twoThetaDataStart + D7_NUMBER_PIXELS_BANK;
+    twoTheta.assign(twoThetaDataStart, twoThetaDataEnd);
   } else {
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadParameterFile");
     loadInst->setPropertyValue("Filename", getPropertyValue("YIGFilename"));
@@ -363,12 +363,12 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
 
   auto &componentInfo = workspace->mutableComponentInfo();
   for (auto bank_no = 0; bank_no < static_cast<int>(D7_NUMBER_BANKS);
-       bank_no++) {
+       ++bank_no) {
     NXFloat twoThetaBank = entry.openNXFloat(
         "D7/2theta/actual_bank" +
         std::to_string(bank_no + 2)); // detector bank IDs start at 2
     twoThetaBank.load();
-    if (getPropertyValue("PositionCalibration").compare("None") == 0) {
+    if (getPropertyValue("PositionCalibration") == "None") {
       Quat rotation(-twoThetaBank[0], V3D(0, 1, 0));
       IComponent_const_sptr currentBank = instrument->getComponentByName(
           std::string("bank" + std::to_string(bank_no + 2)));
