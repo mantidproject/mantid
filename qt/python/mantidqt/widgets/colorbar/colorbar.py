@@ -84,7 +84,7 @@ class ColorbarWidget(QWidget):
         if parent:
             # Set facecolor to match parent
             self.canvas.figure.set_facecolor(parent.palette().window().color().getRgbF())
-        self.ax = self.canvas.figure.add_axes([0.4,0.05,0.2,0.9])
+        self.ax = self.canvas.figure.add_axes([0.0,0.02,0.2,0.97])
 
         # layout
         self.layout = QVBoxLayout(self)

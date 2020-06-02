@@ -57,10 +57,10 @@ class SliceViewerDataView(QWidget):
 
         # normalization options
         if can_normalise:
-            self.norm_layout = QHBoxLayout()
+            self.norm_layout = QVBoxLayout()
             self.norm_layout.setContentsMargins(0, 0, 0, 0)
             self.norm_layout.setSpacing(0)
-            self.norm_label = QLabel("Normalization =")
+            self.norm_label = QLabel("Normalization")
             self.norm_layout.addWidget(self.norm_label)
             self.norm_opts = QComboBox()
             self.norm_opts.addItems(["None", "By bin width"])
@@ -73,6 +73,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_layout.setContentsMargins(0,0,0,0)
         self.mpl_layout.setSpacing(0)
         self.fig = Figure()
+        self.fig.set_tight_layout(True)
         self.ax = None
         self._grid_on = False
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
@@ -80,6 +81,8 @@ class SliceViewerDataView(QWidget):
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
         self.create_axes_orthogonal()
         self.mpl_layout.addWidget(self.canvas)
+        self.colorbar_label = QLabel("Colormap")
+        self.colorbar_layout.addWidget(self.colorbar_label)
         self.colorbar = ColorbarWidget(self)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
