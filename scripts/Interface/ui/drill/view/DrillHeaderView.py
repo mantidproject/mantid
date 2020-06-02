@@ -233,3 +233,13 @@ class DrillHeaderView(QHeaderView):
 
             self.sectionsFolded[li] = True
 
+    def foldSection(self, li):
+        """
+        Fold a section if not already folded.
+
+        Args:
+            li (int): section logical index
+        """
+        if (self.isSectionFolded(li)):
+            return
+        self.changeSectionFolding(li)
