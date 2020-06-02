@@ -13,6 +13,7 @@
 #include "MantidDataHandling/DataBlockGenerator.h"
 #include <memory>
 
+using Mantid::specnum_t;
 using Mantid::DataHandling::DataBlock;
 using Mantid::DataHandling::DataBlockComposite;
 
@@ -29,20 +30,20 @@ public:
   void
   test_that_data_block_composite_produces_generator_which_generates_range() {
     // Arrange
-    int64_t min1 = 2;
-    int64_t max1 = 8;
+    specnum_t min1 = 2;
+    specnum_t max1 = 8;
     DataBlock dataBlock1;
     dataBlock1.setMinSpectrumID(min1);
     dataBlock1.setMaxSpectrumID(max1);
 
-    int64_t min2 = 45;
-    int64_t max2 = 49;
+    specnum_t min2 = 45;
+    specnum_t max2 = 49;
     DataBlock dataBlock2;
     dataBlock2.setMinSpectrumID(min2);
     dataBlock2.setMaxSpectrumID(max2);
 
-    int64_t min3 = 23;
-    int64_t max3 = 27;
+    specnum_t min3 = 23;
+    specnum_t max3 = 27;
     DataBlock dataBlock3;
     dataBlock3.setMinSpectrumID(min3);
     dataBlock3.setMaxSpectrumID(max3);
@@ -56,8 +57,8 @@ public:
     auto generator = dataBlockCompsite.getGenerator();
 
     // Assert
-    std::vector<int64_t> expected = {2,  3,  4,  5,  6,  7,  8,  23, 24,
-                                     25, 26, 27, 45, 46, 47, 48, 49};
+    std::vector<specnum_t> expected = {2,  3,  4,  5,  6,  7,  8,  23, 24,
+                                       25, 26, 27, 45, 46, 47, 48, 49};
     auto index = 0;
     for (; !generator->isDone(); generator->next(), ++index) {
       TSM_ASSERT_EQUALS("Should take elements out of the DataBlock interval",
@@ -69,20 +70,20 @@ public:
 
   void test_that_getting_dataBlocks_returns_them_sorted() {
     // Arrange
-    int64_t min1 = 2;
-    int64_t max1 = 8;
+    specnum_t min1 = 2;
+    specnum_t max1 = 8;
     DataBlock dataBlock1;
     dataBlock1.setMinSpectrumID(min1);
     dataBlock1.setMaxSpectrumID(max1);
 
-    int64_t min2 = 45;
-    int64_t max2 = 49;
+    specnum_t min2 = 45;
+    specnum_t max2 = 49;
     DataBlock dataBlock2;
     dataBlock2.setMinSpectrumID(min2);
     dataBlock2.setMaxSpectrumID(max2);
 
-    int64_t min3 = 23;
-    int64_t max3 = 27;
+    specnum_t min3 = 23;
+    specnum_t max3 = 27;
     DataBlock dataBlock3;
     dataBlock3.setMinSpectrumID(min3);
     dataBlock3.setMaxSpectrumID(max3);
@@ -115,20 +116,20 @@ public:
   void
   test_that_add_number_of_spectra_is_returned_as_well_as_correct_min_and_max() {
     // Arrange
-    int64_t min1 = 2;
-    int64_t max1 = 8;
+    specnum_t min1 = 2;
+    specnum_t max1 = 8;
     DataBlock dataBlock1;
     dataBlock1.setMinSpectrumID(min1);
     dataBlock1.setMaxSpectrumID(max1);
 
-    int64_t min2 = 45;
-    int64_t max2 = 49;
+    specnum_t min2 = 45;
+    specnum_t max2 = 49;
     DataBlock dataBlock2;
     dataBlock2.setMinSpectrumID(min2);
     dataBlock2.setMaxSpectrumID(max2);
 
-    int64_t min3 = 23;
-    int64_t max3 = 27;
+    specnum_t min3 = 23;
+    specnum_t max3 = 27;
     DataBlock dataBlock3;
     dataBlock3.setMinSpectrumID(min3);
     dataBlock3.setMaxSpectrumID(max3);
@@ -157,26 +158,26 @@ public:
 
   void test_adding_composites_prouduces_correct_new_composite() {
     // Arrange
-    int64_t min1 = 2;
-    int64_t max1 = 8;
+    specnum_t min1 = 2;
+    specnum_t max1 = 8;
     DataBlock dataBlock1;
     dataBlock1.setMinSpectrumID(min1);
     dataBlock1.setMaxSpectrumID(max1);
 
-    int64_t min2 = 45;
-    int64_t max2 = 49;
+    specnum_t min2 = 45;
+    specnum_t max2 = 49;
     DataBlock dataBlock2;
     dataBlock2.setMinSpectrumID(min2);
     dataBlock2.setMaxSpectrumID(max2);
 
-    int64_t min4 = 17;
-    int64_t max4 = 20;
+    specnum_t min4 = 17;
+    specnum_t max4 = 20;
     DataBlock dataBlock4;
     dataBlock4.setMinSpectrumID(min4);
     dataBlock4.setMaxSpectrumID(max4);
 
-    int64_t min3 = 23;
-    int64_t max3 = 27;
+    specnum_t min3 = 23;
+    specnum_t max3 = 27;
     DataBlock dataBlock3;
     dataBlock3.setMinSpectrumID(min3);
     dataBlock3.setMaxSpectrumID(max3);
@@ -214,13 +215,13 @@ public:
 
   void test_that_boost_array_can_be_loaded_into_composite() {
     // Arrange
-    constexpr int64_t size = 11;
+    constexpr specnum_t size = 11;
     // Has intervals [1,1], [3,5], [8,11], [16, 16], [21,22]
     std::vector<int> indexArray({1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
-    std::vector<int64_t> monitors;
+    std::vector<specnum_t> monitors;
 
     // Act
     Mantid::DataHandling::populateDataBlockCompositeWithContainer(
@@ -270,13 +271,13 @@ public:
 
   void test_that_boost_array_can_be_loaded_into_composite_with_monitors() {
     // Arrange
-    constexpr int64_t size = 11;
+    constexpr specnum_t size = 11;
     // Has intervals [1,1], [3,5], [8,11], [16, 16], [21,22]
     std::vector<int> indexArray({1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
-    std::vector<int64_t> monitors{9};
+    std::vector<specnum_t> monitors{9};
 
     // Act
     Mantid::DataHandling::populateDataBlockCompositeWithContainer(
@@ -341,13 +342,13 @@ public:
   void
   test_that_boost_array_can_be_loaded_into_composite_with_monitors_at_the_beginning() {
     // Arrange
-    constexpr int64_t size = 12;
+    constexpr specnum_t size = 12;
     // Has intervals [1,5], [8,11], [16, 16], [21,22]
     std::vector<int> indexArray({1, 2, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
-    std::vector<int64_t> monitors{1};
+    std::vector<specnum_t> monitors{1};
 
     // Act
     Mantid::DataHandling::populateDataBlockCompositeWithContainer(
@@ -398,13 +399,13 @@ public:
   void
   test_that_boost_array_can_be_loaded_into_composite_with_monitor_at_end() {
     // Arrange
-    constexpr int64_t size = 11;
+    constexpr specnum_t size = 11;
     // Has intervals [1,1], [3,5], [8,11], [16, 16], [21,22]
     std::vector<int> indexArray({1, 3, 4, 5, 8, 9, 10, 11, 16, 21, 22});
     DataBlockComposite composite;
     int numberOfPeriods = 1;
     size_t numberOfChannels = 100;
-    std::vector<int64_t> monitors{22};
+    std::vector<specnum_t> monitors{22};
 
     // Act
     Mantid::DataHandling::populateDataBlockCompositeWithContainer(
@@ -462,13 +463,13 @@ public:
   void
   test_that_removing_data_blocks_which_dont_overlap_leave_the_composite_unaffected() {
     // Arrange
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(2, 8), std::make_pair(10, 17), std::make_pair(34, 39)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
 
     auto copiedDataBlockComposite(dataBlockComposite);
 
-    std::vector<std::pair<int64_t, int64_t>> removeIntervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> removeIntervals = {
         std::make_pair(9, 9), std::make_pair(21, 27), std::make_pair(100, 210)};
     auto dataBlockCompositeForRemoval =
         getSampleDataBlockComposite(removeIntervals);
@@ -507,7 +508,7 @@ public:
 
   void test_that_exact_match_removes_everything() {
     // Arrange
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(2, 8), std::make_pair(10, 17), std::make_pair(34, 39)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
 
@@ -525,10 +526,10 @@ public:
     // Scaneario:
     //    original:     |------|
     //    removal:  |------|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 10)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(1, 7)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -550,10 +551,10 @@ public:
     // Scaneario:
     //    original:        |------|
     //    removal:  |------|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 10)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(1, 5)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -575,10 +576,10 @@ public:
     // Scaneario:
     //    original: |------|
     //    removal:      |------|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 10)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(7, 12)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -600,10 +601,10 @@ public:
     // Scaneario:
     //    original: |------|
     //    removal:         |------|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 10)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(10, 12)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -625,10 +626,10 @@ public:
     // Scaneario:
     //    original: |------|
     //    removal:   |---|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 12)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(7, 9)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -654,10 +655,10 @@ public:
     // Scaneario:
     //    original: |------|
     //    removal:  |---|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 12)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(5, 9)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -679,10 +680,10 @@ public:
     // Scaneario:
     //    original: |------|
     //    removal:    |----|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 12)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(8, 12)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -704,10 +705,10 @@ public:
     // Scaneario:
     //    original: |------|
     //    removal: |--------|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 12)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(4, 14)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -726,10 +727,10 @@ public:
     // Scaneario:
     //    original:  |------------------|
     //    removal: |-----|  |--|  |-|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(4, 7), std::make_pair(9, 10), std::make_pair(13, 13)};
     auto dataBlockCompositeRemoval =
         getSampleDataBlockComposite(intervalsRemoval);
@@ -760,10 +761,10 @@ public:
     // Scaneario:
     //    original:  |------------------|  |-------|
     //    removal: |-----|  |--|  |-|        |--| |--|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervalsRemoval = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervalsRemoval = {
         std::make_pair(4, 7), std::make_pair(9, 10), std::make_pair(13, 13),
         std::make_pair(21, 22), std::make_pair(25, 30)};
     auto dataBlockCompositeRemoval =
@@ -803,11 +804,11 @@ public:
     // original   |------|     |------|
     // truncation   |               |
     // result       |----|     |----|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    int64_t min = 8;
-    int64_t max = 22;
+    specnum_t min = 8;
+    specnum_t max = 22;
 
     // Act
     dataBlockComposite.truncate(min, max);
@@ -831,11 +832,11 @@ public:
     // original   |------|     |------|
     // truncation |       |
     // result     |------|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    int64_t min = 5;
-    int64_t max = 18;
+    specnum_t min = 5;
+    specnum_t max = 18;
 
     // Act
     dataBlockComposite.truncate(min, max);
@@ -855,11 +856,11 @@ public:
     // original     |------|     |------|
     // truncation |                       |
     // result       |------|     |------|
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    int64_t min = 4;
-    int64_t max = 34;
+    specnum_t min = 4;
+    specnum_t max = 34;
     auto dataBlockCompositeCopy = dataBlockComposite;
 
     // Act
@@ -875,11 +876,11 @@ public:
     // original     |------|     |------|
     // truncation            ||
     // result        EMPTY
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    int64_t min = 17;
-    int64_t max = 19;
+    specnum_t min = 17;
+    specnum_t max = 19;
 
     // Act
     dataBlockComposite.truncate(min, max);
@@ -894,11 +895,11 @@ public:
     // original     |------|     |------|
     // truncation ||
     // result        EMPTY
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    int64_t min = 2;
-    int64_t max = 3;
+    specnum_t min = 2;
+    specnum_t max = 3;
 
     // Act
     dataBlockComposite.truncate(min, max);
@@ -913,11 +914,11 @@ public:
     // original     |------|     |------|
     // truncation                         ||
     // result            EMPTY
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    int64_t min = 32;
-    int64_t max = 33;
+    specnum_t min = 32;
+    specnum_t max = 33;
 
     // Act
     dataBlockComposite.truncate(min, max);
@@ -928,7 +929,7 @@ public:
 
   void test_that_data_block_composites_are_equal() {
     // Arrange
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
 
@@ -938,10 +939,10 @@ public:
 
   void test_that_data_block_composites_are_not_equal() {
     // Arrange
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
-    std::vector<std::pair<int64_t, int64_t>> intervals2 = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals2 = {
         std::make_pair(5, 15), std::make_pair(20, 26)};
     auto dataBlockComposite2 = getSampleDataBlockComposite(intervals2);
 
@@ -953,7 +954,7 @@ public:
   void
   test_that_data_block_composite_returns_collection_with_all_spectrum_numbers() {
     // Arrange
-    std::vector<std::pair<int64_t, int64_t>> intervals = {
+    std::vector<std::pair<specnum_t, specnum_t>> intervals = {
         std::make_pair(5, 16), std::make_pair(20, 26)};
     auto dataBlockComposite = getSampleDataBlockComposite(intervals);
 
@@ -961,35 +962,35 @@ public:
     auto allSpectra = dataBlockComposite.getAllSpectrumNumbers();
 
     // Assert
-    auto spectrumIsContained = [&allSpectra](int64_t spectrumNumber) {
+    auto spectrumIsContained = [&allSpectra](specnum_t spectrumNumber) {
       return std::find(std::begin(allSpectra), std::end(allSpectra),
                        spectrumNumber) != std::end(allSpectra);
     };
 
-    for (int64_t item = 2; item <= 4; ++item) {
+    for (specnum_t item = 2; item <= 4; ++item) {
       TSM_ASSERT("Should not find the value.", !spectrumIsContained(item));
     }
 
-    for (int64_t item = 5; item <= 16; ++item) {
+    for (specnum_t item = 5; item <= 16; ++item) {
       TSM_ASSERT("Should find the value.", spectrumIsContained(item));
     }
 
-    for (int64_t item = 17; item <= 19; ++item) {
+    for (specnum_t item = 17; item <= 19; ++item) {
       TSM_ASSERT("Should not find the value.", !spectrumIsContained(item));
     }
 
-    for (int64_t item = 20; item <= 26; ++item) {
+    for (specnum_t item = 20; item <= 26; ++item) {
       TSM_ASSERT("Should find the value.", spectrumIsContained(item));
     }
 
-    for (int64_t item = 27; item <= 30; ++item) {
+    for (specnum_t item = 27; item <= 30; ++item) {
       TSM_ASSERT("Should not find the value.", !spectrumIsContained(item));
     }
   }
 
 private:
   DataBlockComposite getSampleDataBlockComposite(
-      const std::vector<std::pair<int64_t, int64_t>> &intervals) {
+      const std::vector<std::pair<specnum_t, specnum_t>> &intervals) {
     DataBlockComposite composite;
     for (const auto &interval : intervals) {
       DataBlock dataBlock(1, (interval.second - interval.first + 1), 120);

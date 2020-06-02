@@ -25,6 +25,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_copy_to_clipboard_triggered = QtCore.Signal()
     sig_plot_options_triggered = QtCore.Signal()
     sig_plot_help_triggered = QtCore.Signal()
     sig_generate_plot_script_file_triggered = QtCore.Signal()
@@ -44,6 +45,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Zoom', 'Zoom \n In: L-click+drag \n Out: R-click+drag', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
+        ('Copy', 'Copy image to clipboard', 'mdi.content-copy', 'copy_to_clipboard', None),
         ('Save', 'Save image file', 'mdi.content-save', 'save_figure', None),
         ('Print', 'Print image', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
@@ -105,6 +107,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+
+    def copy_to_clipboard(self):
+        self.sig_copy_to_clipboard_triggered.emit()
 
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
@@ -206,9 +211,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # if any of the lines are a sample log plot disable fitting
         for ax in fig.get_axes():
             for artist in ax.get_lines():
-                if ax.get_artists_sample_log_plot_details(artist) is not None:
-                    self._set_fit_enabled(False)
-                    break
+                try:
+                    if ax.get_artists_sample_log_plot_details(artist) is not None:
+                        self._set_fit_enabled(False)
+                        break
+                except ValueError:
+                    #The artist is not tracked - ignore this one and check the rest
+                    continue
 
         # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.

@@ -60,13 +60,11 @@ void LoadMuonNexus::init() {
       "algorithm. For multiperiod files, one workspace will be\n"
       "generated for each period");
 
-  auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
-  mustBePositive->setLower(1);
-  declareProperty("SpectrumMin", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive,
-                  "Index number of the first spectrum to read\n"
-                  "(default 1)");
-  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
+  auto mustBePositive = std::make_shared<BoundedValidator<specnum_t>>();
+  mustBePositive->setLower(0);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositive,
+                  "Index number of the first spectrum to read\n");
+  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()),
                   mustBePositive,
                   "Index of last spectrum to read\n"
                   "(default the last spectrum)");

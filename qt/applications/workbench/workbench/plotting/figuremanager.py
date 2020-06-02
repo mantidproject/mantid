@@ -9,6 +9,7 @@
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 import copy
+import io
 import sys
 from functools import wraps
 import matplotlib
@@ -19,6 +20,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.collections import LineCollection, QuadMesh
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
+from qtpy.QtGui import QImage
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
@@ -205,6 +207,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
             self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
@@ -327,6 +330,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
+    
+    def copy_to_clipboard(self):
+        """Copy the current figure image to clipboard"""
+        # store the image in a buffer using savefig(), this has the
+        # advantage of applying all the default savefig parameters
+        # such as background color; those would be ignored if you simply
+        # grab the canvas using Qt
+        buf = io.BytesIO()
+        self.canvas.figure.savefig(buf)
+        QApplication.clipboard().setImage(QImage.fromData(buf.getvalue()))
+        buf.close()
 
     def grid_toggle(self, on):
         """Toggle grid lines on/off"""
