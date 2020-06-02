@@ -8,8 +8,8 @@
 #define MANTID_DATAHANDLING_LOADCSNSNEXUS_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 /****************************************/
 
@@ -18,8 +18,7 @@ namespace DataHandling {
 
 /** LoadCSNSNexus : TODO: DESCRIPTION
  */
-class DLLExport LoadCSNSNexus
-	: public API::Algorithm{
+class DLLExport LoadCSNSNexus : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -28,15 +27,14 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {""};
-  }
+  const std::vector<std::string> seeAlso() const override { return {""}; }
   const std::string category() const override;
 
   Types::Core::DateAndTime getExperimentTime(const std::string &typeName);
 
   std::vector<std::string>
-  getModules(const std::string &inst, const std::vector<std::string> &inputNames);
+  getModules(const std::string &inst,
+             const std::vector<std::string> &inputNames);
   bool checkBanknames(const std::vector<std::string> &inputNames);
   std::vector<std::string> getGPPDModules(const std::string &bankName);
   std::vector<int64_t> getPixelId(const std::vector<std::string> &inputList);
@@ -49,11 +47,12 @@ public:
   std::multimap<uint32_t, std::pair<float, int64_t>>
   getEventData(const std::vector<std::string> &inputList,
                const std::vector<uint32_t> &startList,
-               const std::vector<uint32_t> &endList, const std::vector<int64_t> &pids);
-  void
-  loadEventData(DataObjects::EventWorkspace_sptr &workspace,
-                const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-                const std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
+               const std::vector<uint32_t> &endList,
+               const std::vector<int64_t> &pids);
+  void loadEventData(
+      DataObjects::EventWorkspace_sptr &workspace,
+      const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
+      const std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
 
 private:
   void init() override;
@@ -68,4 +67,3 @@ private:
 } // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LOADCSNSNEXUS_H_ */
-

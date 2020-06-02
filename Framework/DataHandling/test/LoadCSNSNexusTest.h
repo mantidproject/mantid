@@ -104,4 +104,3 @@ private:
 };
 
 #endif /*LOADCSNSNEXUSTEST_H_*/
-
