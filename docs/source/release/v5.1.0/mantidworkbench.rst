@@ -43,6 +43,8 @@ Improvements
 - The gray and plasma colormaps have been added to the instrument view.
 - The x-axis tick labels on colorfill plots are now horizontal.
 
+- The figure options menu now has a help button which opens the documentation for the menu.
+
 Bugfixes
 ########
 
