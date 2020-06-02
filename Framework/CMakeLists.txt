@@ -77,7 +77,6 @@ add_subdirectory(Beamline)
 set(MANTIDLIBS ${MANTIDLIBS} Parallel)
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set(MANTIDLIBS ${MANTIDLIBS} HistogramData)
-# Indexing has header-only dependency on Kernel, so Kernel comes after.
 set(MANTIDLIBS ${MANTIDLIBS} Indexing)
 set(MANTIDLIBS ${MANTIDLIBS} Kernel)
 set(MANTIDLIBS ${MANTIDLIBS} Beamline)
