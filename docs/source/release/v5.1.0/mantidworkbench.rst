@@ -67,5 +67,6 @@ Bugfixes
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
 - Colorfill plots now correctly use the workspace name as the plot title.
+- Overplotting no longer resets the axes scales.
 
 :ref:`Release 5.1.0 <v5.1.0>`
