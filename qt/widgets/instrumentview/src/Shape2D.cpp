@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
 
 namespace MantidQt {
@@ -671,7 +672,8 @@ void Shape2DSector::drawShape(QPainter &painter) const {
   double sweepLength = (m_endAngle - m_startAngle) * to_degrees;
 
   path.moveTo(x_origin, y_origin);
-  QRectF absoluteBBox = findArcBoundingBox(m_startAngle, m_endAngle);
+  QRectF absoluteBBox(QPointF(-1, 1), QPointF(1, -1));
+
   path.arcTo(QRectF(absoluteBBox.topLeft() * m_innerRadius + m_center,
                     absoluteBBox.bottomRight() * m_innerRadius + m_center),
              m_startAngle * to_degrees, sweepLength);
@@ -679,10 +681,12 @@ void Shape2DSector::drawShape(QPainter &painter) const {
   path.arcTo(QRectF(absoluteBBox.topLeft() * m_outerRadius + m_center,
                     absoluteBBox.bottomRight() * m_outerRadius + m_center),
              m_endAngle * to_degrees, -sweepLength);
-  path.moveTo(x_origin, y_origin);
   path.closeSubpath();
 
   painter.drawPath(path);
+  if (m_fill_color != QColor()) {
+    painter.fillPath(path, m_fill_color);
+  }
 }
 
 QRectF findArcBoundingBox(double startAngle, double endAngle) {
@@ -799,6 +803,7 @@ QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
 void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
   QPointF to_center = pos - m_center;
   double newAngle;
+
   switch (i) {
   case 0:
     m_outerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
@@ -807,26 +812,75 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
     m_innerRadius = sqrt(pow(to_center.x(), 2) + pow(to_center.y(), 2));
     break;
   case 2:
-    newAngle = atan2(to_center.x(), to_center.y());
+    newAngle = atan2(to_center.y(), to_center.x());
     if (newAngle < 0)
       newAngle += 2 * M_PI;
-    if (m_startAngle < m_endAngle && newAngle >= m_endAngle) {
+
+    if ((m_startAngle < m_endAngle && newAngle >= m_endAngle &&
+         std::abs(newAngle - m_startAngle) < 1) ||
+        (newAngle < m_endAngle && m_startAngle < m_endAngle &&
+         std::abs(newAngle - m_startAngle) > 5.28 && newAngle < m_startAngle) ||
+        (newAngle > m_endAngle && m_startAngle > m_endAngle &&
+         std::abs(newAngle - m_startAngle) > 5.28 && newAngle < m_startAngle)) {
+
       newAngle = m_endAngle - 0.00001;
-    } else if (m_startAngle > m_endAngle && newAngle <= m_endAngle) {
+
+      if (newAngle < 0) {
+        newAngle += 2 * M_PI;
+      }
+
+    } else if ((m_startAngle > m_endAngle && newAngle <= m_endAngle &&
+                std::abs(newAngle - m_startAngle) < 1) ||
+               (newAngle > m_endAngle && m_startAngle > m_endAngle &&
+                std::abs(newAngle - m_startAngle) > 5.28 &&
+                newAngle > m_startAngle) ||
+               (newAngle < m_endAngle && m_startAngle < m_endAngle &&
+                std::abs(newAngle - m_startAngle) > 5.28 &&
+                newAngle > m_startAngle)) {
+
       newAngle = m_endAngle + 0.0001;
+
+      if (newAngle >= 2 * M_PI) {
+        newAngle -= 2 * M_PI;
+      }
     }
+
     m_startAngle = newAngle;
     break;
 
   case 3:
-    newAngle = atan2(to_center.x(), to_center.y());
+    newAngle = atan2(to_center.y(), to_center.x());
     if (newAngle < 0)
       newAngle += 2 * M_PI;
-    if (m_endAngle < m_startAngle && newAngle >= m_startAngle) {
+
+    if ((m_endAngle < m_startAngle && newAngle >= m_startAngle &&
+         std::abs(newAngle - m_endAngle) < 1) ||
+        (newAngle < m_startAngle && m_endAngle < m_startAngle &&
+         std::abs(newAngle - m_endAngle) > 5.28 && newAngle < m_endAngle) ||
+        (newAngle > m_startAngle && m_endAngle > m_startAngle &&
+         std::abs(newAngle - m_endAngle) > 5.28 && newAngle < m_endAngle)) {
+
       newAngle = m_startAngle - 0.00001;
-    } else if (m_endAngle > m_startAngle && newAngle <= m_startAngle) {
+
+      if (newAngle < 0) {
+        newAngle += 2 * M_PI;
+      }
+
+    } else if ((m_endAngle >= m_startAngle && newAngle <= m_startAngle &&
+                std::abs(newAngle - m_endAngle) < 1) ||
+               (newAngle >= m_startAngle && m_endAngle >= m_startAngle &&
+                std::abs(newAngle - m_endAngle) > 5.28 &&
+                newAngle > m_endAngle) ||
+               (newAngle < m_startAngle && m_endAngle < m_startAngle &&
+                std::abs(newAngle - m_endAngle) > 5.28 &&
+                newAngle > m_endAngle)) {
+
       newAngle = m_startAngle + 0.0001;
+      if (newAngle >= 2 * M_PI) {
+        newAngle -= 2 * M_PI;
+      }
     }
+
     m_endAngle = newAngle;
     break;
   }
@@ -843,7 +897,7 @@ QStringList Shape2DSector::getDoubleNames() const {
 }
 
 double Shape2DSector::getDouble(const QString &prop) const {
-  double to_degrees = 180 * M_PI;
+  double to_degrees = 180 / M_PI;
   if (prop == "outerRadius") {
     return m_outerRadius;
   }
@@ -887,6 +941,27 @@ void Shape2DSector::setPoint(const QString &prop, const QPointF &value) {
   if (prop == "center") {
     m_center = value;
   }
+}
+
+Shape2D *Shape2DSector::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double innerRadius, outerRadius, startAngle, endAngle, xCenter, yCenter;
+  tsv >> innerRadius >> outerRadius >> startAngle >> endAngle >> xCenter >>
+      yCenter;
+
+  return new Shape2DSector(innerRadius, outerRadius, startAngle, endAngle,
+                           QPointF(xCenter, yCenter));
+}
+
+std::string Shape2DSector::saveToProject() const {
+  API::TSVSerialiser tsv;
+
+  tsv.writeLine("Type") << "sector";
+  tsv.writeLine("Parameters") << m_innerRadius << m_outerRadius << m_startAngle
+                              << m_endAngle << m_center.x() << m_center.y();
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
 }
 //------------------------------------------------------------------------------
 

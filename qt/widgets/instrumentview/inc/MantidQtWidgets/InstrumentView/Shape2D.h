@@ -325,9 +325,9 @@ public:
   QPointF getPoint(const QString &prop) const override;
   void setPoint(const QString &prop, const QPointF &value) override;
   /// Load state for the shape from a project file
-  // static Shape2D *loadFromProject(const std::string &lines);
+  static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
-  // virtual std::string saveToProject() const override;
+  virtual std::string saveToProject() const override;
   std::string type() const override { return "sector"; }
 
 protected:
