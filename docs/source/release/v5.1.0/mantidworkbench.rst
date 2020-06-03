@@ -9,6 +9,7 @@ New
 ###
 
 - The Advanced Plotting menu is now in Workbench. This enables creating surface and contour plots of three or more workspaces, and choosing which log value to plot against.
+- There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
 
 Improvements
 ############
@@ -65,5 +66,6 @@ Bugfixes
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
+- Colorfill plots now correctly use the workspace name as the plot title.
 
 :ref:`Release 5.1.0 <v5.1.0>`
