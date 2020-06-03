@@ -1060,8 +1060,6 @@ def get_images_from_figure(figure):
 def get_axes_from_figure(figure):
     """Return a list of axes in the given figure excluding any colorbar axes"""
     images = get_images_from_figure(figure)
-    axes = []
-    for im in images:
-        axes.append(im.axes)
+    axes = [img.axes for img in images]
 
     return axes
