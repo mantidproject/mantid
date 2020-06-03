@@ -52,5 +52,8 @@ def keyPressEvent(self, event):
             completion_text = self.completer().currentCompletion()
             if completion_text != self.currentText():  # manually emit the code completion signal
                 self.completer().activated.emit(completion_text)
+    # If up or down pressed, start the completer
+    elif event.key() in [Qt.Key_Down, Qt.Key_Up]:
+        self.completer().complete()
 
     self.lineEdit().keyPressEvent(event)
