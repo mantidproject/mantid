@@ -25,6 +25,7 @@ namespace Algorithms {
  * @param EMode The energy mode of the instrument
  * @param nevents The number of Monte Carlo events used in the simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
  * @param logger Logger from parent algorithm to write logging info

@@ -419,18 +419,13 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       errors[PropertyNames::ENVIRONMENT] =
           "Environment flags require a non-empty 'Name' entry.";
     } else {
-      if (!existsAndNotEmptyString(*environArgs, SEArgs::CONTAINER)) {
-        errors[PropertyNames::ENVIRONMENT] =
-            "Environment flags require a non-empty 'Container' entry.";
-      } else {
-        // If specifying the environment through XML file, we can not strictly
-        // validate the sample settings, since only the overriding properties
-        // are specified. Hence we just make sure that whatever is specified is
-        // at least positive
-        if (geomArgs) {
-          assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
-                            positiveValues);
-        }
+      // If specifying the environment through XML file, we can not strictly
+      // validate the sample settings, since only the overriding properties
+      // are specified. Hence we just make sure that whatever is specified is
+      // at least positive
+      if (geomArgs) {
+        assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
+                          positiveValues);
       }
     }
   } else {
