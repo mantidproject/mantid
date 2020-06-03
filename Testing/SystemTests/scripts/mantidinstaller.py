@@ -83,10 +83,10 @@ def get_installer(package_dir, do_install=True):
     if system == 'Windows':
         return NSISInstaller(package_dir, do_install)
     elif system == 'Linux':
-        dist = platform.dist()
-        if dist[0] == 'Ubuntu':
+        dist = linux_distro_distributor()
+        if dist == 'Ubuntu':
             return DebInstaller(package_dir, do_install)
-        elif dist[0].lower() == 'redhat' or dist[0].lower() == 'fedora' or dist[0].lower() == 'centos':
+        elif dist.lower() == 'redhat' or dist.lower() == 'fedora' or dist.lower() == 'centos':
             return RPMInstaller(package_dir, do_install)
         else:
             scriptfailure('Unknown Linux flavour: %s' % str(dist))
@@ -94,6 +94,17 @@ def get_installer(package_dir, do_install=True):
         return DMGInstaller(package_dir, do_install)
     else:
         raise scriptfailure("Unsupported platform")
+
+
+def linux_distro_distributor():
+    """Extract the distributor for the current Linux distribution
+    """
+    try:
+        lsb_descr = subprocess.check_output('lsb_release --id', shell=True,
+                                            stderr=subprocess.STDOUT).decode('utf-8')
+        return lsb_descr.strip()[len('Distributor ID:')+1:].strip()
+    except subprocess.CalledProcessError as exc:
+        return f'Unknown distribution: lsb_release --id failed {exc}'
 
 
 def run(cmd):
