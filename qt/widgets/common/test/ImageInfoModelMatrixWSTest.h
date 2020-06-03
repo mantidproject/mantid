@@ -25,10 +25,6 @@ public:
   }
   static void destroySuite(ImageInfoModelMatrixWSTest *suite) { delete suite; }
 
-  void test_construct() {
-    TS_ASSERT_THROWS_NOTHING(ImageInfoModelMatrixWS model)
-  }
-
   void test_getInfoList() {
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
@@ -37,7 +33,7 @@ public:
     model.setWorkspace(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
-    const std::array expectList{
+    const std::array<std::string, 22> expectList{
         "Signal",    "7",      "Spec Num",  "4",         "Time-of-flight",
         "2",         "Det ID", "4",         "L2",        "5.009",
         "TwoTheta",  "3.4",    "Azimuthal", "90",        "Wavelength",
@@ -59,8 +55,8 @@ public:
 
     auto list = model.getInfoList(2, 4, 7);
 
-    const std::array expectList{"Signal",         "7", "Spec Num", "4",
-                                "Time-of-flight", "2"};
+    const std::array<std::string, 6> expectList{
+        "Signal", "7", "Spec Num", "4", "Time-of-flight", "2"};
 
     TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
@@ -103,7 +99,7 @@ public:
 
     auto list = model.getInfoList(2, 4, 7, false);
 
-    const std::array expectList{
+    const std::array<std::string, 22> expectList{
         "Signal",    "-", "Spec Num",   "-", "Time-of-flight", "-",
         "Det ID",    "-", "L2",         "-", "TwoTheta",       "-",
         "Azimuthal", "-", "Wavelength", "-", "Energy",         "-",

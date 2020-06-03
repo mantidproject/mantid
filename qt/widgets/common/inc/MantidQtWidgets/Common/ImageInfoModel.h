@@ -17,6 +17,8 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModel {
 
 public:
+  virtual ~ImageInfoModel() = default;
+
   /** Creates a list with information about the coordinates in the workspace.
   @param x: x data coordinate
   @param y: y data coordinate, for a matrix workspace this will be the spectrum
