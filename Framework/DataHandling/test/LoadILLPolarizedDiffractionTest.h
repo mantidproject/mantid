@@ -119,17 +119,6 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.47, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 2042)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
-
-    MatrixWorkspace_sptr workspaceEntry5 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(5));
-    TS_ASSERT(workspaceEntry5)
-    TS_ASSERT_EQUALS(workspaceEntry5->getNumberHistograms(), 134)
-    TS_ASSERT_EQUALS(workspaceEntry5->blocksize(), 1)
-    TS_ASSERT(workspaceEntry5->detectorInfo().isMonitor(132))
-    TS_ASSERT(workspaceEntry5->detectorInfo().isMonitor(133))
-    TS_ASSERT(workspaceEntry5->isHistogramData())
-    TS_ASSERT(!workspaceEntry5->isDistribution())
   }
 
   void test_D7_timeOfFlight() {
@@ -217,20 +206,6 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[512], 0.00, 0.01)
-
-    MatrixWorkspace_sptr workspaceEntry2 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(1));
-    TS_ASSERT(workspaceEntry2)
-    TS_ASSERT_EQUALS(workspaceEntry2->getNumberHistograms(), 134)
-    TS_ASSERT_EQUALS(workspaceEntry2->blocksize(), 512)
-    TS_ASSERT(workspaceEntry2->detectorInfo().isMonitor(132))
-    TS_ASSERT(workspaceEntry2->detectorInfo().isMonitor(133))
-    TS_ASSERT(workspaceEntry2->isHistogramData())
-    TS_ASSERT(!workspaceEntry2->isDistribution())
-
-    TS_ASSERT_EQUALS(workspaceEntry2->getAxis(0)->unit()->caption(), "Time")
-    TS_ASSERT_EQUALS(workspaceEntry2->YUnitLabel(), "Counts")
   }
 
   void test_D7_multifile_sum() {
