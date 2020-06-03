@@ -382,31 +382,31 @@ public:
     V3D sample(0, 0, 0);
     V3D zAxis(0, 0, 1);
 
-    const auto &pixel1 = instrument->getDetector(1);
+    const auto &pixel1 = instrument->getDetector(0);
     TS_ASSERT(pixel1)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 12.66, 0.01)
 
-    const auto &pixel44 = instrument->getDetector(44);
+    const auto &pixel44 = instrument->getDetector(43);
     TS_ASSERT(pixel44)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 55.45,
                     0.01)
 
-    const auto &pixel45 = instrument->getDetector(45);
+    const auto &pixel45 = instrument->getDetector(44);
     TS_ASSERT(pixel45)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 58.79,
                     0.01)
 
-    const auto &pixel88 = instrument->getDetector(88);
+    const auto &pixel88 = instrument->getDetector(87);
     TS_ASSERT(pixel88)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 101.58,
                     0.01)
 
-    const auto &pixel89 = instrument->getDetector(89);
+    const auto &pixel89 = instrument->getDetector(88);
     TS_ASSERT(pixel89)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 100.78,
                     0.01)
 
-    const auto &pixel132 = instrument->getDetector(132);
+    const auto &pixel132 = instrument->getDetector(131);
     TS_ASSERT(pixel132)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 143.57,
                     0.01)

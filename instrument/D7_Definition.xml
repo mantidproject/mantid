@@ -101,13 +101,13 @@
     </component>
   </type>
   <idlist idname="bank2_ids">
-    <id end="44" start="1" step="1"/>
+    <id end="44" start="0" step="1"/>
   </idlist>
   <idlist idname="bank3_ids">
-    <id end="88" start="45" step="1"/>
+    <id end="88" start="44" step="1"/>
   </idlist>
   <idlist idname="bank4_ids">
-    <id end="132" start="89" step="1"/>
+    <id end="131" start="88" step="1"/>
   </idlist>
   <type name="bank">
     <component type="pixel">
