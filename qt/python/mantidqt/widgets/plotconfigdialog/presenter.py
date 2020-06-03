@@ -14,6 +14,9 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTa
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter import LegendTabWidgetPresenter
 
+HELP_URL = 'qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/loading_and_displaying_data/' \
+           '06_formatting_plots.html'
+
 
 class PlotConfigDialogPresenter:
 
@@ -76,6 +79,9 @@ class PlotConfigDialogPresenter:
         self.view.close()
 
     def open_help_window(self):
-        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/'
-                                        'loading_and_displaying_data/'
-                                        '06_formatting_plots.html#figureoptionsgear-png-ptions-menu')
+        # Show the help documentation relevant to the plot type.
+        if self.tab_widget_presenters[3] is not None:
+            # If the dialog has the images tab then go to the section on image plots.
+            InterfaceManager().showHelpPage(HELP_URL + '#image-plots')
+        else:
+            InterfaceManager().showHelpPage(HELP_URL + '#figureoptionsgear-png-ptions-menu')
