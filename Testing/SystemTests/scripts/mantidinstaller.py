@@ -110,12 +110,10 @@ def linux_distro_distributor():
 def run(cmd):
     """Run a command in a subprocess"""
     try:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        stdout, stderr = p.communicate()
-        if p.returncode != 0:
-            raise Exception('Returned with code '+str(p.returncode)+'\n'+ stdout)
-    except Exception as err:
-        log('Error in subprocess %s:\n' % str(err))
+        stdout = subprocess.check_output(cmd, shell=True,
+                                         stderr=subprocess.STDOUT).decode('utf-8')
+    except subprocess.CalledProcessError as exc:
+        log(f'Error in subprocess {exc}')
         raise
     log(stdout)
     return stdout
@@ -292,15 +290,12 @@ class DMGInstaller(MantidInstaller):
         bin_dir = '/Applications/MantidPlot.app/Contents/MacOS'
         self.mantidPlotPath = bin_dir + '/MantidPlot'
         self.python_cmd = bin_dir + '/mantidpython'
-        # only necessary on 10.8 build
-        if int(platform.release().split('.')[0]) < 13:
-            os.environ['DYLD_LIBRARY_PATH'] = '/Applications/MantidPlot.app/Contents/MacOS'
 
     def do_install(self):
         """Mounts the dmg and copies the application into the right place.
         """
         p = subprocess.Popen(['hdiutil','attach',self.mantidInstaller],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-        p.stdin.write('yes') # This accepts the GPL
+        p.stdin.write(b'yes') # This accepts the GPL
         p.communicate()[0] # This captures (and discards) the GPL text
         mantidInstallerName = os.path.basename(self.mantidInstaller)
         mantidInstallerName = mantidInstallerName.replace('.dmg','')
