@@ -67,7 +67,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="FileFinder" name="sensitivityMaps" native="true">
+        <widget class="FileFinderWidget" name="sensitivityMaps" native="true">
          <property name="label" stdset="0">
           <string/>
          </property>
@@ -259,7 +259,7 @@
         </widget>
        </item>
        <item row="20" column="1">
-        <widget class="FileFinder" name="panelOutputWorkspaces" native="true">
+        <widget class="FileFinderWidget" name="panelOutputWorkspaces" native="true">
          <property name="label" stdset="0">
           <string/>
          </property>
@@ -269,7 +269,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="FileFinder" name="defaultMaskFile" native="true">
+        <widget class="FileFinderWidget" name="defaultMaskFile" native="true">
          <property name="label" stdset="0">
           <string/>
          </property>
@@ -310,9 +310,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FileFinder</class>
+   <class>FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header location="global">mantidqt.widgets.filefinder</header>
+   <header location="global">mantidqt.widgets.filefinderwidget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
