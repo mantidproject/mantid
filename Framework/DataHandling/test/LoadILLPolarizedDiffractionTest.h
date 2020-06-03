@@ -502,8 +502,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "YIGFile"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("YIGFilename", "YIG_IPF.xml"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("YIGFilename", "YIG_IPF.xml"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
