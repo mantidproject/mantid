@@ -106,7 +106,7 @@ class SliceViewerDataView(QWidget):
         self.nonortho_tr = None
         self.ax = self.fig.add_subplot(111, projection='mantid')
         if self.grid_on:
-            self.ax.grid()
+            self.ax.grid(self.grid_on)
         if self.line_plots:
             self.add_line_plots()
         self.plot_MDH = self.plot_MDH_orthogonal
@@ -204,7 +204,7 @@ class SliceViewerDataView(QWidget):
                                               **kwargs)
         # pcolormesh clears any grid that was previously visible
         if self.grid_on:
-            self.ax.grid()
+            self.ax.grid(self.grid_on)
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -232,7 +232,6 @@ class SliceViewerDataView(QWidget):
     def clear_figure(self):
         """Removes everything from the figure"""
         self.image = None
-        self._grid_on = False
         self.fig.clf()
 
     def draw_plot(self):
@@ -320,7 +319,8 @@ class SliceViewerDataView(QWidget):
         If not visible sets the grid visibility
         """
         if not self._grid_on:
-            self.toggle_grid()
+            self._grid_on = True
+            self.mpl_toolbar.set_action_checked(ToolItemText.GRID, state=self._grid_on)
 
     def set_nonorthogonal_transform(self, transform):
         """
@@ -330,12 +330,12 @@ class SliceViewerDataView(QWidget):
         """
         self.nonortho_tr = transform.tr
 
-    def toggle_grid(self):
+    def toggle_grid(self,state):
         """
         Toggle the visibility of the grid on the axes
         """
-        self.ax.grid()
-        self._grid_on = not self._grid_on
+        self._grid_on = state
+        self.ax.grid(self._grid_on)
         self.canvas.draw_idle()
 
     def mouse_move(self, event):

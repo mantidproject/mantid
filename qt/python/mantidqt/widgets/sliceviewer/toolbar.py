@@ -26,7 +26,7 @@ class ToolItemText:
 
 class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
-    gridClicked = Signal()
+    gridClicked = Signal(bool)
     linePlotsClicked = Signal(bool)
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
@@ -38,7 +38,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
          False),
         (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
-        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
+        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
         (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
          'linePlotsClicked', False),
         (ToolItemText.OVERLAYPEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
@@ -95,3 +95,15 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                 if action.isChecked() and not state:
                     action.trigger()  # ensure view reacts appropriately
                 action.setEnabled(state)
+
+    def set_action_checked(self, text: str,  state: bool):
+        """
+        Sets the checked/unchecked state of toggle button with the given text
+        :param text: Text on the action
+        :param state: checked if True else it is disabled
+        """
+        actions = self.actions()
+        for action in actions:
+            if action.text() == text:
+                if action.isChecked() != state:
+                    action.trigger()  # ensure view reacts appropriately
