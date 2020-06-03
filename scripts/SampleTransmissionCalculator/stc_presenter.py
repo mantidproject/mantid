@@ -4,6 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqt.gui_helper import show_interface_help
+import sys
+import mantid
+import os
 
 
 class SampleTransmissionCalculatorPresenter(object):
@@ -18,6 +22,7 @@ class SampleTransmissionCalculatorPresenter(object):
 
     def set_connections(self):
         self.view.calculate_button.clicked.connect(self.calculate)
+        self.view.help_button.clicked.connect(self.help_window)
 
     def calculate(self):
         input_dict = self.view.get_input_dict()
@@ -35,3 +40,16 @@ class SampleTransmissionCalculatorPresenter(object):
                 self.view.set_error_indicator(key)
                 warning += validations[key] + ' '
             self.view.set_validation_label(warning)
+
+    def help_window(self):
+        gui_name = 'Sample Transmission Calculator'
+        collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
+        version = ".".join(mantid.__version__.split(".")[:2])
+        qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/Sample Transmission Calculator.html'
+        external_url = 'http://docs.mantidproject.org/nightly/interfaces/Sample Transmission Calculator.html'
+        show_interface_help(gui_name,
+                            self.view.assistant_process,
+                            collection_file,
+                            qt_url,
+                            external_url
+                            )

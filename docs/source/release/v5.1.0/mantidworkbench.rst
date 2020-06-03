@@ -73,6 +73,7 @@ Improvements
 - Added an option to matrix workspaces to export bins and spectra to a table workspace.
 - Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
 - Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
+- The Sample Transmission Calculator is now implemented in workbench.
 
 Bugfixes
 ########

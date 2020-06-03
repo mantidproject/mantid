@@ -19,6 +19,7 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.axes = fig.add_subplot(111)
         self.plot_frame = FigureCanvas(fig)
         self.output_layout.replaceWidget(self.placeholder_widget, self.plot_frame)
+        self.assistant_process = QtCore.QProcess(self)
         self.validation_label.setStyleSheet("QLabel { color : red; }")
         self.histogram_err.setStyleSheet("QLabel { color : red; }")
         self.chemical_formula_err.setStyleSheet("QLabel { color : red; }")
