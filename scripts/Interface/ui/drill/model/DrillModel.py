@@ -81,6 +81,7 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self.samples = list()
+        self.settings = dict()
 
         if (instrument in RundexSettings.ACQUISITION_MODES):
             config['default.instrument'] = instrument
