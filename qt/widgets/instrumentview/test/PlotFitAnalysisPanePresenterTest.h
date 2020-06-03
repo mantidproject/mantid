@@ -10,9 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
-//#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-//#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,7 +18,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-
+#include "MantidAPI/FunctionFactory.h"
 
 #include <string>
 #include <utility>
@@ -40,24 +38,15 @@ public:
   static void destroySuite(PlotFitAnalysisPanePresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    //m_workspace = createWorkspace(4, 3);
-    //m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
- // m_model = new NiceMock<FullALFModelTest>();
- // m_view = new NiceMock<ALFViewTest>("ALF");
- // m_paneView = new NiceMock<paneViewTest>();
- // m_paneModel = new NiceMock<paneModelTest>();
- // m_pane = new NiceMock<paneTest>(m_paneView, m_paneModel);
- // m_presenter = new ALFCustomInstrumentPresenter(m_view, m_model,m_pane);
+  m_view = new NiceMock<paneViewTest>();
+  m_model = new paneModelTest();
+  m_presenter = new PlotFitAnalysisPanePresenter(m_view, m_model);
   }
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
-  //  m_model->~FullALFModelTest();
- //   delete m_view;
- //   delete m_paneView;
- //   m_paneModel = NULL;
- //   delete m_presenter;
- //   m_pane->~paneTest();
+    delete m_view;
+    delete m_presenter;
   }
 
 
@@ -74,23 +63,42 @@ return;
 }
 
 void test_doFit(){
-return;
+  std::string name = "test";
+  // set name via addSpectrum
+  EXPECT_CALL(*m_view, addSpectrum(name)).Times(1);
+  m_presenter->addSpectrum(name);
+  // set up rest of test
+
+  IFunction_sptr function = Mantid::API::FunctionFactory::Instance().createInitialized(
+      "name = FlatBackground");
+
+  EXPECT_CALL(*m_view, getFunction()).Times(1).WillOnce(Return(function));
+  std::pair<double,double> range = std::make_pair(0.0,1.0);
+  EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(range));
+  
+  EXPECT_CALL(*m_view, updateFunction(function));
+
+  m_presenter->doFit();
+  TS_ASSERT_EQUALS(m_model->getCount(),1);
 }
 
 void test_addFunction(){
-return;
+ 
+  IFunction_sptr function = Mantid::API::FunctionFactory::Instance().createInitialized(
+      "name = FlatBackground");
+ EXPECT_CALL(*m_view, addFunction(function)).Times(1);
+ m_presenter->addFunction(function);
 }
 
 void test_addSpectrum(){
-return;
+  std::string name = "test";
+  EXPECT_CALL(*m_view, addSpectrum(name)).Times(1);
+  m_presenter->addSpectrum(name);
 }
 
 private:
-//  NiceMock<FullALFModelTest> *m_model;
-//  NiceMock<ALFViewTest> *m_view;
-//  NiceMock<paneViewTest> *m_paneView;
-//  NiceMock<paneModelTest> *m_paneModel;
-//  NiceMock<paneTest> *m_pane;
-//  ALFCustomInstrumentPresenter *m_presenter;
+  NiceMock<paneViewTest> *m_view;
+  paneModelTest *m_model;
+  PlotFitAnalysisPanePresenter *m_presenter;
 };
 

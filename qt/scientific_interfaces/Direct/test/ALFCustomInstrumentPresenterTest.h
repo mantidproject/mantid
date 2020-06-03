@@ -15,6 +15,7 @@
 #include "ALFCustomInstrumentPresenter.h"
 #include "ALFMock.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"

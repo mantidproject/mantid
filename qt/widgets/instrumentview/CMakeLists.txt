@@ -121,6 +121,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/PanelsSurface.h
   inc/MantidQtWidgets/InstrumentView/PeakMarker2D.h
   inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
+  inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h
   inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h
   inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h
   inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h
