@@ -10,6 +10,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -252,6 +253,33 @@ public:
     TS_ASSERT_DELTA(0.3373, outputWS->y(0)[3], delta);
     TS_ASSERT_DELTA(0.2725, outputWS->y(0)[4], delta);
     TS_ASSERT_DELTA(0.1121, outputWS->y(0).back(), delta);
+  }
+
+  void test_Workspace_With_Different_Lambda_Ranges() {
+    using namespace Mantid::API;
+
+    // create an instrument including some monitors so that there's a good
+    // variation in the wavelength range of the spectra when convert from TOF to
+    // wavelength
+    MatrixWorkspace_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 100,
+                                                                     true);
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setChild(true);
+    convert.setProperty("InputWorkspace", testWS);
+    convert.setProperty("Target", "Wavelength");
+    convert.setProperty("OutputWorkspace", "dummy");
+    convert.execute();
+    testWS = convert.getProperty("OutputWorkspace");
+
+    auto mcAbsorb = createAlgorithm();
+    addSample(testWS, Environment::SampleOnly);
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
   }
 
   //---------------------------------------------------------------------------
