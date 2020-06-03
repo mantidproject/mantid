@@ -18,9 +18,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
 /************************/
-// clang-format off
-// clang-format on
-/****************************************/
 
 namespace Mantid {
 namespace DataHandling {
