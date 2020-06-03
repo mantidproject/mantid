@@ -31,7 +31,7 @@ public:
 
   MOCK_METHOD0(algorithmStarted, void());
   MOCK_METHOD0(algorithmEnded, void());
-  MOCK_METHOD2(updateProgress, void(double, const QString &));
+  MOCK_METHOD4(updateProgress, void(const double, const QString &, const double, const int));
   MOCK_METHOD0(showDetailsDialog, void());
 
   std::shared_ptr<AlgorithmProgressPresenter> m_presenter;

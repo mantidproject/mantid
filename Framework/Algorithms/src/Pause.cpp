@@ -41,7 +41,7 @@ void Pause::init() {
  */
 void Pause::exec() {
   DateAndTime startTime = DateAndTime::getCurrentTime();
-  double Duration = getProperty("Duration");
+  const double duration = getProperty("Duration");
 
   // Keep going until you get cancelled
   while (true) {
@@ -63,12 +63,12 @@ void Pause::exec() {
     DateAndTime now = DateAndTime::getCurrentTime();
     double seconds = DateAndTime::secondsFromDuration(now - startTime);
 
-    if (Duration > 0) {
+    if (duration > 0) {
       // Break when you've waited long enough
-      if (seconds > Duration)
+      if (seconds > duration)
         break;
       // Report progress for non-infinite runs
-      this->progress(seconds / Duration);
+      this->progress(seconds / duration,"",duration - seconds);
     }
   }
 }

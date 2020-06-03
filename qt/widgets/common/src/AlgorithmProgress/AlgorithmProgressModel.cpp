@@ -56,14 +56,19 @@ void AlgorithmProgressModel::startHandle(const Mantid::API::IAlgorithm *alg) {
 /// @param alg The algorithm that has reported progress
 /// @param progress The progress that the algorithm is currently at
 /// @param message The message that the progress bar should display
+/// @param estimatedTime :: estimated time to completion in seconds
+/// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressModel::progressHandle(const Mantid::API::IAlgorithm *alg,
                                             const double progress,
-                                            const std::string &message) {
+                                            const std::string &message,
+                                            const double estimatedTime,
+                                            const int progressPrecision) {
   m_mainWindowPresenter->updateProgressBar(alg->getAlgorithmID(), progress,
-                                           message);
+                                           message, estimatedTime, progressPrecision);
   if (m_dialogPresenter) {
     m_dialogPresenter->updateProgressBar(alg->getAlgorithmID(), progress,
-                                         message);
+                                         message, estimatedTime,
+                                         progressPrecision);
   }
 }
 /// This handle is triggered when the algorithm finishes. It will notify

@@ -55,9 +55,11 @@ void AlgorithmProgressWidget::showDetailsDialog() {
   }
 }
 
-void AlgorithmProgressWidget::updateProgress(double progress,
-                                             const QString &message) {
-  m_presenter->setProgressBar(m_progressBar, progress, message);
+void AlgorithmProgressWidget::updateProgress(const double progress, const QString &message, const double estimatedTime,
+    const int progressPrecision) {
+  m_presenter->setProgressBar(m_progressBar, progress,
+                              message, estimatedTime,
+                               progressPrecision);
 }
 
 void AlgorithmProgressWidget::blockUpdates(bool block) {

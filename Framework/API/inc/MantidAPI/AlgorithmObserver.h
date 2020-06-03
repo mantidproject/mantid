@@ -38,7 +38,8 @@ public:
   void stopObservingManager();
 
   virtual void progressHandle(const IAlgorithm *alg, double p,
-                              const std::string &msg);
+                              const std::string &msg, const double estimatedTime,
+                              const int progressPrecision);
   virtual void startingHandle(IAlgorithm_sptr alg);
   virtual void startHandle(const IAlgorithm *alg);
   virtual void finishHandle(const IAlgorithm *alg);

@@ -45,7 +45,7 @@ class MockObserver(AlgorithmObserver):
     def errorHandle(self, message):
         self.error_message = message
 
-    def progressHandle(self, p, message):
+    def progressHandle(self, p, message, estimated_time, progress_precision):
         if len(message) > 0:
             self.progress_message = message
         if p == 0.5:

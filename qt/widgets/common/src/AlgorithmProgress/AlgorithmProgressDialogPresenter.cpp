@@ -61,8 +61,11 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
 /// @param progress The progress that the algorithm has reported
 /// @param message The message that the algorithm has reported. It can be
 /// emitted from another thread, so a copy of the message is forced
+/// @param estimatedTime :: estimated time to completion in seconds
+/// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
-    Mantid::API::AlgorithmID alg, double progress, QString message) {
+    Mantid::API::AlgorithmID alg, const double progress, const QString message,
+    const double estimatedTime, const int progressPrecision) {
   // if the algorithm isn't contained in the progress bar tree, then pretend it
   // just started
   if (m_progressBars.count(alg) == 0) {
@@ -74,7 +77,8 @@ void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
       return;
     }
   }
-  setProgressBar(m_progressBars.at(alg).second, progress, message);
+  setProgressBar(m_progressBars.at(alg).second, progress, message, estimatedTime,
+                 progressPrecision);
 }
 
 /// This slot is triggered whenever an algorithms ends. If the algorithm is not

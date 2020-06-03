@@ -15,10 +15,13 @@ AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
 
 void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
                                               double p,
-                                              const std::string &msg) {
+                                              const std::string &msg,
+                                              const double estimatedTime,
+                                              const int progressPrecision) {
   UNUSED_ARG(alg)
   try {
-    return callMethod<void>(getSelf(), "progressHandle", p, msg);
+    return callMethod<void>(getSelf(), "progressHandle", p, msg, estimatedTime,
+                            progressPrecision);
   } catch (UndefinedAttributeError &) {
     return;
   }
