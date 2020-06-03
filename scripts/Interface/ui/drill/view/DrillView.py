@@ -429,6 +429,7 @@ class DrillView(QMainWindow):
         Args:
             columns (list(str)): list of columns titles
         """
+        self.columns = columns
         self.table.clear()
         self.invalidCells = set()
         self.table.setRowCount(0)
@@ -516,20 +517,24 @@ class DrillView(QMainWindow):
         """
         self.table.setRowBackground(row, self.ERROR_COLOR)
 
-    def set_cell_ok(self, row, column):
+    def set_cell_ok(self, row, columnTitle):
         """
         Set a cell as OK. Remove it from the invalid cells set, change its
         color and remove the tooltip itf it exists.
 
         Args:
             row (int): row index
-            column (int): column index
+            columnTile (str): column header
         """
+        if ((row < 0) or (row >= self.table.rowCount())
+                or (columnTitle not in self.columns)):
+            return
+        column = self.columns.index(columnTitle)
         self.table.setCellBackground(row, column, self.WHITE)
         self.table.setCellToolTip(row, column, "")
         self.invalidCells.discard((row, column))
 
-    def set_cell_error(self, row, column, msg):
+    def set_cell_error(self, row, columnTitle, msg):
         """
         Set a cell a containing an invalid value. Change its colors, add a
         tooltip containing the provided message and add it to the set of
@@ -537,9 +542,13 @@ class DrillView(QMainWindow):
 
         Args:
             row (int): row index
-            column (int): column index
+            columnTitle (str): column header
             msg (str): the error message
         """
+        if ((row < 0) or (row >= self.table.rowCount())
+                or (columnTitle not in self.columns)):
+            return
+        column = self.columns.index(columnTitle)
         self.table.setCellBackground(row, column, self.ERROR_COLOR)
         self.table.setCellToolTip(row, column, msg)
         self.invalidCells.add((row, column))

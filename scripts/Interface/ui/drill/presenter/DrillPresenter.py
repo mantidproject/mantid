@@ -59,11 +59,11 @@ class DrillPresenter:
                 )
         self.model.processing_done.connect(self.processingDone)
         self.model.param_ok.connect(
-                lambda row, column: self.view.set_cell_ok(row, column)
+                lambda row, param: self.view.set_cell_ok(row, param)
                 )
         self.model.param_error.connect(
-                lambda row, column, msg: self.view.set_cell_error(
-                    row, column, msg)
+                lambda row, param, msg: self.view.set_cell_error(
+                    row, param, msg)
                 )
 
         self.updateViewFromModel()

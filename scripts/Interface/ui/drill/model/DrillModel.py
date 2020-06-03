@@ -38,8 +38,8 @@ class DrillModel(QObject):
     process_error = Signal(int)
     processing_done = Signal()
     progress_update = Signal(int)
-    param_ok = Signal(int, int)
-    param_error = Signal(int, int, str)
+    param_ok = Signal(int, str)
+    param_error = Signal(int, str, str)
 
     def __init__(self):
         super(DrillModel, self).__init__()
@@ -168,12 +168,12 @@ class DrillModel(QObject):
         self.controller = ParameterController(self.algorithm)
         self.controller.signals.okParam.connect(
                 lambda p : self.param_ok.emit(
-                    p.sample, self.columns.index(p.name)
+                    p.sample, p.name
                     )
                 )
         self.controller.signals.wrongParam.connect(
                 lambda p : self.param_error.emit(
-                    p.sample, self.columns.index(p.name), p.errorMsg
+                    p.sample, p.name, p.errorMsg
                     )
                 )
         self.controller.start()
