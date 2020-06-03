@@ -383,13 +383,16 @@ public:
     V3D zAxis(0, 0, 1);
 
     const auto &pixel1 = instrument->getDetector(0);
+    TS_ASSERT(pixel1)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 12.66, 0.01)
 
     const auto &pixel44 = instrument->getDetector(43);
+    TS_ASSERT(pixel44)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 55.45,
                     0.01)
 
     const auto &pixel45 = instrument->getDetector(44);
+    TS_ASSERT(pixel45)
     TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 58.79,
                     0.01)
 
