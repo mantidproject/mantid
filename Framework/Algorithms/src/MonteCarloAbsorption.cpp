@@ -221,8 +221,7 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
 
 /**
  * Run the simulation over the whole input workspace
- * @param in
- * putWS A reference to the input workspace
+ * @param inputWS A reference to the input workspace
  * @param nevents Number of MC events per wavelength point to simulate
  * @param resimulateTracksForDiffWavelengths Whether to resimulate the tracks
  * for each wavelength point
