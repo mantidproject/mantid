@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -87,8 +87,8 @@ public:
   // checks that this is done ok
   void testParsing() {
     IComponent *comp(nullptr);
-    boost::shared_ptr<Interpolation> interpolation =
-        boost::make_shared<Interpolation>();
+    std::shared_ptr<Interpolation> interpolation =
+        std::make_shared<Interpolation>();
     std::vector<std::string> constraint;
     std::string penaltyFactor;
     std::string fitFunc;

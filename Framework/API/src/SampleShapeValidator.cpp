@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/Sample.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -16,7 +16,7 @@ std::string SampleShapeValidator::getType() const { return "SampleShape"; }
 
 /// @return A copy of the validator as a new object
 Kernel::IValidator_sptr SampleShapeValidator::clone() const {
-  return boost::make_shared<SampleShapeValidator>();
+  return std::make_shared<SampleShapeValidator>();
 }
 
 /**
@@ -25,7 +25,7 @@ Kernel::IValidator_sptr SampleShapeValidator::clone() const {
  *  @return A user level description if a problem exists or ""
  */
 std::string SampleShapeValidator::checkValidity(
-    const boost::shared_ptr<ExperimentInfo> &value) const {
+    const std::shared_ptr<ExperimentInfo> &value) const {
   const auto &sampleShape = value->sample().getShape();
   if (sampleShape.hasValidShape()) {
     return "";

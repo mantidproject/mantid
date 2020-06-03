@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
@@ -33,7 +33,7 @@ boost::python::list getNonIntegratedDimensionsAsPyList(const MDGeometry &self) {
   boost::python::list nonIntegrated;
   for (auto &dimension : dimensions) {
     nonIntegrated.append(
-        boost::const_pointer_cast<Mantid::Geometry::IMDDimension>(dimension));
+        std::const_pointer_cast<Mantid::Geometry::IMDDimension>(dimension));
   }
   return nonIntegrated;
 }

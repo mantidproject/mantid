@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -40,7 +40,7 @@ class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
 
 public:
   /// Typedef for a shared pointer of this kind of event workspace
-  using sptr = boost::shared_ptr<MDEventWorkspace<MDE, nd>>;
+  using sptr = std::shared_ptr<MDEventWorkspace<MDE, nd>>;
   /// Typedef to access the MDEventType.
   using MDEventType = MDE;
 
@@ -239,7 +239,7 @@ protected:
   /** MDBox containing all of the events in the workspace. */
   std::unique_ptr<MDBoxBase<MDE, nd>> data;
 
-  // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
+  // std::shared_ptr<BoxCtrlChangesList > m_BoxController;
   /// Display normalization for the event workspace itself
   Mantid::API::MDNormalization m_displayNormalization;
   /// Display normalization to pass onto generated histo workspaces

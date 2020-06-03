@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,7 +31,7 @@ public:
    * Set the UserSetting color map for the vsi.
    *@param colorMap UserSetting colormap for the vsi
    */
-  void setUserSettingColorMap(QString colorMap);
+  void setUserSettingColorMap(const QString &colorMap);
 
   /**
    * Get the UserSetting color map for the vsi.
@@ -48,7 +48,7 @@ public:
    * Set the LastSession color map
    * @param colorMap The colormap for the VSI.
    */
-  void setLastSessionColorMap(QString colorMap);
+  void setLastSessionColorMap(const QString &colorMap);
 
   /**
    * Get the background color for the user setting.
@@ -66,7 +66,7 @@ public:
    * Set the background color for the user setting.
    * @param backgroundColor The background color.
    */
-  void setUserSettingBackgroundColor(QColor backgroundColor);
+  void setUserSettingBackgroundColor(const QColor &backgroundColor);
 
   /**
    * Get the background color for the last session.
@@ -78,14 +78,15 @@ public:
    * Set the background color for the user setting.
    * @param backgroundColor The background color.
    */
-  void setLastSessionBackgroundColor(QColor backgroundColor);
+  void setLastSessionBackgroundColor(const QColor &backgroundColor);
 
   /**
    * Set the general MD color map
    * @param colorMapName The name of the general color map.
    * @param colorMapFile The file name of the general color map.
    */
-  void setGeneralMdColorMap(QString colorMapName, QString colorMapFile);
+  void setGeneralMdColorMap(const QString &colorMapName,
+                            const QString &colorMapFile);
 
   /**
    * Get the general MD color map file
@@ -141,7 +142,7 @@ public:
    * Set the user setting for the initial view.
    * @param initialView The selected initial view.
    */
-  void setUserSettingIntialView(QString initialView);
+  void setUserSettingIntialView(const QString &initialView);
 
   /**
    * Retrieves the state of the last session's log scale.

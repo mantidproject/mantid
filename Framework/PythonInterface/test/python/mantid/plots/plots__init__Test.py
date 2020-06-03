@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
@@ -20,7 +18,7 @@ from mantid.plots import datafunctions
 from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.utility import MantidAxType
 from mantid.plots.axesfunctions import get_colorplot_extents
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
                               RemoveSpectra, AnalysisDataService as ADS)
 from mantidqt.plotting.markers import SingleMarker
@@ -76,14 +74,15 @@ class Plots__init__Test(unittest.TestCase):
 
     def test_remove_workspace_artist_for_known_workspace_removes_plot(self):
         self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)
-        is_empty = self.ax.remove_workspace_artists(self.ws2d_histo)
-        self.assertEqual(True, is_empty)
+        workspace_removed = self.ax.remove_workspace_artists(self.ws2d_histo)
+        self.assertEqual(True, workspace_removed)
         self.assertEqual(0, len(self.ax.lines))
 
     def test_remove_workspace_artist_for_unknown_workspace_does_nothing(self):
         self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)
         unknown_ws = CreateSampleWorkspace()
-        self.ax.remove_workspace_artists(unknown_ws)
+        workspace_removed  = self.ax.remove_workspace_artists(unknown_ws)
+        self.assertEqual(False, workspace_removed)
         self.assertEqual(1, len(self.ax.lines))
 
     def test_remove_workspace_artist_for_removes_only_specified_workspace(self):
@@ -92,7 +91,8 @@ class Plots__init__Test(unittest.TestCase):
         line_second_ws = self.ax.plot(second_ws, specNum=5)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_workspace_artists(self.ws2d_histo)
+        workspace_removed = self.ax.remove_workspace_artists(self.ws2d_histo)
+        self.assertEqual(True, workspace_removed)
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo not in self.ax.lines)
         self.assertTrue(line_second_ws in self.ax.lines)

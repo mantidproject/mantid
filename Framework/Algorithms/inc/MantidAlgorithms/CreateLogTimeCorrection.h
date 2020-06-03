@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -65,7 +65,7 @@ private:
                           const std::vector<double> &corrections) const;
 
   /// Write correction map to a text file
-  void writeCorrectionToFile(const std::string filename,
+  void writeCorrectionToFile(const std::string &filename,
                              const Geometry::DetectorInfo &detectorInfo,
                              const std::vector<double> &corrections) const;
 };

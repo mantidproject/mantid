@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -215,7 +215,6 @@ public:
   }
 
   void testGetInstrument() {
-    std::string name; // place to put results
     ConfigService::Instance().setFacility("ISIS");
     ConfigService::Instance().setString("default.instrument", "HRPD");
 
@@ -607,7 +606,7 @@ public:
     const bool startingCaseOption = fileFinder.getCaseSensitive();
 
     // This test essentially covers the case where a user types an erroneous
-    // range of runs into an MWRunFiles widget.
+    // range of runs into an FileFinderWidget.
     // If they have accidentally typed in an extremely large range (most of
     // which dont exist) then it is important
     // that this fact is realised as early as possible, and the user is not

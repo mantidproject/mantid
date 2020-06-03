@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -95,12 +95,13 @@ private:
   int copy_file(const char *inFile, int nx_read_access, const char *outFile,
                 int nx_write_access);
 
-  int WriteOutDataOrErrors(Geometry::RectangularDetector_const_sptr det,
+  int WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det,
                            int x_pixel_slab, const char *field_name,
                            const char *errors_field_name, bool doErrors,
-                           bool doBoth, int is_definition, std::string bank);
+                           bool doBoth, int is_definition,
+                           const std::string &bank);
 
-  int WriteDataGroup(std::string bank, int is_definition);
+  int WriteDataGroup(const std::string &bank, int is_definition);
 
   //
   //      // For iterating through the HDF file...

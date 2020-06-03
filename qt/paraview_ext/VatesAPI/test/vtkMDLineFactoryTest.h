@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -44,7 +44,7 @@ public:
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
     TSM_ASSERT("Successor has not been used properly.",
@@ -66,7 +66,7 @@ public:
     vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    auto ws = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
@@ -77,7 +77,7 @@ public:
   void testOnInitaliseCannotDelegateToSuccessor() {
     vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     ITableWorkspace_sptr ws =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), const std::runtime_error &);
   }
 
@@ -97,7 +97,7 @@ public:
     EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100), Ge(0))))
         .Times(AtLeast(1));
 
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
         Mantid::DataObjects::MDEvent<1>, 1>>
         ws = MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
 
@@ -138,7 +138,7 @@ class vtkMDLineFactoryTestPerformance : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
         Mantid::DataObjects::MDEvent<1>, 1>>
         input = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     // Rebin it to make it possible to compare cells to bins.

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSymmetrise.h"
 #include "IndirectDataValidationHelper.h"
@@ -46,7 +46,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.propertiesPreview->addWidget(m_propTrees["SymmPVPropTree"]);
 
   // Editor Factories
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  auto *doubleEditorFactory = new DoubleEditorFactory();
   m_propTrees["SymmPropTree"]->setFactoryForManager(m_dblManager,
                                                     doubleEditorFactory);
 
@@ -319,7 +319,7 @@ void IndirectSymmetrise::updateMiniPlots() {
       static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
   Mantid::API::MatrixWorkspace_sptr input =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               workspaceName.toStdString()));
 
@@ -620,8 +620,8 @@ void IndirectSymmetrise::setSaveEnabled(bool enabled) {
 
 void IndirectSymmetrise::updateRunButton(bool enabled,
                                          std::string const &enableOutputButtons,
-                                         QString const message,
-                                         QString const tooltip) {
+                                         QString const &message,
+                                         QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

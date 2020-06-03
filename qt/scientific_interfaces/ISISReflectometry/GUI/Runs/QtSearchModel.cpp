@@ -1,94 +1,21 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtSearchModel.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <QColor>
-#include <boost/regex.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 using namespace Mantid::API;
 
-namespace { // unnamed
-
-bool runHasCorrectInstrument(std::string const &run,
-                             std::string const &instrument) {
-  // Return false if the run appears to be from another instruement
-  return (run.substr(0, instrument.size()) == instrument);
-}
-
-std::string trimRunName(std::string const &runFile,
-                        std::string const &instrument) {
-  // Trim the instrument prefix and ".raw" suffix
-  auto run = runFile;
-  run = run.substr(instrument.size(), run.size() - (instrument.size() + 4));
-
-  // Also get rid of any leading zeros
-  size_t numZeros = 0;
-  while (run[numZeros] == '0')
-    numZeros++;
-  run = run.substr(numZeros, run.size() - numZeros);
-
-  return run;
-}
-
-bool resultExists(SearchResult const &result,
-                  std::vector<SearchResult> const &runDetails) {
-  auto resultIter = std::find(runDetails.cbegin(), runDetails.cend(), result);
-  return resultIter != runDetails.cend();
-}
-} // unnamed namespace
-
 QtSearchModel::QtSearchModel() : m_runDetails() {}
 
-bool QtSearchModel::knownFileType(std::string const &filename) const {
-  boost::regex pattern("raw$", boost::regex::icase);
-  boost::smatch match; // Unused.
-  return boost::regex_search(filename, match, pattern);
-}
-
-std::vector<SearchResult> const &QtSearchModel::results() const {
-  return m_runDetails;
-}
-
-void QtSearchModel::setError(int i, std::string const &error) {
-  m_runDetails[i].setError(error);
-  emit dataChanged(index(i, 0), index(i, 2));
-}
-
-void QtSearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
-                                     const std::string &instrument) {
-
-  // Copy the data from the input table workspace
-  std::vector<SearchResult> newRunDetails;
-  for (size_t i = 0; i < tableWorkspace->rowCount(); ++i) {
-    const std::string runFile = tableWorkspace->String(i, 0);
-
-    if (!runHasCorrectInstrument(runFile, instrument))
-      continue;
-
-    if (!knownFileType(runFile))
-      continue;
-
-    auto const run = trimRunName(runFile, instrument);
-    const std::string description = tableWorkspace->String(i, 6);
-    const std::string location = tableWorkspace->String(i, 1);
-    auto result = SearchResult(run, description, location);
-
-    if (!resultExists(result, m_runDetails))
-      newRunDetails.emplace_back(std::move(result));
-  }
-
-  mergeNewResults(newRunDetails);
-}
-
-void QtSearchModel::mergeNewResults(std::vector<SearchResult> const &source) {
+void QtSearchModel::mergeNewResults(SearchResults const &source) {
   if (source.empty())
     return;
 
@@ -112,7 +39,7 @@ int QtSearchModel::rowCount(const QModelIndex &) const {
 /**
 @return the number of columns in the model.
 */
-int QtSearchModel::columnCount(const QModelIndex &) const { return 3; }
+int QtSearchModel::columnCount(const QModelIndex &) const { return 2; }
 
 /**
 Overrident data method, allows consuming view to extract data for an index and
@@ -152,10 +79,7 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
     return QString::fromStdString(run.runNumber());
 
   if (colNumber == 1)
-    return QString::fromStdString(run.description());
-
-  if (colNumber == 2)
-    return QString::fromStdString(run.location());
+    return QString::fromStdString(run.title());
 
   return QVariant();
 }
@@ -178,8 +102,6 @@ QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation,
       return "Run";
     case 1:
       return "Description";
-    case 2:
-      return "Location";
     default:
       return "";
     }

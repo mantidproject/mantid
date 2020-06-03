@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import *
 from mantid.api import *
@@ -10,22 +10,26 @@ from mantid.simpleapi import (Load, DeleteWorkspace, CalculateMonteCarloAbsorpti
 
 import unittest
 
+
 class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
     _red_ws = None
     _container_ws = None
     _indirect_elastic_ws = None
+    _indirect_fws_ws = None
 
     def setUp(self):
         red_ws = Load('irs26176_graphite002_red.nxs')
         container_ws = Load('irs26173_graphite002_red.nxs')
         indirect_elastic_ws = Load('osi104367_elf.nxs')
+        indirect_fws_ws = Load('ILL_IN16B_FWS_Reduced.nxs')
         self._red_ws = red_ws
         self._container_ws = container_ws
         self._indirect_elastic_ws = indirect_elastic_ws
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
         self._expected_hist = 10
         self._expected_blocksize = 1905
+        self._indirect_fws_ws = indirect_fws_ws
 
         self._arguments = {'SampleChemicalFormula': 'H2-O',
                            'SampleDensityType': 'Mass Density',
@@ -57,7 +61,7 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._test_arguments['ContainerInnerRadius'] = 1.0
         self._test_arguments['ContainerOuterRadius'] = 2.0
 
-    def _test_corrections_workspace(self, corr_ws):
+    def _test_corrections_workspace(self, corr_ws, spectrum_axis=None):
         x_unit = corr_ws.getAxis(0).getUnit().unitID()
         self.assertEqual(x_unit, self._expected_unit)
 
@@ -70,13 +74,16 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         blocksize = corr_ws.blocksize()
         self.assertEqual(blocksize, self._expected_blocksize)
 
-    def _test_corrections_workspaces(self, workspaces):
+        if spectrum_axis:
+            self.assertEqual(corr_ws.getAxis(1).getUnit().unitID(), spectrum_axis)
+
+    def _test_corrections_workspaces(self, workspaces, spectrum_axis=None):
         self.assertNotEquals(workspaces, None)
 
         for workspace in workspaces:
-            self._test_corrections_workspace(workspace)
+            self._test_corrections_workspace(workspace, spectrum_axis)
 
-    def _run_correction_and_test(self, shape, sample_ws=None):
+    def _run_correction_and_test(self, shape, sample_ws=None, spectrum_axis=None):
 
         if sample_ws is None:
             sample_ws = self._red_ws
@@ -86,7 +93,7 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         corrected = CalculateMonteCarloAbsorption(SampleWorkspace=sample_ws,
                                                   Shape=shape,
                                                   **arguments)
-        self._test_corrections_workspaces(corrected)
+        self._test_corrections_workspaces(corrected, spectrum_axis)
 
     def _run_correction_with_container_test(self, shape):
         self._test_arguments.update(self._container_args)
@@ -102,7 +109,25 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_unit = "MomentumTransfer"
         self._expected_hist = 17
         self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_elastic_ws)
+        self._run_correction_and_test(shape, self._indirect_elastic_ws, 'Label')
+
+    def _run_indirect_fws_test_red(self, shape):
+        self._expected_unit = "Wavelength"
+        self._expected_hist = 18
+        self._expected_blocksize = 1
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(2), 'Label')
+
+    def _run_indirect_fws_test_q(self, shape):
+        self._expected_unit = "Wavelength"
+        self._expected_hist = 18
+        self._expected_blocksize = 1
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(1), 'MomentumTransfer')
+
+    def _run_indirect_fws_test_2theta(self, shape):
+        self._expected_unit = "Wavelength"
+        self._expected_hist = 18
+        self._expected_blocksize = 1
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
 
     def _flat_plate_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0
@@ -144,6 +169,15 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_annulus_indirect_elastic(self):
         self._annulus_test(self._run_indirect_elastic_test)
+
+    def test_flat_plate_indirect_fws(self):
+        self._flat_plate_test(self._run_indirect_fws_test_2theta)
+
+    def test_cylinder_indirect_fws(self):
+        self._cylinder_test(self._run_indirect_fws_test_q)
+
+    def test_annulus_indirect_fws(self):
+        self._annulus_test(self._run_indirect_fws_test_red)
 
 if __name__ == "__main__":
     unittest.main()

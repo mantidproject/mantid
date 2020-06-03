@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <unordered_set>
 
 using Mantid::CurveFitting::Functions::ComptonProfile;
@@ -30,12 +30,12 @@ public:
   void test_initialized_object_has_expected_parameters() {
     auto profile = createFunction();
     static const size_t nparams(1);
-    const char *expectedParams[nparams] = {"Mass"};
 
     TS_ASSERT_EQUALS(nparams, profile->nParams());
 
     // Test names as they are used in scripts
     if (profile->nParams() > 0) {
+      const char *expectedParams[nparams] = {"Mass"};
       std::unordered_set<std::string> expectedParamStr(
           expectedParams, expectedParams + nparams);
       std::vector<std::string> actualNames = profile->getParameterNames();
@@ -66,7 +66,7 @@ private:
   };
 
   Mantid::API::IFunction_sptr createFunction() {
-    auto profile = boost::make_shared<FakeComptonProfile>();
+    auto profile = std::make_shared<FakeComptonProfile>();
     profile->initialize();
     return profile;
   }

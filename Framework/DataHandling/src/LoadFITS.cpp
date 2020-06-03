@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadFITS.h"
 #include "MantidAPI/FileProperty.h"
@@ -130,18 +130,18 @@ void LoadFITS::init() {
       "one histogram per row and one bin per pixel, such that a 2D "
       "color plot (color fill plot) will display an image.");
 
-  auto zeroOrPosDbl = boost::make_shared<BoundedValidator<double>>();
+  auto zeroOrPosDbl = std::make_shared<BoundedValidator<double>>();
   zeroOrPosDbl->setLower(0.0);
   declareProperty("FilterNoiseLevel", 0.0, zeroOrPosDbl,
                   "Threshold to remove noisy pixels. Try 50 for example.");
 
-  auto posInt = boost::make_shared<BoundedValidator<int>>();
+  auto posInt = std::make_shared<BoundedValidator<int>>();
   posInt->setLower(1);
   declareProperty("BinSize", 1, posInt,
                   "Rebunch n*n on both axes, generating pixels with sums of "
                   "blocks of n by n original pixels.");
 
-  auto posDbl = boost::make_shared<BoundedValidator<double>>();
+  auto posDbl = std::make_shared<BoundedValidator<double>>();
   posDbl->setLower(std::numeric_limits<double>::epsilon());
   declareProperty("Scale", 80.0, posDbl, "Pixels per cm.",
                   Kernel::Direction::Input);
@@ -479,7 +479,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   WorkspaceGroup_sptr wsGroup;
 
   if (!AnalysisDataService::Instance().doesExist(outWSName)) {
-    wsGroup = boost::make_shared<WorkspaceGroup>();
+    wsGroup = std::make_shared<WorkspaceGroup>();
     wsGroup->setTitle(outWSName);
   } else {
     // Get the name of the latest file in group to start numbering from
@@ -519,7 +519,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
       directoryName = directoryName + "/IMAT_Definition.xml";
       loadInst->setPropertyValue("Filename", directoryName);
       loadInst->setProperty<MatrixWorkspace_sptr>(
-          "Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(imgWS));
+          "Workspace", std::dynamic_pointer_cast<MatrixWorkspace>(imgWS));
       loadInst->execute();
     } catch (std::exception &ex) {
       g_log.information("Cannot load the instrument definition. " +
@@ -678,7 +678,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
 Workspace2D_sptr
 LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                         std::vector<char> &buffer, MantidImage &imageY,
-                        MantidImage &imageE, const Workspace2D_sptr parent,
+                        MantidImage &imageE, const Workspace2D_sptr &parent,
                         bool loadAsRectImg, int binSize, double noiseThresh) {
   // Create workspace (taking into account already here if rebinning is
   // going to happen)
@@ -686,11 +686,11 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
   if (!parent) {
     if (!loadAsRectImg) {
       size_t finalPixelCount = m_pixelCount / binSize * binSize;
-      ws = boost::dynamic_pointer_cast<Workspace2D>(
+      ws = std::dynamic_pointer_cast<Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", finalPixelCount, 2,
                                               1));
     } else {
-      ws = boost::dynamic_pointer_cast<Workspace2D>(
+      ws = std::dynamic_pointer_cast<Workspace2D>(
           WorkspaceFactory::Instance().create(
               "Workspace2D",
               fileInfo.axisPixelLengths[1] / binSize, // one bin per column
@@ -699,7 +699,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
               fileInfo.axisPixelLengths[0] / binSize));
     }
   } else {
-    ws = boost::dynamic_pointer_cast<Workspace2D>(
+    ws = std::dynamic_pointer_cast<Workspace2D>(
         WorkspaceFactory::Instance().create(parent));
   }
 
@@ -763,9 +763,9 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
  * @param cmpp centimeters per pixel (already taking into account
  * possible rebinning)
  */
-void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
-                                  const FITSInfo &fileInfo, int binSize,
-                                  double cmpp) {
+void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws,
+                                  bool loadAsRectImg, const FITSInfo &fileInfo,
+                                  int binSize, double cmpp) {
   // add axes
   size_t width = fileInfo.axisPixelLengths[0] / binSize;
   size_t height = fileInfo.axisPixelLengths[1] / binSize;
@@ -778,8 +778,8 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
     }
     ws->replaceAxis(0, std::move(axw));
     // "cm" width label unit
-    boost::shared_ptr<Kernel::Units::Label> unitLbl =
-        boost::dynamic_pointer_cast<Kernel::Units::Label>(
+    std::shared_ptr<Kernel::Units::Label> unitLbl =
+        std::dynamic_pointer_cast<Kernel::Units::Label>(
             UnitFactory::Instance().create("Label"));
     unitLbl->setLabel("width", "cm");
     ws->getAxis(0)->unit() = unitLbl;
@@ -792,7 +792,7 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
     }
     ws->replaceAxis(1, std::move(axh));
     // "cm" height label unit
-    unitLbl = boost::dynamic_pointer_cast<Kernel::Units::Label>(
+    unitLbl = std::dynamic_pointer_cast<Kernel::Units::Label>(
         UnitFactory::Instance().create("Label"));
     unitLbl->setLabel("height", "cm");
     ws->getAxis(1)->unit() = unitLbl;
@@ -848,7 +848,7 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
  * @throws std::runtime_error if there are file input issues
  */
 void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
-                                   Workspace2D_sptr ws,
+                                   const Workspace2D_sptr &ws,
                                    std::vector<char> &buffer) {
   const size_t bytespp = (fileInfo.bitsPerPixel / 8);
   const size_t len = m_pixelCount * bytespp;

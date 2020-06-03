@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../../../ISISReflectometry/GUI/Batch/GroupProcessingAlgorithm.h"
@@ -72,13 +72,13 @@ public:
   }
 
   void testStitchParamsSetFromStitchingOptions() {
-    auto experiment =
-        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                   SummationType::SumInLambda, false, false,
-                   PolarizationCorrections(PolarizationCorrectionType::None),
-                   FloodCorrections(FloodCorrectionType::Workspace),
-                   TransmissionStitchOptions(), makeStitchOptions(),
-                   std::vector<PerThetaDefaults>());
+    auto experiment = Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
+        PolarizationCorrections(PolarizationCorrectionType::None),
+        FloodCorrections(FloodCorrectionType::Workspace),
+        TransmissionStitchOptions(), makeStitchOptions(),
+        std::vector<PerThetaDefaults>());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);
@@ -90,7 +90,7 @@ public:
   void testPerThetaDefaultsQResolutionUsedForParamsIfStitchingOptionsEmpty() {
     auto experiment = Experiment(
         AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false,
+        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
         PolarizationCorrections(PolarizationCorrectionType::None),
         FloodCorrections(FloodCorrectionType::Workspace),
         TransmissionStitchOptions(), std::map<std::string, std::string>(),
@@ -104,7 +104,7 @@ public:
   void testQResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
     auto experiment = Experiment(
         AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false,
+        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
         PolarizationCorrections(PolarizationCorrectionType::None),
         FloodCorrections(FloodCorrectionType::Workspace),
         TransmissionStitchOptions(), std::map<std::string, std::string>(),
@@ -119,7 +119,7 @@ public:
   testQOutputResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
     auto experiment = Experiment(
         AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false,
+        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
         PolarizationCorrections(PolarizationCorrectionType::None),
         FloodCorrections(FloodCorrectionType::Workspace),
         TransmissionStitchOptions(), std::map<std::string, std::string>(),

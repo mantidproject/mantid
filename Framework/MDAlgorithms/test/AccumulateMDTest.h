@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -266,9 +266,8 @@ public:
     create_alg->execute();
     // IMDEventWorkspace_sptr in_ws =
     // create_alg->getProperty("OutputWorkspace");
-    IMDEventWorkspace_sptr in_ws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("md_sample_workspace"));
+    IMDEventWorkspace_sptr in_ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve("md_sample_workspace"));
 
     AccumulateMD acc_alg;
     acc_alg.initialize();
@@ -282,7 +281,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
     // IMDEventWorkspace_sptr out_ws = acc_alg.getProperty("OutputWorkspace");
     IMDEventWorkspace_sptr out_ws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("accumulated_workspace"));
 
     // Should have the same number of events in output as the sum of the inputs
@@ -327,9 +326,8 @@ public:
     create_alg->setPropertyValue("u", "1,0,0");
     create_alg->setPropertyValue("v", "0,1,0");
     create_alg->execute();
-    IMDEventWorkspace_sptr in_ws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("md_sample_workspace"));
+    IMDEventWorkspace_sptr in_ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve("md_sample_workspace"));
 
     AccumulateMD acc_alg;
     acc_alg.initialize();
@@ -343,7 +341,7 @@ public:
     acc_alg.setProperty("Clean", true);
     TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
     IMDEventWorkspace_sptr out_ws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        std::dynamic_pointer_cast<IMDEventWorkspace>(
             AnalysisDataService::Instance().retrieve("accumulated_workspace"));
 
     // Should only have the same number of events as data_source_2 this time

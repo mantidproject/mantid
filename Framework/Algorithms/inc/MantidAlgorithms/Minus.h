@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAlgorithms/BinaryOperation.h"
@@ -66,8 +66,8 @@ private:
   std::string checkSizeCompatibility(
       const API::MatrixWorkspace_const_sptr lhs,
       const API::MatrixWorkspace_const_sptr rhs) const override;
-  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs) const;
+  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr &lhs,
+                              const API::MatrixWorkspace_const_sptr &rhs) const;
   bool
   checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
                      const API::MatrixWorkspace_const_sptr rhs) const override;

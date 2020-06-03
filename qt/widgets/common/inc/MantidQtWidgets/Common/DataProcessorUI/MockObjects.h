@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -96,7 +96,7 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(boost::shared_ptr<
+  void showTable(std::shared_ptr<
                  MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>)
       override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
@@ -241,8 +241,8 @@ public:
   bool isValidModel(Mantid::API::Workspace_sptr, size_t) const override {
     return false;
   };
-  boost::shared_ptr<AbstractTreeModel> getModel() override {
-    return boost::shared_ptr<QTwoLevelTreeModel>();
+  std::shared_ptr<AbstractTreeModel> getModel() override {
+    return std::shared_ptr<QTwoLevelTreeModel>();
   };
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override {
     return Mantid::API::ITableWorkspace_sptr();

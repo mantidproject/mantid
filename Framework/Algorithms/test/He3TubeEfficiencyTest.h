@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 
 namespace He3TubeEffeciencyHelper {
-void createWorkspace2DInADS(const std::string inputWS) {
+void createWorkspace2DInADS(const std::string &inputWS) {
   const int nspecs(4);
   const int nbins(5);
 
@@ -58,7 +58,7 @@ void createWorkspace2DInADS(const std::string inputWS) {
   loader.execute();
 }
 
-void createEventWorkspaceInADS(const std::string inputEvWS) {
+void createEventWorkspaceInADS(const std::string &inputEvWS) {
   EventWorkspace_sptr event =
       WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
   event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
@@ -123,7 +123,7 @@ public:
     MatrixWorkspace_sptr result =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
     EventWorkspace_sptr ev_result =
-        boost::dynamic_pointer_cast<EventWorkspace>(result);
+        std::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor events should be untouched
     EventList mon_ev = ev_result->getSpectrum(0);
@@ -195,7 +195,7 @@ public:
     MatrixWorkspace_sptr result =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
     EventWorkspace_sptr ev_result =
-        boost::dynamic_pointer_cast<EventWorkspace>(result);
+        std::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor should be untouched
     EventList mon_ev = ev_result->getSpectrum(0);

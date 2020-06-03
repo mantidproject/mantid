@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -28,9 +28,10 @@ class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog
   Q_OBJECT
 public:
   EditLocalParameterDialog(QWidget *parent, const QString &parName,
-                           const QStringList &wsNames, QList<double> values,
-                           QList<bool> fixes, QStringList ties,
-                           QStringList constraints);
+                           const QStringList &wsNames,
+                           const QList<double> &values,
+                           const QList<bool> &fixes, const QStringList &ties,
+                           const QStringList &constraints);
   void doSetup(const QString &parName, const QStringList &wsNames);
   QString getParameterName() const { return m_parName; }
   QList<double> getValues() const;
@@ -55,9 +56,9 @@ private slots:
   void fixParameter(int /*index*/, bool /*fix*/);
   void setAllFixed(bool /*fix*/);
   void setTie(int /*index*/, QString /*tie*/);
-  void setTieAll(QString /*tie*/);
+  void setTieAll(const QString & /*tie*/);
   void setConstraint(int /*index*/, QString /*tie*/);
-  void setConstraintAll(QString /*tie*/);
+  void setConstraintAll(const QString & /*tie*/);
   void copy();
   void paste();
   void setValueToLog(int /*i*/);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -184,7 +184,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Find out number of lines in a text file
    */
-  int getFileLines(std::string filename) {
+  int getFileLines(const std::string &filename) {
     ifstream infile;
     infile.open(filename.c_str());
 
@@ -206,8 +206,8 @@ public:
   /** Write out a TableWorkspace contain 2 banks' parameters
    * ISIS HRPD Data
    */
-  void create2BankProf9Table(string workspacename) {
-    TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
+  void create2BankProf9Table(const string &workspacename) {
+    TableWorkspace_sptr partablews = std::make_shared<TableWorkspace>();
     partablews->addColumn("str", "Name");
     partablews->addColumn("double", "Value_1");
     partablews->addColumn("double", "Value_2");
@@ -261,7 +261,7 @@ public:
    * 10
    * Source data is from POWGEN's bank 1 calibrated
    */
-  void createProfile10TableWS(std::string wsname) {
+  void createProfile10TableWS(const std::string &wsname) {
     // Create a map of string/double for parameters of profile 10
     std::map<std::string, double> parammap{
         {"BANK", 1.},        {"Alph0", 1.88187},  {"Alph0t", 64.4102},
@@ -277,7 +277,7 @@ public:
 
     // Crate table workspace
     DataObjects::TableWorkspace_sptr geomws =
-        boost::make_shared<TableWorkspace>();
+        std::make_shared<TableWorkspace>();
 
     geomws->addColumn("str", "Name");
     geomws->addColumn("double", "Value");

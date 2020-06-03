@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 //------------------------------------------------------------------------------
@@ -10,7 +10,7 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <stdexcept>
 #include <vector>
@@ -34,17 +34,18 @@ public:
   /// Create a parameterized detector from the given base component and
   /// ParameterMap and
   /// return a shared_ptr<IDetector>
-  static boost::shared_ptr<IDetector> createDetector(const IDetector *base,
-                                                     const ParameterMap *map);
+  static std::shared_ptr<IDetector> createDetector(const IDetector *base,
+                                                   const ParameterMap *map);
 
   /// Create a parameterized instrument from the given base and ParameterMap
-  static boost::shared_ptr<Instrument>
-  createInstrument(boost::shared_ptr<const Instrument> base,
-                   boost::shared_ptr<ParameterMap> map);
+  static std::shared_ptr<Instrument>
+  createInstrument(std::shared_ptr<const Instrument> base,
+                   std::shared_ptr<ParameterMap> map);
   /// Create a parameterized component from the given base component and
   /// ParameterMap
-  static boost::shared_ptr<IComponent>
-  create(boost::shared_ptr<const IComponent> base, const ParameterMap *map);
+  static std::shared_ptr<IComponent>
+  create(const std::shared_ptr<const IComponent> &base,
+         const ParameterMap *map);
 };
 
 } // Namespace Geometry

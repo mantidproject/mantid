@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import re
 
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
@@ -195,7 +193,8 @@ class GroupingTablePresenter(object):
         else:
             self._model.remove_group_from_analysis(group_name)
 
-        self.selected_group_changed_notifier.notify_subscribers(group_added)
+        group_info = {'is_added': group_added, 'name': group_name}
+        self.selected_group_changed_notifier.notify_subscribers(group_info)
 
     def plot_default_case(self):
         for row in range(self._view.num_rows()):

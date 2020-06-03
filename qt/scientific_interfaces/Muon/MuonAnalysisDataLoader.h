@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -72,7 +72,7 @@ public:
                   const Mantid::API::Grouping &grouping) const;
   /// create analysis workspace
   Mantid::API::Workspace_sptr
-  createAnalysisWorkspace(const Mantid::API::Workspace_sptr inputWS,
+  createAnalysisWorkspace(const Mantid::API::Workspace_sptr &inputWS,
                           const Muon::AnalysisOptions &options) const;
   /// Get dead time table
   Mantid::API::ITableWorkspace_sptr
@@ -92,7 +92,7 @@ public:
 protected:
   /// Set properties of algorithm from options
   void
-  setProcessAlgorithmProperties(Mantid::API::IAlgorithm_sptr alg,
+  setProcessAlgorithmProperties(const Mantid::API::IAlgorithm_sptr &alg,
                                 const Muon::AnalysisOptions &options) const;
   /// Remove from cache any workspaces that have been deleted in the meantime
   void updateCache() const;
@@ -100,7 +100,7 @@ protected:
 private:
   /// Get instrument name from workspace
   std::string
-  getInstrumentName(const Mantid::API::Workspace_sptr workspace) const;
+  getInstrumentName(const Mantid::API::Workspace_sptr &workspace) const;
   /// Check if we should cache result of a load of the given files
   bool shouldBeCached(const QStringList &filenames) const;
 

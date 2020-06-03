@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidAPI/FileProperty.h"
@@ -116,7 +116,7 @@ void MergeMDFiles::loadBoxData() {
       }
 
       // Open the event data, track the total number of events
-      auto bc = boost::shared_ptr<API::BoxController>(
+      auto bc = std::shared_ptr<API::BoxController>(
           new API::BoxController(static_cast<size_t>(m_nDims)));
       bc->fromXMLString(m_fileComponentsStructure[i].getBCXMLdescr());
 
@@ -197,8 +197,9 @@ uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox) {
  * @param outputFile :: the name of the output file where file-based workspace
  *should be saved
  */
-void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
-                                   const std::string &outputFile) {
+void MergeMDFiles::doExecByCloning(
+    const Mantid::API::IMDEventWorkspace_sptr &ws,
+    const std::string &outputFile) {
   m_OutIWS = ws;
   m_MDEventType = ws->getEventTypeName();
 
@@ -214,7 +215,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   // Fix the max depth to something bigger.
   bc->setMaxDepth(20);
   bc->setSplitThreshold(5000);
-  auto saver = boost::shared_ptr<API::IBoxControllerIO>(
+  auto saver = std::shared_ptr<API::IBoxControllerIO>(
       new DataObjects::BoxControllerNeXusIO(bc.get()));
   saver->setDataType(sizeof(coord_t), m_MDEventType);
   if (m_fileBasedTargetWS) {
@@ -390,7 +391,7 @@ void MergeMDFiles::exec() {
   loader->executeAsChildAlg();
   IMDWorkspace_sptr result = (loader->getProperty("OutputWorkspace"));
 
-  auto firstWS = boost::dynamic_pointer_cast<API::IMDEventWorkspace>(result);
+  auto firstWS = std::dynamic_pointer_cast<API::IMDEventWorkspace>(result);
   if (!firstWS)
     throw std::runtime_error(
         "Can not load MDEventWorkspace from initial file " + firstFile);

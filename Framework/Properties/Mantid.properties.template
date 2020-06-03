@@ -111,9 +111,6 @@ icatDownload.directory =
 # ICat mount point. Directory where archive is mounted. See Facility.xml filelocation.
 icatDownload.mountPoint =
 
-# The Number of algorithms properties to retain im memory for refence in scripts.
-algorithms.retained = 50
-
 # Defines the maximum number of cores to use for OpenMP
 # For machine default set to 0
 MultiThreaded.MaxCores = 0

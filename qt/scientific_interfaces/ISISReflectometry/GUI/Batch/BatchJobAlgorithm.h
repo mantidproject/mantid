@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,7 +23,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobAlgorithm
     : public IBatchJobAlgorithm,
       public MantidQt::API::ConfiguredAlgorithm {
 public:
-  using UpdateFunction = void (*)(Mantid::API::IAlgorithm_sptr algorithm,
+  using UpdateFunction = void (*)(const Mantid::API::IAlgorithm_sptr &algorithm,
                                   Item &item);
 
   BatchJobAlgorithm(
@@ -40,7 +40,7 @@ private:
   UpdateFunction m_updateFunction;
 };
 
-using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;
+using BatchJobAlgorithm_sptr = std::shared_ptr<BatchJobAlgorithm>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

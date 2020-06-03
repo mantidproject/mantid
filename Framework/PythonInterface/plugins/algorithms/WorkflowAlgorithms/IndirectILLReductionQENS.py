@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import numpy
 from mantid import mtd
@@ -459,9 +457,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             mask_min = 0
             mask_max = mtd[left].blocksize()
 
-            if (self._common_args['CropDeadMonitorChannels'] and
-                    (self._unmirror_option == 1 or self._unmirror_option > 3) and
-                    mtd[left].blocksize() != mtd[right].blocksize()):
+            if (self._common_args['CropDeadMonitorChannels']
+                    and (self._unmirror_option == 1 or self._unmirror_option > 3)
+                    and mtd[left].blocksize() != mtd[right].blocksize()):
                 raise RuntimeError("Different number of bins found in the left and right wings"
                                    " after cropping the dead monitor channels. "
                                    "Unable to perform the requested unmirror option, consider using option "

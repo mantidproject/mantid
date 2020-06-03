@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAPI/Axis.h"
@@ -90,7 +90,7 @@ DetectorEfficiencyCor::DetectorEfficiencyCor()
  * Declare algorithm properties
  */
 void DetectorEfficiencyCor::init() {
-  auto val = boost::make_shared<CompositeValidator>();
+  auto val = std::make_shared<CompositeValidator>();
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
@@ -103,7 +103,7 @@ void DetectorEfficiencyCor::init() {
       "The name of the workspace in which to store the result. Each histogram "
       "from the input workspace maps to a histogram in this workspace that has "
       "just one value which indicates if there was a bad detector.");
-  auto checkEi = boost::make_shared<BoundedValidator<double>>();
+  auto checkEi = std::make_shared<BoundedValidator<double>>();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
                   "The energy of neutrons leaving the source as can be "
@@ -308,7 +308,7 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
 void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
                                                 double &detRadius,
                                                 V3D &detAxis) {
-  boost::shared_ptr<const IObject> shape_sptr = det.shape();
+  std::shared_ptr<const IObject> shape_sptr = det.shape();
   if (!shape_sptr->hasValidShape()) {
     throw Exception::NotFoundError("Shape", "Detector has no shape");
   }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MaskMD.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -89,7 +89,7 @@ void MaskMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "Dimensions",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Dimension ids/names all comma separated.\n"
       "According to the dimensionality of the workspace, these names will be "
@@ -100,7 +100,7 @@ void MaskMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
           "Extents",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Extents {min, max} corresponding to each of the dimensions specified, "
       "according to the order those identifies have been specified.");
@@ -116,7 +116,7 @@ workspace.
 @throws runtime_error if the requested dimension is unknown either by id, or by
 name in the workspace.
 */
-size_t tryFetchDimensionIndex(Mantid::API::IMDWorkspace_sptr ws,
+size_t tryFetchDimensionIndex(const Mantid::API::IMDWorkspace_sptr &ws,
                               const std::string &candidateNameOrId) {
   size_t dimWorkspaceIndex;
   try {

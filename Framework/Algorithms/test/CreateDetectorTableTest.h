@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -64,9 +64,8 @@ public:
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
 
@@ -98,9 +97,8 @@ public:
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace",
-                        boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndices", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludeData", true));
     TS_ASSERT_THROWS_NOTHING(
@@ -156,7 +154,7 @@ public:
   }
 
   void test_Exec_Non_Peak_Table_Workspace_Throws_Exception() {
-    ITableWorkspace_sptr inputWS = boost::make_shared<TableWorkspace>();
+    ITableWorkspace_sptr inputWS = std::make_shared<TableWorkspace>();
 
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

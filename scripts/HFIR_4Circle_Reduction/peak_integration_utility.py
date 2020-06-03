@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # Utility methods to do peak integration
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
 import numpy
 import math
 import os
@@ -101,7 +99,7 @@ def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_
 def calculate_penalty(model_vec_y, exp_vec_y):
     """
     calculate the penalty/cost of the model to experimental data
-    say: error = 1/(N-1)sqrt(\sum(y_i - m_i)**2)
+    say: error = 1/(N-1)sqrt(\\sum(y_i - m_i)**2)
     :param model_vec_y:
     :param exp_vec_y:
     :return:
@@ -517,7 +515,7 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
     """
     calculate peak intensity as a Gaussian
     the equation to calculate Gaussian from -infinity to +infinity is
-    I = A\times s\times\sqrt{2\pi}
+    I = A\times s\times\\sqrt{2\\pi}
     :param parameter_dict:
     :param error_dict:
     :return:
@@ -548,8 +546,8 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
     except KeyError as key_err:
         raise RuntimeError('Error dictionary must have "A2", "s2", "A_s" but not only found {0}. FYI: {1}'
                            ''.format(error_dict.keys(), key_err))
-    intensity_error = numpy.sqrt(2/numpy.pi * (gauss_a**2 * error_s_sq + error_a_sq * gauss_sigma**2 +
-                                               2 * gauss_a * gauss_sigma * error_a_s))
+    intensity_error = numpy.sqrt(2/numpy.pi * (gauss_a**2 * error_s_sq + error_a_sq * gauss_sigma**2
+                                               + 2 * gauss_a * gauss_sigma * error_a_s))
 
     return peak_intensity, intensity_error
 

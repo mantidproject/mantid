@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 #include "../../API/inc/MantidAPI/IMDWorkspace.h"
 #include "../../Kernel/inc/MantidKernel/MDUnit.h"
 #include "../inc/MantidMDAlgorithms/CutMD.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -42,10 +43,10 @@ class CutMDTest : public CxxTest::TestSuite {
 private:
   IMDWorkspace_sptr m_inWS;
 
-  void addNormalization(std::string wsName) {
+  void addNormalization(const std::string &wsName) {
     auto ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
-    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
-    auto histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+    auto histoWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
     if (eventWS) {
       eventWS->setDisplayNormalization(eventNorm);
       eventWS->setDisplayNormalizationHisto(histoNorm);
@@ -75,7 +76,7 @@ private:
     IMDWorkspace_sptr cutMDtestws =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
 
-    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(cutMDtestws);
+    auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(cutMDtestws);
 
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
@@ -137,7 +138,7 @@ public:
 
     m_inWS =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(sharedWSName);
-    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
+    auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
     eventWS->setDisplayNormalization(eventNorm);
     eventWS->setDisplayNormalizationHisto(histoNorm);
   }
@@ -165,7 +166,7 @@ public:
         "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "H,K,L",
         "Units", "U,U,U");
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -182,7 +183,7 @@ public:
   void test_slice_to_original() {
     const std::string wsName = "__CutMDTest_slice_to_original";
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", sharedWSName);
@@ -223,7 +224,7 @@ public:
   void test_recalculate_extents_with_3_bin_arguments() {
     const std::string wsName = "__CutMDTest_recalc_extents_with_3_bin_args";
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", sharedWSName);
@@ -252,7 +253,7 @@ public:
   void test_truncate_extents() {
     const std::string wsName = "__CutMDTest_truncate_extents";
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", sharedWSName);
@@ -304,7 +305,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -364,7 +365,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -413,7 +414,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -460,7 +461,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -544,7 +545,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -649,7 +650,7 @@ public:
         10, dim->getNBins());
 
     // Check the data.
-    auto histoOutWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(outWS);
+    auto histoOutWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(outWS);
     TS_ASSERT(histoOutWS);
     TSM_ASSERT_DELTA("Wrong integrated value", 6.0, histoOutWS->getSignalAt(0),
                      1e-4);

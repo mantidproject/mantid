@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import math
 
 from mantid.kernel import *
@@ -227,16 +226,15 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Check if we were able to really fit any peak
         if 0 == fitted_peaks.rowCount():
-            failure_msg = ("Could find " + str(len(found_peaks)) + " peaks using the algorithm FindPeaks but " +
-                           "then it was not possible to fit any peak starting from these peaks found and using '" +
-                           self.PEAK_TYPE + "' as peak function.")
+            failure_msg = ("Could find " + str(len(found_peaks)) + " peaks using the algorithm FindPeaks but "
+                           + "then it was not possible to fit any peak starting from these peaks found and using '"
+                           + self.PEAK_TYPE + "' as peak function.")
             self.log().warning('Could not fit any peak. Please check the list of expected peaks, as it does not '
-                               'seem to be appropriate for the workspace given. More details: ' +
-                               failure_msg)
+                               'seem to be appropriate for the workspace given. More details: ' + failure_msg)
 
-            raise RuntimeError('Could not fit any peak.  Failed to fit peaks with peak type ' +
-                               self.PEAK_TYPE + ' even though FindPeaks found ' + str(found_peaks.rowCount()) +
-                               ' peaks in principle. See the logs for further details.')
+            raise RuntimeError('Could not fit any peak.  Failed to fit peaks with peak type '
+                               + self.PEAK_TYPE + ' even though FindPeaks found ' + str(found_peaks.rowCount())
+                               + ' peaks in principle. See the logs for further details.')
 
         self.log().information("Fitted {0} peaks in total.".format(fitted_peaks.rowCount()))
 
@@ -499,9 +497,9 @@ class EnggFitPeaks(PythonAlgorithm):
         spec_x_axis = wks.readX(wks_index)
         center = self._find_peak_center_in_params(fitted_params)
         intensity = self._find_peak_intensity_in_params(fitted_params)
-        return (spec_x_axis.min() <= center <= spec_x_axis.max() and
-                intensity > 0 and
-                fitted_params['Chi'] < 10 and self._b2bexp_is_acceptable(fitted_params))
+        return (spec_x_axis.min() <= center <= spec_x_axis.max()
+                and intensity > 0 and fitted_params['Chi'] < 10
+                and self._b2bexp_is_acceptable(fitted_params))
 
     def _find_peak_center_in_params(self, fitted_params):
         """
@@ -550,11 +548,9 @@ class EnggFitPeaks(PythonAlgorithm):
                 and not math.isnan(fitted_params['A_Err'])
                 and not math.isnan(fitted_params['B_Err'])
                 and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0 / self.CENTER_ERROR_LIMIT)
-                and
-                (0 != fitted_params['X0_Err'] and 0 != fitted_params['A_Err'] and
-                 0 != fitted_params['B_Err'] and 0 != fitted_params['S_Err'] and
-                 0 != fitted_params['I_Err'])
-                )
+                and (0 != fitted_params['X0_Err'] and 0 != fitted_params['A_Err']
+                     and 0 != fitted_params['B_Err'] and 0 != fitted_params['S_Err']
+                     and 0 != fitted_params['I_Err']))
 
     def _add_parameters_to_map(self, param_map, param_table):
         """

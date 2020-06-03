@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include <tuple>
 
@@ -19,7 +20,7 @@ namespace Mantid::Crystal {
  * Using a set of offset vectors, either provided as separate lists or as a set
  * of vectors, predict whether
  */
-class DLLExport PredictFractionalPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PredictFractionalPeaks : public API::Algorithm {
 public:
   const std::string name() const override { return "PredictFractionalPeaks"; }
   const std::string summary() const override {

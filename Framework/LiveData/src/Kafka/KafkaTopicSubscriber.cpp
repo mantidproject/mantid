@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include "MantidKernel/Logger.h"
@@ -13,6 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <utility>
 
 using RdKafka::Conf;
 using RdKafka::KafkaConsumer;
@@ -22,9 +23,9 @@ using RdKafka::TopicMetadata;
 namespace {
 /// Timeout for message consume
 const int CONSUME_TIMEOUT_MS = 300000;
-const std::string MAX_MESSAGE_SIZE = "200000000";
+const std::string MAX_MESSAGE_SIZE = "500000000";
 // Receive buffer size must be at least MAX_MESSAGE_SIZE+512
-const std::string RECEIVE_BUFFER_SIZE = "200000512";
+const std::string RECEIVE_BUFFER_SIZE = "500000512";
 /// A reference to the static logger
 Mantid::Kernel::Logger &LOGGER() {
   static Mantid::Kernel::Logger logger("KafkaTopicSubscriber");
@@ -77,8 +78,8 @@ const std::string KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX = "_monitors";
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::vector<std::string> topics,
                                            SubscribeAtOption subscribeOption)
-    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicNames(topics), m_subscribeOption(subscribeOption) {}
+    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(std::move(broker)),
+      m_topicNames(std::move(topics)), m_subscribeOption(subscribeOption) {}
 
 /// Destructor
 KafkaTopicSubscriber::~KafkaTopicSubscriber() {

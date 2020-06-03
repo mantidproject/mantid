@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,7 +26,7 @@ class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
                                          public Common::Python::InstanceHolder {
   Q_OBJECT
 public:
-  FigureCanvasQt(const int subplotspec, const QString projection = "",
+  FigureCanvasQt(const int subplotspec, const QString &projection = "",
                  QWidget *parent = nullptr);
   FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 

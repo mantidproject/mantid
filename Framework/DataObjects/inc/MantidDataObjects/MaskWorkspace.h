@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,9 +20,9 @@ class DLLExport MaskWorkspace : public SpecialWorkspace2D,
 public:
   MaskWorkspace() = default;
   MaskWorkspace(std::size_t numvectors);
-  MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
+  MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument,
                 const bool includeMonitors = false);
-  MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
+  MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent);
 
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const {
@@ -47,7 +47,7 @@ public:
   const std::string id() const override;
 
   /// Copy the set up from another workspace
-  void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews) override;
+  void copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews) override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -69,10 +69,10 @@ private:
 };
 
 /// shared pointer to the MaskWorkspace class
-using MaskWorkspace_sptr = boost::shared_ptr<MaskWorkspace>;
+using MaskWorkspace_sptr = std::shared_ptr<MaskWorkspace>;
 
 /// shared pointer to a const MaskWorkspace
-using MaskWorkspace_const_sptr = boost::shared_ptr<const MaskWorkspace>;
+using MaskWorkspace_const_sptr = std::shared_ptr<const MaskWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

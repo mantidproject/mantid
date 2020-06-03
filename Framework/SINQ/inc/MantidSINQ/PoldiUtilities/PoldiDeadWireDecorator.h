@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,12 +30,14 @@ namespace Poldi {
   */
 class MANTID_SINQ_DLL PoldiDeadWireDecorator : public PoldiDetectorDecorator {
 public:
-  PoldiDeadWireDecorator(std::set<int> deadWires,
-                         boost::shared_ptr<PoldiAbstractDetector> detector =
-                             boost::shared_ptr<PoldiAbstractDetector>());
-  PoldiDeadWireDecorator(const Geometry::DetectorInfo &poldiDetectorInfo,
-                         boost::shared_ptr<PoldiAbstractDetector> detector =
-                             boost::shared_ptr<PoldiAbstractDetector>());
+  PoldiDeadWireDecorator(
+      std::set<int> deadWires,
+      const std::shared_ptr<PoldiAbstractDetector> &detector =
+          std::shared_ptr<PoldiAbstractDetector>());
+  PoldiDeadWireDecorator(
+      const Geometry::DetectorInfo &poldiDetectorInfo,
+      const std::shared_ptr<PoldiAbstractDetector> &sqdetector =
+          std::shared_ptr<PoldiAbstractDetector>());
 
   void setDeadWires(std::set<int> deadWires);
   std::set<int> deadWires();

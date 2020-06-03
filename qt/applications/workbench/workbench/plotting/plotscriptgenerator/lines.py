@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib import rcParams
 from matplotlib.container import ErrorbarContainer
@@ -133,7 +131,16 @@ def _get_mantid_specific_plot_kwargs(artist):
     ax = get_ax_from_curve(artist)
     if artist not in ax.get_tracked_artists():
         return dict()
-    return {
-        'specNum': ax.get_artists_workspace_and_spec_num(artist)[1],
-        'distribution': not ax.get_artist_normalization_state(artist)
-    }
+    sample_log_plot_details = ax.get_artists_sample_log_plot_details(artist)
+    if sample_log_plot_details is None:
+        return {
+            'specNum': ax.get_artists_workspace_and_spec_num(artist)[1],
+            'distribution': not ax.get_artist_normalization_state(artist)
+        }
+    else:
+        sample_log_details_map =  {'LogName': sample_log_plot_details[0]}
+        if sample_log_plot_details[1] is not None:
+            sample_log_details_map['Filtered'] = sample_log_plot_details[1]
+        if sample_log_plot_details[2] is not None:
+            sample_log_details_map['ExperimentInfo'] = sample_log_plot_details[2]
+        return sample_log_details_map

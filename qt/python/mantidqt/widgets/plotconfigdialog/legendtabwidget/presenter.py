@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 from mantid.plots.legend import LegendProperties
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.view import LegendTabWidgetView
@@ -42,11 +40,20 @@ class LegendTabWidgetPresenter:
         self.view.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
     def init_view(self):
+        """Sets all of the initial values of the input fields when the tab is first loaded"""
         if int(matplotlib.__version__[0]) < 2:
             self.view.hide_box_properties()
 
-        """Sets all of the initial values of the input fields when the tab is first loaded"""
-        legend_props = LegendProperties.from_legend(self.axes[0].get_legend())
+        legend_props = None
+        for ax in self.axes:
+            legend_props = LegendProperties.from_legend(ax.get_legend())
+            if legend_props:
+                break
+
+        # This *should* never raise an error because there's a check before this presenter is created that at least one
+        # axes on the plot has a legend with text. This is here just to be on the safe side.
+        assert legend_props, "None of the axes have a non-empty legend."
+
         self.check_font_in_list(legend_props.entries_font)
         self.check_font_in_list(legend_props.title_font)
 
@@ -95,7 +102,8 @@ class LegendTabWidgetPresenter:
             return
 
         for ax in self.axes:
-            LegendProperties.create_legend(props, ax)
+            if ax.get_legend():
+                LegendProperties.create_legend(props, ax)
 
         self.current_view_properties = props
 

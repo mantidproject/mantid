@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,6 +14,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -74,9 +75,11 @@ private:
   void createInstrument(ANSTO::Tar::File &tarFile,
                         InstrumentInfo &instrumentInfo,
                         std::map<std::string, double> &logParams,
+                        std::map<std::string, std::string> &logStrings,
                         std::map<std::string, std::string> &allParams);
   void loadInstrumentParameters(NeXus::NXEntry &entry,
                                 std::map<std::string, double> &logParams,
+                                std::map<std::string, std::string> &logStrings,
                                 std::map<std::string, std::string> &allParams);
 
   // load nx dataset

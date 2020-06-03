@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -35,7 +35,7 @@ void ExtractFFTSpectrum::init() {
                                                         "", Direction::Input,
                                                         PropertyMode::Optional),
                   "The optional input workspace for the imaginary part.");
-  declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0, 5),
+  declareProperty("FFTPart", 2, std::make_shared<BoundedValidator<int>>(0, 5),
                   "Spectrum number, one of the six possible spectra output by "
                   "the FFT algorithm");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -76,8 +76,8 @@ void ExtractFFTSpectrum::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  boost::shared_ptr<Kernel::Units::Label> lblUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> lblUnit =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", "ns");
   outputWS->getAxis(0)->unit() = lblUnit;

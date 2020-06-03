@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------
 // Includes
@@ -513,7 +513,7 @@ void ScriptEditor::dropEvent(QDropEvent *de) {
  */
 void ScriptEditor::print() {
   QPrinter printer(QPrinter::HighResolution);
-  QPrintDialog *print_dlg = new QPrintDialog(&printer, this);
+  auto *print_dlg = new QPrintDialog(&printer, this);
   print_dlg->setWindowTitle(tr("Print Script"));
   if (print_dlg->exec() != QDialog::Accepted) {
     return;
@@ -564,9 +564,9 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   // not appear, you have to delete the ( and type it again
   // This does that for you!
   if (event->text() == "(") {
-    QKeyEvent *backspEvent =
+    auto *backspEvent =
         new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
-    QKeyEvent *bracketEvent = new QKeyEvent(*event);
+    auto *bracketEvent = new QKeyEvent(*event);
     QsciScintilla::keyPressEvent(bracketEvent);
     QsciScintilla::keyPressEvent(backspEvent);
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -449,16 +449,16 @@ public:
   }
 
 private:
-  boost::shared_ptr<CSGObject> createCappedCylinder() {
+  std::shared_ptr<CSGObject> createCappedCylinder() {
     std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
     std::string C32 = "px 1.2";
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
-    CylSurMap[31] = boost::make_shared<Cylinder>();
-    CylSurMap[32] = boost::make_shared<Plane>();
-    CylSurMap[33] = boost::make_shared<Plane>();
+    std::map<int, std::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = std::make_shared<Cylinder>();
+    CylSurMap[32] = std::make_shared<Plane>();
+    CylSurMap[33] = std::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -471,23 +471,23 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    auto retVal = boost::make_shared<CSGObject>();
+    auto retVal = std::make_shared<CSGObject>();
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
     return retVal;
   }
 
-  boost::shared_ptr<CSGObject> createCappedCylinder2() {
+  std::shared_ptr<CSGObject> createCappedCylinder2() {
     std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
     std::string C32 = "px -1.0";
     std::string C33 = "px -3.0";
 
     // First create some surfaces
-    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
-    CylSurMap[31] = boost::make_shared<Cylinder>();
-    CylSurMap[32] = boost::make_shared<Plane>();
-    CylSurMap[33] = boost::make_shared<Plane>();
+    std::map<int, std::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = std::make_shared<Cylinder>();
+    CylSurMap[32] = std::make_shared<Plane>();
+    CylSurMap[33] = std::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -500,14 +500,14 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    boost::shared_ptr<CSGObject> retVal = boost::make_shared<CSGObject>();
+    std::shared_ptr<CSGObject> retVal = std::make_shared<CSGObject>();
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
     return retVal;
   }
 
-  boost::shared_ptr<CSGObject> createCuboid(std::vector<std::string> &planes) {
+  std::shared_ptr<CSGObject> createCuboid(std::vector<std::string> &planes) {
     std::string C1 = planes[0];
     std::string C2 = planes[1];
     std::string C3 = planes[2];
@@ -516,13 +516,13 @@ private:
     std::string C6 = planes[5];
 
     // Create surfaces
-    std::map<int, boost::shared_ptr<Surface>> CubeSurMap;
-    CubeSurMap[1] = boost::make_shared<Plane>();
-    CubeSurMap[2] = boost::make_shared<Plane>();
-    CubeSurMap[3] = boost::make_shared<Plane>();
-    CubeSurMap[4] = boost::make_shared<Plane>();
-    CubeSurMap[5] = boost::make_shared<Plane>();
-    CubeSurMap[6] = boost::make_shared<Plane>();
+    std::map<int, std::shared_ptr<Surface>> CubeSurMap;
+    CubeSurMap[1] = std::make_shared<Plane>();
+    CubeSurMap[2] = std::make_shared<Plane>();
+    CubeSurMap[3] = std::make_shared<Plane>();
+    CubeSurMap[4] = std::make_shared<Plane>();
+    CubeSurMap[5] = std::make_shared<Plane>();
+    CubeSurMap[6] = std::make_shared<Plane>();
 
     CubeSurMap[1]->setSurface(C1);
     CubeSurMap[2]->setSurface(C2);
@@ -541,7 +541,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    boost::shared_ptr<CSGObject> retVal = boost::make_shared<CSGObject>();
+    std::shared_ptr<CSGObject> retVal = std::make_shared<CSGObject>();
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 

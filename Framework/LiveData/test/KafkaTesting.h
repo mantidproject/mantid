@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,12 +14,13 @@
 #include <gmock/gmock.h>
 
 GNU_DIAG_OFF("conversion")
+#include "Kafka/private/Schema/6s4t_run_stop_generated.h"
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
 #include "Kafka/private/Schema/hs00_event_histogram_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
-#include "Kafka/private/Schema/y2gw_run_info_generated.h"
+#include "Kafka/private/Schema/pl72_run_start_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <ctime>
@@ -220,21 +221,30 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
 void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
                                  const std::string &startTime,
                                  const std::string &instName, int32_t nPeriods,
-                                 std::string nexusStructure = "") {
+                                 const std::string &nexusStructure = "") {
   // Convert date to time_t
   auto mantidTime = Mantid::Types::Core::DateAndTime(startTime);
   auto startTimestamp =
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(
-      builder, InfoTypes::RunStart,
-      CreateRunStart(builder, startTimestamp,
-                     builder.CreateString(std::to_string(runNumber)),
-                     builder.CreateString(instName), nPeriods,
-                     builder.CreateString(nexusStructure))
-          .Union());
-  FinishRunInfoBuffer(builder, runInfo);
+
+  // Detector-spectrum map info
+  std::vector<int32_t> m_spec = {1, 2, 3, 4, 5};
+  // These match the detector numbers in HRPDTEST_Definition.xml
+  std::vector<int32_t> m_detid = {1001, 1002, 1100, 901000, 10100};
+  auto specVector = builder.CreateVector(m_spec);
+  auto detIdsVector = builder.CreateVector(m_detid);
+  auto spdet = CreateSpectraDetectorMapping(
+      builder, specVector, detIdsVector, static_cast<int32_t>(m_spec.size()));
+
+  auto runStart = CreateRunStart(
+      builder, startTimestamp, 0,
+      builder.CreateString(std::to_string(runNumber)),
+      builder.CreateString(instName), builder.CreateString(nexusStructure), 0,
+      builder.CreateString(""), builder.CreateString(""),
+      builder.CreateString(""), static_cast<uint32_t>(nPeriods), spdet);
+  FinishRunStartBuffer(builder, runStart);
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                  builder.GetSize());
@@ -248,9 +258,8 @@ void fakeReceiveARunStopMessage(std::string *buffer,
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(builder, InfoTypes::RunStop,
-                               CreateRunStop(builder, stopTimestamp).Union());
-  FinishRunInfoBuffer(builder, runInfo);
+  auto runStop = CreateRunStop(builder, stopTimestamp);
+  FinishRunStopBuffer(builder, runStop);
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                  builder.GetSize());
@@ -699,59 +708,5 @@ private:
   const std::string m_instName = "HRPDTEST";
   int32_t m_nperiods = 1;
   int64_t m_stopOffset;
-};
-
-// -----------------------------------------------------------------------------
-// Fake ISIS spectra-detector stream
-// -----------------------------------------------------------------------------
-class FakeISISSpDetStreamSubscriber
-    : public Mantid::LiveData::IKafkaStreamSubscriber {
-public:
-  void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
-                      std::string &topic) override {
-    assert(buffer);
-
-    // Serialize data with flatbuffers
-    flatbuffers::FlatBufferBuilder builder;
-    auto specVector = builder.CreateVector(m_spec);
-    auto detIdsVector = builder.CreateVector(m_detid);
-    auto spdet = CreateSpectraDetectorMapping(
-        builder, specVector, detIdsVector, static_cast<int32_t>(m_spec.size()));
-    FinishSpectraDetectorMappingBuffer(builder, spdet);
-    // Copy to provided buffer
-    buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
-                   builder.GetSize());
-
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
-  }
-
-  std::unordered_map<std::string, std::vector<int64_t>>
-  getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
-    return {
-        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
-  }
-
-  std::unordered_map<std::string, std::vector<int64_t>>
-  getCurrentOffsets() override {
-    std::unordered_map<std::string, std::vector<int64_t>> offsets;
-    return offsets;
-  }
-
-  void seek(const std::string &topic, uint32_t partition,
-            int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
-
-private:
-  std::vector<int32_t> m_spec = {1, 2, 3, 4, 5};
-  // These match the detector numbers in HRPDTEST_Definition.xml
-  std::vector<int32_t> m_detid = {1001, 1002, 1100, 901000, 10100};
 };
 } // namespace KafkaTesting

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/BankRenderingHelpers.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -457,8 +457,17 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto bank = compInfo.quadrilateralComponent(index);
   const auto &detShape = compInfo.shape(bank.bottomLeft);
   const auto &shapeInfo = detShape.getGeometryHandler()->shapeInfo();
-  auto xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
-  auto ystep = shapeInfo.points()[1].Y() - shapeInfo.points()[2].Y();
+  double xstep;
+  double ystep;
+  if (shapeInfo.points().size() > 2) {
+    // cuboids
+    xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
+    ystep = shapeInfo.points()[1].Y() - shapeInfo.points()[2].Y();
+  } else {
+    // cylnders, etc
+    xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
+    ystep = shapeInfo.points()[0].Y() - shapeInfo.points()[1].Y();
+  }
 
   try {
     render2DTexture(c, bank.nX, bank.nY,

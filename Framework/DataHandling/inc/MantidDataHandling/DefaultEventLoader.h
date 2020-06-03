@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -74,7 +74,7 @@ public:
   std::vector<size_t> pixelID_to_wi_vector;
 
   /// One entry of pulse times for each preprocessor
-  std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
+  std::vector<std::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
 private:
   DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws,

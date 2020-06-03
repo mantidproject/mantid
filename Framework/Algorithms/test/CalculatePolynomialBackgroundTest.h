@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -256,9 +256,9 @@ public:
   }
 
 private:
-  static boost::shared_ptr<Algorithms::CalculatePolynomialBackground>
+  static std::shared_ptr<Algorithms::CalculatePolynomialBackground>
   makeAlgorithm() {
-    auto a = boost::make_shared<Algorithms::CalculatePolynomialBackground>();
+    auto a = std::make_shared<Algorithms::CalculatePolynomialBackground>();
     a->initialize();
     a->setChild(true);
     a->setRethrows(true);

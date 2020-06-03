@@ -14,6 +14,7 @@ set(
   src/DropEventHelper.cpp
   src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
+  src/FileFinderWidget.cpp
   src/FilePropertyWidget.cpp
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
@@ -32,7 +33,6 @@ set(
   src/HintingLineEdit.cpp
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
-  src/IndirectFitPropertyBrowserLegacy.cpp
   src/IFunctionModel.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
@@ -56,7 +56,6 @@ set(
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
-  src/MWRunFiles.cpp
   src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
@@ -161,7 +160,6 @@ set(
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
-  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -179,7 +177,7 @@ set(
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
@@ -187,6 +185,7 @@ set(
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -257,6 +256,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+    inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -296,7 +296,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
@@ -324,7 +324,6 @@ set(
   src/HelpWindow.cpp
   src/FlowLayout.cpp
   src/Hint.cpp
-  src/IndirectFitPropertyBrowserLegacy.cpp
   src/InterfaceManager.cpp
   src/ListPropertyWidget.cpp
   src/LocalParameterEditor.cpp
@@ -339,7 +338,7 @@ set(
   src/MdSettings.cpp
   src/Message.cpp
   src/NonOrthogonal.cpp
-  src/MWRunFiles.cpp
+  src/FileFinderWidget.cpp
   src/OptionsPropertyWidget.cpp
   src/pixmaps.cpp
   src/PlotAxis.cpp
@@ -493,7 +492,6 @@ set(
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
-  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/LocalParameterEditor.h
   inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
@@ -501,11 +499,12 @@ set(
   inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidWidget.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -628,6 +627,7 @@ set(
   inc/MantidQtWidgets/Common/PluginLibraries.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QStringUtils.h
   inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -766,7 +766,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
@@ -797,7 +797,7 @@ foreach(
 endforeach()
 
 # Python unit tests
-set(TEST_PY_FILES test/MWRunFilesTest.py)
+set(TEST_PY_FILES test/FileFinderWidgetTest.py)
 
 set(
   TARGET_LIBRARIES
@@ -931,6 +931,7 @@ set(TEST_FILES
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
+    test/FitPropertyBrowserTest.h
     test/FunctionModelTest.h
     test/FunctionMultiDomainPresenterTest.h
     test/FunctionBrowserUtilsTest.h
@@ -976,6 +977,7 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitPropertyBrowserTest.h
   test/FunctionModelTest.h
   test/FunctionMultiDomainPresenterTest.h
   test/FunctionBrowserUtilsTest.h
@@ -1036,8 +1038,7 @@ mtd_add_qt_tests(
   LINK_LIBS
     ${TARGET_LIBRARIES}
     DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )
@@ -1048,6 +1049,7 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitPropertyBrowserTest.h
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
@@ -1078,7 +1080,6 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
-    ${GMOCK_INCLUDE_DIR}
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
@@ -1090,8 +1091,7 @@ mtd_add_qt_tests(
     ${Boost_LIBRARIES}
     PythonInterfaceCore
     DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

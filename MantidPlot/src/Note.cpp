@@ -50,7 +50,7 @@ DECLARE_WINDOW(Note)
 using namespace Mantid;
 
 Note::Note(const QString &label, QWidget *parent, const QString &name,
-           Qt::WFlags f)
+           const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f) {
   te = new QTextEdit(this);
   te->setObjectName(name);

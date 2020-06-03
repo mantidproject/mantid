@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -53,8 +53,8 @@ public:
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &name,
                      TableDatasetIndex const &index) override;
-  void setResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>>
+                         &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
   void addTempCorrection(double value);
@@ -92,6 +92,7 @@ private:
 
   QtProperty *m_deltaFunctionOn;
   QtProperty *m_deltaFunctionHeight;
+  QtProperty *m_deltaFunctionCenter;
 
   QtProperty *m_tempCorrectionOn;
   QtProperty *m_temperature;

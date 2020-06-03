@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,6 +26,7 @@ namespace API {
 class IFunction;
 class CompositeFunction;
 class Expression;
+class MultiDomainFunction;
 
 /** @class FunctionFactoryImpl
 
@@ -47,11 +48,16 @@ public:
    * @param type :: The function's type
    * @return A pointer to the created function
    */
-  boost::shared_ptr<IFunction> createFunction(const std::string &type) const;
+  std::shared_ptr<IFunction> createFunction(const std::string &type) const;
 
   /// Creates an instance of a function
-  boost::shared_ptr<IFunction>
-  createInitialized(const std::string &input) const;
+  std::shared_ptr<IFunction> createInitialized(const std::string &input) const;
+
+  /// Creates an instnce of an inizialised multidomain function where each
+  /// domain has the same function.
+  std::shared_ptr<MultiDomainFunction>
+  createInitializedMultiDomainFunction(const std::string &input,
+                                       size_t domainNumber);
 
   /// Query available functions based on the template type
   template <typename FunctionType>
@@ -79,30 +85,32 @@ private:
   using Kernel::DynamicFactory<IFunction>::createUnwrapped;
 
   /// Create a simple function
-  boost::shared_ptr<IFunction>
+  std::shared_ptr<IFunction>
   createSimple(const Expression &expr,
                std::map<std::string, std::string> &parentAttributes) const;
   /// Create a composite function
-  boost::shared_ptr<CompositeFunction>
+  std::shared_ptr<CompositeFunction>
   createComposite(const Expression &expr,
                   std::map<std::string, std::string> &parentAttributes) const;
 
   /// Throw an exception
   void inputError(const std::string &str = "") const;
   /// Add constraints to the created function
-  void addConstraints(boost::shared_ptr<IFunction> fun,
+  void addConstraints(const std::shared_ptr<IFunction> &fun,
                       const Expression &expr) const;
   /// Add a single constraint to the created function
-  void addConstraint(boost::shared_ptr<IFunction> fun,
+  void addConstraint(const std::shared_ptr<IFunction> &fun,
                      const Expression &expr) const;
   /// Add a single constraint to the created function with non-default penalty
-  void addConstraint(boost::shared_ptr<IFunction> fun,
+  void addConstraint(const std::shared_ptr<IFunction> &fun,
                      const Expression &constraint_expr,
                      const Expression &penalty_expr) const;
   /// Add ties to the created function
-  void addTies(boost::shared_ptr<IFunction> fun, const Expression &expr) const;
+  void addTies(const std::shared_ptr<IFunction> &fun,
+               const Expression &expr) const;
   /// Add a tie to the created function
-  void addTie(boost::shared_ptr<IFunction> fun, const Expression &expr) const;
+  void addTie(const std::shared_ptr<IFunction> &fun,
+              const Expression &expr) const;
 
   mutable std::map<std::string, std::vector<std::string>> m_cachedFunctionNames;
   mutable std::mutex m_mutex;
@@ -127,8 +135,8 @@ std::vector<std::string> FunctionFactoryImpl::getFunctionNames() const {
   const std::vector<std::string> names = this->getKeys();
   std::copy_if(names.cbegin(), names.cend(), std::back_inserter(typeNames),
                [this](const std::string &name) {
-                 boost::shared_ptr<IFunction> func = this->createFunction(name);
-                 return boost::dynamic_pointer_cast<FunctionType>(func);
+                 std::shared_ptr<IFunction> func = this->createFunction(name);
+                 return std::dynamic_pointer_cast<FunctionType>(func);
                });
   return typeNames;
 }

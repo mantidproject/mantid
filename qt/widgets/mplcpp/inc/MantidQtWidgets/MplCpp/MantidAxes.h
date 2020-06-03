@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,13 +30,13 @@ public:
   /// @name Plot creation functions
   ///@{
   Line2D plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
-              const size_t wkspIndex, const QString lineColour,
-              const QString label,
+              const size_t wkspIndex, const QString &lineColour,
+              const QString &label,
               const boost::optional<QHash<QString, QVariant>> &otherKwargs =
                   boost::none);
   ErrorbarContainer errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                             const size_t wkspIndex, const QString lineColour,
-                             const QString label,
+                             const size_t wkspIndex, const QString &lineColour,
+                             const QString &label,
                              const boost::optional<QHash<QString, QVariant>>
                                  &otherKwargs = boost::none);
   void pcolormesh(const Mantid::API::MatrixWorkspace_sptr &workspace,

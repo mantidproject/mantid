@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -33,7 +33,7 @@ public:
   ~Grouping();
 
   /// Construct a Grouping from a table
-  Grouping(ITableWorkspace_sptr table);
+  Grouping(const ITableWorkspace_sptr &table);
 
   /// Convert to grouping table
   ITableWorkspace_sptr toTable() const;
@@ -48,12 +48,12 @@ public:
                  const std::string &mainFieldDirection);
   virtual ~GroupingLoader();
   /// Load the grouping from the instrument's IDF
-  boost::shared_ptr<Grouping> getGroupingFromIDF() const;
+  std::shared_ptr<Grouping> getGroupingFromIDF() const;
   /// Loads grouping from the XML file specified
   static void loadGroupingFromXML(const std::string &filename,
                                   Grouping &grouping);
   /// Returns a "dummy" grouping of a single group with all the detectors in it
-  boost::shared_ptr<Grouping> getDummyGrouping();
+  std::shared_ptr<Grouping> getDummyGrouping();
 
 private:
   /// Instrument to load grouping from

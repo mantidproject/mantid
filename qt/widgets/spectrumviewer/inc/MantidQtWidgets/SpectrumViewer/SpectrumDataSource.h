@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
-#include <boost/shared_ptr.hpp>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -36,7 +36,7 @@ public:
   virtual ~SpectrumDataSource();
 
   virtual bool hasData(const std::string &wsName,
-                       const boost::shared_ptr<Mantid::API::Workspace> ws) = 0;
+                       const std::shared_ptr<Mantid::API::Workspace> &ws) = 0;
 
   /// Get the smallest 'x' value covered by the data
   virtual double getXMin();
@@ -91,9 +91,8 @@ protected:
   size_t m_totalCols;
 };
 
-using SpectrumDataSource_sptr = boost::shared_ptr<SpectrumDataSource>;
-using SpectrumDataSource_const_sptr =
-    boost::shared_ptr<const SpectrumDataSource>;
+using SpectrumDataSource_sptr = std::shared_ptr<SpectrumDataSource>;
+using SpectrumDataSource_const_sptr = std::shared_ptr<const SpectrumDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

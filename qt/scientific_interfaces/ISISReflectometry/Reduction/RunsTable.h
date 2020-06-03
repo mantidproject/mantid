@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #pragma once
 
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
@@ -34,6 +33,8 @@ public:
 
   void setSelectedRowLocations(
       std::vector<MantidWidgets::Batch::RowLocation> selected);
+  void appendSelectedRowLocations(
+      MantidWidgets::Batch::RowLocation selectedRowLocation);
   template <typename T>
   bool isInSelection(T const &item,
                      std::vector<MantidWidgets::Batch::RowLocation> const

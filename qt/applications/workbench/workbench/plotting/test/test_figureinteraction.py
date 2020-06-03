@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 # system imports
 import unittest
@@ -24,12 +23,12 @@ from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
-from mantid.py3compat.mock import MagicMock, PropertyMock, call, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
-from mantidqt.plotting.functions import plot
+from mantidqt.plotting.functions import plot, pcolormesh_from_names
 from mantidqt.utils.qt.testing import start_qapplication
-from workbench.plotting.figureinteraction import FigureInteraction
+from workbench.plotting.figureinteraction import FigureInteraction, LogNorm
 
 
 @start_qapplication
@@ -217,9 +216,9 @@ class FigureInteractionTest(unittest.TestCase):
 
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
         plot([self.ws1], spectrum_nums=[1], errors=errors, overplot=True, fig=fig)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
         self._test_toggle_normalization(errorbars_on=False,
@@ -377,6 +376,31 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor._quick_change_axes(scale_types, ax)
         current_scale_types2 = (ax.get_xscale(), ax.get_yscale())
         self.assertNotEqual(current_scale_types2, current_scale_types1)
+
+    def test_scale_on_ragged_workspaces_maintained_when_toggling_normalisation(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="ragged_ws")
+        fig = pcolormesh_from_names([ws])
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        clim = fig.axes[0].images[0].get_clim()
+        fig_interactor._toggle_normalization(fig.axes[0])
+        self.assertEqual(clim, fig.axes[0].images[0].get_clim())
+        self.assertNotEqual((-0.1, 0.1), fig.axes[0].images[0].get_clim())
+
+    def test_log_maintained_when_normalisation_toggled(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="ragged_ws")
+        fig = pcolormesh_from_names([ws])
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._change_colorbar_axes(LogNorm)
+
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertTrue(isinstance(fig.axes[0].images[-1].norm, LogNorm))
 
     # Private methods
     def _create_mock_fig_manager_to_accept_right_click(self):
@@ -600,6 +624,23 @@ class FigureInteractionTest(unittest.TestCase):
         event = MagicMock()
         self.interactor.mpl_redraw_annotations(event)
         self.assertEqual(1, self.interactor.redraw_annotations.call_count)
+
+    def test_toggle_normalisation_on_contour_plot_maintains_contour_line_colour(self):
+        from mantidqt.plotting.functions import plot_contour
+        from mantid.plots.legend import convert_color_to_hex
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="test_ws")
+        fig = plot_contour([ws])
+
+        for col in fig.get_axes()[0].collections:
+            col.set_color("#ff9900")
+
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
+                            for col in fig.get_axes()[0].collections))
 
 
 if __name__ == '__main__':

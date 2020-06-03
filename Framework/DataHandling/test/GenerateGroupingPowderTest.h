@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -105,7 +105,7 @@ public:
     TS_ASSERT(load2.isExecuted());
 
     DataObjects::GroupingWorkspace_sptr gws2 =
-        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
             API::AnalysisDataService::Instance().retrieve("GroupPowder"));
 
     TS_ASSERT_DELTA(gws2->dataY(0)[0], 13.0, 1.0E-5);    // 130.6 degrees

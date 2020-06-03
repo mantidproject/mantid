@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXSPE.h"
 
@@ -48,8 +48,8 @@ SaveNXSPE::SaveNXSPE() : API::Algorithm() {}
  * Initialise the algorithm
  */
 void SaveNXSPE::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
+  auto wsValidator = std::make_shared<CompositeValidator>();
+  wsValidator->add(std::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 

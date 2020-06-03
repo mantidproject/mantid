@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
@@ -240,9 +240,9 @@ MDWSTransform::buildQTrahsf(MDWSDescription &TargWSDescription,
   // Now define lab frame to target frame transformation
   Kernel::DblMatrix Scale(3, 3, true);
   Kernel::DblMatrix Transf(3, 3, true);
-  boost::shared_ptr<Geometry::OrientedLattice> spLatt;
+  std::shared_ptr<Geometry::OrientedLattice> spLatt;
   if (UnitUB)
-    spLatt = boost::shared_ptr<Geometry::OrientedLattice>(
+    spLatt = std::shared_ptr<Geometry::OrientedLattice>(
         new Geometry::OrientedLattice(1, 1, 1));
   else
     spLatt = TargWSDescription.getLattice();

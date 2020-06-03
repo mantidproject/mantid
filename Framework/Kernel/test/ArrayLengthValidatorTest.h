@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -45,7 +45,7 @@ public:
 
   /// test the clone function
   void testClone() {
-    boost::shared_ptr<ArrayLengthValidator<int>> vi(
+    std::shared_ptr<ArrayLengthValidator<int>> vi(
         new ArrayLengthValidator<int>);
     IValidator_sptr vvi = vi->clone();
     TS_ASSERT_DIFFERS(vi, vvi);

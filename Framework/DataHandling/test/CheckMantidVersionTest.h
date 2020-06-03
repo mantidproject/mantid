@@ -1,12 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "MantidDataHandling/CheckMantidVersion.h"
 
@@ -21,8 +23,8 @@ class MockedCheckMantidVersion : public CheckMantidVersion {
 public:
   MockedCheckMantidVersion(std::string currentVersion,
                            std::string gitHubVersion)
-      : CheckMantidVersion(), CurrentVersion(currentVersion),
-        GitHubVersion(gitHubVersion) {}
+      : CheckMantidVersion(), CurrentVersion(std::move(currentVersion)),
+        GitHubVersion(std::move(gitHubVersion)) {}
 
   std::string CurrentVersion;
   std::string GitHubVersion;
@@ -117,8 +119,7 @@ public:
 
     std::string currentVersion =
         alg.PropertyManagerOwner::getProperty("CurrentVersion");
-    std::string mostRecentVersion =
-        alg.PropertyManagerOwner::getProperty("MostRecentVersion");
+    alg.PropertyManagerOwner::getProperty("MostRecentVersion");
     bool isNewVersionAvailable =
         alg.PropertyManagerOwner::getProperty("IsNewVersionAvailable");
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtMainWindowView.h"
 #include "Common/IndexOf.h"
@@ -11,6 +11,9 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
+#include "GUI/Options/OptionsDialogModel.h"
+#include "GUI/Options/OptionsDialogPresenter.h"
+#include "GUI/Options/QtOptionsDialogView.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
@@ -32,6 +35,8 @@ DECLARE_SUBWINDOW_AND_CODERS(QtMainWindowView, Encoder, Decoder,
 
 QtMainWindowView::QtMainWindowView(QWidget *parent)
     : UserSubWindow(parent), m_notifyee(nullptr), m_batchIndex(1) {}
+
+QtMainWindowView::~QtMainWindowView() = default;
 
 IBatchView *QtMainWindowView::newBatch() {
   auto *newTab = new QtBatchView(this);
@@ -69,6 +74,8 @@ void QtMainWindowView::initLayout() {
           SLOT(onLoadBatchRequested(bool)));
   connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
           SLOT(onSaveBatchRequested(bool)));
+  connect(m_ui.showOptions, SIGNAL(triggered(bool)), this,
+          SLOT(onShowOptionsRequested(bool)));
   connect(m_ui.showSlitCalculator, SIGNAL(triggered(bool)), this,
           SLOT(onShowSlitCalculatorRequested(bool)));
 
@@ -102,10 +109,13 @@ void QtMainWindowView::initLayout() {
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
+  m_optionsDialogView = std::make_unique<QtOptionsDialogView>(this);
+  auto optionsDialogPresenter = std::make_unique<OptionsDialogPresenter>(
+      m_optionsDialogView.get(), std::make_unique<OptionsDialogModel>());
   m_presenter = std::make_unique<MainWindowPresenter>(
       this, messageHandler, fileHandler, std::make_unique<Encoder>(),
       std::make_unique<Decoder>(), std::move(slitCalculator),
-      std::move(makeBatchPresenter));
+      std::move(optionsDialogPresenter), std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();
@@ -181,13 +191,12 @@ Handles attempt to close main window
 * @param event : [input] The close event
 */
 void QtMainWindowView::closeEvent(QCloseEvent *event) {
-  // Don't close if anything is running
-  if (m_presenter->isAnyBatchProcessing() ||
-      m_presenter->isAnyBatchAutoreducing()) {
+  // Don't close if anything is running or
+  // user does not want to discard unsaved changes
+  if (m_presenter->isCloseEventPrevented())
     event->ignore();
-  } else {
+  else
     event->accept();
-  }
 }
 
 void QtMainWindowView::giveUserCritical(const std::string &prompt,
@@ -213,6 +222,10 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
     return true;
 
   return false;
+}
+
+bool QtMainWindowView::askUserDiscardChanges() {
+  return askUserYesNo("There are unsaved changes. Continue?", "Warning");
 }
 
 std::string

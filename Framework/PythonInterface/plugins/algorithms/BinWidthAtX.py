@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import AlgorithmFactory, HistogramValidator,\
     MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction
@@ -78,10 +76,7 @@ class BinWidthAtX(PythonAlgorithm):
             if lowerBound > upperBound:
                 lowerBound, upperBound = upperBound, lowerBound
             if x <= lowerBound or x > upperBound:
-                raise RuntimeError(
-                    self._PROP_X_VALUE +
-                    ' = {0} out of range for workspace index {1}'
-                    .format(x, wsIndex))
+                raise RuntimeError(self._PROP_X_VALUE + ' = {0} out of range for workspace index {1}'.format(x, wsIndex))
             binIndex = inputWs.yIndexOfX(x, wsIndex)
             dx = xs[binIndex + 1] - xs[binIndex]
             widths[wsIndex] = dx

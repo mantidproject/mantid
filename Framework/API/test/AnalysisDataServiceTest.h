@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,7 +10,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -29,7 +29,7 @@ private:
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
-using MockWorkspace_sptr = boost::shared_ptr<MockWorkspace>;
+using MockWorkspace_sptr = std::shared_ptr<MockWorkspace>;
 } // namespace
 
 class AnalysisDataServiceTest : public CxxTest::TestSuite {
@@ -567,9 +567,9 @@ private:
   /// Add a group with N simple workspaces to the ADS
   WorkspaceGroup_sptr addGroupToADS(const std::string &name,
                                     const size_t nitems = 2) {
-    auto group(boost::make_shared<WorkspaceGroup>());
+    auto group(std::make_shared<WorkspaceGroup>());
     for (auto i = 0u; i < nitems; ++i) {
-      group->addWorkspace(boost::make_shared<MockWorkspace>());
+      group->addWorkspace(std::make_shared<MockWorkspace>());
     }
     ads.add(name, group);
     return group;
@@ -578,9 +578,9 @@ private:
   /// Add a group with N simple workspaces to the ADS
   WorkspaceGroup_sptr addOrReplaceGroupToADS(const std::string &name,
                                              const size_t nitems = 2) {
-    auto group(boost::make_shared<WorkspaceGroup>());
+    auto group(std::make_shared<WorkspaceGroup>());
     for (auto i = 0u; i < nitems; ++i) {
-      group->addWorkspace(boost::make_shared<MockWorkspace>());
+      group->addWorkspace(std::make_shared<MockWorkspace>());
     }
     ads.addOrReplace(name, group);
     return group;

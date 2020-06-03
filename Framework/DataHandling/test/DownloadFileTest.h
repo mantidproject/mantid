@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -73,8 +73,8 @@ public:
     exec_alg(url, tmpFile.path(), "http://" + url);
   }
 
-  void exec_alg(std::string address, std::string filename,
-                std::string newAddress = "") {
+  void exec_alg(const std::string &address, const std::string &filename,
+                const std::string &newAddress = "") {
     MockedDownloadFile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import inspect
 import os
 import testhelpers
@@ -13,7 +11,7 @@ import unittest
 
 from mantid.kernel import (ConfigService, ConfigServiceImpl, config,
                            std_vector_str, FacilityInfo, InstrumentInfo)
-import six
+
 
 class ConfigServiceTest(unittest.TestCase):
 
@@ -65,7 +63,7 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertRaises(RuntimeError, config.getInstrument, "MadeUpInstrument")
 
     def test_service_acts_like_dictionary(self):
-        test_prop = "algorithms.retained"
+        test_prop = "projectRecovery.secondsBetween"
         self.assertTrue(config.hasProperty(test_prop))
         dictcall = config[test_prop]
         fncall = config.getString(test_prop)
@@ -111,7 +109,7 @@ class ConfigServiceTest(unittest.TestCase):
     def test_appending_paths(self):
         new_path_list = self._setup_test_areas()
         try:
-            config.appendDataSearchDir(six.text_type(new_path_list[0]))
+            config.appendDataSearchDir(str(new_path_list[0]))
             updated_paths = config.getDataSearchDirs()
         finally:
             self._clean_up_test_areas()

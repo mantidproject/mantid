@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/TransformHKL.h"
 #include "MantidAPI/Sample.h"
@@ -37,7 +37,7 @@ void TransformHKL::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
@@ -50,7 +50,7 @@ void TransformHKL::init() {
   identity_matrix[4] = 1;
   identity_matrix[8] = 1;
   // clang-format off
-  auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
+  auto threeBythree = std::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
       std::make_unique<ArrayProperty<double>>(

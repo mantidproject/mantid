@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,6 +36,13 @@ public:
   void addPeriodLogs(const int period, API::Run &exptRun);
   /// Add 'period i' log.
   void addPeriodLog(const int period, API::Run &exptRun);
+
+  /// gets the list of log names that should not be filtered
+  static std::vector<std::string>
+  getLogNamesExcludedFromFiltering(const API::Run &run);
+
+  /// applies log filtering for a run
+  static void applyLogFiltering(Mantid::API::Run &exptRun);
 
 private:
   /// A LogParser object

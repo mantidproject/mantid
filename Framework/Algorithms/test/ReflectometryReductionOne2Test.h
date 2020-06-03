@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -878,7 +878,7 @@ public:
     alg.setProperty("BackgroundProcessingInstructions", "1");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS,
                           {"ExtractSpectra", "GroupDetectors", "ConvertUnits",
@@ -890,7 +890,7 @@ public:
     setupAlgorithmForBackgroundSubtraction(
         alg, createWorkspaceWithFlatBackground("test_ws"));
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     // Note that ExtractSpectra is not called because the whole workspace is
     // used for the background subtraction
@@ -910,7 +910,7 @@ public:
     alg.setProperty("BackgroundProcessingInstructions", "1, 2, 4, 5");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS, {"ExtractSpectra",
                                      "ReflectometryBackgroundSubtraction",
@@ -930,7 +930,7 @@ public:
     alg.setProperty("BackgroundCalculationMethod", "Polynomial");
     alg.setProperty("DegreeOfPolynomial", "2");
     alg.execute();
-    auto outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS, {"ExtractSpectra",
                                      "ReflectometryBackgroundSubtraction",
@@ -964,7 +964,7 @@ private:
                                             const double wavelengthMin,
                                             const double wavelengthMax,
                                             const std::string &procInstr,
-                                            MatrixWorkspace_sptr transWS,
+                                            const MatrixWorkspace_sptr &transWS,
                                             const bool multiple_runs) {
     setupAlgorithm(alg, wavelengthMin, wavelengthMax, procInstr);
     alg.setProperty("FirstTransmissionRun", transWS);
@@ -981,7 +981,7 @@ private:
                                        const double wavelengthMin,
                                        const double wavelengthMax,
                                        const std::string &procInstr,
-                                       MatrixWorkspace_sptr inputWS,
+                                       const MatrixWorkspace_sptr &inputWS,
                                        const bool integrate) {
     setupAlgorithm(alg, wavelengthMin, wavelengthMax, procInstr);
     alg.setProperty("InputWorkspace", inputWS);
@@ -997,8 +997,9 @@ private:
     }
   }
 
-  void setupAlgorithmForBackgroundSubtraction(ReflectometryReductionOne2 &alg,
-                                              MatrixWorkspace_sptr inputWS) {
+  void
+  setupAlgorithmForBackgroundSubtraction(ReflectometryReductionOne2 &alg,
+                                         const MatrixWorkspace_sptr &inputWS) {
     setupAlgorithm(alg, 0, 5, "3");
     alg.setChild(false); // required to get history
     alg.setProperty("InputWorkspace", inputWS);
@@ -1066,7 +1067,7 @@ private:
     alg.setPropertyValue("OutputWorkspace", name);
     alg.execute();
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(name));
     ws->setCounts(0, background);
     ws->setCounts(1, background);
@@ -1098,14 +1099,14 @@ private:
     alg.setProperty("OutputWorkspace", name);
     alg.execute();
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(name));
     for (auto spec = 0; spec < nspec; ++spec)
       ws->setCounts(spec, Counts(1, polynomial[spec] + peak[spec]));
     return ws;
   }
 
-  void checkWorkspaceHistory(MatrixWorkspace_sptr ws,
+  void checkWorkspaceHistory(const MatrixWorkspace_sptr &ws,
                              std::vector<std::string> const &expected,
                              bool const unroll = true) {
     auto wsHistory = ws->getHistory();
@@ -1116,19 +1117,20 @@ private:
       auto childHistories = lastAlgHistory->getChildHistories();
       std::transform(childHistories.cbegin(), childHistories.cend(),
                      std::back_inserter(algNames),
-                     [](AlgorithmHistory_const_sptr childAlg) {
+                     [](const AlgorithmHistory_const_sptr &childAlg) {
                        return childAlg->name();
                      });
     } else if (!unroll) {
-      std::transform(algHistories.cbegin(), algHistories.cend(),
-                     std::back_inserter(algNames),
-                     [](AlgorithmHistory_sptr alg) { return alg->name(); });
+      std::transform(
+          algHistories.cbegin(), algHistories.cend(),
+          std::back_inserter(algNames),
+          [](const AlgorithmHistory_sptr &alg) { return alg->name(); });
     }
     TS_ASSERT_EQUALS(algNames, expected);
   }
 
   void checkHistoryAlgorithmProperties(
-      MatrixWorkspace_sptr ws, size_t toplevelIdx, size_t childIdx,
+      const MatrixWorkspace_sptr &ws, size_t toplevelIdx, size_t childIdx,
       std::map<std::string, std::string> const &expected) {
     auto parentHist = ws->getHistory().getAlgorithmHistory(toplevelIdx);
     auto childHistories = parentHist->getChildHistories();

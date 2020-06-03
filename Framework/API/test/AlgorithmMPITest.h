@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -138,7 +138,7 @@ public:
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
-    boost::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
+    std::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
     setProperty("OutputWorkspace", ws->clone());
   }
 
@@ -165,8 +165,8 @@ public:
         std::make_unique<HistogramValidator>()));
   }
   void exec() override {
-    boost::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
-    boost::shared_ptr<MatrixWorkspace> ws2 = getProperty("InputWorkspace2");
+    std::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
+    std::shared_ptr<MatrixWorkspace> ws2 = getProperty("InputWorkspace2");
   }
 
 protected:
@@ -194,8 +194,8 @@ public:
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
-    boost::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
-    boost::shared_ptr<MatrixWorkspace> ws2 = getProperty("InputWorkspace2");
+    std::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
+    std::shared_ptr<MatrixWorkspace> ws2 = getProperty("InputWorkspace2");
     setProperty("OutputWorkspace", ws1->clone());
   }
 
@@ -252,7 +252,7 @@ public:
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
-    boost::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
+    std::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
     setProperty("OutputWorkspace",
                 std::make_unique<FakeWorkspaceA>(storageModeOut));
   }
@@ -271,7 +271,7 @@ void runNoParallelism(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    auto in = boost::make_shared<WorkspaceTester>(storageMode);
+    auto in = std::make_shared<WorkspaceTester>(storageMode);
     auto alg = create<FakeAlgNoParallelism>(comm);
     alg->setProperty("InputWorkspace", in);
     if (comm.size() == 1) {
@@ -289,10 +289,10 @@ void runNoParallelism(const Parallel::Communicator &comm) {
 
 void runTestGetInputWorkspaceStorageModes(const Parallel::Communicator &comm) {
   auto alg = create<FakeAlgTestGetInputWorkspaceStorageModes>(comm);
-  alg->setProperty("Input1", boost::make_shared<WorkspaceTester>());
-  alg->setProperty("Input2", boost::make_shared<WorkspaceTester>());
-  alg->setProperty("InOut1", boost::make_shared<WorkspaceTester>());
-  alg->setProperty("InOut2", boost::make_shared<WorkspaceTester>());
+  alg->setProperty("Input1", std::make_shared<WorkspaceTester>());
+  alg->setProperty("Input2", std::make_shared<WorkspaceTester>());
+  alg->setProperty("InOut1", std::make_shared<WorkspaceTester>());
+  alg->setProperty("InOut2", std::make_shared<WorkspaceTester>());
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
 }
@@ -313,7 +313,7 @@ void run1To1(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    auto in = boost::make_shared<FakeWorkspaceA>(storageMode);
+    auto in = std::make_shared<FakeWorkspaceA>(storageMode);
     in->initialize(1, 2, 1);
     auto alg = create<FakeAlg1To1>(comm);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
@@ -334,8 +334,8 @@ void runNTo0(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    auto in1 = boost::make_shared<FakeWorkspaceA>(storageMode);
-    auto in2 = boost::make_shared<FakeWorkspaceB>(storageMode);
+    auto in1 = std::make_shared<FakeWorkspaceA>(storageMode);
+    auto in2 = std::make_shared<FakeWorkspaceB>(storageMode);
     in1->initialize(1, 2, 1);
     in2->initialize(1, 2, 1);
     auto alg = create<FakeAlgNTo0>(comm);
@@ -351,8 +351,8 @@ void runNTo1(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    auto in1 = boost::make_shared<FakeWorkspaceA>(storageMode);
-    auto in2 = boost::make_shared<FakeWorkspaceB>(storageMode);
+    auto in1 = std::make_shared<FakeWorkspaceA>(storageMode);
+    auto in2 = std::make_shared<FakeWorkspaceB>(storageMode);
     in1->initialize(1, 2, 1);
     in2->initialize(1, 2, 1);
     auto alg = create<FakeAlgNTo1>(comm);
@@ -390,7 +390,7 @@ void run0To1(const Parallel::Communicator &comm) {
 
 template <Parallel::StorageMode modeIn, Parallel::StorageMode modeOut>
 void run1To1StorageModeTransition(const Parallel::Communicator &comm) {
-  auto in = boost::make_shared<FakeWorkspaceA>(modeIn);
+  auto in = std::make_shared<FakeWorkspaceA>(modeIn);
   in->initialize(1, 2, 1);
   auto alg = create<FakeAlg1To1StorageModeTransition<modeOut>>(comm);
   if (modeIn != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {

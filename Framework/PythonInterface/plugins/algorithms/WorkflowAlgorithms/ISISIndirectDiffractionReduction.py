@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
-from __future__ import (absolute_import, division, print_function)
-
 import os
 
 from IndirectReductionCommon import load_files, load_file_ranges
@@ -89,8 +87,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Factor by which to scale the container runs.')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
-                                 '[[DiffractionFocussing]] child algorithms.')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '
+                                 + '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty(FileProperty('InstrumentParFile', '',
                                           action=FileAction.OptionalLoad,

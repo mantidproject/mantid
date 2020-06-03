@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,8 +36,9 @@ value of type boost::optional<T> will be returned.
  */
 template <typename T>
 T checkForMandatoryInstrumentDefault(
-    Mantid::API::Algorithm *const alg, std::string propName,
-    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name) {
+    Mantid::API::Algorithm *const alg, const std::string &propName,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
+    const std::string &idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
@@ -68,8 +69,9 @@ T checkForMandatoryInstrumentDefault(
  */
 template <typename T>
 boost::optional<T> checkForOptionalInstrumentDefault(
-    Mantid::API::Algorithm *const alg, std::string propName,
-    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name) {
+    Mantid::API::Algorithm *const alg, const std::string &propName,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
+    const std::string &idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
@@ -89,13 +91,15 @@ boost::optional<T> checkForOptionalInstrumentDefault(
  * Specializations for std::string
  */
 template <>
-DLLExport std::string checkForMandatoryInstrumentDefault(
-    Mantid::API::Algorithm *const alg, std::string propName,
-    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name);
+MANTID_API_DLL std::string checkForMandatoryInstrumentDefault(
+    Mantid::API::Algorithm *const alg, const std::string &propName,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
+    const std::string &idf_name);
 
 template <>
-DLLExport boost::optional<std::string> checkForOptionalInstrumentDefault(
-    Mantid::API::Algorithm *const alg, std::string propName,
-    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name);
+MANTID_API_DLL boost::optional<std::string> checkForOptionalInstrumentDefault(
+    Mantid::API::Algorithm *const alg, const std::string &propName,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
+    const std::string &idf_name);
 } // namespace API
 } // namespace Mantid

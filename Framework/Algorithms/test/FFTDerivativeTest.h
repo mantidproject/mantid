@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FFTDerivative.h"
@@ -25,14 +25,14 @@ public:
 
     createWS(N, 0, "exp");
 
-    IAlgorithm *fft = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "FFTDerivative");
+    auto fft =
+        Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
     fft->initialize();
     fft->setPropertyValue("InputWorkspace", "FFTDerivative_WS_exp");
     fft->setPropertyValue("OutputWorkspace", "FFTDerivative_out");
     fft->execute();
 
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
     auto &X = fWS->x(0);
@@ -45,8 +45,8 @@ public:
       TS_ASSERT_DELTA(Y[i], (-4 * xx * exp(-(xx * xx) * 2)), 0.000001);
     }
 
-    FrameworkManager::Instance().deleteWorkspace("FFTDerivative_WS_exp");
-    FrameworkManager::Instance().deleteWorkspace("FFTDerivative_out");
+    AnalysisDataService::Instance().remove("FFTDerivative_WS_exp");
+    AnalysisDataService::Instance().remove("FFTDerivative_out");
   }
 
   void testGaussianSecondOrderDerivative() {
@@ -54,15 +54,15 @@ public:
 
     createWS(N, 0, "exp");
 
-    IAlgorithm *fft = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "FFTDerivative");
+    auto fft =
+        Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
     fft->initialize();
     fft->setPropertyValue("InputWorkspace", "FFTDerivative_WS_exp");
     fft->setPropertyValue("OutputWorkspace", "FFTDerivative_out");
     fft->setPropertyValue("Order", "2");
     fft->execute();
 
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
     auto &X = fWS->x(0);
@@ -76,15 +76,14 @@ public:
       TS_ASSERT_DELTA(Y[i], (16 * xx * xx * ex - 4 * ex), 0.000001);
     }
 
-    FrameworkManager::Instance().deleteWorkspace("FFTDerivative_WS_exp");
-    FrameworkManager::Instance().deleteWorkspace("FFTDerivative_out");
+    AnalysisDataService::Instance().remove("FFTDerivative_WS_exp");
+    AnalysisDataService::Instance().remove("FFTDerivative_out");
   }
 
 private:
   MatrixWorkspace_sptr createWS(int n, int dn, const std::string &name) {
-    FrameworkManager::Instance();
     Mantid::DataObjects::Workspace2D_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
 
     const double dX = 10.0 / (n - 1);

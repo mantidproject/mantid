@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidAPI/FileProperty.h"
@@ -271,7 +271,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
  *  @throw FileError Thrown if unable to parse XML file
  */
 void LoadIDFFromNexus::LoadParameters(
-    ::NeXus::File *nxfile, const MatrixWorkspace_sptr localWorkspace) {
+    ::NeXus::File *nxfile, const MatrixWorkspace_sptr &localWorkspace) {
 
   std::string parameterString;
 
@@ -314,7 +314,7 @@ void LoadIDFFromNexus::LoadParameters(
 // given workspace, returning success.
 bool LoadIDFFromNexus::loadParameterFile(
     const std::string &fullPathName,
-    const MatrixWorkspace_sptr localWorkspace) {
+    const MatrixWorkspace_sptr &localWorkspace) {
 
   try {
     // load and also populate instrument parameters from this 'fallback'

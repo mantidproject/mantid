@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -288,7 +288,7 @@ private:
   Mantid::API::IFunction_sptr createFunctionWithBackground() {
     auto func = createFunctionNoBackground();
 
-    auto background = boost::make_shared<LinearStub>();
+    auto background = std::make_shared<LinearStub>();
     background->initialize();
     func->addFunction(background);
     func->setUpForFit();
@@ -296,15 +296,15 @@ private:
     return func;
   }
 
-  boost::shared_ptr<ComptonScatteringCountRate>
+  std::shared_ptr<ComptonScatteringCountRate>
   createFunctionNoBackground(const bool useTwoIntensityFuncAsFirst = false) {
-    boost::shared_ptr<ComptonProfileStub> func1;
+    std::shared_ptr<ComptonProfileStub> func1;
     if (useTwoIntensityFuncAsFirst) {
-      func1 = boost::make_shared<TwoIntensitiesComptonProfileStub>();
+      func1 = std::make_shared<TwoIntensitiesComptonProfileStub>();
       func1->initialize();
       func1->setParameter("Intensity_2", 3.0);
     } else {
-      func1 = boost::make_shared<ComptonProfileStub>();
+      func1 = std::make_shared<ComptonProfileStub>();
       func1->initialize();
     }
     func1->setParameter("Mass", 1.0);
@@ -312,14 +312,14 @@ private:
     func1->setParameter("Intensity", 2.0);
     func1->addTies("Mass=1.0");
 
-    auto func2 = boost::make_shared<ComptonProfileStub>();
+    auto func2 = std::make_shared<ComptonProfileStub>();
     func2->initialize();
     func2->setParameter("Mass", 1.0);
     func2->setParameter("Width", 10.0);
     func2->setParameter("Intensity", 3.0);
     func2->addTies("Mass=1.0");
 
-    auto profile = boost::make_shared<ComptonScatteringCountRate>();
+    auto profile = std::make_shared<ComptonScatteringCountRate>();
     profile->initialize();
     profile->addFunction(func1);
     profile->addFunction(func2);
@@ -330,7 +330,7 @@ private:
 
   Mantid::API::IFunction_sptr createFunction() {
 
-    auto profile = boost::make_shared<ComptonScatteringCountRate>();
+    auto profile = std::make_shared<ComptonScatteringCountRate>();
     profile->initialize();
     return profile;
   }

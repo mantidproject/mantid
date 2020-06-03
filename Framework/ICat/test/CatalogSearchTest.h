@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -121,16 +121,9 @@ public:
 
     if (!searchobj.isInitialized())
       searchobj.initialize();
-    std::string errorMsg = "Invalid value for property StartDate (string) "
-                           "sssss"
-                           ": Invalid Date:date format must be DD/MM/YYYY";
 
     TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate", "sssss"),
                      const std::invalid_argument &);
-
-    errorMsg = "Invalid value for property EndDate (string) "
-               "aaaaa"
-               ": Invalid Date:date format must be DD/MM/YYYY";
     TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate", "aaaaa"),
                      const std::invalid_argument &);
 
@@ -146,17 +139,8 @@ public:
     if (!searchobj.isInitialized())
       searchobj.initialize();
 
-    std::string errorMsg = "Invalid value for property StartDate (string) "
-                           "39/22/2009"
-                           ": Invalid Date:Day part of the Date parameter must "
-                           "be between 1 and 31";
     TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate", "39/22/2009"),
                      const std::invalid_argument &);
-
-    errorMsg = "Invalid value for property EndDate (string) "
-               "1/22/2009"
-               ": Invalid Date:Month part of the Date parameter must be "
-               "between 1 and 12";
     TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate", "1/22/2009"),
                      const std::invalid_argument &);
 

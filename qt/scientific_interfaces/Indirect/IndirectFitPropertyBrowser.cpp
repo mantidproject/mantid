@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
 #include "FunctionTemplateBrowser.h"
@@ -106,11 +106,11 @@ MultiDomainFunction_sptr IndirectFitPropertyBrowser::getGlobalFunction() const {
   auto fun = isFullFunctionBrowserActive()
                  ? m_functionBrowser->getGlobalFunction()
                  : m_templateBrowser->getGlobalFunction();
-  if (auto temp = boost::dynamic_pointer_cast<MultiDomainFunction>(fun)) {
+  if (auto temp = std::dynamic_pointer_cast<MultiDomainFunction>(fun)) {
     return temp;
   } else if (fun) {
     MultiDomainFunction_sptr multiFunction =
-        boost::make_shared<MultiDomainFunction>();
+        std::make_shared<MultiDomainFunction>();
     multiFunction->addFunction(fun);
     multiFunction->setDomainIndex(0, 0);
     return multiFunction;
@@ -212,7 +212,7 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
     if (getNumberOfDatasets() > 0) {
       return getGlobalFunction();
     } else {
-      auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+      auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
       auto singleFunction = getSingleFunction();
       if (singleFunction) {
         multiDomainFunction->addFunction(singleFunction);
@@ -221,7 +221,7 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
       return multiDomainFunction;
     }
   } catch (const std::invalid_argument &) {
-    return boost::make_shared<MultiDomainFunction>();
+    return std::make_shared<MultiDomainFunction>();
   }
 }
 
@@ -318,7 +318,8 @@ void IndirectFitPropertyBrowser::clear() {
  * Updates the plot guess feature in this indirect fit property browser.
  * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(MatrixWorkspace_const_sptr) {}
+void IndirectFitPropertyBrowser::updatePlotGuess(
+    const MatrixWorkspace_const_sptr &) {}
 
 void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
   m_functionBrowser->setErrorsEnabled(enabled);
@@ -338,27 +339,28 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
   }
 }
 
-void IndirectFitPropertyBrowser::setCurrentDataset(TableRowIndex i) {
+void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0)
     return;
   if (isFullFunctionBrowserActive()) {
-    m_functionBrowser->setCurrentDataset(i.value);
+    m_functionBrowser->setCurrentDataset(static_cast<int>(i.value));
   } else {
-    m_templateBrowser->setCurrentDataset(i.value);
+    m_templateBrowser->setCurrentDataset(static_cast<int>(i.value));
   }
 }
 
-TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return TableRowIndex{m_functionBrowser->getCurrentDataset()};
+FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
+  return FitDomainIndex{
+      static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
-    TableRowIndex nData, const QStringList &datasetNames,
+    int nData, const QStringList &datasetNames,
     const std::vector<double> &qValues,
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
-  m_functionBrowser->setNumberOfDatasets(nData.value);
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+  m_functionBrowser->setNumberOfDatasets(nData);
   m_functionBrowser->setDatasetNames(datasetNames);
-  m_templateBrowser->setNumberOfDatasets(nData.value);
+  m_templateBrowser->setNumberOfDatasets(nData);
   m_templateBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setQValues(qValues);
   m_templateBrowser->setResolution(fitResolutions);
@@ -387,7 +389,7 @@ void IndirectFitPropertyBrowser::setModelResolution(
 }
 
 void IndirectFitPropertyBrowser::setModelResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   if (isFullFunctionBrowserActive()) {
     showFullFunctionBrowser(false);
   }

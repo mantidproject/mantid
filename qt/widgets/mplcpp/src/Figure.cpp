@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidPythonInterface/core/CallMethod.h"
@@ -58,7 +58,7 @@ QColor Figure::faceColor() const {
  * @param color A character string indicating the color.
  * See https://matplotlib.org/api/colors_api.html
  */
-void Figure::setFaceColor(const QColor color) {
+void Figure::setFaceColor(const QColor &color) {
   callMethodNoCheck<void, const char *>(
       pyobj(), "set_facecolor",
       color.name(QColor::HexRgb).toLatin1().constData());
@@ -103,7 +103,7 @@ Axes Figure::addAxes(double left, double bottom, double width, double height) {
  * @param projection An optional string denoting the projection type
  * @return A wrapper around the Axes object
  */
-Axes Figure::addSubPlot(const int subplotspec, const QString projection) {
+Axes Figure::addSubPlot(const int subplotspec, const QString &projection) {
   GlobalInterpreterLock lock;
   if (projection.isEmpty())
     return Axes{pyobj().attr("add_subplot")(subplotspec)};

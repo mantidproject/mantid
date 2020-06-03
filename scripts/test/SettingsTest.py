@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 from mantid.simpleapi import *
@@ -15,6 +14,8 @@ RAII Test helper class. Equivalent to the ScopedFileHelper.
 
 If this proves useful. It would be sensible to make it more accessible for other testing classes.
 '''
+
+
 class TempFile(object):
 
     __tempFile = None
@@ -38,6 +39,8 @@ class TempFile(object):
 '''
 Determine if all tests should be skipped. Check for the expat module to decide.
 '''
+
+
 def skipAllTests():
     skiptests = False
     try:

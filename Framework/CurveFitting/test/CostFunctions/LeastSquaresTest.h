@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -49,13 +49,13 @@ public:
     values->setFitData(y);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b");
     fun->setParameter("a", 1.1);
     fun->setParameter("b", 2.2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     SimplexMinimizer s;
@@ -79,12 +79,12 @@ public:
     values->setFitData(y);
     values->setFitWeights(sqrty);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b");
     fun->setParameter("a", 1.1);
     fun->setParameter("b", 2.2);
 
-    boost::shared_ptr<CostFuncRwp> costFun = boost::make_shared<CostFuncRwp>();
+    std::shared_ptr<CostFuncRwp> costFun = std::make_shared<CostFuncRwp>();
     costFun->setFittingFunction(fun, domain, values);
 
     SimplexMinimizer s;
@@ -111,8 +111,8 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     BFGS_Minimizer s;
@@ -139,13 +139,13 @@ public:
     values->setFitData(y);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b");
     fun->setParameter("a", 1.1);
     fun->setParameter("b", 2.2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_DELTA(costFun->val(), 0.145,
                     1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
@@ -184,13 +184,13 @@ public:
     values->setFitData(y);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
     fun->setAttributeValue("Formula", "a*x+b");
     fun->setParameter("a", 1.1);
     fun->setParameter("b", 2.2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_DELTA(costFun->val(), 0.145,
                     1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
@@ -225,8 +225,8 @@ public:
     fun->setParameter("Lifetime", 1.);
     fun->fix(1);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     BFGS_Minimizer s;
@@ -257,7 +257,7 @@ public:
     fun->setParameter("Height", 19.);
     fun->setParameter("Lifetime", 0.1);
 
-    boost::shared_ptr<CostFuncRwp> costFun = boost::make_shared<CostFuncRwp>();
+    std::shared_ptr<CostFuncRwp> costFun = std::make_shared<CostFuncRwp>();
     costFun->setFittingFunction(fun, domain, values);
 
     LevenbergMarquardtMDMinimizer s;
@@ -276,7 +276,7 @@ public:
     API::FunctionDomain1D_sptr domain(
         new API::FunctionDomain1DVector(79300., 79600., 41));
     API::FunctionValues_sptr data(new API::FunctionValues(*domain));
-    boost::shared_ptr<UserFunction> fun0 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun0 = std::make_shared<UserFunction>();
     fun0->setAttributeValue("Formula", "b + h * exp(-((x-c)/s)^2)");
     fun0->setParameter("b", 9);
     fun0->setParameter("h", 224.);
@@ -288,7 +288,7 @@ public:
     values->setFitDataFromCalculated(*data);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<UserFunction> fun1 = boost::make_shared<UserFunction>();
+    std::shared_ptr<UserFunction> fun1 = std::make_shared<UserFunction>();
     fun1->setAttributeValue("Formula", "b + h * exp(-((x-c)/s)^2)");
     fun1->setParameter("b", 0);
     fun1->setParameter("h", 200.);
@@ -298,8 +298,7 @@ public:
 
     API::CompositeFunction_sptr fnWithBk(new API::CompositeFunction());
 
-    boost::shared_ptr<LinearBackground> bk =
-        boost::make_shared<LinearBackground>();
+    std::shared_ptr<LinearBackground> bk = std::make_shared<LinearBackground>();
     bk->initialize();
 
     bk->setParameter("A0", 0.0);
@@ -307,7 +306,7 @@ public:
     bk->tie("A1", "0");
 
     // set up Gaussian fitting function
-    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
     fn->setParameter("PeakCentre", 79450.0);
     fn->setParameter("Height", 200.0);
@@ -316,8 +315,8 @@ public:
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     // costFun->setFittingFunction(fun1,domain,values);
     costFun->setFittingFunction(fnWithBk, domain, values);
 

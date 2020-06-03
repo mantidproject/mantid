@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PredictSatellitePeaksTest.h
  *
@@ -47,7 +53,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("Modulated")));
     TS_ASSERT(ws);
     if (!ws)

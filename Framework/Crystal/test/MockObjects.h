@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * MockObjects.h
@@ -38,11 +38,10 @@ public:
 class MockICluster : public ICluster {
 public:
   MOCK_CONST_METHOD1(
-      integrate,
-      ClusterIntegratedValues(
-          boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws));
-  MOCK_CONST_METHOD1(
-      writeTo, void(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws));
+      integrate, ClusterIntegratedValues(
+                     std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws));
+  MOCK_CONST_METHOD1(writeTo,
+                     void(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws));
   MOCK_CONST_METHOD0(getLabel, size_t());
   MOCK_CONST_METHOD0(getOriginalLabel, size_t());
   MOCK_CONST_METHOD0(size, size_t());

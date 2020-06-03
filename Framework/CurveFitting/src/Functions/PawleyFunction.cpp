@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
@@ -17,7 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -189,7 +189,7 @@ void PawleyParameterFunction::init() {
  */
 void PawleyParameterFunction::setProfileFunction(
     const std::string &profileFunction) {
-  IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+  IPeakFunction_sptr peakFunction = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(profileFunction));
 
   if (!peakFunction) {
@@ -328,14 +328,14 @@ PawleyFunction::PawleyFunction()
 }
 
 void PawleyFunction::setMatrixWorkspace(
-    boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+    std::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX,
+    double endX) {
   if (workspace) {
     Axis *xAxis = workspace->getAxis(wi);
     Kernel::Unit_sptr wsUnit = xAxis->unit();
 
-    if (boost::dynamic_pointer_cast<Units::Empty>(wsUnit) ||
-        boost::dynamic_pointer_cast<Units::dSpacing>(wsUnit)) {
+    if (std::dynamic_pointer_cast<Units::Empty>(wsUnit) ||
+        std::dynamic_pointer_cast<Units::dSpacing>(wsUnit)) {
       m_wsUnit = m_dUnit;
     } else {
       double factor, power;
@@ -367,10 +367,10 @@ void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
    * and all existing profile functions are replaced.
    */
   for (size_t i = 0; i < m_peakProfileComposite->nFunctions(); ++i) {
-    IPeakFunction_sptr oldFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+    IPeakFunction_sptr oldFunction = std::dynamic_pointer_cast<IPeakFunction>(
         m_peakProfileComposite->getFunction(i));
 
-    IPeakFunction_sptr newFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+    IPeakFunction_sptr newFunction = std::dynamic_pointer_cast<IPeakFunction>(
         FunctionFactory::Instance().createFunction(
             m_pawleyParameterFunction->getProfileFunctionName()));
 
@@ -405,7 +405,8 @@ double PawleyFunction::getTransformedCenter(double d) const {
   return d;
 }
 
-void PawleyFunction::setPeakPositions(std::string centreName, double zeroShift,
+void PawleyFunction::setPeakPositions(const std::string &centreName,
+                                      double zeroShift,
                                       const UnitCell &cell) const {
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double centre = getTransformedCenter(cell.d(m_hkls[i]));
@@ -471,7 +472,7 @@ void PawleyFunction::function(const FunctionDomain &domain,
     FunctionValues localValues;
 
     for (size_t i = 0; i < m_peakProfileComposite->nFunctions(); ++i) {
-      IPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPeakFunction>(
+      IPeakFunction_sptr peak = std::dynamic_pointer_cast<IPeakFunction>(
           m_peakProfileComposite->getFunction(i));
 
       try {
@@ -490,7 +491,7 @@ void PawleyFunction::function(const FunctionDomain &domain,
 
 /// Removes all peaks from the function.
 void PawleyFunction::clearPeaks() {
-  m_peakProfileComposite = boost::dynamic_pointer_cast<CompositeFunction>(
+  m_peakProfileComposite = std::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("CompositeFunction"));
   m_compositeFunction->replaceFunction(1, m_peakProfileComposite);
   m_hkls.clear();
@@ -512,7 +513,7 @@ void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
                              double height) {
   m_hkls.emplace_back(hkl);
 
-  IPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPeakFunction>(
+  IPeakFunction_sptr peak = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(
           m_pawleyParameterFunction->getProfileFunctionName()));
 
@@ -540,7 +541,7 @@ IPeakFunction_sptr PawleyFunction::getPeakFunction(size_t i) const {
     throw std::out_of_range("Peak index out of range.");
   }
 
-  return boost::dynamic_pointer_cast<IPeakFunction>(
+  return std::dynamic_pointer_cast<IPeakFunction>(
       m_peakProfileComposite->getFunction(i));
 }
 
@@ -573,7 +574,7 @@ void PawleyFunction::init() {
 /// Checks that the decorated function has the correct structure.
 void PawleyFunction::beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) {
   CompositeFunction_sptr composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(fn);
+      std::dynamic_pointer_cast<CompositeFunction>(fn);
 
   if (!composite) {
     throw std::invalid_argument("PawleyFunction only works with "
@@ -584,11 +585,11 @@ void PawleyFunction::beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) {
   m_compositeFunction = composite;
 
   if (m_compositeFunction->nFunctions() == 0) {
-    m_peakProfileComposite = boost::dynamic_pointer_cast<CompositeFunction>(
+    m_peakProfileComposite = std::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createFunction("CompositeFunction"));
 
     m_pawleyParameterFunction =
-        boost::dynamic_pointer_cast<PawleyParameterFunction>(
+        std::dynamic_pointer_cast<PawleyParameterFunction>(
             FunctionFactory::Instance().createFunction(
                 "PawleyParameterFunction"));
 
@@ -596,9 +597,9 @@ void PawleyFunction::beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) {
     m_compositeFunction->addFunction(m_peakProfileComposite);
   } else {
     m_pawleyParameterFunction =
-        boost::dynamic_pointer_cast<PawleyParameterFunction>(
+        std::dynamic_pointer_cast<PawleyParameterFunction>(
             m_compositeFunction->getFunction(0));
-    m_peakProfileComposite = boost::dynamic_pointer_cast<CompositeFunction>(
+    m_peakProfileComposite = std::dynamic_pointer_cast<CompositeFunction>(
         m_compositeFunction->getFunction(1));
   }
 }

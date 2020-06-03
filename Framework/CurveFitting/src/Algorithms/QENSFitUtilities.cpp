@@ -1,10 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/QENSFitUtilities.h"
 #include <unordered_map>
+#include <utility>
+
 namespace Mantid {
 namespace API {
 
 void renameWorkspacesWith(
-    WorkspaceGroup_sptr groupWorkspace,
+    const WorkspaceGroup_sptr &groupWorkspace,
     std::function<std::string(std::size_t)> const &getName,
     std::function<void(Workspace_sptr, const std::string &)> const &renamer) {
   std::unordered_map<std::string, std::size_t> nameCount;
@@ -21,7 +29,8 @@ void renameWorkspacesWith(
   }
 }
 
-void renameWorkspace(IAlgorithm_sptr renamer, Workspace_sptr workspace,
+void renameWorkspace(const IAlgorithm_sptr &renamer,
+                     const Workspace_sptr &workspace,
                      const std::string &newName) {
   renamer->setProperty("InputWorkspace", workspace);
   renamer->setProperty("OutputWorkspace", newName);
@@ -37,7 +46,7 @@ bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
 
 void renameWorkspacesInQENSFit(
     Algorithm *qensFit, IAlgorithm_sptr renameAlgorithm,
-    WorkspaceGroup_sptr outputGroup, std::string const &outputBaseName,
+    const WorkspaceGroup_sptr &outputGroup, std::string const &outputBaseName,
     std::string const &,
     std::function<std::string(std::size_t)> const &getNameSuffix) {
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
@@ -48,8 +57,8 @@ void renameWorkspacesInQENSFit(
     return name;
   };
 
-  auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
-    renameWorkspace(renameAlgorithm, workspace, name);
+  auto renamer = [&](const Workspace_sptr &workspace, const std::string &name) {
+    renameWorkspace(renameAlgorithm, std::move(workspace), name);
     renamerProg.report("Renamed workspace in group.");
   };
   renameWorkspacesWith(outputGroup, getName, renamer);

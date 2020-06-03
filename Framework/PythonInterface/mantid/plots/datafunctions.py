@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import datetime
 
 import numpy as np
@@ -605,6 +603,7 @@ def get_sample_log(workspace, **kwargs):
     if not run.hasProperty(LogName):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
+
     try:
         units = tsp.units
     except UnicodeDecodeError as exc:
@@ -614,8 +613,14 @@ def get_sample_log(workspace, **kwargs):
                             mantid.kernel.Int32TimeSeriesProperty,
                             mantid.kernel.Int64TimeSeriesProperty)):
         raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
-    times = tsp.times.astype('datetime64[us]')
-    y = tsp.value
+    Filtered = kwargs.pop('Filtered', True)
+    if not Filtered:
+        #these methods access the unfiltered data
+        times = tsp.times.astype('datetime64[us]')
+        y = tsp.value
+    else:
+        times = tsp.filtered_times.astype('datetime64[us]')
+        y = tsp.filtered_value
     FullTime = kwargs.pop('FullTime', False)
     StartFromLog = kwargs.pop('StartFromLog', False)
     if FullTime:
@@ -1015,13 +1020,14 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     """
     if vmin <= 0 and scale == LogNorm:
         vmin = 0.0001  # Avoid 0 log scale error
-        mantid.kernel.logger.error("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
+        mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
 
     if vmax <= 0 and scale == LogNorm:
         vmax = 1  # Avoid 0 log scale error
-        mantid.kernel.logger.error("Scale is set to logarithmic so non-positive max value has been changed to 1.")
+        mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
     image.set_norm(scale(vmin=vmin, vmax=vmax))
+
     if image.colorbar:
         image.colorbar.remove()
         locator = None
@@ -1031,4 +1037,5 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 locator = LogLocator()
                 mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
                                              "as the range between min value and max value is too large")
-        figure.colorbar(image, ticks=locator)
+        figure.subplots_adjust(wspace=0.5, hspace=0.5)
+        figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)

@@ -33,6 +33,9 @@
 
 #include <QTableWidget>
 #include <QVarLengthArray>
+#include <utility>
+
+#include <utility>
 
 #include "Graph.h"
 #include "MdiSubWindow.h"
@@ -116,7 +119,7 @@ public:
   };
 
   Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-        const QString &name = QString(), Qt::WFlags f = nullptr);
+        const QString &name = QString(), const Qt::WFlags &f = nullptr);
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
   int bottomSelectedRow() const { return d_table->bottomSelectedRow(); }
@@ -160,13 +163,14 @@ public slots:
                                   bool rightColumns = false);
   QList<int> plotDesignations() { return col_plot_type; };
 
-  void setHeader(QStringList header);
+  void setHeader(const QStringList &header);
   void loadHeader(QStringList header);
   void setHeaderColType();
   void setText(int row, int col, const QString &text);
   void setRandomValues();
   void setAscValues();
-  void setTextAlignment(int row, int col, QFlags<Qt::AlignmentFlag> alignment);
+  void setTextAlignment(int row, int col,
+                        const QFlags<Qt::AlignmentFlag> &alignment);
 
   virtual void cellEdited(int, int col);
   void moveCurrentCell();
@@ -339,7 +343,7 @@ public slots:
   int columnType(int col) { return colTypes[col]; };
 
   QList<int> columnTypes() { return colTypes; };
-  void setColumnTypes(QList<int> ctl) { colTypes = ctl; };
+  void setColumnTypes(QList<int> ctl) { colTypes = std::move(std::move(ctl)); };
   void setColumnTypes(const QStringList &ctl);
   void setColumnType(int col, ColType val) { colTypes[col] = val; }
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,8 +23,8 @@ using namespace Mantid::HistogramData::detail;
 
 class ConvertSpectrumAxis2Test : public CxxTest::TestSuite {
 private:
-  void do_algorithm_run(std::string target, std::string inputWS,
-                        std::string outputWS, bool startYNegative = true,
+  void do_algorithm_run(const std::string &target, const std::string &inputWS,
+                        const std::string &outputWS, bool startYNegative = true,
                         bool isHistogram = true) {
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         3, 1, false, startYNegative, isHistogram);
@@ -45,7 +45,7 @@ private:
   }
 
   void check_output_values_for_signed_theta_conversion(
-      std::string outputWSSignedTheta) {
+      const std::string &outputWSSignedTheta) {
     MatrixWorkspace_const_sptr outputSignedTheta;
     TS_ASSERT_THROWS_NOTHING(
         outputSignedTheta =
@@ -69,8 +69,9 @@ private:
     TS_ASSERT_DELTA((*thetaAxis)(2), 1.1458, 0.0001);
   }
 
-  void check_output_values_for_theta_conversion(std::string inputWSTheta,
-                                                std::string outputWSTheta) {
+  void
+  check_output_values_for_theta_conversion(const std::string &inputWSTheta,
+                                           const std::string &outputWSTheta) {
     MatrixWorkspace_const_sptr input, output;
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -101,8 +102,8 @@ private:
                      const Mantid::Kernel::Exception::IndexError &);
   }
 
-  void clean_up_workspaces(const std::string inputWS,
-                           const std::string outputWS) {
+  void clean_up_workspaces(const std::string &inputWS,
+                           const std::string &outputWS) {
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);
   }
@@ -495,8 +496,7 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->unit()->unitID(), "Degrees");
 
     Mantid::DataObjects::EventWorkspace_sptr eventWS =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
-            output);
+        std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(output);
     TS_ASSERT(eventWS);
   }
 };

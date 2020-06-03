@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/LogManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
@@ -272,7 +273,6 @@ public:
 
   void test_last_time_series_log_entry_equals_end_time() {
     LoadNexusLogs ld;
-    std::string outws_name = "REF_L_instrument";
     ld.initialize();
     ld.setPropertyValue("Filename", "REF_L_32035.nxs");
     MatrixWorkspace_sptr ws = createTestWorkspace();
@@ -291,6 +291,64 @@ public:
     const auto endTime = run.endTime();
 
     TS_ASSERT_EQUALS(endTime.totalNanoseconds(), lastTime.totalNanoseconds());
+  }
+
+  void test_load_file_with_invalid_log_entries() {
+    LoadNexusLogs ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "ENGINX00228061_log_alarm_data.nxs");
+    MatrixWorkspace_sptr ws = createTestWorkspace();
+    // Put it in the object.
+    ld.setProperty("Workspace", ws);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+
+    auto run = ws->run();
+
+    // This one should not be present as there is no invalid data
+    TS_ASSERT_THROWS_ANYTHING(
+        run.getLogData(LogManager::getInvalidValuesFilterLogName("slitpos")));
+
+    // This one should not be present as there is no invalid data
+    TS_ASSERT_THROWS_ANYTHING(run.getLogData(
+        LogManager::getInvalidValuesFilterLogName("cryo_Sample")));
+
+    // these two both contain invalid data
+    auto pclog1 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
+        LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
+    TS_ASSERT_EQUALS(pclog1->size(), 3);
+    TS_ASSERT_EQUALS(pclog1->nthValue(0), true);
+    TS_ASSERT_EQUALS(pclog1->nthValue(1), false);
+    TS_ASSERT_EQUALS(pclog1->nthValue(2), true);
+
+    auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
+        LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
+    TS_ASSERT_EQUALS(pclog2->size(), 3);
+    TS_ASSERT_EQUALS(pclog2->nthValue(0), false);
+    TS_ASSERT_EQUALS(pclog2->nthValue(1), false);
+    TS_ASSERT_EQUALS(pclog2->nthValue(2), false);
+
+    // force the filtering by passing in an empty log
+    auto emptyProperty = new TimeSeriesProperty<bool>("empty");
+    run.filterByLog(*emptyProperty);
+
+    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("cryo_temp1"));
+    // middle value is invalid and is filtered out
+    TS_ASSERT_DELTA(pclogFiltered1->nthValue(0), 3, 1e-5);
+    TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
+
+    auto pclogFiltered2 = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("cryo_temp2"));
+    std::vector<double> correctFiltered2{3., 5., 7.};
+    // Here the entire log is filtered out
+    // Our filtering in this case does not filter anything.
+    // This seems stringe, but actually may be what people want,
+    // It also resolves the question of what we should do with an entirely
+    // invalid log.
+    TS_ASSERT_DELTA(pclogFiltered2->nthValue(0), 3, 1e-5);
+    TS_ASSERT_DELTA(pclogFiltered2->nthValue(1), 5, 1e-5);
+    TS_ASSERT_DELTA(pclogFiltered2->nthValue(2), 7, 1e-5);
   }
 
 private:

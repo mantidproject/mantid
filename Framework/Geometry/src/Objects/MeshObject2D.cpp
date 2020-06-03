@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -11,8 +11,8 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
-#include <boost/make_shared.hpp>
 #include <cmath>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -182,7 +182,7 @@ void MeshObject2D::initialize() {
   m_planeParameters = parameters;
 
   MeshObjectCommon::checkVertexLimit(m_vertices.size());
-  m_handler = boost::make_shared<GeometryHandler>(*this);
+  m_handler = std::make_shared<GeometryHandler>(*this);
 }
 bool MeshObject2D::hasValidShape() const {
   // 3 or more points define a plane.
@@ -418,7 +418,7 @@ void MeshObject2D::setMaterial(const Kernel::Material &material) {
 
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 
-boost::shared_ptr<GeometryHandler> MeshObject2D::getGeometryHandler() const {
+std::shared_ptr<GeometryHandler> MeshObject2D::getGeometryHandler() const {
   return m_handler;
 }
 

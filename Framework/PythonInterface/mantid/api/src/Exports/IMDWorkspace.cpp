@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -26,7 +26,7 @@ void export_IMDWorkspace() {
 
   boost::python::enum_<Mantid::Kernel::SpecialCoordinateSystem>(
       "SpecialCoordinateSystem")
-      .value("None", Mantid::Kernel::None)
+      .value("NONE", Mantid::Kernel::None)
       .value("QLab", Mantid::Kernel::QLab)
       .value("QSample", Mantid::Kernel::QSample)
       .value("HKL", Mantid::Kernel::HKL);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 
@@ -48,7 +48,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
 /**get event type form its string representation*/
 BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(
     const std::vector<std::string> &typesSupported,
-    const std::string typeName) {
+    const std::string &typeName) {
   auto it = std::find(typesSupported.begin(), typesSupported.end(), typeName);
   if (it == typesSupported.end())
     throw std::invalid_argument("Unsupported event type: " + typeName +

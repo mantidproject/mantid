@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -18,7 +19,7 @@ namespace Crystal {
    RHSWorkspace will
     only be matched to the first in the LHSWorkspace that is within tolerance.
 */
-class DLLExport DiffPeaksWorkspaces : public API::Algorithm {
+class MANTID_CRYSTAL_DLL DiffPeaksWorkspaces : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

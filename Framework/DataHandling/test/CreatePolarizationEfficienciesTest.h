@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,7 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -306,7 +306,7 @@ private:
     size_t const size = 8;
     BinEdges xVals(size + 1, LinearGenerator(0, 0.5));
     Counts yVals(size, 0);
-    auto retVal = boost::make_shared<Workspace2D>();
+    auto retVal = std::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
     retVal->getAxis(0)->setUnit("Wavelength");
     return retVal;
@@ -316,7 +316,7 @@ private:
     size_t const size = 9;
     Points xVals(size, LinearGenerator(0, 0.5));
     Counts yVals(size, 0);
-    auto retVal = boost::make_shared<Workspace2D>();
+    auto retVal = std::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
     retVal->getAxis(0)->setUnit("Wavelength");
     return retVal;

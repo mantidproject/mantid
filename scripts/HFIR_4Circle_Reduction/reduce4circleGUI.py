@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302,R0912
 ################################################################################
@@ -10,9 +10,6 @@
 # MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
-import six
 import os
 import sys
 import csv
@@ -61,10 +58,9 @@ if PYQT4:
     try:
         from mantidqtpython import MantidQt
         SCROLL_AVAILABLE = True
-    except ImportError as e:
+    except ImportError:
         SCROLL_AVAILABLE = False
-if six.PY3:
-    unicode = str
+unicode = str
 
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'

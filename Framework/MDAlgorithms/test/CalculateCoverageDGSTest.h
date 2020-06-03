@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -92,8 +92,7 @@ public:
     if (!ws)
       return;
 
-    MDHistoWorkspace_sptr out =
-        boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+    MDHistoWorkspace_sptr out = std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumDims(), 4);
     TS_ASSERT_EQUALS(out->getDimension(0)->getNBins(), 40);

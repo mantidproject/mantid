@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -65,8 +65,8 @@ public:
    *ignore differences in event lists
    */
   template <typename MDE, size_t nd>
-  static void do_compare_MDEW(boost::shared_ptr<MDEventWorkspace<MDE, nd>> ws1,
-                              boost::shared_ptr<MDEventWorkspace<MDE, nd>> ws2,
+  static void do_compare_MDEW(std::shared_ptr<MDEventWorkspace<MDE, nd>> ws1,
+                              std::shared_ptr<MDEventWorkspace<MDE, nd>> ws2,
                               bool BoxStructureOnly = false) {
     TS_ASSERT(ws1->getBox());
 
@@ -182,12 +182,12 @@ public:
     //------ Start by creating the file
     //----------------------------------------------
     // Make a 1D MDEventWorkspace
-    boost::shared_ptr<MDEventWorkspace<MDE, nd>> ws1 =
+    std::shared_ptr<MDEventWorkspace<MDE, nd>> ws1 =
         MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
     // Put in ADS so we can use fake data
     AnalysisDataService::Instance().addOrReplace(
-        "LoadMDTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+        "LoadMDTest_ws", std::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
     FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace",
                                       "LoadMDTest_ws", "UniformParams", "10000",
                                       "RandomizeSignal", "1");
@@ -247,7 +247,7 @@ public:
 
     // Perform the full comparison
     auto ws =
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
     do_compare_MDEW(ws, ws1, BoxStructureOnly);
 
     // Look for the not-disk-cached-cause-they-are-too-small
@@ -292,8 +292,8 @@ public:
     TS_ASSERT(iws);
     if (!iws)
       return;
-    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>> ws2 =
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
+    std::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>> ws2 =
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
 
     // Modify that by adding some boxes
     MDGridBox<MDLeanEvent<nd>, nd> *box =
@@ -377,8 +377,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
             "reloaded_again"));
-    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>> ws3 =
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
+    std::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>> ws3 =
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
     TS_ASSERT(ws3);
     if (!ws3)
       return;
@@ -433,11 +433,11 @@ public:
     //------ Start by creating the file
     //----------------------------------------------
     // Make a 1D MDEventWorkspace
-    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>, 2>> ws1 =
+    std::shared_ptr<MDEventWorkspace<MDLeanEvent<2>, 2>> ws1 =
         MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
     AnalysisDataService::Instance().addOrReplace(
-        "LoadMDTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+        "LoadMDTest_ws", std::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
 
     // Save it
     SaveMD2 saver;
@@ -472,7 +472,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
-    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>, 2>> ws =
+    std::shared_ptr<MDEventWorkspace<MDLeanEvent<2>, 2>> ws =
         AnalysisDataService::Instance()
             .retrieveWS<MDEventWorkspace<MDLeanEvent<2>, 2>>(outWSName);
 
@@ -488,7 +488,7 @@ public:
   }
 
   /** Run SaveMD v1 with the MDHistoWorkspace */
-  void doTestHistoV1(MDHistoWorkspace_sptr ws) {
+  void doTestHistoV1(const MDHistoWorkspace_sptr &ws) {
     std::string filename = "SaveMDTestHisto.nxs";
 
     SaveMD alg1;
@@ -531,7 +531,7 @@ public:
   }
 
   /** Run SaveMD2 with the MDHistoWorkspace */
-  void doTestHisto(MDHistoWorkspace_sptr ws) {
+  void doTestHisto(const MDHistoWorkspace_sptr &ws) {
     std::string filename = "SaveMD2TestHisto.nxs";
 
     SaveMD2 alg1;
@@ -579,10 +579,10 @@ public:
     Mantid::Geometry::GeneralFrame frame(
         Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     std::vector<Geometry::IMDDimension_sptr> dims(
-        1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", frame, min,
-                                                          max, 5));
+        1, std::make_shared<Geometry::MDHistoDimension>("X", "x", frame, min,
+                                                        max, 5));
     MDHistoWorkspace_sptr ws =
-        boost::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
+        std::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
     ws->setTo(1.0, 1.0, 1);
     doTestHistoV1(ws);
     doTestHisto(ws);
@@ -682,7 +682,7 @@ public:
   }
 
   Mantid::API::IMDWorkspace_sptr
-  testSaveAndLoadWorkspace(Mantid::API::IMDWorkspace_sptr inputWS,
+  testSaveAndLoadWorkspace(const Mantid::API::IMDWorkspace_sptr &inputWS,
                            const char *rootGroup,
                            const bool rmCoordField = false) {
     const std::string fileName = "SaveMDSpecialCoordinatesTest.nxs";

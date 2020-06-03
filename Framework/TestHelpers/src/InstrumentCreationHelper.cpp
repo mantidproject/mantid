@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -21,9 +21,9 @@ namespace InstrumentCreationHelper {
 void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
                                   bool includeMonitors, bool startYNegative,
                                   const std::string &instrumentName) {
-  auto instrument = boost::make_shared<Instrument>(instrumentName);
+  auto instrument = std::make_shared<Instrument>(instrumentName);
   instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+      std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
   const double pixelRadius(0.05);
   auto pixelShape = ComponentCreationHelper::createCappedCylinder(

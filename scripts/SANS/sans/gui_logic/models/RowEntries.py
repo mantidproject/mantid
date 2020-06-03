@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from six import iteritems, iterkeys
 
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
@@ -57,7 +55,7 @@ class RowEntries(_UserEntries):
 
         self._start_observing = True  # Allow init to use setattr without validation
 
-        for k, v in iteritems(kwargs):
+        for k, v in kwargs.items():
             setattr(self, k, v)
 
     @property
@@ -101,7 +99,7 @@ class RowEntries(_UserEntries):
                     self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
 
     def is_empty(self):
-        return not any(getattr(self, attr) for attr in iterkeys(self._data_vars))
+        return not any(getattr(self, attr) for attr in self._data_vars.keys())
 
     def reset_row_state(self):
         self.state = RowState.UNPROCESSED

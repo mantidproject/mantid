@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -80,7 +80,7 @@ public:
     detectorgroup = work1->getSpectrum(2083).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
+    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it)
       TS_ASSERT_EQUALS(*it, pixnum++);
 
     AnalysisDataService::Instance().remove(outputSpace);

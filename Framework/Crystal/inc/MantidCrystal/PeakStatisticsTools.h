@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/Peak.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
@@ -29,7 +30,7 @@ namespace PeakStatisticsTools {
  *
  *
  */
-class DLLExport UniqueReflection {
+class MANTID_CRYSTAL_DLL UniqueReflection {
 public:
   UniqueReflection(const Kernel::V3D &hkl) : m_hkl(hkl), m_peaks() {}
 
@@ -67,7 +68,7 @@ private:
  * completeness of the observations.
  *
  */
-class DLLExport UniqueReflectionCollection {
+class MANTID_CRYSTAL_DLL UniqueReflectionCollection {
 public:
   UniqueReflectionCollection(
       const Geometry::UnitCell &cell, const std::pair<double, double> &dLimits,
@@ -109,7 +110,7 @@ private:
  * Do not rely on this class to exist forever, parts of it may change
  * or the entire class may disappear over time.
  */
-class DLLExport PeaksStatistics {
+class MANTID_CRYSTAL_DLL PeaksStatistics {
 public:
   explicit PeaksStatistics(const UniqueReflectionCollection &reflections)
       : m_measuredReflections(0), m_uniqueReflections(0), m_completeness(0.0),

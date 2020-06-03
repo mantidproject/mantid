@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -20,7 +20,7 @@ EqualBinSizesValidator::EqualBinSizesValidator(const double errorLevel,
 
 /// Clone the current state
 Kernel::IValidator_sptr EqualBinSizesValidator::clone() const {
-  return boost::make_shared<EqualBinSizesValidator>(*this);
+  return std::make_shared<EqualBinSizesValidator>(*this);
 }
 
 /** Checks that the bin sizes of each histogram in the workspace are the same

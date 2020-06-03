@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -80,27 +80,27 @@ private:
   void exec() override;
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectra(API::MatrixWorkspace_sptr ws,
+  API::MatrixWorkspace_sptr extractSpectra(const API::MatrixWorkspace_sptr &ws,
                                            const std::vector<size_t> &indices);
   /// Returns a workspace with the evaulation of the fit to the calculated
   /// transmission fraction
-  API::MatrixWorkspace_sptr fit(API::MatrixWorkspace_sptr raw,
+  API::MatrixWorkspace_sptr fit(const API::MatrixWorkspace_sptr &raw,
                                 const std::vector<double> &rebinParams,
-                                const std::string fitMethod);
+                                const std::string &fitMethod);
   /// Call the Linear fitting algorithm as a child algorithm
-  API::MatrixWorkspace_sptr fitData(API::MatrixWorkspace_sptr WS, double &grad,
-                                    double &offset);
+  API::MatrixWorkspace_sptr fitData(const API::MatrixWorkspace_sptr &WS,
+                                    double &grad, double &offset);
   /// Call the Polynomial fitting algorithm as a child algorithm
-  API::MatrixWorkspace_sptr fitPolynomial(API::MatrixWorkspace_sptr WS,
+  API::MatrixWorkspace_sptr fitPolynomial(const API::MatrixWorkspace_sptr &WS,
                                           int order,
                                           std::vector<double> &coeficients);
   /// Calls the rebin algorithm
   API::MatrixWorkspace_sptr rebin(const std::vector<double> &binParams,
-                                  API::MatrixWorkspace_sptr ws);
+                                  const API::MatrixWorkspace_sptr &ws);
   /// Outpus message to log if the detector at the given index is not a monitor
   /// in both input workspaces.
-  void logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
-                       API::MatrixWorkspace_sptr directWS, size_t index);
+  void logIfNotMonitor(const API::MatrixWorkspace_sptr &sampleWS,
+                       const API::MatrixWorkspace_sptr &directWS, size_t index);
 };
 
 } // namespace Algorithms

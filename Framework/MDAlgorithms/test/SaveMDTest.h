@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -50,7 +50,7 @@ public:
     do_test_exec(23, "SaveMDTest_other_file_name_test.nxs", true, false, true);
   }
 
-  void do_test_exec(size_t numPerBox, std::string filename,
+  void do_test_exec(size_t numPerBox, const std::string &filename,
                     bool MakeFileBacked = false, bool UpdateFileBackEnd = false,
                     bool OtherFileName = false) {
 
@@ -108,8 +108,8 @@ public:
   }
 
   /// Add some data and update the back-end
-  void do_test_UpdateFileBackEnd(MDEventWorkspace1Lean::sptr ws,
-                                 std::string filename) {
+  void do_test_UpdateFileBackEnd(const MDEventWorkspace1Lean::sptr &ws,
+                                 const std::string &filename) {
     size_t initial_numEvents = ws->getNPoints();
     TSM_ASSERT_EQUALS("Starting off with 230 events.", initial_numEvents, 230);
 
@@ -150,8 +150,8 @@ public:
       Poco::File(fullPath).remove();
   }
 
-  void do_test_OtherFileName(MDEventWorkspace1Lean::sptr ws,
-                             std::string originalFileName) {
+  void do_test_OtherFileName(const MDEventWorkspace1Lean::sptr &ws,
+                             const std::string &originalFileName) {
     const std::string otherFileName = "SaveMD_other_file_name.nxs";
 
     auto algSave = AlgorithmManager::Instance().createUnmanaged("SaveMD");
@@ -177,7 +177,7 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT(reference_out_ws);
       auto ws_cast =
-          boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
+          std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
               reference_out_ws);
 
       // Compare the loaded and original workspace
@@ -218,7 +218,7 @@ public:
     gon.pushAxis("Psi", 0, 1, 0);
     // add experiment infos
     for (int i = 0; i < 80; i++) {
-      ExperimentInfo_sptr ei = boost::make_shared<ExperimentInfo>();
+      ExperimentInfo_sptr ei = std::make_shared<ExperimentInfo>();
       ei->mutableRun().addProperty("Psi", double(i));
       ei->mutableRun().addProperty("Ei", 400.);
       ei->mutableRun().setGoniometer(gon, true);
@@ -284,7 +284,7 @@ public:
   }
 
   /** Run SaveMD with the MDHistoWorkspace */
-  void doTestHisto(MDHistoWorkspace_sptr ws) {
+  void doTestHisto(const MDHistoWorkspace_sptr &ws) {
     std::string filename = "SaveMDTestHisto.nxs";
 
     SaveMD alg;

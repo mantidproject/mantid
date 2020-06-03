@@ -1,26 +1,33 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_view import SeqFittingTabView
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
 
 
 class SeqFittingTabWidget(object):
-    def __init__(self, context, model, parent):
-        self.seq_fitting_tab_view = SeqFittingTabView(parent)
+    def __init__(self, context, model, parent, view=None):
+        self.seq_fitting_tab_view = view if view else SeqFittingTabView(parent)
         self.seq_fitting_tab_model = model
 
         self.seq_fitting_tab_presenter = SeqFittingTabPresenter(self.seq_fitting_tab_view, self.seq_fitting_tab_model,
                                                                 context)
 
         self.seq_fitting_tab_view.setup_slot_for_fit_selected_button(self.seq_fitting_tab_presenter.
-                                                                     handle_single_fit_requested)
+                                                                     handle_fit_selected_pressed)
         self.seq_fitting_tab_view.setup_slot_for_sequential_fit_button(self.seq_fitting_tab_presenter.
-                                                                       handle_sequential_fit_requested)
-        self.seq_fitting_tab_view.setup_slot_for_table_parameter_changed(
+                                                                       handle_sequential_fit_pressed)
+
+        self.seq_fitting_tab_view.fit_table.set_slot_for_parameter_changed(
             self.seq_fitting_tab_presenter.handle_updated_fit_parameter_in_table)
+
+        self.seq_fitting_tab_view.fit_table.setup_slot_for_row_selection_changed(
+            self.seq_fitting_tab_presenter.handle_fit_selected_in_table)
+
+        self.seq_fitting_tab_view.fit_table.set_slot_for_key_up_down_pressed(
+            self.seq_fitting_tab_presenter.handle_fit_selected_in_table)
+
+        context.deleted_plots_notifier.add_subscriber(self.seq_fitting_tab_presenter.selected_workspaces_observer)

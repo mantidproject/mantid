@@ -1,14 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 using namespace MantidQt::SliceViewer;
 using namespace testing;
@@ -34,12 +36,12 @@ public:
       const Mantid::Kernel::V3D &origin, const std::vector<double> &peakRadius,
       const std::vector<double> &backgroundInnerRadius,
       const std::vector<double> &backgroundOuterRadius,
-      const std::vector<Mantid::Kernel::V3D> directions,
+      const std::vector<Mantid::Kernel::V3D> &directions,
       std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
           calculator)
       : PeakRepresentationEllipsoid(origin, peakRadius, backgroundInnerRadius,
                                     backgroundOuterRadius, directions,
-                                    calculator)
+                                    std::move(calculator))
 
   {}
   std::shared_ptr<PeakPrimitives> getDrawingInformationWrapper(

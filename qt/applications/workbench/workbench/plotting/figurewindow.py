@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
 """Provides the QMainWindow subclass for a plotting window"""
-from __future__ import absolute_import
-
 # std imports
 import weakref
 
@@ -123,12 +121,18 @@ class FigureWindow(QMainWindow, ObservingView):
         if len(names) == 0:
             return
         # local import to avoid circular import with FigureManager
-        from mantidqt.plotting.functions import pcolormesh_from_names, plot_from_names
+        from mantidqt.plotting.functions import pcolormesh, plot_from_names, plot_surface, plot_wireframe, plot_contour
 
         fig = self._canvas.figure
         fig_type = figure_type(fig, ax)
         if fig_type == FigureType.Image:
-            pcolormesh_from_names(names, fig=fig, ax=ax)
+            pcolormesh(names, fig=fig)
+        elif fig_type == FigureType.Surface:
+            plot_surface(names, fig=fig)
+        elif fig_type == FigureType.Wireframe:
+            plot_wireframe(names, fig=fig)
+        elif fig_type == FigureType.Contour:
+            plot_contour(names, fig=fig)
         else:
             plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
                             overplot=ax, fig=fig)

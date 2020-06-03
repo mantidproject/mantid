@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -21,16 +21,21 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ErrorReporter {
 public:
   /// Constructor
-  ErrorReporter(std::string application, Types::Core::time_duration startTime,
-                std::string exitCode, bool share);
+  ErrorReporter(const std::string &application,
+                const Types::Core::time_duration &startTime,
+                const std::string &exitCode, bool share);
   /// Constructor
-  ErrorReporter(std::string application, Types::Core::time_duration startTime,
-                std::string exitCode, bool share, std::string name,
-                std::string email, std::string textBox);
+  ErrorReporter(const std::string &application,
+                const Types::Core::time_duration &startTime,
+                const std::string &exitCode, bool share,
+                const std::string &name, const std::string &email,
+                const std::string &textBox);
   /// Constructor
-  ErrorReporter(std::string application, Types::Core::time_duration startTime,
-                std::string exitCode, bool share, std::string name,
-                std::string email, std::string textBox, std::string stacktrace);
+  ErrorReporter(const std::string &application,
+                const Types::Core::time_duration &startTime,
+                const std::string &exitCode, bool share,
+                const std::string &name, const std::string &email,
+                const std::string &textBox, const std::string &stacktrace);
   /// Sends an error report
   int sendErrorReport();
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLIndirect2.h"
 #include "MantidAPI/Axis.h"
@@ -13,9 +13,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cmath>
@@ -94,7 +96,7 @@ void LoadILLIndirect2::exec() {
   NeXus::NXRoot dataRoot(filenameData);
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
-  // Load Data details (number of tubes, channels, etc)
+  // Load Data details (number of tubes, channels, mode, etc)
   loadDataDetails(firstEntry);
   progress.report("Loaded metadata");
 
@@ -130,7 +132,6 @@ void LoadILLIndirect2::exec() {
  */
 void LoadILLIndirect2::setInstrumentName(
     const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
-
   if (instrumentNamePath.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
@@ -175,11 +176,25 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
       m_activeSDIndices.insert(i);
     }
   }
-
   m_numberOfSimpleDetectors = m_activeSDIndices.size();
 
   g_log.information() << "Number of activated single detectors is: "
                       << m_numberOfSimpleDetectors << std::endl;
+  try {
+    NXInt mode = entry.openNXInt("acquisition_mode");
+    mode.load();
+    m_bats = mode[0] == 1;
+  } catch (...) {
+    g_log.information() << "Unable to read acquisition_mode, assuming doppler";
+  }
+  try {
+    NXFloat firstTubeAngle = entry.openNXFloat("instrument/PSD/PSD angle 1");
+    firstTubeAngle.load();
+    m_firstTubeAngleRounded =
+        static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
+  } catch (...) {
+    g_log.information() << "Unable to read first tube anlge, assuming 25.1";
+  }
 }
 
 /**
@@ -220,44 +235,36 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   dataMon.load();
 
   // First, Monitor
-
   // Assign Y
   int *monitor_p = &dataMon(0, 0);
   m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
-
   // Assign Error
   MantidVec &E = m_localWorkspace->dataE(0);
   std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(),
                  [](const double v) { return std::sqrt(v); });
-
   // Then Tubes
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       const size_t index = i * m_numberOfPixelsPerTube + j + m_numberOfMonitors;
-
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       m_localWorkspace->dataY(index).assign(data_p,
                                             data_p + m_numberOfChannels);
-
       // Assign Error
       MantidVec &E = m_localWorkspace->dataE(index);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      [](const double v) { return std::sqrt(v); });
     }
   }
-
   // Then add Simple Detector (SD)
   size_t offset =
       m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors;
   for (auto &index : m_activeSDIndices) {
-
     // Assign Y, note that index starts from 1
     int *dataSD_p = &dataSD(index - 1, 0, 0);
     m_localWorkspace->dataY(offset).assign(dataSD_p,
                                            dataSD_p + m_numberOfChannels);
-
     // Assign Error
     MantidVec &E = m_localWorkspace->dataE(offset);
     std::transform(dataSD_p, dataSD_p + m_numberOfChannels, E.begin(),
@@ -271,24 +278,18 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
  * @param nexusfilename
  */
 void LoadILLIndirect2::loadNexusEntriesIntoProperties(
-    std::string nexusfilename) {
+    const std::string &nexusfilename) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
-
-  // Open NeXus file
   NXhandle nxfileID;
   NXstatus stat = NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);
-
   if (stat == NX_ERROR) {
     g_log.debug() << "convertNexusToProperties: Error loading "
                   << nexusfilename;
     throw Kernel::Exception::FileError("Unable to open File:", nexusfilename);
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
-
-  // Add also "Facility", as asked
   runDetails.addProperty("Facility", std::string("ILL"));
-
   NXclose(&nxfileID);
 }
 
@@ -296,20 +297,31 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
  * Run the Child Algorithm LoadInstrument.
  */
 void LoadILLIndirect2::runLoadInstrument() {
-
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  loadInst->setPropertyValue("Filename", getInstrumentFilePath());
+  loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
+  loadInst->execute();
+}
 
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
-    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
-    loadInst->execute();
-
-  } catch (std::runtime_error &) {
-    g_log.information("Cannot load the instrument definition.");
+/**
+ * Makes up the full path of the relevant IDF dependent on first tube angle and
+ * mode
+ * @return : the full path to the corresponding IDF
+ */
+std::string LoadILLIndirect2::getInstrumentFilePath() {
+  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
+  std::string idf = m_instrumentName;
+  if (!m_bats && m_firstTubeAngleRounded == 251) {
+    // load the instrument with the first tube analyser focused at the midpoint
+    // of sample to tube center
+    idf += "F";
   }
+  Poco::Path file(idf + "_Definition.xml");
+  Poco::Path fullPath(directory, file);
+  return fullPath.toString();
 }
 
 /**
@@ -323,17 +335,13 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
       m_localWorkspace->getInstrument();
   Geometry::IComponent_const_sptr component =
       instrument->getComponentByName(componentName);
-
   double r, theta, phi;
   V3D oldPos = component->getPos();
   oldPos.getSpherical(r, theta, phi);
-
   V3D newPos;
   newPos.spherical(r, twoTheta, phi);
-
   g_log.debug() << componentName << " : t = " << theta
                 << " ==> t = " << twoTheta << "\n";
-
   auto &compInfo = m_localWorkspace->mutableComponentInfo();
   const auto componentIndex = compInfo.indexOf(component->getComponentID());
   compInfo.setPosition(componentIndex, newPos);
@@ -345,7 +353,6 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
  * @param entry : the nexus entry
  */
 void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
-
   std::string prefix("single_tube_");
   int index = 1;
   for (auto i : m_activeSDIndices) {
@@ -366,27 +373,19 @@ void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
  * in which case all the tubes should be rotated around the sample.
  */
 void LoadILLIndirect2::rotateTubes() {
-  const auto &run = m_localWorkspace->run();
-  if (run.hasProperty("PSD.PSD Angle 1")) {
-    const double firstTubeAngle =
-        run.getPropertyAsSingleValue("PSD.PSD Angle 1");
-    const int firstTubeAngleRounded =
-        static_cast<int>(std::round(firstTubeAngle * 10));
-    if (firstTubeAngleRounded != 251 && firstTubeAngleRounded != 331) {
-      g_log.warning() << "Unexpected first tube angle found: " << firstTubeAngle
-                      << " degrees. Check your instrument configuration. "
-                         "Assuming 25.1 degrees instead.";
-    } else if (firstTubeAngleRounded == 331) {
-      auto rotator = this->createChildAlgorithm("RotateInstrumentComponent");
-      rotator->setProperty("Workspace", m_localWorkspace);
-      rotator->setProperty("RelativeRotation", false);
-      rotator->setPropertyValue("ComponentName", "psds");
-      rotator->setProperty("Y", 1.);
-      rotator->setProperty("Angle", -8.);
-      rotator->execute();
-    }
-  } else {
-    g_log.warning("Unable to find first tube angle, assuming 25.1 degree");
+  if (m_firstTubeAngleRounded != 251 && m_firstTubeAngleRounded != 331) {
+    g_log.warning() << "Unexpected first tube angle found: "
+                    << m_firstTubeAngleRounded
+                    << " degrees. Check your instrument configuration. "
+                       "Assuming 25.1 degrees instead.";
+  } else if (m_firstTubeAngleRounded == 331) {
+    auto rotator = this->createChildAlgorithm("RotateInstrumentComponent");
+    rotator->setProperty("Workspace", m_localWorkspace);
+    rotator->setProperty("RelativeRotation", false);
+    rotator->setPropertyValue("ComponentName", "psds");
+    rotator->setProperty("Y", 1.);
+    rotator->setProperty("Angle", -8.);
+    rotator->execute();
   }
 }
 

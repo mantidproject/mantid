@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
 #include <stdexcept>
@@ -10,8 +10,8 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -61,7 +61,7 @@ void BraggScattererInCrystalStructure::declareProperties() {
                   "Position of the scatterer");
 
   IValidator_sptr unitCellStringValidator =
-      boost::make_shared<UnitCellStringValidator>();
+      std::make_shared<UnitCellStringValidator>();
   declareProperty(
       std::make_unique<Kernel::PropertyWithValue<std::string>>(
           "UnitCell", "1.0 1.0 1.0 90.0 90.0 90.0", unitCellStringValidator),
@@ -112,7 +112,7 @@ void BraggScattererInCrystalStructure::afterPropertySet(
 
 /// Return a clone of the validator.
 IValidator_sptr UnitCellStringValidator::clone() const {
-  return boost::make_shared<UnitCellStringValidator>(*this);
+  return std::make_shared<UnitCellStringValidator>(*this);
 }
 
 /// Check if the string is valid input for Geometry::strToUnitCell.

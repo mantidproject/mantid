@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -37,9 +37,8 @@ public:
   void testRotateClockwise() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -76,9 +75,8 @@ public:
   void testRotateCounterClockwise() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -115,9 +113,8 @@ public:
   void testRotateClockwiseSampleAt001() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -154,9 +151,8 @@ public:
   void testRotateClockwiseSampleAt111() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");

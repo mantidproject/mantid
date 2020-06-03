@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,7 +20,6 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -90,7 +89,7 @@ DECLARE_ALGORITHM(MonteCarloAbsorption)
  */
 void MonteCarloAbsorption::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -102,11 +101,11 @@ void MonteCarloAbsorption::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
 
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
-                  "attempted (default: all points)");
+                  "attempted if ResimulateTracksForDifferentWavelengths=true");
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
       "The number of \"neutron\" events to generate per simulated point");
@@ -120,7 +119,7 @@ void MonteCarloAbsorption::init() {
                   "instrument with a sparse grid of "
                   "detectors interpolating the "
                   "results to the real instrument.");
-  auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto threeOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   threeOrMore->setLower(3);
   declareProperty(
       "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
@@ -129,7 +128,7 @@ void MonteCarloAbsorption::init() {
       "NumberOfDetectorRows",
       std::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
-  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto twoOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   twoOrMore->setLower(2);
   declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
                   twoOrMore,
@@ -261,9 +260,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  MCAbsorptionStrategy strategy(
-      *beamProfile, inputWS.sample(), efixed.emode(), nevents, nlambda,
-      maxScatterPtAttempts, useSparseInstrument, interpolateOpt, false, g_log);
+  MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), efixed.emode(),
+                                nevents, maxScatterPtAttempts,
+                                resimulateTracksForDiffWavelengths, g_log);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
@@ -284,10 +283,53 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
         toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
-    const auto lambdas = simulationWS.points(i);
+    const auto lambdas = simulationWS.points(i).rawData();
 
-    strategy.calculate(rng, detPos, lambdas, lambdaFixed,
-                       simulationWS.getSpectrum(i));
+    const auto nbins = lambdas.size();
+    const size_t lambdaStepSize = nbins / nlambda;
+
+    std::vector<double> packedLambdas;
+    std::vector<double> packedAttFactors;
+    std::vector<double> packedAttFactorErrors;
+
+    for (size_t j = 0; j < nbins; j += lambdaStepSize) {
+      packedLambdas.push_back(lambdas[j]);
+      packedAttFactors.push_back(0);
+      packedAttFactorErrors.push_back(0);
+      // Ensure we have the last point for the interpolation
+      if (lambdaStepSize > 1 && j + lambdaStepSize >= nbins && j + 1 != nbins) {
+        j = nbins - lambdaStepSize - 1;
+      }
+    }
+
+    strategy.calculate(rng, detPos, packedLambdas, lambdaFixed,
+                       packedAttFactors, packedAttFactorErrors);
+
+    for (size_t j = 0; j < packedLambdas.size(); j++) {
+      simulationWS.getSpectrum(i)
+          .dataY()[simulationWS.yIndexOfX(packedLambdas[j])] =
+          packedAttFactors[j];
+
+      simulationWS.getSpectrum(i)
+          .dataE()[simulationWS.yIndexOfX(packedLambdas[j])] =
+          packedAttFactorErrors[j];
+    }
+
+    // Interpolate through points not simulated. Simulation WS only has
+    // reduced X values if using sparse instrument so no interpolation required
+
+    if (!useSparseInstrument && lambdaStepSize > 1) {
+      auto histnew = simulationWS.histogram(i);
+
+      if (lambdaStepSize < nbins) {
+        interpolateOpt.applyInplace(histnew, lambdaStepSize);
+      } else {
+        std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
+                  histnew.y()[0]);
+      }
+      outputWS->setHistogram(i, histnew);
+    }
+
     prog.report(reportMsg);
 
     if (!useSparseInstrument) {

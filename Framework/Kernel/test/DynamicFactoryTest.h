@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/NObserver.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <string>
 #include <vector>
@@ -25,7 +25,7 @@ class CaseSensitiveIntFactory
     : public DynamicFactory<int, CaseSensitiveStringComparator> {};
 
 class DynamicFactoryTest : public CxxTest::TestSuite {
-  using int_ptr = boost::shared_ptr<int>;
+  using int_ptr = std::shared_ptr<int>;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

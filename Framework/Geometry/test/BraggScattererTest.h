@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ public:
 
 private:
   BraggScatterer_sptr getDefaultScatterer() {
-    return boost::make_shared<MockBraggScatterer>();
+    return std::make_shared<MockBraggScatterer>();
   }
 
   BraggScatterer_sptr getInitializedScatterer() {

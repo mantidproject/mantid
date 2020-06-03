@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,6 +27,15 @@ class V3D;
 } // namespace Kernel
 namespace Algorithms {
 class IBeamProfile;
+
+struct ComponentScatterPoint {
+  int componentIndex;
+  Kernel::V3D scatterPoint;
+};
+struct ScatterPointStat {
+  int generatedPointCount;
+  int usedPointCount;
+};
 
 /**
   Defines a volume where interactions of Tracks and Objects can take place.
@@ -55,17 +64,21 @@ public:
                              const Geometry::Track &afterScatter,
                              double lambdaBefore, double lambdaAfter) const;
   void generateScatterPointStats();
-  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng);
+  ComponentScatterPoint generatePoint(Kernel::PseudoRandomNumberGenerator &rng);
 
 private:
   int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng);
   boost::optional<Kernel::V3D>
   generatePointInObjectByIndex(int componentIndex,
                                Kernel::PseudoRandomNumberGenerator &rng);
-  void UpdateScatterPointCounts(int componentIndex);
-  int m_sampleScatterPoints = 0;
-  std::vector<int> m_envScatterPoints;
-  const boost::shared_ptr<Geometry::IObject> m_sample;
+  void UpdateScatterPointCounts(int componentIndex, bool pointUsed);
+  void UpdateScatterAngleStats(Kernel::V3D toStart, Kernel::V3D scatteredDirec);
+  ScatterPointStat m_sampleScatterPoints = {0, 0};
+  std::vector<ScatterPointStat> m_envScatterPoints;
+  double m_scatterAngleMean = 0;
+  double m_scatterAngleM2 = 0;
+  double m_scatterAngleSD = 0;
+  const std::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;

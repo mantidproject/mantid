@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -64,7 +64,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    EventWorkspace_sptr outws = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr outws = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("FastSineLogEventWS"));
     TS_ASSERT(outws);
 
@@ -95,7 +95,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
@@ -133,7 +133,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
@@ -173,7 +173,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
@@ -211,7 +211,7 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 

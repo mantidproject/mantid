@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -24,14 +24,14 @@ public:
 
 template <typename T>
 CatalogConfigService *makeCatalogConfigServiceAdapter(
-    const T &adaptee, const std::string key = "icatDownload.mountPoint") {
+    const T &adaptee, const std::string &key = "icatDownload.mountPoint") {
   class Adapter : public CatalogConfigService {
   private:
     const T &m_adaptee;
     std::string m_key;
 
   public:
-    Adapter(const T &adaptee, const std::string key)
+    Adapter(const T &adaptee, const std::string &key)
         : m_adaptee(adaptee), m_key(key) {}
     OptionalPath preferredMountPoint() const override {
       auto const mountPoint = m_adaptee.getString(m_key);

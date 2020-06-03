@@ -72,7 +72,7 @@ The following design principles should be adhered to when developing the GUI. If
 Adhere to MVP
 #############
 
-To ensure the GUI can be easily tested we follow the MVP design pattern. There is general guidance on this `here <https://developer.mantidproject.org/GUIDesignGuidelines.html>`_.
+To ensure the GUI can be easily tested we follow the MVP design pattern. There is general guidance on this `here <https://developer.mantidproject.org/MVPDesign.html>`_.
 
 The view cannot easily be tested, so the aim of MVP is to keep the view as simple as possible so that testing it is not necessary. Typically any user action on the view results in a notification to the presenter and is handled from there (even if that is just an update back to the view). Even simple things like which buttons are enabled on startup are controlled via the presenter rather than setting defaults in the view itself.
 

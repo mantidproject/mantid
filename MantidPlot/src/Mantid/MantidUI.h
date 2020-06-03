@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -19,7 +19,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -310,15 +309,17 @@ public slots:
       bool errs = true);
 
   // Set properties of a 1d graph which plots data from a workspace
-  static void setUpBinGraph(MultiLayer *ml, const QString &wsName,
-                            Mantid::API::MatrixWorkspace_const_sptr workspace);
+  static void
+  setUpBinGraph(MultiLayer *ml, const QString &wsName,
+                const Mantid::API::MatrixWorkspace_const_sptr &workspace);
 
   // Copy to a Table Y-values (and Err-values if errs==true) of bins with
   // indeces from i0 to i1 (inclusive) from a workspace
-  Table *createTableFromBins(const QString &wsName,
-                             Mantid::API::MatrixWorkspace_const_sptr workspace,
-                             const QList<int> &bins, bool errs = true,
-                             int fromRow = -1, int toRow = -1);
+  Table *
+  createTableFromBins(const QString &wsName,
+                      const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+                      const QList<int> &bins, bool errs = true,
+                      int fromRow = -1, int toRow = -1);
 
   // Copies selected columns (time bins) in a MantidMatrix to a Table
   Table *createTableFromSelectedColumns(MantidMatrix *m, bool errs);
@@ -499,8 +500,8 @@ public slots:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
 
   // Find the name of the first input workspace for an algorithm
-  QString
-  findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
+  QString findInputWorkspaceProperty(
+      const Mantid::API::IAlgorithm_sptr &algorithm) const;
   // Show Qt critical error message box
   void showCritical(const QString &) override;
   // Show the dialog monitoring currently running algorithms
@@ -595,7 +596,7 @@ private:
 
   /// This creates an algorithm dialog.
   MantidQt::API::AlgorithmDialog *
-  createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
+  createAlgorithmDialog(const Mantid::API::IAlgorithm_sptr &alg);
 
   /// This method accepts user inputs and executes loadraw/load nexus
   /// algorithm

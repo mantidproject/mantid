@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -25,9 +25,9 @@
 
 namespace {
 template <typename MDE, size_t nd>
-boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
+std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
 createOutputWorkspace(size_t splitInto) {
-  boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out(
+  std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out(
       new Mantid::DataObjects::MDEventWorkspace<MDE, nd>());
   Mantid::API::BoxController_sptr bc = out->getBoxController();
   bc->setSplitThreshold(100);
@@ -37,9 +37,9 @@ createOutputWorkspace(size_t splitInto) {
 
 template <typename MDE, size_t nd>
 void addMDDimensions(
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
-    Mantid::coord_t min, Mantid::coord_t max, std::string axisNameFormat,
-    std::string axisIdFormat) {
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
+    Mantid::coord_t min, Mantid::coord_t max, const std::string &axisNameFormat,
+    const std::string &axisIdFormat) {
 
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
@@ -62,10 +62,10 @@ void addMDDimensions(
 
 template <typename MDE, size_t nd>
 void addMDDimensionsWithFrames(
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
     Mantid::coord_t min, Mantid::coord_t max,
-    const Mantid::Geometry::MDFrame &frame, std::string axisNameFormat,
-    std::string axisIdFormat) {
+    const Mantid::Geometry::MDFrame &frame, const std::string &axisNameFormat,
+    const std::string &axisIdFormat) {
   for (size_t d = 0; d < nd; d++) {
     char name[200];
     sprintf(name, axisNameFormat.c_str(), d);
@@ -73,7 +73,7 @@ void addMDDimensionsWithFrames(
     sprintf(id, axisIdFormat.c_str(), d);
 
     // Use the same frame for all dimensions
-    auto dim = boost::make_shared<Mantid::Geometry::MDHistoDimension>(
+    auto dim = std::make_shared<Mantid::Geometry::MDHistoDimension>(
         std::string(name), std::string(id), frame, min, max, 10);
     out->addDimension(dim);
   }
@@ -82,10 +82,10 @@ void addMDDimensionsWithFrames(
 
 template <typename MDE, size_t nd>
 void addMDDimensionsWithIndividualFrames(
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
     Mantid::coord_t min, Mantid::coord_t max,
     const std::vector<Mantid::Geometry::MDFrame_sptr> &frame,
-    std::string axisNameFormat, std::string axisIdFormat) {
+    const std::string &axisNameFormat, const std::string &axisIdFormat) {
   for (size_t d = 0; d < nd; d++) {
     char name[200];
     sprintf(name, axisNameFormat.c_str(), d);
@@ -93,7 +93,7 @@ void addMDDimensionsWithIndividualFrames(
     sprintf(id, axisIdFormat.c_str(), d);
 
     // Use the same frame for all dimensions
-    auto dim = boost::make_shared<Mantid::Geometry::MDHistoDimension>(
+    auto dim = std::make_shared<Mantid::Geometry::MDHistoDimension>(
         std::string(name), std::string(id), *frame[d], min, max, 10);
     out->addDimension(dim);
   }
@@ -102,7 +102,7 @@ void addMDDimensionsWithIndividualFrames(
 
 template <typename MDE, size_t nd>
 void addData(
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
     size_t splitInto, Mantid::coord_t min, Mantid::coord_t max,
     size_t numEventsPerBox) {
   if (numEventsPerBox > 0) {
@@ -172,17 +172,17 @@ makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10,
 Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
     double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,
     size_t numBins = 10, coord_t max = 10.0, double errorSquared = 1.0,
-    std::string name = "", double numEvents = 1.0);
+    const std::string &name = "", double numEvents = 1.0);
 
 /// More general fake n-dimensionsal MDHistoWorkspace
 Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
     size_t numDims, double signal, double errorSquared, size_t *numBins,
-    coord_t *min, coord_t *max, std::string name = "");
+    coord_t *min, coord_t *max, const std::string &name = "");
 /// More general fake n-dimensionsal MDHistoWorkspace
 Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
     size_t numDims, double signal, double errorSquared, size_t *numBins,
     coord_t *min, coord_t *max, std::vector<std::string> names,
-    std::string name = "");
+    const std::string &name = "");
 
 //-------------------------------------------------------------------------------------
 /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
@@ -200,9 +200,9 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
  * @return shared ptr to the created workspace
  */
 template <typename MDE, size_t nd>
-boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
+std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
 makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
-            size_t numEventsPerBox = 0, std::string wsName = "",
+            size_t numEventsPerBox = 0, const std::string &wsName = "",
             std::string axisNameFormat = "Axis%d",
             std::string axisIdFormat = "Axis%d") {
   // Create bare workspace
@@ -238,11 +238,11 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
  * @return shared ptr to the created workspace
  */
 template <typename MDE, size_t nd>
-boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
+std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
 makeAnyMDEWWithIndividualFrames(
     size_t splitInto, coord_t min, coord_t max,
     std::vector<Mantid::Geometry::MDFrame_sptr> frames,
-    size_t numEventsPerBox = 0, std::string wsName = "",
+    size_t numEventsPerBox = 0, const std::string &wsName = "",
     std::string axisNameFormat = "Axis%d",
     std::string axisIdFormat = "Axis%d") {
   // Create bare workspace
@@ -280,10 +280,11 @@ makeAnyMDEWWithIndividualFrames(
  * @return shared ptr to the created workspace
  */
 template <typename MDE, size_t nd>
-boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
+std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
 makeAnyMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
                       const Mantid::Geometry::MDFrame &frame,
-                      size_t numEventsPerBox = 0, std::string wsName = "",
+                      size_t numEventsPerBox = 0,
+                      const std::string &wsName = "",
                       std::string axisNameFormat = "Axis%d",
                       std::string axisIdFormat = "Axis%d") {
   // Create bare workspace
@@ -305,7 +306,7 @@ makeAnyMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
 
 /** Make a MDEventWorkspace with MDLeanEvents */
 template <size_t nd>
-boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
+std::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
 makeMDEW(size_t splitInto, coord_t min, coord_t max,
          size_t numEventsPerBox = 0) {
   return makeAnyMDEW<MDLeanEvent<nd>, nd>(splitInto, min, max, numEventsPerBox);
@@ -313,7 +314,7 @@ makeMDEW(size_t splitInto, coord_t min, coord_t max,
 
 /** Make a MDEventWorkspace with MDLeanEvents nad MDFrames*/
 template <size_t nd>
-boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
+std::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
 makeMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
                    const Mantid::Geometry::MDFrame &frame,
                    size_t numEventsPerBox = 0) {
@@ -323,7 +324,7 @@ makeMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
 
 /** Make a MDEventWorkspace with MDLeanEvents and individual MDFrames*/
 template <size_t nd>
-boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
+std::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
 makeMDEWWithIndividualFrames(
     size_t splitInto, coord_t min, coord_t max,
     const std::vector<Mantid::Geometry::MDFrame_sptr> &frame,
@@ -335,7 +336,7 @@ makeMDEWWithIndividualFrames(
 /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto,
  * not 10 */
 template <size_t nd>
-boost::shared_ptr<MDEventWorkspace<MDEvent<nd>, nd>>
+std::shared_ptr<MDEventWorkspace<MDEvent<nd>, nd>>
 makeMDEWFull(size_t splitInto, coord_t min, coord_t max,
              size_t numEventsPerBox = 0) {
   return makeAnyMDEW<MDEvent<nd>, nd>(splitInto, min, max, numEventsPerBox);
@@ -499,7 +500,7 @@ static void extents_match(MDBOX box, size_t dim, double min, double max) {
   TSM_ASSERT_DELTA(dim, box->getExtents(dim).getMax(), max, 1e-6);
 }
 
-void checkAndDeleteFile(std::string filename);
+void checkAndDeleteFile(const std::string &filename);
 
 //=====================================================================================
 //===================================== TEST METHODS

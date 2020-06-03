@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <Poco/File.h>
 #include <boost/regex.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -1530,7 +1530,7 @@ void MdViewerWidget::updateAppState() {
  */
 void MdViewerWidget::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(ws);
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
   if (src) {
@@ -1559,7 +1559,7 @@ void MdViewerWidget::afterReplaceHandle(
  * @param ws : Pointer to workspace being deleted
  */
 void MdViewerWidget::preDeleteHandle(const std::string &wsName,
-                                     const boost::shared_ptr<Workspace> ws) {
+                                     const std::shared_ptr<Workspace> &ws) {
   UNUSED_ARG(ws);
 
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
@@ -1663,7 +1663,7 @@ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e,
     // MDWorkspace is loaded.
     if (currentView->getViewType() == ModeControlWidget::Views::SPLATTERPLOT &&
         otherWorkspacePresent()) {
-      if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
+      if (std::dynamic_pointer_cast<IPeaksWorkspace>(
               AnalysisDataService::Instance().retrieve(
                   candidate.toStdString()))) {
         wsNames.append(candidate);

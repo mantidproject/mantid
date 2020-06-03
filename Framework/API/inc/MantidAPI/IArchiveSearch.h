@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,7 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <set>
 #include <string>
@@ -52,6 +52,6 @@ public:
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch
-using IArchiveSearch_sptr = boost::shared_ptr<IArchiveSearch>;
+using IArchiveSearch_sptr = std::shared_ptr<IArchiveSearch>;
 } // namespace API
 } // namespace Mantid

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -168,18 +168,16 @@ GSLVector &GSLVector::operator*=(const GSLVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
-  for (auto &x : m_data) {
-    x *= d;
-  }
+  std::transform(m_data.begin(), m_data.end(), m_data.begin(),
+                 [d](double x) { return x * d; });
   return *this;
 }
 
 /// Add a number
 /// @param d :: The number
 GSLVector &GSLVector::operator+=(const double d) {
-  for (auto &x : m_data) {
-    x += d;
-  }
+  std::transform(m_data.begin(), m_data.end(), m_data.begin(),
+                 [d](double x) { return x + d; });
   return *this;
 }
 

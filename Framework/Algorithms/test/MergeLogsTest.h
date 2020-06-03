@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -116,7 +116,7 @@ public:
     return log;
   }
 
-  void testLogValues(MatrixWorkspace_sptr ws, const std::string &name,
+  void testLogValues(const MatrixWorkspace_sptr &ws, const std::string &name,
                      const int msize, double value) {
     TimeSeriesProperty<double> *log =
         ws->run().getTimeSeriesProperty<double>(name);
@@ -131,7 +131,7 @@ public:
   }
 
   // msize1 < msize2!
-  void testLogValues(MatrixWorkspace_sptr ws, const std::string &name,
+  void testLogValues(const MatrixWorkspace_sptr &ws, const std::string &name,
                      const int msize1, const int msize2, const double v1,
                      const double v2) {
     TimeSeriesProperty<double> *log =

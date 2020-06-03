@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -35,7 +35,7 @@ class CharIconPainter;
 class EXPORT_OPT_MANTIDQT_ICONS CharIconEngine : public QIconEngine {
 public:
   CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
-                 QList<QHash<QString, QVariant>> options);
+                 const QList<QHash<QString, QVariant>> &options);
   void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode,
              QIcon::State state) override;
   QPixmap pixmap(const QSize &size, QIcon::Mode mode,

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -18,8 +18,8 @@
 #include <QColor>
 #include <QPointer>
 #include <QWidget>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 
 class pqPipelineSource;
 
@@ -30,7 +30,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTableControllerVsi
     : public QWidget {
   Q_OBJECT
 public:
-  PeaksTableControllerVsi(boost::shared_ptr<CameraManager> cameraManager,
+  PeaksTableControllerVsi(std::shared_ptr<CameraManager> cameraManager,
                           QWidget *parent = nullptr);
   ~PeaksTableControllerVsi() override;
   std::vector<bool> getViewablePeaks();
@@ -69,8 +69,8 @@ private:
   void setPeakSourceColorToDefault();
   std::map<std::string, QColor> getColors();
   MantidQt::SliceViewer::PeakPalette<QColor> m_peakPalette;
-  boost::shared_ptr<CameraManager> m_cameraManager;
-  boost::shared_ptr<Mantid::VATES::CompositePeaksPresenterVsi> m_presenter;
+  std::shared_ptr<CameraManager> m_cameraManager;
+  std::shared_ptr<Mantid::VATES::CompositePeaksPresenterVsi> m_presenter;
   /// Object for choosing a PeakTransformFactory based on the workspace type.
   Mantid::Geometry::PeakTransformSelector m_peakTransformSelector;
   PeaksTabWidget *m_peaksTabWidget;

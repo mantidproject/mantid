@@ -216,22 +216,6 @@ Output:
    9 0.007436056621
    10 0.004211476538
 
-**Example - Load detector grouping into table:**
-
-.. testcode:: ExLoadDetectorGrouping
-
-   # Load some spectra
-   ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumList="1,16,17,32",DetectorGroupingTable="detectorTable")
-   tab = mtd['detectorTable']
-   for i in range(0,tab.rowCount()):
-       print(tab.cell(i,0))
-
-Output:
-
-.. testoutput:: ExLoadDetectorGrouping
-
-   [ 1 16]
-   [17 32]
 
 .. categories::
 

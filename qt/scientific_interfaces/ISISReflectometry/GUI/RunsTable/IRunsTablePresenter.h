@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,6 +47,8 @@ public:
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
+  virtual void setTablePrecision(int &precision) = 0;
+  virtual void resetTablePrecision() = 0;
   virtual void settingsChanged() = 0;
 };
 } // namespace ISISReflectometry

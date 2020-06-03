@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidAlgorithms/ExtractSpectra2.h"
@@ -72,7 +72,7 @@ void ExtractSpectra::init() {
                   "An X value that is in the highest X "
                   "value bin to be retained (default: max "
                   "X)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "The index number of the first entry in the Workspace that "
@@ -114,7 +114,7 @@ void ExtractSpectra::exec() {
     if (out != m_inputWorkspace)
       m_inputWorkspace = m_inputWorkspace->clone();
   } else {
-    auto extract = boost::make_shared<ExtractSpectra2>();
+    auto extract = std::make_shared<ExtractSpectra2>();
     setupAsChildAlgorithm(extract);
     extract->setWorkspaceInputProperties(
         "InputWorkspace", m_inputWorkspace, IndexType::WorkspaceIndex,
@@ -128,7 +128,7 @@ void ExtractSpectra::exec() {
   if (isDefault("XMin") && isDefault("XMax"))
     return;
 
-  eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
+  eventW = std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
   if (eventW)
     this->execEvent();
   else
@@ -271,7 +271,7 @@ void ExtractSpectra::checkProperties() {
     if ((m_minX == m_maxX ||
          (m_inputWorkspace->isHistogramData() && m_maxX == m_minX + 1)) &&
         m_commonBoundaries &&
-        !boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace)) {
+        !std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace)) {
       g_log.error("The X range given lies entirely within a single bin");
       throw std::out_of_range(
           "The X range given lies entirely within a single bin");

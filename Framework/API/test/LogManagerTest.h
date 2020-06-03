@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/LogManager.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -28,6 +29,7 @@ namespace {
 class ConcreteProperty : public Property {
 public:
   ConcreteProperty() : Property("Test", typeid(int)) {}
+  ConcreteProperty(std::string name) : Property(name, typeid(int)) {}
   ConcreteProperty *clone() const override {
     return new ConcreteProperty(*this);
   }
@@ -35,16 +37,37 @@ public:
   std::string getDefault() const override {
     return "getDefault() is not implemented in this class";
   }
-  std::string value() const override { return "Nothing"; }
+  std::string value() const override { return m_value; }
   Json::Value valueAsJson() const override { return Json::Value(); }
-  std::string setValue(const std::string &) override { return ""; }
+  std::string setValue(const std::string &value) override {
+    m_value = value;
+    return m_value;
+  }
   std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
-  std::string setDataItem(const boost::shared_ptr<DataItem>) override {
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override {
     return "";
   }
   Property &operator+=(Property const *) override { return *this; }
+
+private:
+  std::string m_value = "Nothing";
 };
+
+void addTestTimeSeriesFilter(LogManager &run, const std::string &name) {
+  auto timeSeries = new TimeSeriesProperty<bool>(name);
+  timeSeries->addValue("2012-07-19T16:17:00", true);
+  timeSeries->addValue("2012-07-19T16:17:10", true);
+  timeSeries->addValue("2012-07-19T16:17:20", true);
+  timeSeries->addValue("2012-07-19T16:17:30", true);
+  timeSeries->addValue("2012-07-19T16:17:40", false);
+  timeSeries->addValue("2012-07-19T16:17:50", false);
+  timeSeries->addValue("2012-07-19T16:18:00", true);
+  timeSeries->addValue("2012-07-19T16:18:10", true);
+  timeSeries->addValue("2012-07-19T16:19:20", true);
+  timeSeries->addValue("2012-07-19T16:19:20", true);
+  run.addProperty(timeSeries);
+}
 
 template <typename T>
 void addTestTimeSeries(LogManager &run, const std::string &name) {
@@ -63,7 +86,8 @@ void addTestTimeSeries(LogManager &run, const std::string &name) {
 }
 } // namespace
 
-void addTimeSeriesEntry(LogManager &runInfo, std::string name, double val) {
+void addTimeSeriesEntry(LogManager &runInfo, const std::string &name,
+                        double val) {
   TimeSeriesProperty<double> *tsp;
   tsp = new TimeSeriesProperty<double>(name);
   tsp->addValue("2011-05-24T00:00:00", val);
@@ -184,7 +208,7 @@ public:
     runInfo.addProperty(p);
 
     TS_ASSERT_EQUALS(runInfo.getMemorySize(),
-                     sizeof(ConcreteProperty) + sizeof(void *));
+                     p->getMemorySize() + sizeof(Property *));
   }
 
   void test_GetTimeSeriesProperty_Returns_TSP_When_Log_Exists() {
@@ -529,6 +553,92 @@ public:
     run3.loadNexus(th.file.get(), "");
   }
 
+  void test_operator_equals() {
+    LogManager a;
+    LogManager b;
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    b.addProperty(std::make_unique<ConcreteProperty>());
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equals_when_number_of_entries_differ() {
+    LogManager a;
+    LogManager b;
+    a.addProperty(std::make_unique<ConcreteProperty>("a1"));
+    b.addProperty(std::make_unique<ConcreteProperty>("b1"));
+    b.addProperty(std::make_unique<ConcreteProperty>("b2"));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equals_when_values_differ() {
+    LogManager a;
+    LogManager b;
+    auto prop1 = std::make_unique<ConcreteProperty>();
+    auto prop2 = std::make_unique<ConcreteProperty>();
+    prop2->setValue("another_value");
+    a.addProperty(std::move(prop1));
+    b.addProperty(std::move(prop2));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equals_when_keys_differ() {
+    LogManager a;
+    LogManager b;
+    auto prop1 = std::make_unique<ConcreteProperty>("Temp");
+    auto prop2 = std::make_unique<ConcreteProperty>("Pressure");
+    a.addProperty(std::move(prop1));
+    b.addProperty(std::move(prop2));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_has_invalid_values_filter() {
+    LogManager runInfo;
+    const std::string name = "test_has_invalid_values_filter";
+    const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
+    TSM_ASSERT("The filter name should start with the log name",
+               filterName.rfind(name, 0) == 0);
+    addTestTimeSeries<double>(runInfo, name);
+
+    TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), false);
+    addTestTimeSeriesFilter(runInfo, filterName);
+
+    TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), true);
+  }
+
+  void test_get_invalid_values_filter() {
+    LogManager runInfo;
+    const std::string name = "test_get_invalid_values_filter";
+    const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
+    addTestTimeSeries<double>(runInfo, name);
+    auto *filterfail = runInfo.getInvalidValuesFilter(name);
+    TSM_ASSERT("The filter was returned correrctly as NULL",
+               filterfail == nullptr);
+    addTestTimeSeriesFilter(runInfo, filterName);
+
+    auto *filter = runInfo.getInvalidValuesFilter(name);
+    TSM_ASSERT("The filter was returned incorrectly as NULL", filter);
+    TS_ASSERT_THROWS_NOTHING(filter->firstTime());
+
+    // check it can be used to filter the log
+    auto *log = runInfo.getProperty(name);
+    auto *tsLog = dynamic_cast<TimeSeriesProperty<double> *>(log);
+    TS_ASSERT(tsLog);
+    if (tsLog) {
+      auto filtered =
+          std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog, *filter);
+      TS_ASSERT_DELTA(filtered->nthValue(0), 2, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(1), 3, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(2), 4, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(3), 5, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(4), 21, 1e-5);
+      TS_ASSERT_DELTA(filtered->nthValue(5), 22, 1e-5);
+    }
+  }
+
 private:
   template <typename T>
   void doTest_GetPropertyAsSingleValue_SingleType(const T value) {
@@ -554,8 +664,7 @@ private:
     LogManager runInfo;
     const std::string name = "T_prop";
     runInfo.addProperty<T>(name, value);
-    int result(-1);
-    result = runInfo.getPropertyAsIntegerValue(name);
+    int result = runInfo.getPropertyAsIntegerValue(name);
     TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsIntegerValue(name));
     TS_ASSERT_EQUALS(value, static_cast<T>(result));
   }
@@ -579,12 +688,11 @@ public:
   }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {
-    double value(0.0);
     for (size_t i = 0; i < 20000; ++i) {
-      value = m_testRun.getPropertyAsSingleValue(m_propName);
+      // This has an observable side-effect of calling, so we don't need
+      // to store its return value
+      m_testRun.getPropertyAsSingleValue(m_propName);
     }
-    // Enure variable is used so that it is not optimised away by the compiler
-    value += 1.0;
   }
 
   LogManager m_testRun;

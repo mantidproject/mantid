@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -74,7 +74,6 @@ public:
     VariancesTester variances{1.0, 4.0};
     auto old_ptr = &variances[0];
     StandardDeviationVectorOfTester sigmas(std::move(variances));
-    TS_ASSERT(!variances);
     TS_ASSERT_EQUALS(&sigmas[0], old_ptr);
     TS_ASSERT_EQUALS(sigmas[0], 1.0);
     TS_ASSERT_EQUALS(sigmas[1], 2.0);
@@ -93,7 +92,6 @@ public:
     auto old_ptr = &variances[0];
     StandardDeviationVectorOfTester sigmas{};
     sigmas = std::move(variances);
-    TS_ASSERT(!variances);
     TS_ASSERT_EQUALS(&sigmas[0], old_ptr);
     TS_ASSERT_EQUALS(sigmas[0], 1.0);
     TS_ASSERT_EQUALS(sigmas[1], 2.0);

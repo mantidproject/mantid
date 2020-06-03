@@ -21,7 +21,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="MantidQt::API::MWRunFiles" name="mwInputFile" native="true">
+       <widget class="MantidQt::API::FileFinderWidget" name="mwInputFile" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -623,9 +623,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>

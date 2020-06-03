@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------
 // Includes
@@ -191,12 +191,12 @@ void SampleTransmission::algorithmComplete(bool error) {
 
   // Fill the output table
   double scattering = ws->y(1)[0];
-  QTreeWidgetItem *scatteringItem = new QTreeWidgetItem();
+  auto *scatteringItem = new QTreeWidgetItem();
   scatteringItem->setText(0, "Scattering");
   scatteringItem->setText(1, QString::number(scattering));
   m_uiForm.twResults->addTopLevelItem(scatteringItem);
 
-  QTreeWidgetItem *transmissionItem = new QTreeWidgetItem();
+  auto *transmissionItem = new QTreeWidgetItem();
   transmissionItem->setText(0, "Transmission");
   m_uiForm.twResults->addTopLevelItem(transmissionItem);
   transmissionItem->setExpanded(true);

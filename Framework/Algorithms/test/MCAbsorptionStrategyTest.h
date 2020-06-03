@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,14 +42,9 @@ public:
     EXPECT_CALL(testBeamProfile, defineActiveRegion(_))
         .WillOnce(Return(testSampleSphere.getShape().getBoundingBox()));
     const size_t nevents(10), maxTries(100);
-    const int nLambda(1);
-    Mantid::Algorithms::InterpolationOption interpolateOptEnum;
-    interpolateOptEnum.set(
-        Mantid::Algorithms::InterpolationOption::Value::CSpline);
     MCAbsorptionStrategy mcabsorb(testBeamProfile, testSampleSphere,
                                   Mantid::Kernel::DeltaEMode::Type::Direct,
-                                  nevents, nLambda, maxTries, false,
-                                  interpolateOptEnum, false, g_log);
+                                  nevents, maxTries, false, g_log);
     // 3 random numbers per event expected
     MockRNG rng;
     EXPECT_CALL(rng, nextValue())
@@ -62,21 +57,16 @@ public:
         .WillRepeatedly(Return(testRay));
     const V3D endPos(0.7, 0.7, 1.4);
     const double lambdaBefore(2.5), lambdaAfter(3.5);
-    Mantid::HistogramData::Points lambdas{lambdaBefore};
     const double lambdaFixed = lambdaAfter;
 
-    Mantid::DataObjects::Histogram1D attenuationFactorSpectrum(
-        Mantid::HistogramData::Histogram::XMode::Points,
-        Mantid::HistogramData::Histogram::YMode::Counts);
-    // attenuationFactorSpectrum.setX(lambdas.cowData);
-    attenuationFactorSpectrum.dataX() = {lambdaBefore};
-    attenuationFactorSpectrum.dataY() = {0};
-    attenuationFactorSpectrum.dataE() = {0};
-    mcabsorb.calculate(rng, endPos, lambdas, lambdaFixed,
-                       attenuationFactorSpectrum);
-    TS_ASSERT_DELTA(0.0043828472, attenuationFactorSpectrum.dataY()[0], 1e-08);
-    TS_ASSERT_DELTA(1.0 / std::sqrt(nevents),
-                    attenuationFactorSpectrum.dataE()[0], 1e-08);
+    std::vector<double> lambdas = {lambdaBefore};
+    std::vector<double> attenuationFactors = {0};
+    std::vector<double> attenuationFactorErrors = {0};
+    mcabsorb.calculate(rng, endPos, lambdas, lambdaFixed, attenuationFactors,
+                       attenuationFactorErrors);
+    TS_ASSERT_DELTA(0.0043828472, attenuationFactors[0], 1e-08);
+    TS_ASSERT_DELTA(1.0 / std::sqrt(nevents), attenuationFactorErrors[0],
+                    1e-08);
   }
 
   //----------------------------------------------------------------------------
@@ -95,28 +85,20 @@ public:
     RectangularBeamProfile testBeamProfile(
         ReferenceFrame(Y, Z, Right, "source"), V3D(), 1, 1);
     const size_t nevents(10), maxTries(1);
-    const int nLambda(1);
-    Mantid::Algorithms::InterpolationOption interpolateOptEnum;
-    interpolateOptEnum.set(
-        Mantid::Algorithms::InterpolationOption::Value::CSpline);
     MCAbsorptionStrategy mcabs(testBeamProfile, testThinAnnulus,
                                Mantid::Kernel::DeltaEMode::Type::Direct,
-                               nevents, nLambda, maxTries, false,
-                               interpolateOptEnum, false, g_log);
+                               nevents, maxTries, false, g_log);
     MockRNG rng;
     EXPECT_CALL(rng, nextValue()).WillRepeatedly(Return(0.5));
     const double lambdaBefore(2.5), lambdaAfter(3.5);
-    Mantid::HistogramData::Points lambdas{lambdaBefore};
     const double lambdaFixed = lambdaAfter;
     const V3D endPos(0.7, 0.7, 1.4);
-    Mantid::DataObjects::Histogram1D attenuationFactorSpectrum(
-        Mantid::HistogramData::Histogram::XMode::Points,
-        Mantid::HistogramData::Histogram::YMode::Counts);
-    attenuationFactorSpectrum.dataX() = {lambdaBefore};
-    attenuationFactorSpectrum.dataY() = {0};
-    attenuationFactorSpectrum.dataE() = {0};
+    std::vector<double> lambdas = {lambdaBefore};
+    std::vector<double> attenuationFactors = {0};
+    std::vector<double> attenuationFactorErrors = {0};
     TS_ASSERT_THROWS(mcabs.calculate(rng, endPos, lambdas, lambdaFixed,
-                                     attenuationFactorSpectrum),
+                                     attenuationFactors,
+                                     attenuationFactorErrors),
                      const std::runtime_error &)
   }
 

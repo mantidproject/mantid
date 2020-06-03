@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,7 @@ private:
   class RebinParams {
   public:
     RebinParams(const double qMin, const bool qMinIsDefault, const double qMax,
-                const bool qMaxIsDefault, const boost::optional<double> qStep)
+                const bool qMaxIsDefault, const boost::optional<double> &qStep)
         : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax),
           m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
 
@@ -72,33 +72,34 @@ private:
   void init() override;
   void exec() override;
   std::string
-  getRunNumberForWorkspaceGroup(WorkspaceGroup_const_sptr workspace);
+  getRunNumberForWorkspaceGroup(const WorkspaceGroup_const_sptr &workspace);
   WorkspaceNames getOutputWorkspaceNames();
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
-  getDetectorNames(Mantid::API::MatrixWorkspace_sptr inputWS);
+  getDetectorNames(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   /// Correct detector positions vertically
   Mantid::API::MatrixWorkspace_sptr
   correctDetectorPositions(Mantid::API::MatrixWorkspace_sptr inputWS,
                            const double twoTheta);
   /// Calculate theta
-  double calculateTheta(Mantid::API::MatrixWorkspace_sptr inputWS);
+  double calculateTheta(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   /// Find cropping and binning parameters
-  RebinParams getRebinParams(MatrixWorkspace_sptr inputWS, const double theta);
-  boost::optional<double> getQStep(MatrixWorkspace_sptr inputWS,
+  RebinParams getRebinParams(const MatrixWorkspace_sptr &inputWS,
+                             const double theta);
+  boost::optional<double> getQStep(const MatrixWorkspace_sptr &inputWS,
                                    const double theta);
   /// Rebin and scale a workspace in Q
   Mantid::API::MatrixWorkspace_sptr
-  rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS,
+  rebinAndScale(const Mantid::API::MatrixWorkspace_sptr &inputWS,
                 RebinParams const &params);
   /// Crop a workspace in Q
-  MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr cropQ(const MatrixWorkspace_sptr &inputWS,
                              RebinParams const &params);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(
-      Mantid::API::IAlgorithm_sptr alg,
-      Mantid::Geometry::Instrument_const_sptr instrument);
+      const Mantid::API::IAlgorithm_sptr &alg,
+      const Mantid::Geometry::Instrument_const_sptr &instrument);
   /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
   getPolarizationEfficiencies();

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,7 +15,7 @@ namespace Functions {
 
 /** FullprofPolynomial : Polynomial background defined in Fullprof
  */
-class DLLExport FullprofPolynomial : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL FullprofPolynomial : public BackgroundFunction {
 public:
   FullprofPolynomial();
 
@@ -57,7 +57,7 @@ private:
   double m_bkpos;
 };
 
-using FullprofPolynomial_sptr = boost::shared_ptr<FullprofPolynomial>;
+using FullprofPolynomial_sptr = std::shared_ptr<FullprofPolynomial>;
 
 } // namespace Functions
 } // namespace CurveFitting

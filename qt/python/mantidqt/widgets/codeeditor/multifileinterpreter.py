@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 import os.path as osp
 
@@ -69,7 +67,7 @@ class MultiPythonFileInterpreter(QWidget):
         if filename is None:
             title = NEW_TAB_TITLE
             i = 1
-            while title in self.tab_titles:
+            while title in self.stripped_tab_titles:
                 title = "{} ({})".format(NEW_TAB_TITLE, i)
                 i += 1
             return title, title
@@ -77,8 +75,13 @@ class MultiPythonFileInterpreter(QWidget):
             return osp.basename(filename), filename
 
     @property
-    def tab_titles(self):
-        return [self._tabs.tabText(i).rstrip('*') for i in range(self.editor_count)]
+    def stripped_tab_titles(self):
+        tab_text = [self._tabs.tabText(i) for i in range(self.editor_count)]
+        tab_text = [txt.rstrip('*') for txt in tab_text]
+        # Some DEs (such as KDE) will automatically assign keyboard shortcuts using the Qt & annotation
+        # see Qt Docs - qtabwidget#addTab
+        tab_text = [txt.replace('&', '') for txt in tab_text]
+        return tab_text
 
     def closeEvent(self, event):
         self.deleteLater()

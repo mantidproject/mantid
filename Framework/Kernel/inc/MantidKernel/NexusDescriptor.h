@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,12 +42,17 @@ public:
   static const unsigned char HDF5Signature[8];
 
   /// Returns true if the file is considered to store data in a hierarchy
-  static bool isHDF(const std::string &filename,
-                    const Version version = AnyVersion);
+  static bool isReadable(const std::string &filename,
+                         const Version version = AnyVersion);
 
 public:
-  /// Constructor accepting a filename
-  NexusDescriptor(const std::string &filename);
+  /**
+   * Constructor accepting a filename
+   * @param filename input filename
+   * @param init true: expensive init including walking through the file, false:
+   * don't init
+   */
+  NexusDescriptor(const std::string &filename, const bool init = true);
   /// Destructor
   ~NexusDescriptor();
 

@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-public-methods,invalid-name,protected-access
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from testhelpers import assertRaisesNothing
 
@@ -15,7 +13,6 @@ from LoadCIF import SpaceGroupBuilder, UnitCellBuilder, AtomListBuilder, UBMatri
 from mantid.api import AlgorithmFactory
 from mantid.geometry import UnitCell
 
-from six import iteritems
 import numpy as np
 import sys
 
@@ -208,7 +205,7 @@ class AtomListBuilderTest(unittest.TestCase):
         uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'], '22': [u'0.01', u'0.02'],
                      '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.items()])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al'])
                            ]))
@@ -225,7 +222,7 @@ class AtomListBuilderTest(unittest.TestCase):
                      '22': [u'0.01', u'0.02'],
                      '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.items()])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al'])
                            ]))
@@ -241,7 +238,7 @@ class AtomListBuilderTest(unittest.TestCase):
         bElements = {'11': [u'1.0', u'2.0'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
                      '22': [u'1.0', u'2.0'], '23': [u'0.0', u'0.0'], '33': [u'4.0', u'5.0']}
 
-        bDict = dict([(u'_atom_site_aniso_b_{0}'.format(key), value) for key, value in iteritems(bElements)])
+        bDict = dict([(u'_atom_site_aniso_b_{0}'.format(key), value) for key, value in bElements.items()])
         bDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al'])
                            ]))
@@ -256,7 +253,7 @@ class AtomListBuilderTest(unittest.TestCase):
         uElements = {'11': [u'0.01'], '12': [u'0.0'], '13': [u'0.0'], '22': [u'0.01'],
                      '23': [u'0.0'], '33': [u'0.04']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.items()])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Al']),
                            (u'_atom_site_u_iso_or_equiv', [u'0.01', u'invalid'])
@@ -272,7 +269,7 @@ class AtomListBuilderTest(unittest.TestCase):
         uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
                      '22': [u'0.01', u'0.02'], '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.items()])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al']),
                            (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])

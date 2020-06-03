@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrix.h"
 #include "../ApplicationWindow.h"
@@ -91,7 +91,7 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 }
 } // namespace
 
-MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
+MantidMatrix::MantidMatrix(const Mantid::API::MatrixWorkspace_const_sptr &ws,
                            QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
     : MdiSubWindow(parent, label, name, nullptr), WorkspaceObserver(),
@@ -213,8 +213,8 @@ void MantidMatrix::viewChanged(int index) {
   }
 }
 
-void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
-                         int end) {
+void MantidMatrix::setup(const Mantid::API::MatrixWorkspace_const_sptr &ws,
+                         int start, int end) {
   if (!ws) {
     QMessageBox::critical(nullptr, "WorkspaceMatrixModel error",
                           "2D workspace expected.");
@@ -968,7 +968,7 @@ void MantidMatrix::repaintAll() {
 
 void MantidMatrix::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (!ws)
     return;
   if (wsName != m_strName) {
@@ -984,7 +984,7 @@ void MantidMatrix::afterReplaceHandle(
   }
 
   Mantid::API::MatrixWorkspace_sptr new_workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(
+      std::dynamic_pointer_cast<MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
 
   // If the cast failed (e.g. Matrix2D became a GroupWorkspace) do not try to
@@ -997,7 +997,8 @@ void MantidMatrix::afterReplaceHandle(
   }
 }
 
-void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+void MantidMatrix::changeWorkspace(
+    const Mantid::API::MatrixWorkspace_sptr &ws) {
   if (m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms()) ||
       m_cols != static_cast<int>(ws->blocksize())) {
     closeDependants();
@@ -1130,7 +1131,7 @@ void MantidMatrix::setMatrixProperties() {
 
 void MantidMatrix::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   (void)wsName; // Avoid unused warning
   if (m_workspace.get() == ws.get()) {
     emit needToClose();
@@ -1171,7 +1172,8 @@ void MantidMatrix::goToTab(const QString &name) {
  */
 const std::string &MantidMatrix::getWorkspaceName() { return m_strName; }
 
-void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
+void findYRange(const MatrixWorkspace_const_sptr &ws, double &miny,
+                double &maxy) {
   // this is here to fill m_min and m_max with numbers that aren't nan
   miny = std::numeric_limits<double>::max();
   maxy = std::numeric_limits<double>::lowest();
@@ -1349,7 +1351,8 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
  * Update the existing extensions
  * @param ws: the new workspace
  */
-void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
+void MantidMatrix::updateExtensions(
+    const Mantid::API::MatrixWorkspace_sptr &ws) {
   auto it = m_extensions.begin();
   while (it != m_extensions.cend()) {
     auto type = it->first;

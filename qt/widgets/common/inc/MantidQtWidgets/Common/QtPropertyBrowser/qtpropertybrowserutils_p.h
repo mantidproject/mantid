@@ -192,7 +192,7 @@ private slots:
 
 private:
   void handleKeyEvent(QKeyEvent *e);
-  int translateModifiers(Qt::KeyboardModifiers state,
+  int translateModifiers(const Qt::KeyboardModifiers &state,
                          const QString &text) const;
 
   int m_num;

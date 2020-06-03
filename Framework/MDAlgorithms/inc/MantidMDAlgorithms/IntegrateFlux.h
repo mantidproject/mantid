@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -40,7 +40,7 @@ private:
   void init() override;
   void exec() override;
 
-  boost::shared_ptr<API::MatrixWorkspace>
+  std::shared_ptr<API::MatrixWorkspace>
   createOutputWorkspace(const API::MatrixWorkspace &inputWS, size_t nX) const;
   void integrateSpectra(const API::MatrixWorkspace &inputWS,
                         API::MatrixWorkspace &integrWS) const;

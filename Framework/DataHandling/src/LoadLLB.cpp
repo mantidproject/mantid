@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/Axis.h"
@@ -149,9 +149,6 @@ void LoadLLB::initWorkSpace(NeXus::NXEntry &entry) {
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
-/**
- *
- */
 void LoadLLB::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("nxbeam/incident_wavelength");
@@ -198,7 +195,7 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
 
   std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
   for (size_t i = 0; i < m_numberOfTubes; i++) {
-    float *data_p = &data(static_cast<int>(i), 0);
+    const float *data_p = &data(static_cast<int>(i), 0);
     float currentSpec = 0;
 
     for (size_t j = 0; j < m_numberOfChannels; ++j)

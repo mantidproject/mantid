@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -50,7 +50,7 @@ void WeightedMeanOfWorkspace::exec() {
   MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != nullptr) {
     throw std::runtime_error(
         "WeightedMeanOfWorkspace cannot handle EventWorkspaces!");

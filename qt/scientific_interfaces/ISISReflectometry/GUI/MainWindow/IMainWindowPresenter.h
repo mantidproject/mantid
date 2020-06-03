@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,6 +23,19 @@ class IMainWindowPresenter {
 public:
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
+  virtual bool isWarnProcessAllChecked() const = 0;
+  virtual bool isWarnProcessPartialGroupChecked() const = 0;
+  virtual bool isProcessAllPrevented() const = 0;
+  virtual bool isProcessPartialGroupPrevented() const = 0;
+  virtual bool isWarnDiscardChangesChecked() const = 0;
+  virtual bool isRoundChecked() const = 0;
+  virtual int &getRoundPrecision() const = 0;
+  virtual boost::optional<int> roundPrecision() const = 0;
+  virtual bool isCloseEventPrevented() = 0;
+  virtual bool isCloseBatchPrevented(int batchIndex) const = 0;
+  virtual bool isOverwriteBatchPrevented(int tabIndex) const = 0;
+  virtual bool isBatchUnsaved(int batchIndex) const = 0;
+  virtual bool isAnyBatchUnsaved() = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyAnyBatchReductionResumed() = 0;

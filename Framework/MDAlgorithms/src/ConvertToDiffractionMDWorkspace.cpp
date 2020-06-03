@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 
@@ -62,7 +62,7 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
  */
 void ConvertToDiffractionMDWorkspace::init() {
   // Input units must be TOF
-  auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
+  auto validator = std::make_shared<API::WorkspaceUnitValidator>("TOF");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, validator),
                   "An input workspace in time-of-flight. If you specify a "
@@ -94,7 +94,7 @@ void ConvertToDiffractionMDWorkspace::init() {
                                        "HKL"};
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
-      boost::make_shared<StringListValidator>(propOptions),
+      std::make_shared<StringListValidator>(propOptions),
       "What will be the dimensions of the output workspace?\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
       "  Q (sample frame): Wave-vector change of the lattice in the frame of "
@@ -338,7 +338,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     }
   }
 
-  m_inEventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_inWS);
+  m_inEventWS = std::dynamic_pointer_cast<EventWorkspace>(m_inWS);
 
   // check the input units
   if (m_inWS->getAxis(0)->unit()->unitID() != "TOF")
@@ -347,7 +347,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
   // Try to get the output workspace
   IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
-  ws = boost::dynamic_pointer_cast<
+  ws = std::dynamic_pointer_cast<
       DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<3>, 3>>(i_out);
 
   // Initalize the matrix to 3x3 identity
@@ -419,7 +419,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     // Create an output workspace with 3 dimensions.
     size_t nd = 3;
     i_out = DataObjects::MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
-    ws = boost::dynamic_pointer_cast<DataObjects::MDEventWorkspace3Lean>(i_out);
+    ws = std::dynamic_pointer_cast<DataObjects::MDEventWorkspace3Lean>(i_out);
 
     // ---------------- Get the extents -------------
     std::vector<double> extents = getProperty("Extents");
@@ -495,7 +495,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   size_t totalEvents = m_inWS->size();
   if (m_inEventWS && !OneEventPerBin)
     totalEvents = m_inEventWS->getNumberEvents();
-  prog = boost::make_shared<Progress>(this, 0.0, 1.0, totalEvents);
+  prog = std::make_shared<Progress>(this, 0.0, 1.0, totalEvents);
 
   // Create the thread pool that will run all of these.
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
@@ -592,7 +592,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
   // Save the output
   setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+              std::dynamic_pointer_cast<IMDEventWorkspace>(ws));
 
   // Clean up
   delete[] m_extentsMin;

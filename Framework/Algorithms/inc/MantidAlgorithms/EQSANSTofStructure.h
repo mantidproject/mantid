@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -60,12 +60,12 @@ private:
   void exec() override;
   // void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, bool
   // frame_skipping);
-  void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS,
+  void execEvent(const Mantid::DataObjects::EventWorkspace_sptr &inputWS,
                  double threshold, double frame_offset, double tof_frame_width,
                  double tmp_frame_width, bool frame_skipping);
 
   /// Compute TOF offset
-  double getTofOffset(DataObjects::EventWorkspace_const_sptr inputWS,
+  double getTofOffset(const DataObjects::EventWorkspace_const_sptr &inputWS,
                       bool frame_skipping);
   double frame_tof0;
   bool flight_path_correction;

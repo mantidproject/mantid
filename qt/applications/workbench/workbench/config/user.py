@@ -1,16 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
-from mantid.py3compat import is_text_string
 from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings
 
@@ -158,13 +154,13 @@ class UserConfig(object):
         Sanity check the section and option are strings and return the flattened option key
         """
         if second is None:
-            if not is_text_string(option):
+            if not isinstance(option, str):
                 raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(option), option))
             return option
-        else:  # fist argument is actually the section/group
-            if not is_text_string(option):
+        else:  # first argument is actually the section/group
+            if not isinstance(option, str):
                 raise TypeError(
                     'Found invalid type ({}) for section ({}) must be a string'.format(type(option), option))
-            if not is_text_string(second):
+            if not isinstance(second, str):
                 raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(second), second))
             return joinsettings(option, second)

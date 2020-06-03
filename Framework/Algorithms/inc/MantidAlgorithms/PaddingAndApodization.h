@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -53,7 +53,7 @@ private:
   void init() override;
   void exec() override;
   using fptr = double (*)(const double, const double);
-  fptr getApodizationFunction(const std::string method);
+  fptr getApodizationFunction(const std::string &method);
   HistogramData::Histogram
   applyApodizationFunction(const HistogramData::Histogram &histogram,
                            const double decayConstant, fptr function);

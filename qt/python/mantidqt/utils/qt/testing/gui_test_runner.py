@@ -1,16 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import, print_function
-
 import inspect
-import six
 import traceback
 
 from qtpy.QtCore import QTimer, QMetaObject, Qt
@@ -100,7 +97,7 @@ class ScriptRunner(object):
                     if inspect.isgenerator(ret):
                         self.script_iter.append(ret)
                         ret = None
-                    elif isinstance(ret, six.integer_types) or isinstance(ret, float):
+                    elif isinstance(ret, int) or isinstance(ret, float):
                         # Start non-blocking pause in seconds
                         self.pause_timer.start(int(ret * 1000))
                         ret = None
@@ -158,11 +155,11 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
     :param in_workbench: Set to True if the script will be run inside the workbench application.
     """
     if attach_debugger:
-        raw_input('Please attach the Debugger now if required. Press any key to continue')
+        input('Please attach the Debugger now if required. Press any key to continue')
     app = get_application()
     if widget_or_name is not None:
         widget_name = 'Widget to test'
-        if isinstance(widget_or_name, six.string_types):
+        if isinstance(widget_or_name, str):
             widget = create_widget(widget_or_name)
             widget_name = widget_or_name
         elif isinstance(widget_or_name, QWidget):
@@ -201,7 +198,7 @@ def run_script(script_or_name, widget):
     :param widget: A widget to interact with.
     :return: Output of the script or an Exception object.
     """
-    if isinstance(script_or_name, six.string_types):
+    if isinstance(script_or_name, str):
         module_name, fun_name = split_qualified_name(script_or_name)
         m = __import__(module_name, fromlist=[fun_name])
         fun = getattr(m, fun_name)

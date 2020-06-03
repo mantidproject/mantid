@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -86,8 +86,8 @@ protected:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream,
                                              const SpaceGroup &self);
 
-using SpaceGroup_sptr = boost::shared_ptr<SpaceGroup>;
-using SpaceGroup_const_sptr = boost::shared_ptr<const SpaceGroup>;
+using SpaceGroup_sptr = std::shared_ptr<SpaceGroup>;
+using SpaceGroup_const_sptr = std::shared_ptr<const SpaceGroup>;
 
 } // namespace Geometry
 } // namespace Mantid

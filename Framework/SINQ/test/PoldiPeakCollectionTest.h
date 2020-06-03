@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ class TestablePoldiPeakCollection : public PoldiPeakCollection {
 
   TestablePoldiPeakCollection() : PoldiPeakCollection() {}
 
-  TestablePoldiPeakCollection(TableWorkspace_sptr workspace)
+  TestablePoldiPeakCollection(const TableWorkspace_sptr &workspace)
       : PoldiPeakCollection(workspace) {}
 };
 
@@ -50,7 +50,7 @@ public:
   static void destroySuite(PoldiPeakCollectionTest *suite) { delete suite; }
 
   PoldiPeakCollectionTest() {
-    m_dummyData = boost::dynamic_pointer_cast<TableWorkspace>(
+    m_dummyData = std::dynamic_pointer_cast<TableWorkspace>(
         WorkspaceFactory::Instance().createTable());
     m_dummyData->addColumn("str", "HKL");
     m_dummyData->addColumn("double", "d");
@@ -174,7 +174,7 @@ public:
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
     PoldiPeakCollection otherCollection(
-        boost::static_pointer_cast<TableWorkspace>(newDummy));
+        std::static_pointer_cast<TableWorkspace>(newDummy));
     TS_ASSERT_EQUALS(otherCollection.intensityType(),
                      PoldiPeakCollection::Integral);
   }
@@ -184,7 +184,7 @@ public:
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
     PoldiPeakCollection collection(
-        boost::static_pointer_cast<TableWorkspace>(newDummy));
+        std::static_pointer_cast<TableWorkspace>(newDummy));
 
     TableWorkspace_sptr compare = collection.asTableWorkspace();
 
@@ -238,7 +238,7 @@ public:
     newDummy->logs()->addProperty<std::string>("UnitCell", unitCellToStr(cell));
 
     PoldiPeakCollection collection(
-        boost::static_pointer_cast<TableWorkspace>(newDummy));
+        std::static_pointer_cast<TableWorkspace>(newDummy));
     TS_ASSERT_EQUALS(unitCellToStr(collection.unitCell()), unitCellToStr(cell));
   }
 
@@ -297,7 +297,7 @@ public:
   void testColumnCheckConsistency() {
     TestablePoldiPeakCollection peaks;
 
-    auto newTable = boost::make_shared<TableWorkspace>();
+    auto newTable = std::make_shared<TableWorkspace>();
     peaks.prepareTable(newTable);
 
     TS_ASSERT(peaks.checkColumns(newTable));

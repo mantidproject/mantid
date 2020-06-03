@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
@@ -178,7 +178,7 @@ void CompareWorkspaces::init() {
           "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
-  m_messages = boost::make_shared<TableWorkspace>();
+  m_messages = std::make_shared<TableWorkspace>();
   m_messages->addColumn("str", "Message");
   m_messages->addColumn("str", "Workspace 1");
   m_messages->addColumn("str", "Workspace 2");
@@ -228,9 +228,9 @@ bool CompareWorkspaces::processGroups() {
 
   // Attempt to cast to WorkspaceGroups (will be nullptr on failure)
   WorkspaceGroup_const_sptr ws1 =
-      boost::dynamic_pointer_cast<const WorkspaceGroup>(w1);
+      std::dynamic_pointer_cast<const WorkspaceGroup>(w1);
   WorkspaceGroup_const_sptr ws2 =
-      boost::dynamic_pointer_cast<const WorkspaceGroup>(w2);
+      std::dynamic_pointer_cast<const WorkspaceGroup>(w2);
 
   if (ws1 && ws2) { // Both are groups
     processGroups(ws1, ws2);
@@ -262,8 +262,8 @@ bool CompareWorkspaces::processGroups() {
  * @param groupTwo
  */
 void CompareWorkspaces::processGroups(
-    boost::shared_ptr<const API::WorkspaceGroup> groupOne,
-    boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
+    const std::shared_ptr<const API::WorkspaceGroup> &groupOne,
+    const std::shared_ptr<const API::WorkspaceGroup> &groupTwo) {
 
   // Check their sizes
   const auto totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
@@ -323,8 +323,8 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  PeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
-  PeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
+  PeaksWorkspace_sptr pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(w1);
+  PeaksWorkspace_sptr pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(w2);
   if ((pws1 && !pws2) || (!pws1 && pws2)) {
     recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
     return;
@@ -340,8 +340,8 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  auto tws1 = boost::dynamic_pointer_cast<const ITableWorkspace>(w1);
-  auto tws2 = boost::dynamic_pointer_cast<const ITableWorkspace>(w2);
+  auto tws1 = std::dynamic_pointer_cast<const ITableWorkspace>(w1);
+  auto tws2 = std::dynamic_pointer_cast<const ITableWorkspace>(w2);
   if ((tws1 && !tws2) || (!tws1 && tws2)) {
     recordMismatch("One workspace is a TableWorkspace and the other is not.");
     return;
@@ -357,9 +357,9 @@ void CompareWorkspaces::doComparison() {
 
   // Check things for IMDEventWorkspaces
   IMDEventWorkspace_const_sptr mdews1 =
-      boost::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
+      std::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
   IMDEventWorkspace_const_sptr mdews2 =
-      boost::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
+      std::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
   if ((mdews1 && !mdews2) || (!mdews1 && mdews2)) {
     recordMismatch(
         "One workspace is an IMDEventWorkspace and the other is not.");
@@ -367,9 +367,9 @@ void CompareWorkspaces::doComparison() {
   }
   // Check things for IMDHistoWorkspaces
   IMDHistoWorkspace_const_sptr mdhws1 =
-      boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
+      std::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
   IMDHistoWorkspace_const_sptr mdhws2 =
-      boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
+      std::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
   if ((mdhws1 && !mdhws2) || (!mdhws1 && mdhws2)) {
     recordMismatch(
         "One workspace is an IMDHistoWorkspace and the other is not.");
@@ -389,14 +389,14 @@ void CompareWorkspaces::doComparison() {
 
   // These casts must succeed or there's a logical problem in the code
   MatrixWorkspace_const_sptr ws1 =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(w1);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(w1);
   MatrixWorkspace_const_sptr ws2 =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(w2);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(w2);
 
   EventWorkspace_const_sptr ews1 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws1);
   EventWorkspace_const_sptr ews2 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws2);
   if (getProperty("CheckType")) {
     if ((ews1 && !ews2) || (!ews1 && ews2)) {
       recordMismatch(
@@ -618,8 +618,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
  *  @retval true The data matches
  *  @retval false The data does not matches
  */
-bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
-                                  API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
+                                  const API::MatrixWorkspace_const_sptr &ws2) {
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
   const size_t numBins = ws1->blocksize();
@@ -712,8 +712,8 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
  * @retval true The axes match
  * @retval false The axes do not match
  */
-bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
-                                  API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkAxes(const API::MatrixWorkspace_const_sptr &ws1,
+                                  const API::MatrixWorkspace_const_sptr &ws2) {
   const int numAxes = ws1->axes();
 
   if (numAxes != ws2->axes()) {
@@ -790,8 +790,8 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
-bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
-                                        MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1,
+                                        const MatrixWorkspace_const_sptr &ws2) {
   if (ws1->getNumberHistograms() != ws2->getNumberHistograms()) {
     recordMismatch("Number of spectra mismatch");
     return false;
@@ -832,8 +832,9 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second workspace
 /// @retval true The instruments match
 /// @retval false The instruments do not match
-bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
-                                        API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkInstrument(
+    const API::MatrixWorkspace_const_sptr &ws1,
+    const API::MatrixWorkspace_const_sptr &ws2) {
   // First check the name matches
   if (ws1->getInstrument()->getName() != ws2->getInstrument()->getName()) {
     g_log.debug() << "Instrument names: WS1 = "
@@ -871,8 +872,9 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second workspace
 /// @retval true The masking matches
 /// @retval false The masking does not match
-bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
-                                     API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkMasking(
+    const API::MatrixWorkspace_const_sptr &ws1,
+    const API::MatrixWorkspace_const_sptr &ws2) {
   const auto numHists = static_cast<int>(ws1->getNumberHistograms());
 
   for (int i = 0; i < numHists; ++i) {
@@ -1052,7 +1054,7 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
     const IPeak &peak1 = tws1->getPeak(i);
     const IPeak &peak2 = tws2->getPeak(i);
     for (size_t j = 0; j < tws1->columnCount(); j++) {
-      boost::shared_ptr<const API::Column> col = tws1->getColumn(j);
+      std::shared_ptr<const API::Column> col = tws1->getColumn(j);
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
@@ -1111,8 +1113,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
 
 //------------------------------------------------------------------------------------------------
 void CompareWorkspaces::doTableComparison(
-    API::ITableWorkspace_const_sptr tws1,
-    API::ITableWorkspace_const_sptr tws2) {
+    const API::ITableWorkspace_const_sptr &tws1,
+    const API::ITableWorkspace_const_sptr &tws2) {
   // First the easy things
   const auto numCols = tws1->columnCount();
   if (numCols != tws2->columnCount()) {
@@ -1177,10 +1179,11 @@ void CompareWorkspaces::doTableComparison(
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
+void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1,
+                                       const Workspace_sptr &w2) {
   IMDWorkspace_sptr mdws1, mdws2;
-  mdws1 = boost::dynamic_pointer_cast<IMDWorkspace>(w1);
-  mdws2 = boost::dynamic_pointer_cast<IMDWorkspace>(w2);
+  mdws1 = std::dynamic_pointer_cast<IMDWorkspace>(w1);
+  mdws2 = std::dynamic_pointer_cast<IMDWorkspace>(w2);
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("CompareMDWorkspaces");
   alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);
@@ -1204,7 +1207,7 @@ void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
  * @param ws1 Name of first workspace being compared
  * @param ws2 Name of second workspace being compared
  */
-void CompareWorkspaces::recordMismatch(std::string msg, std::string ws1,
+void CompareWorkspaces::recordMismatch(const std::string &msg, std::string ws1,
                                        std::string ws2) {
   // Workspace names default to the workspaces currently being compared
   if (ws1.empty()) {

@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
@@ -168,16 +167,14 @@ def runs_are_equal(ws1,ws2):
 
     def get_run_num(name_or_ws):
         err = None
-        try:
-            if isinstance(name_or_ws,api.MatrixWorkspace):
-                run_num = name_or_ws.getRunNumber()
-            elif name_or_ws in mtd: # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
-                ws = mtd[name_or_ws]
-                run_num = ws.getRunNumber()
-            else:
-                raise AttributeError
-        except Exception as err:
-            pass
+
+        if isinstance(name_or_ws,api.MatrixWorkspace):
+            run_num = name_or_ws.getRunNumber()
+        elif name_or_ws in mtd: # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
+            ws = mtd[name_or_ws]
+            run_num = ws.getRunNumber()
+        else:
+            raise AttributeError
         if err is not None:
             raise AttributeError("Input parameter is neither workspace nor ws name")
         return run_num

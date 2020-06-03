@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Scale.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -41,7 +41,7 @@ void Scale::init() {
                   "The value by which to scale the input workspace");
   std::vector<std::string> operations{Operation::MULT, Operation::ADD};
   declareProperty(PropertyNames::OPERATION, Operation::MULT,
-                  boost::make_shared<StringListValidator>(operations),
+                  std::make_shared<StringListValidator>(operations),
                   "Whether to multiply by, or add factor");
 }
 
@@ -53,7 +53,7 @@ std::map<std::string, std::string> Scale::validateInputs() {
     MatrixWorkspace_const_sptr inputWS =
         getProperty(PropertyNames::INPUT_WORKSPACE);
     const auto eventWS =
-        boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
+        std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
     if (bool(eventWS)) {
       result[PropertyNames::INPUT_WORKSPACE] = "Cannot Add to EventWorkspace";
     }

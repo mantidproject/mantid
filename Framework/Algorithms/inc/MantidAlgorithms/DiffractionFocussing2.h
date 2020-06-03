@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -110,7 +110,7 @@ private:
 
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
-  using group2vectormap = std::map<int, boost::shared_ptr<MantidVec>>;
+  using group2vectormap = std::map<int, std::shared_ptr<MantidVec>>;
   /// Map from udet to group
   std::vector<int> udet2group;
   /// The list of group numbers

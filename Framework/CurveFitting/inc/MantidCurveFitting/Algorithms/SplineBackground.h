@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
@@ -25,7 +26,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 09/10/2009
  */
-class DLLExport SplineBackground : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineBackground : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SplineBackground"; }
@@ -66,8 +67,8 @@ private:
 
   /// Gets the values from the fitted GSL, and creates a clone of input
   /// workspace with new values
-  API::MatrixWorkspace_sptr saveSplineOutput(const API::MatrixWorkspace_sptr ws,
-                                             const size_t spec);
+  API::MatrixWorkspace_sptr
+  saveSplineOutput(const API::MatrixWorkspace_sptr &ws, const size_t spec);
 
   /// Sets up the splines for later fitting
   void setupSpline(double xMin, double xMax, int numBins, int ncoeff);

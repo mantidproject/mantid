@@ -1,13 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace
-from AbinsModules import AbinsConstants, AbinsTestHelpers
+
+import abins
+from abins.constants import (ALL_INSTRUMENTS, ALL_SUPPORTED_AB_INITIO_PROGRAMS,
+                             QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO,
+                             QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR)
 
 
 class HelperTestingClass(object):
@@ -36,7 +39,7 @@ class HelperTestingClass(object):
 
     def set_instrument_name(self, instrument_name=None):
 
-        if instrument_name in AbinsConstants.ALL_INSTRUMENTS:
+        if instrument_name in ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
         else:
             raise ValueError("Wrong instrument.")
@@ -50,15 +53,15 @@ class HelperTestingClass(object):
 
     def set_ab_initio_program(self, ab_initio_program=None):
 
-        if ab_initio_program in AbinsConstants.ALL_SUPPORTED_AB_INITIO_PROGRAMS:
+        if ab_initio_program in ALL_SUPPORTED_AB_INITIO_PROGRAMS:
             self._ab_initio_program = ab_initio_program
         else:
             raise RuntimeError("Unsupported ab initio program: %s " % ab_initio_program)
 
     def set_order(self, order=None):
 
-        orders = [AbinsConstants.QUANTUM_ORDER_ONE, AbinsConstants.QUANTUM_ORDER_TWO,
-                  AbinsConstants.QUANTUM_ORDER_THREE, AbinsConstants.QUANTUM_ORDER_FOUR]
+        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO,
+                  QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR]
 
         if order in orders:
             self._quantum_order_event = order
@@ -147,7 +150,7 @@ class HelperTestingClass(object):
         """
 
         try:
-            AbinsTestHelpers.remove_output_files(list_of_names=[self._system_name])
+            abins.test_helpers.remove_output_files(list_of_names=[self._system_name])
         except TypeError:
             # nothing to remove but it is OK
             pass
@@ -176,7 +179,7 @@ class AbinsCRYSTALTestScratch(systemtesting.MantidSystemTest, HelperTestingClass
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_TWO)
         self.case_from_scratch()
 
     def excludeInPullRequests(self):
@@ -206,7 +209,7 @@ class AbinsCRYSTALTestBiggerSystem(systemtesting.MantidSystemTest, HelperTesting
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.set_order(QUANTUM_ORDER_ONE)
         self.case_from_scratch()
 
     def validate(self):
@@ -233,7 +236,7 @@ class AbinsCRYSTALTestT(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_TWO)
         self.case_restart_diff_t()
 
     def excludeInPullRequests(self):
@@ -263,8 +266,8 @@ class AbinsCRYSTALTestLargerOrder(systemtesting.MantidSystemTest, HelperTestingC
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
-        self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_ONE)
+        self.case_restart_diff_order(QUANTUM_ORDER_TWO)
 
     def excludeInPullRequests(self):
         return True
@@ -293,8 +296,8 @@ class AbinsCRYSTALTestSmallerOrder(systemtesting.MantidSystemTest, HelperTesting
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-        self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.set_order(QUANTUM_ORDER_TWO)
+        self.case_restart_diff_order(QUANTUM_ORDER_ONE)
 
     def validate(self):
         self.tolerance = 1e-1
@@ -318,7 +321,7 @@ class AbinsCRYSTALTestScale(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_TWO)
 
         self.set_scale(scale=scaling_factor)
         self.case_from_scratch()
@@ -343,7 +346,7 @@ class AbinsCASTEPNoH(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CASTEP")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Total")
         self.case_from_scratch()
         self._wrk_1 = self._output_name
@@ -368,7 +371,7 @@ class AbinsCASTEP1DDispersion(systemtesting.MantidSystemTest, HelperTestingClass
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CASTEP")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.set_order(QUANTUM_ORDER_ONE)
         self.case_from_scratch()
         self._wrk_1 = self._output_name
 
@@ -394,7 +397,7 @@ class AbinsDMOL3TestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("DMOL3")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Total")
         self.case_from_scratch()
 
@@ -422,7 +425,7 @@ class AbinsGAUSSIANestScratch(systemtesting.MantidSystemTest, HelperTestingClass
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("GAUSSIAN")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Incoherent")
         self.case_from_scratch()
 
@@ -449,7 +452,7 @@ class AbinsBinWidth(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CASTEP")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_order(QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Incoherent")
         self.set_bin_width(width=3.0)
         self.case_from_scratch()
@@ -474,7 +477,7 @@ class AbinsCASTEPIsotopes(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CASTEP")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.set_order(QUANTUM_ORDER_ONE)
         self.set_cross_section(cross_section="Incoherent")
         self.set_bin_width(width=2.0)
         self.case_from_scratch()

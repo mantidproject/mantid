@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -71,7 +71,7 @@ public:
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &, TableDatasetIndex const &) override {}
   void
-  setResolution(const std::vector<std::pair<std::string, int>> &) override {}
+  setResolution(const std::vector<std::pair<std::string, size_t>> &) override {}
   void setQValues(const std::vector<double> &) override {}
 
 protected slots:

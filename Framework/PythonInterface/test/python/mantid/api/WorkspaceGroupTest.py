@@ -1,12 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-import six
 import unittest
 from testhelpers import run_algorithm
 from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace, AnalysisDataService, WorkspaceFactory
@@ -88,7 +85,7 @@ class WorkspaceGroupTest(unittest.TestCase):
         group = self.create_group_via_GroupWorkspace_algorithm()
         names = group.getNames()
 
-        six.assertCountEqual(self, names, ["First", "Second"])
+        self.assertCountEqual(names, ["First", "Second"])
 
     def test_that_a_group_is_invalidated_if_ADS_is_cleared_and_RuntimeError_raised(self):
         group = self.create_group_via_GroupWorkspace_algorithm()

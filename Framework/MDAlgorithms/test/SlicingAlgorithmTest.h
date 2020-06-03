@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -594,10 +594,11 @@ public:
 
   //----------------------------------------------------------------------------
   std::unique_ptr<SlicingAlgorithmImpl> do_createGeneralTransform(
-      IMDEventWorkspace_sptr inWS, std::string name1, std::string name2,
-      std::string name3, std::string name4, VMD translation,
-      std::string extents, std::string numBins, bool ForceOrthogonal = false,
-      bool NormalizeBasisVectors = true) {
+      const IMDEventWorkspace_sptr &inWS, const std::string &name1,
+      const std::string &name2, const std::string &name3,
+      const std::string &name4, const VMD &translation,
+      const std::string &extents, const std::string &numBins,
+      bool ForceOrthogonal = false, bool NormalizeBasisVectors = true) {
     auto alg = std::make_unique<SlicingAlgorithmImpl>();
     alg->m_inWS = inWS;
     alg->initSlicingProps();

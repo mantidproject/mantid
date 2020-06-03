@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -56,9 +56,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    IMDEventWorkspace_sptr hklws =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("HKLMD"));
+    IMDEventWorkspace_sptr hklws = std::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve("HKLMD"));
     TS_ASSERT(hklws);
 
     size_t numevents = hklws->getNEvents();

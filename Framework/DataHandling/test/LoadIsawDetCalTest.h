@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -48,8 +48,8 @@ void loadEmptyInstrument(const std::string &filename,
 
 class LoadIsawDetCalTest : public CxxTest::TestSuite {
 public:
-  void checkPosition(IComponent_const_sptr det, const double x, const double y,
-                     const double z) {
+  void checkPosition(const IComponent_const_sptr &det, const double x,
+                     const double y, const double z) {
     if (det != nullptr) {
       const auto detPos = det->getPos();
       const V3D testPos(x, y, z);
@@ -59,8 +59,8 @@ public:
     }
   }
 
-  void checkRotation(IComponent_const_sptr det, const double w, const double a,
-                     const double b, const double c) {
+  void checkRotation(const IComponent_const_sptr &det, const double w,
+                     const double a, const double b, const double c) {
     if (det != nullptr) {
       const auto detRot = det->getRotation();
       const Quat testRot(w, a, b, c);

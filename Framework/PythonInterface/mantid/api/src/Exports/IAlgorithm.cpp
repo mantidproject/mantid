@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via
@@ -364,7 +364,7 @@ boost::python::dict validateInputs(IAlgorithm &self) {
 void export_ialgorithm() {
   class_<AlgorithmIDProxy>("AlgorithmID", no_init).def(self == self);
 
-  register_ptr_to_python<boost::shared_ptr<IAlgorithm>>();
+  register_ptr_to_python<std::shared_ptr<IAlgorithm>>();
 
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>(
       "IAlgorithm", "Interface for all algorithms", no_init)

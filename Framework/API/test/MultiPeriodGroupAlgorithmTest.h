@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -34,14 +34,14 @@ public:
                     "");
     declareProperty(
         "PropertyA", 1,
-        boost::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
-                                                                // adding this
-                                                                // property to
-                                                                // cause errors
-                                                                // if it's not
-                                                                // passed to
-                                                                // spawned
-                                                                // algorithms.
+        std::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
+                                                              // adding this
+                                                              // property to
+                                                              // cause errors
+                                                              // if it's not
+                                                              // passed to
+                                                              // spawned
+                                                              // algorithms.
   }
   void exec() override {
     setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
@@ -77,14 +77,14 @@ public:
                     "");
     declareProperty(
         "PropertyX", 1,
-        boost::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
-                                                                // adding this
-                                                                // property to
-                                                                // cause errors
-                                                                // if it's not
-                                                                // passed to
-                                                                // spawned
-                                                                // algorithms.
+        std::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
+                                                              // adding this
+                                                              // property to
+                                                              // cause errors
+                                                              // if it's not
+                                                              // passed to
+                                                              // spawned
+                                                              // algorithms.
   }
   void exec() override {
     MatrixWorkspace_sptr a = getProperty("PropertyA");

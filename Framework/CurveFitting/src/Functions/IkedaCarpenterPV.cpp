@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -128,7 +128,7 @@ void IkedaCarpenterPV::init() {
   this->lowerConstraint0("X0");
 }
 
-void IkedaCarpenterPV::lowerConstraint0(std::string paramName) {
+void IkedaCarpenterPV::lowerConstraint0(const std::string &paramName) {
   auto mixingConstraint =
       std::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
   mixingConstraint->setPenaltyFactor(1e9);

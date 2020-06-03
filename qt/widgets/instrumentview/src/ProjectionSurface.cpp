@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -33,6 +33,7 @@
 #include <cfloat>
 #include <cmath>
 #include <limits>
+#include <utility>
 
 using Mantid::Kernel::V3D;
 
@@ -380,10 +381,10 @@ QRect ProjectionSurface::selectionRect() const {
 }
 
 RectF ProjectionSurface::selectionRectUV() const {
-  double left = static_cast<double>(m_selectRect.left());
-  double right = static_cast<double>(m_selectRect.right());
-  double top = static_cast<double>(m_selectRect.top());
-  double bottom = static_cast<double>(m_selectRect.bottom());
+  auto left = static_cast<double>(m_selectRect.left());
+  auto right = static_cast<double>(m_selectRect.right());
+  auto top = static_cast<double>(m_selectRect.top());
+  auto bottom = static_cast<double>(m_selectRect.bottom());
 
   if (left > right) {
     std::swap(left, right);
@@ -689,8 +690,8 @@ void ProjectionSurface::saveShapesToTableWorkspace() {
  * @param ws :: table workspace to load shapes from
  */
 void ProjectionSurface::loadShapesFromTableWorkspace(
-    Mantid::API::ITableWorkspace_const_sptr ws) {
-  m_maskShapes.loadFromTableWorkspace(ws);
+    const Mantid::API::ITableWorkspace_const_sptr &ws) {
+  m_maskShapes.loadFromTableWorkspace(std::move(ws));
 }
 
 /**
@@ -708,12 +709,12 @@ QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(int detID) const {
 /**
  * Get peaks workspace for manually editing.
  */
-boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+std::shared_ptr<Mantid::API::IPeaksWorkspace>
 ProjectionSurface::getEditPeaksWorkspace() const {
   if (!m_peakShapes.isEmpty()) {
     return m_peakShapes.last()->getPeaksWorkspace();
   }
-  return boost::shared_ptr<Mantid::API::IPeaksWorkspace>();
+  return std::shared_ptr<Mantid::API::IPeaksWorkspace>();
 }
 
 /**
@@ -721,7 +722,7 @@ ProjectionSurface::getEditPeaksWorkspace() const {
  * @param ws :: Shared pointer to the deleted peaks workspace.
  */
 void ProjectionSurface::deletePeaksWorkspace(
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws) {
+    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws) {
   const int npeaks = m_peakShapes.size();
   for (int i = 0; i < npeaks; ++i) {
     if (m_peakShapes[i]->getPeaksWorkspace() == ws) {

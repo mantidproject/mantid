@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/FindSXPeaksHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
@@ -34,7 +35,7 @@ using peakvector = std::vector<FindSXPeaksHelper::SXPeak>;
   @author L C Chapon, ISIS, Rutherford Appleton Laboratory
   @date 11/08/2009
 */
-class DLLExport FindSXPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindSXPeaks : public API::Algorithm {
 public:
   /// Default constructor
   FindSXPeaks();
@@ -95,7 +96,7 @@ private:
 
   /// Check what x units this workspace has
   FindSXPeaksHelper::XAxisUnit getWorkspaceXAxisUnit(
-      Mantid::API::MatrixWorkspace_const_sptr workspace) const;
+      const Mantid::API::MatrixWorkspace_const_sptr &workspace) const;
 
   /// The value in X to start the search from
   double m_MinRange;

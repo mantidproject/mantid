@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,17 +31,18 @@ protected:
                               int MaxRecursionDepth = 5);
 
   /// Set the settings in the given box controller
-  void setBoxController(Mantid::API::BoxController_sptr bc,
-                        Mantid::Geometry::Instrument_const_sptr instrument);
+  void
+  setBoxController(const Mantid::API::BoxController_sptr &bc,
+                   const Mantid::Geometry::Instrument_const_sptr &instrument);
 
   /// Set the settings in the given box controller
-  void setBoxController(Mantid::API::BoxController_sptr bc);
+  void setBoxController(const Mantid::API::BoxController_sptr &bc);
 
   std::string getBoxSettingsGroupName() { return "Box Splitting Settings"; }
   /// Take the defaults for the box splitting from the instrument parameters.
-  void
-  takeDefaultsFromInstrument(Mantid::Geometry::Instrument_const_sptr instrument,
-                             const size_t ndims);
+  void takeDefaultsFromInstrument(
+      const Mantid::Geometry::Instrument_const_sptr &instrument,
+      const size_t ndims);
 
 private:
 };

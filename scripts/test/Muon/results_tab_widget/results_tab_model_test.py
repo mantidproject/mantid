@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, print_function, unicode_literals)
-
 from collections import OrderedDict
 from copy import deepcopy
 import datetime
@@ -14,7 +12,7 @@ import unittest
 
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import iteritems, mock, string_types
+from unittest import mock
 from mantid.simpleapi import Load
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -51,7 +49,7 @@ def create_test_fits(input_workspaces,
         'Name': name,
         'Value': value,
         'Error': error
-    } for name, (value, error) in iteritems(parameters)]
+    } for name, (value, error) in parameters.items()]
 
     fits = []
     for name in input_workspaces:
@@ -382,7 +380,7 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(len(expected_row), len(actual_row))
             for col_index, expected in enumerate(expected_row):
                 actual = table.cell(row_index, col_index)
-                if isinstance(expected, string_types):
+                if isinstance(expected, str):
                     self.assertEqual(expected, actual)
                 else:
                     # Fit pushes things back/forth through strings so exact match is not possible

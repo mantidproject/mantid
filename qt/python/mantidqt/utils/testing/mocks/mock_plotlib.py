@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -23,10 +23,7 @@ only the ones that have been necessary so far. If another function
 needs to be mocked it can be freely added in the relevant class below
 and it should not break any existing tests.
 """
-from __future__ import (absolute_import, division, print_function)
-
-
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 
 
 class MockAx:

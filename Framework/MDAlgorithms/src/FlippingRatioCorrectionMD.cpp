@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidMDAlgorithms/FlippingRatioCorrectionMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -60,7 +59,7 @@ void FlippingRatioCorrectionMD::init() {
   declareProperty(
       std::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
           "FlippingRatio", "",
-          boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(),
+          std::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(),
           Direction::Input),
       "Formula to define the flipping ratio. It can depend on the variables in "
       "the list "
@@ -142,14 +141,14 @@ void FlippingRatioCorrectionMD::exec() {
   cloneMD->executeAsChildAlg();
   outputWS1 = cloneMD->getProperty("OutputWorkspace");
   API::IMDEventWorkspace_sptr event1 =
-      boost::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS1);
+      std::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS1);
   cloneMD->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace2"));
   cloneMD->setChildStartProgress(0.25);
   cloneMD->setChildEndProgress(0.5);
   cloneMD->executeAsChildAlg();
   outputWS2 = cloneMD->getProperty("OutputWorkspace");
   API::IMDEventWorkspace_sptr event2 =
-      boost::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS2);
+      std::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS2);
 
   if (event1) {
     m_factor = C1;

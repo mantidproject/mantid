@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/PlotAxis.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
@@ -22,7 +22,7 @@ namespace {
 QString
 replacePerWithNegativeIndice(const std::string &label,
                              const bool &plotAsDistribution,
-                             const Mantid::Kernel::UnitLabel xLabel = "") {
+                             const Mantid::Kernel::UnitLabel &xLabel = "") {
   std::vector<std::string> splitVec;
   QString negativeOnePower = toQStringInternal(L"\u207b\u00b9");
   QString newLabel;

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
 
@@ -21,16 +19,15 @@ def run_MuonPreProcess(parameter_dict):
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperty("OutputWorkspace", "__pre_processed_data")
     alg.setProperties(parameter_dict)
     alg.execute()
-    return "__pre_processed_data"
+    return parameter_dict["OutputWorkspace"]
 
 
 def run_MuonGroupingCounts(parameter_dict, workspace_name):
     """
     Apply the MuonGroupingCounts algorithm with the properties supplied through
-    the input dictionary of {proeprty_name:property_value} pairs.
+    the input dictionary of {property_name:property_value} pairs.
     Returns the calculated workspace name.
     """
     alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
@@ -46,7 +43,7 @@ def run_MuonGroupingCounts(parameter_dict, workspace_name):
 def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
     """
     Apply the MuonPairingAsymmetry algorithm with the properties supplied through
-    the input dictionary of {proeprty_name:property_value} pairs.
+    the input dictionary of {property_name:property_value} pairs.
     Returns the calculated workspace name.
     """
     alg = mantid.AlgorithmManager.create("MuonPairingAsymmetry")
@@ -61,7 +58,7 @@ def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
 def run_MuonGroupingAsymmetry(parameter_dict, workspace_name, unormalised_workspace_name):
     """
     Apply the MuonGroupingCounts algorithm with the properties supplied through
-    the input dictionary of {proeprty_name:property_value} pairs.
+    the input dictionary of {property_name:property_value} pairs.
     Returns the calculated workspace name.
     """
     alg = mantid.AlgorithmManager.create("MuonGroupingAsymmetry")
@@ -143,7 +140,8 @@ def run_Fit(parameters_dict, alg):
     alg.setProperty('StartX', parameters_dict['StartX'])
     alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
-    return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty("OutputParameters").valueAsStr, alg.getProperty(
+    return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty(
+        "OutputParameters").valueAsStr, alg.getProperty(
         "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
         alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
@@ -165,8 +163,9 @@ def run_simultaneous_Fit(parameters_dict, alg):
 
     alg.execute()
 
-    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr,\
-        alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value,\
+    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
+        alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty(
+        'OutputChi2overDoF').value, \
         alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
@@ -176,8 +175,8 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.setRethrows(True)
     alg.setProperties(parameters_dict)
     alg.execute()
-    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr,\
-        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
+    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
+        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value, \
         alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
@@ -242,7 +241,6 @@ def convert_to_field(workspace_name):
 
 
 def extract_single_spec(ws, spec, output_workspace_name):
-
     alg = mantid.AlgorithmManager.create("ExtractSingleSpectrum")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)

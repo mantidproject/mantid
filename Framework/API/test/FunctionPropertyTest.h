@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,8 +11,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/ParamFunction.h"
-#include <boost/shared_ptr.hpp>
 #include <json/value.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -50,7 +50,7 @@ public:
     std::string error;
     TS_ASSERT_THROWS_NOTHING(error = prop.setValue(createTestFunctionString()));
     TS_ASSERT(error.empty());
-    boost::shared_ptr<IFunction> fun_p = prop;
+    std::shared_ptr<IFunction> fun_p = prop;
     TS_ASSERT_EQUALS(fun_p->asString(),
                      "name=FunctionPropertyTest_Function,A=3,B=2");
     TS_ASSERT_EQUALS(fun_p->getParameter("A"), 3.0);
@@ -87,7 +87,6 @@ public:
 
   void test_Assignment_By_SharedPtr() {
     FunctionProperty prop("fun");
-    std::string error;
     auto fun_p = FunctionFactory::Instance().createInitialized(
         createTestFunctionString());
     TS_ASSERT(fun_p);
@@ -105,13 +104,12 @@ public:
 
   void test_Shared_Pointer() {
     FunctionProperty prop("fun");
-    std::string error;
-    boost::shared_ptr<FunctionPropertyTest_Function> fun_p(
+    std::shared_ptr<FunctionPropertyTest_Function> fun_p(
         new FunctionPropertyTest_Function);
     TS_ASSERT(fun_p);
     fun_p->setParameter("A", 3);
     prop = fun_p;
-    boost::shared_ptr<IFunction> fun1_p = prop;
+    std::shared_ptr<IFunction> fun1_p = prop;
     TS_ASSERT(fun1_p);
     TS_ASSERT_EQUALS(fun_p, fun1_p);
     TS_ASSERT_EQUALS(fun1_p->asString(),

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 
@@ -11,11 +11,12 @@
 #include <QStyle>
 #include <QToolTip>
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
 HintingLineEdit::HintingLineEdit(QWidget *parent, std::vector<Hint> hints)
-    : QLineEdit(parent), m_hints(hints), m_dontComplete(false) {
+    : QLineEdit(parent), m_hints(std::move(hints)), m_dontComplete(false) {
   m_hintLabel = new QLabel(this, Qt::ToolTip);
   m_hintLabel->setMargin(1 +
                          style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth,

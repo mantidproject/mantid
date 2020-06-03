@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -100,7 +100,7 @@ public:
 
   void testExec_DXNoData() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       std::vector<double> &X = wsToSave->dataX(i);
@@ -114,7 +114,7 @@ public:
     }
     AnalysisDataService::Instance().add(m_name, wsToSave);
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
     AnalysisDataService::Instance().remove(m_name);
@@ -122,7 +122,7 @@ public:
 
   void testExec_DX() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);
@@ -530,7 +530,7 @@ public:
     writeSampleWS(wsToSave, false);
 
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(
         save.setProperty("SpectrumMetaData", "SpectrumNumber"));
@@ -836,7 +836,7 @@ public:
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(
         save.setPropertyValue("SpectrumMetaData", "NotAValidChoice"));
@@ -942,7 +942,7 @@ public:
 private:
   void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
                      const bool &isSpectra = true) {
-    wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+    wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);

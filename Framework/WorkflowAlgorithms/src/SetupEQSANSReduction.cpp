@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -114,7 +114,7 @@ void SetupEQSANSReduction::init() {
                                          "Scattering"};
 
   declareProperty("BeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the data beam center");
 
   // declareProperty("FindBeamCenter", false, "If True, the beam center will be
@@ -146,7 +146,7 @@ void SetupEQSANSReduction::init() {
 
   // declareProperty("Tolerance", EMPTY_DBL(), "Tolerance on the center of mass
   // position between each iteration [m]. Default: 0.00125");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   // declareProperty("UseDirectBeamMethod", true, "If true, the direct beam
   // method will be used");
@@ -181,7 +181,7 @@ void SetupEQSANSReduction::init() {
   incidentBeamNormOptions.emplace_back("Charge");
   this->declareProperty(
       "Normalisation", "BeamProfileAndCharge",
-      boost::make_shared<StringListValidator>(incidentBeamNormOptions),
+      std::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
 
   declareProperty("LoadMonitors", false,
@@ -228,7 +228,7 @@ void SetupEQSANSReduction::init() {
                   "The name of the input file to load as dark current.");
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the sensitivity data beam center");
 
   //    Option 1: Set beam center by hand
@@ -282,7 +282,7 @@ void SetupEQSANSReduction::init() {
   std::string trans_grp = "Transmission";
   std::vector<std::string> transOptions{"Value", "DirectBeam"};
   declareProperty("TransmissionMethod", "Value",
-                  boost::make_shared<StringListValidator>(transOptions),
+                  std::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
 
   // - Transmission value entered by hand
@@ -326,7 +326,7 @@ void SetupEQSANSReduction::init() {
 
   // - transmission beam center
   declareProperty("TransmissionBeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
   setPropertySettings("TransmissionBeamCenterMethod",
                       std::make_unique<VisibleWhenProperty>(
@@ -395,7 +395,7 @@ void SetupEQSANSReduction::init() {
   std::string bck_grp = "Background";
   declareProperty("BackgroundFiles", "", "Background data files");
   declareProperty("BckTransmissionMethod", "Value",
-                  boost::make_shared<StringListValidator>(transOptions),
+                  std::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
 
   // - Transmission value entered by hand
@@ -440,7 +440,7 @@ void SetupEQSANSReduction::init() {
 
   // - transmission beam center
   declareProperty("BckTransmissionBeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
   setPropertySettings("BckTransmissionBeamCenterMethod",
                       std::make_unique<VisibleWhenProperty>(
@@ -505,7 +505,7 @@ void SetupEQSANSReduction::init() {
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
   std::vector<std::string> maskOptions{"None", "Front", "Back"};
   declareProperty("MaskedSide", "None",
-                  boost::make_shared<StringListValidator>(maskOptions),
+                  std::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
 
   setPropertyGroup("MaskedDetectorList", mask_grp);
@@ -519,7 +519,7 @@ void SetupEQSANSReduction::init() {
   scaleOptions.emplace_back("Value");
   scaleOptions.emplace_back("ReferenceData");
   declareProperty("AbsoluteScaleMethod", "None",
-                  boost::make_shared<StringListValidator>(scaleOptions),
+                  std::make_shared<StringListValidator>(scaleOptions),
                   "Absolute scale correction method");
   declareProperty("AbsoluteScalingFactor", 1.0, "Absolute scaling factor");
   setPropertySettings("AbsoluteScalingFactor",
@@ -562,7 +562,7 @@ void SetupEQSANSReduction::init() {
   // I(Q) calculation
   std::string iq1d_grp = "I(q) Calculation";
   declareProperty("DoAzimuthalAverage", true);
-  auto positiveInt = boost::make_shared<BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
   declareProperty("IQNumberOfBins", 100, positiveInt,
                   "Number of I(q) bins when binning is not specified");
@@ -611,8 +611,8 @@ void SetupEQSANSReduction::exec() {
     g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
-  boost::shared_ptr<PropertyManager> reductionManager =
-      boost::make_shared<PropertyManager>();
+  std::shared_ptr<PropertyManager> reductionManager =
+      std::make_shared<PropertyManager>();
   PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                       reductionManager);
 
@@ -890,7 +890,7 @@ void SetupEQSANSReduction::exec() {
 }
 
 void SetupEQSANSReduction::setupSensitivity(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
@@ -957,7 +957,7 @@ void SetupEQSANSReduction::setupSensitivity(
   }
 }
 void SetupEQSANSReduction::setupTransmission(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Transmission options
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
@@ -1042,7 +1042,7 @@ void SetupEQSANSReduction::setupTransmission(
 }
 
 void SetupEQSANSReduction::setupBackground(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");

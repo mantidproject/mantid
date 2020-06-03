@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -10,11 +10,13 @@
 """
 Provides facilities to check plot types
 """
-from __future__ import absolute_import
-
 # third party
 from enum import Enum
+from matplotlib.axes import Axes
+from matplotlib.collections import LineCollection
 from matplotlib.container import ErrorbarContainer
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 
 
 class FigureType(Enum):
@@ -29,6 +31,12 @@ class FigureType(Enum):
     Errorbar = 2
     # An image plot from imshow, pcolor, pcolormesh
     Image = 3
+    # A 3D surface plot
+    Surface = 4
+    # A 3D wireframe plot
+    Wireframe = 5
+    # A contour plot
+    Contour = 6
     # Any other type of plot
     Other = 100
 
@@ -46,8 +54,16 @@ def axes_type(ax):
         axtype = FigureType.Errorbar
     elif len(ax.lines) > 0:
         axtype = FigureType.Line
+    elif isinstance(ax, Axes3D):
+        if any(isinstance(col, Poly3DCollection) for col in ax.collections):
+            axtype = FigureType.Surface
+        elif any(isinstance(col, Line3DCollection) for col in ax.collections):
+            axtype = FigureType.Wireframe
     elif len(ax.images) > 0 or len(ax.collections) > 0:
-        axtype = FigureType.Image
+        if any(isinstance(col, LineCollection) for col in ax.collections):
+            axtype = FigureType.Contour
+        else:
+            axtype = FigureType.Image
 
     return axtype
 
@@ -63,10 +79,11 @@ def figure_type(fig, ax=None):
     if len(fig.get_axes()) == 0:
         return FigureType.Empty
     else:
-        ax_types = [axes_type(axis) for axis in fig.axes]
-        if any([type == FigureType.Image for type in ax_types]):
-            return FigureType.Image
-        elif ax:
+        if ax:
+            # If ax is a colorbar then find a non-colorbar axes on the figure so the plot type can be determined.
+            if type(ax) == Axes:
+                ax = next(axes for axes in fig.get_axes() if not type(axes) == Axes)
+
             return axes_type(ax)
         else:
             return axes_type(fig.axes[0])

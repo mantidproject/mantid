@@ -109,7 +109,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="y_axes_scale">
+               <widget class="QComboBox" name="x_axes_scale">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                   <horstretch>0</horstretch>
@@ -139,7 +139,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="x_axes_scale">
+               <widget class="QComboBox" name="y_axes_scale">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                   <horstretch>0</horstretch>

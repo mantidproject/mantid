@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -263,7 +263,7 @@ void Fit1D::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "The Workspace to fit, uses the workspace numbering of the "
@@ -699,7 +699,7 @@ void Fit1D::exec() {
 
     int histN = isHistogram ? 1 : 0;
     Mantid::DataObjects::Workspace2D_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             Mantid::API::WorkspaceFactory::Instance().create(
                 "Workspace2D", 3, l_data.n + histN, l_data.n));
     ws->setTitle("");
@@ -733,7 +733,7 @@ void Fit1D::exec() {
     delete[] lOut;
 
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+                std::dynamic_pointer_cast<MatrixWorkspace>(ws));
 
     if (isDerivDefined)
       gsl_matrix_free(covar);

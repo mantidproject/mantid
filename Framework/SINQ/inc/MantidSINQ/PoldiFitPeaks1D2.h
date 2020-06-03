@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,7 +51,7 @@ private:
   double m_width;
 };
 
-using RefinedRange_sptr = boost::shared_ptr<RefinedRange>;
+using RefinedRange_sptr = std::shared_ptr<RefinedRange>;
 
 bool MANTID_SINQ_DLL operator<(const RefinedRange_sptr &lhs,
                                const RefinedRange_sptr &rhs);
@@ -106,10 +106,11 @@ protected:
   API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
 
   void
-  setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak,
+  setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak,
                                const API::IFunction_sptr &fittedFunction) const;
 
-  double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction) const;
+  double
+  getFwhmWidthRelation(const API::IPeakFunction_sptr &peakFunction) const;
 
   API::IAlgorithm_sptr
   getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,

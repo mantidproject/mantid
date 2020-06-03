@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -46,12 +46,12 @@ const std::string IntegrateByComponent::category() const {
 void IntegrateByComponent::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<HistogramValidator>()),
+                      std::make_shared<HistogramValidator>()),
                   "The input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The output workspace.");
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "LevelsUp", 0, mustBePosInt,
@@ -158,8 +158,8 @@ void IntegrateByComponent::exec() {
  * @return  vector of vectors, containing each spectrum that belongs to each
  * group
  */
-std::vector<std::vector<size_t>>
-IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
+std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(
+    const API::MatrixWorkspace_sptr &countsWS) {
   std::vector<std::vector<size_t>> mymap;
   std::vector<size_t> single;
 
@@ -178,7 +178,8 @@ IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
  * group
  */
 std::vector<std::vector<size_t>>
-IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
+IntegrateByComponent::makeMap(const API::MatrixWorkspace_sptr &countsWS,
+                              int parents) {
   std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   if (parents == 0) // this should not happen in this file, but if one reuses
@@ -197,7 +198,7 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     }
 
     const auto detIdx = spectrumInfo.spectrumDefinition(i)[0].first;
-    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
+    std::vector<std::shared_ptr<const Mantid::Geometry::IComponent>> anc =
         detectorInfo.detector(detIdx).getAncestors();
 
     if (anc.size() < static_cast<size_t>(parents)) {

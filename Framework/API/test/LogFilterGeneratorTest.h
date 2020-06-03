@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -136,7 +136,7 @@ private:
   MatrixWorkspace_sptr createTestWorkspace(bool hasStatusLog = true,
                                            bool hasPeriodLog = true,
                                            bool hasBadLog = true) {
-    MatrixWorkspace_sptr ws = boost::make_shared<WorkspaceTester>();
+    MatrixWorkspace_sptr ws = std::make_shared<WorkspaceTester>();
     const std::vector<double> xData{0.0, 1.0}, yCounts{25.0}, errors{5.0};
     ws->initialize(1, xData.size(), yCounts.size());
     ws->setBinEdges(0, xData);

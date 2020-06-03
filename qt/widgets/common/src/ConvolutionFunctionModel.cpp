@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -12,6 +12,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include <iostream>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFunctionModel");
@@ -75,11 +76,11 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
 
 void ConvolutionFunctionModel::setModel(
     const std::string &background,
-    const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
+    const std::vector<std::pair<std::string, size_t>> &resolutionWorkspaces,
     const std::string &peaks, bool hasDeltaFunction,
     const std::vector<double> &qValues, const bool isQDependent,
     bool hasTempCorrection, double tempValue) {
-  auto fitFunction = boost::make_shared<MultiDomainFunction>();
+  auto fitFunction = std::make_shared<MultiDomainFunction>();
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     CompositeFunction_sptr domainFunction;
@@ -112,13 +113,13 @@ void ConvolutionFunctionModel::setModel(
 
 CompositeFunction_sptr
 ConvolutionFunctionModel::addBackground(CompositeFunction_sptr domainFunction,
-                                        std::string background) {
+                                        const std::string &background) {
   if (background.empty())
     return domainFunction;
 
   auto backgroundFunction =
       FunctionFactory::Instance().createInitialized(background);
-  auto functionWithBackground = boost::make_shared<CompositeFunction>();
+  auto functionWithBackground = std::make_shared<CompositeFunction>();
   functionWithBackground->addFunction(backgroundFunction);
   functionWithBackground->addFunction(domainFunction);
 
@@ -126,16 +127,15 @@ ConvolutionFunctionModel::addBackground(CompositeFunction_sptr domainFunction,
 }
 
 CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
-    std::string peaksFunction, bool hasDeltaFunction, bool isQDependent,
+    const std::string &peaksFunction, bool hasDeltaFunction, bool isQDependent,
     double qValue, bool hasTempCorrection, double tempValue) {
   auto functionSpecified = !peaksFunction.empty();
-  CompositeFunction_sptr innerFunction =
-      boost::make_shared<CompositeFunction>();
+  CompositeFunction_sptr innerFunction = std::make_shared<CompositeFunction>();
   if (functionSpecified) {
     auto peakFunction =
         FunctionFactory::Instance().createInitialized(peaksFunction);
     auto peakFunctionComposite =
-        boost::dynamic_pointer_cast<CompositeFunction>(peakFunction);
+        std::dynamic_pointer_cast<CompositeFunction>(peakFunction);
     if (peakFunctionComposite) {
       innerFunction = peakFunctionComposite;
     } else {
@@ -158,7 +158,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
       innerFunction->addFunction(deltaFunction);
     } else {
       CompositeFunction_sptr innerFunctionNew =
-          boost::make_shared<CompositeFunction>();
+          std::make_shared<CompositeFunction>();
       innerFunctionNew->addFunction(deltaFunction);
       innerFunctionNew->addFunction(innerFunction);
       return innerFunctionNew;
@@ -169,9 +169,9 @@ CompositeFunction_sptr ConvolutionFunctionModel::createInnerFunction(
 }
 
 CompositeFunction_sptr ConvolutionFunctionModel::addTempCorrection(
-    CompositeFunction_sptr peaksFunction, double tempValue) {
+    const CompositeFunction_sptr &peaksFunction, double tempValue) {
   CompositeFunction_sptr productFunction =
-      boost::dynamic_pointer_cast<CompositeFunction>(
+      std::dynamic_pointer_cast<CompositeFunction>(
           FunctionFactory::Instance().createFunction("ProductFunction"));
   auto tempFunction = createTemperatureCorrection(tempValue);
   productFunction->addFunction(tempFunction);
@@ -194,11 +194,11 @@ ConvolutionFunctionModel::createTemperatureCorrection(double correction) {
 }
 
 CompositeFunction_sptr ConvolutionFunctionModel::createConvolutionFunction(
-    IFunction_sptr resolutionFunction, IFunction_sptr innerFunction) {
+    IFunction_sptr resolutionFunction, const IFunction_sptr &innerFunction) {
   CompositeFunction_sptr convolution =
-      boost::dynamic_pointer_cast<CompositeFunction>(
+      std::dynamic_pointer_cast<CompositeFunction>(
           FunctionFactory::Instance().createFunction("Convolution"));
-  convolution->addFunction(resolutionFunction);
+  convolution->addFunction(std::move(resolutionFunction));
 
   if (innerFunction->nFunctions() > 0)
     convolution->addFunction(innerFunction);
@@ -206,9 +206,8 @@ CompositeFunction_sptr ConvolutionFunctionModel::createConvolutionFunction(
   return convolution;
 }
 
-IFunction_sptr
-ConvolutionFunctionModel::createResolutionFunction(std::string workspaceName,
-                                                   int workspaceIndex) {
+IFunction_sptr ConvolutionFunctionModel::createResolutionFunction(
+    const std::string &workspaceName, size_t workspaceIndex) {
   std::string resolution =
       workspaceName.empty()
           ? "name=Resolution"

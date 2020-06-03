@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
@@ -10,7 +10,7 @@
 #include "MantidPythonInterface/core/ExtractWorkspace.h"
 
 #include <boost/python/extract.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -28,7 +28,7 @@ using boost::python::extract;
 ExtractWorkspace::ExtractWorkspace(const boost::python::api::object &pyvalue)
     : m_value() {
   // Test for a weak pointer first
-  using Workspace_wptr = boost::weak_ptr<Workspace>;
+  using Workspace_wptr = std::weak_ptr<Workspace>;
   extract<Workspace_wptr &> extractWeak(pyvalue);
   if (extractWeak.check()) {
     m_value = extractWeak().lock();
@@ -53,7 +53,7 @@ const API::Workspace_sptr ExtractWorkspace::operator()() const {
     return m_value;
   } else {
     throw std::invalid_argument(
-        "Unable to extract boost::shared_ptr<Workspace> from Python object");
+        "Unable to extract std::shared_ptr<Workspace> from Python object");
   }
 }
 } // namespace PythonInterface

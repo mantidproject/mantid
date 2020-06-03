@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ public:
 
   std::string name() const override { return "PoldiSpectrumLinearBackground"; }
 
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
   size_t getTimeBinCount() const;
 
   void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,

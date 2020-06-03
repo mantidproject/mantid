@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -99,7 +99,7 @@ private:
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
   /// Create the gague volume for the correction
-  boost::shared_ptr<const Geometry::IObject> constructGaugeVolume();
+  std::shared_ptr<const Geometry::IObject> constructGaugeVolume();
 
   double m_cubeSide; ///< The length of the side of an element cube in m
 };

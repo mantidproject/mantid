@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,7 +12,7 @@
 #include "MantidKernel/V3D.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedDetector.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QImage>
 #include <QList>
@@ -67,7 +67,8 @@ public:
   void componentSelected(size_t componentIndex) override;
   void getSelectedDetectors(std::vector<size_t> &detIndices) override;
   void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
-  void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+  void
+  setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
   QString getInfoText() const override;
   RectF getSurfaceBounds() const override;
   //@}
@@ -107,7 +108,7 @@ public:
   /// Save settings for the unwrapped surface to a project file
   virtual std::string saveToProject() const override;
   /// Get a handle to a peaks workspace from a name
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+  std::shared_ptr<Mantid::API::IPeaksWorkspace>
   retrievePeaksWorkspace(const std::string &name) const;
 
 protected slots:

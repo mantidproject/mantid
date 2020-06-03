@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -196,7 +196,7 @@ int CompAssembly::nelements() const {
  * @return m_children[i]
  * @throw std::runtime_error if i is not in range
  */
-boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const {
+std::shared_ptr<IComponent> CompAssembly::getChild(const int i) const {
   if (m_map) {
     // Get the child of the base (unparametrized) assembly
     auto child_base = dynamic_cast<const CompAssembly *>(m_base);
@@ -210,7 +210,7 @@ boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const {
     if (i < 0 || i > static_cast<int>(m_children.size() - 1)) {
       throw std::runtime_error("CompAssembly::getChild() range not valid");
     }
-    return boost::shared_ptr<IComponent>(m_children[i], NoDeleting());
+    return std::shared_ptr<IComponent>(m_children[i], NoDeleting());
   }
 }
 
@@ -219,7 +219,7 @@ boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const {
  * @return A shared pointer to the ith component
  * @throw std:runtime_error if i is out of range
  */
-boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const {
+std::shared_ptr<IComponent> CompAssembly::operator[](int i) const {
   return this->getChild(i);
 }
 
@@ -233,13 +233,13 @@ boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const {
 void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
                                bool recursive) const {
   for (int i = 0; i < this->nelements(); i++) {
-    boost::shared_ptr<IComponent> comp = this->getChild(i);
+    std::shared_ptr<IComponent> comp = this->getChild(i);
     if (comp) {
       outVector.emplace_back(comp);
       // Look deeper, on option.
       if (recursive) {
-        boost::shared_ptr<ICompAssembly> assemb =
-            boost::dynamic_pointer_cast<ICompAssembly>(comp);
+        std::shared_ptr<ICompAssembly> assemb =
+            std::dynamic_pointer_cast<ICompAssembly>(comp);
         if (assemb)
           assemb->getChildren(outVector, recursive);
       }
@@ -265,10 +265,10 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
  * In particular, nlevels=1, would force cname to be a full path name.
  * @returns A shared pointer to the component
  */
-boost::shared_ptr<const IComponent>
+std::shared_ptr<const IComponent>
 CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
-  boost::shared_ptr<const ICompAssembly> thisNode =
-      boost::shared_ptr<const ICompAssembly>(this, NoDeleting());
+  std::shared_ptr<const ICompAssembly> thisNode =
+      std::shared_ptr<const ICompAssembly>(this, NoDeleting());
 
   // If name has '/' in it, it is taken as part of a path name of the component.
   // Steps may be skipped at a '/' from the path name,
@@ -278,29 +278,29 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   if (cut < cname.length()) {
     auto otherNode = this->getComponentByName(cname.substr(0, cut), nlevels);
     if (otherNode) {
-      boost::shared_ptr<const ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const ICompAssembly>(otherNode);
+      std::shared_ptr<const ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const ICompAssembly>(otherNode);
       return asmb->getComponentByName(cname.substr(cut + 1, std::string::npos),
                                       nlevels);
     } else {
-      return boost::shared_ptr<const IComponent>(); // Search failed
+      return std::shared_ptr<const IComponent>(); // Search failed
     }
   }
 
   // Check the instrument name first
   if (this->getName() == cname) {
-    return boost::dynamic_pointer_cast<const ICompAssembly>(thisNode);
+    return std::dynamic_pointer_cast<const ICompAssembly>(thisNode);
   }
   // Otherwise Search the instrument tree using a breadth-first search algorithm
   // since most likely candidates
   // are higher-level components
   // I found some useful info here
   // http://www.cs.bu.edu/teaching/c/tree/breadth-first/
-  std::deque<boost::shared_ptr<const ICompAssembly>> nodeQueue{thisNode};
+  std::deque<std::shared_ptr<const ICompAssembly>> nodeQueue{thisNode};
   const bool limitSearch(nlevels > 0);
   while (!nodeQueue.empty()) {
     // get the next node in the queue
-    boost::shared_ptr<const ICompAssembly> node = nodeQueue.front();
+    std::shared_ptr<const ICompAssembly> node = nodeQueue.front();
     nodeQueue.pop_front();
 
     // determine the depth
@@ -313,9 +313,8 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
       }
     }
 
-    auto rectDet = boost::dynamic_pointer_cast<const RectangularDetector>(node);
-    auto structDet =
-        boost::dynamic_pointer_cast<const StructuredDetector>(node);
+    auto rectDet = std::dynamic_pointer_cast<const RectangularDetector>(node);
+    auto structDet = std::dynamic_pointer_cast<const StructuredDetector>(node);
 
     if (bool(rectDet) && (node != thisNode)) {
       // for rectangular detectors search the depth rather than siblings
@@ -332,7 +331,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
       // loop over the children
       int nchildren = node->nelements();
       for (int i = 0; i < nchildren; ++i) {
-        boost::shared_ptr<const IComponent> comp = (*node)[i];
+        std::shared_ptr<const IComponent> comp = (*node)[i];
         if (comp->getName() == cname) {
           return comp;
         } else {
@@ -340,8 +339,8 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
           if ((!limitSearch) || (depth + 1 < nlevels)) {
             // don't bother adding things to the queue that aren't
             // assemblies
-            boost::shared_ptr<const ICompAssembly> compAssembly =
-                boost::dynamic_pointer_cast<const ICompAssembly>(comp);
+            std::shared_ptr<const ICompAssembly> compAssembly =
+                std::dynamic_pointer_cast<const ICompAssembly>(comp);
             if (bool(compAssembly)) {
               nodeQueue.emplace_back(compAssembly);
             }
@@ -352,7 +351,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   } // while-end
 
   // If we have reached here then the search failed
-  return boost::shared_ptr<const IComponent>();
+  return std::shared_ptr<const IComponent>();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -410,9 +409,9 @@ void CompAssembly::testIntersectionWithChildren(
     Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const {
   int nchildren = this->nelements();
   for (int i = 0; i < nchildren; ++i) {
-    boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
+    std::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
     if (ICompAssembly_sptr childAssembly =
-            boost::dynamic_pointer_cast<ICompAssembly>(comp)) {
+            std::dynamic_pointer_cast<ICompAssembly>(comp)) {
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection
@@ -432,7 +431,7 @@ void CompAssembly::testIntersectionWithChildren(
  */
 void CompAssembly::printChildren(std::ostream &os) const {
   for (int i = 0; i < nelements(); i++) {
-    boost::shared_ptr<IComponent> it = (*this)[i];
+    std::shared_ptr<IComponent> it = (*this)[i];
     os << "Component " << i << " : **********\n";
     it->printSelf(os);
   }
@@ -446,7 +445,7 @@ void CompAssembly::printChildren(std::ostream &os) const {
  */
 void CompAssembly::printTree(std::ostream &os) const {
   for (int i = 0; i < nelements(); i++) {
-    boost::shared_ptr<IComponent> it = (*this)[i];
+    std::shared_ptr<IComponent> it = (*this)[i];
     const CompAssembly *test = dynamic_cast<CompAssembly *>(it.get());
     os << "Element " << i << " from " << nelements() << " in the assembly : ";
     if (test) {

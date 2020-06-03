@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RenameWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -98,7 +98,7 @@ void RenameWorkspace::exec() {
   Workspace_sptr inputWS = getProperty("InputWorkspace");
 
   WorkspaceGroup_sptr inputGroup =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+      std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
 
   // get the workspace name
   std::string inputwsName = inputWS->getName();
@@ -116,7 +116,7 @@ void RenameWorkspace::exec() {
     return;
 
   // Deal with attached monitor workspace if any.
-  auto matInputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+  auto matInputWS = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
   if (!matInputWS) // its some kind workspaces which may not have possibility
     return;        // to attach monitors to it
   auto monWS = matInputWS->monitorWorkspace();
@@ -151,7 +151,7 @@ bool RenameWorkspace::processGroups() {
 
   // Cast the input to a group
   WorkspaceGroup_sptr inputGroup =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+      std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
   assert(inputGroup); // Should always be true
 
   // Decide whether we will rename the group members. Must do this before
@@ -174,8 +174,9 @@ bool RenameWorkspace::processGroups() {
         suffix << i + 1;
         std::string wsName = outputwsName + "_" + suffix.str();
 
-        IAlgorithm *alg = API::FrameworkManager::Instance().createAlgorithm(
+        auto alg = API::AlgorithmManager::Instance().createUnmanaged(
             this->name(), this->version());
+        alg->initialize();
         alg->setPropertyValue("InputWorkspace", names[i]);
         alg->setPropertyValue("OutputWorkspace", wsName);
         alg->setChild(true);

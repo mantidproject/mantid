@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -32,7 +32,7 @@ public:
 
   void testFunction() {
     FunctionParameterDecorator_sptr fn =
-        boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+        std::dynamic_pointer_cast<FunctionParameterDecorator>(
             FunctionFactory::Instance().createFunction(
                 "PeakParameterFunction"));
 
@@ -41,7 +41,7 @@ public:
     fn->setDecoratedFunction("Gaussian");
 
     IPeakFunction_sptr peakFunction =
-        boost::dynamic_pointer_cast<IPeakFunction>(fn->getDecoratedFunction());
+        std::dynamic_pointer_cast<IPeakFunction>(fn->getDecoratedFunction());
 
     FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
     FunctionValues values(domain);
@@ -56,7 +56,7 @@ public:
 
   void testFunctionDeriv() {
     FunctionParameterDecorator_sptr fn =
-        boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+        std::dynamic_pointer_cast<FunctionParameterDecorator>(
             FunctionFactory::Instance().createFunction(
                 "PeakParameterFunction"));
 
@@ -88,7 +88,7 @@ public:
 
   void testWrongDomainSize() {
     FunctionParameterDecorator_sptr fn =
-        boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+        std::dynamic_pointer_cast<FunctionParameterDecorator>(
             FunctionFactory::Instance().createFunction(
                 "PeakParameterFunction"));
 
@@ -108,7 +108,7 @@ public:
 
   void testNoFunctionSet() {
     FunctionParameterDecorator_sptr fn =
-        boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+        std::dynamic_pointer_cast<FunctionParameterDecorator>(
             FunctionFactory::Instance().createFunction(
                 "PeakParameterFunction"));
 
@@ -125,7 +125,7 @@ public:
 
   void testBeforeDecoratedFunctionSet() {
     FunctionParameterDecorator_sptr fn =
-        boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+        std::dynamic_pointer_cast<FunctionParameterDecorator>(
             FunctionFactory::Instance().createFunction(
                 "PeakParameterFunction"));
 

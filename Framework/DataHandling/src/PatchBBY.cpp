@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/PatchBBY.h"
 #include "MantidAPI/FileProperty.h"
@@ -125,7 +125,7 @@ void PatchBBY::init() {
         declareProperty(
             std::make_unique<Kernel::PropertyWithValue<std::string>>(
                 itr->Name, "",
-                boost::make_shared<Kernel::ListValidator<std::string>>(keys),
+                std::make_shared<Kernel::ListValidator<std::string>>(keys),
                 Kernel::Direction::Input),
             "Optional");
       }
@@ -239,8 +239,7 @@ void PatchBBY::exec() {
       tarFile.select(file_it->c_str());
       // extract hdf file into tmp file
       Poco::TemporaryFile hdfFile;
-      boost::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"),
-                                     fclose);
+      std::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"), fclose);
       if (handle) {
         // copy content
         char buffer[4096];

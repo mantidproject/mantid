@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/Cache.h"
@@ -55,7 +55,7 @@ bool convertTimeSeriesToDouble(const Property *property, double &value,
       value = static_cast<double>(log->minValue());
       break;
     case Math::Mean:
-      value = log->getStatistics().mean;
+      value = static_cast<double>(log->mean());
       break;
     case Math::Median:
       value = log->getStatistics().median;
@@ -95,7 +95,6 @@ bool convertPropertyToDouble(const Property *property, double &value,
 /// Name of the log entry containing the proton charge when retrieved using
 /// getProtonCharge
 const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
-
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
@@ -240,11 +239,15 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
  * Filter the run by the given boolean log. It replaces all time
  * series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each log on
+ * @param excludedFromFiltering :: A string list of logs that
+ * will be excluded from filtering
  */
-void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter) {
+void LogManager::filterByLog(
+    const Kernel::TimeSeriesProperty<bool> &filter,
+    const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
   m_singleValueCache->clear();
-  m_manager->filterByProperty(filter);
+  m_manager->filterByProperty(filter, excludedFromFiltering);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -548,6 +551,41 @@ void LogManager::loadNexus(::NeXus::File *file,
  * Clear the logs.
  */
 void LogManager::clearLogs() { m_manager->clear(); }
+
+/// Gets the correct log name for the matching invalid values log for a given
+/// log name
+std::string
+LogManager::getInvalidValuesFilterLogName(const std::string &logName) {
+  return PropertyManager::getInvalidValuesFilterLogName(logName);
+}
+
+/// returns true if the log has a matching invalid values log filter
+bool LogManager::hasInvalidValuesFilter(const std::string &logName) const {
+  return hasProperty(getInvalidValuesFilterLogName(logName));
+}
+
+/// returns the invalid values log if the log has a matching invalid values log
+/// filter
+Kernel::TimeSeriesProperty<bool> *
+LogManager::getInvalidValuesFilter(const std::string &logName) const {
+  try {
+    auto log = getLogData(getInvalidValuesFilterLogName(logName));
+    if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
+      return tsp;
+    }
+  } catch (Exception::NotFoundError &) {
+    // do nothing, just drop through tto the return line below
+  }
+  return nullptr;
+}
+
+bool LogManager::operator==(const LogManager &other) const {
+  return *m_manager == *(other.m_manager);
+}
+
+bool LogManager::operator!=(const LogManager &other) const {
+  return *m_manager != *(other.m_manager);
+}
 
 //-----------------------------------------------------------------------------------------------------------------------
 // Private methods

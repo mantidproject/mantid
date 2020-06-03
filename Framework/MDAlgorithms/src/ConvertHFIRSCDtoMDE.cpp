@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -143,7 +142,7 @@ void ConvertHFIRSCDtoMDE::init() {
   declareProperty(
       std::make_unique<PropertyWithValue<double>>(
           "Wavelength", DBL_MAX,
-          boost::make_shared<BoundedValidator<double>>(0.0, 100.0, true),
+          std::make_shared<BoundedValidator<double>>(0.0, 100.0, true),
           Direction::Input),
       "Wavelength");
   declareProperty(
@@ -212,15 +211,15 @@ void ConvertHFIRSCDtoMDE::exec() {
   Mantid::Geometry::QSample frame;
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
-  outputWS->addDimension(boost::make_shared<Geometry::MDHistoDimension>(
+  outputWS->addDimension(std::make_shared<Geometry::MDHistoDimension>(
       "Q_sample_x", "Q_sample_x", frame, static_cast<coord_t>(minVals[0]),
       static_cast<coord_t>(maxVals[0]), 1));
 
-  outputWS->addDimension(boost::make_shared<Geometry::MDHistoDimension>(
+  outputWS->addDimension(std::make_shared<Geometry::MDHistoDimension>(
       "Q_sample_y", "Q_sample_y", frame, static_cast<coord_t>(minVals[1]),
       static_cast<coord_t>(maxVals[1]), 1));
 
-  outputWS->addDimension(boost::make_shared<Geometry::MDHistoDimension>(
+  outputWS->addDimension(std::make_shared<Geometry::MDHistoDimension>(
       "Q_sample_z", "Q_sample_z", frame, static_cast<coord_t>(minVals[2]),
       static_cast<coord_t>(maxVals[2]), 1));
   outputWS->setCoordinateSystem(Mantid::Kernel::QSample);
@@ -231,7 +230,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   outputWS->splitBox();
 
   auto mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outputWS);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   float k =

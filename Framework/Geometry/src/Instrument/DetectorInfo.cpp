@@ -1,13 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include <utility>
+
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -23,12 +25,13 @@ namespace Geometry {
  * argument. */
 DetectorInfo::DetectorInfo(
     std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
-    boost::shared_ptr<const Geometry::Instrument> instrument,
-    boost::shared_ptr<const std::vector<detid_t>> detectorIds,
-    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-        detIdToIndexMap)
-    : m_detectorInfo(std::move(detectorInfo)), m_instrument(instrument),
-      m_detectorIDs(detectorIds), m_detIDToIndex(detIdToIndexMap),
+    std::shared_ptr<const Geometry::Instrument> instrument,
+    std::shared_ptr<const std::vector<detid_t>> detectorIds,
+    std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap)
+    : m_detectorInfo(std::move(detectorInfo)),
+      m_instrument(std::move(instrument)),
+      m_detectorIDs(std::move(detectorIds)),
+      m_detIDToIndex(std::move(detIdToIndexMap)),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
@@ -437,7 +440,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
 }
 
 /// Helper used by SpectrumInfo.
-boost::shared_ptr<const Geometry::IDetector>
+std::shared_ptr<const Geometry::IDetector>
 DetectorInfo::getDetectorPtr(const size_t index) const {
   auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));

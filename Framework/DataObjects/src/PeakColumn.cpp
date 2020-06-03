@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidKernel/ConfigService.h"
@@ -37,7 +37,7 @@ const std::string typeFromName(const std::string &name) {
   // We should enter the critical section if the map has not been fully filled.
   // Be sure to keep the value tested against in sync with the number of inserts
   // below
-  if (TYPE_INDEX.size() != 18) {
+  if (TYPE_INDEX.size() != 19) {
     PARALLEL_CRITICAL(fill_column_index_map) {
       if (TYPE_INDEX.empty()) // check again inside the critical block
       {
@@ -60,7 +60,8 @@ const std::string typeFromName(const std::string &name) {
         TYPE_INDEX.emplace("QLab", "V3D");
         TYPE_INDEX.emplace("QSample", "V3D");
         TYPE_INDEX.emplace("PeakNumber", "int");
-        // If adding an entry, be sure to increment the size comparizon in the
+        TYPE_INDEX.emplace("TBar", "double");
+        // If adding an entry, be sure to increment the size comparison in the
         // first line
       }
     }

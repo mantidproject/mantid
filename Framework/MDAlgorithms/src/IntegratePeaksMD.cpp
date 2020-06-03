@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -56,7 +56,7 @@ void IntegratePeaksMD::init() {
   std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
                                        "HKL"};
   declareProperty("CoordinatesToUse", "Q (lab frame)",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
   declareProperty(
@@ -123,7 +123,7 @@ void IntegratePeaksMD::init() {
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
   peakNames.emplace_back("NoFit");
   declareProperty("ProfileFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peakNames),
+                  std::make_shared<StringListValidator>(peakNames),
                   "Fitting function for profile that is used only with "
                   "Cylinder integration.");
 
@@ -131,7 +131,7 @@ void IntegratePeaksMD::init() {
   integrationOptions[0] = "Sum";
   integrationOptions[1] = "GaussianQuadrature";
   auto integrationvalidator =
-      boost::make_shared<StringListValidator>(integrationOptions);
+      std::make_shared<StringListValidator>(integrationOptions);
   declareProperty("IntegrationOption", "GaussianQuadrature",
                   integrationvalidator,
                   "Integration method for calculating intensity "
@@ -206,15 +206,15 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     size_t histogramNumber = peakWS->getNumberPeaks();
     Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, numSteps, numSteps);
-    wsProfile2D = boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+    wsProfile2D = std::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("ProfilesData", wsProfile2D);
     Workspace_sptr wsFit = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, numSteps, numSteps);
-    wsFit2D = boost::dynamic_pointer_cast<Workspace2D>(wsFit);
+    wsFit2D = std::dynamic_pointer_cast<Workspace2D>(wsFit);
     AnalysisDataService::Instance().addOrReplace("ProfilesFit", wsFit2D);
     Workspace_sptr wsDiff = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, numSteps, numSteps);
-    wsDiff2D = boost::dynamic_pointer_cast<Workspace2D>(wsDiff);
+    wsDiff2D = std::dynamic_pointer_cast<Workspace2D>(wsDiff);
     AnalysisDataService::Instance().addOrReplace("ProfilesFitDiff", wsDiff2D);
     auto newAxis1 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
     auto newAxis2 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
@@ -544,8 +544,8 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
         IFunction_sptr ifun =
             FunctionFactory::Instance().createInitialized(fun_str.str());
-        boost::shared_ptr<const CompositeFunction> fun =
-            boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
+        std::shared_ptr<const CompositeFunction> fun =
+            std::dynamic_pointer_cast<const CompositeFunction>(ifun);
         const auto &x = wsProfile2D->x(i);
         wsFit2D->setSharedX(i, wsProfile2D->sharedX(i));
         wsDiff2D->setSharedX(i, wsProfile2D->sharedX(i));
@@ -680,8 +680,8 @@ void IntegratePeaksMD::exec() {
 }
 
 double f_eval(double x, void *params) {
-  boost::shared_ptr<const API::CompositeFunction> fun =
-      *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(
+  std::shared_ptr<const API::CompositeFunction> fun =
+      *reinterpret_cast<std::shared_ptr<const API::CompositeFunction> *>(
           params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);

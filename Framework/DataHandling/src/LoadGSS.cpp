@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
@@ -423,7 +423,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   // Create workspace & GSS Files data is always in TOF
 
   MatrixWorkspace_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(
+      std::dynamic_pointer_cast<MatrixWorkspace>(
           WorkspaceFactory::Instance().create("Workspace2D", nHist, xWidth,
                                               yWidth));
   outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -488,7 +488,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
 /** Create the instrument geometry with Instrument
  */
 void LoadGSS::createInstrumentGeometry(
-    MatrixWorkspace_sptr workspace, const std::string &instrumentname,
+    const MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
     const double &primaryflightpath, const std::vector<int> &detectorids,
     const std::vector<double> &totalflightpaths,
     const std::vector<double> &twothetas) {

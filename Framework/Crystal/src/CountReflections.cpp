@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CountReflections.h"
 #include "MantidCrystal/PeakStatisticsTools.h"
@@ -61,12 +61,12 @@ void CountReflections::init() {
 
   auto centeringSymbols = getAllReflectionConditionSymbols();
   declareProperty("LatticeCentering", centeringSymbols[0],
-                  boost::make_shared<StringListValidator>(centeringSymbols),
+                  std::make_shared<StringListValidator>(centeringSymbols),
                   "Lattice centering of the cell.");
 
   auto pointGroups = PointGroupFactory::Instance().getAllPointGroupSymbols();
   declareProperty(
-      "PointGroup", "1", boost::make_shared<StringListValidator>(pointGroups),
+      "PointGroup", "1", std::make_shared<StringListValidator>(pointGroups),
       "Point group symmetry for completeness and redundancy calculations.");
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(
@@ -192,7 +192,7 @@ PeaksWorkspace_sptr CountReflections::getPeaksWorkspace(
       getProperty("MissingReflectionsWorkspace");
 
   PeaksWorkspace_sptr outputPeaksWorkspace =
-      boost::dynamic_pointer_cast<PeaksWorkspace>(rawOutputPeaksWorkspace);
+      std::dynamic_pointer_cast<PeaksWorkspace>(rawOutputPeaksWorkspace);
 
   if (outputPeaksWorkspace != templateWorkspace) {
     outputPeaksWorkspace = templateWorkspace->clone();

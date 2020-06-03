@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,7 +51,7 @@ public:
 };
 
 using AbstractDoubleValueExtractor_sptr =
-    boost::shared_ptr<AbstractDoubleValueExtractor>;
+    std::shared_ptr<AbstractDoubleValueExtractor>;
 
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
@@ -134,7 +134,7 @@ protected:
   static std::map<std::string, AbstractDoubleValueExtractor_sptr> m_extractors;
 };
 
-using PoldiInstrumentAdapter_sptr = boost::shared_ptr<PoldiInstrumentAdapter>;
+using PoldiInstrumentAdapter_sptr = std::shared_ptr<PoldiInstrumentAdapter>;
 
 } // namespace Poldi
 } // namespace Mantid

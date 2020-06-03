@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -19,6 +19,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -37,8 +39,8 @@ public:
   }
 
   /** Make a HKL peaks workspace */
-  PeaksWorkspace_sptr getHKLpw(Instrument_sptr inst, std::vector<V3D> hkls,
-                               detid_t detid) {
+  PeaksWorkspace_sptr getHKLpw(const Instrument_sptr &inst,
+                               const std::vector<V3D> &hkls, detid_t detid) {
     PeaksWorkspace_sptr hklPW;
     if (hkls.size() > 0) {
       hklPW = PeaksWorkspace_sptr(new PeaksWorkspace());
@@ -51,9 +53,9 @@ public:
     return hklPW;
   }
 
-  void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls, int convention = 1,
-                    bool useExtendedDetectorSpace = false,
+  void do_test_exec(const std::string &reflectionCondition,
+                    size_t expectedNumber, const std::vector<V3D> &hkls,
+                    int convention = 1, bool useExtendedDetectorSpace = false,
                     bool addExtendedDetectorDefinition = false, int edge = 0) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
@@ -78,13 +80,13 @@ public:
     WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
     WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
 
-    PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 10000);
+    PeaksWorkspace_sptr hklPW = getHKLpw(inst, std::move(hkls), 10000);
 
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
@@ -150,7 +152,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
@@ -212,7 +214,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
@@ -276,7 +278,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
@@ -322,7 +324,7 @@ public:
     PredictPeaks alg;
     alg.initialize();
     alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<Workspace>(inWS));
+                    std::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");
@@ -346,7 +348,7 @@ public:
     PredictPeaks alg;
     alg.initialize();
     alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<Workspace>(inWS));
+                    std::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");

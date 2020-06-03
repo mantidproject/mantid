@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
@@ -13,7 +13,6 @@
       - Keep the same parameters and work as a drop-in replacement for the old algorithm.
       - Reproduce the output of the old algorithm.
 """
-from __future__ import (absolute_import, division, print_function)
 import time
 import math
 import os
@@ -65,14 +64,14 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background for the normalization")
         self.declareProperty("LowResDataAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the data will be cropped according "+
-                             "to the lowResDataAxisPixelRange property")
+                             doc="If true, the low resolution direction of the data will be cropped according "
+                                 + "to the lowResDataAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the data")
         self.declareProperty("LowResNormAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the normalization run will be cropped "+
-                             "according to the LowResNormAxisPixelRange property")
+                             doc="If true, the low resolution direction of the normalization run will be cropped "
+                                 + "according to the LowResNormAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the normalizaion run")
@@ -86,6 +85,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (degrees)")
         self.declareProperty("AngleOffsetError", 0.0, doc="Angle offset error (degrees)")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
+        self.declareProperty("ApplyScalingFactor", True, doc="If true, the scaling from Scaling Factor file will be applied")
         self.declareProperty("ScalingFactorFile", "", doc="Scaling factor configuration file")
         self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
         self.declareProperty("SlitsWidthFlag", True,
@@ -210,7 +210,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         normalized_data.setDistribution(True)
 
         # Apply scaling factors
-        normalized_data = self.apply_scaling_factor(normalized_data)
+        apply_scaling_factor = self.getProperty("ApplyScalingFactor").value
+        if apply_scaling_factor:
+            normalized_data = self.apply_scaling_factor(normalized_data)
 
         q_workspace = SumSpectra(InputWorkspace = normalized_data)
         q_workspace.getAxis(0).setUnit("MomentumTransfer")

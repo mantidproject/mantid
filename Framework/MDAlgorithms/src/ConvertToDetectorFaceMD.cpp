@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
 #include "MantidAPI/Axis.h"
@@ -80,7 +80,7 @@ void ConvertToDetectorFaceMD::init() {
  */
 template <class T, class MDE, size_t nd>
 void ConvertToDetectorFaceMD::convertEventList(
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
     size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
     uint16_t runIndex, int32_t detectorID) {
   EventList &el = in_ws->getSpectrum(workspaceIndex);
@@ -141,7 +141,7 @@ ConvertToDetectorFaceMD::getBanks() {
     for (auto &comp : comps) {
       // Retrieve it
       RectangularDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const RectangularDetector>(comp);
+          std::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det) {
         std::string name = det->getName();
         if (name.size() < 5)
@@ -160,7 +160,7 @@ ConvertToDetectorFaceMD::getBanks() {
           "bank" + Mantid::Kernel::Strings::toString(bankNum);
       IComponent_const_sptr comp = inst->getComponentByName(bankName);
       RectangularDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const RectangularDetector>(comp);
+          std::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det)
         banks[bankNum] = det;
     }
@@ -189,7 +189,7 @@ void ConvertToDetectorFaceMD::exec() {
   // TODO convert matrix to event as needed
   MatrixWorkspace_sptr mws = this->getProperty("InputWorkspace");
 
-  in_ws = boost::dynamic_pointer_cast<EventWorkspace>(mws);
+  in_ws = std::dynamic_pointer_cast<EventWorkspace>(mws);
   if (!in_ws)
     throw std::runtime_error("InputWorkspace is not an EventWorkspace");
 
@@ -253,9 +253,9 @@ void ConvertToDetectorFaceMD::exec() {
   outWS->splitBox();
 
   MDEventWorkspace3::sptr outWS3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace3>(outWS);
+      std::dynamic_pointer_cast<MDEventWorkspace3>(outWS);
   MDEventWorkspace4::sptr outWS4 =
-      boost::dynamic_pointer_cast<MDEventWorkspace4>(outWS);
+      std::dynamic_pointer_cast<MDEventWorkspace4>(outWS);
 
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   ExperimentInfo_sptr ei(in_ws->cloneExperimentInfo());

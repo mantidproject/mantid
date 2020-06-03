@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -56,8 +56,7 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const {
   if (this->m_peaksWorkspace->getNumberPeaks() >= 1) {
     double effectiveRadius = 1e-2;
     std::string viewable = m_viewableRegion->toExtentsAsString();
-    auto peaksWS =
-        boost::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
+    auto peaksWS = std::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("PeaksInRegion");
@@ -169,7 +168,7 @@ double ConcretePeaksPresenterVsi::getMaxRadius(
  */
 void ConcretePeaksPresenterVsi::sortPeaksWorkspace(
     const std::string &byColumnName, const bool ascending) {
-  auto peaksWS = boost::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
+  auto peaksWS = std::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
 
   // Sort the Peaks in-place.
   Mantid::API::IAlgorithm_sptr alg =

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
@@ -71,7 +71,7 @@ AbsorptionCorrection::AbsorptionCorrection()
 void AbsorptionCorrection::init() {
 
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -88,10 +88,10 @@ void AbsorptionCorrection::init() {
                                            CALC_ENVIRONMENT};
   declareProperty(
       "ScatterFrom", CALC_SAMPLE,
-      boost::make_shared<StringListValidator>(std::move(scatter_options)),
+      std::make_shared<StringListValidator>(std::move(scatter_options)),
       "The component to calculate the absorption for (default: Sample)");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
                   "The ABSORPTION cross-section, at 1.8 Angstroms, for the "
@@ -105,7 +105,7 @@ void AbsorptionCorrection::init() {
                   "The number density of the sample in number of atoms per "
                   "cubic angstrom if not set with SetSampleMaterial");
 
-  auto positiveInt = boost::make_shared<BoundedValidator<int64_t>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
   declareProperty(
       "NumberOfWavelengthPoints", static_cast<int64_t>(EMPTY_INT()),
@@ -115,14 +115,13 @@ void AbsorptionCorrection::init() {
 
   std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
-      "ExpMethod", "Normal",
-      boost::make_shared<StringListValidator>(exp_options),
+      "ExpMethod", "Normal", std::make_shared<StringListValidator>(exp_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");
   declareProperty(
       "EFixed", 0.0, mustBePositive,
@@ -333,7 +332,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
 
     // Save input in Sample with wrong atomic number and name
-    auto shape = boost::shared_ptr<IObject>(
+    auto shape = std::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInAbsorptionCorrection", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
@@ -407,7 +406,7 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
     msg << "Cannot use geometry xml for ScatterFrom=" << scatterFrom;
     throw std::runtime_error(msg.str());
   } else { // create a geometry from the sample object
-    boost::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
+    std::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
     sample.setShape(shape);
     m_sampleObject = &sample.getShape();
 

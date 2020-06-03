@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPDFgetNFile.h"
 #include "MantidAPI/Axis.h"
@@ -106,7 +106,7 @@ void LoadPDFgetNFile::exec() {
  * 1. a 2D vector for column data
  * 2. a 1D string vector for column name
  */
-void LoadPDFgetNFile::parseDataFile(std::string filename) {
+void LoadPDFgetNFile::parseDataFile(const std::string &filename) {
   // 1. Open file
   std::ifstream ifile;
   ifile.open((filename.c_str()));
@@ -257,7 +257,7 @@ void LoadPDFgetNFile::parseDataLine(string line) {
 }
 
 //----------------------------------------------------------------------------------------------
-void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
+void LoadPDFgetNFile::setUnit(const Workspace2D_sptr &ws) {
   // 1. Set X
   string xcolname = mColumnNames[0];
 
@@ -267,8 +267,8 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
   } else if (xcolname == "r") {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = ws->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(unit);
+    std::shared_ptr<Units::Label> label =
+        std::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel("AtomicDistance", "Angstrom");
   } else {
     stringstream errss;
@@ -368,7 +368,7 @@ void LoadPDFgetNFile::generateDataWorkspace() {
   size_t size = numptsvec[0];
 
   // 2. Generate workspace2D object and set the unit
-  outWS = boost::dynamic_pointer_cast<Workspace2D>(
+  outWS = std::dynamic_pointer_cast<Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numsets, size,
                                                size));
 

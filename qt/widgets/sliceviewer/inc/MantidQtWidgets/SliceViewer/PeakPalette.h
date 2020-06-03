@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ private:
   ColourMapType m_foregroundMap;
   typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
                                                  const int index) {
-    typename ColourMapType::iterator it = map.find(index);
+    auto it = map.find(index);
     if (it == map.end()) {
       std::stringstream stream;
       stream << "Index " << index << " is out of range";

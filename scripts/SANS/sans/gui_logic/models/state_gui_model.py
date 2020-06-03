@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The state gui model contains all the reduction information which is not explicitly available in the data table.
 
@@ -10,9 +10,6 @@ This is one of the two models which is used for the data reduction. It contains 
 are not available in the model associated with the data table.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
-from mantid.py3compat import ensure_str
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
                                DetectorType)
 from sans.gui_logic.models.model_common import ModelCommon
@@ -253,8 +250,8 @@ class StateGuiModel(ModelCommon):
 
     @reduction_mode.setter
     def reduction_mode(self, value):
-        if (value is ReductionMode.LAB or value is ReductionMode.HAB or
-            value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
+        if (value is ReductionMode.LAB or value is ReductionMode.HAB
+                or value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
             if DetectorId.REDUCTION_MODE in self._user_file_items:
                 del self._user_file_items[DetectorId.REDUCTION_MODE]
             new_state_entries = {DetectorId.REDUCTION_MODE: [value]}
@@ -561,7 +558,7 @@ class StateGuiModel(ModelCommon):
 
     @q_1d_rebin_string.setter
     def q_1d_rebin_string(self, value):
-        self._set_q_1d_limits(rebin_string=ensure_str(value))
+        self._set_q_1d_limits(rebin_string=value)
 
     @property
     def q_xy_max(self):

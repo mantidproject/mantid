@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <iomanip>
 // includes for workspace handling
@@ -90,10 +90,10 @@ SliceSelector::~SliceSelector() {
  */
 void SliceSelector::preDeleteHandle(
     const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) {
+    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   UNUSED_ARG(workspaceName);
   Mantid::API::MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
   if (!ws || (ws != m_loadedWorkspace->m_ws)) {
     return;
   }

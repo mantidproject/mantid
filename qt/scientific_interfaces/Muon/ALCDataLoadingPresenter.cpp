@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingPresenter.h"
 
@@ -327,11 +327,11 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
   if (m_loadedData)
-    return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
+    return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
   return MatrixWorkspace_sptr();
 }
 
-void ALCDataLoadingPresenter::setData(MatrixWorkspace_sptr data) {
+void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
 
   if (data) {
     // Set the data

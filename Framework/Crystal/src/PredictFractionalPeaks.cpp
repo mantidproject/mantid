@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidAPI/Run.h"
@@ -159,7 +159,7 @@ private:
  * @param modulationProps The set of modulation properties
  * @return A new PeaksWorkspace
  */
-boost::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
+std::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
     const PeaksWorkspace &inputPeaks,
     const Mantid::Crystal::ModulationProperties &modulationProps) {
   using Mantid::API::WorkspaceFactory;
@@ -341,7 +341,7 @@ void PredictFractionalPeaks::init() {
                  std::back_inserter(propOptions),
                  [](const auto &condition) { return condition->getName(); });
   declareProperty(PropertyNames::REFLECTION_COND, "",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "If provided, generate a list of possible peaks from this "
                   "reflection condition and use them to predict the fractional "
                   "peaks. This option requires a range of HKL values and "

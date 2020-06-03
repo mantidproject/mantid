@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -35,7 +35,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
 
   /// Sets some data
-  void setData(Mantid::API::MatrixWorkspace_sptr data);
+  void setData(const Mantid::API::MatrixWorkspace_sptr &data);
 
   // Returns a boolean stating whether data is currently being loading
   bool isLoading() const;

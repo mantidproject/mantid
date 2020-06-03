@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -24,7 +24,7 @@
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <Eigen/Geometry>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -36,12 +36,11 @@ namespace {
  Helper function to create an ID -> index map from an ordered collection of IDs.
  First ID gets index of 0, subsequent ID entries increment index by 1.
 */
-boost::shared_ptr<
-    const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
+std::shared_ptr<const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
 makeComponentIDMap(
-    const boost::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
+    const std::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
         &componentIds) {
-  auto idMap = boost::make_shared<
+  auto idMap = std::make_shared<
       std::unordered_map<Mantid::Geometry::ComponentID, size_t>>();
 
   for (size_t i = 0; i < componentIds->size(); ++i) {
@@ -50,16 +49,16 @@ makeComponentIDMap(
   return idMap;
 }
 
-boost::shared_ptr<CSGObject> createCappedCylinder() {
+std::shared_ptr<CSGObject> createCappedCylinder() {
   std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
   std::string C32 = "px 1.2";
   std::string C33 = "px -3.2";
 
   // First create some surfaces
-  std::map<int, boost::shared_ptr<Surface>> CylSurMap;
-  CylSurMap[31] = boost::make_shared<Cylinder>();
-  CylSurMap[32] = boost::make_shared<Plane>();
-  CylSurMap[33] = boost::make_shared<Plane>();
+  std::map<int, std::shared_ptr<Surface>> CylSurMap;
+  CylSurMap[31] = std::make_shared<Cylinder>();
+  CylSurMap[32] = std::make_shared<Plane>();
+  CylSurMap[33] = std::make_shared<Plane>();
 
   CylSurMap[31]->setSurface(C31);
   CylSurMap[32]->setSurface(C32);
@@ -72,7 +71,7 @@ boost::shared_ptr<CSGObject> createCappedCylinder() {
   // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
   std::string ObjCapCylinder = "-31 -32 33";
 
-  auto retVal = boost::make_shared<CSGObject>();
+  auto retVal = std::make_shared<CSGObject>();
   retVal->setObject(21, ObjCapCylinder);
   retVal->populate(CylSurMap);
 
@@ -87,35 +86,34 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
     Eigen::Vector3d scaleFactor = Eigen::Vector3d{1, 1, 1}) {
 
   auto detectorIndices =
-      boost::make_shared<std::vector<size_t>>(); // No detectors in this example
+      std::make_shared<std::vector<size_t>>(); // No detectors in this example
   auto detectorRanges =
-      boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+      std::make_shared<std::vector<std::pair<size_t, size_t>>>();
   detectorRanges->emplace_back(
       std::make_pair(0, 0)); // One component with no detectors
 
-  auto componentIndices = boost::make_shared<std::vector<size_t>>(
+  auto componentIndices = std::make_shared<std::vector<size_t>>(
       std::vector<size_t>{0}); // No detectors in this example
   auto componentRanges =
-      boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+      std::make_shared<std::vector<std::pair<size_t, size_t>>>();
   componentRanges->emplace_back(
       std::make_pair(0, 1)); // One component with no sub-components
 
-  auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+  auto parentIndices = std::make_shared<const std::vector<size_t>>(
       std::vector<size_t>()); // These indices are invalid, but that's
                               // ok as not being tested here
 
-  auto positions =
-      boost::make_shared<std::vector<Eigen::Vector3d>>(1, position);
-  auto rotations = boost::make_shared<std::vector<
+  auto positions = std::make_shared<std::vector<Eigen::Vector3d>>(1, position);
+  auto rotations = std::make_shared<std::vector<
       Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
       1, rotation);
   auto scaleFactors =
-      boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
-  auto names = boost::make_shared<std::vector<std::string>>(1);
+      std::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
+  auto names = std::make_shared<std::vector<std::string>>(1);
   using Mantid::Beamline::ComponentType;
   auto componentType =
-      boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
-  auto children = boost::make_shared<std::vector<std::vector<size_t>>>(1);
+      std::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+  auto children = std::make_shared<std::vector<std::vector<size_t>>>(1);
   return std::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
       parentIndices, children, positions, rotations, scaleFactors,
@@ -133,37 +131,37 @@ public:
 
   void test_indexOf() {
     auto detectorIndices =
-        boost::make_shared<std::vector<size_t>>(); // No detectors in this
-                                                   // example
+        std::make_shared<std::vector<size_t>>(); // No detectors in this
+                                                 // example
     auto detectorRanges =
-        boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+        std::make_shared<std::vector<std::pair<size_t, size_t>>>();
     detectorRanges->emplace_back(
         std::make_pair(0, 0)); // One component with no detectors
     detectorRanges->emplace_back(
         std::make_pair(0, 0)); // Another component with no detectors
 
-    auto componentIndices = boost::make_shared<std::vector<size_t>>(
+    auto componentIndices = std::make_shared<std::vector<size_t>>(
         std::vector<size_t>{0, 1}); // No detectors in this example
     auto componentRanges =
-        boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+        std::make_shared<std::vector<std::pair<size_t, size_t>>>();
     componentRanges->emplace_back(
         std::make_pair(0, 0)); // One component with no sub-components
     componentRanges->emplace_back(
         std::make_pair(0, 0)); // Another component with no subcomponents
 
-    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+    auto parentIndices = std::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
 
-    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
-    auto rotations = boost::make_shared<std::vector<
+    auto positions = std::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto rotations = std::make_shared<std::vector<
         Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(2);
-    auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
-    auto names = boost::make_shared<std::vector<std::string>>(2);
+    auto scaleFactors = std::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto names = std::make_shared<std::vector<std::string>>(2);
     using Mantid::Beamline::ComponentType;
-    auto isRectBank = boost::make_shared<std::vector<ComponentType>>(
-        2, ComponentType::Generic);
-    auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+    auto isRectBank =
+        std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+    auto children = std::make_shared<std::vector<std::vector<size_t>>>(
         1, std::vector<size_t>(1));
     auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
@@ -173,13 +171,13 @@ public:
     Mantid::Geometry::ObjComponent comp2("component2");
 
     auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
 
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->emplace_back(boost::make_shared<const Geometry::CSGObject>());
-    shapes->emplace_back(boost::make_shared<const Geometry::CSGObject>());
+    auto shapes = std::make_shared<
+        std::vector<std::shared_ptr<const Geometry::IObject>>>();
+    shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
+    shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -192,11 +190,11 @@ public:
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    auto shapes = std::make_shared<
+        std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo a(std::move(internalInfo), componentIds,
@@ -219,11 +217,11 @@ public:
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    auto shapes = std::make_shared<
+        std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
@@ -231,7 +229,7 @@ public:
 
     TS_ASSERT(compInfo.hasValidShape(0));
     // Nullify the shape of the component
-    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
+    shapes->at(0) = std::shared_ptr<const Geometry::IObject>(nullptr);
     TS_ASSERT(!compInfo.hasValidShape(0));
     TS_ASSERT_THROWS(compInfo.solidAngle(0, V3D{1, 1, 1}),
                      Mantid::Kernel::Exception::NullPointerException &);
@@ -247,11 +245,11 @@ public:
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    auto shapes = std::make_shared<
+        std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo info(std::move(internalInfo), componentIds,
@@ -267,7 +265,7 @@ public:
     observer = V3D{0, 0, 0};
     TS_ASSERT_DELTA(info.solidAngle(0, observer), 4 * M_PI, satol);
     // Nullify  the shape and retest solid angle
-    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
+    shapes->at(0) = std::shared_ptr<const Geometry::IObject>(nullptr);
     TS_ASSERT_THROWS(info.solidAngle(0, observer),
                      Mantid::Kernel::Exception::NullPointerException &);
   }
@@ -282,11 +280,11 @@ public:
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    auto shapes = std::make_shared<
+        std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
@@ -305,11 +303,11 @@ public:
         "component1", ComponentCreationHelper::createSphere(radius));
 
     auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    auto shapes = std::make_shared<
+        std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo componentInfo(std::move(internalInfo), componentIds,
@@ -326,7 +324,7 @@ public:
                             position[2] + radius}))
                   .norm() < 1e-9);
     // Nullify shape and retest BoundingBox
-    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
+    shapes->at(0) = std::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
     TS_ASSERT(boundingBox.isNull());
   }
@@ -348,11 +346,11 @@ public:
                           radius, height, baseCentre, axis, id));
 
     auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+        std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    auto shapes = std::make_shared<
+        std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->push_back(ComponentCreationHelper::createCappedCylinder(
         radius, height, baseCentre, axis, id));
 
@@ -373,7 +371,7 @@ public:
                             position[2] + radius}))
                   .norm() < 1e-9);
     // Nullify shape and retest BoundingBox
-    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
+    shapes->at(0) = std::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
     TS_ASSERT(boundingBox.isNull());
   }

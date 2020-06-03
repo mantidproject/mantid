@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
@@ -117,7 +115,11 @@ class ImagesTabWidgetView(QWidget):
         return self.interpolation_combo_box.currentText()
 
     def set_interpolation(self, interpolation):
-        self.interpolation_combo_box.setCurrentText(interpolation)
+        index = self.interpolation_combo_box.findText(interpolation, flags=Qt.MatchFixedString)
+        if index >= 0:  # -1 indicates the value was not found.
+            self.interpolation_combo_box.setCurrentIndex(index)
+        else:
+            self.interpolation_combo_box.setCurrentIndex(0)
 
     def get_scale(self):
         return self.scale_combo_box.currentText()

@@ -1,24 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <map>
+#include <memory>
 namespace MantidQt {
 namespace MantidWidgets {
 
 class WorkspaceProviderNotifiable;
 class ViewNotifiable;
 
-using WorkspacePresenterWN_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
-using WorkspacePresenterVN_sptr = boost::shared_ptr<ViewNotifiable>;
+using WorkspacePresenterWN_wptr = std::weak_ptr<WorkspaceProviderNotifiable>;
+using WorkspacePresenterVN_sptr = std::shared_ptr<ViewNotifiable>;
 using StringList = std::vector<std::string>;
 /**
 \class  IWorkspaceDockView

@@ -42,12 +42,12 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingViewQtWidget
 
 public:
   EnggDiffFittingViewQtWidget(
-      QWidget *parent, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
-      boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
-      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-      boost::shared_ptr<IEnggDiffractionParam> mainParam,
-      boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner,
-      boost::shared_ptr<IEnggDiffractionParam> fileSettings);
+      QWidget *parent, std::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
+      std::shared_ptr<IEnggDiffractionSettings> mainSettings,
+      std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      std::shared_ptr<IEnggDiffractionParam> mainParam,
+      std::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner,
+      std::shared_ptr<IEnggDiffractionParam> fileSettings);
   ~EnggDiffFittingViewQtWidget() override;
 
   /// From the IEnggDiffractionUserMsg interface
@@ -97,8 +97,8 @@ public:
 
   void resetCanvas() override;
 
-  void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused, bool plotSinglePeaks,
+  void setDataVector(std::vector<std::shared_ptr<QwtData>> &data, bool focused,
+                     bool plotSinglePeaks,
                      const std::string &xAxisLabel) override;
 
   void addRunNoItem(std::string runNo) override;
@@ -119,7 +119,7 @@ public:
 
   std::string getSaveFile(const std::string &prevPath) override;
 
-  void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
+  void dataCurvesFactory(std::vector<std::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
   void setPeakPickerEnabled(bool enabled);
@@ -201,19 +201,19 @@ private:
   QwtPlotZoomer *m_zoomTool = nullptr;
 
   /// where to go and look for, in particular, focused runs to do fitting on
-  boost::shared_ptr<IEnggDiffractionParam> m_fileSettings;
+  std::shared_ptr<IEnggDiffractionParam> m_fileSettings;
 
   /// user messages interface provided by a main view/widget
-  boost::shared_ptr<IEnggDiffractionUserMsg> m_mainMsgProvider;
+  std::shared_ptr<IEnggDiffractionUserMsg> m_mainMsgProvider;
 
   /// settings from the user
-  boost::shared_ptr<IEnggDiffractionSettings> m_mainSettings;
+  std::shared_ptr<IEnggDiffractionSettings> m_mainSettings;
 
   /// interface for the Python runner
-  boost::shared_ptr<IEnggDiffractionPythonRunner> m_mainPythonRunner;
+  std::shared_ptr<IEnggDiffractionPythonRunner> m_mainPythonRunner;
 
   /// presenter as in the model-view-presenter
-  boost::shared_ptr<IEnggDiffFittingPresenter> m_presenter;
+  std::shared_ptr<IEnggDiffFittingPresenter> m_presenter;
 
   /// current selected instrument
   /// updated from the EnggDiffractionPresenter processInstChange

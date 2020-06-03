@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -65,8 +65,8 @@ IRemoteJobManager_sptr RemoteJobManagerFactoryImpl::create(
  * the type (for example the type is not recognized).
  */
 Mantid::API::IRemoteJobManager_sptr
-RemoteJobManagerFactoryImpl::create(const std::string baseURL,
-                                    const std::string jobManagerType) const {
+RemoteJobManagerFactoryImpl::create(const std::string &baseURL,
+                                    const std::string &jobManagerType) const {
   Mantid::API::IRemoteJobManager_sptr jm;
 
   // use the inherited/generic create method

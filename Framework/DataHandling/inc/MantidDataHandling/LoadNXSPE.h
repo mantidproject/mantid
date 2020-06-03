@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -56,8 +57,8 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Function to return a cuboid shape, with widths dx,dy,dz
-  boost::shared_ptr<Geometry::CSGObject> createCuboid(double dx, double dy,
-                                                      double dz);
+  std::shared_ptr<Geometry::CSGObject> createCuboid(double dx, double dy,
+                                                    double dz);
 };
 
 } // namespace DataHandling

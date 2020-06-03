@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -45,7 +45,7 @@ void ScaleX::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
-  auto isDouble = boost::make_shared<BoundedValidator<double>>();
+  auto isDouble = std::make_shared<BoundedValidator<double>>();
   declareProperty("Factor", m_algFactor, isDouble,
                   "The value by which to scale the X-axis of the input "
                   "workspace. Default is 1.0");
@@ -53,9 +53,9 @@ void ScaleX::init() {
   op[0] = "Multiply";
   op[1] = "Add";
   declareProperty("Operation", "Multiply",
-                  boost::make_shared<StringListValidator>(op),
+                  std::make_shared<StringListValidator>(op),
                   "Whether to multiply by, or add factor");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("IndexMin", 0, mustBePositive,
                   "The workspace index of the first spectrum to scale. Only "
@@ -120,7 +120,7 @@ void ScaleX::exec() {
 
   // Check if its an event workspace
   EventWorkspace_const_sptr eventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (eventWS != nullptr) {
     this->execEvent();
     return;
@@ -183,7 +183,7 @@ void ScaleX::execEvent() {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  auto outputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   const std::string op = getPropertyValue("Operation");
   auto numHistograms = static_cast<int>(outputWS->getNumberHistograms());

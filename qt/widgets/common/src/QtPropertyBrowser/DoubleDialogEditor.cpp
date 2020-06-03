@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 
@@ -25,7 +25,7 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
                                        bool hasOption, bool isOptionSet)
     : QWidget(parent), m_property(property), m_hasOption(hasOption),
       m_isOptionSet(isOptionSet) {
-  QHBoxLayout *layout = new QHBoxLayout;
+  auto *layout = new QHBoxLayout;
   m_editor = new DoubleEditor(property, this);
   layout->addWidget(m_editor);
   setFocusProxy(m_editor);

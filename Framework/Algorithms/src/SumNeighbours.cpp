@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -37,7 +37,7 @@ void SumNeighbours::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input,
-          boost::make_shared<InstrumentValidator>()),
+          std::make_shared<InstrumentValidator>()),
       "A workspace containing one or more rectangular area "
       "detectors. Each spectrum needs to correspond to only one "
       "pixelID (e.g. no grouping or previous calls to "
@@ -48,7 +48,7 @@ void SumNeighbours::init() {
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
 
   declareProperty("SumX", 4, mustBePositive,
@@ -73,11 +73,11 @@ void SumNeighbours::exec() {
   const auto &spectrumInfo = inWS->spectrumInfo();
   const auto &det = spectrumInfo.detector(0);
   // Check if grandparent is rectangular detector
-  boost::shared_ptr<const Geometry::IComponent> parent = det.getParent();
-  boost::shared_ptr<const RectangularDetector> rect;
+  std::shared_ptr<const Geometry::IComponent> parent = det.getParent();
+  std::shared_ptr<const RectangularDetector> rect;
 
   if (parent) {
-    rect = boost::dynamic_pointer_cast<const RectangularDetector>(
+    rect = std::dynamic_pointer_cast<const RectangularDetector>(
         parent->getParent());
   }
 

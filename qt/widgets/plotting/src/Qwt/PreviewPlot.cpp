@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------
 // Includes
@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QPalette>
+#include <utility>
 
 #include <qwt_array.h>
 #include <qwt_data.h>
@@ -78,7 +79,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
             SLOT(handleViewToolSelect()));
 
   // Create the reset plot view option
-  QAction *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
+  auto *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
   connect(resetPlotAction, SIGNAL(triggered()), this, SLOT(resetView()));
   m_contextMenu->addAction(resetPlotAction);
 
@@ -240,7 +241,7 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) const {
  * @param ws Pointer to workspace
  */
 QPair<double, double>
-PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws) {
+PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws) {
   QStringList curveNames = getCurvesForWorkspace(ws);
 
   if (curveNames.size() == 0)
@@ -312,7 +313,7 @@ void PreviewPlot::addSpectrum(const QString &curveName,
   addCurve(m_curves[curveName], ws, wsIndex, curveColour, curveName);
 
   // Create the curve label
-  QLabel *label = new QLabel(curveName);
+  auto *label = new QLabel(curveName);
   label->setVisible(false);
   QPalette palette = label->palette();
   palette.setColor(label->foregroundRole(), curveColour);
@@ -365,7 +366,7 @@ void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
  *
  * @param ws Pointer to workspace
  */
-void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws) {
+void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr &ws) {
   if (!ws) {
     g_log.error("Cannot remove curve for null workspace");
     return;
@@ -646,7 +647,7 @@ void PreviewPlot::hardReplot() {
  * @param pNf Poco notification
  */
 void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf) {
-  auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+  auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
   if (ws)
     // emit a queued signal to the queued slot
@@ -658,9 +659,9 @@ void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf) {
  *
  * @param ws the workspace that is being removed.
  */
-void PreviewPlot::removeWorkspace(MatrixWorkspace_sptr ws) {
+void PreviewPlot::removeWorkspace(const MatrixWorkspace_sptr &ws) {
   // Remove the workspace on the main GUI thread
-  removeSpectrum(ws);
+  removeSpectrum(std::move(ws));
   emit needToReplot();
 }
 
@@ -674,7 +675,7 @@ void PreviewPlot::removeWorkspace(MatrixWorkspace_sptr ws) {
 void PreviewPlot::handleReplaceEvent(
     WorkspaceAfterReplaceNotification_ptr pNf) {
   MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+      std::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
   // Ignore non matrix worksapces
   if (!ws)
@@ -820,11 +821,11 @@ void PreviewPlot::removeCurve(QwtPlotItem *curve) {
  * @param defaultItem Default item name
  * @return List of Actions added
  */
-QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
+QList<QAction *> PreviewPlot::addOptionsToMenus(const QString &menuName,
                                                 QActionGroup *group,
-                                                QStringList items,
-                                                QString defaultItem) {
-  QMenu *menu = new QMenu(m_contextMenu);
+                                                const QStringList &items,
+                                                const QString &defaultItem) {
+  auto *menu = new QMenu(m_contextMenu);
 
   for (auto &item : items) {
     QAction *action = new QAction(item, menu);
@@ -838,7 +839,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
     action->setChecked(item == defaultItem);
   }
 
-  QAction *menuAction = new QAction(menuName, menu);
+  auto *menuAction = new QAction(menuName, menu);
   menuAction->setMenu(menu);
 
   // sets the name of the Y Axis menu so it can be accessed in the future
@@ -880,7 +881,7 @@ QString PreviewPlot::getAxisType(int axisID) {
  * @param ws Pointer to workspace
  * @return List of curve names
  */
-QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws) {
+QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr &ws) {
   QStringList curveNames;
 
   for (auto it = m_curves.begin(); it != m_curves.end(); ++it) {

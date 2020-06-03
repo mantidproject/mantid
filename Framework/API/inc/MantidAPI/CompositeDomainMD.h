@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,7 +27,7 @@ class FunctionDomainMD;
 */
 class MANTID_API_DLL CompositeDomainMD : public CompositeDomain {
 public:
-  CompositeDomainMD(IMDWorkspace_const_sptr ws, size_t maxDomainSize);
+  CompositeDomainMD(const IMDWorkspace_const_sptr &ws, size_t maxDomainSize);
   ~CompositeDomainMD() override;
   /// Return the total number of arguments in the domain
   size_t size() const override { return m_totalSize; }

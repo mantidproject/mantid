@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,8 +15,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/CatalogSearchParam.h"
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::ICat;
@@ -178,13 +177,13 @@ private:
    * Create a compositeCatalog and add two DummyCatalogs to it.
    * @return A shared pointer to a CompositeCatalog.
    */
-  const boost::shared_ptr<CompositeCatalog> createCompositeCatalog() {
-    const boost::shared_ptr<CompositeCatalog> compositeCatalog(
+  const std::shared_ptr<CompositeCatalog> createCompositeCatalog() {
+    const std::shared_ptr<CompositeCatalog> compositeCatalog(
         new CompositeCatalog());
     DummyCatalog::m_counter = 0;
 
-    compositeCatalog->add(boost::make_shared<DummyCatalog>());
-    compositeCatalog->add(boost::make_shared<DummyCatalog>());
+    compositeCatalog->add(std::make_shared<DummyCatalog>());
+    compositeCatalog->add(std::make_shared<DummyCatalog>());
 
     TS_ASSERT_EQUALS(DummyCatalog::m_counter, 0);
 

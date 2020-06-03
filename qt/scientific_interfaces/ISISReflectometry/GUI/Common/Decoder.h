@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -66,10 +66,12 @@ private:
                         const QMap<QString, QVariant> &map);
   void decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
                   RunsTablePresenter *presenter,
-                  const QMap<QString, QVariant> &map);
+                  const QMap<QString, QVariant> &map,
+                  boost::optional<int> precision);
   void decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                        RunsTablePresenter *presenter,
-                       const QMap<QString, QVariant> &map);
+                       const QMap<QString, QVariant> &map,
+                       boost::optional<int> precision);
   void decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list);
   MantidQt::CustomInterfaces::ISISReflectometry::Group
   decodeGroup(const QMap<QString, QVariant> &map);
@@ -86,7 +88,8 @@ private:
   void decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &map);
   void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
   void updateRunsTableViewFromModel(QtRunsTableView *view,
-                                    const ReductionJobs *model);
+                                    const ReductionJobs *model,
+                                    boost::optional<int> precision);
   bool m_projectSave = false;
   friend class CoderCommonTester;
 };

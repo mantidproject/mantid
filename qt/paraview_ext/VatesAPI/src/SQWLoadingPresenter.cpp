@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -92,7 +92,7 @@ SQWLoadingPresenter::execute(vtkDataSetFactory *factory,
   Workspace_sptr result =
       AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
   Mantid::API::IMDEventWorkspace_sptr eventWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
 
@@ -126,7 +126,7 @@ void SQWLoadingPresenter::extractMetadata(
     axisLabels.push_back(makeAxisTitle(*inDim));
     // Copy the dimension, but set the ID and name to be the same. This is an
     // assumption in bintohistoworkspace.
-    dimensions.push_back(boost::make_shared<MDHistoDimension>(
+    dimensions.push_back(std::make_shared<MDHistoDimension>(
         inDim->getName(), inDim->getName(), inDim->getMDFrame(),
         inDim->getMinimum(), inDim->getMaximum(), size_t{10}));
   }
@@ -169,7 +169,7 @@ void SQWLoadingPresenter::executeLoadMetadata() {
   Workspace_sptr result =
       AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
   Mantid::API::IMDEventWorkspace_sptr eventWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
   m_wsTypeName = eventWs->id();
   // Call base-class extraction method.
   extractMetadata(*eventWs);

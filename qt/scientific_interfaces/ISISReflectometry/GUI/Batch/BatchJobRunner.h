@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -56,12 +56,16 @@ public:
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
   AlgorithmRuntimeProps rowProcessingProperties() const override;
 
+  bool getProcessPartial() const override;
+  bool getProcessAll() const override;
+
 protected:
   Batch m_batch;
   bool m_isProcessing;
   bool m_isAutoreducing;
   bool m_reprocessFailed;
   bool m_processAll;
+  bool m_processPartial;
   std::vector<MantidWidgets::Batch::RowLocation> m_rowLocationsToProcess;
 
 private:
@@ -69,7 +73,7 @@ private:
 
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
-
+  size_t getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
   template <typename T> bool isSelected(T const &item);
   bool hasSelectedRowsRequiringProcessing(Group const &group);
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>

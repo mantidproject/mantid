@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -24,8 +24,8 @@ class LocalParameterEditor : public QWidget {
   Q_OBJECT
 public:
   LocalParameterEditor(QWidget *parent, int index, double value, bool fixed,
-                       QString tie, QString constraint, bool othersFixed,
-                       bool allOthersFixed, bool othersTied,
+                       const QString &tie, const QString &constraint,
+                       bool othersFixed, bool allOthersFixed, bool othersTied,
                        bool logOptionsEnabled);
 signals:
   void setAllValues(double /*_t1*/);
@@ -57,8 +57,8 @@ private slots:
 private:
   bool eventFilter(QObject *widget, QEvent *evn) override;
   void setEditorState();
-  static QString setTieDialog(QString tie);
-  static QString setConstraintDialog(QString tie);
+  static QString setTieDialog(const QString &tie);
+  static QString setConstraintDialog(const QString &tie);
   QLineEdit *m_editor;
   QPushButton *m_button;
   QAction *m_setAllAction;

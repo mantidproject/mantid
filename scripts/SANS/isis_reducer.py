@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
@@ -12,7 +12,6 @@
     understand what's happening and how best to fit it in the Reducer design.
 
 """
-from __future__ import (absolute_import, division, print_function)
 from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
@@ -897,8 +896,8 @@ class ISISReducer(Reducer):
         if su.are_two_files_identical(idf_path_workspace, idf_path_reducer):
             return
         else:
-            logger.notice("Updating the IDF of the Reducer. Switching from " +
-                          str(idf_path_reducer) + " to " + str(idf_path_workspace))
+            logger.notice("Updating the IDF of the Reducer. Switching from "
+                          + str(idf_path_reducer) + " to " + str(idf_path_workspace))
             idf_path = os.path.basename(idf_path_workspace)
             instrument = self._get_correct_instrument(instrument_name, idf_path)
 

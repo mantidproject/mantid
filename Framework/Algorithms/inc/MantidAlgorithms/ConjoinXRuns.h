@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,8 +42,8 @@ private:
   void init() override;
   void exec() override;
 
-  std::string checkLogEntry(API::MatrixWorkspace_sptr) const;
-  std::vector<double> getXAxis(API::MatrixWorkspace_sptr) const;
+  std::string checkLogEntry(const API::MatrixWorkspace_sptr &) const;
+  std::vector<double> getXAxis(const API::MatrixWorkspace_sptr &) const;
   void joinSpectrum(int64_t);
 
   /// Sample log entry name

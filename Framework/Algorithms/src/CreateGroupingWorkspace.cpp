@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -19,6 +19,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <fstream>
 #include <queue>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
@@ -82,13 +83,13 @@ void CreateGroupingWorkspace::init() {
   std::vector<std::string> grouping{"",       "All", "Group", "2_4Grouping",
                                     "Column", "bank"};
   declareProperty("GroupDetectorsBy", "",
-                  boost::make_shared<StringListValidator>(grouping),
+                  std::make_shared<StringListValidator>(grouping),
                   "Only used if GroupNames is empty");
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
   declareProperty("FixedGroupCount", 0,
-                  boost::make_shared<BoundedValidator<int>>(0, INT_MAX),
+                  std::make_shared<BoundedValidator<int>>(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
   declareProperty("ComponentName", "",
@@ -207,10 +208,9 @@ std::map<detid_t, int> readGroupingFile(const std::string &groupingFileName,
  * @param prog Progress reporter
  * @returns :: Map of detector IDs to group number
  */
-std::map<detid_t, int> makeGroupingByNumGroups(const std::string compName,
-                                               int numGroups,
-                                               Instrument_const_sptr inst,
-                                               Progress &prog) {
+std::map<detid_t, int>
+makeGroupingByNumGroups(const std::string &compName, int numGroups,
+                        const Instrument_const_sptr &inst, Progress &prog) {
   std::map<detid_t, int> detIDtoGroup;
 
   // Get detectors for given instument component
@@ -250,14 +250,14 @@ std::map<detid_t, int> makeGroupingByNumGroups(const std::string compName,
 
 bool groupnumber(std::string groupi, std::string groupj) {
   int i = 0;
-  std::string groupName = groupi;
+  std::string groupName = std::move(groupi);
   // Take out the "group" part of the group name and convert to an int
   groupName.erase(
       remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
       groupName.end());
   Strings::convert(groupName, i);
   int j = 0;
-  groupName = groupj;
+  groupName = std::move(groupj);
   // Take out the "group" part of the group name and convert to an int
   groupName.erase(
       remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
@@ -276,7 +276,7 @@ bool groupnumber(std::string groupi, std::string groupj) {
  * @returns:: map of detID to group number
  */
 std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
-                                           Instrument_const_sptr inst,
+                                           const Instrument_const_sptr &inst,
                                            Progress &prog, bool sortnames) {
   // This will contain the grouping
   std::map<detid_t, int> detIDtoGroup;
@@ -303,12 +303,12 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
   // Find Detectors that belong to groups
   if (!group_map.empty()) {
     // Find Detectors that belong to groups
-    using sptr_ICompAss = boost::shared_ptr<const Geometry::ICompAssembly>;
-    using sptr_IComp = boost::shared_ptr<const Geometry::IComponent>;
-    using sptr_IDet = boost::shared_ptr<const Geometry::IDetector>;
+    using sptr_ICompAss = std::shared_ptr<const Geometry::ICompAssembly>;
+    using sptr_IComp = std::shared_ptr<const Geometry::IComponent>;
+    using sptr_IDet = std::shared_ptr<const Geometry::IDetector>;
     std::queue<std::pair<sptr_ICompAss, int>> assemblies;
     sptr_ICompAss current =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
     sptr_IDet currentDet;
     sptr_IComp currentIComp;
     sptr_ICompAss currentchild;
@@ -331,7 +331,7 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
       if (nchilds != 0) {
         for (int i = 0; i < nchilds; ++i) {
           currentIComp = (*(current.get()))[i]; // Get child
-          currentDet = boost::dynamic_pointer_cast<const Geometry::IDetector>(
+          currentDet = std::dynamic_pointer_cast<const Geometry::IDetector>(
               currentIComp);
           if (currentDet.get()) // Is detector
           {
@@ -341,7 +341,7 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
           } else // Is an assembly, push in the queue
           {
             currentchild =
-                boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+                std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
                     currentIComp);
             if (currentchild.get()) {
               child_group = group_map[currentchild->getName()];
@@ -402,7 +402,7 @@ void CreateGroupingWorkspace::exec() {
     inst = inWS->getInstrument();
   } else {
     Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS = boost::make_shared<Workspace2D>();
+    MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setProperty("RewriteSpectraMap",
@@ -432,7 +432,6 @@ void CreateGroupingWorkspace::exec() {
       sortnames = true;
       GroupNames = "";
       int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
-
       // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num) {
@@ -451,7 +450,7 @@ void CreateGroupingWorkspace::exec() {
   }
 
   // --------------------------- Create the output --------------------------
-  auto outWS = boost::make_shared<GroupingWorkspace>(inst);
+  auto outWS = std::make_shared<GroupingWorkspace>(inst);
   this->setProperty("OutputWorkspace", outWS);
 
   // This will get the grouping

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -48,13 +48,9 @@ public:
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
     Spectra const spectra = Spectra("0-1");
 
-    m_model->addWorkspace(m_workspace, spectra);
+    m_model->addWorkspace(m_workspace->getName(), spectra);
 
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
-  }
-
-  void test_that_getSpectrumDependentAttributes_will_return_an_empty_vector() {
-    TS_ASSERT(m_model->getSpectrumDependentAttributes().empty());
   }
 
 private:

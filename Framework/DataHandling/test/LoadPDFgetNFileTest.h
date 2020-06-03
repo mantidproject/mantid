@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -46,7 +46,7 @@ public:
 
     // 4.
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("NOM_Sqa"));
 
     TS_ASSERT(outws);
@@ -76,7 +76,7 @@ public:
 
     // 4.
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("NOM_Gr"));
 
     TS_ASSERT(outws);
@@ -106,7 +106,7 @@ public:
 
     // 4.
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve(
                 "NOM_SmoothBackground"));
 

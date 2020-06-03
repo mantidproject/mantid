@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <utility>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidGeometry/Instrument.h"
@@ -59,7 +60,7 @@ public:
     runTest(xmlShape, "320,340,360,380", false);
   }
 
-  void runTest(std::string xmlShape, std::string expectedHits,
+  void runTest(const std::string &xmlShape, std::string expectedHits,
                bool includeMonitors = true) {
     using namespace Mantid::API;
 
@@ -80,21 +81,21 @@ public:
     MatrixWorkspace_const_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-    checkDeadDetectors(outWS, expectedHits);
+    checkDeadDetectors(outWS, std::move(expectedHits));
   }
 
-  void checkDeadDetectors(Mantid::API::MatrixWorkspace_const_sptr outWS,
-                          std::string expectedHits) {
+  void checkDeadDetectors(const Mantid::API::MatrixWorkspace_const_sptr &outWS,
+                          const std::string &expectedHits) {
     // check that the detectors have actually been marked dead
     std::vector<int> expectedDetectorArray =
-        convertStringToVector(expectedHits);
+        convertStringToVector(std::move(expectedHits));
     const auto &detectorInfo = outWS->detectorInfo();
     for (const auto detID : expectedDetectorArray) {
       TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(detID)));
     }
   }
 
-  std::vector<int> convertStringToVector(const std::string input) {
+  std::vector<int> convertStringToVector(const std::string &input) {
     Mantid::Kernel::ArrayProperty<int> arrayProp("name", input);
     return arrayProp();
   }
@@ -140,16 +141,14 @@ public:
   MaskDetectorsInShapeTestPerformance() : workspace("SANS2D") {
     // Load the instrument alone so as to isolate the raw file loading time from
     // the instrument loading time
-    IAlgorithm *loader =
-        FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+    auto loader = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loader->setPropertyValue("Filename", "SANS2D_Definition.xml");
     loader->setPropertyValue("OutputWorkspace", workspace);
     TS_ASSERT(loader->execute());
   }
 
   void testMaskingLotsOfDetectors() {
-    IAlgorithm *masker =
-        FrameworkManager::Instance().createAlgorithm("MaskDetectorsInShape");
+    auto masker = AlgorithmManager::Instance().create("MaskDetectorsInShape");
     masker->setPropertyValue("Workspace", workspace);
     masker->setPropertyValue(
         "ShapeXML", "<infinite-cylinder id=\"beam_area\"><centre x=\"0\" "

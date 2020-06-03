@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -35,6 +35,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <limits>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -63,7 +64,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
 
   setupColorMapWidget();
 
-  QHBoxLayout *unwrappedControlsLayout = new QHBoxLayout;
+  auto *unwrappedControlsLayout = new QHBoxLayout;
   setupUnwrappedControls(unwrappedControlsLayout);
 
   m_autoscaling = new QCheckBox("Autoscaling", this);
@@ -289,7 +290,7 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
           SLOT(setVisibleLayer(int)));
   connect(m_layerSlide, SIGNAL(valueChanged(int)), m_layerDisplay,
           SLOT(setNum(int)));
-  QHBoxLayout *voxelControlsLayout = new QHBoxLayout();
+  auto *voxelControlsLayout = new QHBoxLayout();
   voxelControlsLayout->addWidget(m_layerCheck);
   voxelControlsLayout->addWidget(m_layerSlide);
   voxelControlsLayout->addWidget(m_layerDisplay);
@@ -305,7 +306,7 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
  */
 QFrame *InstrumentWidgetRenderTab::setupAxisFrame() {
   m_resetViewFrame = new QFrame();
-  QHBoxLayout *axisViewLayout = new QHBoxLayout();
+  auto *axisViewLayout = new QHBoxLayout();
   axisViewLayout->addWidget(new QLabel("Axis View:"));
 
   mAxisCombo = new QComboBox();
@@ -411,7 +412,7 @@ void InstrumentWidgetRenderTab::initSurface() {
   auto surface = getSurface();
 
   // 3D axes switch needs to be shown for the 3D surface
-  auto p3d = boost::dynamic_pointer_cast<Projection3D>(surface);
+  auto p3d = std::dynamic_pointer_cast<Projection3D>(surface);
   if (p3d) {
     p3d->set3DAxesState(areAxesOn());
   }
@@ -425,7 +426,7 @@ void InstrumentWidgetRenderTab::initSurface() {
   // enable u-correction for surfaces of rotation. correction applied in the
   // last
   // session is loaded and re-applied in the new session
-  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  auto rotSurface = std::dynamic_pointer_cast<RotationSurface>(surface);
   if (rotSurface) {
     m_UCorrection->setEnabled(true);
     QString groupName = m_instrWidget->getInstrumentSettingsGroupName();
@@ -592,8 +593,8 @@ void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
 }
 
 void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
-  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(
-      m_instrWidget->getSurface());
+  auto surface =
+      std::dynamic_pointer_cast<UnwrappedSurface>(m_instrWidget->getSurface());
   if (!surface)
     return;
   surface->setFlippedView(on);
@@ -610,8 +611,8 @@ void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
  * for finding the file
  * @param filename Optional full path of the saved image
  */
-void InstrumentWidgetRenderTab::saveImage(QString filename) {
-  m_instrWidget->saveImage(filename);
+void InstrumentWidgetRenderTab::saveImage(const QString &filename) {
+  m_instrWidget->saveImage(std::move(filename));
 }
 
 /**
@@ -672,7 +673,7 @@ QMenu *InstrumentWidgetRenderTab::createPeaksMenu() {
   m_precisionActionGroup = new QActionGroup(this);
   QSignalMapper *signalMapper = new QSignalMapper(this);
   for (int i = 1; i < 10; ++i) {
-    QAction *prec = new QAction(QString::number(i), setPrecision);
+    auto *prec = new QAction(QString::number(i), setPrecision);
     prec->setCheckable(true);
     setPrecision->addAction(prec);
     connect(prec, SIGNAL(triggered()), signalMapper, SLOT(map()));
@@ -790,7 +791,7 @@ void InstrumentWidgetRenderTab::showMenuToolTip(QAction *action) {
  */
 void InstrumentWidgetRenderTab::setUCorrection() {
   auto surface = getSurface();
-  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  auto rotSurface = std::dynamic_pointer_cast<RotationSurface>(surface);
   if (rotSurface) {
     QPointF oldUCorr = rotSurface->getUCorrection();
     // ask the user to enter a number for the u-correction
@@ -828,7 +829,7 @@ void InstrumentWidgetRenderTab::setUCorrection() {
  */
 QPointF InstrumentWidgetRenderTab::getUCorrection() const {
   auto surface = getSurface();
-  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  auto rotSurface = std::dynamic_pointer_cast<RotationSurface>(surface);
   if (rotSurface) {
     return rotSurface->getUCorrection();
   }

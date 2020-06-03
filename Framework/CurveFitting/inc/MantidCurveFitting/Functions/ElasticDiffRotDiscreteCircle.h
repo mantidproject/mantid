@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -25,8 +25,9 @@ namespace Functions {
 /* Class representing the elastic portion of DiffRotDiscreteCircle
  * Contains a Delta Dirac.
  */
-class DLLExport ElasticDiffRotDiscreteCircle : public DeltaFunction,
-                                               public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL ElasticDiffRotDiscreteCircle
+    : public DeltaFunction,
+      public FunctionQDepends {
 public:
   /// Constructor
   ElasticDiffRotDiscreteCircle();

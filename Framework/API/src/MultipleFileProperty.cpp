@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
@@ -77,8 +76,8 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
                                            bool allowEmptyTokens)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
-          boost::make_shared<MultiFileValidator>(
-              exts, (action == FileProperty::Load)),
+          std::make_shared<MultiFileValidator>(exts,
+                                               (action == FileProperty::Load)),
           Direction::Input),
       m_allowEmptyTokens(allowEmptyTokens) {
   if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
