@@ -221,7 +221,8 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
 
 /**
  * Run the simulation over the whole input workspace
- * @param inputWS A reference to the input workspace
+ * @param in
+ * putWS A reference to the input workspace
  * @param nevents Number of MC events per wavelength point to simulate
  * @param resimulateTracksForDiffWavelengths Whether to resimulate the tracks
  * for each wavelength point
@@ -284,7 +285,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), efixed.emode(),
                                 nevents, maxScatterPtAttempts,
-                                resimulateTracksForDiffWavelengths, g_log, pointsIn);
+                                resimulateTracksForDiffWavelengths, g_log,
+                                pointsIn);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
