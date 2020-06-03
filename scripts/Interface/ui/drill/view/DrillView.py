@@ -418,7 +418,9 @@ class DrillView(QMainWindow):
         Args:
             mode (str): acquisition mode
         """
+        self.modeSelector.blockSignals(True)
         self.modeSelector.setCurrentText(mode)
+        self.modeSelector.blockSignals(False)
 
     def set_table(self, columns):
         """
