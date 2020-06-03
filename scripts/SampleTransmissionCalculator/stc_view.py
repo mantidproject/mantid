@@ -74,4 +74,3 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
 
     def set_error_indicator(self, error_key):
         getattr(self, error_key+'_err').setText('*')
-

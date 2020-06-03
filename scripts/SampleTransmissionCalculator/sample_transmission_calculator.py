@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy import QtCore, QtWidgets
+from qtpy import QtWidgets
 
 from SampleTransmissionCalculator.stc_model import SampleTransmissionCalculatorModel
 from SampleTransmissionCalculator.stc_view import SampleTransmissionCalculatorView
@@ -23,4 +23,3 @@ class SampleTransmissionCalculator(QtWidgets.QMainWindow):
 
         self.presenter = SampleTransmissionCalculatorPresenter(view, model)
         self.setWindowTitle("Sample Transmission Calculator")
-
