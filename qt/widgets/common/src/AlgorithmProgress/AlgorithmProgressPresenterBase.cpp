@@ -83,6 +83,8 @@ void AlgorithmProgressPresenterBase::setProgressBar(
 /// @param alg The ID of the algorithm that has started executing
 /// @param progress The progress that the algorithm has reported
 /// @param msg The message that the algorithm has sent
+/// @param estimatedTime :: estimated time to completion in seconds
+/// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressPresenterBase::updateProgressBar(
     Mantid::API::AlgorithmID alg, double progress, const std::string &msg,
     const double estimatedTime, const int progressPrecision) {
