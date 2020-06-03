@@ -22,8 +22,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 # noinspection PyProtectedMember
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load, Scale
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom
-import AbinsModules
-from AbinsModules import AbinsParameters
+import abins
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -55,18 +54,19 @@ class Abins(PythonAlgorithm):
         # ----------------------------------------------------------------------------------------
 
     def PyInit(self):
-
         # Declare all properties
+        from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ALL_SAMPLE_FORMS
+
         self.declareProperty(name="AbInitioProgram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN", "VASP"]),
                              doc="An ab initio program which was used for vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("VibrationalOrPhononFile", "",
                                           action=FileAction.Load,
                                           direction=Direction.Input,
-                                          extensions=["phonon", "out", "outmol", "log", "LOG"]),
+                                          extensions=AB_INITIO_FILE_EXTENSIONS),
                              doc="File with the data from a vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -88,14 +88,14 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="SampleForm",
                              direction=Direction.Input,
                              defaultValue="Powder",
-                             validator=StringListValidator(AbinsModules.AbinsConstants.ALL_SAMPLE_FORMS),
+                             validator=StringListValidator(ALL_SAMPLE_FORMS),
                              # doc="Form of the sample: SingleCrystal or Powder.")
                              doc="Form of the sample: Powder.")
 
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
-                             validator=StringListValidator(AbinsModules.AbinsConstants.ALL_INSTRUMENTS),
+                             validator=StringListValidator(ALL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -130,7 +130,8 @@ class Abins(PythonAlgorithm):
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
                                  "CRYSTAL": self._validate_crystal_input_file,
                                  "DMOL3": self._validate_dmol3_input_file,
-                                 "GAUSSIAN": self._validate_gaussian_input_file}
+                                 "GAUSSIAN": self._validate_gaussian_input_file,
+                                 "VASP": self._validate_vasp_input_file}
 
         issues = dict()
 
@@ -171,6 +172,7 @@ class Abins(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+        from abins.constants import ATOM_PREFIX
 
         # 0) Create reporter to report progress
         steps = 9
@@ -183,17 +185,17 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read ab initio data
-        ab_initio_data = AbinsModules.AbinsData.from_calculation_data(self._vibrational_or_phonon_data_file,
-                                                                      self._ab_initio_program)
+        ab_initio_data = abins.AbinsData.from_calculation_data(self._vibrational_or_phonon_data_file,
+                                                               self._ab_initio_program)
         prog_reporter.report("Vibrational/phonon data has been read.")
 
         # 3) calculate S
-        s_calculator = AbinsModules.CalculateS.init(filename=self._vibrational_or_phonon_data_file,
-                                                    temperature=self._temperature,
-                                                    sample_form=self._sample_form, abins_data=ab_initio_data,
-                                                    instrument=self._instrument,
-                                                    quantum_order_num=self._num_quantum_order_events,
-                                                    bin_width=self._bin_width)
+        s_calculator = abins.SCalculatorFactory.init(filename=self._vibrational_or_phonon_data_file,
+                                                     temperature=self._temperature,
+                                                     sample_form=self._sample_form, abins_data=ab_initio_data,
+                                                     instrument=self._instrument,
+                                                     quantum_order_num=self._num_quantum_order_events,
+                                                     bin_width=self._bin_width)
         s_data = s_calculator.get_formatted_data()
         prog_reporter.report("Dynamical structure factors have been determined.")
 
@@ -210,7 +212,7 @@ class Abins(PythonAlgorithm):
         else:  # case selected atoms
             # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
             # A regular expression match is used to make the underscore separator optional and check the index format
-            prefix = AbinsModules.AbinsConstants.ATOM_PREFIX
+            prefix = ATOM_PREFIX
             atom_symbols = [item for item in self._atoms if item[:len(prefix)] != prefix]
             if len(atom_symbols) != len(set(atom_symbols)):  # only different types
                 raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
@@ -315,18 +317,18 @@ class Abins(PythonAlgorithm):
         :type iterable of int:
 
         :param s_data: dynamical factor data
-        :type AbinsModules.SData.SData
+        :type abins.SData
 
         :returns: workspaces for list of atoms types, S for the particular type of atom
         """
-        from AbinsModules.AbinsConstants import MASS_EPS, ONLY_ONE_MASS
+        from abins.constants import FLOAT_TYPE, MASS_EPS, ONLY_ONE_MASS
 
         s_data_extracted = s_data.extract()
 
         # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
         shape = [self._num_quantum_order_events]
         shape.extend(list(s_data_extracted["atom_0"]["s"]["order_1"].shape))
-        s_atom_data = np.zeros(shape=tuple(shape), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        s_atom_data = np.zeros(shape=tuple(shape), dtype=FLOAT_TYPE)
         temp_s_atom_data = np.copy(s_atom_data)
 
         num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
@@ -356,7 +358,7 @@ class Abins(PythonAlgorithm):
         :type atom_number: int
 
         :param s_data_extracted: Collection of precalculated S for all atoms and quantum orders, obtained from extract()
-            method of AbinsModules.SData.SData object.
+            method of abins.SData object.
         :type s_data: dict
 
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
@@ -369,16 +371,16 @@ class Abins(PythonAlgorithm):
         :returns: mantid workspaces of S for atom (total) and individual quantum orders
         :returntype: list of Workspace2D
         """
+        from abins.constants import ATOM_PREFIX, FUNDAMENTALS, S_LAST_INDEX
+
         atom_workspaces = []
         s_atom_data.fill(0.0)
         internal_atom_label = "atom_%s" % (atom_number - 1)
-        output_atom_label = "%s_%d" % (AbinsModules.AbinsConstants.ATOM_PREFIX, atom_number)
+        output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
         symbol = self._extracted_ab_initio_data[internal_atom_label]["symbol"]
         z_number = Atom(symbol=symbol).z_number
 
-        for i, order in enumerate(range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                                        self._num_quantum_order_events + AbinsModules.AbinsConstants.S_LAST_INDEX)):
-
+        for i, order in enumerate(range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX)):
             s_atom_data[i] = s_data_extracted[internal_atom_label]["s"]["order_%s" % order]
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
@@ -406,7 +408,7 @@ class Abins(PythonAlgorithm):
             information but is used in-place to save on time instantiating large arrays.
         :param substitution: True if isotope substitution and False otherwise
         """
-        from AbinsModules.AbinsConstants import MASS_EPS
+        from abins.constants import FUNDAMENTALS, MASS_EPS, PYTHON_INDEX_SHIFT, S_LAST_INDEX
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
@@ -419,9 +421,8 @@ class Abins(PythonAlgorithm):
 
                 temp_s_atom_data.fill(0.0)
 
-                for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                                   self._num_quantum_order_events + AbinsModules.AbinsConstants.S_LAST_INDEX):
-                    order_indx = order - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
+                for order in range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX):
+                    order_indx = order - PYTHON_INDEX_SHIFT
                     temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
                     temp_s_atom_data[order_indx] = temp_s_order
 
@@ -464,7 +465,7 @@ class Abins(PythonAlgorithm):
         :type iterable of int:
 
         :param s_data: dynamical factor data
-        :type AbinsModules.SData.SData
+        :type abins.SData
 
         :returns: workspaces for list of atoms types, each workspace contains  quantum order events of
                  S for the particular atom type
@@ -481,15 +482,17 @@ class Abins(PythonAlgorithm):
         :param protons_number: number of protons in the given type fo atom
         :param nucleons_number: number of nucleons in the given type of atom
         """
-        if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+        from abins.constants import FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS, ONE_DIMENSIONAL_SPECTRUM
+
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             # only FUNDAMENTALS
-            if s_points.shape[0] == AbinsModules.AbinsConstants.FUNDAMENTALS:
+            if s_points.shape[0] == FUNDAMENTALS:
 
                 self._fill_s_1d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
 
             # total workspaces
-            elif len(s_points.shape) == AbinsModules.AbinsConstants.ONE_DIMENSIONAL_SPECTRUM:
+            elif len(s_points.shape) == ONE_DIMENSIONAL_SPECTRUM:
 
                 self._fill_s_1d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
@@ -566,6 +569,7 @@ class Abins(PythonAlgorithm):
         :param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
         :returns: workspace with total S from partial_workspaces
                 """
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
         total_workspace = self._out_ws_name + "_total"
 
         if isinstance(mtd[partial_workspaces[0]], WorkspaceGroup):
@@ -583,7 +587,7 @@ class Abins(PythonAlgorithm):
 
             # collect all S
             for partial_ws in local_partial_workspaces:
-                if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+                if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
                     s_atoms += mtd[partial_ws].dataY(0)
 
             # create workspace with S
@@ -637,11 +641,11 @@ class Abins(PythonAlgorithm):
 
     def _check_advanced_parameter(self):
         """
-        Checks if parameters from AbinsParameters.py are valid. If any parameter is invalid then RuntimeError is thrown
+        Checks if parameters from abins.parameters are valid. If any parameter is invalid then RuntimeError is thrown
         with meaningful message.
         """
 
-        message = " in AbinsParameters.py. "
+        message = " in abins.parameters. "
 
         self._check_general_resolution(message)
         self._check_tosca_parameters(message)
@@ -657,12 +661,12 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         # check fwhm
-        fwhm = AbinsParameters.instruments['fwhm']
+        fwhm = abins.parameters.instruments['fwhm']
         if not (isinstance(fwhm, float) and 0.0 < fwhm < 10.0):
             raise RuntimeError("Invalid value of fwhm" + message_end)
 
         # check delta_width
-        delta_width = AbinsParameters.instruments['TwoDMap']['delta_width']
+        delta_width = abins.parameters.instruments['TwoDMap']['delta_width']
         if not (isinstance(delta_width, float) and 0.0 < delta_width < 1.0):
             raise RuntimeError("Invalid value of delta_width" + message_end)
 
@@ -673,7 +677,7 @@ class Abins(PythonAlgorithm):
         """
 
         # TOSCA final energy in cm^-1
-        tosca_parameters = AbinsParameters.instruments['TOSCA']
+        tosca_parameters = abins.parameters.instruments['TOSCA']
         final_energy = tosca_parameters['final_neutron_energy']
         if not (isinstance(final_energy, float) and final_energy > 0.0):
             raise RuntimeError("Invalid value of final_neutron_energy for TOSCA" + message_end)
@@ -703,25 +707,25 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         folder_names = []
-        ab_initio_group = AbinsParameters.hdf_groups['ab_initio_data']
+        ab_initio_group = abins.parameters.hdf_groups['ab_initio_data']
         if not isinstance(ab_initio_group, str) or ab_initio_group == "":
             raise RuntimeError("Invalid name for folder in which the ab initio data should be stored.")
         folder_names.append(ab_initio_group)
 
-        powder_data_group = AbinsParameters.hdf_groups['powder_data']
+        powder_data_group = abins.parameters.hdf_groups['powder_data']
         if not isinstance(powder_data_group, str) or powder_data_group == "":
             raise RuntimeError("Invalid value of powder_data_group" + message_end)
         elif powder_data_group in folder_names:
             raise RuntimeError("Name for powder_data_group  already used by as name of another folder.")
         folder_names.append(powder_data_group)
 
-        crystal_data_group = AbinsParameters.hdf_groups['crystal_data']
+        crystal_data_group = abins.parameters.hdf_groups['crystal_data']
         if not isinstance(crystal_data_group, str) or crystal_data_group == "":
             raise RuntimeError("Invalid value of crystal_data_group" + message_end)
         elif crystal_data_group in folder_names:
             raise RuntimeError("Name for crystal_data_group already used as a name of another folder.")
 
-        s_data_group = AbinsModules.AbinsParameters.hdf_groups['s_data']
+        s_data_group = abins.parameters.hdf_groups['s_data']
         if not isinstance(s_data_group, str) or s_data_group == "":
             raise RuntimeError("Invalid value of s_data_group" + message_end)
         elif s_data_group in folder_names:
@@ -732,11 +736,11 @@ class Abins(PythonAlgorithm):
         Checks rebinning parameters.
         :param message_end: closing part of the error message.
         """
-        min_wavenumber = AbinsParameters.sampling['min_wavenumber']
+        min_wavenumber = abins.parameters.sampling['min_wavenumber']
         if not (isinstance(min_wavenumber, float) and min_wavenumber >= 0.0):
             raise RuntimeError("Invalid value of min_wavenumber" + message_end)
 
-        max_wavenumber = AbinsParameters.sampling['max_wavenumber']
+        max_wavenumber = abins.parameters.sampling['max_wavenumber']
         if not (isinstance(max_wavenumber, float) and max_wavenumber > 0.0):
             raise RuntimeError("Invalid number of max_wavenumber" + message_end)
 
@@ -748,16 +752,16 @@ class Abins(PythonAlgorithm):
         Checks threshold for frequencies.
         :param message_end: closing part of the error message.
         """
-        freq_threshold = AbinsParameters.sampling['frequencies_threshold']
+        freq_threshold = abins.parameters.sampling['frequencies_threshold']
         if not (isinstance(freq_threshold, float) and freq_threshold >= 0.0):
             raise RuntimeError("Invalid value of frequencies_threshold" + message_end)
 
         # check s threshold
-        s_absolute_threshold = AbinsParameters.sampling['s_absolute_threshold']
+        s_absolute_threshold = abins.parameters.sampling['s_absolute_threshold']
         if not (isinstance(s_absolute_threshold, float) and s_absolute_threshold > 0.0):
             raise RuntimeError("Invalid value of s_absolute_threshold" + message_end)
 
-        s_relative_threshold = AbinsParameters.sampling['s_relative_threshold']
+        s_relative_threshold = abins.parameters.sampling['s_relative_threshold']
         if not (isinstance(s_relative_threshold, float) and s_relative_threshold > 0.0):
             raise RuntimeError("Invalid value of s_relative_threshold" + message_end)
 
@@ -766,7 +770,7 @@ class Abins(PythonAlgorithm):
         Check optimal size of chunk
         :param message_end: closing part of the error message.
         """
-        optimal_size = AbinsParameters.performance['optimal_size']
+        optimal_size = abins.parameters.performance['optimal_size']
         if not (isinstance(optimal_size, int) and optimal_size > 0):
             raise RuntimeError("Invalid value of optimal_size" + message_end)
 
@@ -776,7 +780,7 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         if PATHOS_FOUND:
-            threads = AbinsModules.AbinsParameters.performance['threads']
+            threads = abins.parameters.performance['threads']
             if not (isinstance(threads, int) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
@@ -829,6 +833,20 @@ class Abins(PythonAlgorithm):
         logger.information("Validate CRYSTAL file with vibrational or phonon data.")
         return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
                                                        expected_file_extension=".out")
+
+    def _validate_vasp_input_file(self, filename_full_path=None):
+        logger.information("Validate VASP file with vibrational or phonon data.")
+
+        if 'OUTCAR' in os.path.basename(filename_full_path):
+            return dict(Invalid=False, Comment="")
+        else:
+            output = self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                             expected_file_extension=".xml")
+            if output["Invalid"]:
+                output["Comment"] = ("Invalid filename {}. Expected OUTCAR, *.OUTCAR or"
+                                     " *.xml for VASP calculation output. Please rename your file and try again. "
+                                     .format(filename_full_path))
+        return output
 
     def _validate_castep_input_file(self, filename_full_path=None):
         """
@@ -899,7 +917,7 @@ class Abins(PythonAlgorithm):
         """
         Loads all properties to object's attributes.
         """
-
+        from abins.constants import ALL_INSTRUMENTS, FLOAT_TYPE
         self._ab_initio_program = self.getProperty("AbInitioProgram").value
         self._vibrational_or_phonon_data_file = self.getProperty("VibrationalOrPhononFile").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
@@ -909,10 +927,9 @@ class Abins(PythonAlgorithm):
         self._sample_form = self.getProperty("SampleForm").value
 
         instrument_name = self.getProperty("Instrument").value
-        if instrument_name in AbinsModules.AbinsConstants.ALL_INSTRUMENTS:
+        if instrument_name in ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
-            instrument_producer = AbinsModules.InstrumentProducer()
-            self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
+            self._instrument = abins.instruments.get_instrument(self._instrument_name)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
@@ -927,13 +944,13 @@ class Abins(PythonAlgorithm):
         self._calc_partial = (len(self._atoms) > 0)
 
         # Sampling mesh is determined by
-        # AbinsModules.AbinsParameters.sampling['min_wavenumber']
-        # AbinsModules.AbinsParameters.sampling['max_wavenumber']
-        # and AbinsModules.AbinsParameters.sampling['bin_width']
+        # abins.parameters.sampling['min_wavenumber']
+        # abins.parameters.sampling['max_wavenumber']
+        # and abins.parameters.sampling['bin_width']
         step = self._bin_width
-        start = AbinsParameters.sampling['min_wavenumber']
-        stop = AbinsParameters.sampling['max_wavenumber'] + step
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        start = abins.parameters.sampling['min_wavenumber']
+        stop = abins.parameters.sampling['max_wavenumber'] + step
+        self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
 
 
 AlgorithmFactory.subscribe(Abins)

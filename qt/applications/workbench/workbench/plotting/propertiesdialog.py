@@ -16,6 +16,7 @@ from mantidqt.utils.qt import load_ui
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm, Normalize
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
@@ -114,14 +115,19 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
-        if figure_type(canvas.figure) == FigureType.Image:
+        if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
 
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
-        self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
+        if isinstance(axes, Axes3D):
+            self.lim_setter = getattr(axes, 'set_{}lim3d'.format(axis_id))
+        else:
+            self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.nonposkw = 'nonpos' + axis_id
         # Grid has no direct accessor from the axes
@@ -202,6 +208,8 @@ class ColorbarAxisEditor(AxisEditor):
     def __init__(self, canvas, axes):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
 
+        self.ui.gridBox.hide()
+
         self.images = self.canvas.figure.gca().images
         if len(self.images) == 0:
             self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)
@@ -214,9 +222,7 @@ class ColorbarAxisEditor(AxisEditor):
 
         limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
 
-        scale = Normalize
-        if isinstance(self.images[0].norm, LogNorm):
-            scale = LogNorm
+        scale = LogNorm if self.ui.logBox.isChecked() else Normalize
 
         if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
             raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
@@ -228,7 +234,7 @@ class ColorbarAxisEditor(AxisEditor):
         memento = AxisEditorModel()
         self._memento = memento
         memento.min, memento.max = self.images[0].get_clim()
-        memento.log = False
+        memento.log = isinstance(self.images[0].norm, LogNorm)
         memento.grid = False
 
         self._fill(memento)

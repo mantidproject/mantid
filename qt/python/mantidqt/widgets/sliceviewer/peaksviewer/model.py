@@ -38,7 +38,6 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
-
     def __init__(self, peaks_ws, fg_color, bg_color):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -91,7 +90,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
         self._representations = representations
 
-    def slice_center(self, selected_index, slice_info):
+    def slicepoint(self, selected_index, slice_info):
         """
         Return the value of the center in the slice dimension for the peak at the given index
         :param selected_index: Index of a peak in the table
@@ -99,7 +98,10 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         """
         frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
         peak = self.ws.getPeak(selected_index)
-        return slice_info.transform(getattr(peak, frame_to_slice_fn)())[2]
+        slicepoint = slice_info.slicepoint
+        slicepoint[slice_info.z_index] = getattr(peak, frame_to_slice_fn)()[slice_info.z_index]
+
+        return slicepoint
 
     def zoom_to(self, index):
         """
@@ -129,10 +131,9 @@ def create_peaksviewermodel(peaks_ws_name):
     :return: A new PeaksViewerModel object
     :raises ValueError: if the workspace referred to by the name is not a PeaksWorkspace
     """
-    return PeaksViewerModel(
-        _get_peaksworkspace(peaks_ws_name),
-        fg_color=next(FG_COLORS)['fg_color'],
-        bg_color=DEFAULT_BG_COLOR)
+    return PeaksViewerModel(_get_peaksworkspace(peaks_ws_name),
+                            fg_color=next(FG_COLORS)['fg_color'],
+                            bg_color=DEFAULT_BG_COLOR)
 
 
 # Private

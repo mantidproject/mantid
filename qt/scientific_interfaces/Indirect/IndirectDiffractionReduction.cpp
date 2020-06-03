@@ -112,7 +112,7 @@ void IndirectDiffractionReduction::initLayout() {
  * Make file finding status display on the run button and enable/disable it
  */
 void IndirectDiffractionReduction::connectRunButtonValidation(
-    const MantidQt::API::MWRunFiles *file_field) {
+    const MantidQt::API::FileFinderWidget *file_field) {
   connect(file_field, SIGNAL(fileTextChanged(const QString &)), this,
           SLOT(runFilesChanged()));
   connect(file_field, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
@@ -447,8 +447,8 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName,
  * OSIRISDiffractionReduction algorithm.
  */
 void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
-  // Get the files names from MWRunFiles widget, and convert them from Qt forms
-  // into stl equivalents.
+  // Get the files names from FileFinderWidget widget, and convert them from Qt
+  // forms into stl equivalents.
   QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();
   std::vector<std::string> stlFileNames;
   stlFileNames.reserve(fileNames.size());

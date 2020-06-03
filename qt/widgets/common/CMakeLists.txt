@@ -14,6 +14,7 @@ set(
   src/DropEventHelper.cpp
   src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
+  src/FileFinderWidget.cpp
   src/FilePropertyWidget.cpp
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
@@ -55,7 +56,6 @@ set(
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
-  src/MWRunFiles.cpp
   src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
@@ -177,7 +177,7 @@ set(
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
@@ -185,6 +185,7 @@ set(
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -255,6 +256,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+    inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -294,7 +296,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
@@ -336,7 +338,7 @@ set(
   src/MdSettings.cpp
   src/Message.cpp
   src/NonOrthogonal.cpp
-  src/MWRunFiles.cpp
+  src/FileFinderWidget.cpp
   src/OptionsPropertyWidget.cpp
   src/pixmaps.cpp
   src/PlotAxis.cpp
@@ -497,11 +499,12 @@ set(
   inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidWidget.h
-  inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -624,6 +627,7 @@ set(
   inc/MantidQtWidgets/Common/PluginLibraries.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
+  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QStringUtils.h
   inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -762,7 +766,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
-    inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
@@ -793,7 +797,7 @@ foreach(
 endforeach()
 
 # Python unit tests
-set(TEST_PY_FILES test/MWRunFilesTest.py)
+set(TEST_PY_FILES test/FileFinderWidgetTest.py)
 
 set(
   TARGET_LIBRARIES

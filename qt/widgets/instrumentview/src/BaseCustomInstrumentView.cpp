@@ -41,7 +41,7 @@ void BaseCustomInstrumentView::setUpInstrument(
 QWidget *BaseCustomInstrumentView::generateLoadWidget() {
   m_loadRunObservable = new Observable();
 
-  m_files = new API::MWRunFiles(this);
+  m_files = new API::FileFinderWidget(this);
   m_files->setLabelText(m_instrument);
   m_files->allowMultipleFiles(false);
   m_files->setInstrumentOverride(m_instrument);

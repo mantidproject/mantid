@@ -227,7 +227,7 @@ void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
     auto const intVec = vectorFromString<int>(spectra);
     std::vector<WorkspaceIndex> vec(intVec.size());
     std::transform(intVec.begin(), intVec.end(), vec.begin(),
-                   [](int i) { return WorkspaceIndex{i}; });
+                   [](size_t i) { return WorkspaceIndex{i}; });
     m_view->setMaskSpectraList(vec);
   } else
     m_view->setMaskSpectraList({});
@@ -252,8 +252,7 @@ void IndirectSpectrumSelectionPresenter::setBinMask(
 }
 
 void IndirectSpectrumSelectionPresenter::setMaskIndex(WorkspaceIndex index) {
-  if (index.value >= 0)
-    m_maskIndex = index;
+  m_maskIndex = index;
 }
 
 void IndirectSpectrumSelectionPresenter::displayBinMask() {

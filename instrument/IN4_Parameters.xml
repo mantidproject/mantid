@@ -41,6 +41,9 @@
 		<parameter name="enable_elastic_channel_fitting" type="bool">
 			<value val="true" />
 		</parameter>
+		<parameter name="Ei_calibration_detectors" type="string">
+			<value val="0-299" />
+		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
 			<value val="actual_time, Detector.detsum, Detector_Rosace.detsum, duration, monitor.monsum" />

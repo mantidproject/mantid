@@ -76,7 +76,7 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
 
 void ConvolutionFunctionModel::setModel(
     const std::string &background,
-    const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
+    const std::vector<std::pair<std::string, size_t>> &resolutionWorkspaces,
     const std::string &peaks, bool hasDeltaFunction,
     const std::vector<double> &qValues, const bool isQDependent,
     bool hasTempCorrection, double tempValue) {
@@ -207,7 +207,7 @@ CompositeFunction_sptr ConvolutionFunctionModel::createConvolutionFunction(
 }
 
 IFunction_sptr ConvolutionFunctionModel::createResolutionFunction(
-    const std::string &workspaceName, int workspaceIndex) {
+    const std::string &workspaceName, size_t workspaceIndex) {
   std::string resolution =
       workspaceName.empty()
           ? "name=Resolution"

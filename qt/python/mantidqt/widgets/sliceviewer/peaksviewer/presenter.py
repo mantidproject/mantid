@@ -19,7 +19,6 @@ class PeaksViewerPresenter(object):
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
-
     class Event(Enum):
         PeaksListChanged = 1
         OverlayPeaks = 2
@@ -94,7 +93,7 @@ class PeaksViewerPresenter(object):
         if selected_index is None:
             return
 
-        self._view.set_slicepoint(self.model.slice_center(selected_index, self._view.sliceinfo))
+        self._view.set_slicepoint(self.model.slicepoint(selected_index, self._view.sliceinfo))
         self.model.zoom_to(selected_index)
 
     # private api
@@ -110,7 +109,6 @@ class PeaksViewerPresenter(object):
 class PeaksViewerCollectionPresenter(object):
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
-
     def __init__(self, view):
         """
         :param view: View displaying the model information

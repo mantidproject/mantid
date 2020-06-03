@@ -2,8 +2,8 @@
 #  This file is part of the mantid workbench.
 #
 #
-
 from setuptools import find_packages, setup
+
 
 @SETUPTOOLS_BUILD_COMMANDS_DEF@
 
@@ -16,7 +16,7 @@ setup(
     package_data={'': ['*.ui']},
     entry_points={
         'gui_scripts': [
-            'workbench = workbench.app.mainwindow:main'
+            'workbench = workbench.app.main:main'
         ]
     },
     @SETUPTOOLS_BUILD_COMMANDS_USE@

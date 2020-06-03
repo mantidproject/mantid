@@ -29,7 +29,7 @@
       <item>
        <layout class="QHBoxLayout" name="loCalibInputFile">
         <item>
-         <widget class="MantidQt::API::MWRunFiles" name="leRunNo" native="true">
+         <widget class="MantidQt::API::FileFinderWidget" name="leRunNo" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -431,9 +431,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
