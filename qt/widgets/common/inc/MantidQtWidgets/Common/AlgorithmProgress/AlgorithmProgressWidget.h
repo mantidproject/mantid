@@ -48,8 +48,8 @@ public:
   /// Enable or disable the processing of updates to the algorithm progress
   void blockUpdates(bool block = true);
   /// Update the progress bar
-  void updateProgress(const double progress,
-                      const QString &message, const double estimatedTime,
+  void updateProgress(const double progress, const QString &message,
+                      const double estimatedTime,
                       const int progressPrecision) override;
 
 public slots:

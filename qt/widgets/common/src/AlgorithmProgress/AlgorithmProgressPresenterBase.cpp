@@ -47,10 +47,9 @@ void AlgorithmProgressPresenterBase::algorithmEnded(
 /// already have been copied into the GUI thread, so it is safe to receive it by
 /// @param estimatedTime :: estimated time to completion in seconds
 /// @param progressPrecision :: number of digits after the decimal
-void AlgorithmProgressPresenterBase::setProgressBar(QProgressBar *progressBar,
-                                                    const double progress,
-                                                    const QString &message, const double estimatedTime,
-                                                    const int progressPrecision) {
+void AlgorithmProgressPresenterBase::setProgressBar(
+    QProgressBar *progressBar, const double progress, const QString &message,
+    const double estimatedTime, const int progressPrecision) {
   progressBar->setValue(static_cast<int>(progress * 100));
   // Make the progress string
   std::ostringstream mess;
@@ -77,7 +76,6 @@ void AlgorithmProgressPresenterBase::setProgressBar(QProgressBar *progressBar,
   }
   QString formatStr = QString::fromStdString(mess.str());
   progressBar->setFormat(formatStr);
-
 }
 /// This function is called whenever an algorithm reports progress. It emits a
 /// signal triggering the slot inside the GUI thread. It is safe to call this
@@ -86,11 +84,10 @@ void AlgorithmProgressPresenterBase::setProgressBar(QProgressBar *progressBar,
 /// @param progress The progress that the algorithm has reported
 /// @param msg The message that the algorithm has sent
 void AlgorithmProgressPresenterBase::updateProgressBar(
-    Mantid::API::AlgorithmID alg, double progress,
-    const std::string &msg, const double estimatedTime,
-    const int progressPrecision) {
-  emit updateProgressBarSignal(alg, progress, QString::fromStdString(msg), 
-    estimatedTime, progressPrecision);
+    Mantid::API::AlgorithmID alg, double progress, const std::string &msg,
+    const double estimatedTime, const int progressPrecision) {
+  emit updateProgressBarSignal(alg, progress, QString::fromStdString(msg),
+                               estimatedTime, progressPrecision);
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

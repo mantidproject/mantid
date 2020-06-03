@@ -64,7 +64,8 @@ void AlgorithmProgressModel::progressHandle(const Mantid::API::IAlgorithm *alg,
                                             const double estimatedTime,
                                             const int progressPrecision) {
   m_mainWindowPresenter->updateProgressBar(alg->getAlgorithmID(), progress,
-                                           message, estimatedTime, progressPrecision);
+                                           message, estimatedTime,
+                                           progressPrecision);
   if (m_dialogPresenter) {
     m_dialogPresenter->updateProgressBar(alg->getAlgorithmID(), progress,
                                          message, estimatedTime,

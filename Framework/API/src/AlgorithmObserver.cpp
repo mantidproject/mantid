@@ -166,7 +166,7 @@ void AlgorithmObserver::errorHandle(const IAlgorithm *alg,
 void AlgorithmObserver::_progressHandle(
     const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
   this->progressHandle(pNf->algorithm(), pNf->progress, pNf->message,
-    pNf->estimatedTime, pNf->progressPrecision);
+                       pNf->estimatedTime, pNf->progressPrecision);
 }
 
 /** Poco notification handler for Algorithm::StartedNotification.

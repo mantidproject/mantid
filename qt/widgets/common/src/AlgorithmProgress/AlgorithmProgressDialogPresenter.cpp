@@ -77,8 +77,8 @@ void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
       return;
     }
   }
-  setProgressBar(m_progressBars.at(alg).second, progress, message, estimatedTime,
-                 progressPrecision);
+  setProgressBar(m_progressBars.at(alg).second, progress, message,
+                 estimatedTime, progressPrecision);
 }
 
 /// This slot is triggered whenever an algorithms ends. If the algorithm is not

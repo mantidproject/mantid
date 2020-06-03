@@ -14,8 +14,7 @@ AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
     : API::AlgorithmObserver(), m_self(self) {}
 
 void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
-                                              double p,
-                                              const std::string &msg,
+                                              double p, const std::string &msg,
                                               const double estimatedTime,
                                               const int progressPrecision) {
   UNUSED_ARG(alg)

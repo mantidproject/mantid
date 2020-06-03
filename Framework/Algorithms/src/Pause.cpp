@@ -68,7 +68,7 @@ void Pause::exec() {
       if (seconds > duration)
         break;
       // Report progress for non-infinite runs
-      this->progress(seconds / duration,"",duration - seconds);
+      this->progress(seconds / duration, "", duration - seconds);
     }
   }
 }
