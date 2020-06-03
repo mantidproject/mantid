@@ -22,18 +22,20 @@ public:
   @param y: y data coordinate, for a matrix workspace this will be the spectrum
   number
   @param signal: the signal value at x,y
-  @param includeValues: if false the returned list will contain the information
-  headers with "-" for each of the values
+  @param getValues: if false the returned list will have the information
+  headers and '-' for each of the values
   @return a vector containing pairs of strings
   */
   virtual std::vector<std::string> getInfoList(const double x, const double y,
                                                const double signal,
-                                               bool includeValues = true) = 0;
+                                               bool getValues = true) = 0;
+
+  virtual void setWorkspace(const Mantid::API::Workspace_sptr &ws) = 0;
 
 protected:
-  void addNameAndValue(const std::string &label, const double value,
-                       const int precision, std::vector<std::string> &list,
-                       bool includeValues = true);
+  void addNameAndValue(const std::string &label, std::vector<std::string> &list,
+                       const double value, const int precision,
+                       bool includeValue = true);
 };
 
 } // namespace MantidWidgets

@@ -10,21 +10,14 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/**
- * Constructor
- */
-ImageInfoModelMD::ImageInfoModelMD(const Mantid::API::IMDWorkspace_sptr &ws)
-    : m_workspace(ws) {}
-
 std::vector<std::string> ImageInfoModelMD::getInfoList(const double x,
                                                        const double y,
                                                        const double signal,
-                                                       bool includeValues) {
-
+                                                       bool getValues) {
   std::vector<std::string> list;
-  addNameAndValue("x", x, 4, list, includeValues);
-  addNameAndValue("y", y, 4, list, includeValues);
-  addNameAndValue("Signal", signal, 4, list, includeValues);
+  addNameAndValue("x", list, x, 4, getValues);
+  addNameAndValue("y", list, y, 4, getValues);
+  addNameAndValue("Signal", list, signal, 4, getValues);
 
   return list;
 }

@@ -17,21 +17,21 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMD : public ImageInfoModel {
 
 public:
-  ImageInfoModelMD(const Mantid::API::IMDWorkspace_sptr &ws);
-
   /** Creates a list with information about the coordinates in the workspace.
   @param x: x data coordinate
   @param y: y data coordinate
   @param signal: the signal value at x, y
-  @param includeValues: if false the list will contain "-" for each of the
-                        numeric values
+  @param getValues: if false the list will contain the header names and "-" for
+  each of the numeric values
   @return a vector containing pairs of strings
   */
   std::vector<std::string> getInfoList(const double x, const double y,
                                        const double signal,
-                                       bool includeValues = true) override;
+                                       bool getValues = true) override;
 
-  Mantid::API::IMDWorkspace_sptr m_workspace;
+  void setWorkspace(const Mantid::API::Workspace_sptr &ws) override {
+    UNUSED_ARG(ws);
+  }
 };
 
 } // namespace MantidWidgets

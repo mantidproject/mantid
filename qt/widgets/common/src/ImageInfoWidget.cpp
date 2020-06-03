@@ -18,7 +18,7 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoWidget::ImageInfoWidget(const Mantid::API::Workspace_sptr &workspace,
+ImageInfoWidget::ImageInfoWidget(const std::string &workspace_type,
                                  QWidget *parent)
     : IImageInfoWidget(parent),
       m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
@@ -30,13 +30,13 @@ ImageInfoWidget::ImageInfoWidget(const Mantid::API::Workspace_sptr &workspace,
   horizontalHeader()->hide();
   verticalHeader()->hide();
 
-  m_presenter->createImageInfoModel(workspace);
-  updateTable(0, 0, 0, false);
+  m_presenter->createImageInfoModel(workspace_type);
+  updateTable();
 }
 
 void ImageInfoWidget::updateTable(const double x, const double y,
-                                  const double z, bool includeValues) {
-  auto info = m_presenter->getInfoList(x, y, z, includeValues);
+                                  const double z) {
+  auto info = m_presenter->getInfoList(x, y, z);
 
   if (info.empty())
     return;
@@ -56,7 +56,12 @@ void ImageInfoWidget::updateTable(const double x, const double y,
       column++;
     }
   }
+  horizontalHeader()->setMinimumSectionSize(50);
   resizeColumnsToContents();
+}
+void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) {
+  m_presenter->setWorkspace(ws);
+  updateTable();
 }
 } // namespace MantidWidgets
 

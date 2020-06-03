@@ -933,19 +933,18 @@ class ImageInfoWidget : public QTableWidget {
 #include <boost/python/handle.hpp>
 %End
 public:
-    ImageInfoWidget(SIP_PYOBJECT ws, QWidget *parent = nullptr) [(const Mantid::API::Workspace_sptr&, QWidget*=nullptr)];
+    ImageInfoWidget(std::string workspace_type, QWidget *parent = nullptr);
+    void updateTable(const double x, const double y, const double z);
+    void setWorkspace(SIP_PYOBJECT);
     %MethodCode
     try {
       auto extractor = Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(boost::python::object(boost::python::handle<>(a0)));
-      sipCpp = new sipImageInfoWidget(extractor(), a1);
+      sipCpp->setWorkspace(extractor());
     } catch(...) {
       sipRaiseUnknownException();
       return NULL;
     }
     %End
-	void updateTable(const double x, const double y, const double z, bool includeValues = true);
-  private:
-  ImageInfoWidget(const ImageInfoWidget&);
 };
 
 // ---------------------------------

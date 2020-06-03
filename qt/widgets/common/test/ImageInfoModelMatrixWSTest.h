@@ -26,27 +26,25 @@ public:
   static void destroySuite(ImageInfoModelMatrixWSTest *suite) { delete suite; }
 
   void test_construct() {
-    MatrixWorkspace_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            10, 10, true, false, true, "workspace", false);
-    TS_ASSERT_THROWS_NOTHING(ImageInfoModelMatrixWS model(workspace))
+    TS_ASSERT_THROWS_NOTHING(ImageInfoModelMatrixWS model)
   }
 
   void test_getInfoList() {
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModelMatrixWS model(workspace);
+    ImageInfoModelMatrixWS model;
+    model.setWorkspace(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
-
-    const std::string expectList[]{
+    const std::array expectList{
         "Signal",    "7",      "Spec Num",  "4",         "Time-of-flight",
         "2",         "Det ID", "4",         "L2",        "5.009",
         "TwoTheta",  "3.4",    "Azimuthal", "90",        "Wavelength",
         "0.0003164", "Energy", "8.173e+08", "d-Spacing", "0.00528",
         "|Q|",       "1190"};
 
+    TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
     }
@@ -56,12 +54,15 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, false);
     workspace->getAxis(0)->setUnit("TOF");
-    ImageInfoModelMatrixWS model(workspace);
+    ImageInfoModelMatrixWS model;
+    model.setWorkspace(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
 
-    const std::string expectList[]{"Signal",         "7", "Spec Num", "4",
-                                   "Time-of-flight", "2", "Det ID",   "4"};
+    const std::array expectList{"Signal",         "7", "Spec Num", "4",
+                                "Time-of-flight", "2"};
+
+    TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
     }
@@ -71,7 +72,8 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModelMatrixWS model(workspace);
+    ImageInfoModelMatrixWS model;
+    model.setWorkspace(workspace);
 
     auto list1 = model.getInfoList(-1, 4, 7);
     auto list2 = model.getInfoList(10, 4, 7);
@@ -84,7 +86,8 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModelMatrixWS model(workspace);
+    ImageInfoModelMatrixWS model;
+    model.setWorkspace(workspace);
     auto list1 = model.getInfoList(2, -1, 7);
     auto list2 = model.getInfoList(2, 11, 7);
     TS_ASSERT_EQUALS(0, list1.size())
@@ -95,18 +98,31 @@ public:
     MatrixWorkspace_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             10, 10, true, false, true, "workspace", false);
-    ImageInfoModelMatrixWS model(workspace);
+    ImageInfoModelMatrixWS model;
+    model.setWorkspace(workspace);
 
     auto list = model.getInfoList(2, 4, 7, false);
 
-    const std::string expectList[]{
+    const std::array expectList{
         "Signal",    "-", "Spec Num",   "-", "Time-of-flight", "-",
         "Det ID",    "-", "L2",         "-", "TwoTheta",       "-",
         "Azimuthal", "-", "Wavelength", "-", "Energy",         "-",
         "d-Spacing", "-", "|Q|",        "-"};
 
+    TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
     }
+  }
+
+  void test_getInfoList_returns_nothing_if_no_workspace_has_been_set() {
+    MatrixWorkspace_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            10, 10, true, false, true, "workspace", false);
+    ImageInfoModelMatrixWS model;
+
+    auto list = model.getInfoList(2, 4, 7);
+
+    TS_ASSERT_EQUALS(0, list.size())
   }
 };

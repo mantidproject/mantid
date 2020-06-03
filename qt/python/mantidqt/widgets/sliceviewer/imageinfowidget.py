@@ -9,10 +9,4 @@
 #
 from mantidqt.utils.qt import import_qt
 
-ImageInfoWidget_cpp = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
-
-
-class ImageInfoWidget(ImageInfoWidget_cpp):
-
-    def __init__(self, workspace, parent):
-        super(ImageInfoWidget, self).__init__(workspace, parent)
+ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')

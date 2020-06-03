@@ -28,8 +28,10 @@ public:
     m_presenter = std::make_shared<ImageInfoPresenter>(this);
   }
 
-  MOCK_METHOD4(updateTable, void(const double x, const double y, const double z,
-                                 bool includeValues));
+  MOCK_METHOD3(updateTable,
+               void(const double x, const double y, const double z));
+  MOCK_METHOD1(setWorkspace, void(const Mantid::API::Workspace_sptr &ws));
+
   std::shared_ptr<ImageInfoPresenter> getPresenter() { return m_presenter; }
 
 private:
@@ -50,9 +52,7 @@ public:
   void test_createImageInfoModel_creates_matrix_ws_model_with_matrix_ws() {
     auto mockView = std::make_shared<NiceMock<MockImageInfoView>>();
     auto presenter = mockView->getPresenter();
-    auto matrixWs =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, false);
-    presenter->createImageInfoModel(matrixWs);
+    presenter->createImageInfoModel("MATRIX");
     auto model = presenter->getModel();
     TS_ASSERT(std::dynamic_pointer_cast<ImageInfoModelMatrixWS>(model) != NULL);
   }
@@ -60,8 +60,7 @@ public:
   void test_createImageInfoModel_creates_MD_model_with_md_ws() {
     auto mockView = std::make_shared<NiceMock<MockImageInfoView>>();
     auto presenter = mockView->getPresenter();
-    auto mdWs = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    presenter->createImageInfoModel(mdWs);
+    presenter->createImageInfoModel("MDH");
     auto model = presenter->getModel();
     TS_ASSERT(std::dynamic_pointer_cast<ImageInfoModelMD>(model) != NULL);
   }

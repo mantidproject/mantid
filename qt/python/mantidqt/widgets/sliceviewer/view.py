@@ -38,7 +38,7 @@ from .peaksviewer.representation.painter import MplPainter
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, dims_info, can_normalise, workspace, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -60,13 +60,13 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setContentsMargins(0,0,0,0)
         self.colorbar_layout.setSpacing(0)
 
-        self.image_info_widget = ImageInfoWidget(workspace, self)
+        self.image_info_widget = ImageInfoWidget(self.ws_type, self)
         self.track_cursor = QCheckBox("Track Cursor", self)
         if self.ws_type == 'MDE':
             self.colorbar_layout.addWidget(self.image_info_widget, alignment=Qt.AlignCenter)
             self.colorbar_layout.addWidget(self.track_cursor, alignment=Qt.AlignCenter)
         else:
-            self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
+            self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight | Qt.AlignBottom)
             self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
         self.track_cursor.setChecked(True)
 
@@ -501,7 +501,7 @@ class SliceViewerDataView(QWidget):
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
 
-    def __init__(self, presenter, dims_info, can_normalise, workspace, parent=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -510,7 +510,7 @@ class SliceViewerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)
-        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, workspace, self)
+        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self)
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None

@@ -29,21 +29,25 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMatrixWS
     : public ImageInfoModel {
 
 public:
-  ImageInfoModelMatrixWS(const Mantid::API::MatrixWorkspace_sptr &ws);
+  ImageInfoModelMatrixWS();
 
   /** Creates a list with information about the coordinates in the workspace.
   @param x: x data coordinate
   @param specNum: the spectrum number of the coordinate
   @param signal: the signal value at x, y
-  @param includeValues: if false the list will contain "-" for each of the
-                        numeric values
+  @param getValues: if false the returned list will have the information
+  headers and '-' for each of the values
   @return a vector containing pairs of strings
   */
   std::vector<std::string> getInfoList(const double x, const double specNum,
                                        const double signal,
-                                       bool includeValues = true) override;
+                                       bool getValues = true) override;
+
+  void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
 
 private:
+  void updateCachedWorkspaceInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
+
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   const Mantid::API::SpectrumInfo *m_spectrumInfo;
   std::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;

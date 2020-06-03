@@ -47,6 +47,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.plot_MDH = mock.Mock()
         data_view.dimensions = mock.Mock()
         data_view.norm_opts = mock.Mock()
+        data_view.image_info_widget = mock.Mock()
         dimensions = mock.Mock()
         dimensions.get_slicepoint.return_value = [None, None, 0.5]
         dimensions.transpose = False

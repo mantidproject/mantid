@@ -20,19 +20,24 @@ ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view)
 
 std::vector<std::string> ImageInfoPresenter::getInfoList(const double x,
                                                          const double y,
-                                                         const double z,
-                                                         bool includeValues) {
-  return getModel()->getInfoList(x, y, z, includeValues);
+                                                         const double z) {
+  bool getValues(true);
+  if (x == DBL_MAX || y == DBL_MAX || z == DBL_MAX)
+    getValues = false;
+  return getModel()->getInfoList(x, y, z, getValues);
 }
 
 void ImageInfoPresenter::createImageInfoModel(
-    const Mantid::API::Workspace_sptr &ws) {
-  if (auto matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws))
-    m_model = std::make_unique<ImageInfoModelMatrixWS>(matWS);
-  else if (auto MDWS =
-               std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws)) {
-    m_model = std::make_unique<ImageInfoModelMD>(MDWS);
+    const std::string &workspace_type) {
+  if (workspace_type == "MATRIX")
+    m_model = std::make_unique<ImageInfoModelMatrixWS>();
+  else {
+    m_model = std::make_unique<ImageInfoModelMD>();
   }
+}
+
+void ImageInfoPresenter::setWorkspace(const Mantid::API::Workspace_sptr &ws) {
+  m_model->setWorkspace(ws);
 }
 
 } // namespace MantidWidgets

@@ -14,11 +14,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 void ImageInfoModel::addNameAndValue(const std::string &label,
-                                     const double value, const int precision,
                                      std::vector<std::string> &list,
-                                     bool includeValues) {
+                                     const double value, const int precision,
+                                     bool includeValue) {
   std::ostringstream valueString;
-  if (includeValues)
+  if (includeValue)
     valueString << std::setprecision(precision) << value;
   else
     valueString << "-";

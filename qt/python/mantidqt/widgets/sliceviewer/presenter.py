@@ -43,7 +43,7 @@ class SliceViewer(object):
         self.normalization = mantid.api.MDNormalization.NoNormalization
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
-                                                      self.model.can_normalize_workspace(), ws, parent)
+                                                      self.model.can_normalize_workspace(), parent)
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
@@ -52,7 +52,11 @@ class SliceViewer(object):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_nonorthogonal_axes_button()
 
+        if self.model.get_ws_type() == WS_TYPE.MATRIX:
+            self.view.data_view.image_info_widget.setWorkspace(ws)
+
         self.view.setWindowTitle(f"SliceViewer - {self.model.get_ws_name()}")
+
         self.new_plot()
 
     def new_plot_MDH(self):

@@ -25,11 +25,12 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoPresenter {
 public:
   ImageInfoPresenter(IImageInfoWidget *view);
 
-  std::vector<std::string> getInfoList(const double x, const double y,
-                                       const double z,
-                                       bool includeValues = true);
+  std::vector<std::string> getInfoList(const double x = DBL_MAX,
+                                       const double y = DBL_MAX,
+                                       const double z = DBL_MAX);
 
-  void createImageInfoModel(const Mantid::API::Workspace_sptr &ws);
+  void createImageInfoModel(const std::string &ws_type);
+  void setWorkspace(const Mantid::API::Workspace_sptr &ws);
 
   std::shared_ptr<ImageInfoModel> getModel() { return m_model; }
 

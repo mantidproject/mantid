@@ -28,62 +28,48 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(const MatrixWorkspace_sptr &ws)
-    : m_workspace(ws) {
-
-  m_workspace->getXMinMax(m_xMin, m_xMax);
-  m_spectrumInfo = &m_workspace->spectrumInfo();
-  m_instrument = m_workspace->getInstrument();
-  if (m_instrument) {
-    m_source = m_instrument->getSource();
-    if (!m_source) {
-      g_log.debug("No SOURCE on instrument in MatrixWorkspace");
-    }
-
-    m_sample = m_instrument->getSample();
-    if (!m_sample) {
-      g_log.debug("No SAMPLE on instrument in MatrixWorkspace");
-    }
-  } else {
-    g_log.debug("No INSTRUMENT on MatrixWorkspace");
-  }
-}
+ImageInfoModelMatrixWS::ImageInfoModelMatrixWS() : m_workspace(nullptr) {}
 
 // Creates a list containing pairs of strings with information about the
 // coordinates in the workspace.
 std::vector<std::string>
 ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
-                                    const double signal, bool includeValues) {
+                                    const double signal, bool getValues) {
   std::vector<std::string> list;
-  const int spectrumNumber = static_cast<int>(specNum);
-  size_t wsIndex;
-  try {
-    wsIndex = m_workspace->getIndexFromSpectrumNumber(spectrumNumber);
-  } catch (std::runtime_error) {
-    if (includeValues)
-      return list;
-    wsIndex = 0;
+
+  if (!m_workspace) {
+    return list;
   }
 
-  if (includeValues && (x >= m_xMax || x <= m_xMin))
-    return list;
+  const int spectrumNumber = static_cast<int>(specNum);
+  size_t wsIndex = 0;
+  if (getValues) {
+    try {
+      wsIndex = m_workspace->getIndexFromSpectrumNumber(spectrumNumber);
+    } catch (std::runtime_error &error) {
+      g_log.debug(error.what());
+      return list;
+    }
 
-  addNameAndValue("Signal", signal, 4, list, includeValues);
+    if (x >= m_xMax || x <= m_xMin)
+      return list;
+  }
 
-  const auto &spec = m_workspace->getSpectrum(wsIndex);
-  addNameAndValue("Spec Num", spectrumNumber, 0, list, includeValues);
+  addNameAndValue("Signal", list, signal, 4, getValues);
+  addNameAndValue("Spec Num", list, spectrumNumber, 0, getValues);
 
   std::string x_label = "";
   const auto &old_unit = m_workspace->getAxis(0)->unit();
   if (old_unit) {
     x_label = old_unit->caption();
-    addNameAndValue(x_label, x, 3, list, includeValues);
+    addNameAndValue(x_label, list, x, 3, getValues);
   }
 
+  const auto &spec = m_workspace->getSpectrum(wsIndex);
   const auto &ids = spec.getDetectorIDs();
   if (!ids.empty()) {
     const auto id = *(ids.begin());
-    addNameAndValue("Det ID", id, 0, list, includeValues);
+    addNameAndValue("Det ID", list, id, 0, getValues);
   }
 
   /* Cannot get any more information if we do not have a instrument, source and
@@ -111,11 +97,11 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
     two_theta = m_spectrumInfo->twoTheta(wsIndex);
     azi = m_spectrumInfo->detector(wsIndex).getPhi();
   }
-  addNameAndValue("L2", l2, 4, list, includeValues);
-  addNameAndValue("TwoTheta", two_theta * Mantid::Geometry::rad2deg, 2, list,
-                  includeValues);
-  addNameAndValue("Azimuthal", azi * Mantid::Geometry::rad2deg, 2, list,
-                  includeValues);
+  addNameAndValue("L2", list, l2, 4, getValues);
+  addNameAndValue("TwoTheta", list, two_theta * Mantid::Geometry::rad2deg, 2,
+                  getValues);
+  addNameAndValue("Azimuthal", list, azi * Mantid::Geometry::rad2deg, 2,
+                  getValues);
 
   int emode(0);
   double efixed(0.0), delta(0.0);
@@ -161,45 +147,75 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
   const double tof =
       old_unit->convertSingleToTOF(x, l1, l2, two_theta, emode, efixed, delta);
   if (x_label != "Time-of-flight") {
-    addNameAndValue("Time-of-flight", tof, 1, list, includeValues);
+    addNameAndValue("Time-of-flight", list, tof, 1, getValues);
   }
 
   if (x_label != "Wavelength") {
     const auto wl_unit = UnitFactory::Instance().create("Wavelength");
     const double wavelength = wl_unit->convertSingleFromTOF(
         tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("Wavelength", wavelength, 4, list, includeValues);
+    addNameAndValue("Wavelength", list, wavelength, 4, getValues);
   }
 
   if (x_label != "Energy") {
     const auto e_unit = UnitFactory::Instance().create("Energy");
     const double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                        emode, efixed, delta);
-    addNameAndValue("Energy", energy, 4, list, includeValues);
+    addNameAndValue("Energy", list, energy, 4, getValues);
   }
 
   if (x_label != "d-Spacing" &&
-      ((two_theta != 0.0 && emode == 0) || !includeValues)) {
+      ((two_theta != 0.0 && emode == 0) || !getValues)) {
     const auto d_unit = UnitFactory::Instance().create("dSpacing");
     const double d_spacing = d_unit->convertSingleFromTOF(
         tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("d-Spacing", d_spacing, 4, list, includeValues);
+    addNameAndValue("d-Spacing", list, d_spacing, 4, getValues);
   }
 
-  if (x_label != "q" && (two_theta != 0.0 || !includeValues)) {
+  if (x_label != "q" && (two_theta != 0.0 || !getValues)) {
     const auto q_unit = UnitFactory::Instance().create("MomentumTransfer");
     const double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                       emode, efixed, delta);
-    addNameAndValue("|Q|", mag_q, 4, list, includeValues);
+    addNameAndValue("|Q|", list, mag_q, 4, getValues);
   }
 
   if (x_label != "DeltaE" && (two_theta != 0.0 && emode != 0)) {
     const auto deltaE_unit = UnitFactory::Instance().create("DeltaE");
     const double delta_E = deltaE_unit->convertSingleFromTOF(
         tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("DeltaE", delta_E, 4, list, includeValues);
+    addNameAndValue("DeltaE", list, delta_E, 4, getValues);
   }
   return list;
+}
+
+void ImageInfoModelMatrixWS::setWorkspace(
+    const Mantid::API::Workspace_sptr &ws) {
+  auto matWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  if (matWs != m_workspace) {
+    updateCachedWorkspaceInfo(matWs);
+  }
+}
+
+void ImageInfoModelMatrixWS::updateCachedWorkspaceInfo(
+    const Mantid::API::MatrixWorkspace_sptr &ws) {
+  g_log.debug("updating cached values");
+  m_workspace = ws;
+  m_workspace->getXMinMax(m_xMin, m_xMax);
+  m_spectrumInfo = &m_workspace->spectrumInfo();
+  m_instrument = m_workspace->getInstrument();
+  if (m_instrument) {
+    m_source = m_instrument->getSource();
+    if (!m_source) {
+      g_log.debug("No SOURCE on instrument in MatrixWorkspace");
+    }
+
+    m_sample = m_instrument->getSample();
+    if (!m_sample) {
+      g_log.debug("No SAMPLE on instrument in MatrixWorkspace");
+    }
+  } else {
+    g_log.debug("No INSTRUMENT on MatrixWorkspace");
+  }
 }
 
 } // namespace MantidWidgets
