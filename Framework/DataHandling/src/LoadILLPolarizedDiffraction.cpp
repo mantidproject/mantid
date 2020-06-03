@@ -47,8 +47,6 @@ constexpr size_t D7_NUMBER_PIXELS_BANK = 44;
 constexpr size_t NUMBER_MONITORS = 2;
 // This defines Time Of Flight measurement mode switch value
 constexpr size_t TOF_MODE_ON = 1;
-// The conversion factor from radian to degree
-constexpr double DEG_TO_RAD = M_PI / 180.;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -196,7 +194,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     // load and assign monitor data
     for (auto monitor_no = static_cast<int>(D7_NUMBER_PIXELS);
          monitor_no < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS);
-         monitor_no++) {
+         ++monitor_no) {
       NXUInt monitorData = entry.openNXDataSet<unsigned int>(
           "monitor" +
           std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) +
