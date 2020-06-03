@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QWidget
 from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 from mantidqt.utils.qt import load_ui
 
-MARKER_STYLES = ['None', 'point', 'pixel', "circle", "triangle_down", "triangle_up", "triangle_left",
+MARKER_STYLES = ['None', 'point', 'pixel', "triangle_down", "triangle_up", "triangle_left",
                  "triangle_right", "tri_down", "tri_up", "tri_left", "tri_right", "octagon", "square",
                  "pentagon", "plus (filled)", "star", "hexagon1", "hexagon2", "plus", "x", "x (filled)",
                  "diamond", "thin_diamond", "vline", "hline", "tickleft", "tickright", "tickup",
