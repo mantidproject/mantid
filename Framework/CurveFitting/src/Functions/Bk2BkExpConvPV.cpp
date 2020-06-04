@@ -111,8 +111,10 @@ void Bk2BkExpConvPV::setMatrixWorkspace(
     const auto centre = getParameter("X0");
     const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
     if (scaleFactor != 0) {
-      setParameter("Alpha", getParameter("Alpha") / scaleFactor);
-      setParameter("Beta", getParameter("Beta") / scaleFactor);
+      if (isActive(parameterIndex("Alpha")))
+        setParameter("Alpha", getParameter("Alpha") / scaleFactor);
+      if (isActive(parameterIndex("Beta")))
+        setParameter("Beta", getParameter("Beta") / scaleFactor);
     }
   }
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);

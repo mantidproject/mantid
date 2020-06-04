@@ -420,9 +420,12 @@ void IkedaCarpenterPV::setMatrixWorkspace(
     const auto centre = getParameter("X0");
     const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
     if (scaleFactor != 0) {
-      setParameter("Alpha0", getParameter("Alpha0") * scaleFactor);
-      setParameter("Alpha1", getParameter("Alpha1") * scaleFactor);
-      setParameter("Beta0", getParameter("Beta0") * scaleFactor);
+      if (isActive(parameterIndex("Alpha0")))
+        setParameter("Alpha0", getParameter("Alpha0") * scaleFactor);
+      if (isActive(parameterIndex("Alpha1")))
+        setParameter("Alpha1", getParameter("Alpha1") * scaleFactor);
+      if (isActive(parameterIndex("Beta0")))
+        setParameter("Beta0", getParameter("Beta0") * scaleFactor);
     }
   }
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
