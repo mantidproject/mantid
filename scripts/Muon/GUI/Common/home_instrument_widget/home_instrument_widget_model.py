@@ -77,6 +77,12 @@ class InstrumentWidgetModel(object):
     def set_user_last_good_data(self, last_good_data):
         self._context.gui_context.update_and_send_signal(LastGoodData=last_good_data)
 
+    def set_double_pulse_time(self, double_pulse_time):
+        self._context.gui_context.update_and_send_non_calculation_signal(DoublePulseTime=double_pulse_time)
+
+    def set_double_pulse_enabled(self, enabled):
+        self._context.gui_context.update_and_send_non_calculation_signal(DoublePulseEnabled=enabled)
+
     def get_dead_time_table_from_data(self):
         dead_time_name = self._data.current_data["DataDeadTimeTable"]
         return api.AnalysisDataService.retrieve(self._data.current_data["DataDeadTimeTable"]) if dead_time_name else None

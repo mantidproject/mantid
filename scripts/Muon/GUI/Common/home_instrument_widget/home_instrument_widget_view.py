@@ -52,12 +52,14 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
         self.last_good_data_edit_enabled(True)
+        self.double_pulse_edit_enabled(True)
 
         self._on_time_zero_changed = lambda: 0
         self._on_first_good_data_changed = lambda: 0
         self._on_dead_time_from_file_selected = lambda: 0
         self._on_dead_time_file_option_selected = lambda: 0
         self._on_dead_time_unselected = lambda: 0
+        self._on_double_pulse_time_changed = lambda: 0
 
         self.time_zero_edit.editingFinished.connect(
             lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
@@ -67,6 +69,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             lambda: self._on_last_good_data_changed() if not self.is_last_good_data_checked() else None)
         self.dead_time_file_selector.currentIndexChanged.connect(
             self.on_dead_time_file_combo_changed)
+        self.double_pulse_data_edit.editingFinished.connect(lambda: self._on_double_pulse_time_changed())
 
     def setup_interface(self):
         self.setObjectName("InstrumentWidget")
@@ -77,6 +80,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.setup_last_good_data_row()
         self.setup_dead_time_row()
         self.setup_rebin_row()
+        self.setup_double_pulse_row()
 
         self.group = QtWidgets.QGroupBox("Instrument")
         self.group.setFlat(False)
@@ -375,6 +379,66 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         return float(self.last_good_data_edit.text())
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Double Pulse Options
+    # -------------------------------------------------------------------------------------------------------------------
+
+    def setup_double_pulse_row(self):
+
+        self.double_pulse_label = QtWidgets.QLabel(self)
+        self.double_pulse_label.setText("Double pulse time offset : ")
+
+        self.double_pulse_data_edit = QtWidgets.QLineEdit(self)
+
+        double_pulse_data_validator = QtGui.QRegExpValidator(
+            QtCore.QRegExp(valid_float_regex),
+            self.double_pulse_data_edit)
+        self.double_pulse_data_edit.setValidator(double_pulse_data_validator)
+        self.double_pulse_data_edit.setText("")
+
+        self.double_pulse_data_unit_label = QtWidgets.QLabel(self)
+        self.double_pulse_data_unit_label.setText(u" \u03BCs (Double pulse ")
+
+        self.double_pulse_data_checkbox = QtWidgets.QCheckBox(self)
+        self.double_pulse_data_checkbox.setChecked(False)
+
+        self.double_pulse_data_label_2 = QtWidgets.QLabel(self)
+        self.double_pulse_data_label_2.setText(" )")
+
+        self.double_pulse_data_layout = QtWidgets.QHBoxLayout()
+        self.double_pulse_data_layout.addSpacing(10)
+        self.double_pulse_data_layout.addWidget(self.double_pulse_data_unit_label)
+        self.double_pulse_data_layout.addWidget(self.double_pulse_data_checkbox)
+        self.double_pulse_data_layout.addWidget(self.double_pulse_data_label_2)
+        self.double_pulse_data_layout.addStretch(0)
+
+        self.layout.addWidget(self.double_pulse_label, 4, 0)
+        self.layout.addWidget(self.double_pulse_data_edit, 4, 1)
+        self.layout.addItem(self.double_pulse_data_layout, 4, 2)
+
+    def on_double_pulse_time_changed(self, slot):
+        self._on_double_pulse_time_changed = slot
+
+    def set_last_good_data(self, double_pulse_time):
+        self.double_pulse_data_edit.setText(
+            "{0:.3f}".format(round(float(double_pulse_time), 3)))
+
+    def on_double_pulse_checkState_changed(self, slot):
+        self.double_pulse_data_checkbox.stateChanged.connect(slot)
+
+    def double_pulse_state(self):
+        return self.double_pulse_data_checkbox.checkState()
+
+    def on_last_double_pulse_checkbox_state_change(self):
+        self.double_pulse_data_edit(
+            self.double_pulse_data_checkbox.checkState())
+
+    def double_pulse_edit_enabled(self, disabled):
+        self.double_pulse_data_edit.setEnabled(not disabled)
+
+    def get_double_pulse_time(self):
+        return float(self.double_pulse_data_edit.text())
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Dead time correction
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -417,13 +481,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_other_file_label = QtWidgets.QLabel(self)
         self.dead_time_other_file_label.setText("From other file : ")
 
-        self.layout.addWidget(self.dead_time_label, 4, 0)
-        self.layout.addWidget(self.dead_time_selector, 4, 1)
-        self.layout.addItem(self.dead_time_layout, 4, 2)
-        self.layout.addWidget(self.dead_time_label_2, 5, 0)
-        self.layout.addWidget(self.dead_time_file_selector, 5, 1)
-        self.layout.addWidget(self.dead_time_other_file_label, 6, 0)
-        self.layout.addWidget(self.dead_time_browse_button, 6, 1)
+        self.layout.addWidget(self.dead_time_label, 5, 0)
+        self.layout.addWidget(self.dead_time_selector, 5, 1)
+        self.layout.addItem(self.dead_time_layout, 5, 2)
+        self.layout.addWidget(self.dead_time_label_2, 6, 0)
+        self.layout.addWidget(self.dead_time_file_selector, 6, 1)
+        self.layout.addWidget(self.dead_time_other_file_label, 7, 0)
+        self.layout.addWidget(self.dead_time_browse_button, 7, 1)
 
     def on_dead_time_file_option_changed(self, slot):
         self._on_dead_time_file_option_selected = slot
