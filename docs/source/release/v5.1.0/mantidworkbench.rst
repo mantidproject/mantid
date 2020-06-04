@@ -1,6 +1,6 @@
-=======================
-MantidWorkbench Changes
-=======================
+=================
+Workbench Changes
+=================
 
 .. contents:: Table of Contents
    :local:
@@ -43,10 +43,12 @@ Improvements
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
 - The gray and plasma colormaps have been added to the instrument view.
 - The x-axis tick labels on colorfill plots are now horizontal.
+- Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 
 Bugfixes
 ########
 
+- Fixed new tab names not incrementing correctly on KDE display environments (i.e. KUbuntu).
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly.
 - Fixed a crash when you selected a spectra to plot that was not present in a workspace.
 - Fixed a crash when opening the plot options for a sample logs plot.
@@ -68,5 +70,6 @@ Bugfixes
 - The SavePlot1D algorithm can now be run in Workbench.
 - Colorfill plots now correctly use the workspace name as the plot title.
 - Overplotting no longer resets the axes scales.
+- Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 
 :ref:`Release 5.1.0 <v5.1.0>`
