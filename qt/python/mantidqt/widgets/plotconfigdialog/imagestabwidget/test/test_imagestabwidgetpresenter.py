@@ -195,7 +195,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                  'vmax': 2,
                  'scale': 'Linear',
                  'interpolation': 'None'}
-        mock_view = Mock(get_selected_image_name=lambda: '(0, 0)',
+        mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0)',
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()

@@ -1041,21 +1041,21 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
         figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
 
+
 def get_images_from_figure(figure):
     """Return a list of images in the given figure excluding any colorbar images"""
     axes = figure.get_axes()
 
-    images = []
+    all_images = []
     for ax in axes:
-        images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
-                               or isinstance(col, Poly3DCollection)]
+        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
+                                   or isinstance(col, Poly3DCollection)]
 
     # remove any colorbar images
-    for img in images:
-        if img.colorbar:
-            images.remove(img.colorbar.solids)
-
+    colorbars = [img.colorbar.solids for img in all_images if img.colorbar]
+    images = [img for img in all_images if img not in colorbars]
     return images
+
 
 def get_axes_from_figure(figure):
     """Return a list of axes in the given figure excluding any colorbar axes"""
