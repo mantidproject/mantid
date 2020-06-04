@@ -475,6 +475,7 @@ class DrillView(QMainWindow):
             state (bool): 'True' to disable, 'False' to enable again
         """
         self.instrumentselector.setDisabled(state)
+        self.modeSelector.setDisabled(state)
         self.datadirs.setDisabled(state)
         self.load.setDisabled(state)
         self.settings.setDisabled(state)
@@ -483,8 +484,12 @@ class DrillView(QMainWindow):
         self.cut.setDisabled(state)
         self.erase.setDisabled(state)
         self.deleterow.setDisabled(state)
+        self.nrows.setDisabled(state)
         self.addrow.setDisabled(state)
         self.save.setDisabled(state)
+        self.increment.setDisabled(state)
+        self.fill.setDisabled(state)
+        self.help.setDisabled(state)
         self.processRows.setDisabled(state)
         self.processAll.setDisabled(state)
         self.table.setDisabled(state)
