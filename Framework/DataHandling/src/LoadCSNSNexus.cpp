@@ -140,8 +140,8 @@ LoadCSNSNexus::getGPPDModules(const std::string &bankName) {
   m_file->openGroup(m_entry, "NXentry");
   m_file->openGroup("instrument", "NXinstrument");
   auto entries = m_file->getEntries();
-  for (const auto & it : entries) {
-    const auto & name = it.first;
+  for (const auto &it : entries) {
+    const auto &name = it.first;
     if (name.compare(0, 7, "module" + std::to_string(firstModuleId)) == 0 ||
         name.compare(0, 7, "module" + std::to_string(secondModuleId)) == 0) {
       data.emplace_back(name);
