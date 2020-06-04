@@ -1018,9 +1018,9 @@ void InstrumentActor::calculateIntegratedSpectra(
   // Use the workspace function to get the integrated spectra
   workspace.getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue,
                                  wholeRange());
-  //replace any values that are not finite
+  // replace any values that are not finite
   std::replace_if(m_specIntegrs.begin(), m_specIntegrs.end(),
-      [](double x) { return !std::isfinite(x); }, INVALID_VALUE);
+                  [](double x) { return !std::isfinite(x); }, INVALID_VALUE);
 
   m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
 }
