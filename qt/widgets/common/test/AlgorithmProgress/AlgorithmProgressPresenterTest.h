@@ -97,9 +97,8 @@ public:
     pres->algorithmEndedSlot(secondAlgorithmID);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
-  /*
-  TODO MUST FIX THE MOCK
-  void xtestUpdateProgressBar() {
+  
+  void testUpdateProgressBar() {
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
     EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
@@ -112,7 +111,7 @@ public:
     pres->updateProgressBarSlot(algorithmIDpretender, 3.0, "",0.,0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
-  void xtestUpdateProgressBar_NotUpdatedIfAlgorithmNotBeingTracked() {
+  void testUpdateProgressBar_NotUpdatedIfAlgorithmNotBeingTracked() {
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
     int testInt2 = 666;
@@ -126,7 +125,7 @@ public:
     pres->updateProgressBarSlot(secondAlgorithmID, 3.0, "",0.,0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
-  void xtestRealAlgorithmRunning() {
+  void testRealAlgorithmRunning() {
     EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
     int reports = 10;
     QString emptyQString;
@@ -137,7 +136,7 @@ public:
     // Another thing to note: 0.0 progress is NOT reported
     for (const auto prog : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
       EXPECT_CALL(*mockView.get(),
-                  updateProgress(DoubleEq(prog), emptyQString));
+                  updateProgress(DoubleEq(prog), emptyQString,0.,0));
     }
     EXPECT_CALL(*mockView.get(), algorithmEnded()).Times(1);
 
@@ -151,7 +150,7 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
-  */
+
 private:
   std::unique_ptr<NiceMock<MockAlgorithmProgressWidget>> mockView;
 };
