@@ -61,7 +61,7 @@ const size_t InstrumentActor::INVALID_INDEX =
     std::numeric_limits<size_t>::max();
 double InstrumentActor::m_tolerance = 0.00001;
 const double InstrumentActor::INVALID_VALUE =
-    -std::numeric_limits<size_t>::max();
+    -std::numeric_limits<double>::max();
 
 /**
  * Constructor. Creates a tree of GLActors. Each actor is responsible for
