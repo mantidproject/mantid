@@ -60,6 +60,7 @@ bool isPhysicalView() {
 const size_t InstrumentActor::INVALID_INDEX =
     std::numeric_limits<size_t>::max();
 double InstrumentActor::m_tolerance = 0.00001;
+const double INVALID_VALUE = 0.;
 
 /**
  * Constructor. Creates a tree of GLActors. Each actor is responsible for
@@ -1017,6 +1018,10 @@ void InstrumentActor::calculateIntegratedSpectra(
   // Use the workspace function to get the integrated spectra
   workspace.getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue,
                                  wholeRange());
+  //replace any values that are not finite
+  std::replace_if(m_specIntegrs.begin(), m_specIntegrs.end(),
+      [](double x) { return !std::isfinite(x); }, INVALID_VALUE);
+
   m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
 }
 
@@ -1049,13 +1054,6 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
   } else {
     m_DataMinValue = DBL_MAX;
     m_DataMaxValue = -DBL_MAX;
-
-    if (std::any_of(m_specIntegrs.begin(), m_specIntegrs.end(),
-                    [](double val) { return !std::isfinite(val); }))
-      throw std::runtime_error(
-          "The workspace contains values that cannot be displayed (infinite "
-          "or NaN).\n"
-          "Please run ReplaceSpecialValues algorithm for correction.");
 
     const auto &spectrumInfo = workspace->spectrumInfo();
 
