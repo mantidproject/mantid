@@ -5,11 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
-
+from qtpy.QtCore import Qt
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
 from matplotlib.backends.qt_compat import is_pyqt5
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from workbench.plotting.toolbar import ToolbarStateManager
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
+
+import pydevd_pycharm
+pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True)
 
 if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import FigureCanvas
@@ -26,6 +31,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
         self.figure = None
         self.toolbar = None
+        self.fit_browser = None
 
         self.setup_figure()
         self.setup_toolbar()
@@ -38,16 +44,32 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
         self.vLayout_plot.addWidget(self.toolbar)
         self.vLayout_plot.addWidget(self.figure.canvas)
+        self.fit_browser = FitPropertyBrowser(self.figure.canvas, ToolbarStateManager(self.toolbar))
+        self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)
+        self.vLayout_plot.addWidget(self.fit_browser)
+
+        # From figuremanager has this instead... not sure what vLayout_plot is but not in init
+        # self.window.setCentralWidget(self.figure.canvas)
+        # self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+        self.fit_browser.hide()
 
     def resizeEvent(self, QResizeEvent):
         self.figure.tight_layout()
 
     def setup_toolbar(self):
         self.toolbar.sig_home_clicked.connect(self.display_all)
+        self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
 
     # =================
     # Component Setters
     # =================
+
+    def fit_toggle(self):
+        """Toggle fit browser and tool on/off"""
+        if self.fit_browser.isVisible():
+            self.fit_browser.hide()
+        else:
+            self.fit_browser.show()
 
     def clear_figure(self):
         self.figure.clf()
