@@ -1,6 +1,6 @@
-=======================
-MantidWorkbench Changes
-=======================
+=================
+Workbench Changes
+=================
 
 .. contents:: Table of Contents
    :local:
@@ -47,6 +47,7 @@ Improvements
 Bugfixes
 ########
 
+- Fixed new tab names not incrementing correctly on KDE display environments (i.e. KUbuntu).
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly.
 - Fixed a crash when you selected a spectra to plot that was not present in a workspace.
 - Fixed a crash when opening the plot options for a sample logs plot.
