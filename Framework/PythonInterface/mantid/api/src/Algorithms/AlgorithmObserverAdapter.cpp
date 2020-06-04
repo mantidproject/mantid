@@ -18,6 +18,7 @@ void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
                                               const double estimatedTime,
                                               const int progressPrecision) {
   UNUSED_ARG(alg)
+  UNUSED_ARG(p)
   UNUSED_ARG(msg)
   UNUSED_ARG(estimatedTime)
   UNUSED_ARG(progressPrecision)
