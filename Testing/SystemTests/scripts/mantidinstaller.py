@@ -13,7 +13,11 @@ import sys
 import subprocess
 import time
 
+# global script path
 scriptLog = None
+# distributions
+RPMBASED = ['redhat', 'centos', 'fedora']
+DEBBASED = ['ubuntu', 'debian']
 
 
 def createScriptLog(path):
@@ -83,10 +87,10 @@ def get_installer(package_dir, do_install=True):
     if system == 'Windows':
         return NSISInstaller(package_dir, do_install)
     elif system == 'Linux':
-        dist = linux_distro_distributor()
-        if dist == 'Ubuntu':
+        dist = linux_distro_distributor().lower()
+        if any(map(lambda name: name in dist, DEBBASED)):
             return DebInstaller(package_dir, do_install)
-        elif dist.lower() == 'redhat' or dist.lower() == 'fedora' or dist.lower() == 'centos':
+        elif any(map(lambda name: name in dist, RPMBASED)):
             return RPMInstaller(package_dir, do_install)
         else:
             scriptfailure('Unknown Linux flavour: %s' % str(dist))
