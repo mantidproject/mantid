@@ -45,14 +45,6 @@ class MockObserver(AlgorithmObserver):
     def errorHandle(self, message):
         self.error_message = message
 
-    def progressHandle(self, p, message, estimated_time, progress_precision):
-        if len(message) > 0:
-            self.progress_message = message
-        if p == 0.5:
-            self.first_progress_reported = True
-        if p == 1.0:
-            self.second_progress_reported = True
-
 
 class MockObserverStarting(AlgorithmObserver):
 
@@ -90,12 +82,3 @@ class TestAlgorithmObserver(unittest.TestCase):
         algorithm.execute()
         self.assertTrue(observer.finish_handled)
         self.assertTrue(observer.error_message.startswith('Error in algorithm'))
-
-    def test_progress_handle(self):
-        algorithm = AlgorithmManager.create("MockAlgorithm", -1)
-        observer = MockObserver()
-        observer.observeProgress(algorithm)
-        algorithm.execute()
-        self.assertTrue(observer.first_progress_reported)
-        self.assertTrue(observer.second_progress_reported)
-        self.assertEqual(observer.progress_message, 'Half way')
