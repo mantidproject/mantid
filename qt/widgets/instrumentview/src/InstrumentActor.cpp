@@ -63,7 +63,6 @@ double InstrumentActor::m_tolerance = 0.00001;
 const double InstrumentActor::INVALID_VALUE =
     -std::numeric_limits<size_t>::max();
 
-
 /**
  * Constructor. Creates a tree of GLActors. Each actor is responsible for
  * displaying insrument components in 3D.
@@ -1022,8 +1021,8 @@ void InstrumentActor::calculateIntegratedSpectra(
                                  wholeRange());
   // replace any values that are not finite
   std::replace_if(m_specIntegrs.begin(), m_specIntegrs.end(),
-      [](double x) { return !std::isfinite(x); },
-      InstrumentActor::INVALID_VALUE);
+                  [](double x) { return !std::isfinite(x); },
+                  InstrumentActor::INVALID_VALUE);
 
   m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
 }
