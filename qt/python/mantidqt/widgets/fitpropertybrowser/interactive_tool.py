@@ -73,6 +73,7 @@ class FitInteractiveTool(QObject):
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_notify_callback))
         self._cids.append(canvas.mpl_connect('button_press_event', self.button_press_callback))
         self._cids.append(canvas.mpl_connect('button_release_event', self.button_release_callback))
+        self._cids.append(canvas.mpl_connect('figure_leave_event', self.stop_add_peak))
 
         # The mouse state machine that handles responses to the mouse events.
         self.mouse_state = StateMachine(self)
@@ -256,6 +257,9 @@ class FitInteractiveTool(QObject):
         self.select_peak(peak)
         self.canvas.draw()
         self.peak_added.emit(peak.peak_id, x, peak.height(), peak.fwhm())
+
+    def stop_add_peak(self, event):
+        self.mouse_state.state = self.mouse_state.state.transition()
 
     def update_peak(self, peak_id, centre, height, fwhm):
         """

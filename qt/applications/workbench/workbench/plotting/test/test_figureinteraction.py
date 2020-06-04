@@ -563,6 +563,13 @@ class FigureInteractionTest(unittest.TestCase):
 
         self.assertEqual(0, self.interactor._set_hover_cursor.call_count)
 
+    def test_motion_event_returns_if_fit_active(self):
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=True)
+        self.interactor._set_hover_cursor = MagicMock()
+        self.interactor.motion_event(MagicMock())
+
+        self.assertEqual(0, self.interactor._set_hover_cursor.call_count)
+
     def test_motion_event_changes_cursor_and_draws_canvas_if_any_marker_is_moving(self):
         markers = [MagicMock(), MagicMock(), MagicMock()]
         for marker in markers:
@@ -572,6 +579,7 @@ class FigureInteractionTest(unittest.TestCase):
         event.ydata = 2
         self.interactor.markers = markers
         self.interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=False)
         self.interactor._set_hover_cursor = MagicMock()
 
         self.interactor.motion_event(event)
@@ -588,6 +596,7 @@ class FigureInteractionTest(unittest.TestCase):
         event.ydata = 2
         self.interactor.markers = markers
         self.interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=False)
         self.interactor._set_hover_cursor = MagicMock()
 
         self.interactor.motion_event(event)
