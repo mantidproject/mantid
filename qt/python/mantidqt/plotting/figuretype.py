@@ -18,6 +18,8 @@ from matplotlib.container import ErrorbarContainer
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 
+from mantid.plots import MantidAxes
+
 
 class FigureType(Enum):
     """Enumerate possible types of Figure"""
@@ -29,14 +31,16 @@ class FigureType(Enum):
     Line = 1
     # Line plot with error bars
     Errorbar = 2
+    # A waterfall plot
+    Waterfall = 3
     # An image plot from imshow, pcolor, pcolormesh
-    Image = 3
+    Image = 4
     # A 3D surface plot
-    Surface = 4
+    Surface = 5
     # A 3D wireframe plot
-    Wireframe = 5
+    Wireframe = 6
     # A contour plot
-    Contour = 6
+    Contour = 7
     # Any other type of plot
     Other = 100
 
@@ -52,8 +56,13 @@ def axes_type(ax):
     # an errorbar plot also has len(lines) > 0
     if len(ax.containers) > 0 and isinstance(ax.containers[0], ErrorbarContainer):
         axtype = FigureType.Errorbar
+        if isinstance(ax, MantidAxes) and ax.is_waterfall():
+            axtype = FigureType.Waterfall
     elif len(ax.lines) > 0:
         axtype = FigureType.Line
+        if isinstance(ax, MantidAxes) and ax.is_waterfall():
+            axtype = FigureType.Waterfall
+
     elif isinstance(ax, Axes3D):
         if any(isinstance(col, Poly3DCollection) for col in ax.collections):
             axtype = FigureType.Surface

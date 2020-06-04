@@ -46,6 +46,8 @@ Click Menus
 |FigureOptionsGear.png| ptions Menu
 ===================================
 
+1D plots
+--------
 
 .. figure:: /images/PlotOptions.png
    :alt: Plot Options Axes Legend
@@ -60,6 +62,9 @@ Click Menus
 .. figure:: /images/PlotOptionsCurves.png
    :alt: Plot Options Axes Legend
    :align: center
+
+Image Plots
+-----------
 
 .. figure:: /images/PlotOptionsColorfill.png
    :alt: Plot Options Colorfill
