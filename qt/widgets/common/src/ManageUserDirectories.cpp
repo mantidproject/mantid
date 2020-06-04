@@ -52,6 +52,8 @@ void ManageUserDirectories::initLayout() {
 
   connect(m_uiForm.pbSaveBrowse, SIGNAL(clicked()), this,
           SLOT(selectSaveDir()));
+  connect(m_uiForm.pbExtensionsBrowser, SIGNAL(clicked()), this,
+          SLOT(selectExtensionsDir()));
 }
 
 void ManageUserDirectories::loadProperties() {
@@ -111,6 +113,13 @@ void ManageUserDirectories::loadProperties() {
                             "defaultsave.directory"))
                         .trimmed();
   m_uiForm.leDefaultSave->setText(saveDir);
+
+  // extensions directory
+  QString extDir = QString::fromStdString(
+                       Mantid::Kernel::ConfigService::Instance().getString(
+                           "user.python.plugins.directories"))
+                       .trimmed();
+  m_uiForm.leExtensions->setText(extDir);
 }
 void ManageUserDirectories::saveProperties() {
   QString newSearchArchive = m_uiForm.cbSearchArchive->currentText().toLower();
@@ -146,6 +155,7 @@ void ManageUserDirectories::saveProperties() {
   QString newDataDirs;
   QString newUserDirs;
   QString newSaveDir;
+  QString newExtensionsDir;
 
   newDataDirs = dataDirs.join(";");
   newUserDirs = userDirs.join(";");
@@ -156,6 +166,10 @@ void ManageUserDirectories::saveProperties() {
   newSaveDir.replace('\\', '/');
   appendSlashIfNone(newSaveDir);
 
+  newExtensionsDir = m_uiForm.leExtensions->text();
+  newExtensionsDir.replace('\\', '/');
+  appendSlashIfNone(newExtensionsDir);
+
   Mantid::Kernel::ConfigServiceImpl &config =
       Mantid::Kernel::ConfigService::Instance();
 
@@ -163,6 +177,8 @@ void ManageUserDirectories::saveProperties() {
   config.setString("datasearch.directories", newDataDirs.toStdString());
   config.setString("defaultsave.directory", newSaveDir.toStdString());
   config.setString("pythonscripts.directories", newUserDirs.toStdString());
+  config.setString("user.python.plugins.directories",
+                   newExtensionsDir.toStdString());
   config.saveConfig(m_userPropFile.toStdString());
 }
 
@@ -279,6 +295,24 @@ void ManageUserDirectories::selectSaveDir() {
     path.replace('\\', '/');
     settings.setValue("ManageUserSettings/last_directory", path);
     m_uiForm.leDefaultSave->setText(path);
+  }
+}
+
+void ManageUserDirectories::selectExtensionsDir() {
+  QSettings settings;
+  QString lastDirectory = m_uiForm.leExtensions->text();
+  if (lastDirectory.trimmed() == "")
+    lastDirectory =
+        settings.value("ManageUserSettings/last_directory", "").toString();
+
+  const QString newDir = QFileDialog::getExistingDirectory(
+      this, tr("Select New Extensions Directory"), lastDirectory,
+      QFileDialog::ShowDirsOnly);
+
+  if (newDir != "") {
+    QString path = newDir + QDir::separator();
+    path.replace('\\', '/');
+    m_uiForm.leExtensions->setText(path);
   }
 }
 

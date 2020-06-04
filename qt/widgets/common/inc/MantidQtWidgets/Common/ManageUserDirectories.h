@@ -41,6 +41,7 @@ private slots:
   void moveUp();
   void moveDown();
   void selectSaveDir();
+  void selectExtensionsDir();
 
 private:
   Ui::ManageUserDirectories m_uiForm;

@@ -236,6 +236,25 @@
         </layout>
        </item>
        <item>
+        <widget class="QGroupBox" name="pbPythonExt">
+         <property name="title">
+          <string>Python Extensions (fit functions, algorithms)</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLineEdit" name="leExtensions"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbExtensionsBrowser">
+            <property name="text">
+             <string>Browse to Directory</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
