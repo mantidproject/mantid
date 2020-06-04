@@ -13,10 +13,13 @@ from mantid.simpleapi import PowderILLDetectorScan, config, mtd
 # More options are covered by system tests, since it takes too long for a unit test.
 class PowderILLDetectorScanTest(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        config.appendDataSearchSubDir('ILL/D2B/')
+
     def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D2B'
-        config.appendDataSearchSubDir('ILL/D2B/')
 
     def tearDown(self):
         mtd.clear()
