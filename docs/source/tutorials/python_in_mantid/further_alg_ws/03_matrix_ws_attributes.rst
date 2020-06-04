@@ -4,72 +4,51 @@
 MatrixWorkspace Attributes
 ==========================
 
-* A MatrixWorkspace is essentially a 2D list of binned data where a workspace index, starting at 0, gives access to the data fields in each spectra.
 
-* The data is accessed using the `readX()`, `readY()` and `readE()` commands. Each of these commands takes a number that refers to the index on the workspace and returns a list of the data for that workspace index, i.e
+* Access the data accessed using `readX()`, `readY()` and `readE()`. These commands takes an integer workspace index and returns a list of the data i.e
 
-.. code-block:: python
+Spectra and Bins
+================
 
-	# Get the Y vector for the second row of data
-	y_data2 = raw_workspace.readY(1)
-	for y in y_data2:
-	    print(y)
+* A MatrixWorkspace is a 2D array of data :ref:`divided into spectra and bins <03_workspaces>`.
 
-# Or in loop access. Print the first value in all spectra
+Get the number of histograms (spectra) in a workspace:
 
 .. code-block:: python
 
-	for index in range(0, raw_workspace.getNumberHistograms()):
-	    #Note the round brackets followed by the square brackets
-	    print(raw_workspace.readY(index)[0])
+	print(workspace_name.getNumberHistograms())
 
-To find out the number of histograms on a workspace use the getNumberHistograms().
+Get the number of bins:
 
 .. code-block:: python
 
-	# raw_workspace from above
-	print(raw_workspace.getNumberHistograms())
+	print(workspace_name.blocksize())
 
-To find out the number of bins use blocksize().
-
-.. code-block:: python
-
-	# raw_workspace from above
-	print(raw_workspace.blocksize())
 
 Workspace algebra
 =================
 
-MatrixWorkspaces can have algebraic operations applied to them directly without the need to call a specific algorithm, e.g. Plus
+MatrixWorkspaces can be undergo basic algebra using an algorithm: :ref:<algm-Plus>, :ref:<algm-Minus>, :ref:<algm-Multiply>, :ref:<algm-Divide>.
 
-The expected operations of +,-,*,/ are supported with either a single number or another workspace as the second argument, e.g.
+As a shorthand, use +,-,*,/ with either number or another workspace as the second argument
 
 .. code-block:: python
 
 	w1 = mtd['workspace1']
 	w2 = mtd['workspace2']
 
-# Sum the two workspaces and place the output into a third
-
-.. code-block:: python
-
+    # Sum the two workspaces and place the output into a third
 	w3 = w1 + w2
 
-# Multiply the new workspace by 2 and place the output into a new workspace
-
-.. code-block:: python
-
+    # Multiply the new workspace by 2 and place the output into a new workspace
 	w4 = w3 * 2
 
-It is also possible to replace one of the input workspaces using one of +=,-=,*=,/= e.g.
-# Multiply a workspace by 2 and replace w1 with the output
+Replace an input workspaces using +=,-=,*=,/= e.g.
 
 .. code-block:: python
 
+    # Multiply a workspace by 2 and replace w1 with the output
 	w1 *= 2.0
 
-# Add 'workspace2' to 'workspace1' and replace 'workspace1' with the output
-
-.. code-block:: python
-
+   # Add 'workspace2' to 'workspace1' and replace 'workspace1' with the output
 	w1 += w2

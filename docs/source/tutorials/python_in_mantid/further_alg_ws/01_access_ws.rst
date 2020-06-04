@@ -16,7 +16,7 @@ As described before, if running an algorithm via an algorithm call then the work
 
 .. code-block:: python
 
-	run = ConvertUnits(run, Target='dSpacing')
+	output_ws = ConvertUnits(input_ws, Target='dSpacing')
 
 Using `mtd['name']`
 ===================
