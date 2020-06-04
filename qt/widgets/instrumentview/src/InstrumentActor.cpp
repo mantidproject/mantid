@@ -60,7 +60,9 @@ bool isPhysicalView() {
 const size_t InstrumentActor::INVALID_INDEX =
     std::numeric_limits<size_t>::max();
 double InstrumentActor::m_tolerance = 0.00001;
-const double INVALID_VALUE = 0.;
+const double InstrumentActor::INVALID_VALUE =
+    -std::numeric_limits<size_t>::max();
+
 
 /**
  * Constructor. Creates a tree of GLActors. Each actor is responsible for
@@ -437,7 +439,7 @@ void InstrumentActor::setIntegrationRange(const double &xmin,
 double InstrumentActor::getIntegratedCounts(size_t index) const {
   auto i = getWorkspaceIndex(index);
   if (i == INVALID_INDEX)
-    return -1.0;
+    return InstrumentActor::INVALID_VALUE;
   return m_specIntegrs.at(i);
 }
 
@@ -1020,7 +1022,8 @@ void InstrumentActor::calculateIntegratedSpectra(
                                  wholeRange());
   // replace any values that are not finite
   std::replace_if(m_specIntegrs.begin(), m_specIntegrs.end(),
-                  [](double x) { return !std::isfinite(x); }, INVALID_VALUE);
+      [](double x) { return !std::isfinite(x); },
+      InstrumentActor::INVALID_VALUE);
 
   m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
 }
@@ -1058,7 +1061,6 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // Ignore monitors if multiple detectors aren't grouped.
-    // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < m_specIntegrs.size(); i++) {
       const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
       if (spectrumDefinition.size() == 1 &&
@@ -1068,6 +1070,8 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
       auto sum = m_specIntegrs[i];
 
+      if (sum == InstrumentActor::INVALID_VALUE)
+        continue;
       if (sum < m_DataMinValue)
         m_DataMinValue = sum;
       if (sum > m_DataMaxValue)

@@ -41,6 +41,8 @@ Improvements
 
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
+  If there are no valid values for that detector the value will appear as invalid (grayed out).
+  It can also now display negative values in workspaces correctly.
 - The gray and plasma colormaps have been added to the instrument view.
 - The x-axis tick labels on colorfill plots are now horizontal.
 
@@ -60,7 +62,7 @@ Bugfixes
 - Fixed the default axis scale settings applying to the wrong axis.
 - Performing an overplot by dragging workspaces onto colorfill plots now correctly replaces the workspace.
 - Removed gridlines from the colorbar on colorfill plots.
-- The Instrument View now passes through useful error messages to the workbench if it fails to start, for example if your data contains NaN or infinite values.
+- The Instrument View now passes through useful error messages to the workbench if it fails to start.
 - The correct interpolation now appears in the plot figure options for colorfill plots.
 - Changing the axis scale on a colourfill plot now has the same result if it is done from either the context menu or figure options.
 - `plt.show()` now shows the most recently created figure.
