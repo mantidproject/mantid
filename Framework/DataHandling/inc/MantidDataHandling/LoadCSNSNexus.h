@@ -1,41 +1,24 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source,
+//     Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADCSNSNEXUS_H_
 #define MANTID_DATAHANDLING_LOADCSNSNEXUS_H_
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
-//#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
 /****************************************/
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/LatticeDomain.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-
-#include <boost/shared_ptr.hpp>
-
-using Mantid::Kernel::V3D;
-
-using namespace Mantid::API;
-
-/****************************************/
-using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace DataHandling {
 
-using namespace std;
-using namespace DataObjects;
 /** LoadCSNSNexus : TODO: DESCRIPTION
  */
-class DLLExport LoadCSNSNexus
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadCSNSNexus : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -44,35 +27,32 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadMcStas"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {""}; }
   const std::string category() const override;
 
-  /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
-
-  Types::Core::DateAndTime getExperimentTime(std::string typeName);
+  Types::Core::DateAndTime getExperimentTime(const std::string &typeName);
 
   std::vector<std::string>
-  getModules(std::string inst, const std::vector<std::string> &inputNames);
+  getModules(const std::string &inst,
+             const std::vector<std::string> &inputNames);
   bool checkBanknames(const std::vector<std::string> &inputNames);
-  std::vector<std::string> getGPPDModules(std::string bankName);
+  std::vector<std::string> getGPPDModules(const std::string &bankName);
   std::vector<int64_t> getPixelId(const std::vector<std::string> &inputList);
-  std::vector<uint32_t> getTimeBin(std::string typeName);
-  std::vector<uint32_t> getHistData(const vector<string> &inputList);
-  void loadHistData(MatrixWorkspace_sptr &workspace,
-                    std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-                    std::vector<uint32_t> &histData);
+  std::vector<uint32_t> getTimeBin(const std::string &typeName);
+  std::vector<uint32_t> getHistData(const std::vector<std::string> &inputList);
+  void loadHistData(API::MatrixWorkspace_sptr &workspace,
+                    const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
+                    const std::vector<uint32_t> &histData);
 
   std::multimap<uint32_t, std::pair<float, int64_t>>
-  getEventData(const vector<string> &inputList,
-               const vector<uint32_t> &startList,
-               const vector<uint32_t> &endList, const vector<int64_t> &pids);
-  void
-  loadEventData(EventWorkspace_sptr &workspace,
-                const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
-                std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
+  getEventData(const std::vector<std::string> &inputList,
+               const std::vector<uint32_t> &startList,
+               const std::vector<uint32_t> &endList,
+               const std::vector<int64_t> &pids);
+  void loadEventData(
+      DataObjects::EventWorkspace_sptr &workspace,
+      const std::vector<uint32_t> &timeOfFlight, size_t pidNums,
+      const std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
 
 private:
   void init() override;
