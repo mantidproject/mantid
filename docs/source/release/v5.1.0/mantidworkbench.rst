@@ -43,6 +43,7 @@ Improvements
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
 - The gray and plasma colormaps have been added to the instrument view.
 - The x-axis tick labels on colorfill plots are now horizontal.
+- Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 
 Bugfixes
 ########
