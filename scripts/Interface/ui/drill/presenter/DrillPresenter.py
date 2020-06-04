@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from ..view.SansSettingsView import SansSettingsView
+from ..view.SettingsDialog import SettingsDialog
 
 
 class DrillPresenter:
@@ -137,10 +137,24 @@ class DrillPresenter:
 
     def settingsWindow(self):
         """
-        Show the setting window.
+        Show the setting window. This function creates a special dialog that
+        generates automatically its fields on the basis of settings types. It
+        also connects the differents signals to get validation of user inputs.
         """
-        sw = SansSettingsView(self.view)
+        sw = SettingsDialog(self.view)
+        types, values, doc = self.model.getSettingsTypes()
+        sw.initWidgets(types, values, doc)
         sw.setSettings(self.model.getSettings())
+        self.model.param_ok.connect(
+                lambda sample, param: sw.onSettingValidation(param, True)
+                )
+        self.model.param_error.connect(
+                lambda sample, param, msg: sw.onSettingValidation(param, False,
+                                                                  msg)
+                )
+        sw.valueChanged.connect(
+                lambda p : self.model.checkParameter(p, sw.getSettingValue(p))
+                )
         sw.accepted.connect(
                 lambda : self.model.setSettings(sw.getSettings())
                 )

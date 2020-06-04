@@ -15,7 +15,7 @@ class DrillPresenterTest(unittest.TestCase):
 
     def setUp(self):
         patch = mock.patch(
-                'Interface.ui.drill.presenter.DrillPresenter.SansSettingsView')
+                'Interface.ui.drill.presenter.DrillPresenter.SettingsDialog')
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
 
@@ -62,12 +62,14 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.rundexLoaded("test")
         self.model.importRundexData.assert_called_once_with("test")
 
-    def test_settings_Window(self):
+    def test_settingsWindow(self):
+        self.model.getSettingsTypes.return_value = ({}, {}, {})
         self.presenter.settingsWindow()
         self.mSettings.assert_called_once()
+        self.mSettings.return_value.initWidgets.assert_called_once_with(
+                {}, {}, {})
         self.mSettings.return_value.setSettings.assert_called_once()
         self.model.getSettings.assert_called_once()
-        self.mSettings.return_value.show.assert_called_once()
 
     def test_updateViewFromModel(self):
         self.view.reset_mock()

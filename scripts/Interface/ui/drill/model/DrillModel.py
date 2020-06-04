@@ -10,8 +10,8 @@ import json
 from qtpy.QtCore import QObject, Signal
 
 import mantid.simpleapi as sapi
-from mantid.kernel import config, logger
-from mantid.api import AlgorithmObserver
+from mantid.kernel import *
+from mantid.api import *
 
 from .specifications import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
@@ -198,6 +198,58 @@ class DrillModel(QObject):
             dict(str, any): the settings. Value can be str, int, float or bool
         """
         return self.settings
+
+    def getSettingsTypes(self):
+        """
+        Get informations about the algorithm settings. For all settings that
+        should appear in the settings dialog, the function will return their
+        type, allowed values and documentation. This method is used to generate
+        the settings dialog automatically.
+
+        Returns:
+            tuple(dict(str: str), dict(str: list(str)), dict(str: str)): three
+                dictionnaries for type, allowed values and documentation. Each
+                of them uses the setting name as key. The type is a str:
+                "file", "workspace", "combobox", "bool" or "string".
+        """
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
+
+        types = dict()
+        values = dict()
+        docs = dict()
+        for s in self.settings:
+            p = alg.getProperty(s)
+            if (isinstance(p, FileProperty)):
+                t = "file"
+            elif ((isinstance(p, WorkspaceGroupProperty))
+                  or (isinstance(p, MatrixWorkspaceProperty))):
+                t = "workspace"
+            elif (isinstance(p, StringPropertyWithValue)):
+                t = "combobox"
+            elif (isinstance(p, BoolPropertyWithValue)):
+                t = "bool"
+            else:
+                t = "string"
+
+            types[s] = t
+            values[s] = p.allowedValues
+            docs[s] = p.documentation
+
+        return (types, values, docs)
+
+    def checkParameter(self, param, value, sample=-1):
+        """
+        Check a parameter by giving it name and value. The sample index is a
+        facultative parameter. This method pushes the parameter on the
+        controller queue.
+
+        Args:
+            param (str): parameter name
+            value (any): parameter value. Can be str, bool
+            sample (int): sample index if it is a sample specific parameter
+        """
+        self.controller.addParameter(Parameter(param, value, sample))
 
     def getProcessingParameters(self, sample):
         """

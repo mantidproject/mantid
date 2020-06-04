@@ -8,6 +8,9 @@
 import unittest
 import mock
 
+from mantid.kernel import *
+from mantid.api import *
+
 from Interface.ui.drill.model.DrillModel import DrillModel, DrillException
 
 
@@ -44,6 +47,11 @@ class DrillModelTest(unittest.TestCase):
             }
 
     def setUp(self):
+        # mock sapi
+        patch = mock.patch('Interface.ui.drill.model.DrillModel.sapi')
+        self.mSapi = patch.start()
+        self.addCleanup(patch.stop)
+
         # mock open
         patch = mock.patch('Interface.ui.drill.model.DrillModel.open')
         self.mOpen = patch.start()
@@ -203,6 +211,131 @@ class DrillModelTest(unittest.TestCase):
     def test_getSettings(self):
         self.assertEqual(self.model.getSettings(), self.SETTINGS["a1"])
         self.assertEqual(self.model.getSettings(), self.model.settings)
+
+    def test_getSettingsTypes(self):
+        alg = self.mSapi.AlgorithmManager.createUnmanaged.return_value
+        self.model.getSettingsTypes()
+        self.mSapi.AlgorithmManager.createUnmanaged.assert_called_once_with(
+                self.model.algorithm)
+        alg.initialize.assert_called_once()
+
+        # file property
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=FileProperty)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "file",
+                                     "int": "file",
+                                     "float": "file",
+                                     "bool": "file"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+
+        # workspace property
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=WorkspaceGroupProperty)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "workspace",
+                                     "int": "workspace",
+                                     "float": "workspace",
+                                     "bool": "workspace"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=MatrixWorkspaceProperty)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "workspace",
+                                     "int": "workspace",
+                                     "float": "workspace",
+                                     "bool": "workspace"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+
+        # combobox property
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=StringPropertyWithValue)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "combobox",
+                                     "int": "combobox",
+                                     "float": "combobox",
+                                     "bool": "combobox"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+
+        # bool property
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=BoolPropertyWithValue)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "bool",
+                                     "int": "bool",
+                                     "float": "bool",
+                                     "bool": "bool"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+
+        # other property
+        self.mSapi.reset_mock()
+        prop = mock.Mock()
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "string",
+                                     "int": "string",
+                                     "float": "string",
+                                     "bool": "string"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
 
     def test_getProcessingParameters(self):
         params = dict()

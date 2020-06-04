@@ -926,6 +926,7 @@ public:
     void setReadOnly(bool readOnly);
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
+    void isOptional(bool);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
