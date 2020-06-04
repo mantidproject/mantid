@@ -41,7 +41,7 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
     return list;
   }
 
-  const int spectrumNumber = static_cast<int>(specNum);
+  const int spectrumNumber = static_cast<int>(specNum + 0.5);
   size_t wsIndex = 0;
   if (getValues) {
     try {

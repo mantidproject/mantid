@@ -57,7 +57,7 @@ class SliceViewerDataView(QWidget):
         self.dimensions_layout.addWidget(self.dimensions, 0, 0, 2, 1)
 
         self.colorbar_layout = QVBoxLayout()
-        self.colorbar_layout.setContentsMargins(0,0,0,0)
+        self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
         self.colorbar_layout.setSpacing(0)
 
         self.image_info_widget = ImageInfoWidget(self.ws_type, self)
@@ -72,16 +72,12 @@ class SliceViewerDataView(QWidget):
 
         # normalization options
         if can_normalise:
-            self.norm_layout = QVBoxLayout()
-            self.norm_layout.setContentsMargins(0, 0, 0, 0)
-            self.norm_layout.setSpacing(0)
             self.norm_label = QLabel("Normalization")
-            self.norm_layout.addWidget(self.norm_label)
+            self.colorbar_layout.addWidget(self.norm_label)
             self.norm_opts = QComboBox()
             self.norm_opts.addItems(["None", "By bin width"])
             self.norm_opts.setToolTip("Normalization options")
-            self.norm_layout.addWidget(self.norm_opts)
-            self.colorbar_layout.addLayout(self.norm_layout)
+            self.colorbar_layout.addWidget(self.norm_opts)
 
         # MPL figure + colorbar
         self.fig = Figure()
@@ -102,6 +98,9 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.colorbarChanged.connect(self.update_line_plot_limits)
+        # make width larger to fit image readout table
+        if self.ws_type == 'MDE':
+            self.colorbar.setMaximumWidth(170)
 
         # MPL toolbar
         self.toolbar_layout = QHBoxLayout()
