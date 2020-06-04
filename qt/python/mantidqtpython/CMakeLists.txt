@@ -105,6 +105,7 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                      Qt4::QtCore
                      Qt4::QtGui
                      Qt4::QtOpenGL
+		     Qt4::Qscintilla
                      Qwt5
                      ${PYTHON_LIBRARIES}
                    FOLDER Qt4
