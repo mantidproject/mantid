@@ -63,7 +63,14 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
    ln -s /usr/local/opt/qt-webkit@2.3/include/QtWebKit /usr/local/opt/qt@4/include/QtWebKit
    ln -s /usr/local/opt/qt-webkit@2.3/lib/QtWebKit.framework /usr/local/opt/qt@4/lib/QtWebKit.framework
 
-8. Check that ``which python`` returns a Python in ``/usr/local`` and not system Python.
+8. Unlink ``qscintilla2`` and ``qscintilla2qt4``
+
+.. code-block:: sh
+
+   brew unlink qscintilla2
+   brew unlink qscintilla2qt4
+
+9. Check that ``which python`` returns a Python in ``/usr/local`` and not system Python.
 
 10. Install python requirements
 
