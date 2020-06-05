@@ -1,35 +1,47 @@
 .. _04_run_logs:
 
-==================================
-Accessing Run Info and Sample Logs
-==================================
+========================
+Run Info and Sample Logs
+========================
 
 Each workspace has a method called `getRun()`, which can be used to access information regarding the experimental run. A full list of the methods available on the returned object is at :ref:<Run>.
 
-The logs recorded during a run are also stored on the Run object and can be accessed using the getLogData method. It has two variants:
+The logs recorded during a run are also stored on the Run object and can be accessed using the `getLogData()` method. It has two variants:
 
 .. code-block:: python
 
 	ws = Load('CNCS_7860_event')
 	run = ws.getRun()
-	print run.keys() # You can access all the available log properties using the keys method
-	all_logs = run.getLogData() # With no argument it returns all logs
-	temperature = run.getLogData('SampleTemp') # Returns the named log, raising an exception if the name is not found
+
+	#  You can access all the available log properties using the keys method
+	print('Sample Logs:', run.keys())
+
+	# With no argument it returns all logs
+	all_logs = run.getLogData()
+
+	# Returns the named log, raising an exception if the name is not found
+	temperature = run.getLogData('SampleTemp')
+
 	# Use name & value to access the name values
-	vals = temperature.value
+	vals = temperature.value; print('Temp Values:',vals)
 
 Most logs are a time-series property with the attributes described here. The values at each time can be accessed individually or as a collection.
+
 
 Filtering
 =========
 
+Note that you may find the algorithms :ref:`algm-FilterByLogValue` or :ref:`algm-FilterByTime`
 The LogFilter class can be used to filter logs using other logs. For instance, a log value describes a sine wave
 
 #SineWaveLogFiltering.png
 
 Two additional logs mask out the positive and negative portions of this log. We can filter according to either.
 
-.. code-block:: python
+.. testcode:: LogFilter
+
+    from mantid.simpleapi import *
+    from mantid.kernel import LogFilter
 
 	ws = Load("LogWS.nxs")
 	run = ws.getRun()
@@ -52,3 +64,9 @@ Two additional logs mask out the positive and negative portions of this log. We 
 	filter.addFilter(positive_log)
 	filtered_log = filter.data()
 	print("Filtered log contains %i negative values" % (filtered_log.size()))
+
+.. testoutput:: LogFilter
+
+	Unfiltered log contains 100 values
+	Filtered log contains 50 positive values
+	Filtered log contains 50 negative values

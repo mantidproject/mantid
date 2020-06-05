@@ -4,10 +4,17 @@
 Extract and Manipulate Data: Examples
 =====================================
 
+
+Read vs Extract
+===============
+
 *Read* produces a view into the chosen part of the original data.
 *Extract* creates a copy of this part of the data.
 
-Using a for loop, read and print the first value in all spectra
+Read
+----
+
+Using a loop, read and print the first value in all spectra
 
 .. code-block:: python
 
@@ -25,13 +32,40 @@ Workspace data can be read as numpy arrays, spectrum by spectrum:
 	    x = ws.readX(i)
 	    e = ws.readE(i)
 
+Warning
+-------
 **Be careful**: the outputs of *read* (y,x,e) are only **views into the data held by the workspace,** `ws`. If `ws` is deleted, the contents of x,y,e will be nonsense (the random contents of the memory locations formerly used for `ws`).
 If you need x,y,e to persist longer than ws, use the *extract*, which creates a copy of the data in `ws` into y,x,e.
+
+Extract
+-------
+
+The data from all spectra can be obtained as a mutable multi-dimensional array in one-call using the extract methods.
+
+.. code-block:: python
+
+	ws = Load(Filename="HRP39182.RAW")
+	x = ws.extractX()
+
+	print(x.shape)
+	print(y.shape)
+	print(e.shape)
+
+Since the *extract* methods return multi-dimensional numpy arrays. So to use  *extract* in a similar way to *read*, you need to `slice these arrays with indexing <https://numpy.org/doc/1.18/reference/arrays.indexing.html>`_. 
+
+E.g. instead of `ws.readX(5)` you should use:
+
+.. code-block:: python
+
+    ws.extractX()[5, :]
+
+    xmat = ws.extractX(); x = xmat[5, :]
+
 
 Nested Looping
 ==============
 
-This allows access the individual bins in each spectrum. In the following we sum the y-values in each spectrum:
+This allows access to the individual bins in each spectrum. e.g. To sum the y-values in each spectrum:
 
 .. code-block:: python
 
@@ -47,41 +81,63 @@ This allows access the individual bins in each spectrum. In the following we sum
 	    # Display spectrum number against sum_counts
 	    print("Spectrum Number: {0}, Total Counts: {1}".format(ws.getSpectrum(i).getSpectrumNo(), sum_counts))
 
+
 Creating Output Workspaces
 ==========================
 
-Create a new workspace from the first spectra of the loaded workspace
+We may perform some processing on the data arrays before creating our new workspace. 
 
-.. code-block:: python
+Creating a MatrixWorkspace
+--------------------------
 
-	y = ws.readY(0)
-	x = ws.readX(0)
-	e = ws.readE(0)
-	out_ws = CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1)
+Use :ref:`CreateWorkspace`, with the correct input arrays.
 
-We may perform some processing on the read data arrays before creating our new workspace. The following changes to x-axis for TOF in microseconds to TOF in miliseconds.
+E.g. Change the x-axis for TOF from microseconds to miliseconds:
 
-.. code-block:: python
+.. plot::
+   :include-source:
 
+	from mantid.simpleapi import *
+
+	# Load and Read data
 	ws = Load(Filename="HRP39182.RAW")	
 	x = ws.readX(0)
 	y = ws.readY(0)
 	e = ws.readE(0)
+
+	# Alter the x data
 	new_x = x * 1e-3
+
+	# Create a new Matrix Workspace with the altered data
 	new_ws = CreateWorkspace(DataX=new_x, DataY=y, DataE=e, NSpec=1,UnitX='Label')
+
+	# Set the Label for the AxisUnit
 	unit = new_ws.getAxis(0).getUnit()
 	unit.setLabel("Time-of-flight", "Milliseconds")
 
-The data from all spectra can be obtained as a mutable multi-dimensional array in one-call using the extract methods.
+    # Plot the new workspace
+	plotSpectrum(new_ws,0)
+
+Creating a TableWorkspace
+--------------------------
+
+Use :ref:`CreateEmptyTableWorkspace` and `addColumn()` and `addRow()` as needed.
+
+E.g. To read out the value in the first bin for each spectrum:
 
 .. code-block:: python
 
-	ws = Load(Filename="HRP39182.RAW")
-	x = ws.extractX()
-	y = ws.extractY()
-	e = ws.extractE()
-	print(x.shape)
-	print(y.shape)
-	print(e.shape)
+    ws = Load(Filename="GEM40979.RAW")
+    
+    table = CreateEmptyTableWorkspace()
+    table.addColumn('int', 'Spectrum Number')
+    table.addColumn('double', 'First Bin Value')
 
-Since the extract methods return multi-dimensional numpy arrays, if you want to use them to replace the read methods mentioned above, instead of `ws.readX(5)` you should use `ws.extractX()[5, :]` or `xmat = ws.extractX(); x = xmat[5, :]`.
+    for i in range(ws.getNumberHistograms()):
+
+        specNumber = ws.getSpectrum(i).getSpectrumNo()
+
+        # read each spectrum, just the first bin
+        y = ws.readY(i)[0]
+
+        table.addRow([specNumber,y])

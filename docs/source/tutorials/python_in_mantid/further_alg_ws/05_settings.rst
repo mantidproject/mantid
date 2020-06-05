@@ -5,6 +5,7 @@ Settings
 ========
 
 Mantid's main configuration occurs through files called properties files. There are two (3 on Linux) that allow customisation of Mantid (read in this order):
+
 * Mantid.properties (found in the bin directory) - Default settings, replaced with each version of Mantid
 * Mantid.system.properties (linux only) - System-wide settings for multi-user systems.
 * Mantid.user.properties (found in the bin directory on Windows & in $HOME/.mantid on Linux) - User settings that will never be touched by a later version of Mantid.
@@ -13,9 +14,8 @@ The settings within these files occur as key-value pairs, i.e the default instru
 
 .. code-block:: python
 
-	# Example line of a Mantid properties file
-	# Note: this is not Python code.  See below how to change settings with Python commands
 	default.instrument = INST_NAME
+	# Note, this is not a Python command
 
 where INST_NAME would be the value of the default, for example 'LARMOR'.
 
@@ -51,13 +51,21 @@ Some keys in the properties are considered special and have their own accessors.
 
 	from mantid import config
 
-	current_paths = config.getDataSearchDirs() # A list of the search paths
-	config.appendDataSearchDir('new-dir') # Add directory to the list
+	# Get a list of the search paths
+	current_paths = config.getDataSearchDirs()
+
+	# Add a new directory to the list
+	config.appendDataSearchDir('new-dir')
+
 	# Beware, the following commands will change your data search path
 	# After that you may not be able to find your training data with Load()
-	config.setDataSearchDirs('path1;path2;path3') # Avoids dependency on
-	                                              # the key name
-	config.setDataSearchDirs(['path1','path2']) # Set it via a list
+
+	#Avoids dependency on the key name
+	config.setDataSearchDirs('path1;path2;path3')
+
+    # Set it via a list
+	config.setDataSearchDirs(['path1','path2']) 
+
 
 Facility & Instrument Information
 =================================
