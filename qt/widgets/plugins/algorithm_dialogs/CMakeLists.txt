@@ -82,13 +82,6 @@ mtd_add_qt_library(
   INSTALL_DIR_BASE ${PLUGINS_DIR}
 )
 
-if(ENABLE_WORKBENCH)
-  find_package(
-    QScintillaQt5
-    REQUIRED
-  )
-endif()
-
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
   QT_VERSION 5
