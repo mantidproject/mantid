@@ -275,9 +275,8 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(
-        result["MassDensity"],
-        "Cannot give MassDensity with NumberDensity set")
+    TS_ASSERT_EQUALS(result["MassDensity"],
+                     "Cannot give MassDensity with NumberDensity set")
   }
 
   void testMaterialIsCorrect() {

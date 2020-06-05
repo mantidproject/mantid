@@ -550,7 +550,8 @@ void SetSample::exec() {
   if (geometryArgs || sampleEnviron) {
     setSampleShape(*experimentInfo, geometryArgs, sampleEnviron);
     // get the volume back out to use in setting the material
-    sampleVolume = CUBIC_METRE_TO_CM * experimentInfo->sample().getShape().volume();
+    sampleVolume =
+        CUBIC_METRE_TO_CM * experimentInfo->sample().getShape().volume();
   }
 
   // Finally the material arguments
@@ -682,7 +683,7 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
   if (materialArgs.existsProperty("MassNumber")) {
     materialParams.massNumber = materialArgs.getProperty("MassNumber");
   }
-   if (materialArgs.existsProperty("CoherentXSection")) {
+  if (materialArgs.existsProperty("CoherentXSection")) {
     materialParams.coherentXSection =
         materialArgs.getProperty("CoherentXSection");
   }
