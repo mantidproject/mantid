@@ -137,7 +137,8 @@ class SliceViewer(object):
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
         self.view.data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(), self.view.data_view.dimensions.transpose))
+            self.model.get_data(self.get_slicepoint(),
+                                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """

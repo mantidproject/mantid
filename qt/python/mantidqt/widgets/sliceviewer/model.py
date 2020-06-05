@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Sequence, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos, SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
@@ -97,18 +97,32 @@ class SliceViewerModel:
         """Return the coordinate system of the workspace"""
         return self._ws.getSpecialCoordinateSystem()
 
-    def get_ws_MDE(self, slicepoint, bin_params):
+    def get_ws_MDE(self,
+                   slicepoint: Sequence[Optional[float]],
+                   bin_params: Sequence[float],
+                   limits: Optional[tuple] = None):
+        """
+        :param workspace: An MDEventWorkspace
+        :param slicepoint: ND sequence of either None or float. A float defines the point
+                        in that dimension for the slice.
+        :param bin_params: ND sequence containing the number of bins for each dimension
+        :param limits: An optional 2-tuple sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        """
+        workspace = self._get_ws()
+        bin_limits = _binning_limits(workspace, slicepoint, limits)
         params = {}
-        for n in range(self._get_ws().getNumDims()):
-            if slicepoint[n] is None:
-                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(
-                    self._get_ws().getDimension(n).name,
-                    self._get_ws().getDimension(n).getMinimum(),
-                    self._get_ws().getDimension(n).getMaximum(), bin_params[n])
+        for n in range(workspace.getNumDims()):
+            dimension = workspace.getDimension(n)
+            slice_pt = slicepoint[n]
+            nbins = bin_params[n]
+            if slice_pt is None:
+                dim_min, dim_max = bin_limits[n]
             else:
-                params['AlignedDim{}'.format(n)] = '{},{},{},{}'.format(
-                    self._get_ws().getDimension(n).name, slicepoint[n] - bin_params[n] / 2,
-                    slicepoint[n] + bin_params[n] / 2, 1)
+                dim_min, dim_max = slice_pt - nbins / 2, slice_pt + nbins / 2
+                nbins = 1
+            params[f'AlignedDim{n}'] = f'{dimension.name},{dim_min},{dim_max},{nbins}'
+
         return BinMD(InputWorkspace=self._get_ws(),
                      OutputWorkspace=self._get_ws().name() + '_rebinned',
                      **params)
@@ -120,13 +134,21 @@ class SliceViewerModel:
         else:
             return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices])
 
-    def get_data_MDE(self, slicepoint, bin_params, transpose=False):
+    def get_data_MDE(self, slicepoint, bin_params, limits=None, transpose=False):
+        """
+        :param slicepoint: ND sequence of either None or float. A float defines the point
+                           in that dimension for the slice.
+        :param bin_params: ND sequence containing the number of bins for each dimension
+        :param limits: An optional ND sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        :param transpose: If true then transpose the data before returning
+        """
         if transpose:
             return np.ma.masked_invalid(
-                self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze()).T
+                self.get_ws_MDE(slicepoint, bin_params, limits).getSignalArray().squeeze()).T
         else:
             return np.ma.masked_invalid(
-                self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze())
+                self.get_ws_MDE(slicepoint, bin_params, limits).getSignalArray().squeeze())
 
     def get_dim_limits(self, slicepoint, transpose):
         """
@@ -210,3 +232,26 @@ class SliceViewerModel:
     # private api
     def _get_ws(self):
         return self._ws
+
+
+# Private functions
+def _binning_limits(workspace,
+                    slicepoint: Sequence[Optional[float]],
+                    limits: Optional[Sequence[tuple]] = None):
+    """
+    Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
+    :param workspace: MDEventWorkspace that is to be binned
+    :param slicepoint: ND sequence of either None or float. A float defines the point
+                    in that dimension for the slice.
+    :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
+                    not provided the full extent of each dimension is used.
+    """
+
+    bin_limits = [(dim.getMinimum(), dim.getMaximum())
+                  for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
+    if limits is not None:
+        display_idx = slicepoint.index(None)
+        bin_limits[display_idx] = limits[0]
+        bin_limits[slicepoint.index(None, display_idx + 1)] = limits[1]
+
+    return bin_limits

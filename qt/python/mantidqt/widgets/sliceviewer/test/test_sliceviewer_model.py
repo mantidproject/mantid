@@ -273,6 +273,24 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['type'], 'MDE')
         self.assertEqual(dim_info['qdim'], False)
 
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_get_ws_MDE_with_limits_uses_limits_over_dimension_extents(self, mock_binmd):
+        model = SliceViewerModel(self.ws_MDE_3D)
+        mock_binmd.return_value = self.ws_MD_3D
+
+        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1))),
+                            self.ws_MDE_3D)
+        call_params = dict(InputWorkspace=self.ws_MDE_3D,
+                           OutputWorkspace='ws_MDE_3D_rebinned',
+                           AlignedDim0='h,-2,2,1',
+                           AlignedDim1='k,-1,1,2',
+                           AlignedDim2='l,-2.0,2.0,1')
+        mock_binmd.assert_called_once_with(**call_params)
+        mock_binmd.reset_mock()
+
+        model.get_data((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1)))
+        mock_binmd.assert_called_once_with(**call_params)
+
     def test_model_matrix(self):
         model = SliceViewerModel(self.ws2d_histo)
 
