@@ -783,7 +783,7 @@ void IntegratePeaksMD2::findEllipsoid(
                                   static_cast<double>(center[1]),
                                   static_cast<double>(center[2]));
             for (size_t d = 0; d < center.size(); ++d) {
-              center[d] = tmp[d];
+              center[d] = static_cast<coord_t>(tmp[d]);
             }
           }
 
