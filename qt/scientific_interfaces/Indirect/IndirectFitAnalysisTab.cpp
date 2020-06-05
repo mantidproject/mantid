@@ -93,8 +93,9 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
   connect(m_dataPresenter.get(),
           SIGNAL(excludeRegionChanged(const std::string &, TableDatasetIndex,
                                       WorkspaceIndex)),
-          this, SLOT(tableExcludeChanged(const std::string &, TableDatasetIndex,
-                                         WorkspaceIndex)));
+          this,
+          SLOT(tableExcludeChanged(const std::string &, TableDatasetIndex,
+                                   WorkspaceIndex)));
   connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(startXChanged(double)));
   connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this,

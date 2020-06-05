@@ -55,8 +55,9 @@ ConvFit::ConvFit(QWidget *parent)
   auto dataPresenter = std::make_unique<ConvFitDataPresenter>(
       m_convFittingModel, m_uiForm->dockArea->m_fitDataView);
   connect(
-      dataPresenter.get(), SIGNAL(modelResolutionAdded(
-                               std::string const &, TableDatasetIndex const &)),
+      dataPresenter.get(),
+      SIGNAL(
+          modelResolutionAdded(std::string const &, TableDatasetIndex const &)),
       this,
       SLOT(setModelResolution(std::string const &, TableDatasetIndex const &)));
   setFitDataPresenter(std::move(dataPresenter));
