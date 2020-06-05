@@ -25,6 +25,13 @@ MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms,
   MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(
       numberOfHistograms, numberOfBins);
   ws->setYUnit("Counts");
+  for (int index = 0; index < numberOfHistograms; index++) {
+
+    ws->mutableRun().addProperty("First good spectra "+std::to_string(index), int(numberOfBins/2.));
+    ws->mutableRun().addProperty("Last good spectra " +
+                                     std::to_string(index), numberOfBins);
+  
+  }
   AnalysisDataService::Instance().addOrReplace(WORKSPACE_NAME, ws);
 
   return ws;
@@ -58,7 +65,7 @@ public:
 
 private:
   std::tuple<double, double> calculateBackgroundFromFit(IAlgorithm_sptr &,
-                                                        double, int) override {
+                                                        const std::pair<double,double> &range, const int &index) override {
     return std::make_tuple(m_background, m_fitQuality);
   }
   double m_background{0.00};
