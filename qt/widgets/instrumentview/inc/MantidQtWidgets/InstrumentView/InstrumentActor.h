@@ -279,7 +279,7 @@ private:
   /// Colors in order of component info
   std::vector<size_t> m_monitors;
   std::vector<size_t> m_components;
-    std::vector<bool> m_isCompVisible;
+  std::vector<bool> m_isCompVisible;
   std::vector<size_t> m_detIndex2WsIndex;
 
   bool m_isPhysicalInstrument;
