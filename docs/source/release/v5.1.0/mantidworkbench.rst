@@ -43,6 +43,7 @@ Improvements
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
 - The gray and plasma colormaps have been added to the instrument view.
 - The x-axis tick labels on colorfill plots are now horizontal.
+- Variables assigned in python scripts are now cleared when a script is run in its entirety.
 
 Bugfixes
 ########
