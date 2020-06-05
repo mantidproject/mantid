@@ -4,21 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets
-from SampleTransmissionCalculator.sample_transmission_calculator import SampleTransmissionCalculator
 import sys
+from SampleTransmissionCalculator import stc_gui
+from mantidqt.gui_helper import get_qapplication
 
-
-def qapp():
-
-    if QtWidgets.QApplication.instance():
-        _app = QtWidgets.QApplication.instance()
-    else:
-        _app = QtWidgets.QApplication(sys.argv)
-    return _app
-
-
-app = qapp()
-window = SampleTransmissionCalculator()
-window.show()
-app.exec_()
+app, within_mantid = get_qapplication()
+planner = stc_gui.SampleTransmissionCalculator()
+planner.show()
+if not within_mantid:
+    sys.exit(app.exec_())

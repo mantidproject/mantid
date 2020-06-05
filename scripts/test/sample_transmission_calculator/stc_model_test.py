@@ -12,7 +12,6 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
         self.model = SampleTransmissionCalculatorModel()
 
     def test_calculate_does_not_throw_with_valid_inputs(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 0,
             'single_low': 0.0,
@@ -24,7 +23,7 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.1
         }
-        output_dict = model.calculate(input_dict)
+        output_dict = self.model.calculate(input_dict)
         self.assertEqual(len(output_dict['x']), 100)
 
     @patch('SampleTransmissionCalculator.stc_model.CalculateSampleTransmission')
@@ -72,7 +71,6 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             thickness=0.1)
 
     def test_validate_correct(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 0,
             'single_low': 0.0,
@@ -84,11 +82,10 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.1
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {})
 
     def test_validate_histogram_single_zero(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 0,
             'single_low': 0.0,
@@ -100,11 +97,10 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.1
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {'histogram': 'Histogram must be greater than zero.'})
 
     def test_validate_histogram_single_max_lower_than_min(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 0,
             'single_low': 1.0,
@@ -116,11 +112,10 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.1
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {'histogram': 'Upper histogram edge must be greater than the lower bin.'})
 
     def test_validate_histogram_multiple_invalid_string(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 1,
             'single_low': 1.0,
@@ -132,11 +127,10 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.1
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {'histogram': 'Histogram string not readable.'})
 
     def test_validate_histogram_multiple_not_enough_values(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 1,
             'single_low': 1.0,
@@ -148,11 +142,10 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.1
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {'histogram': 'Histogram requires 3 values.'})
 
     def test_validate_no_formula(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 0,
             'single_low': 0.0,
@@ -164,11 +157,10 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.1
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {'chemical_formula': 'Chemical formula has been left blank.'})
 
     def test_validate_density_zero(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 0,
             'single_low': 0.0,
@@ -180,11 +172,10 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.0,
             'thickness': 0.1
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {'density': 'Density can not be zero.'})
 
     def test_validate_thickness_zero(self):
-        model = SampleTransmissionCalculatorModel()
         input_dict = {
             'binning_type': 0,
             'single_low': 0.0,
@@ -196,7 +187,7 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'density': 0.1,
             'thickness': 0.0
         }
-        validation = model.validate(input_dict)
+        validation = self.model.validate(input_dict)
         self.assertEqual(validation, {'thickness': 'Thickness can not be zero.'})
 
 

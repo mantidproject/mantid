@@ -488,8 +488,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
     }
 
     const QString scriptPath = scriptsDir + '/' + pyQtInterfaceFile;
-
-    if (QFileInfo(scriptPath).exists()) {
+    if (pyQtInterfaceFile.toStdString() ==
+        "Sample_Transmission_Calculator.py") {
+    } else if (QFileInfo(scriptPath).exists()) {
       const QString pyQtInterfaceName =
           QFileInfo(scriptPath).baseName().replace("_", " ");
       m_interfaceNameDataPairs.append(qMakePair(pyQtInterfaceName, scriptPath));

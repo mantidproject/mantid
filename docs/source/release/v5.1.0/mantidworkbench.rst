@@ -11,6 +11,7 @@ New
 - The Advanced Plotting menu is now in Workbench. This enables creating surface and contour plots of three or more workspaces, and choosing which log value to plot against.
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
 - A default legend location can be set in the Workbench settings.
+- The Sample Transmission Calculator is now implemented in workbench.
 
 Improvements
 ############
@@ -73,7 +74,6 @@ Improvements
 - Added an option to matrix workspaces to export bins and spectra to a table workspace.
 - Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
 - Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
-- The Sample Transmission Calculator is now implemented in workbench.
 
 Bugfixes
 ########

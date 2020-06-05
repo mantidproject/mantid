@@ -7,7 +7,7 @@
 from qtpy import QtCore, QtWidgets
 from matplotlib.figure import Figure
 from mantidqt.utils.qt import load_ui
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 Ui_sample_transmission, _ = load_ui(__file__, "SampleTransmission.ui")
 
 
@@ -60,6 +60,7 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
 
     def plot(self, x, y):
         self.axes.cla()
+        self.plot_frame.figure.tight_layout()
         self.axes.plot(x, y)
         self.plot_frame.draw()
 
@@ -67,10 +68,10 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.validation_label.setText(warning_text)
 
     def clear_error_indicator(self):
-        getattr(self, 'histogram_err').setText('')
-        getattr(self, 'chemical_formula_err').setText('')
-        getattr(self, 'density_err').setText('')
-        getattr(self, 'thickness_err').setText('')
+        self.histogram_err.setText('')
+        self.chemical_formula_err.setText('')
+        self.density_err.setText('')
+        self.thickness_err.setText('')
 
     def set_error_indicator(self, error_key):
         getattr(self, error_key+'_err').setText('*')
