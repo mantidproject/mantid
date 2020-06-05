@@ -46,11 +46,9 @@ class SliceViewerDataView(QWidget):
         self.nonortho_tr = None
 
         # Dimension widget
-        self.dimensions_layout = QHBoxLayout()
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
-        self.dimensions_layout.addWidget(self.dimensions)
 
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0,0,0,0)
@@ -70,9 +68,9 @@ class SliceViewerDataView(QWidget):
             self.colorbar_layout.addLayout(self.norm_layout)
 
         # MPL figure + colorbar
-        self.mpl_layout = QHBoxLayout()
-        self.mpl_layout.setContentsMargins(0,0,0,0)
-        self.mpl_layout.setSpacing(0)
+        mpl_layout = QHBoxLayout()
+        mpl_layout.setContentsMargins(0,0,0,0)
+        mpl_layout.setSpacing(0)
         self.fig = Figure()
         self.fig.set_tight_layout(True)
         self.ax = None
@@ -84,14 +82,14 @@ class SliceViewerDataView(QWidget):
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
         self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
         self.create_axes_orthogonal()
-        self.mpl_layout.addWidget(self.canvas)
+        mpl_layout.addWidget(self.canvas)
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
         self.colorbar = ColorbarWidget(self)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.colorbarChanged.connect(self.update_line_plot_limits)
-        self.mpl_layout.addLayout(self.colorbar_layout)
+        mpl_layout.addLayout(self.colorbar_layout)
 
         # MPL toolbar
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
@@ -102,11 +100,11 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
 
         # layout
-        self.layout = QGridLayout(self)
-        self.layout.setSpacing(1)
-        self.layout.addLayout(self.dimensions_layout, 0, 0)
-        self.layout.addWidget(self.mpl_toolbar, 1, 0)
-        self.layout.addLayout(self.mpl_layout, 2, 0)
+        layout = QGridLayout(self)
+        layout.setSpacing(1)
+        layout.addWidget(self.dimensions, 0, 0)
+        layout.addWidget(self.mpl_toolbar, 1, 0)
+        layout.addLayout(mpl_layout, 2, 0)
 
     @property
     def grid_on(self):

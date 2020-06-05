@@ -39,9 +39,9 @@ class DimensionWidget(QWidget):
     def __init__(self, dims_info, parent=None):
         super().__init__(parent)
 
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
-        self.layout.setSpacing(0)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
             self.qflags.append(dim['qdim'])
@@ -55,7 +55,7 @@ class DimensionWidget(QWidget):
             widget.valueChanged.connect(self.valueChanged)
             if hasattr(widget, 'binningChanged'):
                 widget.binningChanged.connect(self.dimensionsChanged)
-            self.layout.addWidget(widget)
+            layout.addWidget(widget)
 
         self.set_initial_states()
 
@@ -165,7 +165,7 @@ class Dimension(QWidget):
         self.number = number
 
         self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setContentsMargins(0, 2, 0, 0)
 
         self.name = QLabel(dim_info['name'])
         self.units = QLabel(dim_info['units'])
@@ -191,8 +191,8 @@ class Dimension(QWidget):
         self.spinbox.editingFinished.connect(self.spinbox_changed)
 
         self.layout.addWidget(self.name)
-        self.button_layout = QHBoxLayout(self)
-        self.button_layout.setContentsMargins(0,0,0,0)
+        self.button_layout = QHBoxLayout()
+        self.button_layout.setContentsMargins(0, 0, 0, 0)
         self.button_layout.setSpacing(0)
         self.button_layout.addWidget(self.x)
         self.button_layout.addWidget(self.y)
