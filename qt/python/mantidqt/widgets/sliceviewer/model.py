@@ -125,6 +125,28 @@ class SliceViewerModel:
             return np.ma.masked_invalid(
                 self.get_ws_MDE(slicepoint, bin_params).getSignalArray().squeeze())
 
+    def get_dim_limits(self, slicepoint, transpose):
+        """
+        Return a xlim, ylim) for the display dimensions where xlim, ylim are tuples
+        :param slicepoint: Sequence containing either a float or None where None indicates a display dimension
+        :param transpose: A boolean flag indicating if the display dimensions are transposed
+        """
+        workspace = self._get_ws()
+        assert len(slicepoint) == workspace.getNumDims(
+        ), "Expected len(slicepoint) to match number of workspace dimensions"
+        limits = []
+        for index, pt in enumerate(slicepoint):
+            if pt is None:
+                dimension = workspace.getDimension(index)
+                limits.append((dimension.getMinimum(), dimension.getMaximum()))
+        assert len(
+            limits) == 2, f"There should be exactly 2 display dimensions, found {len(limits)}"
+        xlim, ylim = limits
+        if transpose:
+            ylim, xlim = xlim, ylim
+
+        return xlim, ylim
+
     def get_dim_info(self, n: int) -> dict:
         """
         returns dict of (minimum, maximun, number_of_bins, width, name, units) for dimension n
