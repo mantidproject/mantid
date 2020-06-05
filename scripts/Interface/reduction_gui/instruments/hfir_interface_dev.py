@@ -10,6 +10,7 @@
     The actual view/layout is define in .ui files. The state of the reduction
     process is kept elsewhere (HFIRReduction object)
 """
+import sys
 from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.sans.hfir_instrument import SANSInstrumentWidget
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget

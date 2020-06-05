@@ -5,14 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, protected-access, super-on-old-class
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QFrame)  # noqa
+from qtpy.QtCore import (QFile, QObject, QEvent, Qt)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
 import os
+import sys
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 import ui.ui_stitcher
 
-import mantidplot
+from mantid.plots._compatability import plotSpectrum
+
 from mantid.api import AnalysisDataService
 
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
@@ -35,9 +39,9 @@ class StitcherWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None):
         super(StitcherWidget, self).__init__(parent, state, settings)
 
-        class DataFrame(QtGui.QFrame, ui.ui_stitcher.Ui_Frame):
+        class DataFrame(QFrame, ui.ui_stitcher.Ui_Frame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
+                QFrame.__init__(self, parent)
                 self.setupUi(self)
 
         self._content = DataFrame(self)
@@ -73,44 +77,44 @@ class StitcherWidget(BaseWidget):
             Initialize the content of the frame
         """
         # Validators
-        self._content.low_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.low_scale_edit))
-        self._content.medium_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_scale_edit))
-        self._content.high_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.high_scale_edit))
+        self._content.low_scale_edit.setValidator(QDoubleValidator(self._content.low_scale_edit))
+        self._content.medium_scale_edit.setValidator(QDoubleValidator(self._content.medium_scale_edit))
+        self._content.high_scale_edit.setValidator(QDoubleValidator(self._content.high_scale_edit))
 
-        self._content.low_min_edit.setValidator(QtGui.QDoubleValidator(self._content.low_min_edit))
-        self._content.low_max_edit.setValidator(QtGui.QDoubleValidator(self._content.low_max_edit))
-        self._content.medium_min_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_min_edit))
-        self._content.medium_max_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_max_edit))
+        self._content.low_min_edit.setValidator(QDoubleValidator(self._content.low_min_edit))
+        self._content.low_max_edit.setValidator(QDoubleValidator(self._content.low_max_edit))
+        self._content.medium_min_edit.setValidator(QDoubleValidator(self._content.medium_min_edit))
+        self._content.medium_max_edit.setValidator(QDoubleValidator(self._content.medium_max_edit))
 
         # Browse buttons
-        self.connect(self._content.low_q_browse_button, QtCore.SIGNAL("clicked()"), self._low_q_browse)
-        self.connect(self._content.medium_q_browse_button, QtCore.SIGNAL("clicked()"), self._medium_q_browse)
-        self.connect(self._content.high_q_browse_button, QtCore.SIGNAL("clicked()"), self._high_q_browse)
+        self._content.low_q_browse_button.clicked.connect(self._low_q_browse)
+        self._content.medium_q_browse_button.clicked.connect(self._medium_q_browse)
+        self._content.high_q_browse_button.clicked.connect(self._high_q_browse)
 
-        self.connect(self._content.low_q_combo, QtCore.SIGNAL("activated(int)"), self._update_low_q)
-        self.connect(self._content.medium_q_combo, QtCore.SIGNAL("activated(int)"), self._update_medium_q)
-        self.connect(self._content.high_q_combo, QtCore.SIGNAL("activated(int)"), self._update_high_q)
+        self._content.low_q_combo.activated.connect(self._update_low_q)
+        self._content.medium_q_combo.activated.connect(self._update_medium_q)
+        self._content.high_q_combo.activated.connect(self._update_high_q)
 
         # Radio buttons
-        self.connect(self._content.low_radio, QtCore.SIGNAL("clicked()"), self._low_q_selected)
-        self.connect(self._content.medium_radio, QtCore.SIGNAL("clicked()"), self._medium_q_selected)
-        self.connect(self._content.high_radio, QtCore.SIGNAL("clicked()"), self._high_q_selected)
+        self._content.low_radio.clicked.connect(self._low_q_selected)
+        self._content.medium_radio.clicked.connect(self._medium_q_selected)
+        self._content.high_radio.clicked.connect(self._high_q_selected)
 
         # Selection buttons
-        self.connect(self._content.low_range_button, QtCore.SIGNAL("clicked()"), self._low_range)
-        self.connect(self._content.medium_range_button, QtCore.SIGNAL("clicked()"), self._medium_range)
+        self._content.low_range_button.clicked.connect(self._low_range)
+        self._content.medium_range_button.clicked.connect(self._medium_range)
 
         # Scale factors
-        self.connect(self._content.low_scale_edit, QtCore.SIGNAL("returnPressed()"), self._update_low_scale)
-        self.connect(self._content.medium_scale_edit, QtCore.SIGNAL("returnPressed()"), self._update_medium_scale)
-        self.connect(self._content.high_scale_edit, QtCore.SIGNAL("returnPressed()"), self._update_high_scale)
+        self._content.low_scale_edit.returnPressed.connect(self._update_low_scale)
+        self._content.medium_scale_edit.returnPressed.connect(self._update_medium_scale)
+        self._content.high_scale_edit.returnPressed.connect(self._update_high_scale)
 
         # Apply and save buttons
-        self.connect(self._content.apply_button, QtCore.SIGNAL("clicked()"), self._apply)
-        self.connect(self._content.save_result_button, QtCore.SIGNAL("clicked()"), self._save_result)
+        self._content.apply_button.clicked.connect(self._apply)
+        self._content.save_result_button.clicked.connect(self._save_result)
 
         # Create button group for data set selection
-        g = QtGui.QButtonGroup(self)
+        g = QButtonGroup(self)
         g.addButton(self._content.low_radio)
         g.addButton(self._content.medium_radio)
         g.addButton(self._content.high_radio)
@@ -130,12 +134,12 @@ class StitcherWidget(BaseWidget):
         self._content.high_q_combo.setEditable(True)
         # pylint: disable = no-self-argument
 
-        class ShowEventFilter(QtCore.QObject):
+        class ShowEventFilter(QObject):
             def eventFilter(obj_self, filteredObj, event):
-                if event.type() == QtCore.QEvent.HoverEnter:
+                if event.type() == QEvent.HoverEnter:
                     self.populate_combobox(filteredObj)
                     filteredObj.update()
-                elif event.type() == QtCore.QEvent.KeyPress:
+                elif event.type() == QEvent.KeyPress:
                     if filteredObj == self._content.low_q_combo:
                         self._low_q_modified = True
                     elif filteredObj == self._content.medium_q_combo:
@@ -143,7 +147,7 @@ class StitcherWidget(BaseWidget):
                     elif filteredObj == self._content.high_q_combo:
                         self._high_q_modified = True
 
-                    if event.key() == QtCore.Qt.Key_Return or event.key() == QtCore.Qt.Key_Enter:
+                    if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
                         filteredObj.setItemText(0, filteredObj.lineEdit().text())
                         if filteredObj == self._content.low_q_combo:
                             self._update_low_q()
@@ -153,7 +157,7 @@ class StitcherWidget(BaseWidget):
                             self._update_high_q()
                         return True
 
-                return QtCore.QObject.eventFilter(obj_self, filteredObj, event)
+                return QObject.eventFilter(obj_self, filteredObj, event)
 
         eventFilter = ShowEventFilter(self)
         self._content.low_q_combo.installEventFilter(eventFilter)
@@ -265,7 +269,7 @@ class StitcherWidget(BaseWidget):
             except (AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 data_object = None
                 util.set_valid(dataset_control.lineEdit(), False)
-                QtGui.QMessageBox.warning(self, "Error loading file",
+                QMessageBox.warning(self, "Error loading file",
                                           "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
                 return
             if min_control is not None and max_control is not None \
@@ -329,7 +333,7 @@ class StitcherWidget(BaseWidget):
             except (AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 self._high_q_data = None
                 util.set_valid(self._content.high_q_combo.lineEdit(), False)
-                QtGui.QMessageBox.warning(self, "Error loading file",
+                QMessageBox.warning(self, "Error loading file",
                                           "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
                 return
             self._content.high_scale_edit.setText("1.0")
@@ -345,7 +349,7 @@ class StitcherWidget(BaseWidget):
         title = "Data file - Choose a reduced I(Q) file"
         if not os.path.isdir(str(self._output_dir)):
             self._output_dir = os.path.expanduser("~")
-        fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
+        fname = QFileInfo(QFileDialog.getOpenFileName(self, title,
                                                                    self._output_dir,
                                                                    "Reduced XML files (*.xml);; Reduced Nexus files"
                                                                    " (*.nxs);; All files (*)")).filePath()
@@ -353,7 +357,7 @@ class StitcherWidget(BaseWidget):
             if isinstance(fname, tuple):
                 fname = fname[0]
             # Store the location of the loaded file
-            self._output_dir = str(QtCore.QFileInfo(fname).path())
+            self._output_dir = str(QFileInfo(fname).path())
         return str(fname)
 
     def _low_q_browse(self):
@@ -487,11 +491,8 @@ class StitcherWidget(BaseWidget):
             ws_list.append(self._high_q_data.get_scaled_ws())
 
         if len(ws_list) > 0:
-            g = mantidplot.graph(self._graph)
-            if g is None or not self._plotted:
-                g = mantidplot.plotSpectrum(ws_list, [0], True)
-                g.setName(self._graph)
-                self._plotted = True
+            g = plotSpectrum(ws_list, [0], error_bars=True, window=self._graph)
+            g.setName(self._graph)
 
     def _save_result(self):
         """
@@ -500,14 +501,14 @@ class StitcherWidget(BaseWidget):
         if self._stitcher is not None:
             if not os.path.isdir(self._output_dir):
                 self._output_dir = os.path.expanduser("~")
-            fname = QtGui.QFileDialog.getSaveFileName(self, "Save combined I(Q)",
+            fname = QFileDialog.getSaveFileName(self, "Save combined I(Q)",
                                                       self._output_dir,
                                                       "Data Files (*.xml)")
             if not fname:
                 return
             if isinstance(fname, tuple):
                 fname = fname[0]
-            fname = str(QtCore.QFileInfo(fname).filePath())
+            fname = str(QFileInfo(fname).filePath())
             if len(fname) > 0:
                 if fname.endswith('.xml'):
                     self._stitcher.save_combined(fname, as_canSAS=True)
