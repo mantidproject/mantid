@@ -23,7 +23,7 @@ void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
   UNUSED_ARG(estimatedTime)
   UNUSED_ARG(progressPrecision)
   // This method is explicitly not implemented.
-  // There are so many progress calls that apssing these across the C++/Python
+  // There are so many progress calls that passing these across the C++/Python
   // boundary is too expensive and can slow down Mantid by up to an order of
   // magnitude
   return;
