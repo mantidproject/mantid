@@ -232,6 +232,12 @@ getPropertyAsVectorDouble(const Kernel::PropertyManager &args,
   }
 }
 
+/**
+ * @brief Returns if a property exists and is not empty
+ * @param pm PropertyManager
+ * @param name the name of the property
+ * @return true if property with name exists, and its value is not empty
+ */
 bool existsAndNotEmptyString(const PropertyManager &pm,
                              const std::string &name) {
   if (pm.existsProperty(name)) {
@@ -241,6 +247,12 @@ bool existsAndNotEmptyString(const PropertyManager &pm,
   return false;
 }
 
+/**
+ * @brief Returns if a property exists and the numeric value is negative
+ * @param pm PropertyManager
+ * @param name the name of the property
+ * @return true if property with name exists, but the numeric value is negative
+ */
 bool existsAndNegative(const PropertyManager &pm, const std::string &name) {
   if (pm.existsProperty(name)) {
     const auto value = pm.getPropertyValue(name);
@@ -270,6 +282,12 @@ const std::string SetSample::summary() const {
   return "Set properties of the sample and its environment for a workspace";
 }
 
+/**
+ * @brief Validates the geometry
+ * @param errors map
+ * @param geomArgs geometry arguments
+ * @param flavour sample or container
+ */
 void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
                                  const Kernel::PropertyManager &geomArgs,
                                  const std::string &flavour) {
@@ -354,9 +372,16 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
   }
 }
 
+/**
+ * @brief Validates the material
+ * @param errors map
+ * @param args material arguments
+ * @param flavour sample or container
+ */
 void SetSample::validateMaterial(std::map<std::string, std::string> &errors,
-                                 const Kernel::PropertyManager &args,
+                                 const Kernel::PropertyManager &inputArgs,
                                  const std::string &flavour) {
+  PropertyManager args = materialSettingsEnsureLegacyCompatibility(inputArgs);
   ReadMaterial::MaterialParameters materialParams;
   setMaterial(materialParams, args);
   auto materialErrors = ReadMaterial::validateInputs(materialParams);
@@ -369,6 +394,13 @@ void SetSample::validateMaterial(std::map<std::string, std::string> &errors,
   }
 }
 
+/**
+ * @brief Ensures there is no specified property with negative value
+ * @param errors map
+ * @param geomArgs geometry arguments
+ * @param flavour sample or container
+ * @param keys the vector of property names to check
+ */
 void SetSample::assertNonNegative(
     std::map<std::string, std::string> &errors,
     const Kernel::PropertyManager &geomArgs, const std::string &flavour,
@@ -502,37 +534,47 @@ void SetSample::exec() {
       getProperty(PropertyNames::CONTAINER_MATERIAL);
 
   // validateInputs guarantees this will be an ExperimentInfo object
-  auto experiment = std::dynamic_pointer_cast<ExperimentInfo>(workspace);
+  auto experimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(workspace);
   // The order here is important. Set the environment first. If this
   // defines a sample geometry then we can process the Geometry flags
   // combined with this
   const SampleEnvironment *sampleEnviron(nullptr);
   if (environArgs) {
-    sampleEnviron = setSampleEnvironmentFromFile(*experiment, environArgs);
+    sampleEnviron = setSampleEnvironmentFromFile(*experimentInfo, environArgs);
   } else if (canGeometryArgs) {
-    setSampleEnvironmentFromXML(*experiment, canGeometryArgs, canMaterialArgs);
+    setSampleEnvironmentFromXML(*experimentInfo, canGeometryArgs,
+                                canMaterialArgs);
   }
 
   double sampleVolume = 0.;
   if (geometryArgs || sampleEnviron) {
-    setSampleShape(*experiment, geometryArgs, sampleEnviron);
+    setSampleShape(*experimentInfo, geometryArgs, sampleEnviron);
     // get the volume back out to use in setting the material
-    sampleVolume = CUBIC_METRE_TO_CM * experiment->sample().getShape().volume();
+    sampleVolume = CUBIC_METRE_TO_CM * experimentInfo->sample().getShape().volume();
   }
 
   // Finally the material arguments
   if (materialArgs) {
+    PropertyManager materialArgsCompatible =
+        materialSettingsEnsureLegacyCompatibility(*materialArgs);
     // add the sample volume if it was defined/determined
     if (sampleVolume > 0.) {
-      const std::string VOLUME_ARG{"SampleVolume"};
       // only add the volume if it isn't already specfied
-      if (!materialArgs->existsProperty(VOLUME_ARG)) {
-        materialArgs->declareProperty(
-            std::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
+      if (!materialArgsCompatible.existsProperty("Volume")) {
+        materialArgsCompatible.declareProperty(
+            std::make_unique<PropertyWithValue<double>>("Volume",
                                                         sampleVolume));
       }
     }
-    runChildAlgorithm("SetSampleMaterial", workspace, *materialArgs);
+    // this does what SetSampleMaterial would do, but without calling it
+    ReadMaterial::MaterialParameters materialParams;
+    setMaterial(materialParams, materialArgsCompatible);
+    ReadMaterial reader;
+    reader.setMaterialParameters(materialParams);
+    const auto sampleMaterial = reader.buildMaterial();
+    auto shapeObject = std::shared_ptr<Geometry::IObject>(
+        experimentInfo->sample().getShape().cloneWithMaterial(*sampleMaterial));
+    experimentInfo->mutableSample().setShape(shapeObject);
   }
 }
 
@@ -602,10 +644,12 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
     auto shape = sFactory.createShape(xml);
     if (shape->hasValidShape()) {
       if (canMaterialArgs) {
+        PropertyManager canMaterialCompatible =
+            materialSettingsEnsureLegacyCompatibility(*canMaterialArgs);
         ReadMaterial::MaterialParameters materialParams;
-        setMaterial(materialParams, *canMaterialArgs);
-        if (materialParams.sampleVolume <= 0.) {
-          materialParams.sampleVolume = shape->volume() * CUBIC_METRE_TO_CM;
+        setMaterial(materialParams, canMaterialCompatible);
+        if (materialParams.volume <= 0.) {
+          materialParams.volume = shape->volume() * CUBIC_METRE_TO_CM;
         }
         ReadMaterial reader;
         reader.setMaterialParameters(materialParams);
@@ -623,7 +667,8 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
 /**
  * @brief SetSample::setMaterial Configures a material from the parameters
  * @param materialParams : output material parameters object
- * @param materialArgs : input material arguments
+ * @param materialArgs : input material arguments, can be altered (see comment
+ * inside)
  */
 void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
                             const Kernel::PropertyManager &materialArgs) {
@@ -637,27 +682,7 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
   if (materialArgs.existsProperty("MassNumber")) {
     materialParams.massNumber = materialArgs.getProperty("MassNumber");
   }
-  if (materialArgs.existsProperty("SampleNumberDensity")) {
-    materialParams.sampleNumberDensity =
-        materialArgs.getProperty("SampleNumberDensity");
-  }
-  if (materialArgs.existsProperty("ZParameter")) {
-    materialParams.zParameter = materialArgs.getProperty("ZParameter");
-  }
-  if (materialArgs.existsProperty("UnitCellVolume")) {
-    materialParams.unitCellVolume = materialArgs.getProperty("UnitCellVolume");
-  }
-  if (materialArgs.existsProperty("SampleMassDensity")) {
-    materialParams.sampleMassDensity =
-        materialArgs.getProperty("SampleMassDensity");
-  }
-  if (materialArgs.existsProperty("SampleMass")) {
-    materialParams.sampleMass = materialArgs.getProperty("SampleMass");
-  }
-  if (materialArgs.existsProperty("SampleVolume")) {
-    materialParams.sampleVolume = materialArgs.getProperty("SampleVolume");
-  }
-  if (materialArgs.existsProperty("CoherentXSection")) {
+   if (materialArgs.existsProperty("CoherentXSection")) {
     materialParams.coherentXSection =
         materialArgs.getProperty("CoherentXSection");
   }
@@ -683,6 +708,24 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
       materialParams.numberDensityUnit =
           MaterialBuilder::NumberDensityUnit::FormulaUnits;
     }
+  }
+  if (materialArgs.existsProperty("ZParameter")) {
+    materialParams.zParameter = materialArgs.getProperty("ZParameter");
+  }
+  if (materialArgs.existsProperty("UnitCellVolume")) {
+    materialParams.unitCellVolume = materialArgs.getProperty("UnitCellVolume");
+  }
+  if (materialArgs.existsProperty("NumberDensity")) {
+    materialParams.numberDensity = materialArgs.getProperty("NumberDensity");
+  }
+  if (materialArgs.existsProperty("MassDensity")) {
+    materialParams.massDensity = materialArgs.getProperty("MassDensity");
+  }
+  if (materialArgs.existsProperty("Mass")) {
+    materialParams.mass = materialArgs.getProperty("Mass");
+  }
+  if (materialArgs.existsProperty("Volume")) {
+    materialParams.volume = materialArgs.getProperty("Volume");
   }
 }
 
@@ -1042,20 +1085,52 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
 }
 
 /**
- * Run the named child algorithm on the given workspace. It assumes an in/out
- * workspace property called InputWorkspace
- * @param name The name of the algorithm to run
- * @param workspace A reference to the workspace
- * @param args A PropertyManager specifying the required arguments
+ * @brief Ensures the backwards compatibility of material arguments
+ * @param materialArgs const input material arguments
+ * @return copy of material arguments without Sample prefix (see the comment)
  */
-void SetSample::runChildAlgorithm(const std::string &name,
-                                  API::Workspace_sptr &workspace,
-                                  const Kernel::PropertyManager &args) {
-  auto alg = createChildAlgorithm(name);
-  alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
-  alg->updatePropertyValues(args);
-  alg->executeAsChildAlg();
-}
+PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
+    const PropertyManager &materialArgs) {
+  PropertyManager compatible(materialArgs);
 
+  // The material should be agnostic whether it's sample's material or
+  // container's so in the properties below there should be no sample prefix,
+  // i.e. NumberDensity instead of SampleNumberDensity.
+  // However, for legacy compatibility, those prefixed with Sample are still
+  // considered through aliases
+  if (materialArgs.existsProperty("SampleNumberDensity")) {
+    const double numerDensity = materialArgs.getProperty("SampleNumberDensity");
+    if (!compatible.existsProperty("NumberDensity")) {
+      compatible.declareProperty("NumberDensity", numerDensity);
+    } else {
+      compatible.setProperty("NumerDesnity", numerDensity);
+    }
+  }
+  if (materialArgs.existsProperty("SampleMassDensity")) {
+    const double massDensity = materialArgs.getProperty("SampleMassDensity");
+    if (!compatible.existsProperty("MassDensity")) {
+      compatible.declareProperty("MassDensity", massDensity);
+    } else {
+      compatible.setProperty("MassDensity", massDensity);
+    }
+  }
+  if (materialArgs.existsProperty("SampleMass")) {
+    const double mass = materialArgs.getProperty("SampleMass");
+    if (!compatible.existsProperty("Mass")) {
+      compatible.declareProperty("Mass", mass);
+    } else {
+      compatible.setProperty("Mass", mass);
+    }
+  }
+  if (materialArgs.existsProperty("SampleVolume")) {
+    const double volume = materialArgs.getProperty("SampleVolume");
+    if (!compatible.existsProperty("Volume")) {
+      compatible.declareProperty("Volume", volume);
+    } else {
+      compatible.setProperty("Volume", volume);
+    }
+  }
+  return compatible;
+}
 } // namespace DataHandling
 } // namespace Mantid

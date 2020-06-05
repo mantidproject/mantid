@@ -65,9 +65,6 @@ private:
   createCylinderLikeXML(const Kernel::PropertyManager &args,
                         const Geometry::ReferenceFrame &refFrame, bool hollow,
                         const std::string &id = "sample-shape") const;
-  void runChildAlgorithm(const std::string &name,
-                         API::Workspace_sptr &workspace,
-                         const Kernel::PropertyManager &args);
   void validateGeometry(std::map<std::string, std::string> &errors,
                         const Kernel::PropertyManager &args,
                         const std::string &flavour);
@@ -80,6 +77,8 @@ private:
                          const std::vector<const std::string *> &keys);
   void setMaterial(ReadMaterial::MaterialParameters &materialParams,
                    const Kernel::PropertyManager &materialArgs);
+  Kernel::PropertyManager materialSettingsEnsureLegacyCompatibility(
+      const Kernel::PropertyManager &materialArgs);
 };
 
 } // namespace DataHandling

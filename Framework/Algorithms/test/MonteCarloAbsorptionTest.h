@@ -63,7 +63,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
         Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl");
     // set up a uniform material for whole environment here to give simple case
     params.chemicalSymbol = "Ti-Zr";
-    params.sampleMassDensity = 5.23;
+    params.massDensity = 5.23;
     auto binaryStlReaderEnv = LoadBinaryStl(envPath, scaleType, params);
     std::shared_ptr<MeshObject> environmentShape = binaryStlReaderEnv.readStl();
 
