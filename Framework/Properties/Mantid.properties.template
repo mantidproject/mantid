@@ -232,6 +232,12 @@ projectSaving.warningSize = 10737418240
 # Whether to show titles on plots
 plots.ShowTitle = On
 
+# Whether to show minor ticks on plots
+plots.ShowMinorTicks = Off
+
+# Whether to show minor gridlines on plots
+plots.ShowMinorGridlines = Off
+
 # The default scale on 1d plots. Options are Linear or Log
 plots.xAxesScale = Linear
 plots.yAxesScale = Linear

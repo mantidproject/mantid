@@ -33,6 +33,8 @@ class PlotSettings(object):
     AXES_SCALE = ['Linear', 'Log']
     LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
                             'center left', 'upper left', 'upper center']
+    SHOW_MINOR_TICKS = "plots.ShowMinorTicks"
+    SHOW_MINOR_GRIDLINES = "plots.ShowMinorGridlines"
 
     def __init__(self, parent, view=None):
         self.view = view if view else PlotsSettingsView(parent, self)
@@ -48,9 +50,14 @@ class PlotSettings(object):
     def load_general_setting_values(self):
         normalize_to_bin_width = "on" == ConfigService.getString(self.NORMALIZATION).lower()
         show_title = "on" == ConfigService.getString(self.SHOW_TITLE).lower()
+        show_minor_ticks = "on" == ConfigService.getString(self.SHOW_MINOR_TICKS).lower()
+        show_minor_gridlines = "on" == ConfigService.getString(self.SHOW_MINOR_GRIDLINES).lower()
 
         self.view.normalize_to_bin_width.setChecked(normalize_to_bin_width)
         self.view.show_title.setChecked(show_title)
+        self.view.show_minor_ticks.setChecked(show_minor_ticks)
+        self.view.show_minor_gridlines.setEnabled(show_minor_ticks)
+        self.view.show_minor_gridlines.setEnabled(show_minor_gridlines)
 
     def setup_axes_group(self):
         x_axes_scale = ConfigService.getString(self.X_AXES_SCALE)
@@ -117,6 +124,8 @@ class PlotSettings(object):
     def setup_signals(self):
         self.view.normalize_to_bin_width.stateChanged.connect(self.action_normalization_changed)
         self.view.show_title.stateChanged.connect(self.action_show_title_changed)
+        self.view.show_minor_ticks.stateChanged.connect(self.action_show_minor_ticks_changed)
+        self.view.show_minor_gridlines.stateChanged.connect(self.action_show_minor_gridlines_changed)
         self.view.x_axes_scale.currentTextChanged.connect(self.action_default_x_axes_changed)
         self.view.y_axes_scale.currentTextChanged.connect(self.action_default_y_axes_changed)
         self.view.line_style.currentTextChanged.connect(self.action_line_style_changed)
@@ -135,6 +144,16 @@ class PlotSettings(object):
 
     def action_show_title_changed(self, state):
         ConfigService.setString(self.SHOW_TITLE, "On" if state == Qt.Checked else "Off")
+
+    def action_show_minor_ticks_changed(self, state):
+        ConfigService.setString(self.SHOW_MINOR_TICKS, "On" if state == Qt.Checked else "Off")
+        self.view.show_minor_gridlines.setEnabled(state == Qt.Checked)
+
+        if not self.view.show_minor_gridlines.isEnabled():
+            self.view.show_minor_gridlines.setChecked(False)
+
+    def action_show_minor_gridlines_changed(self, state):
+        ConfigService.setString(self.SHOW_MINOR_GRIDLINES, "On" if state == Qt.Checked else "Off")
 
     def action_default_x_axes_changed(self, axes_scale):
         ConfigService.setString(self.X_AXES_SCALE, axes_scale)
