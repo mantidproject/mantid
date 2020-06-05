@@ -63,13 +63,7 @@ set(SRC_FILES
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
-<<<<<<< HEAD
     src/LoadISISNexusHelper.cpp
-    src/LoadISISPolarizationEfficiencies.cpp
-||||||| merged common ancestors
-    src/LoadISISPolarizationEfficiencies.cpp
-=======
->>>>>>> Create reflectometry library
     src/LoadInstrument.cpp
     src/LoadInstrumentFromNexus.cpp
     src/LoadInstrumentFromRaw.cpp
@@ -271,13 +265,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
-<<<<<<< HEAD
     inc/MantidDataHandling/LoadISISNexusHelper.h
-    inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
-||||||| merged common ancestors
-    inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
-=======
->>>>>>> Create reflectometry library
     inc/MantidDataHandling/LoadInstrument.h
     inc/MantidDataHandling/LoadInstrumentFromNexus.h
     inc/MantidDataHandling/LoadInstrumentFromRaw.h
