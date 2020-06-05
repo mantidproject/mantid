@@ -36,7 +36,6 @@
 #include <QMessageBox>
 #include <QSettings>
 
-#include <limits>
 #include <numeric>
 #include <utility>
 
@@ -56,12 +55,6 @@ bool isPhysicalView() {
 }
 
 } // namespace
-
-const size_t InstrumentActor::INVALID_INDEX =
-    std::numeric_limits<size_t>::max();
-double InstrumentActor::m_tolerance = 0.00001;
-const double InstrumentActor::INVALID_VALUE =
-    -std::numeric_limits<double>::max();
 
 /**
  * Constructor. Creates a tree of GLActors. Each actor is responsible for
@@ -852,21 +845,21 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
   //  std::cerr<<"To   "<<Xto<<Yto<<Zto<<'\n';
 
   double sZ = Zfrom.scalar_prod(Zto);
-  if (fabs(sZ - 1) < m_tolerance) // vectors the same
+  if (fabs(sZ - 1) < TOLERANCE) // vectors the same
   {
     double sX = Xfrom.scalar_prod(Xto);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) {
+    } else if (fabs(sX + 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180, Zfrom);
     } else {
       R = Mantid::Kernel::Quat(Xfrom, Xto);
     }
-  } else if (fabs(sZ + 1) < m_tolerance) // rotated by 180 degrees
+  } else if (fabs(sZ + 1) < TOLERANCE) // rotated by 180 degrees
   {
-    if (fabs(Xfrom.scalar_prod(Xto) - 1) < m_tolerance) {
+    if (fabs(Xfrom.scalar_prod(Xto) - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180., Xfrom);
-    } else if (fabs(Yfrom.scalar_prod(Yto) - 1) < m_tolerance) {
+    } else if (fabs(Yfrom.scalar_prod(Yto) - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180., Yfrom);
     } else {
       R = Mantid::Kernel::Quat(180., Xto) * Mantid::Kernel::Quat(Xfrom, Xto);
@@ -878,15 +871,15 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     const auto X1 = normalize(Zfrom.cross_prod(Zto));
 
     double sX = Xfrom.scalar_prod(Xto);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(Zfrom, Zto);
       return;
     }
 
     sX = Xfrom.scalar_prod(X1);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R1 = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
+    } else if (fabs(sX + 1) < TOLERANCE) // 180 degree rotation
     {
       R1 = Mantid::Kernel::Quat(180., Zfrom);
     } else {
@@ -903,9 +896,9 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     // Rotation R3 around ZZ by gamma
     Mantid::Kernel::Quat R3;
     sX = Xto.scalar_prod(X1);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R3 = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
+    } else if (fabs(sX + 1) < TOLERANCE) // 180 degree rotation
     {
       R3 = Mantid::Kernel::Quat(180., Zto);
     } else {

@@ -18,6 +18,7 @@
 
 #include <QObject>
 
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -57,9 +58,10 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject {
   Q_OBJECT
 public:
   /// Invalid workspace index in detector index to workspace index lookup
-  static const size_t INVALID_INDEX;
+  static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
   /// Value that indicates this pixel data is invalid
-  static const double INVALID_VALUE;
+  static constexpr double INVALID_VALUE = -std::numeric_limits<double>::max();
+
   /// Constructor
   InstrumentActor(const QString &wsName, bool autoscaling = true,
                   double scaleMin = 0.0, double scaleMax = 0.0);
@@ -216,6 +218,8 @@ signals:
   void colorMapChanged() const;
 
 private:
+  static constexpr double TOLERANCE = 0.00001;
+
   void setUpWorkspace(const std::shared_ptr<const Mantid::API::MatrixWorkspace>
                           &sharedWorkspace,
                       double scaleMin, double scaleMax);
@@ -275,10 +279,7 @@ private:
   /// Colors in order of component info
   std::vector<size_t> m_monitors;
   std::vector<size_t> m_components;
-
-  static double m_tolerance;
-
-  std::vector<bool> m_isCompVisible;
+    std::vector<bool> m_isCompVisible;
   std::vector<size_t> m_detIndex2WsIndex;
 
   bool m_isPhysicalInstrument;
