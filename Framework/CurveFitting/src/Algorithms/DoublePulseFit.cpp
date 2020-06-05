@@ -65,11 +65,6 @@ getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
                        double secondPulseWeight) {
   auto clonedFunction = function->clone();
 
-  // const double muon_halflife = 2.2;
-  // double decay = exp(-offset / muon_halflife);
-  // double first_pulse_weighting = decay / (1 + decay);
-  // double second_pulse_weighting = 1 / (1 + decay);
-
   auto convolution =
       std::make_shared<Mantid::CurveFitting::Functions::Convolution>();
   auto delta1 =

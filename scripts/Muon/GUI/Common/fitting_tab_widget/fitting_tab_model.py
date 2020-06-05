@@ -14,6 +14,7 @@ from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymme
                               CopyLogs, EvaluateFunction)
 from mantid.api import AnalysisDataService
 import mantid
+import math
 
 MUON_ANALYSIS_SUFFIX = ' MA'
 FREQUENCY_DOMAIN_ANALYSIS_SUFFIX = ' FD'
@@ -174,14 +175,27 @@ class FittingTabModel(object):
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        algName = "DoublePulseFit" if self.context.gui_context['DoublePulseEnabled'] else "Fit"
-        alg = mantid.AlgorithmManager.create(algName)
-        if self.context.gui_context['DoublePulseEnabled']:
-            alg.setProperty("PulseOffset", self.context.gui_context['DoublePulseTime'])
+        if 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']:
+            alg = self._create_double_pulse_alg()
+        else:
+            alg = mantid.AlgorithmManager.create("Fit")
+        
         output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix = run_Fit(
             parameters_dict, alg)
         CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'], OutputWorkspace=output_workspace, StoreInADS=False)
         return output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix
+
+    def _create_double_pulse_alg(self):
+        alg = mantid.AlgorithmManager.create("DoublePulseFit")
+        offset = self.context.gui_context['DoublePulseTime']
+        muon_halflife = 2.2;
+        decay = math.exp(-offset / muon_halflife);
+        first_pulse_weighting = decay / (1 + decay);
+        second_pulse_weighting = 1 / (1 + decay);
+        alg.setProperty("PulseOffset", offset)
+        alg.setProperty("FirstPulseWeight", first_pulse_weighting)
+        alg.setProperty("SecondPulseWeight", second_pulse_weighting)
+        return alg
 
     def _handle_single_fit_results(self, input_workspace, fit_function, fitting_parameters_table, output_workspace,
                                    covariance_matrix):
@@ -207,10 +221,10 @@ class FittingTabModel(object):
 
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
-        algName = "DoublePulseFit" if self.context.gui_context['DoublePulseEnabled'] else "Fit"
-        alg = mantid.AlgorithmManager.create(algName)
-        if self.context.gui_context['DoublePulseEnabled']:
-            alg.setProperty("PulseOffset", self.context.gui_context['DoublePulseTime'])
+        if 'DoublePulseEnabled' in self.context.gui_context and self.context.gui_context['DoublePulseEnabled']:
+            alg = self._create_double_pulse_alg()
+        else:
+            alg = mantid.AlgorithmManager.create("Fit")
 
         output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix \
             = run_simultaneous_Fit(parameters_dict, alg)
