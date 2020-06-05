@@ -48,7 +48,7 @@
              <widget class="QLineEdit" name="leDirectoryPath"/>
             </item>
             <item>
-             <widget class="QPushButton" name="pbAddDirectory">
+             <widget class="QPushButton" name="pbDataAddDirectory">
               <property name="text">
                <string>Add Directory</string>
               </property>
@@ -64,28 +64,28 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_2">
               <item>
-               <widget class="QPushButton" name="pbBrowseToDir">
+               <widget class="QPushButton" name="pbDataBrowseToDir">
                 <property name="text">
                  <string>Browse To Directory</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pbRemDir">
+               <widget class="QPushButton" name="pbDataRemDir">
                 <property name="text">
                  <string>Remove Directory</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pbMoveUp">
+               <widget class="QPushButton" name="pbDataMoveUp">
                 <property name="text">
                  <string>Move Up</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pbMoveDown">
+               <widget class="QPushButton" name="pbDataMoveDown">
                 <property name="text">
                  <string>Move Down</string>
                 </property>
@@ -175,7 +175,7 @@
           <widget class="QLineEdit" name="leDirectoryPathPython"/>
          </item>
          <item>
-          <widget class="QPushButton" name="pbAddDirectoryPython">
+          <widget class="QPushButton" name="pbScriptAddDirectory">
            <property name="text">
             <string>Add Directory</string>
            </property>
@@ -186,33 +186,33 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QListWidget" name="lwUserSearchDirs"/>
+          <widget class="QListWidget" name="lwScriptSearchDirs"/>
          </item>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
-            <widget class="QPushButton" name="pbBrowseToDirPython">
+            <widget class="QPushButton" name="pbScriptBrowseToDir">
              <property name="text">
               <string>Browse To Directory</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pbRemDirPython">
+            <widget class="QPushButton" name="pbScriptRemDir">
              <property name="text">
               <string>Remove Directory</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pbMoveUpPython">
+            <widget class="QPushButton" name="pbScriptMoveUp">
              <property name="text">
               <string>Move Up</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pbMoveDownPython">
+            <widget class="QPushButton" name="pbScriptMoveDown">
              <property name="text">
               <string>Move Down</string>
              </property>
@@ -236,20 +236,58 @@
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="pbPythonExt">
+        <widget class="QGroupBox" name="gbPythonExt">
          <property name="title">
           <string>Python Extensions (fit functions, algorithms)</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
-           <widget class="QLineEdit" name="leExtensions"/>
+           <widget class="QListWidget" name="lwExtSearchDirs"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pbExtensionsBrowser">
-            <property name="text">
-             <string>Browse to Directory</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QPushButton" name="pbExtBrowseToDir">
+              <property name="text">
+               <string>Broswse to Directory</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbExtRemoveDir">
+              <property name="text">
+               <string>Remove Directory</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbExtMoveUp">
+              <property name="text">
+               <string>Move Up</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbExtMoveDown">
+              <property name="text">
+               <string>Move Down</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

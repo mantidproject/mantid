@@ -29,7 +29,7 @@ private:
   void loadProperties();
   void saveProperties();
   void appendSlashIfNone(QString &path) const;
-  QListWidget *listWidget();
+  QListWidget *listWidget(QObject *object);
 
 private slots:
   void helpClicked();
@@ -41,7 +41,6 @@ private slots:
   void moveUp();
   void moveDown();
   void selectSaveDir();
-  void selectExtensionsDir();
 
 private:
   Ui::ManageUserDirectories m_uiForm;
