@@ -1,22 +1,11 @@
 .. _06_extract_manipulate_data:
 
-===========================
-Extract and Manipulate Data
-===========================
+=====================================
+Extract and Manipulate Data: Examples
+=====================================
 
-Read or Extract Data
-====================
-
-Read produces a view into the chosen part of the original data.
-Extract creates a copy of this part of the data.
-
-Read out the Y data for the second spectrum:
-
-.. code-block:: python
-
-		y_data2 = raw_workspace.readY(1)
-	for y in y_data2:
-	    print(y)
+*Read* produces a view into the chosen part of the original data.
+*Extract* creates a copy of this part of the data.
 
 Using a for loop, read and print the first value in all spectra
 

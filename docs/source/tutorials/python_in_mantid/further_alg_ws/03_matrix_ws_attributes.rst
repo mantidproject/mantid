@@ -5,8 +5,6 @@ MatrixWorkspace Attributes
 ==========================
 
 
-* Access the data accessed using `readX()`, `readY()` and `readE()`. These commands takes an integer workspace index and returns a list of the data i.e
-
 Spectra and Bins
 ================
 
@@ -23,6 +21,21 @@ Get the number of bins:
 .. code-block:: python
 
 	print(workspace_name.blocksize())
+
+
+Read or Extract Data
+====================
+
+* Access the data using `readX,Y,E` (simply a **view** into an existing workspace) or `extractX,Y,E` (creates a **copy** of the data). These commands take a workspace index and returns a list of the relevant data.
+
+Create a view of the Y data from the 2nd spectrum:
+
+.. code-block:: python
+
+	y_data2 = raw_workspace.readY(1)
+	
+	for y in y_data2:
+	    print(y)
 
 
 Workspace algebra
@@ -52,3 +65,59 @@ Replace an input workspaces using +=,-=,*=,/= e.g.
 
    # Add 'workspace2' to 'workspace1' and replace 'workspace1' with the output
 	w1 += w2
+
+
+Workspace Objects
+=================
+
+There is a lot of information about workspaces that can be accessed.
+
+Below is a brief overview, but you may prefer:
+- :ref:`An exhaustive list <mantid.api.MatrixWorkspace>`
+- :ref:`A wider explanation <MatrixWorkspace>`
+
+getSpectrum for info on the structure of a workspace eg. the spectrum number related to workspace index 0:
+
+.. code-block:: python
+
+    ws.getSpectrum(0).getSpectrumNo()
+
+:ref:`getAxis <mantid.api.MantidAxis>` for Workspace labels and structure eg. Give the AxisUnit a new label:
+
+.. code-block:: python
+
+    ws.getAxis(0).getUnit().setLabel("Time-of-flight", "Milliseconds")
+
+:ref:`getInstrument <Instrument>` for :ref:`Sample` and Source :ref:`Geometry`.
+
+.. code-block:: python
+
+    instrument = ws.getInstrument()
+    print(instrument.getName())
+
+:ref:`SpectrumInfo`, :ref:`DetetctorInfo` and :ref:`ComponentInfo` have many other features:
+
+
+
+    info = ws.spectrumInfo()
+    print(info.hasDetectors(0))
+
+Other :ref:`Workspace Properties <Workspace-Properties_Workspaces>`
+
+.. code-block:: python
+
+    print("getMemorySize = " + str(myWS.getMemorySize()))
+
+You have already come across :ref:`getHistory <Workspace_History>`
+
+:ref:`getRun <Run>` is discussed on the next page ...
+
+
+
+Useful links
+============
+
+* :ref:`WorkingWithWorkspaces`
+* :ref:`MatrixWorkspace`
+* :ref:`Mantid_api` 
+* :ref:`concepts contents`

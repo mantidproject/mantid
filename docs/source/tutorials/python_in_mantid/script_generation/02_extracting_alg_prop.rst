@@ -13,7 +13,7 @@ Algorithms return their output properties as a tuple, which python can unpack au
     ei, mon_peak, mon_index, tzero = GetEi(sample, Monitor1Spec=2,Monitor2Spec=3,EnergyEstimate=12)
     sample = ConvertUnits(sample, Target='DeltaE', Emode='Direct',EFixed=ei)
 
-* To access input properties, use the workspace history. Using this handle allows the properties to be extracted by their name using the `getPropertyValue()` function:
+* To access input properties, use the :ref:`workspace history <Workspace-Workspace_History>`. Using this handle allows the properties to be extracted by their name using the `getPropertyValue()` function:
 
 .. code-block:: python
 
