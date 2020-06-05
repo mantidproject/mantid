@@ -72,7 +72,6 @@ class SliceViewerDataView(QWidget):
         mpl_layout.setContentsMargins(0,0,0,0)
         mpl_layout.setSpacing(0)
         self.fig = Figure()
-        self.fig.set_tight_layout(True)
         self.ax = None
         self.axx, self.axy = None, None
         self.image = None
