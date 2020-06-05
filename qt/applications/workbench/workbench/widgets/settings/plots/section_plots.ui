@@ -87,6 +87,20 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QCheckBox" name="show_minor_ticks">
+              <property name="text">
+               <string>Show Minor Ticks</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="show_minor_gridlines">
+              <property name="text">
+               <string>Show Minor Gridlines</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
