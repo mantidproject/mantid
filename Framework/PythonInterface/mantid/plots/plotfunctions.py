@@ -279,7 +279,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     else:
         fig, _, _, _ = create_subplots(axes_num)
 
-    if not ax_properties:
+    if not ax_properties and not overplot:
         ax_properties = {}
         if ConfigService.getString("plots.xAxesScale").lower() == 'log':
             ax_properties['xscale'] = 'log'
