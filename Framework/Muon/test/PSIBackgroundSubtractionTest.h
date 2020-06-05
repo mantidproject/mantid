@@ -20,7 +20,8 @@ namespace {
 constexpr char *WORKSPACE_NAME = "DummyWS";
 
 MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms,
-                                               const size_t numberOfBins,bool addLogs = true) {
+                                               const size_t numberOfBins,
+                                               bool addLogs = true) {
 
   MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(
       numberOfHistograms, numberOfBins);
@@ -67,8 +68,10 @@ public:
   }
 
 private:
-  std::tuple<double, double> calculateBackgroundFromFit(IAlgorithm_sptr &,
-                                                        const std::pair<double,double> &range, const int &index) override {
+  std::tuple<double, double>
+  calculateBackgroundFromFit(IAlgorithm_sptr &,
+                             const std::pair<double, double> &range,
+                             const int &index) override {
     return std::make_tuple(m_background, m_fitQuality);
   }
   double m_background{0.00};
@@ -121,11 +124,10 @@ public:
     auto ws =
         createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
     for (int index = 0; index < numberOfHistograms; index++) {
-      ws->mutableRun().addProperty("First good spectra " +
-                                       std::to_string(index),
-                                   -1);
+      ws->mutableRun().addProperty(
+          "First good spectra " + std::to_string(index), -1);
       ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
-                                   numberOfBins-10);
+                                   numberOfBins - 10);
     }
 
     alg.initialize();
@@ -135,7 +137,7 @@ public:
     clearADS();
   }
 
-    void test_that_algorithm_does_not_execute_if_bad_last_good_data() {
+  void test_that_algorithm_does_not_execute_if_bad_last_good_data() {
     PSIBackgroundSubtraction alg;
     int numberOfHistograms = 2;
     int numberOfBins = 100;
@@ -145,7 +147,7 @@ public:
       ws->mutableRun().addProperty(
           "First good spectra " + std::to_string(index), 1);
       ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
-                                   numberOfBins*2);
+                                   numberOfBins * 2);
     }
 
     alg.initialize();
@@ -155,7 +157,7 @@ public:
     clearADS();
   }
 
-    void test_that_algorithm_does_not_execute_if_last_before_first_good_data() {
+  void test_that_algorithm_does_not_execute_if_last_before_first_good_data() {
     PSIBackgroundSubtraction alg;
     int numberOfHistograms = 2;
     int numberOfBins = 100;
