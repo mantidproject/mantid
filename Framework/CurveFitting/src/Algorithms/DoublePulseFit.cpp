@@ -64,7 +64,7 @@ getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
                        double offset) {
   auto clonedFunction = function->clone();
 
-  const double muon_halflife = 2.4;
+  const double muon_halflife = 2.2;
   double decay = exp(-offset / muon_halflife);
   double first_pulse_weighting = decay / (1 + decay);
   double second_pulse_weighting = 1 / (1 + decay);

@@ -418,7 +418,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     def on_double_pulse_time_changed(self, slot):
         self._on_double_pulse_time_changed = slot
 
-    def set_last_good_data(self, double_pulse_time):
+    def set_double_pulse_data(self, double_pulse_time):
         self.double_pulse_data_edit.setText(
             "{0:.3f}".format(round(float(double_pulse_time), 3)))
 
