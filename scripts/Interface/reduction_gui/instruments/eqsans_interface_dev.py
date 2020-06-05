@@ -22,14 +22,17 @@ from reduction_gui.reduction.sans.eqsans_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
 
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot # noqa
+IS_IN_MANTIDGUI = False
+if "workbench.app.mainwindow" in sys.modules:
+    IS_IN_MANTIDGUI = True
+else:
+    try:
+        import mantidplot # noqa
+        IS_IN_MANTIDGUI = True
+    except:
+        pass
+if IS_IN_MANTIDGUI:
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
-
 
 class EQSANSInterface(InstrumentInterface):
     """
@@ -61,7 +64,7 @@ class EQSANSInterface(InstrumentInterface):
         self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
 
         # Tabs that only make sense within MantidPlot
-        if IS_IN_MANTIDPLOT:
+        if IS_IN_MANTIDGUI:
             # Stitcher
             self.attach(StitcherWidget(settings = self._settings))
 
