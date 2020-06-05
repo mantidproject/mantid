@@ -8,18 +8,18 @@
 #
 #
 import unittest
+from unittest import mock
 
 import matplotlib as mpl
-mpl.use('Agg')  # noqa
-
-from unittest import mock
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace,
                               GroupWorkspaces)
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
-from qtpy.QtWidgets import QMainWindow, QApplication
+from qtpy.QtWidgets import QMainWindow
 from workbench.plugins.workspacewidget import WorkspaceWidget
 from mantid.plots.utility import MantidAxType
+
+mpl.use('Agg')  # noqa
 
 ALGORITHM_HISTORY_WINDOW_TYPE = "AlgorithmHistoryWindow"
 ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." \
@@ -27,7 +27,6 @@ ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." \
 MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix." \
                           "presenter.MatrixWorkspaceDisplay"
 MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
-app = QApplication([])
 
 
 @start_qapplication
