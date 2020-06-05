@@ -86,7 +86,8 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
         self.declareProperty("NormalizationType", "DirectBeam",
                              doc="Normalization type for reduction. Allowed values: ['DirectBeam', 'WithReference']")
-        self.copyProperties("LRReductionWithReference", "Refl1DModelParameters")
+        self.declareProperty("Refl1DModelParameters", "",
+                             doc="JSON string for Refl1D theoretical model parameters for 'NormalizationType'=='WithReference' ")
 
     def load_data(self):
         """
