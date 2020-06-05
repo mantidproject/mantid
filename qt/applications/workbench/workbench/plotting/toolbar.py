@@ -225,6 +225,11 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 fig.get_axes()[0].is_waterfall():
             self.set_generate_plot_script_enabled(False)
 
+        #reenable script generation for colormaps
+        #TODO integrate this above later
+        if figure_type(fig) in [FigureType.Image]:
+            self.set_generate_plot_script_enabled(True)
+
         # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
         if not isinstance(fig.get_axes()[0], MantidAxes) or not fig.get_axes()[0].is_waterfall():
             self.set_waterfall_options_enabled(False)
