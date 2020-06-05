@@ -32,6 +32,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
     plotOptionsChanged = Signal()
+    zoomPanFinished = Signal()
 
     toolitems = (
         (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
@@ -84,6 +85,12 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         NavigationToolbar2QT.edit_parameters(self)
         self.plotOptionsChanged.emit()
 
+    def release(self, _):
+        """
+        Called when a zoom/pan event has completed
+        """
+        self.zoomPanFinished.emit()
+
     def set_action_enabled(self, text: str, state: bool):
         """
         Sets the enabled/disabled state of action with the given text
@@ -97,7 +104,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                     action.trigger()  # ensure view reacts appropriately
                 action.setEnabled(state)
 
-    def set_action_checked(self, text: str,  state: bool):
+    def set_action_checked(self, text: str, state: bool):
         """
         Sets the checked/unchecked state of toggle button with the given text
         :param text: Text on the action

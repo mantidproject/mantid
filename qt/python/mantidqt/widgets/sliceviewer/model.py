@@ -220,7 +220,7 @@ class SliceViewerModel:
         try:
             proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value)
             proj_matrix = proj_matrix.reshape(3, 3)
-        except KeyError:
+        except (AttributeError, KeyError):  # run can be None so no .get()
             # assume orthogonal projection
             proj_matrix = np.diag([1., 1., 1.])
 

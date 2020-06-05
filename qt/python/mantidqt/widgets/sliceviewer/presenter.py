@@ -72,13 +72,38 @@ class SliceViewer(object):
         """
         Tell the view to display a new plot of an MDEventWorkspace
         """
-        self.view.data_view.plot_MDH(
+        data_view = self.view.data_view
+        data_view.plot_MDH(
             self.model.get_ws(slicepoint=self.get_slicepoint(),
-                              bin_params=self.view.data_view.dimensions.get_bin_params()))
+                              bin_params=data_view.dimensions.get_bin_params(),
+                              limits=data_view.get_axes_limits()))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
         self.view.data_view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
+
+    def update_plot_data_MDH(self):
+        """
+        Update the view to display an updated MDHistoWorkspace slice/cut
+        """
+        self.view.data_view.update_plot_data(
+            self.model.get_data(self.get_slicepoint(),
+                                transpose=self.view.data_view.dimensions.transpose))
+
+    def update_plot_data_MDE(self):
+        """
+        Update the view to display an updated MDEventWorkspace slice/cut
+        """
+        data_view = self.view.data_view
+        data_view.update_plot_data(
+            self.model.get_data(self.get_slicepoint(),
+                                bin_params=data_view.dimensions.get_bin_params(),
+                                limits=data_view.get_axes_limits(),
+                                transpose=self.view.data_view.dimensions.transpose))
+
+    def update_plot_data_matrix(self):
+        # should never be called, since this workspace type is only 2D the plot dimensions never change
+        pass
 
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
@@ -127,31 +152,20 @@ class SliceViewer(object):
                                               PeaksViewerPresenter.Event.SlicePointChanged)
         self.update_plot_data()
 
+    def data_limits_changed(self):
+        """Notify data limits on image axes have changed"""
+        self.new_plot()
+        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
+
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
-        self.view.data_view.set_axes_limits(*self.model.get_dim_limits(
+        self.update_axes_limits(*self.model.get_dim_limits(
             self.get_slicepoint(), self.view.data_view.dimensions.transpose))
 
-    def update_plot_data_MDH(self):
-        """
-        Update the view to display an updated MDHistoWorkspace slice/cut
-        """
-        self.view.data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose))
-
-    def update_plot_data_MDE(self):
-        """
-        Update the view to display an updated MDEventWorkspace slice/cut
-        """
-        self.view.data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                bin_params=self.view.data_view.dimensions.get_bin_params(),
-                                transpose=self.view.data_view.dimensions.transpose))
-
-    def update_plot_data_matrix(self):
-        # should never be called, since this workspace type is only 2D the plot dimensions never change
-        pass
+    def update_axes_limits(self, xlim, ylim):
+        """Set the axes limits on the view"""
+        self.view.data_view.set_axes_limits(xlim, ylim)
+        self.data_limits_changed()
 
     def line_plots(self, state):
         """

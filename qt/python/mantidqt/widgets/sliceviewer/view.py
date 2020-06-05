@@ -113,6 +113,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
+        self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
         # layout
@@ -224,6 +225,10 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
+        # ensure the axes data limits are updated to match the
+        # image. For example if the axes were zoomed and the
+        # swap dimensions was clicked we need to restore the
+        # appropriate extents to see the image in the correct place
         extent = self.image.get_extent()
         self.ax.set_xlim(extent[0], extent[1])
         self.ax.set_ylim(extent[2], extent[3])
@@ -238,6 +243,9 @@ class SliceViewerDataView(QWidget):
                                               transpose=self.dimensions.transpose,
                                               norm=self.colorbar.get_norm(),
                                               **kwargs)
+        # swapping dimensions in nonorthogonal mode currently resets back to the
+        # full data limits as the whole axes has been recreated so we don't have
+        # access to the original limits
         # pcolormesh clears any grid that was previously visible
         if self.grid_on:
             self.ax.grid(self.grid_on)
@@ -248,6 +256,8 @@ class SliceViewerDataView(QWidget):
         clears the plot and creates a new one using a MatrixWorkspace keeping
         the axes limits that have already been set
         """
+        # ensure view is correct if zoomed in while swapping dimensions
+        # compute required extent and just have resampling imshow deal with it
         old_extent = None
         if self.image is not None:
             old_extent = self.image.get_extent()
@@ -294,23 +304,24 @@ class SliceViewerDataView(QWidget):
         self.update_line_plot_labels()
         self.canvas.draw_idle()
 
-    def on_home_clicked(self):
-        """Reset the view to encompass all of the data"""
-        self.presenter.show_all_data_requested()
-
     def select_zoom(self):
         """Select the zoom control on the toolbar"""
         self.mpl_toolbar.zoom()
 
     def update_plot_data(self, data):
         """
-        This just updates the plot data without creating a new plot
+        This just updates the plot data without creating a new plot. The extents
+        can change if the data has been rebinned
         """
         if self.nonortho_tr:
             self.image.set_array(data.T.ravel())
         else:
             self.image.set_data(data.T)
         self.colorbar.update_clim()
+
+    def on_home_clicked(self):
+        """Reset the view to encompass all of the data"""
+        self.presenter.show_all_data_requested()
 
     def on_line_plots_toggle(self, state):
         self.presenter.line_plots(state)
@@ -321,6 +332,12 @@ class SliceViewerDataView(QWidget):
         Switch state of the non-orthognal axes on/off
         """
         self.presenter.nonorthogonal_axes(state)
+
+    def on_data_limits_changed(self):
+        """
+        React to when the data limits have changed
+        """
+        self.presenter.data_limits_changed()
 
     def enable_lineplots_button(self):
         """
@@ -370,6 +387,15 @@ class SliceViewerDataView(QWidget):
         except AttributeError:
             pass
 
+    def get_axes_limits(self):
+        """
+        Return the limits of the image axes or None if no image yet exists
+        """
+        if self.image is None:
+            return None
+        else:
+            return self.ax.get_xlim(), self.ax.get_ylim()
+
     def set_axes_limits(self, xlim, ylim):
         """
         Set the view limits on the image axes to the given extents
@@ -378,7 +404,6 @@ class SliceViewerDataView(QWidget):
         """
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
-        self.canvas.draw_idle()
 
     def set_grid_on(self):
         """
@@ -396,7 +421,7 @@ class SliceViewerDataView(QWidget):
         """
         self.nonortho_tr = transform.tr
 
-    def toggle_grid(self,state):
+    def toggle_grid(self, state):
         """
         Toggle the visibility of the grid on the axes
         """
