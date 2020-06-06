@@ -164,7 +164,8 @@ endfunction()
 set(MINIMUM_PYTHON_VERSION 3.6)
 find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED
              COMPONENTS Interpreter Development NumPy)
-# If anything external uses find_package(PythonInterp) then make sure it finds the correct version
+# If anything external uses find_package(PythonInterp) then make sure it finds the correct version and executable
+set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 set(Python_ADDITIONAL_VERSIONS ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
 
 # Handle switching between previously configured Python verions
