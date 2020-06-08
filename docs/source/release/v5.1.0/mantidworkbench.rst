@@ -1,6 +1,6 @@
-=======================
-MantidWorkbench Changes
-=======================
+=================
+Workbench Changes
+=================
 
 .. contents:: Table of Contents
    :local:
@@ -35,19 +35,25 @@ Improvements
 - The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
 - The "Show sample logs" dialog will now hide the plot and statistics display if there are no suitable logs in the workspace that need it.  This is particularly applicable for some of the reactor based instruments.
 - The plot toolbar now shows the correct buttons for 3D plots.
+- Plots now have a Help button on the toolbar, which will direct the user to a relevant documentation page informing them about that type of plot.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
-
+- We have neatened up the the slice viewer user interface, to reduce the amount of wasted space and devote more to the data view itself.
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
 - The gray and plasma colormaps have been added to the instrument view.
+- Slow running algorithms will now display an estimated time to completion in their progress bars.
 - The x-axis tick labels on colorfill plots are now horizontal.
+- Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
+- The figure options menu now has a help button which opens the documentation for the menu.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
+
 
 Bugfixes
 ########
 
+- Fixed new tab names not incrementing correctly on KDE display environments (i.e. KUbuntu).
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly.
 - Fixed a crash when you selected a spectra to plot that was not present in a workspace.
 - Fixed a crash when opening the plot options for a sample logs plot.
@@ -68,5 +74,7 @@ Bugfixes
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
 - Colorfill plots now correctly use the workspace name as the plot title.
+- Overplotting no longer resets the axes scales.
+- Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 
 :ref:`Release 5.1.0 <v5.1.0>`

@@ -118,6 +118,7 @@ mtd_add_qt_library(
 	${CORE_MANTIDLIBS}
 	DataObjects
   QT4_LINK_LIBS
+	Qt4::Qscintilla
 	Qwt5
   MTD_QT_LINK_LIBS
 	MantidQtWidgetsCommon

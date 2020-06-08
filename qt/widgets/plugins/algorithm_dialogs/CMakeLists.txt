@@ -75,12 +75,19 @@ mtd_add_qt_library(
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}
     ${OPENGL_LIBRARIES}
-  QT4_LINK_LIBS Qt4::QtOpenGL
+  QT4_LINK_LIBS Qt4::QtOpenGL Qt4::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
   INSTALL_DIR_BASE ${PLUGINS_DIR}
 )
+
+if(ENABLE_WORKBENCH)
+  find_package(
+    QScintillaQt5
+    REQUIRED
+  )
+endif()
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
@@ -99,7 +106,7 @@ mtd_add_qt_library(
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}
     ${OPENGL_LIBRARIES}
-  QT5_LINK_LIBS Qt5::OpenGL
+  QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
