@@ -322,6 +322,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
         sample_wave_ws = self._convert_to_wavelength(self._sample_ws)
         self._set_beam(sample_wave_ws)
+        # make sure there is no container defined at this point
         self._set_sample(sample_wave_ws, ['Sample'])
         monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                     startProgress=0, endProgress=progess_steps)
@@ -391,6 +392,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def _set_sample(self, ws, components, can_as_sample=False):
 
+        # this is to ensure that there is no historic remnant of the sample or container that can affect the attenuation
+        # from the other hand this does not allow for sample or container shape or material to be already defined
         ws.setSample(Sample())
         set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
         set_sample_alg.setProperty("InputWorkspace", ws)
@@ -444,7 +447,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                 container_geometry['Shape'] = 'FlatPlateHolder'
                 container_geometry['Width'] = self._sample_width
                 # we need to know the thickness and the centre of the sample as well,
-                # in order to calculate the center offsets for the container panels
+                # in order to calculate the centre offsets for the container panels
                 container_geometry['Thick'] = self._sample_thickness
                 container_geometry['Center'] = [0.0, 0.0, self._sample_center]
                 container_geometry['Angle'] = self._sample_angle
