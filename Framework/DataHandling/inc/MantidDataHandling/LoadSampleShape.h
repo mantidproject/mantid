@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
@@ -51,7 +52,7 @@ private:
   void exec() override;
 };
 void DLLExport rotate(Geometry::MeshObject &sampleMesh,
-                      const API::MatrixWorkspace_const_sptr &inputWS);
+                      const API::ExperimentInfo_const_sptr &inputWS);
 
 } // namespace DataHandling
 } // namespace Mantid

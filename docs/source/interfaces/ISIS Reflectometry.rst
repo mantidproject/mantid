@@ -222,6 +222,7 @@ The **Tools** menu provides access to options and utilities:
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | Slit Calculator  | Tool for calculating approximate slit widths             |
+| Options          | Tool for controlling warnings and rounding precision     |
 +------------------+----------------------------------------------------------+
 
 Runs Tab
@@ -486,8 +487,11 @@ Search Interface
 
   *The search interface*
 
-To search for runs, select the instrument the runs are from, enter the id of
-the investigation the runs are part of, and click on **Search**.
+To search for runs, select the instrument the runs are from, enter the
+experiment ID and cycle name of the investigation the runs are part of, and
+click on **Search**. Note that the cycle name is optional but it is recommended
+to use it to avoid requiring an ICat login. At the time of writing, the ICat
+search is also less reliable.
 
 In the table below, valid runs and their descriptions will be listed. You can
 then transfer runs to the processing table by selecting the runs you wish to
@@ -602,7 +606,7 @@ Live Data Monitoring
 ^^^^^^^^^^^^^^^^^^^^
 .. figure:: /images/ISISReflectometryInterface/live_data_section.png
   :class: screenshot
-  :width: 800px
+  :width: 400px
   :align: center
   :alt: The event handling tab
 

@@ -18,11 +18,11 @@ namespace DataHandling {
 */
 class DLLExport DataBlockComposite : public DataBlock {
 public:
-  int64_t getMinSpectrumID() const override;
-  void setMinSpectrumID(int64_t) override;
+  specnum_t getMinSpectrumID() const override;
+  void setMinSpectrumID(specnum_t) override;
 
-  int64_t getMaxSpectrumID() const override;
-  void setMaxSpectrumID(int64_t) override;
+  specnum_t getMaxSpectrumID() const override;
+  void setMaxSpectrumID(specnum_t) override;
 
   size_t getNumberOfSpectra() const override;
   size_t getNumberOfChannels() const override;
@@ -37,8 +37,8 @@ public:
   std::vector<DataBlock> getDataBlocks();
   DataBlockComposite operator+(const DataBlockComposite &other);
   void removeSpectra(DataBlockComposite &toRemove);
-  void truncate(int64_t specMin, int64_t specMax);
-  std::vector<int64_t> getAllSpectrumNumbers();
+  void truncate(specnum_t specMin, specnum_t specMax);
+  std::vector<specnum_t> getAllSpectrumNumbers();
   bool isEmpty();
 
 private:
@@ -62,8 +62,8 @@ template <typename T>
 void DLLExport populateDataBlockCompositeWithContainer(
     DataBlockComposite &dataBlockComposite, T &indexContainer, int64_t nArray,
     int numberOfPeriods, size_t numberOfChannels,
-    std::vector<int64_t> monitorSpectra) {
-  auto isMonitor = [&monitorSpectra](int64_t index) {
+    std::vector<specnum_t> monitorSpectra) {
+  auto isMonitor = [&monitorSpectra](specnum_t index) {
     return std::find(std::begin(monitorSpectra), std::end(monitorSpectra),
                      index) != std::end(monitorSpectra);
   };
@@ -77,7 +77,7 @@ void DLLExport populateDataBlockCompositeWithContainer(
     void
     operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite,
                int numberOfPeriods, size_t numberOfChannels,
-               int64_t previousValue, int64_t startValue) {
+               specnum_t previousValue, specnum_t startValue) {
       if (previousValue - startValue > 0) {
         auto numberOfSpectra =
             previousValue - startValue; /* Should be from [start,
@@ -103,7 +103,7 @@ void DLLExport populateDataBlockCompositeWithContainer(
     void
     operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite,
                int numberOfPeriods, size_t numberOfChannels,
-               int64_t previousValue, int64_t startValue) {
+               specnum_t previousValue, specnum_t startValue) {
       auto numberOfSpectra = previousValue - startValue + 1;
       DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
       dataBlock.setMinSpectrumID(startValue);

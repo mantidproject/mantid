@@ -20,7 +20,6 @@ from .painter import Painted
 class SphericallyIntergratedPeakRepresentation(object):
     """Provide methods to display a representation of a slice through an
     Spherically intgerated region around a Peak"""
-
     @classmethod
     def draw(cls, peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):
         """
@@ -37,11 +36,11 @@ class SphericallyIntergratedPeakRepresentation(object):
         signal_radius = _signal_radius_info(shape_info)
         peak_origin = slice_info.transform(peak_origin)
 
-        slice_origin, signal_radius = slice_sphere(peak_origin, signal_radius, slice_info.value)
+        slice_origin, signal_radius = slice_sphere(peak_origin, signal_radius, slice_info.z_value)
         if not np.any(np.isfinite((signal_radius, ))):
             # slice not possible
             return None
-        alpha = compute_alpha(slice_origin[2], slice_info.value, slice_info.width)
+        alpha = compute_alpha(slice_origin[2], slice_info.z_value, slice_info.z_width)
         if alpha < 0.0:
             return None
 
@@ -71,7 +70,7 @@ class SphericallyIntergratedPeakRepresentation(object):
         bkgd_radius_thick = _bkgd_radius_info(shape_info)
         if bkgd_radius_thick is not None:
             bkgd_outer_radius, thickness = bkgd_radius_thick
-            _, bkgd_circle_radius = slice_sphere(peak_origin, bkgd_outer_radius, slice_info.value)
+            _, bkgd_circle_radius = slice_sphere(peak_origin, bkgd_outer_radius, slice_info.z_value)
             # yapf: disable
             artists.append(
                 painter.shell(

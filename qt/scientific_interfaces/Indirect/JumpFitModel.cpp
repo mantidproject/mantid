@@ -225,8 +225,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                const Spectra & /*spectra*/) {
+JumpFitModel::JumpFitModel() { m_fitType = FQFIT_STRING; }
+
+void JumpFitModel::addWorkspace(const std::string &workspaceName) {
+  auto workspace =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addJumpFitParameters(workspace.get(), name);
 
@@ -239,13 +243,13 @@ void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
 
   const auto hwhmWorkspace =
       createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  IndirectFittingModel::addNewWorkspace(hwhmWorkspace,
-                                        Spectra(createSpectra(spectrum.get())));
+  IndirectFittingModel::addWorkspace(hwhmWorkspace->getName(),
+                                     Spectra(createSpectra(spectrum.get())));
 }
 
 void JumpFitModel::removeWorkspace(TableDatasetIndex index) {
   m_jumpParameters.erase(getWorkspace(index)->getName());
-  IndirectFittingModel::removeFittingData(index);
+  IndirectFittingModel::removeWorkspace(index);
 }
 
 JumpFitParameters &
@@ -304,7 +308,7 @@ void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
 }
 
 void JumpFitModel::setFitType(const std::string &fitType) {
-  m_fitType = fitType;
+  m_fitString = fitType;
 }
 
 bool JumpFitModel::zeroWidths(TableDatasetIndex dataIndex) const {
@@ -325,10 +329,6 @@ bool JumpFitModel::isMultiFit() const {
   if (numberOfWorkspaces() == TableDatasetIndex{0})
     return false;
   return !allWorkspacesEqual(getWorkspace(TableDatasetIndex{0}));
-}
-
-std::vector<std::string> JumpFitModel::getSpectrumDependentAttributes() const {
-  return {};
 }
 
 std::vector<std::string>
@@ -367,37 +367,9 @@ JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
   return boost::none;
 }
 
-std::string JumpFitModel::sequentialFitOutputName() const {
-  if (isMultiFit())
-    return "MultiFofQFit_seq" + m_fitType + "_Results";
-  return constructOutputName("Seq");
-}
-
-std::string JumpFitModel::simultaneousFitOutputName() const {
-  if (isMultiFit())
-    return "MultiFofQFit_sim" + m_fitType + "_Results";
-  return constructOutputName("Sim");
-}
-
-std::string JumpFitModel::singleFitOutputName(TableDatasetIndex index,
-                                              WorkspaceIndex spectrum) const {
-  return createSingleFitOutputName("%1%_FofQFit_" + m_fitType + "_s%2%_Results",
-                                   index, spectrum);
-}
-
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
-
-std::string
-JumpFitModel::constructOutputName(const std::string &batchType) const {
-  auto const name = createOutputName(
-      "%1%_FofQFit_" + batchType + "_" + m_fitType, "", TableDatasetIndex{0});
-  auto const position = name.find("_Result");
-  if (position != std::string::npos)
-    return name.substr(0, position) + name.substr(position + 7, name.size());
-  return name;
-}
 
 bool JumpFitModel::allWorkspacesEqual(
     const Mantid::API::MatrixWorkspace_sptr &workspace) const {

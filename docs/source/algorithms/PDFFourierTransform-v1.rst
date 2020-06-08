@@ -144,14 +144,14 @@ Usage
 
 **Example - PDF transformation examples:**
 
-.. testcode:: ExPDFFouurierTransform
+.. testcode:: ExPDFFourierTransform
 
     # Simulates Load of a workspace with all necessary parameters
     import numpy as np;
     xx = np.array(range(0,100))*0.1
     yy = np.exp(-(2.0 * xx)**2)
     ws = CreateWorkspace(DataX=xx, DataY=yy, UnitX='MomentumTransfer')
-    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)')   
+    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)', Version=1)
 
     # Look at sample results:
     print('part of S(Q) and its correlation function')
@@ -159,14 +159,14 @@ Usage
        print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
 
-.. testcleanup:: ExPDFFouurierTransform
+.. testcleanup:: ExPDFFourierTransform
 
    DeleteWorkspace(ws)
    DeleteWorkspace(Rt)   
 
 **Output:**
 
-.. testoutput:: ExPDFFouurierTransform
+.. testoutput:: ExPDFFourierTransform
 
    part of S(Q) and its correlation function
    ! 0.00 ! 1.000000 ! 0.317333 ! -3.977330 !

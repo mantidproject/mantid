@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
@@ -20,6 +21,7 @@
 #include <memory>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -256,6 +258,78 @@ public:
     TS_ASSERT_THROWS(
         alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument),
         std::invalid_argument &);
+  }
+
+  void test_GetUBFromPeaksWorkspace() {
+
+    // integrate peak table having altered the UB
+    // should find a new UB and overwrite it with the found UB (same as initial)
+    OrientedLattice lattice = m_peaksWS->mutableSample().getOrientedLattice();
+    auto initialUB = lattice.getUB();
+    // make tmp UB identity
+    Matrix<double> tmpUB(initialUB.numRows(), initialUB.numRows(), true);
+    lattice.setUB(tmpUB);
+    // run algorithm without taking UB from ws
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_eventWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    alg.setProperty("GetUBFromPeaksWorkspace", false);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    // the UB of peak_ws should be overwritten with initial UB
+    lattice = m_peaksWS->mutableSample().getOrientedLattice();
+    auto UB = lattice.getUB();
+    TS_ASSERT(UB.equals(initialUB, 1e-15));
+
+    // clone peaks workspace to copy instrument and sample etc.
+    const auto &algManager = AlgorithmManager::Instance();
+    auto cloneWorkspace = algManager.createUnmanaged("CloneWorkspace");
+    cloneWorkspace->setChild(true);
+    cloneWorkspace->initialize();
+    cloneWorkspace->setProperty("InputWorkspace", m_peaksWS);
+    cloneWorkspace->setPropertyValue("OutputWorkspace", "tmp_peaksWS");
+    cloneWorkspace->execute();
+    Workspace_sptr tmp = cloneWorkspace->getProperty("OutputWorkspace");
+    auto tmp_peaksWS = std::dynamic_pointer_cast<PeaksWorkspace>(tmp);
+    // remove all but first peak
+    std::vector<int> irem(tmp_peaksWS->getNumberPeaks() - 1);
+    std::iota(irem.begin(), irem.end(), 1); // [1:n]
+    tmp_peaksWS->removePeaks(irem);
+    // run algortihm but with getUB true
+    IntegrateEllipsoids alg_getUB;
+    alg_getUB.setChild(true);
+    alg_getUB.setRethrows(true);
+    alg_getUB.initialize();
+    alg_getUB.setProperty("InputWorkspace", m_eventWS);
+    alg_getUB.setProperty("PeaksWorkspace", tmp_peaksWS);
+    alg_getUB.setProperty("GetUBFromPeaksWorkspace", true);
+    alg_getUB.setPropertyValue("OutputWorkspace", "dummy");
+    // check execution doesn't throw error
+    // no minimum num peaks as don't construct new UB
+    TS_ASSERT_THROWS_NOTHING(alg_getUB.execute());
+    // check that integrated intensity is same
+    // i.e. integrating same area in Q space
+    PeaksWorkspace_sptr integratedPeaksWS_getUB =
+        alg_getUB.getProperty("OutputWorkspace");
+    const auto &peak = integratedPeaksWS->getPeak(0);
+    const auto &peak_getUB = integratedPeaksWS_getUB->getPeak(0);
+    TS_ASSERT_DELTA(peak.getIntensity(), peak_getUB.getIntensity(), 1e-15);
+
+    // clear the UB and re-run (should throw error)
+    tmp_peaksWS->mutableSample().clearOrientedLattice();
+    IntegrateEllipsoids alg_noUB;
+    alg_noUB.setChild(true);
+    alg_noUB.setRethrows(true);
+    alg_noUB.initialize();
+    alg_noUB.setProperty("InputWorkspace", m_eventWS);
+    alg_noUB.setProperty("PeaksWorkspace", tmp_peaksWS);
+    alg_noUB.setProperty("GetUBFromPeaksWorkspace", true);
+    alg_noUB.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS(alg_noUB.execute(), std::runtime_error);
   }
 
   void test_execution_events() {

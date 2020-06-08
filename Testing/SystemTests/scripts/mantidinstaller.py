@@ -13,7 +13,11 @@ import sys
 import subprocess
 import time
 
+# global script path
 scriptLog = None
+# distributions
+RPMBASED = ['redhat', 'centos', 'fedora']
+DEBBASED = ['ubuntu', 'debian']
 
 
 def createScriptLog(path):
@@ -83,10 +87,10 @@ def get_installer(package_dir, do_install=True):
     if system == 'Windows':
         return NSISInstaller(package_dir, do_install)
     elif system == 'Linux':
-        dist = platform.dist()
-        if dist[0] == 'Ubuntu':
+        dist = linux_distro_distributor().lower()
+        if any(map(lambda name: name in dist, DEBBASED)):
             return DebInstaller(package_dir, do_install)
-        elif dist[0].lower() == 'redhat' or dist[0].lower() == 'fedora' or dist[0].lower() == 'centos':
+        elif any(map(lambda name: name in dist, RPMBASED)):
             return RPMInstaller(package_dir, do_install)
         else:
             scriptfailure('Unknown Linux flavour: %s' % str(dist))
@@ -96,15 +100,24 @@ def get_installer(package_dir, do_install=True):
         raise scriptfailure("Unsupported platform")
 
 
+def linux_distro_distributor():
+    """Extract the distributor for the current Linux distribution
+    """
+    try:
+        lsb_descr = subprocess.check_output('lsb_release --id', shell=True,
+                                            stderr=subprocess.STDOUT).decode('utf-8')
+        return lsb_descr.strip()[len('Distributor ID:')+1:].strip()
+    except subprocess.CalledProcessError as exc:
+        return f'Unknown distribution: lsb_release --id failed {exc}'
+
+
 def run(cmd):
     """Run a command in a subprocess"""
     try:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        stdout, stderr = p.communicate()
-        if p.returncode != 0:
-            raise Exception('Returned with code '+str(p.returncode)+'\n'+ stdout)
-    except Exception as err:
-        log('Error in subprocess %s:\n' % str(err))
+        stdout = subprocess.check_output(cmd, shell=True,
+                                         stderr=subprocess.STDOUT).decode('utf-8')
+    except subprocess.CalledProcessError as exc:
+        log(f'Error in subprocess {exc}')
         raise
     log(stdout)
     return stdout
@@ -281,15 +294,12 @@ class DMGInstaller(MantidInstaller):
         bin_dir = '/Applications/MantidPlot.app/Contents/MacOS'
         self.mantidPlotPath = bin_dir + '/MantidPlot'
         self.python_cmd = bin_dir + '/mantidpython'
-        # only necessary on 10.8 build
-        if int(platform.release().split('.')[0]) < 13:
-            os.environ['DYLD_LIBRARY_PATH'] = '/Applications/MantidPlot.app/Contents/MacOS'
 
     def do_install(self):
         """Mounts the dmg and copies the application into the right place.
         """
         p = subprocess.Popen(['hdiutil','attach',self.mantidInstaller],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-        p.stdin.write('yes') # This accepts the GPL
+        p.stdin.write(b'yes') # This accepts the GPL
         p.communicate()[0] # This captures (and discards) the GPL text
         mantidInstallerName = os.path.basename(self.mantidInstaller)
         mantidInstallerName = mantidInstallerName.replace('.dmg','')

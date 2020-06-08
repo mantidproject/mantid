@@ -71,7 +71,7 @@ public:
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &, TableDatasetIndex const &) override {}
   void
-  setResolution(const std::vector<std::pair<std::string, int>> &) override {}
+  setResolution(const std::vector<std::pair<std::string, size_t>> &) override {}
   void setQValues(const std::vector<double> &) override {}
 
 protected slots:

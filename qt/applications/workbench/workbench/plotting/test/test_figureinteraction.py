@@ -28,7 +28,7 @@ from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
 from mantidqt.plotting.functions import plot, pcolormesh_from_names
 from mantidqt.utils.qt.testing import start_qapplication
-from workbench.plotting.figureinteraction import FigureInteraction
+from workbench.plotting.figureinteraction import FigureInteraction, LogNorm
 
 
 @start_qapplication
@@ -390,6 +390,18 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertEqual(clim, fig.axes[0].images[0].get_clim())
         self.assertNotEqual((-0.1, 0.1), fig.axes[0].images[0].get_clim())
 
+    def test_log_maintained_when_normalisation_toggled(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="ragged_ws")
+        fig = pcolormesh_from_names([ws])
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._change_colorbar_axes(LogNorm)
+
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertTrue(isinstance(fig.axes[0].images[-1].norm, LogNorm))
+
     # Private methods
     def _create_mock_fig_manager_to_accept_right_click(self):
         fig_manager = MagicMock()
@@ -551,6 +563,13 @@ class FigureInteractionTest(unittest.TestCase):
 
         self.assertEqual(0, self.interactor._set_hover_cursor.call_count)
 
+    def test_motion_event_returns_if_fit_active(self):
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=True)
+        self.interactor._set_hover_cursor = MagicMock()
+        self.interactor.motion_event(MagicMock())
+
+        self.assertEqual(0, self.interactor._set_hover_cursor.call_count)
+
     def test_motion_event_changes_cursor_and_draws_canvas_if_any_marker_is_moving(self):
         markers = [MagicMock(), MagicMock(), MagicMock()]
         for marker in markers:
@@ -560,6 +579,7 @@ class FigureInteractionTest(unittest.TestCase):
         event.ydata = 2
         self.interactor.markers = markers
         self.interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=False)
         self.interactor._set_hover_cursor = MagicMock()
 
         self.interactor.motion_event(event)
@@ -576,6 +596,7 @@ class FigureInteractionTest(unittest.TestCase):
         event.ydata = 2
         self.interactor.markers = markers
         self.interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=False)
         self.interactor._set_hover_cursor = MagicMock()
 
         self.interactor.motion_event(event)
@@ -612,6 +633,23 @@ class FigureInteractionTest(unittest.TestCase):
         event = MagicMock()
         self.interactor.mpl_redraw_annotations(event)
         self.assertEqual(1, self.interactor.redraw_annotations.call_count)
+
+    def test_toggle_normalisation_on_contour_plot_maintains_contour_line_colour(self):
+        from mantidqt.plotting.functions import plot_contour
+        from mantid.plots.legend import convert_color_to_hex
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="test_ws")
+        fig = plot_contour([ws])
+
+        for col in fig.get_axes()[0].collections:
+            col.set_color("#ff9900")
+
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
+                            for col in fig.get_axes()[0].collections))
 
 
 if __name__ == '__main__':

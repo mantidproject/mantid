@@ -125,8 +125,10 @@ set(INC_FILES
     inc/MantidDataObjects/SplittersWorkspace.h
     inc/MantidDataObjects/TableColumn.h
     inc/MantidDataObjects/TableWorkspace.h
+    inc/MantidDataObjects/TableWorkspace_fwd.h
     inc/MantidDataObjects/VectorColumn.h
     inc/MantidDataObjects/Workspace2D.h
+    inc/MantidDataObjects/Workspace2D_fwd.h
     inc/MantidDataObjects/WorkspaceCreation.h
     inc/MantidDataObjects/WorkspaceSingleValue.h)
 

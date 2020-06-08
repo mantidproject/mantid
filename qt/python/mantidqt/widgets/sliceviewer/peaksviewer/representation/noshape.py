@@ -29,10 +29,10 @@ class NonIntegratedPeakRepresentation(object):
         """
         peak_origin = slice_info.transform(peak_origin)
         x, y, z = peak_origin
-        alpha = compute_alpha(z, slice_info.value, slice_info.width)
+        alpha = compute_alpha(z, slice_info.z_value, slice_info.z_width)
         painted = None
         if alpha > 0.0:
-            effective_radius = slice_info.width * cls.VIEW_FRACTION
+            effective_radius = slice_info.z_width * cls.VIEW_FRACTION
             painted = Painted(
                 painter, (painter.cross(x, y, effective_radius, alpha=alpha, color=fg_color), ))
 

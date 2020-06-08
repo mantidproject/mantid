@@ -30,6 +30,7 @@ ALG_BAD_PARAMS = {
     "MuscatFunc(v1)":("dQ", "dW"),
     "OptimizeCrystalPlacement(v1)":("nPeaks", "nParams", "nIndexed"),
     "PDFFourierTransform(v1)":("rho0"),
+    "PDFFourierTransform(v2)":("rho0"),
     "PoldiAutoCorrelation(v5)":("wlenmin", "wlenmax"),
     "PoldiLoadChopperSlits(v1)":("nbLoadedSlits"),
     "PoldiLoadSpectra(v1)":("nbSpectraLoaded"),

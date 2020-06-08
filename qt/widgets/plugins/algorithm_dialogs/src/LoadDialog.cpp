@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
@@ -27,7 +27,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using MantidQt::API::MWRunFiles;
+using MantidQt::API::FileFinderWidget;
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -340,7 +340,7 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
 
   // Boolean properties use the name labels differently
   if (const auto *fileType = dynamic_cast<const FileProperty *>(prop)) {
-    auto *fileFinder = new MWRunFiles(parent);
+    auto *fileFinder = new FileFinderWidget(parent);
     inputWidget = fileFinder;
     fileFinder->setLabelText(propName);
     fileFinder->isForRunFiles(false);

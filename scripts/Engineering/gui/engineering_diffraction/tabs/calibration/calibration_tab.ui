@@ -94,7 +94,7 @@ QGroupBox:title {
            </widget>
           </item>
           <item row="5" column="0" colspan="3">
-           <widget class="FileFinder" name="finder_path" native="true">
+           <widget class="FileFinderWidget" name="finder_path" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -129,7 +129,7 @@ QGroupBox:title {
            </spacer>
           </item>
           <item row="1" column="0" colspan="3">
-           <widget class="FileFinder" name="finder_vanadium" native="true">
+           <widget class="FileFinderWidget" name="finder_vanadium" native="true">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -152,7 +152,7 @@ QGroupBox:title {
            </widget>
           </item>
           <item row="2" column="0" colspan="3">
-           <widget class="FileFinder" name="finder_sample" native="true">
+           <widget class="FileFinderWidget" name="finder_sample" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -248,9 +248,9 @@ QGroupBox:title {
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FileFinder</class>
+   <class>FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>mantidqt.widgets.filefinder</header>
+   <header>mantidqt.widgets.filefinderwidget</header>
    <container>1</container>
   </customwidget>
   <customwidget>

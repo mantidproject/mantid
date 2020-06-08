@@ -16,6 +16,7 @@
 #include <QJsonObject>
 #include <QTextStream>
 #endif
+#include <stdexcept>
 
 namespace {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

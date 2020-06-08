@@ -8,7 +8,7 @@
 # std imports
 import math
 import numpy as np
-import collections
+from collections.abc import Sequence
 
 # 3rd party imports
 from matplotlib.gridspec import GridSpec
@@ -74,7 +74,7 @@ def figure_title(workspaces, fig_num):
     def wsname(w):
         return w.name() if hasattr(w, 'name') else w
 
-    if isinstance(workspaces, str) or not isinstance(workspaces, collections.Sequence):
+    if isinstance(workspaces, str) or not isinstance(workspaces, Sequence):
         # assume a single workspace
         first = workspaces
     else:
@@ -279,7 +279,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     else:
         fig, _, _, _ = create_subplots(axes_num)
 
-    if not ax_properties:
+    if not ax_properties and not overplot:
         ax_properties = {}
         if ConfigService.getString("plots.xAxesScale").lower() == 'log':
             ax_properties['xscale'] = 'log'

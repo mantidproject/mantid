@@ -13,10 +13,9 @@
 
 	<!-- following parameters are saved to the run log,
 	     parameters are entered as log_[log_name] and the 
-	     and the value is: "hdf_tag,scale[,def_value]"
-       if the default value is not included and the
-       parameter is not in the hdf file no log value is
-       recorded-->
+	     and the value is: "hdf_tag,scale,def_value"
+		the default value determines if the value is
+		interpreted as a numeric or string-->
     <parameter name="log_sample_aperture" type="string">
       <value val="sample/sample_aperture, 1.0, 0.0"/>
     </parameter>		 
@@ -52,9 +51,8 @@
     <parameter name="log_L2_det_value" type="string">
       <value val="instrument/L2_det, 0.001, 33.1562"/>
     </parameter>	
-    <!-- no valid default value --> 
     <parameter name="log_Ltof_det_value" type="string">
-      <value val="instrument/Ltof_det, 0.001"/>
+      <value val="instrument/Ltof_det, 0.001, 0.0"/>
     </parameter>	
     <parameter name="log_L1" type="string">
       <value val="instrument/L1, 0.001, 16.671"/>
@@ -84,6 +82,13 @@
     </parameter>
 	<parameter name="log_D_curtaind_value" type="string">
       <value val="instrument/detector/curtaind, 0.001, 0.3978"/>
+    </parameter>
+
+	<parameter name="log_rough_40" type="string">
+      <value val="instrument/shutters/rough_40, 1, in"/>
+    </parameter>	
+	<parameter name="log_rough_100" type="string">
+      <value val="instrument/shutters/rough_100, 1, in"/>
     </parameter>
 	
 	<!-- parameter to be added to log that is not in the hdf file -->
