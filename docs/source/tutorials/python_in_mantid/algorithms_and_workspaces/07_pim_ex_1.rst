@@ -32,7 +32,7 @@ Using SNS Data
 
 #. :ref:`algm-LoadEventNexus` - Load the given POWGEN data set, PG3_4871. If you need to reduce the number of events loaded, select only the first 4000 seconds of the run.
 #. View the number of events in the logging window with the command `logger.notice(message)` (The function to get the number of events from a workspace called `ws` is `ws.getNumberEvents()`.
-#. :ref:`algm-FilterBadPulses` - Remove events that occurred while the accelerator was resetting. You can view the logs by right clicking on the workspace and selecting 'Sample logs...'
+#. :ref:`algm-FilterBadPulses` - Remove events that occurred while the accelerator was resetting, by setting the LowerCutoff to 99.5 % of the average beam proton charge.
 #. :ref:`algm-AlignDetectors` - Convert to d-spacing using the supplied calibration file called PG3_golden.cal
 #. :ref:`algm-Rebin` - Bin the data in d-spacing from 1.4 to 8 angstroms using logarithmic binning of .0004.
 #. :ref:`algm-DiffractionFocussing` - Focus the data in the workspace using the same cal file as the previous step (PG3_golden.cal).

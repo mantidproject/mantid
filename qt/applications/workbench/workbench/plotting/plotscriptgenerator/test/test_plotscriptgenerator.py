@@ -40,8 +40,8 @@ SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
                  "\n"
                  "plt.show()"
                  "\n"
-                 "# Scripting Plots in Mantid: https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
-
+                 "# Scripting Plots in Mantid: \
+                 https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
 class PlotScriptGeneratorTest(unittest.TestCase):
 
