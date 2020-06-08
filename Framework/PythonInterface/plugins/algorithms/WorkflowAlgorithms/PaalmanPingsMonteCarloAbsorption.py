@@ -322,7 +322,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
         sample_wave_ws = self._convert_to_wavelength(self._sample_ws)
         self._set_beam(sample_wave_ws)
-        sample_wave_ws.setSample(Sample())
         self._set_sample(sample_wave_ws, ['Sample'])
         monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                     startProgress=0, endProgress=progess_steps)
