@@ -13,7 +13,10 @@ import sys
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
-import ui.ui_stitcher
+from mantidqt.utils.qt import load_ui
+Ui_Frame, _ = load_ui(__file__, '../../../ui/stitcher.ui')
+
+
 
 from mantid.plots._compatability import plotSpectrum
 
@@ -39,7 +42,7 @@ class StitcherWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None):
         super(StitcherWidget, self).__init__(parent, state, settings)
 
-        class DataFrame(QFrame, ui.ui_stitcher.Ui_Frame):
+        class DataFrame(QFrame, Ui_Frame):
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
                 self.setupUi(self)
