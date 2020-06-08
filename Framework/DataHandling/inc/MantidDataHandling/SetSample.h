@@ -69,7 +69,7 @@ private:
                         const Kernel::PropertyManager &args,
                         const std::string &flavour);
   void validateMaterial(std::map<std::string, std::string> &errors,
-                        const Kernel::PropertyManager &args,
+                        const Kernel::PropertyManager &inputArgs,
                         const std::string &flavour);
   void assertNonNegative(std::map<std::string, std::string> &errors,
                          const Kernel::PropertyManager &args,

@@ -375,7 +375,7 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
 /**
  * @brief Validates the material
  * @param errors map
- * @param args material arguments
+ * @param inputArgs material arguments
  * @param flavour sample or container
  */
 void SetSample::validateMaterial(std::map<std::string, std::string> &errors,
