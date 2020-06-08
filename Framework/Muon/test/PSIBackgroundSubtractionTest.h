@@ -72,7 +72,7 @@ private:
   calculateBackgroundFromFit(IAlgorithm_sptr &,
                              const std::pair<double, double> &range,
                              const int &index) override {
-    (void) range,index;
+    (void)range, index;
     return std::make_tuple(m_background, m_fitQuality);
   }
   double m_background{0.00};
