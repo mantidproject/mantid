@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import qtpy
 
+from ErrorReporter.details_dialog import MoreDetailsDialog
+
 if qtpy.PYQT5:  # noqa
     from ErrorReporter import resources_qt5  # noqa
 elif qtpy.PYQT4:  # noqa
@@ -75,6 +77,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
+        # Dialog window to show more details of the crash to the user.
+        self.details_dialog = MoreDetailsDialog(self)
+
     def quit(self):
         self.quit_signal.emit()
 
@@ -128,6 +133,11 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setEscapeButton(QMessageBox.Ok)
         msg.exec_()
+
+    def display_more_details(self, mantid_application, stacktrace):
+        self.details_dialog.set_stacktrace_text(stacktrace)
+        self.details_dialog.set_version_text(mantid_application)
+        self.details_dialog.show()
 
     def set_report_callback(self, callback):
         self.action.connect(callback)

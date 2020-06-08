@@ -19,6 +19,7 @@ class ErrorReporterPresenter(object):
         self._application = application
         self._traceback = traceback
         self._view.set_report_callback(self.error_handler)
+        self._view.moreDetailsButton.clicked.connect(self.show_more_details)
 
         if not traceback:
             traceback_file_path = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace.txt'.format(application))
@@ -91,3 +92,9 @@ class ErrorReporterPresenter(object):
 
     def show_view_blocking(self):
         self._view.exec_()
+
+    def show_more_details(self):
+        stacktrace_text = ''
+        for line in self._traceback:
+            stacktrace_text += line + '\n'
+        self._view.display_more_details(self._application, stacktrace_text)
