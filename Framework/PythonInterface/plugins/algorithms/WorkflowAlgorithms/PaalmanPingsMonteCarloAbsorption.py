@@ -183,8 +183,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleOuterRadius', 'Sample Shape')
 
         # Sample Material
-        self.declareProperty(name='SampleMaterialAlreadyDefined', defaultValue=False,
-                             doc='Select this option if sample material has already been defined')
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              doc='Chemical formula for the sample material')
         self.declareProperty(name='SampleCoherentXSection', defaultValue=0.0,
@@ -209,7 +207,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the sample Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
-        self.setPropertyGroup('SampleMaterialAlreadyDefined', 'Sample Material')
         self.setPropertyGroup('SampleChemicalFormula', 'Sample Material')
         self.setPropertyGroup('SampleCoherentXSection', 'Sample Material')
         self.setPropertyGroup('SampleIncoherentXSection', 'Sample Material')
@@ -269,8 +266,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerOuterRadius', 'Container Shape')
 
         # Container Material
-        self.declareProperty(name='ContainerMaterialAlreadyDefined', defaultValue=False,
-                             doc='Select this option if container material has already been defined')
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
                              doc='Chemical formula for the container material')
         self.declareProperty(name='ContainerCoherentXSection', defaultValue=0.0,
@@ -295,7 +290,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the container Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
-        self.setPropertyGroup('ContainerMaterialAlreadyDefined', 'Container Material')
         self.setPropertyGroup('ContainerChemicalFormula', 'Container Material')
         self.setPropertyGroup('ContainerCoherentXSection', 'Container Material')
         self.setPropertyGroup('ContainerIncoherentXSection', 'Container Material')
@@ -304,7 +298,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerNumberDensityUnit', 'Container Material')
         self.setPropertyGroup('ContainerDensity', 'Container Material')
 
-        self.setPropertySettings('ContainerMaterialAlreadyDefined', container_condition)
         self.setPropertySettings('ContainerChemicalFormula', container_condition)
         self.setPropertySettings('ContainerDensityType', container_condition)
         self.setPropertySettings('ContainerDensity', container_condition)
@@ -393,7 +386,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     def _set_sample(self, ws, components, can_as_sample=False):
 
         # this is to ensure that there is no historic remnant of the sample or container that can affect the attenuation
-        # from the other hand this does not allow for sample or container shape or material to be already defined
+        # from the other hand this does not allow for sample nor container shape nor material to be already defined
         ws.setSample(Sample())
         set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
         set_sample_alg.setProperty("InputWorkspace", ws)
@@ -422,22 +415,21 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
             set_sample_alg.setProperty("Geometry", sample_geometry)
 
-            if not self._sample_material_defined:
-                sample_material = dict()
-                if self._set_sample_method == 'Chemical Formula':
-                    sample_material['ChemicalFormula'] = self._sample_chemical_formula
-                else:
-                    sample_material['CoherentXSection'] = self._sample_coherent_cross_section
-                    sample_material['IncoherentXSection'] = self._sample_incoherent_cross_section
-                    sample_material['AttenuationXSection'] = self._sample_attenuation_cross_section
-                    sample_material['ScatteringXSection'] = self._sample_coherent_cross_section + self._sample_incoherent_cross_section
+            sample_material = dict()
+            if self._set_sample_method == 'Chemical Formula':
+                sample_material['ChemicalFormula'] = self._sample_chemical_formula
+            else:
+                sample_material['CoherentXSection'] = self._sample_coherent_cross_section
+                sample_material['IncoherentXSection'] = self._sample_incoherent_cross_section
+                sample_material['AttenuationXSection'] = self._sample_attenuation_cross_section
+                sample_material['ScatteringXSection'] = self._sample_coherent_cross_section + self._sample_incoherent_cross_section
 
-                if self._sample_density_type == 'Mass Density':
-                    sample_material['SampleMassDensity'] = self._sample_density
-                if self._sample_density_type == 'Number Density':
-                    sample_material['SampleNumberDensity'] = self._sample_density
-                    sample_material['NumberDensityUnit'] = self._sample_number_density_unit
-                set_sample_alg.setProperty("Material", sample_material)
+            if self._sample_density_type == 'Mass Density':
+                sample_material['SampleMassDensity'] = self._sample_density
+            if self._sample_density_type == 'Number Density':
+                sample_material['SampleNumberDensity'] = self._sample_density
+                sample_material['NumberDensityUnit'] = self._sample_number_density_unit
+            set_sample_alg.setProperty("Material", sample_material)
 
         if 'Container' in components:
             container_geometry = dict()
@@ -473,27 +465,26 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             else:
                 set_sample_alg.setProperty("ContainerGeometry", container_geometry)
 
-            if not self._container_material_defined:
-                container_material = dict()
-                if self._set_can_method == 'Chemical Formula':
-                    container_material['ChemicalFormula'] = self._container_chemical_formula
-                else:
-                    container_material['CoherentXSection'] = self._container_coherent_cross_section
-                    container_material['IncoherentXSection'] = self._container_incoherent_cross_section
-                    container_material['AttenuationXSection'] = self._container_attenuation_cross_section
-                    container_material[
-                        'ScatteringXSection'] = self._container_coherent_cross_section + self._container_incoherent_cross_section
+            container_material = dict()
+            if self._set_can_method == 'Chemical Formula':
+                container_material['ChemicalFormula'] = self._container_chemical_formula
+            else:
+                container_material['CoherentXSection'] = self._container_coherent_cross_section
+                container_material['IncoherentXSection'] = self._container_incoherent_cross_section
+                container_material['AttenuationXSection'] = self._container_attenuation_cross_section
+                container_material[
+                    'ScatteringXSection'] = self._container_coherent_cross_section + self._container_incoherent_cross_section
 
-                if self._container_density_type == 'Mass Density':
-                    container_material['SampleMassDensity'] = self._container_density
-                if self._container_density_type == 'Number Density':
-                    container_material['SampleNumberDensity'] = self._container_density
-                    container_material['NumberDensityUnit'] = self._container_number_density_unit
+            if self._container_density_type == 'Mass Density':
+                container_material['SampleMassDensity'] = self._container_density
+            if self._container_density_type == 'Number Density':
+                container_material['SampleNumberDensity'] = self._container_density
+                container_material['NumberDensityUnit'] = self._container_number_density_unit
 
-                if can_as_sample:
-                    set_sample_alg.setProperty("Material", container_material)
-                else:
-                    set_sample_alg.setProperty("ContainerMaterial", container_material)
+            if can_as_sample:
+                set_sample_alg.setProperty("Material", container_material)
+            else:
+                set_sample_alg.setProperty("ContainerMaterial", container_material)
 
         set_sample_alg.execute()
 
@@ -532,7 +523,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         if self._emode == 'Indirect' or 'Direct':
             self._efixed = self._get_efixed()
 
-        self._sample_material_defined = self.getProperty('SampleMaterialAlreadyDefined').value
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
         self._sample_coherent_cross_section = self.getPropertyValue('SampleCoherentXSection')
         self._sample_incoherent_cross_section = self.getPropertyValue('SampleIncoherentXSection')
@@ -542,7 +532,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._sample_density = self.getProperty('SampleDensity').value
 
         if self._container_ws:
-            self._container_material_defined = self.getProperty('ContainerMaterialAlreadyDefined').value
             self._container_chemical_formula = self.getPropertyValue('ContainerChemicalFormula')
             self._container_coherent_cross_section = self.getPropertyValue('ContainerCoherentXSection')
             self._container_incoherent_cross_section = self.getPropertyValue('ContainerIncoherentXSection')
