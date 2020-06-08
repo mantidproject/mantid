@@ -53,34 +53,21 @@ def generate_script(fig, exclude_headers=False):
     """
     plot_commands = []
     for ax in fig.get_axes():
-        if not isinstance(ax, MantidAxes) or not curve_in_ax(ax):
+        if not isinstance(ax, MantidAxes):
             continue
         ax_object_var = get_axes_object_variable(ax)
-        plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
+        if figure_type(fig) in [FigureType.Image]:
+            plot_commands.extend(get_plot_2d_cmd(ax, ax_object_var))  # ax.imshow or pcolormesh
+        else:
+            if not curve_in_ax(ax):
+                continue
+            plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
         plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
         plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
         plot_commands.append('')
-
-    #TODO NEATEN THIS UP AND MERGE WITH ABOVE IF POSSIBLE
-    if figure_type(fig) in [FigureType.Image]:
-        for ax in fig.get_axes():
-            # These are the two methods used to create image graphs in workbench
-            # if use_imshow(ws):
-            #     pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
-            # else:
-            #     pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
-            ax_object_var = get_axes_object_variable(ax)
-            if isinstance(ax, MantidAxes):
-                plot_commands.extend(get_plot_2d_cmd(ax, ax_object_var))  # ax.plot
-                plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
-                plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
-                plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
-                plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
-                plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
-                plot_commands.append('')
 
     if not plot_commands:
         return
@@ -106,8 +93,7 @@ def get_plot_2d_cmd(ax, ax_object_var):
     """Get commands such as imshow or pcolormesh"""
     cmds = []
     for artist in ax.get_tracked_artists():
-        cmds.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_var,
-                                            cmd=generate_plot_2d_command(artist)))
+        cmds.extend(generate_plot_2d_command(artist,ax_object_var))
     return cmds
 
 def get_axis_limit_cmds(ax, ax_object_var):

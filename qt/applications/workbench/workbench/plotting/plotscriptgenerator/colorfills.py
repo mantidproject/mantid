@@ -14,8 +14,8 @@ from mantid.plots.modest_image import ModestImage
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, get_ax_from_curve
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
 
-BASE_IMSHOW_COMMAND = "imshow({})"
-BASE_PCOLORMESH_COMMAND = "pcolormesh({})"
+BASE_IMSHOW_COMMAND = "imshow"
+BASE_PCOLORMESH_COMMAND = "pcolormesh"
 PLOT_KWARGS = [
     'alpha', 'label', 'zorder']
 
@@ -26,7 +26,8 @@ mpl_default_kwargs = {
 }
 
 
-def generate_plot_2d_command(artist):
+def generate_plot_2d_command(artist,ax_object_var):
+    lines = []
     pos_args = get_plot_command_pos_args(artist)
     kwargs = get_plot_command_kwargs(artist)
     if isinstance(artist, ModestImage):
@@ -34,7 +35,12 @@ def generate_plot_2d_command(artist):
     else:
         base_command = BASE_PCOLORMESH_COMMAND
     arg_string = convert_args_to_string(pos_args, kwargs)
-    return base_command.format(arg_string)
+    lines.append("cfill = {ax_obj}.{cmd}({args})".format(ax_obj=ax_object_var,
+                                            cmd=base_command,
+                                            args=arg_string))
+    if artist.colorbar:
+        lines.append("cbar = fig.colorbar(cfill)")
+    return lines
 
 def get_plot_command_pos_args(artist):
     ax = artist.axes
@@ -67,7 +73,7 @@ def _remove_kwargs_if_default(kwargs):
 
 def _get_plot_command_kwargs_from_colorfill(artist):
     props = {key: artist.properties()[key] for key in PLOT_KWARGS}
-    props ['CMAP'] = artist.colorbar.cmap.name
+    props ['cmap'] = artist.colorbar.cmap.name
     if isinstance(artist, ModestImage):
         props['aspect'] = 'auto'
         props['origin'] = 'lower'
