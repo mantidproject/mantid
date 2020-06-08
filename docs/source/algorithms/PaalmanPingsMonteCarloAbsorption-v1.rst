@@ -6,6 +6,7 @@
 
 .. properties::
 
+.. note:: This algorithm does not support predefined shapes or materials yet.
 
 Description
 -----------
