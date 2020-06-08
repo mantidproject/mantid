@@ -144,6 +144,3 @@ C - 2D and 3D Plot ILL Data
     ax3d[1].set_title("Wireframe")
 
     #plt.show()# uncomment to show the plots
-
-
-

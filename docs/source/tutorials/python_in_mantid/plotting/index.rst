@@ -1,4 +1,4 @@
-.. _pim_controlling_mantid:
+.. _pim_plotting:
 
 ==============================
 Controlling Mantid with Python

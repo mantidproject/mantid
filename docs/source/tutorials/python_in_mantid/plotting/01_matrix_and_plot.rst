@@ -4,6 +4,8 @@
 Matrix and Plot Control
 =======================
 
+plotSpectrum and plotBin
+========================
 
 Right-clicking a workspace from the Workspaces Toolbox and selecting **Show Data** creates a Data Matrix, which displays the underlying data in a worksheet.
 
@@ -69,6 +71,22 @@ Multiple workspaces/spectra can be plotted by providing lists within the `plotSp
     # Plot multiple spectra across multiple workspaces
     plotSpectrum([RawData1,RawData2], [0,1,3])
 
+To overplot on the same window:
+
+.. code-block:: python
+
+    RawData = Load("MAR11015")
+    
+    # Assign original plot to a window called graph_spce
+    graph_spec = plotSpectrum(RawData, 0)
+
+    # Overplot on that window, without clearing it
+    plotSpectrum(RawData, 1, window= graph_spce, clearWindow=False)
+
+
+2D Colourfill and Contour Plots
+===============================
+
 2D plots can be produced as an `image <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.imshow.html>`_ or a `pseudocolormesh <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.pcolormesh.html>`_ (for a non-regular grid):
 
 .. plot::
@@ -92,7 +110,6 @@ Multiple workspaces/spectra can be plotted by providing lists within the `plotSp
 .. plot::
    :include-source:
 
-
     ''' ----------- Pseudocolormesh > pcolormesh() ----------- '''
 
     from mantid.simpleapi import *
@@ -111,8 +128,34 @@ Multiple workspaces/spectra can be plotted by providing lists within the `plotSp
     cbar.set_label('Intensity (arb. units)') #add text to colorbar
     #fig.show()
 
+`Contour lines <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.contour.html>`_ can be overlayed on a 2D colorfill:
 
-`3D plots <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html>`_ `Surface <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#surface-plots>`_ and `Contour <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#contour-plots>`_ plots can also be created:
+.. plot::
+   :include-source:
+
+    ''' ----------- Contour overlay ----------- '''
+
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    data = Load('SANSLOQCan2D.nxs')
+
+    fig, axes = plt.subplots(subplot_kw={'projection':'mantid'})
+    c = axes.imshow(data, cmap='twilight_r', aspect='auto')
+
+    # Overlay contours
+    axes.contour(data, levels=np.linspace(10, 60, 6), colors='yellow', alpha=0.5)
+
+    cbar=fig.colorbar(c)
+    cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
+    #plt.show()
+
+
+3D Surface and Wireframe Plots
+==============================
+
+`3D plots <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html>`_ `Surface <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#surface-plots>`_ and `Wireframe <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#wireframe-plots>`_ plots can also be created:
 
 .. plot::
    :include-source:
@@ -123,11 +166,11 @@ Multiple workspaces/spectra can be plotted by providing lists within the `plotSp
     import matplotlib.pyplot as plt
 
     data = Load('MUSR00015189.nxs')
-    data = mtd['data_1']
+    data = mtd['data_1'] # Extract individual workspace from group
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_surface(data)
-    #fig.show()
+    #plt.show()
 
 .. plot::
    :include-source:
@@ -137,12 +180,11 @@ Multiple workspaces/spectra can be plotted by providing lists within the `plotSp
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
-    data = Load('MUSR00015189.nxs')
-    data = mtd['data_1']
-
+    data = Load('SANSLOQCan2D.nxs')
+    
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
-    ax.contour(data, cmap ='summer')
-    #fig.show()
+    ax.plot_wireframe(data, color='darkorange')
+    #plt.show()
 
 
 * See :ref:`here <plotting>` for custom color cycles and colormaps 

@@ -60,17 +60,3 @@ Using ILL Data
 #. Set the title for each subplot as 'Surface' and 'Wireframe'
 
 #. Remember to show the plots
-
-
-    # Get a different set of figure and axes with 3 subplots for 3D plotting
-    fig3d,ax3d = plt.subplots(ncols=2, subplot_kw={'projection':'mantid3d'}, figsize = (8,3))
-
-    # 3D plot the data, and choose colormaps and colors
-    ax3d[0].plot_surface(data, cmap='summer')
-    ax3d[1].plot_wireframe(data, color='darkmagenta')
-
-    # Add titles to the 3D plots
-    ax3d[0].set_title("Surface")
-    ax3d[1].set_title("Wireframe")
-
-    #plt.show()# uncomment to show the plots

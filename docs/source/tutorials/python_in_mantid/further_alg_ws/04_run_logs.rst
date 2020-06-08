@@ -28,13 +28,16 @@ The logs recorded during a run are also stored on the Run object and can be acce
 Most logs are a time-series property with the attributes described here. The values at each time can be accessed individually or as a collection.
 
 
+.. figure:: /images/SineWaveLogFiltering.png
+   :alt: SineWaveLogFiltering
+   :align: right
+
+
 Filtering
 =========
 
 Note that you may find the algorithms :ref:`algm-FilterByLogValue` or :ref:`algm-FilterByTime`
-The LogFilter class can be used to filter logs using other logs. For instance, a log value describes a sine wave
-
-#SineWaveLogFiltering.png
+The LogFilter class can be used to filter logs using other logs. For instance, a log value describes a sine wave (Right-click > Show Sample logs on the Loaded ws below).
 
 Two additional logs mask out the positive and negative portions of this log. We can filter according to either.
 
