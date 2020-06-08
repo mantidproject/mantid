@@ -49,8 +49,8 @@ Usage
     input_workspace = CreateWorkspace(time, counts)
     input_workspace.setYUnit("Counts")
     run = input_workspace.getRun()
-    run.addProperty("First good spectra 0","0","None",True)
-    run.addProperty("Last good spectra 0","10","None",True)
+    run.addProperty("First good spectra 0",10,"None",True)
+    run.addProperty("Last good spectra 0",99,"None",True)
     workspace_copy = input_workspace.clone()
 
     # Run PSIBackgroundSubtraction Algorithm
@@ -58,8 +58,9 @@ Usage
 
     # Find the difference between the workspaces
     workspace_diff = Minus(workspace_copy, input_workspace)
+    diffs = np.round(workspace_diff.readY(0),4)
     # The counts in workspace diff should be a flat line corresponding to the background
-    print("Differences in counts are: {}".format(workspace_diff.dataY(0)))
+    print("Differences in counts are: {}".format(diffs))
 
 Output:
 

@@ -101,11 +101,11 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
       errors["InputWorkspace"] +=
           "\n Input Workspace should have last good data > first good data. ";
     }
-    if (firstGood <= 0) {
+    if (firstGood < 0) {
       errors["InputWorkspace"] +=
           "\n Input Workspace should have first good data > 0. ";
     }
-    if (lastGood > int(inputWS->readX(index).size())) {
+    if (lastGood >= int(inputWS->readX(index).size())) {
       errors["InputWorkspace"] +=
           "\n Input Workspace should have last good data < number of bins. ";
     }
