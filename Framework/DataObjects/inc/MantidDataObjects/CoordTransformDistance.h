@@ -41,8 +41,8 @@ public:
   CoordTransformDistance(
       const size_t inD, const coord_t *center, const bool *dimensionsUsed,
       const size_t outD = 1,
-      const std::vector<Kernel::V3D> directions = std::vector<Kernel::V3D>(0),
-      const std::vector<double> abcRadii = std::vector<double>(0, 0.0));
+      const std::vector<Kernel::V3D> &eigenvects = std::vector<Kernel::V3D>(0),
+      const std::vector<double> &eigenvals = std::vector<double>(0, 0.0));
 
   CoordTransform *clone() const override;
   std::string toXMLString() const override;
@@ -51,10 +51,10 @@ public:
   void apply(const coord_t *inputVector, coord_t *outVector) const override;
 
   /// Return the center coordinate array
-  const std::vector<coord_t> getCenter() { return m_center; }
+  const std::vector<coord_t> &getCenter() { return m_center; }
 
   /// Return the dimensions used bool array
-  const std::vector<bool> getDimensionsUsed() { return m_dimensionsUsed; }
+  const std::vector<bool> &getDimensionsUsed() { return m_dimensionsUsed; }
 
 protected:
   /// Coordinates at the center

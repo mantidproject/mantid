@@ -34,10 +34,13 @@ namespace DataObjects {
  */
 CoordTransformDistance::CoordTransformDistance(
     const size_t inD, const coord_t *center, const bool *dimensionsUsed,
-    const size_t outD, const std::vector<Kernel::V3D> eigenvects,
-    const std::vector<double> eigenvals)
+    const size_t outD, const std::vector<Kernel::V3D> &eigenvects,
+    const std::vector<double> &eigenvals)
     : CoordTransform(inD, outD) {
 
+  m_center.reserve(inD);
+  m_dimensionsUsed.reserve(inD);
+  m_eigenvals.reserve(inD);
   m_maxEigenval = 0.0;
   for (size_t d = 0; d < inD; d++) {
     m_center.push_back(center[d]);
