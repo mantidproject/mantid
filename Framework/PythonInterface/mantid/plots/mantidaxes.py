@@ -21,6 +21,7 @@ from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.table import Table
+from matplotlib.ticker import NullLocator
 from mpl_toolkits.mplot3d import Axes3D
 
 from mantid import logger
@@ -1150,6 +1151,22 @@ class MantidAxes(Axes):
                 raise RuntimeError("You have set fill to false but have given a colour.")
 
             datafunctions.waterfall_remove_fill(self)
+
+    def set_xscale(self, *args, **kwargs):
+        has_minor_ticks = not isinstance(self.xaxis.minor.locator, NullLocator)
+
+        super().set_xscale(*args, **kwargs)
+
+        if has_minor_ticks:
+            self.minorticks_on()
+
+    def set_yscale(self, *args, **kwargs):
+        has_minor_ticks = not isinstance(self.yaxis.minor.locator, NullLocator)
+
+        super().set_yscale(*args, **kwargs)
+
+        if has_minor_ticks:
+            self.minorticks_on()
 
     # ------------------ Private api --------------------------------------------------------
 

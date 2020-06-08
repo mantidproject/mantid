@@ -7,12 +7,12 @@
 #  This file is part of the mantid workbench.
 #
 #
-# std imports
 
-# 3rdparty imports
+from mantid.kernel import ConfigService
 from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
+
 from matplotlib.colors import LogNorm, Normalize
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
@@ -154,7 +154,8 @@ class AxisEditor(PropertiesEditorBase):
 
         self.lim_setter(self.limit_min, self.limit_max)
 
-        axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id)
+        which = 'both' if ConfigService.getString('plots.ShowMinorGridlines').lower() == 'on' else 'major'
+        axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
     def error_occurred(self, exc):
         # revert

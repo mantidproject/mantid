@@ -57,7 +57,7 @@ class PlotSettings(object):
         self.view.show_title.setChecked(show_title)
         self.view.show_minor_ticks.setChecked(show_minor_ticks)
         self.view.show_minor_gridlines.setEnabled(show_minor_ticks)
-        self.view.show_minor_gridlines.setEnabled(show_minor_gridlines)
+        self.view.show_minor_gridlines.setChecked(show_minor_gridlines)
 
     def setup_axes_group(self):
         x_axes_scale = ConfigService.getString(self.X_AXES_SCALE)

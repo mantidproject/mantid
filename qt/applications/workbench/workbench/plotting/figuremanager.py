@@ -24,7 +24,7 @@ from qtpy.QtGui import QImage
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
-from mantid.kernel import logger
+from mantid.kernel import logger, ConfigService
 from mantid.plots import datafunctions, MantidAxes
 from mantidqt.io import open_a_file_dialog
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -347,8 +347,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            if not any(isinstance(x, QuadMesh) for x in ax.collections):
-                ax.grid(on)
+            if not type(ax) == Axes:
+                if on:
+                    which = 'both' if ConfigService.getString('plots.ShowMinorGridlines').lower() == 'on' else 'major'
+                    ax.grid(on, which=which)
+                else:
+                    # If gridlines are being disabled, always disable major and minor.
+                    ax.grid(on, which='both')
         canvas.draw_idle()
 
     def fit_toggle(self):
