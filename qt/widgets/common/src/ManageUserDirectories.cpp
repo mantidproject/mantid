@@ -130,13 +130,6 @@ void ManageUserDirectories::loadProperties() {
                             "defaultsave.directory"))
                         .trimmed();
   m_uiForm.leDefaultSave->setText(saveDir);
-
-  //// extensions directory
-  // QString extDir = QString::fromStdString(
-  //                     Mantid::Kernel::ConfigService::Instance().getString(
-  //                         "user.python.plugins.directories"))
-  //                     .trimmed();
-  // m_uiForm.leExtensions->setText(extDir);
 }
 void ManageUserDirectories::saveProperties() {
   QString newSearchArchive = m_uiForm.cbSearchArchive->currentText().toLower();

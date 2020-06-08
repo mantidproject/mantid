@@ -249,7 +249,7 @@
             <item>
              <widget class="QPushButton" name="pbExtBrowseToDir">
               <property name="text">
-               <string>Broswse to Directory</string>
+               <string>Browse to Directory</string>
               </property>
              </widget>
             </item>
