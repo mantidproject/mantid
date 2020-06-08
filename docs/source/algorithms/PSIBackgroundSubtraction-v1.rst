@@ -48,7 +48,7 @@ Usage
     # Create workspaces
     input_workspace = CreateWorkspace(time, counts)
     input_workspace.setYUnit("Counts")
-	run = input_workspace.getRun()
+    run = input_workspace.getRun()
     run.addProperty("First good spectra 0","0","None",True)
     run.addProperty("Last good spectra 0","10","None",True)
     workspace_copy = input_workspace.clone()

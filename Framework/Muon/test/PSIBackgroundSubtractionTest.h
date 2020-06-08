@@ -27,7 +27,7 @@ MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms,
       numberOfHistograms, numberOfBins);
   ws->setYUnit("Counts");
   if (addLogs) {
-    for (int index = 0; index < numberOfHistograms; index++) {
+    for (size_t index = 0; index < numberOfHistograms; index++) {
 
       ws->mutableRun().addProperty("First good spectra " +
                                        std::to_string(index),
@@ -72,6 +72,7 @@ private:
   calculateBackgroundFromFit(IAlgorithm_sptr &,
                              const std::pair<double, double> &range,
                              const int &index) override {
+    (void) range,index;
     return std::make_tuple(m_background, m_fitQuality);
   }
   double m_background{0.00};

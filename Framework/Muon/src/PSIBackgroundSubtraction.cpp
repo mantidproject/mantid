@@ -84,14 +84,14 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
     int firstGood = 0;
     int lastGood = 0;
     try {
-      firstGood = std::stod(
+      firstGood = std::stoi(
           run.getProperty(FIRST_GOOD + std::to_string(index))->value());
     } catch (Kernel::Exception::NotFoundError) {
       errors["InputWorkspace"] =
           "Input Workspace should should contain first food data. ";
     }
     try {
-      lastGood = std::stod(
+      lastGood = std::stoi(
           run.getProperty(LAST_GOOD + std::to_string(index))->value());
     } catch (Kernel::Exception::NotFoundError) {
       errors["InputWorkspace"] +=
@@ -105,7 +105,7 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
       errors["InputWorkspace"] +=
           "\n Input Workspace should have first good data > 0. ";
     }
-    if (lastGood > inputWS->readX(index).size()) {
+    if (lastGood > int(inputWS->readX(index).size())) {
       errors["InputWorkspace"] +=
           "\n Input Workspace should have last good data < number of bins. ";
     }
