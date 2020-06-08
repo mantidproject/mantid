@@ -1,3 +1,5 @@
+.. _Workspace_History:
+
 ==================
  WorkspaceHistory
 ==================

@@ -70,7 +70,9 @@ def generate_script(fig, exclude_headers=False):
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
     cmds.append("plt.show()")
-    cmds.append("# Scripting Plots in Mantid: https://docs.mantidproject.org/nightly/plotting/scripting_plots.html")
+    cmds.append("# Scripting Plots in Mantid: \
+                https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+
     return '\n'.join(cmds)
 
 

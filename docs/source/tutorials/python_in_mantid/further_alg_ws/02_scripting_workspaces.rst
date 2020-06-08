@@ -1,4 +1,4 @@
-.. _scripting_workspaces:
+.. _02_scripting_workspaces:
 
 =====================
 Workspaces in Scripts
@@ -69,10 +69,10 @@ Required import:
 
 .. code-block:: python
 
-    #simple plot of 1 spectrum
+    # simple plot of 1 spectrum
     plotSpectrum(ws, 0)
     
-    #Plot of 3 spectra, and error bars
+    # Plot of 3 spectra, and error bars
     plotSpectrum(ws, [0,1,2], error_bars=True)
     
     # Waterfall plot from two workspaces, with two spectras from each
@@ -95,7 +95,7 @@ Required import:
 .. code-block:: python
 
     from mantid.api import AnalysisDataService as ADS
-    #to skip this import, use 'mtd' instead of 'ADS'
+    # to skip this import, use 'mtd' instead of 'ADS'
 
 Access a workspace, loaded in the Workspaces Toolbox, inside a script:
 

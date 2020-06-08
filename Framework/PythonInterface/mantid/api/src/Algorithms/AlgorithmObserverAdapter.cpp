@@ -14,14 +14,19 @@ AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
     : API::AlgorithmObserver(), m_self(self) {}
 
 void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
-                                              double p,
-                                              const std::string &msg) {
+                                              double p, const std::string &msg,
+                                              const double estimatedTime,
+                                              const int progressPrecision) {
   UNUSED_ARG(alg)
-  try {
-    return callMethod<void>(getSelf(), "progressHandle", p, msg);
-  } catch (UndefinedAttributeError &) {
-    return;
-  }
+  UNUSED_ARG(p)
+  UNUSED_ARG(msg)
+  UNUSED_ARG(estimatedTime)
+  UNUSED_ARG(progressPrecision)
+  // This method is explicitly not implemented.
+  // There are so many progress calls that passing these across the C++/Python
+  // boundary is too expensive and can slow down Mantid by up to an order of
+  // magnitude
+  return;
 }
 
 void AlgorithmObserverAdapter::startingHandle(API::IAlgorithm_sptr alg) {

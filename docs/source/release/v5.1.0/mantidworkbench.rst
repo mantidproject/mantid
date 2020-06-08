@@ -43,6 +43,7 @@ Improvements
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
 - The gray and plasma colormaps have been added to the instrument view.
+- Slow running algorithms will now display an estimated time to completion in their progress bars.
 - The x-axis tick labels on colorfill plots are now horizontal.
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 
@@ -72,6 +73,7 @@ Bugfixes
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
 - Colorfill plots now correctly use the workspace name as the plot title.
+- Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 
 :ref:`Release 5.1.0 <v5.1.0>`
