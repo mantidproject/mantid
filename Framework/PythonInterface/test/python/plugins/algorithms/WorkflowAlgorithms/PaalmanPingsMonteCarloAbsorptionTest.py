@@ -97,7 +97,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
     def _test_corrections_workspaces(self, workspaces, spectrum_axis=None, with_container=False):
         self.assertNotEquals(workspaces, None)
         self.assertTrue(isinstance(workspaces, WorkspaceGroup))
-        self.assertEquals(workspaces.getNumberOfEntries(), 3 if with_container else 1)
+        self.assertEquals(workspaces.getNumberOfEntries(), 4 if with_container else 1)
 
         for workspace in workspaces:
             self._test_corrections_workspace(workspace, spectrum_axis)
@@ -136,19 +136,19 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_unit = "Wavelength"
         self._expected_hist = 18
         self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(2), 'Label')
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(3), 'Label')
 
     def _run_indirect_fws_test_q(self, shape):
         self._expected_unit = "Wavelength"
         self._expected_hist = 18
         self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(1), 'MomentumTransfer')
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(2), 'MomentumTransfer')
 
     def _run_indirect_fws_test_2theta(self, shape):
         self._expected_unit = "Wavelength"
         self._expected_hist = 18
         self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(1), 'Degrees')
 
     def _run_indirect_fws_test_red(self, shape):
         self._expected_unit = "Wavelength"

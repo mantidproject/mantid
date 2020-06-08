@@ -318,28 +318,28 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def PyExec(self):
 
+        progess_steps = 1. if not self._container_ws else 0.25
+
         sample_wave_ws = self._convert_to_wavelength(self._sample_ws)
         self._set_beam(sample_wave_ws)
+        sample_wave_ws.setSample(Sample())
+        self._set_sample(sample_wave_ws, ['Sample'])
+        monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
+                                                    startProgress=0, endProgress=progess_steps)
+        self._set_algorithm_properties(monte_carlo_alg, self._monte_carlo_kwargs)
+        monte_carlo_alg.setProperty("InputWorkspace", sample_wave_ws)
+        monte_carlo_alg.setProperty("OutputWorkspace", self._ass_ws_name)
+        monte_carlo_alg.setProperty("SimulateScatteringPointIn", "SampleOnly")
+        monte_carlo_alg.execute()
+        ass_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
+        ass_ws = self._convert_from_wavelength(ass_ws)
+        mtd.addOrReplace(self._ass_ws_name, ass_ws)
+        self._output_ws = self._group_ws([ass_ws])
 
-        if not self._container_ws:
-            sample_wave_ws.setSample(Sample())
-            self._set_sample(sample_wave_ws, ['Sample'])
-            monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                        startProgress=0, endProgress=1)
-            self._set_algorithm_properties(monte_carlo_alg, self._monte_carlo_kwargs)
-            monte_carlo_alg.setProperty("InputWorkspace", sample_wave_ws)
-            monte_carlo_alg.setProperty("OutputWorkspace", self._ass_ws_name)
-            monte_carlo_alg.setProperty("SimulateScatteringPointIn", "SampleOnly")
-            monte_carlo_alg.execute()
-            ass_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
-            ass_ws = self._convert_from_wavelength(ass_ws)
-            mtd.addOrReplace(self._ass_ws_name, ass_ws)
-            self._output_ws = self._group_ws([ass_ws])
-
-        else:
+        if self._container_ws:
             self._set_sample(sample_wave_ws, ['Sample', 'Container'])
             monte_carlo_alg_ssc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                            startProgress=0, endProgress=0.33)
+                                                            startProgress=progess_steps, endProgress=2*progess_steps)
             self._set_algorithm_properties(monte_carlo_alg_ssc, self._monte_carlo_kwargs)
             monte_carlo_alg_ssc.setProperty("InputWorkspace", sample_wave_ws)
             monte_carlo_alg_ssc.setProperty("OutputWorkspace", self._assc_ws_name)
@@ -355,7 +355,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             # since container can not exist without a valid sample, we work around this by setting container as sample
             self._set_sample(can_wave_ws, ['Container'], True)
             monte_carlo_alg_cc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                           startProgress=0.33, endProgress=0.66)
+                                                           startProgress=2*progess_steps, endProgress=3*progess_steps)
             self._set_algorithm_properties(monte_carlo_alg_cc, self._monte_carlo_kwargs)
             monte_carlo_alg_cc.setProperty("InputWorkspace", can_wave_ws)
             monte_carlo_alg_cc.setProperty("OutputWorkspace", self._acc_ws_name)
@@ -367,7 +367,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
             self._set_sample(can_wave_ws, ['Sample', 'Container'])
             monte_carlo_alg_csc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                            startProgress=0.66, endProgress=0.99)
+                                                            startProgress=3*progess_steps, endProgress=1.)
             self._set_algorithm_properties(monte_carlo_alg_csc, self._monte_carlo_kwargs)
             monte_carlo_alg_csc.setProperty("InputWorkspace", can_wave_ws)
             monte_carlo_alg_csc.setProperty("OutputWorkspace", self._acsc_ws_name)
@@ -377,7 +377,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             acsc_ws = self._convert_from_wavelength(acsc_ws)
             mtd.addOrReplace(self._acsc_ws_name, acsc_ws)
 
-            self._output_ws = self._group_ws([assc_ws, acsc_ws, acc_ws])
+            self._output_ws = self._group_ws([ass_ws, assc_ws, acsc_ws, acc_ws])
 
         self.setProperty('CorrectionsWorkspace', self._output_ws)
 
