@@ -302,11 +302,11 @@ protected:
 };
 
 /**
- * A sector: area bounded by two curves of the same shape but different size.
+ * A sector: area defined by an inner and an outer arcs of circle, interrupted
+ * at angles startAngle and endAngle.
  *
- * The constructor takes a curve shape and the ring widths in the x and y
- * directions.
- * It has QPointF "centre" property and "xwidth" and "ywidth" double properties.
+ * The constructor takes a center QPoint property, 2 angles, and 2 widths for
+ * the two circles.
  */
 class Shape2DSector : public Shape2D {
 public:
@@ -346,6 +346,7 @@ protected:
 };
 
 QRectF findArcBoundingBox(double startAngle, double endAngle);
+double distanceBetween(const QPointF &, const QPointF &);
 
 /**
  * An arbitrary shape. Implemented as a polygon.

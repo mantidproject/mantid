@@ -14,6 +14,7 @@
 
 #include <QLine>
 #include <QMap>
+#include <QVector2D>
 
 #include <algorithm>
 #include <cmath>
@@ -103,6 +104,8 @@ void Shape2D::setControlPoint(size_t i, const QPointF &pos) {
 
   if (i < 4) {
     m_boundingRect.setVertex(i, pos);
+    std::cout << "Pos " << pos << std::endl;
+
     refit();
   }
   // else ?
@@ -731,7 +734,82 @@ void Shape2DSector::refit() {
     m_innerRadius = 0.000001;
   if (m_outerRadius <= m_innerRadius)
     m_outerRadius = m_innerRadius + 0.000001;
+
+  QRectF absoluteBBox = findArcBoundingBox(m_startAngle, m_endAngle);
+  QRectF innerBBox(absoluteBBox.topLeft() * m_innerRadius + m_center,
+                   absoluteBBox.bottomRight() * m_innerRadius + m_center);
+  QRectF outerBBox(absoluteBBox.topLeft() * m_outerRadius + m_center,
+                   absoluteBBox.bottomRight() * m_outerRadius + m_center);
+  QPointF topLeft(std::min(innerBBox.topLeft().x(), outerBBox.topLeft().x()),
+                  std::max(innerBBox.topLeft().y(), outerBBox.topLeft().y()));
+  QPointF bottomRight(
+      std::max(innerBBox.bottomRight().x(), outerBBox.bottomRight().x()),
+      std::min(innerBBox.bottomRight().y(), outerBBox.bottomRight().y()));
+
+  // current real bounding box of the sector
+  QRectF BBox(topLeft, bottomRight);
+
+  // check if the bounding box has been modified
+
+  QPointF xProj, yProj, proj;
+  qreal xPos, yPos;
+  QVector2D slope;
+
+  // first case : the top left corner is the one being modified
+  QPointF bRectTopLeft(
+      std::min(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
+      std::max(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
+  QPointF bRectBottomRight(
+      std::max(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
+      std::min(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
+
+  if (BBox.topLeft().x() != bRectTopLeft.x() &&
+      BBox.topLeft().y() != bRectTopLeft.y()) {
+    // first we need to find the best projection of the new corner on the
+    // diagonal line of the rectangle, so its shape won't be modified, only
+    // scaled.
+    //    m_outerRadius += 0.05;
+    slope = QVector2D(BBox.topLeft() - BBox.bottomRight());
+    xPos = (m_boundingRect.p0() - BBox.topLeft()).x();
+    yPos = slope.y() * xPos / slope.x(); // TODO : check if non zero
+    xProj.setX(xPos);
+    xProj.setY(yPos);
+
+    yPos = (m_boundingRect.p0() - BBox.topLeft()).y();
+    xPos = slope.x() * yPos / slope.y();
+
+    yProj.setX(xPos);
+    yProj.setY(yPos);
+
+    if (distanceBetween(xProj, QPointF(0, 0)) <
+        distanceBetween(yProj, QPointF(0, 0))) {
+      proj = xProj;
+    } else {
+      proj = yProj;
+    }
+    proj += BBox.topLeft();
+    m_boundingRect.setVertex(0, proj);
+
+    // then we need to adapt the shape to the new size
+    qreal ratio = distanceBetween(proj, BBox.bottomRight()) /
+                  distanceBetween(slope.toPointF(), QPointF(0, 0));
+    std::cout << ratio << std::endl;
+    std::cout << m_boundingRect.p0() << std::endl;
+    std::cout << "Slope " << slope.x() << " " << slope.y() << std::endl;
+    std::cout << proj << std::endl;
+    std::cout << std::endl;
+    m_innerRadius *= ratio;
+    m_outerRadius *= ratio;
+    m_center.setX((m_center.x() - BBox.bottomRight().x()) * ratio +
+                  BBox.bottomRight().x());
+    m_center.setY((m_center.y() - BBox.bottomRight().y()) * ratio +
+                  BBox.bottomRight().y());
+  }
   resetBoundingRect();
+}
+
+double distanceBetween(const QPointF &p0, const QPointF &p1) {
+  return sqrt(pow(p0.x() - p1.x(), 2) + pow(p0.y() + p1.y(), 2));
 }
 
 void Shape2DSector::resetBoundingRect() {
@@ -773,6 +851,9 @@ void Shape2DSector::resetBoundingRect() {
 
   QPointF top_left(x_min, y_max);
   QPointF bottom_right(x_max, y_min);
+
+  top_left += m_center;
+  bottom_right += m_center;
   m_boundingRect = RectF(top_left, bottom_right);
 }
 
@@ -816,6 +897,7 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
     if (newAngle < 0)
       newAngle += 2 * M_PI;
 
+    // conditions to prevent the startAngle from going over the endAngle
     if ((m_startAngle < m_endAngle && newAngle >= m_endAngle &&
          std::abs(newAngle - m_startAngle) < 1) ||
         (newAngle < m_endAngle && m_startAngle < m_endAngle &&
