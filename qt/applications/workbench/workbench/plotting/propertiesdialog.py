@@ -154,7 +154,7 @@ class AxisEditor(PropertiesEditorBase):
 
         self.lim_setter(self.limit_min, self.limit_max)
 
-        which = 'both' if ConfigService.getString('plots.ShowMinorGridlines').lower() == 'on' else 'major'
+        which = 'both' if axes.show_minor_gridlines else 'major'
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
     def error_occurred(self, exc):

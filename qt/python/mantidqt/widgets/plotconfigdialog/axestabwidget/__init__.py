@@ -26,8 +26,6 @@ class AxProperties(dict):
     def from_ax_object(cls, ax):
         props = dict()
         props['title'] = ax.get_title()
-        props['minor_ticks'] = not isinstance(ax.xaxis.minor.locator, NullLocator)
-        props['minor_gridlines'] = ax.show_minor_gridlines
         props['xlim'] = ax.get_xlim()
         props['xlabel'] = ax.get_xlabel()
         props['xscale'] = ax.get_xscale().title()
@@ -39,6 +37,9 @@ class AxProperties(dict):
             props['zlim'] = ax.get_zlim()
             props['zlabel'] = ax.get_zlabel()
             props['zscale'] = ax.get_zscale().title()
+        else:
+            props['minor_ticks'] = not isinstance(ax.xaxis.minor.locator, NullLocator)
+            props['minor_gridlines'] = ax.show_minor_gridlines
 
         return cls(props)
 

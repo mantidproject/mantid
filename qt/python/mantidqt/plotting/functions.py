@@ -275,11 +275,6 @@ def plot_surface(workspaces, fig=None):
         else:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
 
-        if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
-            ax.minorticks_on()
-
-        ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
-
         surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
         ax.set_title(ws.name())
         fig.colorbar(surface, ax=[ax])
@@ -297,11 +292,6 @@ def plot_wireframe(workspaces, fig=None):
             ax = fig.add_subplot(111, projection='mantid3d')
         else:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
-
-        if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
-            ax.minorticks_on()
-
-        ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
 
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())
