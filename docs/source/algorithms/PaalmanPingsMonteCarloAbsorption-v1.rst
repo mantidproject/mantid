@@ -121,10 +121,132 @@ Usage
 
 .. testoutput:: FlatPlate
 
-    Y-Unit Label of corrections_ass: Attenuation factor
-    Y-Unit Label of corrections_assc: Attenuation factor
-    Y-Unit Label of corrections_acsc: Attenuation factor
-    Y-Unit Label of corrections_acc: Attenuation factor
+    Y-Unit Label of flat_plate_corr__ass: Attenuation factor
+    Y-Unit Label of flat_plate_corr__assc: Attenuation factor
+    Y-Unit Label of flat_plate_corr__acsc: Attenuation factor
+    Y-Unit Label of flat_plate_corr__acc: Attenuation factor
+
+**Example - Cylinder**
+
+.. testcode:: Cylinder
+
+    sample_ws = CreateSampleWorkspace(Function="Quasielastic",
+                                      XUnit="Wavelength",
+                                      XMin=-0.5,
+                                      XMax=0.5,
+                                      BinWidth=0.01)
+    # Efixed is generally defined as part of the IDF for real data.
+    # Fake it here
+    inst_name = sample_ws.getInstrument().getName()
+    SetInstrumentParameter(sample_ws, ComponentName=inst_name,
+        ParameterName='Efixed', ParameterType='Number', Value='4.1')
+
+    container_ws = CreateSampleWorkspace(Function="Quasielastic",
+                                         XUnit="Wavelength",
+                                         XMin=-0.5,
+                                         XMax=0.5,
+                                         BinWidth=0.01)
+    SetInstrumentParameter(container_ws, ComponentName=inst_name,
+        ParameterName='Efixed', ParameterType='Number', Value='4.1')
+
+    corrections = PaalmanPingsMonteCarloAbsorption(
+            SampleWorkspace=sample_ws,
+            Shape='Cylinder',
+            BeamHeight=2.0,
+            BeamWidth=2.0,
+            Height=2.0,
+            SampleRadius=0.2,
+            SampleChemicalFormula='H2-O',
+            SampleDensity=1.0,
+            ContainerWorkspace=container_ws,
+            ContainerRadius=0.22,
+            ContainerChemicalFormula='V',
+            ContainerDensity=6.0,
+            CorrectionsWorkspace='cylinder_corr'
+        )
+
+    ass_ws = corrections[0]
+    assc_ws = corrections[1]
+    acsc_ws = corrections[2]
+    acc_ws = corrections[3]
+
+    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(assc_ws.getName()) + ": " + str(assc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acsc_ws.getName()) + ": " + str(acsc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+
+.. testcleanup:: Cylinder
+
+    mtd.clear()
+
+.. testoutput:: Cylinder
+
+    Y-Unit Label of cylinder_corr__ass: Attenuation factor
+    Y-Unit Label of cylinder_corr__assc: Attenuation factor
+    Y-Unit Label of cylinder_corr__acsc: Attenuation factor
+    Y-Unit Label of cylinder_corr__acc: Attenuation factor
+
+**Example - Annulus**
+
+.. testcode:: Annulus
+
+    sample_ws = CreateSampleWorkspace(Function="Quasielastic",
+                                      XUnit="Wavelength",
+                                      XMin=-0.5,
+                                      XMax=0.5,
+                                      BinWidth=0.01)
+    # Efixed is generally defined as part of the IDF for real data.
+    # Fake it here
+    inst_name = sample_ws.getInstrument().getName()
+    SetInstrumentParameter(sample_ws, ComponentName=inst_name,
+        ParameterName='Efixed', ParameterType='Number', Value='4.1')
+
+    container_ws = CreateSampleWorkspace(Function="Quasielastic",
+                                         XUnit="Wavelength",
+                                         XMin=-0.5,
+                                         XMax=0.5,
+                                         BinWidth=0.01)
+    SetInstrumentParameter(container_ws, ComponentName=inst_name,
+        ParameterName='Efixed', ParameterType='Number', Value='4.1')
+
+    corrections = PaalmanPingsMonteCarloAbsorption(
+            SampleWorkspace=sample_ws,
+            Shape='Annulus',
+            BeamHeight=2.0,
+            BeamWidth=2.0,
+            Height=2.0,
+            SampleInnerRadius=0.2,
+            SampleOuterRadius=0.4,
+            SampleChemicalFormula='H2-O',
+            SampleDensity=1.0,
+            ContainerWorkspace=container_ws,
+            ContainerInnerRadius=0.19,
+            ContainerOuterRadius=0.41,
+            ContainerChemicalFormula='V',
+            ContainerDensity=6.0,
+            CorrectionsWorkspace='annulus_corr'
+        )
+
+    ass_ws = corrections[0]
+    assc_ws = corrections[1]
+    acsc_ws = corrections[2]
+    acc_ws = corrections[3]
+
+    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(assc_ws.getName()) + ": " + str(assc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acsc_ws.getName()) + ": " + str(acsc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+
+.. testcleanup:: Annulus
+
+    mtd.clear()
+
+.. testoutput:: Annulus
+
+    Y-Unit Label of annulus_corr__ass: Attenuation factor
+    Y-Unit Label of annulus_corr__assc: Attenuation factor
+    Y-Unit Label of annulus_corr__acsc: Attenuation factor
+    Y-Unit Label of annulus_corr__acc: Attenuation factor
 
 References
 ----------
