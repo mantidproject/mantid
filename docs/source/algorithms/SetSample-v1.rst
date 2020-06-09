@@ -21,6 +21,9 @@ The arguments to this algorithm are all expected to be
 dictionaries specifying multiple parameters that relate to the
 respective argument, as explained below.
 
+.. note:: Contrary to the :ref:`xml forms of defining the geometry <HowToDefineGeometricShape>` which are in metres,
+          :py:obj:`dict` versions are in centimetres.
+
 Geometry and ContainerGeometry
 ##############################
 
@@ -61,8 +64,6 @@ Specifies the composition of the sample (or its container) using properties from
 Please see the algorithm documentation for the supported keywords.
 
 .. note:: Note that for the keys which historically had the **Sample** prefix (e.g. SampleNumberDensity) the prefix should not be specified here; that is, **NumberDensity** instead of **SampleNumberDensity**, etc. However, for backwards compatibility, it works also with prefixes.
-          <HowToDefineGeometricShape>` which are in metres,
-          :py:obj:`dict` versions are in centimetres.
 
 .. note:: Note that this algorithm does not invoke :ref:`algm-SetSampleMaterial-v1` anymore, but sets the material directly through the API.
 
@@ -146,7 +147,7 @@ used for the dictionary parameters.
    # Use geometry as is from environment definition
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                       'SampleNumberDensity': 0.1})
+                       'NumberDensity': 0.1})
 
 **Example - Override height of preset cylinder sample**
 
@@ -158,7 +159,7 @@ used for the dictionary parameters.
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                       'SampleNumberDensity': 0.1})
+                       'NumberDensity': 0.1})
 
 **Example - Specify height and mass of preset cylinder sample**
 
@@ -171,7 +172,7 @@ used for the dictionary parameters.
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                       'SampleMass': 3.0})
+                       'Mass': 3.0})
 
 **Example - Override complete sample geometry**
 
@@ -185,7 +186,7 @@ used for the dictionary parameters.
                        'InnerRadius': 0.8, 'OuterRadius': 1.0,
                        'Center': [0.,0.,0.]},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                       'SampleNumberDensity': 0.1})
+                       'NumberDensity': 0.1})
 
 **Example - Specify shape using CSG object**
 
@@ -215,12 +216,12 @@ used for the dictionary parameters.
                      'Width': 2.0, 'Thick': 1.0,
                      'Center': [0.,0.,0.]},
            Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                     'SampleNumberDensity': 0.1},
+                     'NumberDensity': 0.1},
            ContainerGeometry={'Shape': 'FlatPlateHolder', 'Height': 4.0,
                      'Width': 2.0, 'Thick': 1.0, 'FrontThick': 0.3, 'BackThick': 0.4,
                      'Center': [0.,0.,0.]},
            ContainerMaterial={'ChemicalFormula': 'Al',
-                     'SampleNumberDensity': 0.01})
+                     'NumberDensity': 0.01})
 
 **Example - Cylinder sample in a hollow cylinder container**
 
@@ -232,12 +233,12 @@ used for the dictionary parameters.
            Geometry={'Shape': 'Cylinder', 'Height': 4.0,
                      'Radius': 2.0, 'Center': [0.,0.,0.]},
            Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                     'SampleNumberDensity': 0.1},
+                     'NumberDensity': 0.1},
            ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0,
                      'InnerRadius': 2.0, 'OuterRadius': 2.3,
                      'Center': [0.,0.,0.]},
            ContainerMaterial={'ChemicalFormula': 'Al',
-                     'SampleNumberDensity': 0.01})
+                     'NumberDensity': 0.01})
 
 **Example - Hollow cylinder sample in a hollow cylinder holder container**
 
@@ -249,12 +250,12 @@ used for the dictionary parameters.
           Geometry={'Shape': 'HollowCylinder', 'Height': 4.0,
                     'InnerRadius': 2.0, 'OuterRadius': 3.0, 'Center': [0.,0.,0.]},
           Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                    'SampleNumberDensity': 0.1},
+                    'NumberDensity': 0.1},
           ContainerGeometry={'Shape': 'HollowCylinderHolder', 'Height': 4.0,
                     'InnerRadius': 1.5, 'InnerOuterRadius': 2.0, 'OuterInnerRadius': 3.0, 'OuterRadius': 4.0,
                     'Center': [0.,0.,0.]},
           ContainerMaterial={'ChemicalFormula': 'Al',
-                    'SampleNumberDensity': 0.01})
+                    'NumberDensity': 0.01})
 
 .. categories::
 

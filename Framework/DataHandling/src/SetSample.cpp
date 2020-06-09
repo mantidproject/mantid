@@ -1100,11 +1100,11 @@ PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
   // However, for legacy compatibility, those prefixed with Sample are still
   // considered through aliases
   if (materialArgs.existsProperty("SampleNumberDensity")) {
-    const double numerDensity = materialArgs.getProperty("SampleNumberDensity");
+    const double numberDensity = materialArgs.getProperty("SampleNumberDensity");
     if (!compatible.existsProperty("NumberDensity")) {
-      compatible.declareProperty("NumberDensity", numerDensity);
+      compatible.declareProperty("NumberDensity", numberDensity);
     } else {
-      compatible.setProperty("NumerDesnity", numerDensity);
+      compatible.setProperty("NumberDesnity", numberDensity);
     }
   }
   if (materialArgs.existsProperty("SampleMassDensity")) {
