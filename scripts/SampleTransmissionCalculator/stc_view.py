@@ -60,8 +60,8 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
 
     def plot(self, x, y):
         self.axes.cla()
-        self.plot_frame.figure.tight_layout()
         self.axes.plot(x, y)
+        self.plot_frame.figure.tight_layout()
         self.plot_frame.draw()
 
     def set_validation_label(self, warning_text=''):
