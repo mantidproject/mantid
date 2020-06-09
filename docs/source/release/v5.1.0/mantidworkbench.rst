@@ -72,6 +72,7 @@ Bugfixes
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
+- Changing the settings on tiled colorbars now applys to all the plots if there is only one colorbar.
 - Colorfill plots now correctly use the workspace name as the plot title.
 - Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.

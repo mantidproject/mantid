@@ -8,7 +8,7 @@
 
 from mantid.plots.datafunctions import update_colorbar_scale
 from mantidqt.utils.qt import block_signals
-from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig
+from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig, get_colorbars_from_fig
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.view import ImagesTabWidgetView, SCALES
 
@@ -34,13 +34,19 @@ class ImagesTabWidgetPresenter:
 
     def apply_properties(self):
         props = self.view.get_properties()
-        image = self.get_selected_image()
+        # if only one colorbar apply settings to all images
+        if len(get_colorbars_from_fig(self.fig)) == 1:
+            images = self.image_names_dict.values()
+        else:
+            images = [self.get_selected_image()]
         self.set_selected_image_label(props.label)
-        image.set_cmap(props.colormap)
-        if props.interpolation:
-            image.set_interpolation(props.interpolation)
 
-        update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
+        for image in images:
+            image.set_cmap(props.colormap)
+            if props.interpolation:
+                image.set_interpolation(props.interpolation)
+
+            update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
 
         if props.vmin > props.vmax:
             self.view.max_min_value_warning.setVisible(True)
