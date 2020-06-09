@@ -77,7 +77,7 @@ void MCInteractionStatistics::UpdateScatterAngleStats(V3D toStart,
   double scatterAngleDegrees = scatteredDirec.angle(-toStart) * 180. / M_PI;
   double delta = scatterAngleDegrees - m_scatterAngleMean;
   int totalScatterPoints = m_sampleScatterPoints.usedPointCount;
-  for (auto stat : m_envScatterPoints) {
+  for (const auto &stat : m_envScatterPoints) {
     totalScatterPoints += stat.usedPointCount;
   }
   m_scatterAngleMean += delta / totalScatterPoints;
@@ -102,7 +102,7 @@ std::string MCInteractionStatistics::generateScatterPointStats() {
 
   int totalScatterPointsGenerated = m_sampleScatterPoints.generatedPointCount;
   int totalScatterPointsUsed = m_sampleScatterPoints.usedPointCount;
-  for (auto stat : m_envScatterPoints) {
+  for (const auto &stat : m_envScatterPoints) {
     totalScatterPointsGenerated += stat.generatedPointCount;
     totalScatterPointsUsed += stat.usedPointCount;
   }
