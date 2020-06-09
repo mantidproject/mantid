@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import json
 import os
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
@@ -22,12 +23,14 @@ class ErrorReporterPresenter(object):
         self._view.moreDetailsButton.clicked.connect(self.show_more_details)
 
         if not traceback:
-            traceback_file_path = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace.txt'.format(application))
+            traceback_file_path = os.path.join(ConfigService.getAppDataDirectory(),
+                                               '{}_stacktrace.txt'.format(application))
             try:
                 if os.path.isfile(traceback_file_path):
                     with open(traceback_file_path, 'r') as file:
                         self._traceback = file.readlines()
-                    new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), '{}_stacktrace_sent.txt'.format(application))
+                    new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(),
+                                                      '{}_stacktrace_sent.txt'.format(application))
                     os.rename(traceback_file_path, new_workspace_name)
             except OSError:
                 pass
@@ -94,6 +97,14 @@ class ErrorReporterPresenter(object):
         self._view.exec_()
 
     def show_more_details(self):
-        # each entry in the list traceback is a line of the stacktrace file
-        stacktrace_text = '\n'.join(self._traceback)
-        self._view.display_more_details(self._application, stacktrace_text)
+        error_reporter = ErrorReporter(
+            self._application, UsageService.getUpTime(), self._exit_code, True,
+            str(self._view.input_name_line_edit.text()),
+            str(self._view.input_email_line_edit.text()),
+            str(self._view.input_free_text.toPlainText()),
+            "".join(self._traceback))
+
+        error_message_json = json.loads(error_reporter.generateErrorMessage())
+        stacktrace_text = error_message_json["stacktrace"]
+        user_information = ''.join('{}: {}\n'.format(key, error_message_json[key]) for key in error_message_json)
+        self._view.display_more_details(user_information, stacktrace_text)
