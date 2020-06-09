@@ -92,33 +92,33 @@ public:
             outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 11)
     TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 3.31, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 12)
     TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 3.46, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 4)
     TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 2.00, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 17)
     TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 4.12, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 167943)
     TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 409.80, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 2042)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
   }
@@ -237,33 +237,33 @@ public:
             outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 24)
     TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 4.89, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 19)
     TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 4.35, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 8)
     TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 2.82, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 38)
     TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 6.16, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 335686)
     TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 579.38, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 4109)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 64.10, 0.01)
   }
@@ -293,66 +293,66 @@ public:
     MatrixWorkspace_sptr workspaceEntry1 =
         std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
             outputWS->getItem(0));
-    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 11)
     TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 3.31, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 12)
     TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 3.46, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 4)
     TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 2.00, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 17)
     TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 4.12, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(132)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 167943)
     TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 409.80, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 2042)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
 
     MatrixWorkspace_sptr workspaceEntry12 =
         std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
             outputWS->getItem(11));
-    TS_ASSERT_DELTA(workspaceEntry12->x(0)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry12->x(0)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(0)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(0)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(0)[0], 14)
     TS_ASSERT_DELTA(workspaceEntry12->e(0)[0], 3.74, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry12->x(1)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry12->x(1)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(1)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(1)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(1)[0], 15)
     TS_ASSERT_DELTA(workspaceEntry12->e(1)[0], 3.87, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry12->x(130)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry12->x(130)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(130)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(130)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(130)[0], 5)
     TS_ASSERT_DELTA(workspaceEntry12->e(130)[0], 2.23, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry12->x(131)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry12->x(131)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(131)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(131)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(131)[0], 15)
     TS_ASSERT_DELTA(workspaceEntry12->e(131)[0], 3.87, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry12->x(132)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry12->x(132)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(132)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(132)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(132)[0], 167220)
     TS_ASSERT_DELTA(workspaceEntry12->e(132)[0], 408.92, 0.01)
 
-    TS_ASSERT_DELTA(workspaceEntry12->x(133)[0], 2.84, 0.01)
-    TS_ASSERT_DELTA(workspaceEntry12->x(133)[1], 3.47, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(133)[0], 3.13, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry12->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(133)[0], 108504)
     TS_ASSERT_DELTA(workspaceEntry12->e(133)[0], 329.39, 0.01)
   }
@@ -440,45 +440,32 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     do_test_general_features(outputWS, "monochromatic");
 
-    MatrixWorkspace_sptr workspaceEntry1 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
-    TS_ASSERT(workspaceEntry1)
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
+         ++entry_no) {
+      MatrixWorkspace_sptr workspaceEntry =
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+              outputWS->getItem(entry_no));
+      TS_ASSERT(workspaceEntry)
 
-    Instrument_const_sptr instrument = workspaceEntry1->getInstrument();
-    TS_ASSERT(instrument)
-
-    V3D sample(0, 0, 0);
-    V3D zAxis(0, 0, 1);
-
-    const auto &pixel1 = instrument->getDetector(0);
-    TS_ASSERT(pixel1)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 10.86, 0.01)
-
-    const auto &pixel44 = instrument->getDetector(43);
-    TS_ASSERT(pixel44)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 53.81,
-                    0.01)
-
-    const auto &pixel45 = instrument->getDetector(44);
-    TS_ASSERT(pixel45)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 57.06,
-                    0.01)
-
-    const auto &pixel88 = instrument->getDetector(87);
-    TS_ASSERT(pixel88)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 99.45,
-                    0.01)
-
-    const auto &pixel89 = instrument->getDetector(88);
-    TS_ASSERT(pixel89)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 101.38,
-                    0.01)
-
-    const auto &pixel132 = instrument->getDetector(131);
-    TS_ASSERT(pixel132)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 144.17,
-                    0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
+                      10.86, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) *
+                          RAD_2_DEG,
+                      53.81, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) *
+                          RAD_2_DEG,
+                      57.06, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) *
+                          RAD_2_DEG,
+                      99.45, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) *
+                          RAD_2_DEG,
+                      101.38, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) *
+                          RAD_2_DEG,
+                      144.17, 0.01)
+    }
   }
 
   void test_D7_yigfile_alignment() {
