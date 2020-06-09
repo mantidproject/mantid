@@ -177,6 +177,18 @@ set(MANTIDPYTHON_PREAMBLE
     "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%"
 )
 
+configure_file ( ${PACKAGING_DIR}/launch_workbench.ps1.in
+    ${PROJECT_BINARY_DIR}/launch_workbench.ps1.in @ONLY )
+# place it in the appropriate directory
+file(GENERATE
+     OUTPUT
+     ${MSVC_BIN_DIR}/launch_workbench.ps1
+     INPUT
+     ${PROJECT_BINARY_DIR}/launch_workbench.ps1.in
+  )
+
+#  Semi-colon gen exp prevents future generators converting to CMake lists
+set ( MSVC_IDE_ENV "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}" )
 # Semi-colon gen exp prevents future generators converting to CMake lists
 set(MSVC_IDE_ENV
     "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}"

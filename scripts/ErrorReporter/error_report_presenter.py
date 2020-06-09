@@ -94,7 +94,6 @@ class ErrorReporterPresenter(object):
         self._view.exec_()
 
     def show_more_details(self):
-        stacktrace_text = ''
-        for line in self._traceback:
-            stacktrace_text += line + '\n'
+        # each entry in the list traceback is a line of the stacktrace file
+        stacktrace_text = '\n'.join(self._traceback)
         self._view.display_more_details(self._application, stacktrace_text)
