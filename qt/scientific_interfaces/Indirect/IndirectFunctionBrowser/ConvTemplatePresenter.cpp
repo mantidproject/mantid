@@ -188,7 +188,7 @@ void ConvTemplatePresenter::setResolution(std::string const &name,
 }
 
 void ConvTemplatePresenter::setResolution(
-    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_model.setResolution(fitResolutions);
 }
 

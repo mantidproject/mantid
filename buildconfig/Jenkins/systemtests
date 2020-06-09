@@ -104,4 +104,4 @@ SYSTEST_NPROCS=${SYSTEST_NPROCS:-$BUILD_THREADS}
 echo "Running system tests with ${SYSTEST_NPROCS} cores."
 
 PKGDIR=${WORKSPACE}/build
-${X11_RUNNER} "${X11_RUNNER_ARGS}" python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
+${X11_RUNNER} "${X11_RUNNER_ARGS}" python3 $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS

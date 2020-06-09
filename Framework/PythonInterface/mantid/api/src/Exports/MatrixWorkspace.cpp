@@ -326,6 +326,13 @@ void applyPointsFromAnotherWorkspace(MatrixWorkspace &self,
   self.setPoints(setIndex, ws.points(getIndex));
 }
 
+std::vector<size_t>
+getIndicesFromDetectorIDs(MatrixWorkspace &self,
+                          const boost::python::list &detIDs) {
+  return self.getIndicesFromDetectorIDs(
+      Converters::PySequenceToVector<int>(detIDs)());
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -366,6 +373,10 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("spec_no")),
            "Returns workspace index correspondent to the given spectrum "
            "number. Throws if no such spectrum is present in the workspace")
+      .def("getIndicesFromDetectorIDs", &getIndicesFromDetectorIDs,
+           (arg("self"), arg("detID_list")),
+           "Returns a list of workspace indices from the corrresponding "
+           "detector IDs.")
       .def("getDetector", &MatrixWorkspace::getDetector,
            return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),

@@ -39,9 +39,10 @@ def current_os_has_gslv2():
 
 class IndirectReplaceFitResultTest(unittest.TestCase):
     def setUp(self):
-        self._input_name = 'iris26176_graphite002_conv_1L_s0_to_17_Result'
-        self._single_fit_name = 'iris26176_graphite002_conv_1L_s1_Result'
+        self._input_name = 'iris26176_graphite002_conv_1L_s0_to_17__Result'
+        self._single_fit_name = 'iris26176_graphite002_red_conv_1L_1__Result'
         self._result_group_name = 'iris26176_graphite002_conv_1L_s0_to_17_Results'
+        self._single_fit_group_name = 'iris26176_graphite002_red_conv_1L_1_Results'
         self._output_name = 'iris26176_graphite002_conv_1L_s0_to_17_Result_Edit'
 
         red_name = 'iris26176_graphite002_red'
@@ -74,11 +75,12 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
                                    WorkspaceIndex='1',
                                    StartX=start_x,
                                    EndX=end_x,
-                                   OutputWorkspace=self._single_fit_name+'s',
+                                   OutputWorkspace=self._single_fit_group_name,
                                    OutputParameterWorkspace='iris26176_graphite002_conv_1L_s1_Parameters',
                                    OutputWorkspaceGroup='iris26176_graphite002_conv_1L_s1_Workspaces')
-        RenameWorkspace(InputWorkspace=self._input_name + 's_1', OutputWorkspace=self._input_name)
-        RenameWorkspace(InputWorkspace=self._single_fit_name+'s_1', OutputWorkspace=self._single_fit_name)
+
+        # RenameWorkspace(InputWorkspace=self._input_name, OutputWorkspace=self._input_name)
+        # RenameWorkspace(InputWorkspace=self._single_fit_name, OutputWorkspace=self._single_fit_name)
 
         self._input_workspace = get_ads_workspace(self._input_name)
         self._single_fit_workspace = get_ads_workspace(self._single_fit_name)

@@ -11,14 +11,24 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
-
+New features
+^^^^^^^^^^^^
 - New ``D7`` instrument definition for ILL 
+
+Improvements
+^^^^^^^^^^^^
 - Polaris.create_total_scattering_pdf output workspaces now have the run number in the names.
 - Polaris.create_total_scattering_pdf no longer takes `output_binning` as a parameter, instead binning of the output pdf can be controlled with `delta_r`.
 - Polaris.create_total_scattering_pdf can rebin the Q space workspace before calculating the PDF by being given an input `delta_q`.
-- Polaris.create_total_scattering_pdf fourier filter can be performed using the butterworth filter by calling with `bw_order`.
 - SampleDetails.set_materials now differentiates between sample density and crystal density for converting between pdf types.
 - :ref:`LoadWAND <algm-LoadWAND>` now adds `duration` log to the workspace
+- Polaris.create_total_scattering_pdf now no longer calculates the PDF with the Lorch filter enabled by default and must be enabled.
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been updated to allow for the algorithm to be run on a PDF to obtain a spectrum density function.
+- :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` now accepts the crystalographic density of the sample to correct for the powder density.
+
+Bugfixes
+^^^^^^^^
+- The fourier filter on Polaris.create_total_scattering_pdf no longer produces a jagged mark at the cut off point.
 
 Engineering Diffraction
 -----------------------
@@ -36,8 +46,6 @@ Improvements
 - :ref:`CombinePeaksWorkspaces <algm-CombinePeaksWorkspaces>` now combines the modulation vectors present in the two workspaces, provided the total number of vectors is less than 3.
 - New algorithm :ref:`FindGoniometerFromUB <algm-FindGoniometerFromUB-v1>` for making UBs for runs at different goniometer angles share common indexing and determine the goniometer axis and rotation required to match UBs to a reference.
 - New instrument geometry for MaNDi instrument at SNS
-
-Imaging
--------
+- New algorithm :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths-v1>` for calculating the absorption weighted path length for each peak in a peaks workspace. The absorption weighted path length is used downstream from Mantid in extinction correction calculations
 
 :ref:`Release 5.1.0 <v5.1.0>`

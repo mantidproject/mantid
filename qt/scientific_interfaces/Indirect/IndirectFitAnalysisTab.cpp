@@ -178,9 +178,6 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(
     IndirectFitPropertyBrowser *browser) {
   browser->init();
   m_fitPropertyBrowser = browser;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_fitPropertyBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
-#endif
 }
 
 void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
@@ -373,7 +370,8 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
     m_fittingAlgorithm.reset();
   } else
     m_fittingModel->addSingleFitOutput(m_fittingAlgorithm,
-                                       m_currentTableDatasetIndex);
+                                       m_currentTableDatasetIndex,
+                                       m_singleFitWorkspaceIndex);
 }
 
 /**
@@ -445,7 +443,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 paramWsName);
         auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
+        if (rowCount == static_cast<int>(m_fittingModel->getNumberOfDomains()))
           m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
       } else {
         IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
@@ -527,6 +525,7 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
                                        WorkspaceIndex spectrum) {
   if (validate()) {
+    m_singleFitWorkspaceIndex = spectrum;
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
@@ -698,7 +697,7 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 QStringList IndirectFitAnalysisTab::getDatasetNames() const {
   QStringList datasetNames;
   auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
-  for (int i{0}; i < numberWorkspaces.value; ++i) {
+  for (size_t i{0}; i < numberWorkspaces.value; ++i) {
     TableDatasetIndex index{i};
     auto const name =
         QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
@@ -712,7 +711,7 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
 
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
@@ -738,7 +737,7 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
   m_plotPresenter->updateAvailableSpectra();
   m_dataPresenter->updateSpectraInTable(i);
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   setModelFitFunction();
@@ -752,13 +751,14 @@ void IndirectFitAnalysisTab::respondToSingleResolutionLoaded() {
 }
 
 void IndirectFitAnalysisTab::respondToDataChanged() {
-  updateResultOptions();
   updateDataReferences();
+  m_fittingModel->removeFittingData();
   m_spectrumPresenter->updateSpectra();
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
   updateParameterEstimationData();
+  updateResultOptions();
 }
 
 void IndirectFitAnalysisTab::respondToSingleDataViewSelected() {
@@ -785,7 +785,6 @@ void IndirectFitAnalysisTab::respondToDataRemoved() {
 void IndirectFitAnalysisTab::respondToSelectedFitDataChanged(
     TableDatasetIndex i) {
   m_spectrumPresenter->setActiveModelIndex(i);
-  updateParameterValues();
 }
 
 void IndirectFitAnalysisTab::respondToNoFitDataSelected() {

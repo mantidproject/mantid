@@ -17,36 +17,36 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 
-#include "MantidKernel/StringTokenizer.h"
+#include <Poco/AutoPtr.h>
+#include <Poco/Channel.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Environment.h>
+#include <Poco/Exception.h>
 #include <Poco/File.h>
+#include <Poco/Instantiator.h>
+#include <Poco/Logger.h>
 #include <Poco/LoggingFactory.h>
+#include <Poco/LoggingRegistry.h>
 #include <Poco/Path.h>
+#include <Poco/Pipe.h>
+#include <Poco/PipeStream.h>
+#include <Poco/Platform.h>
 #include <Poco/Process.h>
+#include <Poco/StreamCopier.h>
+#include <Poco/String.h>
 #include <Poco/URI.h>
 #include <Poco/Util/LoggingConfigurator.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 #include <Poco/Util/SystemConfiguration.h>
-
-#include <Poco/AutoPtr.h>
-#include <Poco/Channel.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/Exception.h>
-#include <Poco/Instantiator.h>
-#include <Poco/Logger.h>
-#include <Poco/LoggingRegistry.h>
-#include <Poco/Pipe.h>
-#include <Poco/PipeStream.h>
-#include <Poco/Platform.h>
-#include <Poco/StreamCopier.h>
-#include <Poco/String.h>
+#include <Poco/Version.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -111,45 +111,6 @@ std::vector<std::string> splitPath(const std::string &path) {
 
 } // end of anonymous namespace
 
-/** Inner templated class to wrap the poco library objects that have protected
- *  destructors and expose them as public.
- */
-template <typename T> class ConfigServiceImpl::WrappedObject : public T {
-public:
-  /// The template type of class that is being wrapped
-  using element_type = T;
-  /// Simple constructor
-  WrappedObject() : T() { m_pPtr = static_cast<T *>(this); }
-
-  /** Constructor with a class to wrap
-   *  @param F :: The object to wrap
-   *
-   * Note that this constructor can hide the copy constructor because it takes
-   * precedence over the copy constructor if supplied with a non-const
-   * WrappedObject argument. However, it just calls the base class copy
-   * constructor and sets m_pPtr, so the behaviour is the same as the copy
-   * constructor.
-   */
-  template <typename Field> explicit WrappedObject(Field &F) : T(F) {
-    m_pPtr = static_cast<T *>(this);
-  }
-
-  /// Overloaded * operator returns the wrapped object pointer
-  const T &operator*() const { return *m_pPtr; }
-  /// Overloaded * operator returns the wrapped object pointer
-  T &operator*() { return m_pPtr; }
-  /// Overloaded -> operator returns the wrapped object pointer
-  const T *operator->() const { return m_pPtr; }
-  /// Overloaded -> operator returns the wrapped object pointer
-  T *operator->() { return m_pPtr; }
-
-private:
-  /// Private pointer to the wrapped class
-  T *m_pPtr;
-};
-
-// Back to the ConfigService class itself...
-
 //-------------------------------
 // Private member functions
 //-------------------------------
@@ -169,8 +130,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
       m_isProxySet(false) {
   // getting at system details
-  m_pSysConfig =
-      std::make_unique<WrappedObject<Poco::Util::SystemConfiguration>>();
+  m_pSysConfig = new Poco::Util::SystemConfiguration();
   m_pConf = nullptr;
 
   // Register StdChannel with Poco
@@ -427,9 +387,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
 
   // use the cached property string to initialise the POCO property file
   std::istringstream istr(m_PropertyString);
-  m_pConf =
-      std::make_unique<WrappedObject<Poco::Util::PropertyFileConfiguration>>(
-          istr);
+  m_pConf = new Poco::Util::PropertyFileConfiguration(istr);
 }
 
 /**
@@ -463,7 +421,11 @@ void ConfigServiceImpl::configureLogging() {
   try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
+#if POCO_VERSION > 0x01090400
+    configurator.configure(m_pConf);
+#else
     configurator.configure(m_pConf.get());
+#endif
   } catch (std::exception &e) {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << '\n';
@@ -969,7 +931,7 @@ std::vector<std::string> ConfigServiceImpl::keys() const {
  *
  *  @param rootName :: The key that is to be deleted
  */
-void ConfigServiceImpl::remove(const std::string &rootName) const {
+void ConfigServiceImpl::remove(const std::string &rootName) {
   m_pConf->remove(rootName);
   m_changed_keys.insert(rootName);
 }
@@ -1754,7 +1716,7 @@ ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
   }
 
   // search all of the instrument directories
-  const std::vector<std::string> directoryNames = getInstrumentDirectories();
+  const auto &directoryNames = getInstrumentDirectories();
 
   // only use downloaded instruments if configured to download
   const std::string updateInstrStr =
@@ -1888,7 +1850,7 @@ const InstrumentInfo &
 ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
 
   // Let's first search for the instrument in our default facility
-  std::string defaultFacility = ConfigService::Instance().getFacility().name();
+  std::string defaultFacility = getFacility().name();
 
   if (!defaultFacility.empty()) {
     try {
@@ -2059,10 +2021,9 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
       return fullPath.path();
   } catch (std::exception &) {
   }
-  Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
-  std::vector<std::string> directoryNames = configService.getDataSearchDirs();
-  std::vector<std::string> instrDirectories =
-      configService.getInstrumentDirectories();
+
+  auto directoryNames = getDataSearchDirs();
+  const auto &instrDirectories = getInstrumentDirectories();
   directoryNames.insert(directoryNames.end(), instrDirectories.begin(),
                         instrDirectories.end());
   for (const auto &searchPath : directoryNames) {

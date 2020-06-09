@@ -84,6 +84,7 @@ set(TEST_FILES
     workbench/plotting/test/test_figurewindow.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plotting/test/test_propertiesdialog.py
+    workbench/plotting/test/test_plothelppages.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py

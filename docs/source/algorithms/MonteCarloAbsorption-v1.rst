@@ -84,6 +84,8 @@ The algorithm proceeds as follows. For each spectrum:
 
 #. finally, if `ResimulateTracksForDifferentWavelengths` = True, interpolate through the unsimulated wavelength points using the selected method
 
+The algorithm generates some statistics on the number of scatter points generated in the sample and each environment component if the logging level is set to debug.
+
 Interpolation
 #############
 

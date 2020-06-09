@@ -59,7 +59,7 @@ private:
   int m_milliseconds;
 };
 
-/** FakeMWRunFiles
+/** FakeFileFinderWidget
  *
  * This implements the slots required to listen to a FindFilesWorker
  * and will simply capture the result produced by the worker.
@@ -67,11 +67,11 @@ private:
  * It will also capture if the worker notified that the search was
  * finished.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FakeMWRunFiles : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON FakeFileFinderWidget : public QObject {
   Q_OBJECT
 
 public:
-  FakeMWRunFiles() : m_results(), m_finishedSignalRecieved(false) {
+  FakeFileFinderWidget() : m_results(), m_finishedSignalRecieved(false) {
     connect(this, SIGNAL(fileFindingFinished()), this,
             SLOT(setSignalRecieved()));
   }

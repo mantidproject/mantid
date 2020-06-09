@@ -142,14 +142,15 @@ class CurveProperties(dict):
         props['markerfacecolor'] = view.marker.get_face_color()
         props['markeredgecolor'] = view.marker.get_edge_color()
         # Errorbar props
-        props['hide_errors'] = view.errorbars.get_hide()
-        props['errorevery'] = view.errorbars.get_error_every()
-        props['capsize'] = view.errorbars.get_capsize()
-        props['capthick'] = view.errorbars.get_cap_thickness()
-        props['ecolor'] = view.errorbars.get_color()
-        # setting errorbar line width to 0 sets width to default, so add a
-        # little bit on to avoid this
-        props['elinewidth'] = view.errorbars.get_width() + 1e-6
+        if view.errorbars.isEnabled():
+            props['hide_errors'] = view.errorbars.get_hide()
+            props['errorevery'] = view.errorbars.get_error_every()
+            props['capsize'] = view.errorbars.get_capsize()
+            props['capthick'] = view.errorbars.get_cap_thickness()
+            props['ecolor'] = view.errorbars.get_color()
+            # setting errorbar line width to 0 sets width to default, so add a
+            # little bit on to avoid this
+            props['elinewidth'] = view.errorbars.get_width() + 1e-6
         return cls(props)
 
     @classmethod

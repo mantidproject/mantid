@@ -85,7 +85,8 @@ DEFAULTS = {
     'project': {
         'prompt_save_on_close': True,
         'prompt_save_editor_modified': True,
-        'prompt_on_deleting_workspace': False
+        'prompt_on_deleting_workspace': False,
+        'save_altered_workspaces_only': False
     }
 }
 

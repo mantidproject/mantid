@@ -99,17 +99,13 @@ private:
   bool checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor);
 
   /// Prepare a vector of SpectraBlock structures to simplify loading
-  size_t prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
+  size_t prepareSpectraBlocks(std::map<specnum_t, std::string> &monitors,
                               DataBlockComposite &LoadBlock);
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);
   /// Load in details about the run
   void loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace,
                       Mantid::NeXus::NXEntry &entry);
-  /// Parse an ISO formatted date-time string into separate date and time
-  /// strings
-  void parseISODateTime(const std::string &datetime_iso, std::string &date,
-                        std::string &time) const;
   /// Load in details about the sample
   void loadSampleData(DataObjects::Workspace2D_sptr &,
                       Mantid::NeXus::NXEntry &entry);
@@ -144,65 +140,54 @@ private:
   std::string m_instrument_name;
   /// The sample name read from Nexus
   std::string m_samplename;
-
   // the description of the data block in the file to load.
   // the description of single time-range data block, obtained from detectors
   DataBlockComposite m_detBlockInfo;
-
   // the description of single time-range data block, obtained from monitors
   DataBlockComposite m_monBlockInfo;
-
   // description of the block to be loaded may include monitors and detectors
   // with the same time binning if the detectors and monitors are loaded
   // together
   // in single workspace or equal to the detectorBlock if monitors are excluded
   // or monBlockInfo if only monitors are loaded.
   DataBlockComposite m_loadBlockInfo;
-
   /// Is there a detector block
   bool m_have_detector;
-
+  // Is there a VMS block
+  bool m_hasVMSBlock;
   /// if true, a spectra list or range of spectra is supplied
   bool m_load_selected_spectra;
   /// map of workspace Index to spectra Number (spectraID)
   std::map<int64_t, specnum_t> m_wsInd2specNum_map;
   /// spectra Number to detector ID (multi)map
   API::SpectrumDetectorMapping m_spec2det_map;
-
   /// The number of the input entry
   int64_t m_entrynumber;
   /// List of disjoint data blocks to load
   std::vector<SpectraBlock> m_spectraBlocks;
-
   /// Time channels
   std::shared_ptr<HistogramData::HistogramX> m_tof_data;
-  /// Proton charge
-  double m_proton_charge;
   /// Spectra numbers
-  std::vector<int> m_spec;
+  std::vector<specnum_t> m_spec;
   /// Pointer to one-past-the-end of spectrum number array (m_spec)
-  const int *m_spec_end;
+  const specnum_t *m_spec_end;
   /// Monitors, map spectrum index to monitor group name
-  std::map<int64_t, std::string> m_monitors;
-
+  std::map<specnum_t, std::string> m_monitors;
   /// A pointer to the ISISRunLogs creator
   boost::scoped_ptr<ISISRunLogs> m_logCreator;
-
   /// Progress reporting object
   std::shared_ptr<API::Progress> m_progress;
-
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
-
   // Handle to the NeXus file
   // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_nexusFile;
   // clang-format on
 
   bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,
-                                 std::vector<int> &spectrum_index,
+                                 std::vector<specnum_t> &spectrum_index,
                                  int64_t ndets, int64_t n_vms_compat_spectra,
-                                 std::map<int64_t, std::string> &monitors,
+                                 std::map<specnum_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);
 
   /// Check if is the file is a multiple time regime file

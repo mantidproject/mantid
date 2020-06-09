@@ -80,6 +80,7 @@ class IN4(systemtesting.MantidSystemTest):
         mtd['cropped'].mutableRun().addProperty('run_title', '', True)
 
     def validate(self):
+        self.disableChecking = ['Instrument', 'Sample']
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-4
         return ['cropped', 'ILL_IN4_SofQW.nxs']
@@ -202,6 +203,7 @@ class IN6(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-2
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument', 'Sample']
         return ['cropped', 'ILL_IN6_SofQW.nxs']
 
 

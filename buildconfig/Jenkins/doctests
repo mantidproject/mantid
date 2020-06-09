@@ -35,7 +35,7 @@ fi
 #####################################################################################
 INSTALLER_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/mantidinstaller.py
 EXE_PATH_FILE=$PWD/mantidplotpath.txt
-python ${INSTALLER_SCRIPT} install $WORKSPACE --dump-exe-path=${EXE_PATH_FILE}
+python3 ${INSTALLER_SCRIPT} install $WORKSPACE --dump-exe-path=${EXE_PATH_FILE}
 MANTIDPLOT_EXE=$(cat ${EXE_PATH_FILE})
 
 ###############################################################################
@@ -79,7 +79,7 @@ if [[ ${NODE_LABELS} == *ubuntu* ]]; then
     ON_WT_PLATFORMS=true
 fi
 if [[ "${ON_WT_PLATFORMS}" == true ]] && [[ ${JOB_NAME} == *wikitests* ]]; then
-  python ${WORKSPACE}/tools/scripts/TestWikiPython.py -o ${WORKSPACE}/docs/source/mwTests
+  python3 ${WORKSPACE}/tools/scripts/TestWikiPython.py -o ${WORKSPACE}/docs/source/mwTests
 fi
 
 #####################################################################################
@@ -110,6 +110,6 @@ set -e #exit on failures from now on
 #####################################################################################
 # Remove package
 #####################################################################################
-python ${INSTALLER_SCRIPT} uninstall $WORKSPACE
+python3 ${INSTALLER_SCRIPT} uninstall $WORKSPACE
 
 exit $status

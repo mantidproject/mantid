@@ -62,6 +62,6 @@ def create_slice_info(transform_side_effect,
     slice_info = MagicMock()
     slice_info.frame = frame
     slice_info.transform.side_effect = transform_side_effect
-    slice_info.value = slice_value
-    slice_info.width = slice_width
+    slice_info.z_value = slice_value
+    slice_info.z_width = slice_width
     return slice_info
