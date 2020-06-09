@@ -62,7 +62,7 @@ def can_overplot():
     fig = current_figure_or_none()
     if fig is not None:
         figtype = figure_type(fig)
-        if figtype is FigureType.Line or figtype is FigureType.Errorbar:
+        if figtype in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
             compatible, msg = True, None
 
     return compatible, msg
@@ -295,7 +295,6 @@ def plot_contour(workspaces, fig=None):
                    colors=DEFAULT_CONTOUR_COLOUR,
                    linewidths=DEFAULT_CONTOUR_WIDTH)
 
-        ax.set_title(ws.name())
         fig.show()
 
     return fig

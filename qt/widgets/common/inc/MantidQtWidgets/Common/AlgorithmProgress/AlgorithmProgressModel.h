@@ -49,7 +49,8 @@ public:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   /// Triggered when the algorithm reports progress
   void progressHandle(const Mantid::API::IAlgorithm *alg, double progress,
-                      const std::string &message) override;
+                      const std::string &message, const double estimatedTime,
+                      const int progressPrecision) override;
   /// Triggered when the algorithm encounters an error
   void errorHandle(const Mantid::API::IAlgorithm *alg,
                    const std::string &what) override;

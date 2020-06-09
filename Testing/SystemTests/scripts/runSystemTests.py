@@ -11,21 +11,6 @@ import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
 
-try:
-    # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-    # Remove this when everything is switched to qtpy
-    import sip
-    sip.setapi('QString', 2)
-    sip.setapi('QVariant', 2)
-    sip.setapi('QDate', 2)
-    sip.setapi('QDateTime', 2)
-    sip.setapi('QTextStream', 2)
-    sip.setapi('QTime', 2)
-    sip.setapi('QUrl', 2)
-except (AttributeError, ImportError):
-    # PyQt < v4.6
-    pass
-
 # Prevents erros in systemtests that use matplotlib directly
 os.environ['MPLBACKEND'] = 'Agg'
 

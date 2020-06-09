@@ -10,13 +10,17 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(IndexingTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(IndexingTest
-                        LINK_PRIVATE
+                        PRIVATE
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Indexing
                         Parallel
                         gmock
-)
+  )
+  if(OpenMP_CXX_FOUND)
+    # Access to config service is required
+    target_link_libraries(IndexingTest PRIVATE Kernel)
+  endif()
 
   add_dependencies(FrameworkTests IndexingTest)
   # Add to the 'FrameworkTests' group in VS

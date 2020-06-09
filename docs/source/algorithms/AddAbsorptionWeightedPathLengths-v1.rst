@@ -26,6 +26,8 @@ The algorithm requires an input workspace with a sample defined but no sample en
 By default the beam is assumed to be the a slit with width and height matching
 the width and height of the sample. This can be overridden using :ref:`SetBeam <algm-SetBeam>`.
 
+The algorithm generates some statistics on the scattering angle for the simulated tracks when the log level is set to debug.
+
 Method
 ######
 

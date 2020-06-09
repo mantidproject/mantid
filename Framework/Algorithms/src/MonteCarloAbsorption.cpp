@@ -296,8 +296,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     auto &outE = simulationWS.mutableE(i);
     // The input was cloned so clear the errors out
     outE = 0.0;
-    // Final detector position
-    if (!spectrumInfo.hasDetectors(i)) {
+
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i)) {
       continue;
     }
     // Per spectrum values
@@ -330,11 +330,11 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
 
     for (size_t j = 0; j < packedLambdas.size(); j++) {
       simulationWS.getSpectrum(i)
-          .dataY()[simulationWS.yIndexOfX(packedLambdas[j])] =
+          .dataY()[simulationWS.yIndexOfX(packedLambdas[j], i)] =
           packedAttFactors[j];
 
       simulationWS.getSpectrum(i)
-          .dataE()[simulationWS.yIndexOfX(packedLambdas[j])] =
+          .dataE()[simulationWS.yIndexOfX(packedLambdas[j], i)] =
           packedAttFactorErrors[j];
     }
 

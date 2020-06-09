@@ -29,7 +29,6 @@ public:
   virtual bool isMultipleDataTabSelected() const override;
   bool isResolutionHidden() const override;
   void setResolutionHidden(bool hide) override;
-  void setStartAndEndHidden(bool hidden) override;
   void disableMultipleDataTab() override;
 
   virtual std::string getSelectedSample() const override;
@@ -52,6 +51,10 @@ public:
   UserInputValidator &validate(UserInputValidator &validator) override;
 
   void setXRange(std::pair<double, double> const &range) override;
+  QComboBox *cbParameterType;
+  QComboBox *cbParameter;
+  QLabel *lbParameter;
+  QLabel *lbParameterType;
 
 public slots:
   void displayWarning(const std::string &warning) override;

@@ -32,32 +32,34 @@ namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
-      m_uiForm(new Ui::JumpFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
   auto templateBrowser = new SingleFunctionTemplateBrowser(widthFits);
-  setPlotView(m_uiForm->pvFitPlotView);
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
-      m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
-      m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter,
-      templateBrowser));
+      m_jumpFittingModel, m_uiForm->dockArea->m_fitDataView,
+      m_uiForm->dockArea->m_fitDataView->cbParameterType,
+      m_uiForm->dockArea->m_fitDataView->cbParameter,
+      m_uiForm->dockArea->m_fitDataView->lbParameter,
+      m_uiForm->dockArea->m_fitDataView->lbParameterType, templateBrowser));
 
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      templateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
 
   setEditResultVisible(false);
-  m_uiForm->fitDataView->setStartAndEndHidden(false);
 }
 
 void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-  m_uiForm->cbParameter->setEnabled(false);
+  m_uiForm->dockArea->m_fitDataView->cbParameter->setEnabled(false);
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,

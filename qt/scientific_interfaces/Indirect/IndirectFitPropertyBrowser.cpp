@@ -46,8 +46,7 @@ namespace IDA {
 IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent)
     : QDockWidget(parent), m_templateBrowser(nullptr),
       m_functionWidget(nullptr) {
-  setFeatures(QDockWidget::DockWidgetFloatable |
-              QDockWidget::DockWidgetMovable);
+  setFeatures(QDockWidget::DockWidgetFloatable);
   setWindowTitle("Fit Function");
 }
 
