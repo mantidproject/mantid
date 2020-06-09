@@ -1159,6 +1159,8 @@ class MantidAxes(Axes):
 
         if has_minor_ticks:
             self.minorticks_on()
+        else:
+            self.minorticks_off()
 
     def set_yscale(self, *args, **kwargs):
         has_minor_ticks = not isinstance(self.yaxis.minor.locator, NullLocator)
@@ -1167,6 +1169,8 @@ class MantidAxes(Axes):
 
         if has_minor_ticks:
             self.minorticks_on()
+        else:
+            self.minorticks_off()
 
     # ------------------ Private api --------------------------------------------------------
 

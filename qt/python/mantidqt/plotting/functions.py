@@ -24,7 +24,7 @@ except ImportError:
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
                                        create_subplots,raise_if_not_sequence
-from mantid.kernel import Logger
+from mantid.kernel import Logger, ConfigService
 from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
@@ -209,6 +209,11 @@ def pcolormesh(workspaces, fig=None):
             else:
                 row_idx += 1
                 col_idx = 0
+
+            if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
+                ax.minorticks_on()
+
+            ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
         else:
             # nothing here
             ax.axis('off')
@@ -270,6 +275,11 @@ def plot_surface(workspaces, fig=None):
         else:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
 
+        if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
+            ax.minorticks_on()
+
+        ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
+
         surface = ax.plot_surface(ws, cmap=DEFAULT_CMAP)
         ax.set_title(ws.name())
         fig.colorbar(surface, ax=[ax])
@@ -287,6 +297,11 @@ def plot_wireframe(workspaces, fig=None):
             ax = fig.add_subplot(111, projection='mantid3d')
         else:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+
+        if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
+            ax.minorticks_on()
+
+        ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
 
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())

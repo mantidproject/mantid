@@ -299,6 +299,9 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
         for ax in fig.axes:
             ax.minorticks_on()
 
+    for ax in fig.axes:
+        ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
+
     return fig, fig.axes
 
 
