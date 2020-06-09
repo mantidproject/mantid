@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import PaalmanPingsMonteCarloAbsorption, Load, config, mtd
+from mantid.simpleapi import PaalmanPingsMonteCarloAbsorption, Load, mtd
 
 
 class FlatPlateTest(systemtesting.MantidSystemTest):
