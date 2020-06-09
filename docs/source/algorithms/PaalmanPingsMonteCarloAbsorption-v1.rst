@@ -15,8 +15,6 @@ Three simple shapes are supported: *FlatPlate*, *Cylinder*, and *Annulus*. Each 
 
 Inelastic, quasielastic and elastic measurements are supported, both for direct and indirect geometry instruments.
 
-The required properties for each of the supported shapes is listed in the table below:
-
 *Height* is a common property for the sample and container regardless the shape.
 
 Below are the required properties for each specific shape:
