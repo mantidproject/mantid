@@ -9,7 +9,6 @@
 These scripts are used by the ISIS Indirect geometry interfaces such as Indirect Convert to Energy,
 Data Analysis, and Bayes.
 """
-import os
 import unittest
 import numpy as np
 
@@ -79,9 +78,10 @@ class IndirectCommonTests(unittest.TestCase):
         self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
 
     def test_getDefaultWorkingDirectory(self):
-        config['defaultsave.directory'] = os.path.join(os.path.expanduser('~'), "")
+        path = os.path.join(os.path.expanduser('~'), "")
+        config['defaultsave.directory'] = path
         workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEqual(os.path.join(os.path.expanduser('~'), ""), workdir,
+        self.assertEqual(path.replace("\\", "/"), workdir,
                          "The working directory does not match the expected one")
 
     def test_getDefaultWorkingDirectory_failure(self):
