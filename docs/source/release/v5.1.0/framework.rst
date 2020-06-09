@@ -18,6 +18,7 @@ New Algorithms
 - New algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` will calculate all 4 terms in self attenuation corrections following the Paalman and Pings formalism.
 Simple shapes are supported: FlatPlate, Cylinder, Annulus. Both elastic and inelastic as well as direct and indirect geometries are supported.
 
+
 Algorithms
 ----------
 
@@ -80,5 +81,6 @@ Deprecations
 ------------
 - **CalculateMonteCarloAbsorption** and **SimpleShapeMonteCarloAbsorption** are deprecated in favour of the new :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`.
 While the new one provides more complete and more correct calculation, it can also fall back to the simpler calculation if the container is not specified.
+
 
 :ref:`Release 5.1.0 <v5.1.0>`
