@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, protected-access, super-on-old-class
 from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QFrame)  # noqa
-from qtpy.QtCore import (QFile, QObject, QEvent, Qt)  # noqa
+from qtpy.QtCore import (QFile, QObject, QEvent, Qt, QFileInfo)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
 import os
 import sys
@@ -14,6 +14,7 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 from mantidqt.utils.qt import load_ui
+from mantid.kernel import logger
 Ui_Frame, _ = load_ui(__file__, '../../../ui/stitcher.ui')
 
 
@@ -352,10 +353,12 @@ class StitcherWidget(BaseWidget):
         title = "Data file - Choose a reduced I(Q) file"
         if not os.path.isdir(str(self._output_dir)):
             self._output_dir = os.path.expanduser("~")
-        fname = QFileInfo(QFileDialog.getOpenFileName(self, title,
-                                                                   self._output_dir,
-                                                                   "Reduced XML files (*.xml);; Reduced Nexus files"
-                                                                   " (*.nxs);; All files (*)")).filePath()
+        FileName = QFileDialog.getOpenFileName(self, title, self._output_dir,
+                                          "Reduced XML files (*.xml);; Reduced Nexus files"
+                                          " (*.nxs);; All files (*)")
+        if isinstance(FileName,tuple):
+            FileName = FileName[0]
+        fname = QFileInfo(FileName).filePath()
         if fname:
             if isinstance(fname, tuple):
                 fname = fname[0]
@@ -494,7 +497,7 @@ class StitcherWidget(BaseWidget):
             ws_list.append(self._high_q_data.get_scaled_ws())
 
         if len(ws_list) > 0:
-            g = plotSpectrum(ws_list, [0], error_bars=True, window=self._graph)
+            g = plotSpectrum(ws_list, [0], error_bars=True)
             g.setName(self._graph)
 
     def _save_result(self):
