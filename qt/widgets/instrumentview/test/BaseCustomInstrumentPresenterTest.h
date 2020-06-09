@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
-//#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-//#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentMocks.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -24,7 +24,6 @@
 
 #include <string>
 #include <utility>
-#include<iostream>
 using namespace Mantid::API;
 using namespace testing;
 using Mantid::Geometry::Instrument;
@@ -42,27 +41,36 @@ public:
   void setUp() override {
     //m_workspace = createWorkspace(4, 3);
     //m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
- // m_model = new NiceMock<FullALFModelTest>();
- // m_view = new NiceMock<ALFViewTest>("ALF");
- // m_paneView = new NiceMock<paneViewTest>();
- // m_paneModel = new NiceMock<paneModelTest>();
- // m_pane = new NiceMock<paneTest>(m_paneView, m_paneModel);
- // m_presenter = new ALFCustomInstrumentPresenter(m_view, m_model,m_pane);
+  m_model = new NiceMock<baseModelTest>();
+  m_view = new NiceMock<baseViewTest>("EMU");
+  m_paneView = new NiceMock<paneViewTest>();
+  m_paneModel = new NiceMock<paneModelTest>();
+  m_pane = new NiceMock<paneTest>(m_paneView, m_paneModel);
+  m_presenter = new BaseCustomInstrumentPresenter(m_view, m_model, m_pane);
   }
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
   //  m_model->~FullALFModelTest();
- //   delete m_view;
- //   delete m_paneView;
- //   m_paneModel = NULL;
- //   delete m_presenter;
- //   m_pane->~paneTest();
+    delete m_view;
+    delete m_model;
+    delete m_paneView;
+    m_paneModel = NULL;
+    delete m_presenter;
+    m_pane->~paneTest();
   }
 
 
 void test_addInstrument(){
-return;  
+return;
+
+//m_loadRunObserver = new VoidObserver()
+//EXPECT_CALL(*m_view, observeLoadRun(m_loadRunObserver)).Times(1);
+//EXPECT_CALL(*m_view, setupHelp()).Times(1);
+//EXPECT_CALL(*m_view, setUpInstrument()).Times(1);
+
+
+//return;  
 // this is only called as part of initLayout
 //  EXPECT_CALL(*m_pane, getView()).Times(1);
 //  m_presenter->addInstrument();
@@ -78,11 +86,21 @@ return;
 }
 
 void test_setUpInstrumentAnalysisSplitter(){
-return;
+auto widget = new QWidget();
+EXPECT_CALL(*m_view, getQWidget()).Times(1).WillOnce(Return(widget));
+EXPECT_CALL(*m_view, setupInstrumentAnalysisSplitters(widget)).Times(1);
+//m_presenter->setUpInstrumentAnalysisSplitter();
 }
 
 void test_loadAndAnalysisSuccess(){
-return;
+std::string path = "path_to_run";
+int run = 101;
+std::string status = "success";
+std::pair<int, std::string> result = std::make_pair(run,status);
+EXPECT_CALL(*m_model, loadData(path)).Times(1).WillOnce(Return(result));
+EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run)));
+EXPECT_CALL(*m_model, setCurrentRun(run));
+//m_presenter->loadAndAnalysis();
 }
 void test_loadAndAnalysisFail(){
 return;
@@ -103,11 +121,11 @@ return;
 }
 
 private:
-//  NiceMock<FullALFModelTest> *m_model;
-//  NiceMock<ALFViewTest> *m_view;
-//  NiceMock<paneViewTest> *m_paneView;
-//  NiceMock<paneModelTest> *m_paneModel;
-//  NiceMock<paneTest> *m_pane;
-//  ALFCustomInstrumentPresenter *m_presenter;
+  NiceMock<baseViewTest> *m_view;
+  NiceMock<baseModelTest> *m_model;
+  NiceMock<paneModelTest> *m_paneModel;
+  NiceMock<paneViewTest> *m_paneView;
+  NiceMock<paneTest> *m_pane;
+  BaseCustomInstrumentPresenter *m_presenter;
 };
 

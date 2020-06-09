@@ -92,6 +92,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
   inc/MantidQtWidgets/InstrumentView/BankTextureBuilder.h
   inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h
+  inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentMocks.h
   inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h
   inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h
   inc/MantidQtWidgets/InstrumentView/BinDialog.h

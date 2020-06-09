@@ -33,17 +33,15 @@ public:
   typedef std::vector<std::tuple<std::string, Observer *>>
       instrumentObserverOptions;
 
-  void initLayout(
+  virtual void initLayout(
       std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
   virtual void addInstrument();
 
+protected slots:
+  virtual void loadRunNumber();
+
 protected:
   virtual void loadSideEffects(){};
-
-private slots:
-  void loadRunNumber();
-
-private:
   void loadAndAnalysis(const std::string &run);
   void
   initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
