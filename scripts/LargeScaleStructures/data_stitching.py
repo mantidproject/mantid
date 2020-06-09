@@ -26,6 +26,7 @@ else:
 if IS_IN_MANTIDGUI:
     from qtpy import QtCore
 
+
 class RangeSelector(object):
     """
         Brings up range selector window and connects the user selection to

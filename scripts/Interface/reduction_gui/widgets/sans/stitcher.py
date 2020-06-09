@@ -9,23 +9,15 @@ from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QFrame)  # n
 from qtpy.QtCore import (QFile, QObject, QEvent, Qt, QFileInfo)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
 import os
-import sys
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 from mantidqt.utils.qt import load_ui
-from mantid.kernel import logger
-Ui_Frame, _ = load_ui(__file__, '../../../ui/stitcher.ui')
-
-
-
 from mantid.plots._compatability import plotSpectrum
-
 from mantid.api import AnalysisDataService
-
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
-
 from reduction_gui.reduction.scripter import BaseScriptElement
+Ui_Frame, _ = load_ui(__file__, '../../../ui/stitcher.ui')
 
 
 class StitcherState(BaseScriptElement):
@@ -354,8 +346,8 @@ class StitcherWidget(BaseWidget):
         if not os.path.isdir(str(self._output_dir)):
             self._output_dir = os.path.expanduser("~")
         FileName = QFileDialog.getOpenFileName(self, title, self._output_dir,
-                                          "Reduced XML files (*.xml);; Reduced Nexus files"
-                                          " (*.nxs);; All files (*)")
+                                               "Reduced XML files (*.xml);; Reduced Nexus files"
+                                               " (*.nxs);; All files (*)")
         if isinstance(FileName,tuple):
             FileName = FileName[0]
         fname = QFileInfo(FileName).filePath()

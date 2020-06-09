@@ -36,6 +36,7 @@ else:
 if IS_IN_MANTIDGUI:
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
 
+
 class HFIRInterface(InstrumentInterface):
     """
         Defines the widgets for HFIR reduction

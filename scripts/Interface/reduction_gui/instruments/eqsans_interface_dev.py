@@ -35,6 +35,7 @@ else:
 if IS_IN_MANTIDGUI:
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
 
+
 class EQSANSInterface(InstrumentInterface):
     """
         Defines the widgets for EQSANS reduction
