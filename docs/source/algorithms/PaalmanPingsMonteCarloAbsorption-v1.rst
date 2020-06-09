@@ -121,10 +121,10 @@ Usage
 
 .. testoutput:: FlatPlate
 
-    Y-Unit Label of flat_plate_corr__ass: Attenuation factor
-    Y-Unit Label of flat_plate_corr__assc: Attenuation factor
-    Y-Unit Label of flat_plate_corr__acsc: Attenuation factor
-    Y-Unit Label of flat_plate_corr__acc: Attenuation factor
+    Y-Unit Label of flat_plate_corr_ass: Attenuation factor
+    Y-Unit Label of flat_plate_corr_assc: Attenuation factor
+    Y-Unit Label of flat_plate_corr_acsc: Attenuation factor
+    Y-Unit Label of flat_plate_corr_acc: Attenuation factor
 
 **Example - Cylinder**
 
@@ -181,10 +181,10 @@ Usage
 
 .. testoutput:: Cylinder
 
-    Y-Unit Label of cylinder_corr__ass: Attenuation factor
-    Y-Unit Label of cylinder_corr__assc: Attenuation factor
-    Y-Unit Label of cylinder_corr__acsc: Attenuation factor
-    Y-Unit Label of cylinder_corr__acc: Attenuation factor
+    Y-Unit Label of cylinder_corr_ass: Attenuation factor
+    Y-Unit Label of cylinder_corr_assc: Attenuation factor
+    Y-Unit Label of cylinder_corr_acsc: Attenuation factor
+    Y-Unit Label of cylinder_corr_acc: Attenuation factor
 
 **Example - Annulus**
 
@@ -243,10 +243,10 @@ Usage
 
 .. testoutput:: Annulus
 
-    Y-Unit Label of annulus_corr__ass: Attenuation factor
-    Y-Unit Label of annulus_corr__assc: Attenuation factor
-    Y-Unit Label of annulus_corr__acsc: Attenuation factor
-    Y-Unit Label of annulus_corr__acc: Attenuation factor
+    Y-Unit Label of annulus_corr_ass: Attenuation factor
+    Y-Unit Label of annulus_corr_assc: Attenuation factor
+    Y-Unit Label of annulus_corr_acsc: Attenuation factor
+    Y-Unit Label of annulus_corr_acc: Attenuation factor
 
 References
 ----------
