@@ -390,9 +390,9 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
           loadTwoThetaDetectors(workspace, entry, bank_no + 2);
       for (auto pixel_no = 0;
            pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK); ++pixel_no) {
-        IComponent_const_sptr pixel = instrument->getDetector(
-            bank_no * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no);
-        const auto pixelIndex = componentInfo.indexOf(pixel->getComponentID());
+        auto const pixelIndex =
+            bank_no * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no;
+        auto const pixel = componentInfo.componentID(pixelIndex);
         V3D position = pixel->getPos();
         double radius, theta, phi;
         position.getSpherical(radius, theta, phi);
