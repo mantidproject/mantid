@@ -33,6 +33,11 @@ from .peaksviewer.workspaceselection import \
      PeaksWorkspaceSelectorView)
 from .peaksviewer.view import PeaksViewerCollectionView
 from .peaksviewer.representation.painter import MplPainter
+from .zoom import ScrollZoomMixin
+
+
+class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
+    pass
 
 
 class SliceViewerDataView(QWidget):
@@ -89,7 +94,7 @@ class SliceViewerDataView(QWidget):
         self.image = None
         self._grid_on = False
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
-        self.canvas = FigureCanvas(self.fig)
+        self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
         self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
         self.canvas.mpl_connect('button_press_event', self.mouse_click)
@@ -137,6 +142,7 @@ class SliceViewerDataView(QWidget):
         self.clear_figure()
         self.nonortho_tr = None
         self.ax = self.fig.add_subplot(111, projection='mantid')
+        self.enable_zoom_on_mouse_scroll()
         if self.grid_on:
             self.ax.grid(self.grid_on)
         if self.line_plots:
@@ -155,11 +161,20 @@ class SliceViewerDataView(QWidget):
                                      1,
                                      grid_helper=GridHelperCurveLinear(
                                          (self.nonortho_tr, transform.inv_tr)))
+        self.enable_zoom_on_mouse_scroll()
         self.set_grid_on()
         self.fig.add_subplot(self.ax)
         self.plot_MDH = self.plot_MDH_nonorthogonal
 
         self.canvas.draw_idle()
+
+    def enable_zoom_on_mouse_scroll(self):
+        """Enable zoom on scroll the mouse wheel for the created axes
+        """
+        self.canvas.enable_zoom_on_scroll(self.ax,
+                                          redraw=False,
+                                          toolbar=self.mpl_toolbar,
+                                          callback=self.on_data_limits_changed)
 
     def add_line_plots(self):
         """Assuming line plots are currently disabled, enable them on the current figure
@@ -292,6 +307,7 @@ class SliceViewerDataView(QWidget):
             self.delete_line_plot_lines()
             self.axx, self.axy = None, None
         self.image = None
+        self.canvas.disable_zoom_on_scroll()
         self.fig.clf()
         self.ax = None
 
