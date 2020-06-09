@@ -549,7 +549,8 @@ public:
       TS_ASSERT(!workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(), "Spectrum")
+      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
+                       "Spectrum")
     }
   }
 
@@ -585,7 +586,8 @@ public:
       TS_ASSERT(workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(), "Wavelength")
+      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
+                       "Wavelength")
       TS_ASSERT_EQUALS(workspaceEntry->getAxis(1)->getValue(0), 0)
       TS_ASSERT_EQUALS(workspaceEntry->getAxis(1)->getValue(0), 0)
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(2), 12.66, 0.01)
