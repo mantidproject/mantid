@@ -6,12 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QCursor
+from qtpy.QtWidgets import QMenu
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
 from matplotlib.backends.qt_compat import is_pyqt5
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
-from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar, FittingPropToolbar
+from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
 
 import pydevd_pycharm
 pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True)
@@ -40,28 +42,29 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def setup_figure(self):
         self.figure = Figure()
         self.figure.canvas = FigureCanvas(self.figure)
+        self.figure.canvas.mpl_connect('button_press_event', self.mouse_click)
         self.figure.add_subplot(111, projection="mantid")
         self.figure.tight_layout()
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
         self.vLayout_plot.addWidget(self.toolbar)
         self.vLayout_plot.addWidget(self.figure.canvas)
-        self.fitprop_toolbar = FittingPropToolbar(self.figure.canvas, self, False)
-        self.vLayout_fitprop.addWidget(self.fitprop_toolbar)
-        self.fit_browser = FitPropertyBrowser(self.figure.canvas, ToolbarStateManager(self.fitprop_toolbar))
-        self.fit_browser.closing.connect(self.fitprop_toolbar.handle_fit_browser_close)
+        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas, ToolbarStateManager(self.toolbar)) # self.fitprop_toolbar
+        self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)
         self.vLayout_fitprop.addWidget(self.fit_browser)
-
-        # From figuremanager has this instead... not sure what vLayout_plot is but not in init
-        # self.window.setCentralWidget(self.figure.canvas)
-        # self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
         self.fit_browser.hide()
+
+    def mouse_click(self, event):
+        if event.button == event.canvas.buttond.get(Qt.RightButton):
+            menu = QMenu()
+            self.fit_browser.add_to_menu(menu)
+            menu.exec_(QCursor.pos())
 
     def resizeEvent(self, QResizeEvent):
         self.figure.tight_layout()
 
     def setup_toolbar(self):
         self.toolbar.sig_home_clicked.connect(self.display_all)
-        self.fitprop_toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+        self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
 
     # =================
     # Component Setters

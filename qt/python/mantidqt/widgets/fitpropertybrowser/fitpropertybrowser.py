@@ -9,13 +9,11 @@
 #
 from qtpy.QtCore import Qt, Signal, Slot
 
-import matplotlib.pyplot
-
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
-
+import matplotlib.pyplot as plt
 from .interactive_tool import FitInteractiveTool
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
@@ -132,7 +130,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
-        import matplotlib.pyplot as plt
+
         """
         Override the base class method. Initialise the peak editing tool.
         """
@@ -166,13 +164,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.setPeakToolOn(True)
         self.canvas.draw()
+        self.set_output_window_names()
 
-        # # change the output name if more than one plot of the same workspace
-        # window_title = self.canvas.get_window_title()
-        # workspace_name = window_title.rsplit('-', 1)[0]
-        # for open_figures in plt.get_figlabels():
-        #     if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
-        #         self.setOutputName(window_title)
+    def set_output_window_names(self):
+        """
+        Change the output name if more than one plot of the same workspace
+        """
+        window_title = self.canvas.get_window_title()
+        workspace_name = window_title.rsplit('-', 1)[0]
+        for open_figures in plt.get_figlabels():
+            if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
+                self.setOutputName(window_title)
+        return None
 
     def get_fit_bounds(self):
         """
@@ -546,5 +549,5 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 presenter = MatrixWorkspaceDisplay(ws, plot=plot)
                 presenter.show_view()
             elif isinstance(ws, ITableWorkspace):
-                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot)
+                presenter = TableWorkspaceDisplay(ws, plot=plt)
                 presenter.show_view()

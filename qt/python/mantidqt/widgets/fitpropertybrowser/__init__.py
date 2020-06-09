@@ -10,3 +10,4 @@
 
 # flake8: noqa
 from .fitpropertybrowser import FitPropertyBrowserBase, FitPropertyBrowser
+from .interactive_tool import FitInteractiveTool
