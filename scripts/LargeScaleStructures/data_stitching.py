@@ -9,17 +9,22 @@
     Data stitching for SANS and reflectometry
 """
 import os
+import sys
 from mantid.simpleapi import *
 from mantid.kernel import Logger
 from functools import cmp_to_key
 
-try:
-    import mantidplot
-    from PyQt4 import QtCore
-    IS_IN_MANTIDPLOT = True
-except(ImportError, ImportWarning):
-    IS_IN_MANTIDPLOT = False
-
+IS_IN_MANTIDGUI = False
+if "workbench.app.mainwindow" in sys.modules:
+    IS_IN_MANTIDGUI = True
+else:
+    try:
+        import mantidplot
+        IS_IN_MANTIDGUI = True
+    except(ImportError, ImportWarning):
+        pass
+if IS_IN_MANTIDGUI:
+    from qtpy import QtCore
 
 class RangeSelector(object):
     """
@@ -39,7 +44,7 @@ class RangeSelector(object):
             self._graph = "Range Selector"
 
         def disconnect(self):
-            if IS_IN_MANTIDPLOT:
+            if IS_IN_MANTIDGUI:
                 mantidplot.app.disconnect(mantidplot.app.mantidUI,
                                           QtCore.SIGNAL("x_range_update(double,double)"),
                                           self._call_back)
@@ -48,7 +53,7 @@ class RangeSelector(object):
                     range_min=None, range_max=None, x_title=None,
                     log_scale=False,
                     ws_output_base=None):
-            if not IS_IN_MANTIDPLOT:
+            if not IS_IN_MANTIDGUI:
                 print("RangeSelector cannot be used output MantidPlot")
                 return
 
