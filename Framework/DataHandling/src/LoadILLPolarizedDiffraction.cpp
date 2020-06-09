@@ -113,6 +113,12 @@ void LoadILLPolarizedDiffraction::init() {
   setPropertySettings("YIGFilename",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "PositionCalibration", IS_EQUAL_TO, "YIGFile"));
+  declareProperty("ConvertToScatteringAngle", false,
+                  "Convert the bin edges to scattering angle",
+                  Direction::Input);
+  declareProperty("TransposeMonochromatic", false,
+                  "Transpose the 2D workspace with monochromatic data",
+                  Direction::Input);
 }
 
 std::map<std::string, std::string>
@@ -212,15 +218,24 @@ void LoadILLPolarizedDiffraction::loadData() {
     }
 
     // load the instrument if it has not been created
-    if (m_outputWorkspaceGroup->getNumberOfEntries() == 0) {
-      loadInstrument(workspace);
-      // rotate detectors to their position during measurement if position
-      // calibration is requested
-      moveTwoTheta(entry, workspace);
+    loadInstrument(workspace);
+
+    // rotate detectors to their position during measurement if position
+    // calibration is requested
+    moveTwoTheta(entry, workspace);
+
+    // convert the spectrum axis to scattering angle
+    if (getProperty("ConvertToScatteringAngle")) {
+      convertSpectrumAxis(workspace);
     }
+    // transpose monochromatic data distribution
+    if (getProperty("TransposeMonochromatic") &&
+        m_acquisitionMode != TOF_MODE_ON) {
+      transposeMonochromatic(workspace);
+    }
+
     // adds the current entry workspace to the output group
     m_outputWorkspaceGroup->addWorkspace(workspace);
-
     entry.close();
   }
   dataRoot.close();
@@ -264,30 +279,28 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
 
   API::MatrixWorkspace_sptr workspace;
 
-  if (m_outputWorkspaceGroup->getNumberOfEntries() == 0) {
-    workspace = WorkspaceFactory::Instance().create(
-        "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
+  workspace = WorkspaceFactory::Instance().create(
+      "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
 
-    // Set x axis units
-    NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
-    acquisitionMode.load();
-    if (acquisitionMode[0] == TOF_MODE_ON) {
-      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Time", Units::Symbol::Microsecond);
-      workspace->getAxis(0)->unit() = lblUnit;
-    } else {
-      auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
-      workspace->getAxis(0)->unit() = lblUnit;
-    }
-    // Set y axis unit
-    workspace->setYUnit("Counts");
+  // Set x axis units
+  NXInt acquisitionMode = entry.openNXInt("acquisition_mode");
+  acquisitionMode.load();
+  m_acquisitionMode = acquisitionMode[0];
+  if (m_acquisitionMode == TOF_MODE_ON) {
+    auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
+        UnitFactory::Instance().create("Label"));
+    lblUnit->setLabel("Time", Units::Symbol::Microsecond);
+    workspace->getAxis(0)->unit() = lblUnit;
   } else {
-    API::Workspace_sptr tmp = (m_outputWorkspaceGroup->getItem(0))->clone();
-    workspace = std::static_pointer_cast<API::MatrixWorkspace>(tmp);
+    auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
+        UnitFactory::Instance().create("Label"));
+    lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
+    workspace->getAxis(0)->unit() = lblUnit;
   }
+  // Set y axis unit
+
+  workspace->setYUnit("Counts");
+
   // check the polarization direction and set the workspace title
   std::string polDirection = entry.getString("D7/POL/actual_state");
   std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
@@ -417,10 +430,41 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
     m_numberOfChannels = 1;
     NXFloat wavelength = entry.openNXFloat("D7/monochromator/wavelength");
     wavelength.load();
-    axes.push_back(static_cast<double>(wavelength[0] * 0.9));
-    axes.push_back(static_cast<double>(wavelength[0] * 1.1));
+    axes.push_back(static_cast<double>(wavelength[0] * 0.99));
+    axes.push_back(static_cast<double>(wavelength[0] * 1.01));
   }
   return axes;
+}
+
+/**
+ * Converts the spectrum axis to scattering angle
+ * @param workspace : workspace to change the
+ */
+void LoadILLPolarizedDiffraction::convertSpectrumAxis(
+    API::MatrixWorkspace_sptr &workspace) {
+  IAlgorithm_sptr convertSpectrumAxis =
+      createChildAlgorithm("ConvertSpectrumAxis");
+  convertSpectrumAxis->initialize();
+  convertSpectrumAxis->setProperty("InputWorkspace", workspace);
+  convertSpectrumAxis->setProperty("OutputWorkspace", "__unused_for_child");
+  convertSpectrumAxis->setProperty("Target", "Theta");
+  convertSpectrumAxis->setProperty("EMode", "Direct");
+  convertSpectrumAxis->execute();
+  workspace = convertSpectrumAxis->getProperty("OutputWorkspace");
+}
+
+/**
+ * Transposes given 2D workspace with monochromatic data
+ * @param workspace : workspace to be transposed
+ */
+void LoadILLPolarizedDiffraction::transposeMonochromatic(
+    API::MatrixWorkspace_sptr &workspace) {
+  IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
+  transpose->initialize();
+  transpose->setProperty("InputWorkspace", workspace);
+  transpose->setProperty("OutputWorkspace", "__unused_for_child");
+  transpose->execute();
+  workspace = transpose->getProperty("OutputWorkspace");
 }
 
 } // namespace DataHandling
