@@ -42,11 +42,11 @@ protected slots:
 
 protected:
   virtual void loadSideEffects(){};
-  void loadAndAnalysis(const std::string &run);
-  void
+  virtual void loadAndAnalysis(const std::string &run);
+  virtual void
   initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
   virtual void setUpInstrumentAnalysisSplitter();
-  std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
+  virtual std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
   IBaseCustomInstrumentView *m_view;
   IBaseCustomInstrumentModel *m_model;

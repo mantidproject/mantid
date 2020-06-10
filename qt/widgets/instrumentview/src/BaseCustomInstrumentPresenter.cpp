@@ -14,6 +14,8 @@
 #include <tuple>
 #include<qobject.h>
 
+#include <iostream>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -28,7 +30,7 @@ BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
 
 void BaseCustomInstrumentPresenter::addInstrument() {
   auto setUp = setupInstrument();
-  initLayout(&setUp);
+  //initLayout(setUp);
 }
 
 void BaseCustomInstrumentPresenter::initLayout(
@@ -98,14 +100,14 @@ typedef std::pair<std::string,
     instrumentSetUp;
 typedef std::vector<std::tuple<std::string, Observer *>>
     instrumentObserverOptions;
-std::pair<instrumentSetUp, instrumentObserverOptions>
 
-BaseCustomInstrumentPresenter::setupInstrument() {
+std::pair<instrumentSetUp, instrumentObserverOptions>
+ BaseCustomInstrumentPresenter::setupInstrument() {
   instrumentSetUp setUpContextConditions;
 
   // set up the slots for the custom context menu
-  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
-  std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
+  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions(0);
+  std::vector<std::function<bool(std::map<std::string, bool>)>> binders(0);
 
   setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
 

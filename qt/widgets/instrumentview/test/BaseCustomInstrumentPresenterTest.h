@@ -46,12 +46,11 @@ public:
   m_paneView = new NiceMock<paneViewTest>();
   m_paneModel = new NiceMock<paneModelTest>();
   m_pane = new NiceMock<paneTest>(m_paneView, m_paneModel);
-  m_presenter = new BaseCustomInstrumentPresenter(m_view, m_model, m_pane);
+  m_presenter = new baseTest(m_view, m_model, m_pane);
   }
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
-  //  m_model->~FullALFModelTest();
     delete m_view;
     delete m_model;
     delete m_paneView;
@@ -62,19 +61,13 @@ public:
 
 
 void test_addInstrument(){
-return;
-
-//m_loadRunObserver = new VoidObserver()
-//EXPECT_CALL(*m_view, observeLoadRun(m_loadRunObserver)).Times(1);
-//EXPECT_CALL(*m_view, setupHelp()).Times(1);
-//EXPECT_CALL(*m_view, setUpInstrument()).Times(1);
-
-
-//return;  
-// this is only called as part of initLayout
-//  EXPECT_CALL(*m_pane, getView()).Times(1);
-//  m_presenter->addInstrument();
-// want to check initLayout is called from base class or mock base class funcs?
+m_presenter->setMockLayout();
+m_presenter->setMockLoad();
+m_presenter->addInstrument();
+m_presenter->loadRunNumber();
+TS_ASSERT_EQUALS(m_presenter->getLayoutCount(), 1);
+TS_ASSERT_EQUALS(m_presenter->getAddCount(), 1);
+TS_ASSERT_EQUALS(m_presenter->getLoadCount(), 1);
 }
 
 void test_startup(){
@@ -82,6 +75,7 @@ return;
 }
 
 void test_initLayout(){
+
 return;
 }
 
@@ -126,6 +120,6 @@ private:
   NiceMock<paneModelTest> *m_paneModel;
   NiceMock<paneViewTest> *m_paneView;
   NiceMock<paneTest> *m_pane;
-  BaseCustomInstrumentPresenter *m_presenter;
+  baseTest *m_presenter;
 };
 

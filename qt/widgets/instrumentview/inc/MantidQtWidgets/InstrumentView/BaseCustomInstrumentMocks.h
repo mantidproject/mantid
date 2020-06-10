@@ -23,15 +23,15 @@
 
 #include <string>
 #include <utility>
-
+#include<iostream>
 using namespace Mantid::API;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt;
 using namespace MantidQt::MantidWidgets;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW baseTest : public BaseCustomInstrumentPresenter{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW baseTest :  public BaseCustomInstrumentPresenter{
 public:
-    explicit baseTest(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model, IPlotFitAnalysisPanePresenter *analysis):BaseCustomInstrumentPresenter(view, model, analysis), m_add(0), m_layout(0), m_load(0),m_mockAdd(false), m_mockLoad(false), m_mockLayout(false){}; 
+    explicit baseTest(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model, IPlotFitAnalysisPanePresenter *analysis):BaseCustomInstrumentPresenter(view, model, analysis), m_add(0), m_load(0), m_layout(0),m_mockAdd(false), m_mockLoad(false), m_mockLayout(false){}; 
     ~baseTest() {}; 
 
 // turn mocks on
@@ -39,22 +39,27 @@ public:
     void setMockLoad(){m_mockLoad = true;};
     void setMockLayout(){m_mockLayout = true;};
 
-// override functions to allow for mocks
-    void addInstrument() override {
-     if(m_mockAdd){m_add+=1;}
-     else{BaseCustomInstrumentPresenter::addInstrument(); }
-};
-void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup) override {
-if(m_mockLayout){m_layout+=1;}
-else{BaseCustomInstrumentPresenter::initLayout(setup);}
-};
-void loadRunNumber() override {
-if(m_mockLoad){m_load+=1;}else{BaseCustomInstrumentPresenter::loadRunNumber();}
-};
-// get methods for mocks
-int getAddCount(){return m_add;};
-int getLayoutCount(){return m_layout;};
-int getloadCount(){return m_load;};
+    void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup) override final{
+    std::cout<<"initLayout "<<m_mockLayout<<" :P"<<std::endl;
+    if(m_mockLayout == true){std::cout<<"true"<<std::endl; m_layout+=1;}
+    else{std::cout<<"false"<<std::endl; BaseCustomInstrumentPresenter::initLayout(setup);}
+    std::cout<<"sone"<<std::endl;
+    };
+    void loadRunNumber() override {
+    std::cout<<"load "<<m_mockLoad<<" :P"<<std::endl;
+    if(m_mockLoad){m_load+=1;}else{BaseCustomInstrumentPresenter::loadRunNumber();}
+    };
+
+    // get methods for mocks
+    int getAddCount(){return m_add;};
+    int getLayoutCount(){return m_layout;};
+    int getLoadCount(){return m_load;};
+
+    // allow tests to get at protected/private functions
+    void loadAndAnalysis(const std::string &run) override {BaseCustomInstrumentPresenter::loadAndAnalysis(run);};
+    void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) override {BaseCustomInstrumentPresenter::initInstrument(setUp);};
+    void setUpInstrumentAnalysisSplitter() override {BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter();};
+   std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument() override{ BaseCustomInstrumentPresenter::setupInstrument();};
 
 private:
 int m_add;
