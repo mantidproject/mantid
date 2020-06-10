@@ -390,9 +390,9 @@ def get_bins(workspace, wkspIndex, withDy=False):
     y = []
     dy = [] if withDy else None
     for i in x:
-        y.append(workspace.readY(i)[wkspIndex])
+        y.append(workspace.readY(int(i))[wkspIndex])
         if withDy:
-            dy.append(workspace.readE(i)[wkspIndex])
+            dy.append(workspace.readE(int(i))[wkspIndex])
 
     dx = None
     return x, y, dy, dx
