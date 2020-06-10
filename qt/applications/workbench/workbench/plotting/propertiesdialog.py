@@ -10,12 +10,10 @@
 # std imports
 
 # 3rdparty imports
-from mantid.plots.datafunctions import update_colorbar_scale
+from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
-from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm, Normalize
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
@@ -115,7 +113,7 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
-        if figure_type(canvas.figure) == FigureType.Image:
+        if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
 
@@ -208,33 +206,46 @@ class ColorbarAxisEditor(AxisEditor):
     def __init__(self, canvas, axes):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
 
-        self.images = self.canvas.figure.gca().images
-        if len(self.images) == 0:
-            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)
-                           or isinstance(col, Poly3DCollection)]
+        self.ui.gridBox.hide()
+
+        self.images=[]
+
+        images = get_images_from_figure(canvas.figure)
+        # If there are an equal number of plots and colorbars so apply changes to plot with the selected colorbar
+        # Otherwise apply changes to all the plots in the figure
+        if len(images) != len(self.canvas.figure.axes)/2:
+            self.images = images
+        else:
+            # apply changes to selected axes
+            for img in images:
+                if img.colorbar and img.colorbar.ax == axes:
+                    self.images.append(img)
 
         self.create_model()
 
     def changes_accepted(self):
         self.ui.errors.hide()
 
+        if len(self.images) == 0:
+            raise RuntimeError("Cannot find any plot linked to this colorbar")
+
         limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
 
-        scale = Normalize
-        if isinstance(self.images[0].norm, LogNorm):
-            scale = LogNorm
+        scale = LogNorm if self.ui.logBox.isChecked() else Normalize
 
         if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
             raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
 
         self.lim_setter(limit_min, limit_max)
-        update_colorbar_scale(self.canvas.figure, self.images[0], scale, limit_min, limit_max)
+        for img in self.images:
+            update_colorbar_scale(self.canvas.figure, img, scale, limit_min, limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = self.images[0].get_clim()
-        memento.log = False
+        if len(self.images) > 0:
+            memento.min, memento.max = self.images[0].get_clim()
+        memento.log = isinstance(self.images[0].norm, LogNorm)
         memento.grid = False
 
         self._fill(memento)

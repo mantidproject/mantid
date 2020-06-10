@@ -91,8 +91,8 @@ private slots:
   /// second one to None
   void checkForEqualPeriods();
 
-  /// Input file changed in MWRunFiles widget
-  void inputFileChanged_MWRunFiles();
+  /// Input file changed in FileFinderWidget widget
+  void inputFileChanged_FileFinderWidget();
 
   // Load current file.
   void runLoadCurrent();
@@ -272,7 +272,7 @@ private:
   std::shared_ptr<Muon::GroupResult>
   getGrouping(const std::shared_ptr<Muon::LoadResult> &loadResult) const;
 
-  /// Set whether the loading buttons and MWRunFiles widget are enabled.
+  /// Set whether the loading buttons and FileFinderWidget widget are enabled.
   void allowLoading(bool enabled);
 
   /// is grouping set

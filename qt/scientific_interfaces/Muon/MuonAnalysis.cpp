@@ -329,7 +329,7 @@ void MuonAnalysis::initLayout() {
 
   // file input
   connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this,
-          SLOT(inputFileChanged_MWRunFiles()));
+          SLOT(inputFileChanged_FileFinderWidget()));
 
   connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this,
           SLOT(setTimeZeroState(int)));
@@ -1139,7 +1139,7 @@ void MuonAnalysis::updatePairTable() {
 /**
  * Slot called when the input file is changed.
  */
-void MuonAnalysis::inputFileChanged_MWRunFiles() {
+void MuonAnalysis::inputFileChanged_FileFinderWidget() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
   allowLoading(true);
@@ -1247,8 +1247,8 @@ MuonAnalysis::getGrouping(const std::shared_ptr<LoadResult> &loadResult) const {
 /**
  * Input file changed. Update GUI accordingly. Note this method does no check of
  * input filename assumed
- * done elsewhere depending on e.g. whether filename came from MWRunFiles or
- * 'get current run' button.
+ * done elsewhere depending on e.g. whether filename came from FileFinderWidget
+ * or 'get current run' button.
  *
  * @param files :: All file names for the files loading.
  */

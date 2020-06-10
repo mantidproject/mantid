@@ -239,10 +239,10 @@ void LoadMuonNexus1::exec() {
     addGoodFrames(localWorkspace, period, nxload.t_nper);
 
     size_t counter = 0;
-    for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
+    for (auto i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
       auto histToRead = static_cast<specnum_t>(i - 1 + period * nxload.t_nsp1);
-      auto specNo = static_cast<specnum_t>(i);
+      auto specNo = i;
       loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
@@ -356,10 +356,9 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(
-          specToLoad.end(),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
+      specToLoad.insert(specToLoad.end(),
+                        boost::counting_iterator<specnum_t>(m_spec_min),
+                        boost::counting_iterator<specnum_t>(m_spec_max));
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
                         m_spec_list.end());
     } else {
@@ -413,7 +412,6 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         setProperty("DeadTimeTable", table);
       } else {
         // More complex case - different dead times for different periods
-
         WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
 
         for (int64_t i = 0; i < m_numberOfPeriods; i++) {
@@ -465,10 +463,9 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(
-          specToLoad.end(),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
+      specToLoad.insert(specToLoad.end(),
+                        boost::counting_iterator<specnum_t>(m_spec_min),
+                        boost::counting_iterator<specnum_t>(m_spec_max));
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
                         m_spec_list.end());
     } else {

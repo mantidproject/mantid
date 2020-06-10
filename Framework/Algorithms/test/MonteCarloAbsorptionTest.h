@@ -10,6 +10,8 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -221,7 +223,7 @@ public:
     TS_ASSERT_DELTA(0.1110, outputWS->y(0).back(), delta);
   }
 
-  void test_Linear_Interpolation() {
+  void test_Linear_Wavelength_Interpolation() {
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
@@ -231,13 +233,13 @@ public:
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
-    TS_ASSERT_DELTA(0.6243, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.3506, outputWS->y(0)[3], delta);
-    TS_ASSERT_DELTA(0.2829, outputWS->y(0)[4], delta);
-    TS_ASSERT_DELTA(0.1110, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6221, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.3455, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.2725, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.1121, outputWS->y(0).back(), delta);
   }
 
-  void test_CSpline_Interpolation() {
+  void test_CSpline_Wavelength_Interpolation() {
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
@@ -247,11 +249,58 @@ public:
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
-    TS_ASSERT_DELTA(0.6243, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.6221, outputWS->y(0).front(), delta);
     // Interpolation gives some negative value due to test setup
-    TS_ASSERT_DELTA(0.3424, outputWS->y(0)[3], delta);
-    TS_ASSERT_DELTA(0.2829, outputWS->y(0)[4], delta);
-    TS_ASSERT_DELTA(0.1110, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.3373, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.2725, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.1121, outputWS->y(0).back(), delta);
+  }
+
+  void test_Workspace_With_Different_Lambda_Ranges() {
+    using namespace Mantid::API;
+
+    // create an instrument including some monitors so that there's a good
+    // variation in the wavelength range of the spectra when convert from TOF to
+    // wavelength
+    MatrixWorkspace_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 100,
+                                                                     true);
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setChild(true);
+    convert.setProperty("InputWorkspace", testWS);
+    convert.setProperty("Target", "Wavelength");
+    convert.setProperty("OutputWorkspace", "dummy");
+    convert.execute();
+    testWS = convert.getProperty("OutputWorkspace");
+
+    auto mcAbsorb = createAlgorithm();
+    addSample(testWS, Environment::SampleOnly);
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+  }
+
+  void test_ignore_masked_spectra() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
+    auto testWS = setUpWS(wsProps);
+    testWS->mutableSpectrumInfo().setMasked(0, true);
+    auto mcAbsorb = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+    auto outputWS = getOutputWorkspace(mcAbsorb);
+    // should still output a spectra but it should also be masked and equal to
+    // zero
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(outputWS->spectrumInfo().isMasked(0), true);
+    auto yData = outputWS->getSpectrum(0).dataY();
+    bool allZero = std::all_of(yData.begin(), yData.end(),
+                               [](double i) { return i == 0; });
+    TS_ASSERT_EQUALS(allZero, true);
   }
 
   //---------------------------------------------------------------------------
@@ -311,19 +360,19 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, true, 5, "Linear", true, 3, 3);
+    auto outputWS = runAlgorithm(wsProps, false, -1, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta{1e-04};
     const size_t middle_index{4};
     TS_ASSERT_DELTA(0.6239, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2877, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.2823, outputWS->y(0)[middle_index], delta);
     TS_ASSERT_DELTA(0.1105, outputWS->y(0).back(), delta);
     TS_ASSERT_DELTA(0.6264, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(0.2917, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.2864, outputWS->y(2)[middle_index], delta);
     TS_ASSERT_DELTA(0.1147, outputWS->y(2).back(), delta);
     TS_ASSERT_DELTA(0.6259, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.2907, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.2853, outputWS->y(4)[middle_index], delta);
     TS_ASSERT_DELTA(0.1132, outputWS->y(4).back(), delta);
   }
 
@@ -331,14 +380,14 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, true, 5, "Linear", true, 3, 3);
+    auto outputWS = runAlgorithm(wsProps, false, -1, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
     const size_t middle_index(4);
 
     TS_ASSERT_DELTA(0.5056, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.3447, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.3429, outputWS->y(0)[middle_index], delta);
     TS_ASSERT_DELTA(0.2286, outputWS->y(0).back(), delta);
   }
 
@@ -346,14 +395,14 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
         1, 10, Environment::SampleOnly, DeltaEMode::Indirect, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, true, 5, "Linear", true, 3, 3);
+    auto outputWS = runAlgorithm(wsProps, false, -1, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-04);
     const size_t middle_index(4);
 
     TS_ASSERT_DELTA(0.3646, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.2337, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.2321, outputWS->y(0)[middle_index], delta);
     TS_ASSERT_DELTA(0.1443, outputWS->y(0).back(), delta);
   }
 

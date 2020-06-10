@@ -134,6 +134,24 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(values[2], 1455001)
         self.assertEqual(values[3], "")
 
+    def test_Invalid_data_logs(self):
+        ws = Load('ENGINX00228061_log_alarm_data.nxs')
+
+        model = SampleLogsModel(ws)
+        log_names = model.get_log_names()
+        self.assertEqual(len(log_names), 48)
+        invalid_logs = model.get_logs_with_invalid_data()
+        self.assertEqual(2, len(invalid_logs.keys()))
+        self.assertIn('cryo_temp1',invalid_logs.keys())
+        self.assertEqual(1, invalid_logs['cryo_temp1'])
+        self.assertIn('cryo_temp2',invalid_logs.keys())
+        self.assertEqual(-1, invalid_logs['cryo_temp2'])
+
+        hidden_logs = model.get_hidden_logs()
+        self.assertEqual(2, len(hidden_logs))
+        self.assertIn('cryo_temp1_invalid_values',hidden_logs)
+        self.assertIn('cryo_temp2_invalid_values',hidden_logs)
+
 
 if __name__ == '__main__':
     unittest.main()

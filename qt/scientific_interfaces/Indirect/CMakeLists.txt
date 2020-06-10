@@ -30,12 +30,12 @@ set(
         IndirectDataTablePresenter.cpp
         IndirectDataValidationHelper.cpp
         IndirectDiffractionReduction.cpp
+        IndirectDockWidgetArea.cpp
         IndirectEditResultsDialog.cpp
         IndirectFitAnalysisTab.cpp
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
         IndirectFitDataView.cpp
-        IndirectFitOutput.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
@@ -43,6 +43,8 @@ set(
         IndirectFitPlotPresenter.cpp
         IndirectFitPlotView.cpp
         IndirectFittingModel.cpp
+        IndirectFitDataModel.cpp
+        IndirectFitOutputModel.cpp
         IndirectInstrumentConfig.cpp
         IndirectInterface.cpp
         IndirectLoadILL.cpp
@@ -105,11 +107,12 @@ set(
         IndexTypes.h
         IndirectDataValidationHelper.h
         IndirectFitData.h
-        IndirectFitOutput.h
         IndirectFitOutputOptionsModel.h
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
+        IndirectFitDataModel.h
+        IndirectFitOutputModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h
         IndirectToolsTab.h
@@ -153,6 +156,7 @@ set(
         IndirectDataReduction.h
         IndirectDataReductionTab.h
         IndirectDataTablePresenter.h
+        IndirectDockWidgetArea.h
         IndirectDiffractionReduction.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
@@ -214,7 +218,6 @@ set(
         ApplyAbsorptionCorrections.ui
         CalculatePaalmanPings.ui
         ContainerSubtraction.ui
-        ConvFit.ui
         ConvFitAddWorkspaceDialog.ui
         DensityOfStates.ui
         Elwin.ui
@@ -225,10 +228,12 @@ set(
         IndirectDataAnalysis.ui
         IndirectDataReduction.ui
         IndirectDiffractionReduction.ui
+        IndirectDockWidgetArea.ui
         IndirectEditResultsDialog.ui
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui
         IndirectFitPreviewPlot.ui
+        IndirectFitTab.ui
         IndirectInterfaceSettings.ui
         IndirectInstrumentConfig.ui
         IndirectLoadILL.ui
@@ -245,10 +250,7 @@ set(
         IndirectTransmission.ui
         IndirectTransmissionCalc.ui
         Iqt.ui
-        IqtFit.ui
-        JumpFit.ui
         JumpFitAddWorkspaceDialog.ui
-        MSDFit.ui
         Quasi.ui
         ResNorm.ui
         Stretch.ui
@@ -330,7 +332,7 @@ set(
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
         IndirectFitDataView.cpp
-        IndirectFitOutput.cpp
+        IndirectDockWidgetArea.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
         IndirectFitOutputOptionsView.cpp
@@ -339,6 +341,8 @@ set(
         IndirectFitPlotPresenter.cpp
         IndirectFitPlotView.cpp
         IndirectFittingModel.cpp
+        IndirectFitDataModel.cpp
+        IndirectFitOutputModel.cpp
         IndirectInstrumentConfig.cpp
         IndirectInterface.cpp
         IndirectLoadILL.cpp
@@ -423,6 +427,7 @@ set(
         IndirectDataReductionTab.h
         IndirectDataTablePresenter.h
         IndirectDiffractionReduction.h
+        IndirectDockWidgetArea.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
         IndirectFitDataPresenter.h
@@ -479,11 +484,12 @@ set(
         ConvFitModel.h
         IndirectDataValidationHelper.h
         IndirectFitData.h
-        IndirectFitOutput.h
         IndirectFitOutputOptionsModel.h
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
+        IndirectFitDataModel.h
+        IndirectFitOutputModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h
         IPythonRunner.h
@@ -501,7 +507,6 @@ set(
         ApplyAbsorptionCorrections.ui
         CalculatePaalmanPings.ui
         ContainerSubtraction.ui
-        ConvFit.ui
         ConvFitAddWorkspaceDialog.ui
         DensityOfStates.ui
         Elwin.ui
@@ -515,10 +520,12 @@ set(
         IndirectDataAnalysis.ui
         IndirectDataReduction.ui
         IndirectDiffractionReduction.ui
+        IndirectDockWidgetArea.ui
         IndirectEditResultsDialog.ui
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui
         IndirectFitPreviewPlot.ui
+        IndirectFitTab.ui
         IndirectInstrumentConfig.ui
         IndirectInterfaceSettings.ui
         IndirectLoadILL.ui
@@ -535,10 +542,7 @@ set(
         IndirectTransmission.ui
         IndirectTransmissionCalc.ui
         Iqt.ui
-        IqtFit.ui
-        JumpFit.ui
         JumpFitAddWorkspaceDialog.ui
-        MSDFit.ui
         Quasi.ui
         ResNorm.ui
         Stretch.ui

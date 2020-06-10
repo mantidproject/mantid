@@ -410,6 +410,27 @@ double IkedaCarpenterPV::intensity() const {
   return result.result;
 }
 
+void IkedaCarpenterPV::setMatrixWorkspace(
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
+  if (workspace) {
+    // convert inital parameters that depend on x axis to correct units so
+    // inital guess is reasonable
+    auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    const auto centre = getParameter("X0");
+    const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
+    if (scaleFactor != 0) {
+      if (isActive(parameterIndex("Alpha0")))
+        setParameter("Alpha0", getParameter("Alpha0") * scaleFactor);
+      if (isActive(parameterIndex("Alpha1")))
+        setParameter("Alpha1", getParameter("Alpha1") * scaleFactor);
+      if (isActive(parameterIndex("Beta0")))
+        setParameter("Beta0", getParameter("Beta0") * scaleFactor);
+    }
+  }
+  IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
+}
+
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

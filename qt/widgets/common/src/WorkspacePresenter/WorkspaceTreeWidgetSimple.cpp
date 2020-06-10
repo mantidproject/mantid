@@ -43,7 +43,10 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_showData(new QAction("Show Data", this)),
       m_showAlgorithmHistory(new QAction("Show History", this)),
       m_showDetectors(new QAction("Show Detectors", this)),
-      m_plotAdvanced(new QAction("Advanced...", this)) {
+      m_plotAdvanced(new QAction("Advanced...", this)),
+      m_plotSurface(new QAction("Surface", this)),
+      m_plotWireframe(new QAction("Wireframe", this)),
+      m_plotContour(new QAction("Contour", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) {
@@ -75,6 +78,12 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
           SLOT(onShowDetectorsClicked()));
   connect(m_plotAdvanced, SIGNAL(triggered()), this,
           SLOT(onPlotAdvancedClicked()));
+  connect(m_plotSurface, SIGNAL(triggered()), this,
+          SLOT(onPlotSurfaceClicked()));
+  connect(m_plotWireframe, SIGNAL(triggered()), this,
+          SLOT(onPlotWireframeClicked()));
+  connect(m_plotContour, SIGNAL(triggered()), this,
+          SLOT(onPlotContourClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -134,6 +143,16 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
 
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
+
+      if (multipleBins) {
+        QMenu *plot3DSubMenu(new QMenu("3D", menu));
+        plot3DSubMenu->addAction(m_plotSurface);
+        plot3DSubMenu->addAction(m_plotWireframe);
+        plot3DSubMenu->addAction(m_plotContour);
+
+        plotSubMenu->addMenu(plot3DSubMenu);
+      }
+
       menu->addMenu(plotSubMenu);
       menu->addSeparator();
       menu->addAction(m_showData);
@@ -257,6 +276,18 @@ void WorkspaceTreeWidgetSimple::onShowDetectorsClicked() {
 
 void WorkspaceTreeWidgetSimple::onPlotAdvancedClicked() {
   emit plotAdvancedClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotSurfaceClicked() {
+  emit plotSurfaceClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotWireframeClicked() {
+  emit plotWireframeClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotContourClicked() {
+  emit plotContourClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

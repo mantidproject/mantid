@@ -28,8 +28,8 @@ namespace MplCpp {
  */
 QString MantidColorMap::chooseColorMap(const QString &previous,
                                        QWidget *parent) {
-  static QStringList allowedCMaps{"coolwarm", "jet", "summer", "winter",
-                                  "viridis"};
+  static QStringList allowedCMaps{"coolwarm", "gray",   "jet",    "plasma",
+                                  "summer",   "winter", "viridis"};
   const int currentIdx = allowedCMaps.indexOf(previous);
   bool ok;
   QString item =

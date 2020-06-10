@@ -49,6 +49,7 @@ public:
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_METHOD1(setSearchInstrument, void(std::string const &));
   MOCK_CONST_METHOD0(getSearchString, std::string());
+  MOCK_CONST_METHOD0(getSearchCycle, std::string());
   MOCK_CONST_METHOD0(getLiveDataUpdateInterval, int());
 
   MOCK_CONST_METHOD0(getAlgorithmRunner,

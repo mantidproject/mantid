@@ -269,8 +269,8 @@ It holds pointers to the ``MuonAnalysisFitDataPresenter`` (which creates the wor
 The actual fit is done by calling the :ref:`algm-Fit` algorithm from the sequential fit dialog.
 
 One point to note is that the fit is done in two stages.
-On pressing the Fit button, the ``startFit`` method is called - this starts running the file search from the ``MWRunFiles`` (run number input widget).
-When the ``MWRunFiles`` widget signals that it has found the relevant files, only then does the fit process continue in ``continueFit``.
+On pressing the Fit button, the ``startFit`` method is called - this starts running the file search from the ``FileFinderWidget`` (run number input widget).
+When the ``FileFinderWidget`` widget signals that it has found the relevant files, only then does the fit process continue in ``continueFit``.
 The reason for this is because users can type a range of runs into the box and then immediately hit Return or click Fit, without first clicking outside the box - and we need time to do the file search before starting.
 
 .. note:: Despite their names, ``MuonSequentialFitDialog`` does *not* inherit from ``SequentialFitDialog`` - they are completely separate classes. I assume this is for historical reasons. Amongst other differences, the muon sequential fit dialog calls :ref:`algm-Fit` multiple times while the general sequential fit dialog uses :ref:`algm-PlotPeakByLogValue`.

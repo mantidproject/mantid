@@ -10,11 +10,11 @@
 import datetime
 
 import numpy as np
-from matplotlib.collections import PolyCollection
+from matplotlib.collections import PolyCollection, QuadMesh
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
-from mpl_toolkits.mplot3d.axes3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -1073,6 +1073,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
         mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
     image.set_norm(scale(vmin=vmin, vmax=vmax))
+
     if image.colorbar:
         image.colorbar.remove()
         locator = None
@@ -1086,5 +1087,24 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
         figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
 
 
-def figure_contains_only_3d_plots(fig) -> bool:
-    return all(isinstance(ax, Axes3D) for ax in fig.get_axes())
+def get_images_from_figure(figure):
+    """Return a list of images in the given figure excluding any colorbar images"""
+    axes = figure.get_axes()
+
+    all_images = []
+    for ax in axes:
+        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
+                                   or isinstance(col, Poly3DCollection)]
+
+    # remove any colorbar images
+    colorbars = [img.colorbar.solids for img in all_images if img.colorbar]
+    images = [img for img in all_images if img not in colorbars]
+    return images
+
+
+def get_axes_from_figure(figure):
+    """Return a list of axes in the given figure excluding any colorbar axes"""
+    images = get_images_from_figure(figure)
+    axes = [img.axes for img in images]
+
+    return axes

@@ -25,8 +25,9 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
-namespace {
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
+namespace {
 MultiDomainFunction_sptr getFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitializedMultiDomainFunction(
       functionString, 10);
@@ -44,10 +45,7 @@ getFunctionWithWorkspaceName(std::string const &workspaceName) {
       "0175)))";
   return getFunction(functionString);
 }
-
 } // namespace
-
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
 class MockIndirectFitPlotView : public IIndirectFitPlotView {
@@ -86,7 +84,7 @@ public:
   MOCK_METHOD0(disableSpectrumPlotSelection, void());
 
   MOCK_CONST_METHOD0(getSelectedSpectrum, IDA::WorkspaceIndex());
-  MOCK_CONST_METHOD0(getSelectedSpectrumIndex, TableRowIndex());
+  MOCK_CONST_METHOD0(getSelectedSpectrumIndex, FitDomainIndex());
   MOCK_CONST_METHOD0(getSelectedDataIndex, TableDatasetIndex());
   MOCK_CONST_METHOD0(dataSelectionSize, TableDatasetIndex());
   MOCK_CONST_METHOD0(isPlotGuessChecked, bool());
@@ -158,10 +156,8 @@ public:
   MOCK_CONST_METHOD2(getFittingRange,
                      std::pair<double, double>(TableDatasetIndex dataIndex,
                                                IDA::WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD3(createDisplayName,
-                     std::string(std::string const &formatString,
-                                 std::string const &rangeDelimiter,
-                                 TableDatasetIndex dataIndex));
+  MOCK_CONST_METHOD1(createDisplayName,
+                     std::string(TableDatasetIndex dataIndex));
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
   MOCK_CONST_METHOD0(getFittingFunction,
@@ -187,10 +183,6 @@ private:
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
-  };
-
-  std::vector<std::string> getSpectrumDependentAttributes() const override {
-    return {};
   };
 };
 
@@ -499,7 +491,7 @@ public:
   test_that_getSelectedSpectrumIndex_will_get_the_selected_spectrum_from_the_view() {
     EXPECT_CALL(*m_view, getSelectedSpectrumIndex())
         .Times(1)
-        .WillOnce(Return(TableRowIndex(0)));
+        .WillOnce(Return(FitDomainIndex(0)));
     m_presenter->getSelectedSpectrumIndex();
   }
 
@@ -572,15 +564,13 @@ public:
         .WillByDefault(Return(TableDatasetIndex(2)));
     ON_CALL(*m_fittingModel, numberOfWorkspaces())
         .WillByDefault(Return(TableDatasetIndex(2)));
-    ON_CALL(*m_fittingModel,
-            createDisplayName("%1% (%2%)", "-", TableDatasetIndex(1)))
+    ON_CALL(*m_fittingModel, createDisplayName(TableDatasetIndex(1)))
         .WillByDefault(Return("DisplayName-1"));
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     Expectation createName =
-        EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
-            .Times(1);
+        EXPECT_CALL(*m_fittingModel, createDisplayName(index)).Times(1);
     EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", index))
         .Times(1)
         .After(createName);
@@ -596,14 +586,13 @@ public:
         .WillByDefault(Return(TableDatasetIndex(1)));
     ON_CALL(*m_fittingModel, numberOfWorkspaces())
         .WillByDefault(Return(TableDatasetIndex(2)));
-    ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
+    ON_CALL(*m_fittingModel, createDisplayName(index))
         .WillByDefault(Return("DisplayName-1"));
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     Expectation createName =
-        EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
-            .Times(1);
+        EXPECT_CALL(*m_fittingModel, createDisplayName(index)).Times(1);
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-1"))
         .Times(1)
         .After(createName);
@@ -615,14 +604,13 @@ public:
   test_that_updateSelectedDataName_will_update_the_name_in_the_data_selection() {
     TableDatasetIndex const index(0);
 
-    ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
+    ON_CALL(*m_fittingModel, createDisplayName(index))
         .WillByDefault(Return("DisplayName-1"));
     ON_CALL(*m_fittingModel, getWorkspace(index))
         .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
     Expectation createName =
-        EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
-            .Times(1);
+        EXPECT_CALL(*m_fittingModel, createDisplayName(index)).Times(1);
     EXPECT_CALL(*m_view,
                 setNameInDataSelection("DisplayName-1", TableDatasetIndex(0)))
         .Times(1)

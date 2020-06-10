@@ -156,8 +156,7 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
   int32_t partition;
   std::string topicName;
   auto runStartStruct = getRunStartMessage(runBuffer);
-  m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
-  initLocalCaches(buffer, runStartStruct);
+  initLocalCaches(runStartStruct);
 
   // Keep track of whether we've reached the end of a run
   std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
@@ -216,14 +215,14 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 }
 
 void KafkaHistoStreamDecoder::initLocalCaches(
-    const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+    const RunStartStruct &runStartData) {
   m_runId = runStartData.runId;
 
   const auto jsonGeometry = runStartData.nexusStructure;
   const auto instName = runStartData.instrumentName;
 
   DataObjects::Workspace2D_sptr histoBuffer;
-  if (rawMsgBuffer.empty()) {
+  if (!runStartData.detSpecMapSpecified) {
     /* Load the instrument to get the number of spectra :c */
     auto ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
     loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
@@ -242,23 +241,11 @@ void KafkaHistoStreamDecoder::initLocalCaches(
         Kernel::UnitFactory::Instance().create("TOF");
     histoBuffer->setYUnit("Counts");
   } else {
-    auto spDetMsg = GetSpectraDetectorMapping(
-        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-    auto nudet = spDetMsg->detector_id()->size();
-    if (nudet != nspec) {
-      std::ostringstream os;
-      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-            "spectra/detector mapping. Expected matched length arrays but "
-            "found nspec="
-         << nspec << ", ndet=" << nudet;
-      throw std::runtime_error(os.str());
-    }
-
     // Create buffer
     histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
-        "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
-        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+        "Workspace2D", runStartData.numberOfSpectra,
+        runStartData.spectrumNumbers.data(), runStartData.detectorIDs.data(),
+        static_cast<uint32_t>(runStartData.detectorIDs.size()));
   }
 
   // Load the instrument if possible but continue if we can't

@@ -116,12 +116,18 @@ The default handler is provided (doing nothing).
 @param alg :: Pointer to the algorithm sending the notification.
 @param p :: Progress reported by the algorithm, 0 <= p <= 1
 @param msg :: Optional message string sent by the algorithm
+@param estimatedTime :: estimated time to completion in seconds
+@param progressPrecision :: number of digits after the decimal
 */
 void AlgorithmObserver::progressHandle(const IAlgorithm *alg, double p,
-                                       const std::string &msg) {
+                                       const std::string &msg,
+                                       const double estimatedTime,
+                                       const int progressPrecision) {
   UNUSED_ARG(alg)
   UNUSED_ARG(p)
   UNUSED_ARG(msg)
+  UNUSED_ARG(estimatedTime)
+  UNUSED_ARG(progressPrecision)
 }
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
@@ -159,7 +165,8 @@ void AlgorithmObserver::errorHandle(const IAlgorithm *alg,
 */
 void AlgorithmObserver::_progressHandle(
     const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
-  this->progressHandle(pNf->algorithm(), pNf->progress, pNf->message);
+  this->progressHandle(pNf->algorithm(), pNf->progress, pNf->message,
+                       pNf->estimatedTime, pNf->progressPrecision);
 }
 
 /** Poco notification handler for Algorithm::StartedNotification.

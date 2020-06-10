@@ -36,7 +36,7 @@ public:
   TableDatasetIndex getActiveDataIndex() const;
   WorkspaceIndex getActiveSpectrum() const;
   TableDatasetIndex numberOfWorkspaces() const;
-  TableRowIndex getActiveDomainIndex() const;
+  FitDomainIndex getActiveDomainIndex() const;
   std::string getFitDataName(TableDatasetIndex index) const;
   std::string getFitDataName() const;
   std::string getLastFitDataName() const;

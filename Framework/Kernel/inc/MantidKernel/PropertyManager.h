@@ -41,6 +41,14 @@ template <typename T> class TimeSeriesProperty;
  */
 class MANTID_KERNEL_DLL PropertyManager : virtual public IPropertyManager {
 public:
+  static const std::string INVALID_VALUES_SUFFIX;
+  // Gets the correct log name for the matching invalid values log for a given
+  // log name
+  static std::string getInvalidValuesFilterLogName(const std::string &logName);
+  static std::string
+  getLogNameFromInvalidValuesFilter(const std::string &logName);
+  static bool isAnInvalidValuesFilterLog(const std::string &logName);
+
   PropertyManager();
   PropertyManager(const PropertyManager &);
   PropertyManager &operator=(const PropertyManager &);

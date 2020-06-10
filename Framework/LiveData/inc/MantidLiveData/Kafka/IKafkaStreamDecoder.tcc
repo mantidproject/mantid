@@ -119,9 +119,18 @@ bool IKafkaStreamDecoder::loadInstrument(const std::string &name,
       if (jsonGeometry.empty())
         loadFromAlgorithm<T>(name, workspace);
       else {
-        NexusGeometry::JSONInstrumentBuilder builder(
-            "{\"nexus_structure\":" + jsonGeometry + "}");
-        workspace->setInstrument(builder.buildGeometry());
+        try {
+          NexusGeometry::JSONInstrumentBuilder builder(
+              "{\"nexus_structure\":" + jsonGeometry + "}");
+          workspace->setInstrument(builder.buildGeometry());
+        } catch (std::exception &exc) {
+          logger.warning()
+              << "Unable to load instrument from nexus_structure provided in "
+                 "run start message. Falling back on trying to use Mantid's "
+                 "instrument repository. Error encountered was \""
+              << exc.what() << "\"\n";
+          loadFromAlgorithm<T>(name, workspace);
+        }
       }
       return true;
     } catch (std::exception &exc) {
@@ -130,8 +139,9 @@ bool IKafkaStreamDecoder::loadInstrument(const std::string &name,
                        << "\". The streamed data will have no associated "
                           "instrument geometry. \n";
     }
+  } else {
+    logger.warning() << "Empty instrument name provided. \n";
   }
-  logger.warning() << "Empty instrument name provided. \n";
   return false;
 }
 

@@ -29,6 +29,7 @@
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
 #include <Poco/SplitterChannel.h>
+#include <Poco/Version.h>
 
 namespace {
 // Track number of attachments to generate a unique channel name
@@ -119,9 +120,15 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
   // Setup logging. ConfigService needs to be started
   auto &configSvc = ConfigService::Instance();
   auto &rootLogger = Poco::Logger::root();
-  auto *rootChannel = Poco::Logger::root().getChannel();
   // The root channel might be a SplitterChannel
+  auto rootChannel = Poco::Logger::root().getChannel();
+#if POCO_VERSION > 0x01090400
+  // getChannel changed to return an AutoPtr
+  if (auto *splitChannel =
+          dynamic_cast<Poco::SplitterChannel *>(rootChannel.get())) {
+#else
   if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
+#endif
     splitChannel->addChannel(m_logChannel);
   } else {
     Poco::Logger::setChannel(rootLogger.name(), m_logChannel);

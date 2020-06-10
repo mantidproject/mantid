@@ -17,6 +17,7 @@ from numpy import linspace, random
 from mantid.plots import MantidAxes  # register mantid projection  # noqa
 from unittest.mock import Mock
 from mantid.simpleapi import CreateWorkspace
+from mantidqt.plotting.functions import pcolormesh
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 
@@ -185,6 +186,26 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         self.assertTrue(1, len(presenter.image_names_dict))
         presenter.view.populate_select_image_combo_box.assert_called_once_with(
             [img_name])
+
+    def test_apply_properties_applies_to_all_images_if_multiple_colorfill_plots_and_one_colorbar(self):
+        fig = pcolormesh([self.ws, self.ws])
+        props = {'label': 'New Label',
+                 'colormap': 'jet',
+                 'vmin': 0,
+                 'vmax': 2,
+                 'scale': 'Linear',
+                 'interpolation': 'None'}
+        mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0)',
+                         get_properties=lambda: ImageProperties(props))
+        presenter = self._generate_presenter(fig=fig, view=mock_view)
+        presenter.apply_properties()
+
+        for ax in range(2):
+            image = fig.axes[ax].images[0]
+            self.assertEqual('jet', image.cmap.name)
+            self.assertEqual(0, image.norm.vmin)
+            self.assertEqual(2, image.norm.vmax)
+            self.assertTrue(isinstance(image.norm, Normalize))
 
 
 if __name__ == '__main__':

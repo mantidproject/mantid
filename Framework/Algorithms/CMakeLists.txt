@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AbsorptionCorrection.cpp
+    src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
     src/AddNote.cpp
     src/AddPeak.cpp
@@ -222,6 +223,7 @@ set(SRC_FILES
     src/PDCalibration.cpp
     src/PDDetermineCharacterizations.cpp
     src/PDFFourierTransform.cpp
+    src/PDFFourierTransform2.cpp
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
@@ -345,6 +347,7 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
+    inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
     inc/MantidAlgorithms/AddNote.h
     inc/MantidAlgorithms/AddPeak.h
@@ -571,6 +574,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PDCalibration.h
     inc/MantidAlgorithms/PDDetermineCharacterizations.h
     inc/MantidAlgorithms/PDFFourierTransform.h
+    inc/MantidAlgorithms/PDFFourierTransform2.h
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
@@ -707,6 +711,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set(TEST_FILES
+    AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
     AddNoteTest.h
     AddPeakTest.h
@@ -925,6 +930,7 @@ set(TEST_FILES
     PDCalibrationTest.h
     PDDetermineCharacterizationsTest.h
     PDFFourierTransformTest.h
+    PDFFourierTransform2Test.h
     PaddingAndApodizationTest.h
     ParallaxCorrectionTest.h
     PauseTest.h
