@@ -15,6 +15,7 @@ from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
+from mantid.simpleapi import CreateEmptyTableWorkspace
 
 
 class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
@@ -84,8 +85,30 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         num_rows = self.model._ws.getNumberHistograms()
         self.copy_bin_values(table, ws_read, num_rows)
 
-    def action_copy_spectrum_to_table(self, table):
-        pass
+    @staticmethod
+    def action_copy_spectrum_to_table(table):
+        ws = table.model().ws
+        selected_rows = [i.row() for i in table.selectionModel().selectedRows()]
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.getName() + "_spectra")
+        num_rows = ws.blocksize()
+        table_ws.setRowCount(num_rows)
+        for i, row in enumerate(selected_rows):
+            table_ws.addColumn("double", "XS" + str(row))
+            table_ws.addColumn("double", "YS" + str(row))
+            table_ws.addColumn("double", "ES" + str(row))
+
+            col_x = 3 * i
+            col_y = 3 * i + 1
+            col_e = 3 * i + 2
+
+            data_y = ws.dataY(row)
+            data_x = ws.dataX(row)
+            data_e = ws.dataE(row)
+
+            for j in range(num_rows):
+                table_ws.setCell(j, col_x, data_x[j])
+                table_ws.setCell(j, col_y, data_y[j])
+                table_ws.setCell(j, col_e, data_e[j])
 
     def action_copy_bin_to_table(self, table):
         pass
