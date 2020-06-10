@@ -47,7 +47,7 @@ The sample and container shapes and materials are set by :ref:`SetSample <algm-S
 
 The actual calculations are performed using :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` for each individual correction term.
 
-The corrections should be applied by the :ref:`ApplyPaalmanPingsCorrections <algm-ApplyPaalmanPingsCorrections>`, where you can find further documentation on the signification of the correction terms and the method.
+The corrections should be applied by the :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`, where you can find further documentation on the signification of the correction terms and the method.
 
 .. note::
 

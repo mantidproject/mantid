@@ -15,9 +15,7 @@ Concepts
 New Algorithms
 --------------
 
-- New algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` will calculate all 4 terms in self attenuation corrections following the Paalman and Pings formalism.
-Simple shapes are supported: FlatPlate, Cylinder, Annulus. Both elastic and inelastic as well as direct and indirect geometries are supported.
-
+- New algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` will calculate all 4 terms in self attenuation corrections following the Paalman and Pings formalism. Simple shapes are supported: FlatPlate, Cylinder, Annulus. Both elastic and inelastic as well as direct and indirect geometries are supported.
 
 
 Algorithms
