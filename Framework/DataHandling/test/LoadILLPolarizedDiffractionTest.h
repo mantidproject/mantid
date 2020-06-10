@@ -379,45 +379,37 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     do_test_general_features(outputWS, "monochromatic");
 
-    MatrixWorkspace_sptr workspaceEntry1 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
-    TS_ASSERT(workspaceEntry1)
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
+         ++entry_no) {
+      MatrixWorkspace_sptr workspaceEntry =
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+              outputWS->getItem(entry_no));
+      TS_ASSERT(workspaceEntry)
 
-    Instrument_const_sptr instrument = workspaceEntry1->getInstrument();
-    TS_ASSERT(instrument)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
+                      12.66, 0.01)
 
-    V3D sample(0, 0, 0);
-    V3D zAxis(0, 0, 1);
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
+                      55.45, 0.01)
 
-    const auto &pixel1 = instrument->getDetector(0);
-    TS_ASSERT(pixel1)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel1->getTwoTheta(sample, zAxis), 12.66, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
+                      58.79, 0.01)
 
-    const auto &pixel44 = instrument->getDetector(43);
-    TS_ASSERT(pixel44)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel44->getTwoTheta(sample, zAxis), 55.45,
-                    0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
+                      101.58, 0.01)
 
-    const auto &pixel45 = instrument->getDetector(44);
-    TS_ASSERT(pixel45)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel45->getTwoTheta(sample, zAxis), 58.79,
-                    0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
+                      100.78, 0.01)
 
-    const auto &pixel88 = instrument->getDetector(87);
-    TS_ASSERT(pixel88)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel88->getTwoTheta(sample, zAxis), 101.58,
-                    0.01)
-
-    const auto &pixel89 = instrument->getDetector(88);
-    TS_ASSERT(pixel89)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel89->getTwoTheta(sample, zAxis), 100.78,
-                    0.01)
-
-    const auto &pixel132 = instrument->getDetector(131);
-    TS_ASSERT(pixel132)
-    TS_ASSERT_DELTA(RAD_2_DEG * pixel132->getTwoTheta(sample, zAxis), 143.57,
-                    0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+                          RAD_2_DEG,
+                      143.57, 0.01)
+    }
   }
 
   void test_D7_nexus_alignment() {
