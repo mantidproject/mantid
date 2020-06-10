@@ -389,24 +389,19 @@ public:
       TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
                           RAD_2_DEG,
                       12.66, 0.01)
-
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(43) *
                           RAD_2_DEG,
                       55.45, 0.01)
-
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(44) *
                           RAD_2_DEG,
                       58.79, 0.01)
-
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(87) *
                           RAD_2_DEG,
                       101.58, 0.01)
-
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(88) *
                           RAD_2_DEG,
                       100.78, 0.01)
-
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(0) *
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().signedTwoTheta(131) *
                           RAD_2_DEG,
                       143.57, 0.01)
     }
