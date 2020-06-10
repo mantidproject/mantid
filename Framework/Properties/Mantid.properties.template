@@ -239,6 +239,9 @@ plots.yAxesScale = Linear
 # Default Line style on 1d plots. Options are solid, dashed, dotted, dashdot
 plots.line.Style = solid
 
+# Default Draw style on 1d plots. Options are default, steps, steps-pre, steps-mid, steps-post
+plots.line.DrawStyle = default
+
 # Default Line width on 1d plots
 plots.line.Width = 1.5
 
