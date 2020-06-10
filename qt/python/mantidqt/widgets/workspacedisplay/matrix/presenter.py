@@ -84,6 +84,12 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         num_rows = self.model._ws.getNumberHistograms()
         self.copy_bin_values(table, ws_read, num_rows)
 
+    def action_copy_spectrum_to_table(self, table):
+        pass
+
+    def action_copy_bin_to_table(self, table):
+        pass
+
     def action_copy_cells(self, table):
         self.copy_cells(table)
 

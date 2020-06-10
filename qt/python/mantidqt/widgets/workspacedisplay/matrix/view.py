@@ -45,6 +45,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.presenter = presenter
         self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
         self.GRAPH_ICON = mantidqt.icons.get_icon("mdi.chart-line")
+        self.TABLE_ICON = mantidqt.icons.get_icon("mdi.table")
 
         # change the default color of the rows - makes them light blue
         # monitors and masked rows are colored in the table's custom model
@@ -114,6 +115,8 @@ class MatrixWorkspaceDisplayView(QTabWidget):
 
         copy_bin_values = QAction(self.COPY_ICON, "Copy", horizontalHeader)
         copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table))
+        copy_bin_to_table = QAction(self.TABLE_ICON, "Copy bin to table", horizontalHeader)
+        copy_bin_to_table.triggered.connect(partial(self.presenter.action_copy_bin_to_table, table))
 
         plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", horizontalHeader)
         plot_bin_action.triggered.connect(partial(self.presenter.action_plot_bin, table))
@@ -123,6 +126,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         separator1.setSeparator(True)
 
         horizontalHeader.addAction(copy_bin_values)
+        horizontalHeader.addAction(copy_bin_to_table)
         horizontalHeader.addAction(separator1)
         horizontalHeader.addAction(plot_bin_action)
         horizontalHeader.addAction(plot_bin_with_errors_action)
@@ -134,6 +138,8 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         copy_spectrum_values = QAction(self.COPY_ICON, "Copy", verticalHeader)
         copy_spectrum_values.triggered.connect(
             partial(self.presenter.action_copy_spectrum_values, table))
+        copy_spectrum_to_table = QAction(self.TABLE_ICON, "Copy spectrum to table", horizontalHeader)
+        copy_spectrum_to_table.triggered.connect(partial(self.presenter.action_copy_spectrum_to_table, table))
 
         plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", verticalHeader)
         plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table))
@@ -145,6 +151,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         separator1.setSeparator(True)
 
         verticalHeader.addAction(copy_spectrum_values)
+        verticalHeader.addAction(copy_spectrum_to_table)
         verticalHeader.addAction(separator1)
         verticalHeader.addAction(plot_spectrum_action)
         verticalHeader.addAction(plot_spectrum_with_errors_action)
