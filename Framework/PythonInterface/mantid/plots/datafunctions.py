@@ -373,10 +373,8 @@ def get_detectors_indices(workspace):
     if is_range:
         return range(range_start + 1, range_end)
     else:
-        indices = [i for i in range(total_range)]
-        for monitor in monitors_indices:
-            indices.remove(monitor)
-        return np.array(indices)
+        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))
+        return indices
 
 
 def get_bins(workspace, wkspIndex, withDy=False):
