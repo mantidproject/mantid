@@ -27,13 +27,14 @@ class ToolItemText:
 class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
     gridClicked = Signal(bool)
+    homeClicked = Signal()
     linePlotsClicked = Signal(bool)
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
     plotOptionsChanged = Signal()
 
     toolitems = (
-        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'home', None),
+        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
         (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
          False),
         (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),

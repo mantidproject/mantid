@@ -189,6 +189,7 @@ set(
   inc/MantidMDAlgorithms/LoadSQW.h
   inc/MantidMDAlgorithms/LoadSQW2.h
   inc/MantidMDAlgorithms/LogarithmMD.h
+  inc/MantidMDAlgorithms/MDBoxMaskFunction.h
   inc/MantidMDAlgorithms/MDEventTreeBuilder.h
   inc/MantidMDAlgorithms/MDEventWSWrapper.h
   inc/MantidMDAlgorithms/MDNorm.h
@@ -305,6 +306,7 @@ set(TEST_FILES
     LoadSQW2Test.h
     LoadSQWTest.h
     LogarithmMDTest.h
+    MDBoxMaskFunctionTest.h
     MDEventWSWrapperTest.h
     MDNormDirectSCTest.h
     MDNormSCDTest.h
