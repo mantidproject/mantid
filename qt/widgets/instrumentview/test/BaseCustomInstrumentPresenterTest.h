@@ -62,12 +62,8 @@ public:
 
 void test_addInstrument(){
 m_presenter->setMockLayout();
-m_presenter->setMockLoad();
 m_presenter->addInstrument();
-m_presenter->loadRunNumber();
 TS_ASSERT_EQUALS(m_presenter->getLayoutCount(), 1);
-TS_ASSERT_EQUALS(m_presenter->getAddCount(), 1);
-TS_ASSERT_EQUALS(m_presenter->getLoadCount(), 1);
 }
 
 void test_startup(){

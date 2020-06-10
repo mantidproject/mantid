@@ -40,13 +40,10 @@ public:
     void setMockLayout(){m_mockLayout = true;};
 
     void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup) override final{
-    std::cout<<"initLayout "<<m_mockLayout<<" :P"<<std::endl;
-    if(m_mockLayout == true){std::cout<<"true"<<std::endl; m_layout+=1;}
-    else{std::cout<<"false"<<std::endl; BaseCustomInstrumentPresenter::initLayout(setup);}
-    std::cout<<"sone"<<std::endl;
+    if(m_mockLayout == true){ m_layout+=1;}
+    else{ BaseCustomInstrumentPresenter::initLayout(setup);}
     };
     void loadRunNumber() override {
-    std::cout<<"load "<<m_mockLoad<<" :P"<<std::endl;
     if(m_mockLoad){m_load+=1;}else{BaseCustomInstrumentPresenter::loadRunNumber();}
     };
 
@@ -59,7 +56,7 @@ public:
     void loadAndAnalysis(const std::string &run) override {BaseCustomInstrumentPresenter::loadAndAnalysis(run);};
     void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) override {BaseCustomInstrumentPresenter::initInstrument(setUp);};
     void setUpInstrumentAnalysisSplitter() override {BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter();};
-   std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument() override{ BaseCustomInstrumentPresenter::setupInstrument();};
+   std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument() override{return  BaseCustomInstrumentPresenter::setupInstrument();};
 
 private:
 int m_add;

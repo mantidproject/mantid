@@ -46,7 +46,7 @@ protected:
   virtual void
   initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
   virtual void setUpInstrumentAnalysisSplitter();
-  virtual std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
+  virtual  std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument(){return nullptr;};
 
   IBaseCustomInstrumentView *m_view;
   IBaseCustomInstrumentModel *m_model;

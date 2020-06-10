@@ -30,7 +30,7 @@ BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
 
 void BaseCustomInstrumentPresenter::addInstrument() {
   auto setUp = setupInstrument();
-  //initLayout(setUp);
+  initLayout(setUp);
 }
 
 void BaseCustomInstrumentPresenter::initLayout(
@@ -93,25 +93,6 @@ void BaseCustomInstrumentPresenter::initInstrument(
   for (auto options : customContextMenu) {
     m_view->addObserver(options);
   }
-}
-
-typedef std::pair<std::string,
-                  std::vector<std::function<bool(std::map<std::string, bool>)>>>
-    instrumentSetUp;
-typedef std::vector<std::tuple<std::string, Observer *>>
-    instrumentObserverOptions;
-
-std::pair<instrumentSetUp, instrumentObserverOptions>
- BaseCustomInstrumentPresenter::setupInstrument() {
-  instrumentSetUp setUpContextConditions;
-
-  // set up the slots for the custom context menu
-  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions(0);
-  std::vector<std::function<bool(std::map<std::string, bool>)>> binders(0);
-
-  setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
-
-  return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }
 
 } // namespace MantidWidgets
