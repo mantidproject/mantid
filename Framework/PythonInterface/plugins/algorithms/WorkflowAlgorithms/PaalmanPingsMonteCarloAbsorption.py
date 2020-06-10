@@ -72,12 +72,9 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     def PyInit(self):
         # Sample Input
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
-                             doc='Sample Workspace')
+                             doc='Workspace with the measurement of the sample [in a container].')
 
         # Monte Carlo Options
-        self.declareProperty(name='NumberOfWavelengthPoints', defaultValue=10,
-                             validator=IntBoundedValidator(1),
-                             doc='Number of wavelengths for calculation')
         self.declareProperty(name='EventsPerPoint', defaultValue=1000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
@@ -104,7 +101,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SparseInstrument', 'Monte Carlo Options')
         self.setPropertyGroup('NumberOfDetectorRows', 'Monte Carlo Options')
         self.setPropertyGroup('NumberOfDetectorColumns', 'Monte Carlo Options')
-        self.setPropertyGroup('NumberOfWavelengthPoints', 'Monte Carlo Options')
         self.setPropertyGroup('EventsPerPoint', 'Monte Carlo Options')
         self.setPropertyGroup('Interpolation', 'Monte Carlo Options')
         self.setPropertyGroup('MaxScatterPtAttempts', 'Monte Carlo Options')
@@ -129,7 +125,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         cylinder_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
         annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
 
-        # height is common to all, and should be the same for sample and container
+        # height is common to all shapes, and should be the same for sample and container
         self.declareProperty('Height', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
                              doc='Height of the sample environment (cm)')
 
@@ -218,7 +214,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         # Container Input
         self.declareProperty(WorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input,
                                                optional=PropertyMode.Optional),
-                             doc='Container Workspace')
+                             doc='Workspace with the container-only measurement.')
 
         container_condition = VisibleWhenProperty('ContainerWorkspace', PropertyCriterion.IsNotDefault)
 
