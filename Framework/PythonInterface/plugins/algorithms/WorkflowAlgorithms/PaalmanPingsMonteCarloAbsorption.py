@@ -500,8 +500,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._beam_height = self.getProperty('BeamHeight').value
         self._beam_width = self.getProperty('BeamWidth').value
 
-        self._monte_carlo_kwargs = {'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,
-                                    'EventsPerPoint': self.getProperty('EventsPerPoint').value,
+        self._monte_carlo_kwargs = {'EventsPerPoint': self.getProperty('EventsPerPoint').value,
                                     'Interpolation': self.getProperty('Interpolation').value,
                                     'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value,
                                     'SparseInstrument': self.getProperty('SparseInstrument').value,
