@@ -23,6 +23,7 @@ class Setting(QObject):
     """
 
     valueChanged = Signal(str)
+    fileChecked = Signal(bool)
 
     def __init__(self, name, values, settingType, doc):
         """
@@ -46,8 +47,8 @@ class Setting(QObject):
             if (settingType == "files"):
                 self._widget.allowMultipleFiles(True)
             self._widget.setLabelText("")
-            self._widget.fileTextChanged.connect(
-                    lambda t : self.valueChanged.emit(name)
+            self._widget.fileInspectionFinished.connect(
+                    lambda : self.fileChecked.emit(self._widget.isValid())
                     )
             self._setter = self._widget.setUserInput
             self._getter = self._widget.getUserInput
@@ -143,8 +144,6 @@ class SettingsDialog(QDialog):
         super(SettingsDialog, self).__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
 
-        self.setStyleSheet("*[valid='false'] {background-color: #3fff0000;}")
-
         # setup ui
         uic.loadUi(os.path.join(self.here, self.ui_filename), self)
         self.okButton.clicked.connect(self.accept)
@@ -172,6 +171,9 @@ class SettingsDialog(QDialog):
             self.settings[n] = Setting(n, values[n], types[n], doc[n])
             self.settings[n].valueChanged.connect(
                     lambda p : self.valueChanged.emit(p)
+                    )
+            self.settings[n].fileChecked.connect(
+                    lambda v, n=n : self.onSettingValidation(n, v)
                     )
 
             widget = self.settings[n].widget
@@ -234,9 +236,12 @@ class SettingsDialog(QDialog):
                        setting
         """
         if (name in self.settings):
-            self.settings[name].widget.setProperty("valid", valid)
+            if valid:
+                self.settings[name].widget.setStyleSheet("")
+            else:
+                self.settings[name].widget.setStyleSheet(
+                        "QLineEdit {background-color: #3fff0000;}")
             if not valid and msg is not None:
                 self.settings[name].widget.setToolTip(msg)
             else:
                 self.settings[name].widget.setToolTip(self.settings[name].doc)
-            self.settings[name].widget.setStyleSheet("")  # force update

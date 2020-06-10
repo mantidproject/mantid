@@ -78,15 +78,15 @@ class SettingsDialogTest(unittest.TestCase):
         mS = mock.Mock()
         self.dialog.settings["name"] = mS
         self.dialog.onSettingValidation("name", False, "msg")
-        mS.widget.setProperty.assert_called_once_with("valid", False)
+        mS.widget.setStyleSheet.assert_called_once()
         mS.widget.setToolTip.assert_called_once_with("msg")
         mS.reset_mock()
         self.dialog.onSettingValidation("name", False)
-        mS.widget.setProperty.assert_called_once_with("valid", False)
+        mS.widget.setStyleSheet.assert_called_once()
         mS.widget.setToolTip.assert_called_once()
         mS.reset_mock()
         self.dialog.onSettingValidation("name", True, "msg")
-        mS.widget.setProperty.assert_called_once_with("valid", True)
+        mS.widget.setStyleSheet.assert_called_once()
         mS.widget.setToolTip.assert_called_once()
 
 
