@@ -65,7 +65,7 @@ Output:
 
 Output:
 
-.. testoutput:: LoadILLDiffractionOmegaScanExample
+.. testoutput:: LoadILLPolarizedDiffractionMonoExample
 
    The output has 6 entries
    Each entry has 1 bins (monochromatic mode) and 134 spectra
