@@ -162,7 +162,7 @@ class MuonContextTest(unittest.TestCase):
 
         first_good_data = self.context.first_good_data([19489])
 
-        self.assertEqual(first_good_data, 0.11)
+        self.assertEqual(first_good_data, 0.113)
 
     def test_first_good_data_returns_correctly_when_manually_specified_used(self):
         self.gui_context.update({'FirstGoodDataFromFile': False, 'FirstGoodData': 5})

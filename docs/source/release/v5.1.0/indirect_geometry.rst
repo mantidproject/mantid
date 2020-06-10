@@ -24,6 +24,7 @@ Improvements
   frequencies and intensities.
 - :ref:`CalculateMonteCarloAbsorption <algm-CalculateMonteCarloAbsorption>` will now work also for ILL fixed window scan reduced data, in which case the correction will be calculated for elastic wavelength.
 - The centre parameter has been added to delta function in the ConvFit tab of Indirect Data Analysis.
+- Added docking and undocking to the plot window and function browser window for the fit tabs in Indirect Data Analysis on workbench.
 
 Bug Fixes
 #########

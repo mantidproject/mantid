@@ -71,7 +71,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
         self.assertEqual(load_result['DeadTimeTable'], None)
-        self.assertEqual(load_result['FirstGoodData'], 0.11)
+        self.assertEqual(load_result['FirstGoodData'], 0.106)
         self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
         self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
         self.assertEqual(run, 22725)

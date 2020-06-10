@@ -77,7 +77,6 @@ public:
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
-  MOCK_METHOD1(setStartAndEndHidden, void(bool hidden));
   MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
   MOCK_METHOD1(setStartX, void(double startX));
   MOCK_METHOD1(setEndX, void(double endX));
