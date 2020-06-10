@@ -213,7 +213,10 @@ class SettingsDialog(QDialog):
             (any): setting value. The type can be str or bool depending on the
                    setting
         """
-        return self.settings[name].getter()
+        if name in self.settings:
+            return self.settings[name].getter()
+        else:
+            return ""
 
     def onSettingValidation(self, name, valid, msg=None):
         """
