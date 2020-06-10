@@ -3,10 +3,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import sys
 from unittest.mock import Mock, patch
 from mantidqt.utils.qt.testing import start_qapplication
-from qtpy import QtCore
 from SampleTransmissionCalculator.stc_view import SampleTransmissionCalculatorView
+from qtpy.QtWidgets import QHBoxLayout
 
 
 @start_qapplication
@@ -14,6 +15,7 @@ class SampleTransmissionCalculatorViewTest(unittest.TestCase):
     def setUp(self):
         self.view = SampleTransmissionCalculatorView()
 
+    @unittest.skipIf(not hasattr(QHBoxLayout, 'replaceWidget'), 'Invalid qt version')
     def test_get_input_dict(self):
         self.view.binning_type_combo_box.setCurrentIndex(0)
         self.view.single_low_spin_box.setValue(0.1)
@@ -40,6 +42,7 @@ class SampleTransmissionCalculatorViewTest(unittest.TestCase):
         }
         self.assertEqual(input_dict, input_dict_expected)
 
+    @unittest.skipIf(not hasattr(QHBoxLayout, 'replaceWidget'), 'Invalid qt version')
     def test_set_output_table(self):
         output_dict = {
             'transmission_1': 1.0,
@@ -58,6 +61,7 @@ class SampleTransmissionCalculatorViewTest(unittest.TestCase):
             key = item.text(0)
             self.assertEqual(item.text(1), str(output_dict[key]))
 
+    @unittest.skipIf(not hasattr(QHBoxLayout, 'replaceWidget'), 'Invalid qt version')
     @patch('SampleTransmissionCalculator.stc_view.FigureCanvas')
     def test_plot(self, figure_canvas_mock):
         x = [1.0, 2.0]
@@ -73,6 +77,7 @@ class SampleTransmissionCalculatorViewTest(unittest.TestCase):
         self.view.axes.plot.assert_called_with(x, y)
         figure_canvas_mock.draw.assert_called_once()
 
+    @unittest.skipIf(not hasattr(QHBoxLayout, 'replaceWidget'), 'Invalid qt version')
     def test_set_validation_label(self):
         warning_text = 'dummy warning text.'
         self.assertEqual(self.view.validation_label.text(), '')
@@ -81,6 +86,7 @@ class SampleTransmissionCalculatorViewTest(unittest.TestCase):
 
         self.assertEqual(self.view.validation_label.text(), warning_text)
 
+    @unittest.skipIf(not hasattr(QHBoxLayout, 'replaceWidget'), 'Invalid qt version')
     def test_error_indicator(self):
         self.assertEqual(self.view.histogram_err.text(), '')
         self.view.set_error_indicator('histogram')

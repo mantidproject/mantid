@@ -6,5 +6,6 @@ set(TEST_PY_FILES
     stc_view_test.py
     )
 
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts
-  ${TEST_PY_FILES})
+set(PYUNITTEST_QT_API pyqt5)
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts.sampletransmissioncalculator
+                      ${TEST_PY_FILES})
