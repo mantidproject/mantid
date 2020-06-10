@@ -465,7 +465,6 @@ class SliceViewerView(QWidget):
 
         self.presenter = presenter
 
-        self.setWindowTitle("SliceViewer")
         self.setWindowFlags(Qt.Window)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 

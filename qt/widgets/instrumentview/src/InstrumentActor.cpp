@@ -36,7 +36,6 @@
 #include <QMessageBox>
 #include <QSettings>
 
-#include <limits>
 #include <numeric>
 #include <utility>
 
@@ -56,10 +55,6 @@ bool isPhysicalView() {
 }
 
 } // namespace
-
-const size_t InstrumentActor::INVALID_INDEX =
-    std::numeric_limits<size_t>::max();
-double InstrumentActor::m_tolerance = 0.00001;
 
 /**
  * Constructor. Creates a tree of GLActors. Each actor is responsible for
@@ -436,7 +431,7 @@ void InstrumentActor::setIntegrationRange(const double &xmin,
 double InstrumentActor::getIntegratedCounts(size_t index) const {
   auto i = getWorkspaceIndex(index);
   if (i == INVALID_INDEX)
-    return -1.0;
+    return InstrumentActor::INVALID_VALUE;
   return m_specIntegrs.at(i);
 }
 
@@ -850,21 +845,21 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
   //  std::cerr<<"To   "<<Xto<<Yto<<Zto<<'\n';
 
   double sZ = Zfrom.scalar_prod(Zto);
-  if (fabs(sZ - 1) < m_tolerance) // vectors the same
+  if (fabs(sZ - 1) < TOLERANCE) // vectors the same
   {
     double sX = Xfrom.scalar_prod(Xto);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) {
+    } else if (fabs(sX + 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180, Zfrom);
     } else {
       R = Mantid::Kernel::Quat(Xfrom, Xto);
     }
-  } else if (fabs(sZ + 1) < m_tolerance) // rotated by 180 degrees
+  } else if (fabs(sZ + 1) < TOLERANCE) // rotated by 180 degrees
   {
-    if (fabs(Xfrom.scalar_prod(Xto) - 1) < m_tolerance) {
+    if (fabs(Xfrom.scalar_prod(Xto) - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180., Xfrom);
-    } else if (fabs(Yfrom.scalar_prod(Yto) - 1) < m_tolerance) {
+    } else if (fabs(Yfrom.scalar_prod(Yto) - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180., Yfrom);
     } else {
       R = Mantid::Kernel::Quat(180., Xto) * Mantid::Kernel::Quat(Xfrom, Xto);
@@ -876,15 +871,15 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     const auto X1 = normalize(Zfrom.cross_prod(Zto));
 
     double sX = Xfrom.scalar_prod(Xto);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(Zfrom, Zto);
       return;
     }
 
     sX = Xfrom.scalar_prod(X1);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R1 = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
+    } else if (fabs(sX + 1) < TOLERANCE) // 180 degree rotation
     {
       R1 = Mantid::Kernel::Quat(180., Zfrom);
     } else {
@@ -901,9 +896,9 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     // Rotation R3 around ZZ by gamma
     Mantid::Kernel::Quat R3;
     sX = Xto.scalar_prod(X1);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R3 = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
+    } else if (fabs(sX + 1) < TOLERANCE) // 180 degree rotation
     {
       R3 = Mantid::Kernel::Quat(180., Zto);
     } else {
@@ -1017,6 +1012,11 @@ void InstrumentActor::calculateIntegratedSpectra(
   // Use the workspace function to get the integrated spectra
   workspace.getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue,
                                  wholeRange());
+  // replace any values that are not finite
+  std::replace_if(m_specIntegrs.begin(), m_specIntegrs.end(),
+                  [](double x) { return !std::isfinite(x); },
+                  InstrumentActor::INVALID_VALUE);
+
   m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
 }
 
@@ -1050,17 +1050,9 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
     m_DataMinValue = DBL_MAX;
     m_DataMaxValue = -DBL_MAX;
 
-    if (std::any_of(m_specIntegrs.begin(), m_specIntegrs.end(),
-                    [](double val) { return !std::isfinite(val); }))
-      throw std::runtime_error(
-          "The workspace contains values that cannot be displayed (infinite "
-          "or NaN).\n"
-          "Please run ReplaceSpecialValues algorithm for correction.");
-
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // Ignore monitors if multiple detectors aren't grouped.
-    // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < m_specIntegrs.size(); i++) {
       const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
       if (spectrumDefinition.size() == 1 &&
@@ -1070,6 +1062,8 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
       auto sum = m_specIntegrs[i];
 
+      if (sum == InstrumentActor::INVALID_VALUE)
+        continue;
       if (sum < m_DataMinValue)
         m_DataMinValue = sum;
       if (sum > m_DataMaxValue)

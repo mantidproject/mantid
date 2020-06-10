@@ -29,7 +29,7 @@ private:
   void loadProperties();
   void saveProperties();
   void appendSlashIfNone(QString &path) const;
-  QListWidget *listWidget();
+  QListWidget *listWidget(QObject *object);
 
 private slots:
   void helpClicked();

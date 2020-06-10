@@ -35,8 +35,9 @@ private:
   /// mock.
   API::IAlgorithm_sptr setupFitAlgorithm(const std::string &wsName);
   virtual std::tuple<double, double>
-  calculateBackgroundFromFit(API::IAlgorithm_sptr &fit, double maxTime,
-                             int workspaceIndex);
+  calculateBackgroundFromFit(API::IAlgorithm_sptr &fit,
+                             const std::pair<double, double> &range,
+                             const int &workspaceIndex);
 
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
