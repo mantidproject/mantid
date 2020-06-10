@@ -46,7 +46,8 @@ void BaseCustomInstrumentPresenter::initLayout(
 }
 
 void BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  m_view->setupInstrumentAnalysisSplitters(m_analysisPanePresenter->getView()->getQWidget());
+  auto paneView = m_analysisPanePresenter->getView();
+  m_view->setupInstrumentAnalysisSplitters(paneView->getQWidget());
 }
 
 void BaseCustomInstrumentPresenter::loadAndAnalysis(

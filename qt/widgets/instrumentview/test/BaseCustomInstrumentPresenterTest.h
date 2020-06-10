@@ -31,7 +31,6 @@ using namespace MantidQt::MantidWidgets;
 
 class BaseCustomInstrumentPresenterTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
   BaseCustomInstrumentPresenterTest() { FrameworkManager::Instance(); }
 
   static BaseCustomInstrumentPresenterTest *createSuite() { return new BaseCustomInstrumentPresenterTest(); }
@@ -39,8 +38,6 @@ public:
   static void destroySuite(BaseCustomInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    //m_workspace = createWorkspace(4, 3);
-    //m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
   m_model = new NiceMock<baseModelTest>();
   m_view = new NiceMock<baseViewTest>("EMU");
   m_paneView = new NiceMock<paneViewTest>();
@@ -72,14 +69,26 @@ return;
 
 void test_initLayout(){
 
-return;
+
+EXPECT_CALL(*m_view, observeLoadRun(m_presenter->loadObserver())).Times(1);
+m_presenter->setMockInitInstrument();
+
+QWidget *widget = new QWidget();
+EXPECT_CALL(*m_pane, getView()).Times(1).WillOnce(Return(m_paneView));
+EXPECT_CALL(*m_paneView, getQWidget()).Times(1).WillOnce(Return(widget));
+EXPECT_CALL(*m_view, setupInstrumentAnalysisSplitters(widget)).Times(1);
+EXPECT_CALL(*m_view, setupHelp()).Times(1);
+
+m_presenter->initLayout();
+TS_ASSERT_EQUALS(m_presenter->getInitInstrumentCount(),1);
 }
 
 void test_setUpInstrumentAnalysisSplitter(){
 auto widget = new QWidget();
-EXPECT_CALL(*m_view, getQWidget()).Times(1).WillOnce(Return(widget));
+EXPECT_CALL(*m_pane, getView()).Times(1).WillOnce(Return(m_paneView));
+EXPECT_CALL(*m_paneView, getQWidget()).Times(1).WillOnce(Return(widget));
 EXPECT_CALL(*m_view, setupInstrumentAnalysisSplitters(widget)).Times(1);
-//m_presenter->setUpInstrumentAnalysisSplitter();
+m_presenter->setUpInstrumentAnalysisSplitter();
 }
 
 void test_loadAndAnalysisSuccess(){
@@ -90,20 +99,58 @@ std::pair<int, std::string> result = std::make_pair(run,status);
 EXPECT_CALL(*m_model, loadData(path)).Times(1).WillOnce(Return(result));
 EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run)));
 EXPECT_CALL(*m_model, setCurrentRun(run));
-//m_presenter->loadAndAnalysis();
+m_presenter->setMockSideEffects();
+
+m_presenter->loadAndAnalysis(path);
+TS_ASSERT_EQUALS(m_presenter->getLoadSideEffectsCount(),1);
+
 }
 void test_loadAndAnalysisFail(){
-return;
+std::string path = "path_to_run";
+int run = 101;
+std::string status = "fail";
+
+int oldRun = 42;
+std::string oldPath = "old_path";
+m_presenter->setCurrent(oldRun, oldPath);
+
+std::pair<int, std::string> result = std::make_pair(run,status);
+EXPECT_CALL(*m_model, loadData(path)).Times(1).WillOnce(Return(result));
+EXPECT_CALL(*m_view, setRunQuietly(std::to_string(oldRun)));
+EXPECT_CALL(*m_view, warningBox(status));
+EXPECT_CALL(*m_model, setCurrentRun(oldRun));
+m_presenter->setMockSideEffects();
+
+m_presenter->loadAndAnalysis(path);
+TS_ASSERT_EQUALS(m_presenter->getLoadSideEffectsCount(),1);
+
 }
 
 void test_loadRunNumber(){
-return;
+m_presenter->setMockLoad();
+std::string path = "path_to_file";
+EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(path));
+
+m_presenter->loadRunNumber();
+TS_ASSERT_EQUALS(m_presenter->getLoadCount(),1);
 }
 void test_loadRunNumberNoChange(){
-return;
+m_presenter->setMockLoad();
+std::string path = "path_to_file";
+m_presenter->setCurrent(5, path);
+EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(path));
+
+m_presenter->loadRunNumber();
+TS_ASSERT_EQUALS(m_presenter->getLoadCount(),0);
 }
+
 void test_loadRunNumberEmpty(){
-return;
+m_presenter->setMockLoad();
+std::string path = "";
+EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(path));
+
+m_presenter->loadRunNumber();
+TS_ASSERT_EQUALS(m_presenter->getLoadCount(),0);
 }
 
 void test_initInstrument(){

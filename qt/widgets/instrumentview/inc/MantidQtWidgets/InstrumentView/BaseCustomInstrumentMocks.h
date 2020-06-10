@@ -31,41 +31,57 @@ using namespace MantidQt::MantidWidgets;
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW baseTest :  public BaseCustomInstrumentPresenter{
 public:
-    explicit baseTest(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model, IPlotFitAnalysisPanePresenter *analysis):BaseCustomInstrumentPresenter(view, model, analysis), m_add(0), m_load(0), m_layout(0),m_mockAdd(false), m_mockLoad(false), m_mockLayout(false){}; 
+    explicit baseTest(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model, IPlotFitAnalysisPanePresenter *analysis):BaseCustomInstrumentPresenter(view, model, analysis), m_initInstrument(0), m_load(0), m_layout(0),m_sideEffects(0),m_mockInitInstrument(false), m_mockLoad(false), m_mockLayout(false), m_mockSideEffects(false){}; 
     ~baseTest() {}; 
 
 // turn mocks on
-    void setMockAdd(){m_mockAdd = true;};
+    void setMockInitInstrument(){m_mockInitInstrument = true;};
     void setMockLoad(){m_mockLoad = true;};
     void setMockLayout(){m_mockLayout = true;};
+    void setMockSideEffects(){m_mockSideEffects = true;};
 
-    void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup) override final{
+    void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp=nullptr) override {
+    if(m_mockInitInstrument){
+       m_initInstrument+=1;
+}else{
+BaseCustomInstrumentPresenter::initInstrument(setUp);};}
+    void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup=nullptr) override final{
     if(m_mockLayout == true){ m_layout+=1;}
     else{ BaseCustomInstrumentPresenter::initLayout(setup);}
     };
-    void loadRunNumber() override {
-    if(m_mockLoad){m_load+=1;}else{BaseCustomInstrumentPresenter::loadRunNumber();}
-    };
+    void loadAndAnalysis(const std::string &run) override {
+    if(m_mockLoad){m_load+=1;}
+   else{BaseCustomInstrumentPresenter::loadAndAnalysis(run);}};
+
+    void loadSideEffects(){
+    if(m_mockSideEffects){m_sideEffects+=1;}else{
+BaseCustomInstrumentPresenter::loadSideEffects();
+    }}
 
     // get methods for mocks
-    int getAddCount(){return m_add;};
+    int getInitInstrumentCount(){return m_initInstrument;};
     int getLayoutCount(){return m_layout;};
     int getLoadCount(){return m_load;};
+    int getLoadSideEffectsCount(){return m_sideEffects;};
 
     // allow tests to get at protected/private functions
-    void loadAndAnalysis(const std::string &run) override {BaseCustomInstrumentPresenter::loadAndAnalysis(run);};
-    void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) override {BaseCustomInstrumentPresenter::initInstrument(setUp);};
     void setUpInstrumentAnalysisSplitter() override {BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter();};
+    void loadRunNumber() override {BaseCustomInstrumentPresenter::loadRunNumber();};
    std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument() override{return  BaseCustomInstrumentPresenter::setupInstrument();};
 
+    VoidObserver *loadObserver(){return m_loadRunObserver;};
+    void setCurrent(int run, std::string file){m_currentRun = run; m_currentFile=file;};
+    
 private:
-int m_add;
+int m_initInstrument;
 int m_load;
 int m_layout;
+int m_sideEffects;
 
-bool m_mockAdd;
+bool m_mockInitInstrument;
 bool m_mockLoad;
 bool m_mockLayout;
+bool m_mockSideEffects;
 };
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW baseViewTest : public MantidQt::MantidWidgets::IBaseCustomInstrumentView{
