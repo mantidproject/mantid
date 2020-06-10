@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from matplotlib.legend import Legend
+from matplotlib.ticker import NullLocator
+
 from mantid.plots.mantidaxes import MantidAxes
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
-from matplotlib.legend import Legend
-
 from workbench.config import DEFAULT_SCRIPT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
@@ -68,6 +69,10 @@ def generate_script(fig, exclude_headers=False):
             if not curve_in_ax(ax):
                 continue
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
+
+        if not isinstance(ax.xaxis.minor.locator, NullLocator):
+            plot_commands.append("axes.minorticks_on()")
+
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim

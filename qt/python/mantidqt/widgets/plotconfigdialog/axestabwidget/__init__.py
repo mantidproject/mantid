@@ -39,7 +39,7 @@ class AxProperties(dict):
             props['zscale'] = ax.get_zscale().title()
         else:
             props['minor_ticks'] = not isinstance(ax.xaxis.minor.locator, NullLocator)
-            props['minor_gridlines'] = ax.show_minor_gridlines
+            props['minor_gridlines'] = ax.show_minor_gridlines if hasattr(ax, 'show_minor_gridlines') else False
 
         return cls(props)
 

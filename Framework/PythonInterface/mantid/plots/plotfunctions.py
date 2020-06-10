@@ -295,12 +295,13 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     if window_title:
         fig.canvas.set_window_title(window_title)
 
-    if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
-        for ax in fig.axes:
-            ax.minorticks_on()
+    if not overplot:
+        if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
+            for ax in fig.axes:
+                ax.minorticks_on()
 
-    for ax in fig.axes:
-        ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
+        for ax in fig.axes:
+            ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
 
     return fig, fig.axes
 

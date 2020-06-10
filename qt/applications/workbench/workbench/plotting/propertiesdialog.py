@@ -8,7 +8,6 @@
 #
 #
 
-from mantid.kernel import ConfigService
 from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui

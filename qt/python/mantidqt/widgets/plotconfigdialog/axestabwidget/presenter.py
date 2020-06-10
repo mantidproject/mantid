@@ -64,11 +64,11 @@ class AxesTabWidgetPresenter:
             # If the grid is enabled update it
             if ax.show_minor_gridlines:
                 if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
-                    ax.grid(which='minor')
+                    ax.grid(True, which='minor')
                 elif ax.xaxis._gridOnMajor:
-                    ax.grid(axis='x', which='minor')
+                    ax.grid(True, axis='x', which='minor')
                 elif ax.yaxis._gridOnMajor:
-                    ax.grid(axis='y', which='minor')
+                    ax.grid(True, axis='y', which='minor')
             else:
                 ax.grid(False, which='minor')
 

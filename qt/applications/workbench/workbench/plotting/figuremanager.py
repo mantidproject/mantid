@@ -347,7 +347,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            if isinstance(ax, Axes3D):
+            if isinstance(ax, Axes3D) or not hasattr(ax, 'show_minor_gridlines'):
                 # The grid toggle function for 3D plots doesn't let you choose between major and minor lines.
                 ax.grid(on)
             elif not type(ax) == Axes:
