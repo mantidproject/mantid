@@ -40,9 +40,11 @@ class Setting(QObject):
         super(Setting, self).__init__()
         self._doc = doc
 
-        if (settingType == "file"):
+        if ((settingType == "file") or (settingType == "files")):
             self._widget = FileFinderWidget()
             self._widget.isOptional(True)
+            if (settingType == "files"):
+                self._widget.allowMultipleFiles(True)
             self._widget.setLabelText("")
             self._widget.fileTextChanged.connect(
                     lambda t : self.valueChanged.emit(name)

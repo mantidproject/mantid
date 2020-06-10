@@ -222,6 +222,8 @@ class DrillModel(QObject):
             p = alg.getProperty(s)
             if (isinstance(p, FileProperty)):
                 t = "file"
+            elif (isinstance(p, MultipleFileProperty)):
+                t = "files"
             elif ((isinstance(p, WorkspaceGroupProperty))
                   or (isinstance(p, MatrixWorkspaceProperty))):
                 t = "workspace"
