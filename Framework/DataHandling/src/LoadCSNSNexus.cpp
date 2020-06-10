@@ -12,7 +12,6 @@
 #include "MantidDataHandling/LoadCSNSNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"

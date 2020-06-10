@@ -7,9 +7,8 @@
 #ifndef MANTID_DATAHANDLING_LOADCSNSNEXUS_H_
 #define MANTID_DATAHANDLING_LOADCSNSNEXUS_H_
 
-#include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include <nexus/NeXusFile.hpp>
 /****************************************/
 
