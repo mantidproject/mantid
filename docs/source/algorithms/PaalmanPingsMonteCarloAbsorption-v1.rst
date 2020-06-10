@@ -20,7 +20,7 @@ Inelastic, quasielastic and elastic measurements are supported, both for direct 
 Below are the required properties for each specific shape:
 
 FlatPlate
-^^^^^^^^^
+#########
 
 - *SampleThickness*
 - *SampleWidth*
@@ -30,13 +30,13 @@ FlatPlate
 - *ContainerBackThickness*
 
 Cylinder
-^^^^^^^^
+########
 
 - *SampleRadius*
 - *ContainerRadius* stands for the outer radius of the annular container, inner radius of which is the same as the radius of the sample.
 
 Annulus
-^^^^^^^
+#######
 
 - *ContainerInnerRadius*
 - *SampleInnerRadius*
