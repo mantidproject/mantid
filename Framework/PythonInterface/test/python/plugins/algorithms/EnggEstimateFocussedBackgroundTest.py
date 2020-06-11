@@ -1,0 +1,64 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+import unittest
+from testhelpers import create_algorithm
+from mantid.simpleapi import CreateWorkspace, EnggEstimateFocussedBackground, DeleteWorkspace
+import numpy as np
+
+def mgauss(x, p):
+    """
+    make gaussian peaks
+    p = [height, cen, sig]
+    """
+    ngauss = len(p) // 3
+    ht = p[0::3]
+    cen = p[1::3]
+    sig = p[2::3]
+    y = np.zeros(x.shape)
+    for ii in range(0, ngauss):
+        y += ht[ii] * np.exp(-0.5 * ((np.array(x) - cen[ii]) / sig[ii]) ** 2)
+    return y
+
+class EnggEstimateFocussedBackground_Test(unittest.TestCase):
+
+    def setUp(self):
+        # create some fairly realistic fake data with peaks and background
+        x = np.linspace(0, 160, 401)
+        mask = np.ones(x.shape, dtype=bool)
+        cens = [60, 70, 100]
+        pin = []
+        for ipk in range(0, len(cens)):
+            pin += [3, cens[ipk], 1]  # height, centre, sig
+            mask[(x > cens[ipk] - 4) & (x < cens[ipk] + 4)] = False  # mask points at peak for comparing bg residuals
+        pin += [3, 80, 20]  # broad peak as background
+        y = mgauss(x, pin)
+        self.ws = CreateWorkspace(OutputWorkspace = 'ws', DataX=x, DataY=y + np.random.normal(y, 0.2 * np.sqrt(y)))
+        self.mask = mask
+
+    def tearDown(self):
+        if self.ws is not None: DeleteWorkspace(self.ws)
+
+    def runTest(self):
+
+        # get bg and subtract
+        ws_bg = EnggEstimateFocussedBackground(InputWorkspace='ws', XWindow=3, NIterations=20)
+        ws_diff = self.ws - ws_bg
+
+        # test residuals to ensure background is well approximated
+        self.assertLess(np.mean(ws_diff.readY(0)[self.mask]), 0.04)
+        self.assertLess(np.median(ws_diff.readY(0)[self.mask]), 0.02)
+
+        # test too small a window
+        with self.assertRaises(RuntimeError):
+            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', XWindow=0.1, NIterations=20)
+        # test too large a window
+        with self.assertRaises(RuntimeError):
+            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', XWindow=200, NIterations=20)
+
+
+if __name__ == '__main__':
+    unittest.main()

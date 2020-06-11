@@ -15,9 +15,6 @@ from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
 
-import pydevd_pycharm
-pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True)
-
 if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import FigureCanvas
 else:

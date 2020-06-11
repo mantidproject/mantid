@@ -4,14 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid import config
-from mantid.api import (AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm)
-from mantid.simpleapi import (CloneWorkspace)
-from mantid.kernel import (Direction, IntBoundedValidator, FloatBoundedValidator, IntListValidator,
-                           StringMandatoryValidator)
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm, Progress
+from mantid.simpleapi import CloneWorkspace
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 import numpy as np
 from scipy.signal import savgol_filter
-
 
 class EnggEstimateFocussedBackground(PythonAlgorithm):
 
@@ -37,7 +34,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
 
         self.declareProperty(
             name="XWindow",
-            defaultValue=1000,
+            defaultValue=1000.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
             doc="Extent of the convolution window in the x-axis for all spectra. A reasonable value is about 4-8 times"
@@ -46,20 +43,23 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
 
         self.declareProperty(
             name="NIterations",
-            defaultValue=20,
+            defaultValue=40,
             direction=Direction.Input,
             validator=IntBoundedValidator(lower=1),
             doc="Number of iterations of the smoothing procedure to perform. Too few iterations and the background will"
                 " be enhanced in the peak regions. Too many iterations and the background will be unrealistically"
-                " low and not catch the rising edge at low TOF/d-spacing (typical values are in range 10-50).")
+                " low and not catch the rising edge at low TOF/d-spacing (typical values are in range 20-100).")
 
         self.declareProperty('ApplyFilterSG', True, direction=Direction.Input,
                              doc='Apply a Savitzky–Golay filter with a linear polynomial over the same XWindow before'
-                                 ' the iterative smoothing procedure (recommended for quicker convergence if the data have '
-                                 'not been rebunched)')
+                                 ' the iterative smoothing procedure (recommended for noisy data)')
 
     def validateInputs(self):
         issues = dict()
+        # check there are more than three points in a workspace
+        inws = self.getProperty("InputWorkspace").value
+        if inws.blocksize() < 3:
+            issues['InputWorkspace'] = "At least three points needed in each spectra"
         return issues
 
     def PyExec(self):
@@ -71,27 +71,47 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         doSGfilter = self.getProperty('ApplyFilterSG').value
 
         # make output workspace
-        outws = CloneWorkspace(inws)
+        outws = CloneWorkspace(inws, OutputWorkspace=self.getProperty("OutputWorkspace").value)
 
         # loop over all spectra
-        for ispec in range(0, inws.getNumberHistograms()):
+        nbins = inws.blocksize()
+        nspec = inws.getNumberHistograms()
+        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=nspec)
+        for ispec in range(0, nspec):
+            prog_reporter.report()
+
             # get n points in convolution window
             binwidth = np.mean(np.diff(inws.readX(ispec)))
             nwindow = int(np.ceil(xwindow / binwidth))
             if not nwindow % 2:
                 nwindow += 1
 
+            if nwindow < 3:
+                raise RuntimeError('Convolution window must have at least three points')
+            elif not nwindow < nbins:
+                # not effective due to edge effects of the convolution
+                raise RuntimeError("Data has must have at least the number of points as the convolution window")
+
+            # do initial filter to remove very high intensity points
             if doSGfilter:
-                ybg = self.doFilter(savgol_filter(inws.readY(ispec), nwindow, polyorder=1), nwindow, niter)
+                ybg = savgol_filter(inws.readY(ispec), nwindow, polyorder=1)
             else:
-                ybg = self.doFilter(inws.readY(ispec), nwindow, niter)
+                ybg = np.copy(inws.readY(ispec))
+            Ibar = np.mean(ybg)
+            Imin = np.min(ybg)
+            ybg[ybg > (Ibar + 2 * (Ibar - Imin))] = (Ibar + 2 * (Ibar - Imin))
+
+            # perform iterative smoothing
+            ybg = self.doIterativeSmoothing(ybg, nwindow, niter)
+
             # replace intensity in output spectrum with background
             outws.setY(ispec, ybg)
+            outws.setE(ispec, np.zeros(ybg.shape))
 
-        # set toutput
+        # set output
         self.setProperty("OutputWorkspace", outws)
 
-    def doFilter(self, y, nwindow, maxdepth, depth=0):
+    def doIterativeSmoothing(self, y, nwindow, maxdepth, depth=0):
         """
         Iterative smoothing procedure to estimate the background in powder diffraction as published in
         Bruckner J. Appl. Cryst. (2000). 33, 977-979
@@ -102,17 +122,21 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         :return:
         """
         if depth < maxdepth:
-            # step 1 - replace v. high intensity points
-            Ibar = np.mean(y)
-            Imin = np.min(y)
+            # smooth with hat function
             yy = np.copy(y)
-            yy[y > (Ibar + 2 * (Ibar - Imin))] = (Ibar + 2 * (Ibar - Imin))
-            # 2 - smooth with hat function
             yy = np.convolve(yy, np.ones(nwindow) / nwindow, mode="same")
-            # 3 - compare pt by pt with original and keep lowest
+            # normalise end values effected by convolution
+            ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode='same')
+            yy[0:nwindow // 2] = yy[0:nwindow // 2] / ends[0:nwindow // 2]
+            yy[-nwindow // 2:] = yy[-nwindow // 2:] / ends[-nwindow // 2:]
+            # compare pt by pt with original and keep lowest
             idx = yy > y
             yy[idx] = y[idx]
-            return self.doFilter(yy, nwindow, maxdepth, depth + 1)
+            return self.doIterativeSmoothing(yy, nwindow, maxdepth, depth + 1)
         else:
             # perform final smoothing
             return np.convolve(y, np.ones(nwindow) / nwindow, mode="same")
+
+
+# register algorithm with mantid
+AlgorithmFactory.subscribe(EnggEstimateFocussedBackground)
