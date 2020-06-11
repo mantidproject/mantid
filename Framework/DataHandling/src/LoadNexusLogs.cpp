@@ -19,7 +19,6 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
 
-
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include <boost/scoped_array.hpp>
 
@@ -393,16 +392,18 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
 }
 namespace {
 // for parsing format
-const std::locale format = std::locale(
-    std::locale::classic(), new boost::posix_time::time_input_facet("%d-%b-%y %H:%M:%S"));
-}
+const std::locale format =
+    std::locale(std::locale::classic(),
+                new boost::posix_time::time_input_facet("%d-%b-%y %H:%M:%S"));
+} // namespace
 /**
-* Converts a string with time to conform with ISO8601 unless it already does or conforms with Posix
-* @param time :: The time string to be converted
-*/
+ * Converts a string with time to conform with ISO8601 unless it already does or
+ * conforms with Posix
+ * @param time :: The time string to be converted
+ */
 void convertToISO8601(std::string &time) {
   if (!Types::Core::DateAndTimeHelpers::stringIsISO8601(time) &&
-          !Types::Core::DateAndTimeHelpers::stringIsPosix(time)) {
+      !Types::Core::DateAndTimeHelpers::stringIsPosix(time)) {
     namespace bt = boost::posix_time;
     bt::ptime pt;
     std::istringstream is(time);
