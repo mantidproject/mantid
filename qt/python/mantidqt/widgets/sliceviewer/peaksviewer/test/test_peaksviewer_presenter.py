@@ -34,9 +34,8 @@ def create_mock_model(name):
     return mock
 
 
-@patch(
-    "mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter",
-    autospec=TableWorkspaceDataPresenter)
+@patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter",
+       autospec=TableWorkspaceDataPresenter)
 class PeaksViewerPresenterTest(unittest.TestCase):
 
     # -------------------- success tests -----------------------------
@@ -98,12 +97,15 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         mock_view = MagicMock()
         name = 'ws1'
         mock_model = create_mock_model(name)
+        viewlimits = (-1, 1), (-2, 2)
+        mock_model.viewlimits.return_value = viewlimits
         mock_view.selected_index = 0
         presenter = PeaksViewerPresenter(mock_model, mock_view)
 
         presenter.notify(PeaksViewerPresenter.Event.PeakSelected)
 
-        mock_model.zoom_to.assert_called_once_with(0)
+        mock_model.viewlimits.assert_called_once_with(0)
+        mock_view.set_axes_limits.assert_called_once_with(*viewlimits)
 
 
 if __name__ == '__main__':

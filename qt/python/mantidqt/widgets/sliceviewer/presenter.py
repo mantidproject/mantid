@@ -159,10 +159,10 @@ class SliceViewer(object):
 
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
-        self.update_axes_limits(*self.model.get_dim_limits(
-            self.get_slicepoint(), self.view.data_view.dimensions.transpose))
+        self.set_axes_limits(*self.model.get_dim_limits(self.get_slicepoint(),
+                                                        self.view.data_view.dimensions.transpose))
 
-    def update_axes_limits(self, xlim, ylim):
+    def set_axes_limits(self, xlim, ylim):
         """Set the axes limits on the view"""
         self.view.data_view.set_axes_limits(xlim, ylim)
         self.data_limits_changed()

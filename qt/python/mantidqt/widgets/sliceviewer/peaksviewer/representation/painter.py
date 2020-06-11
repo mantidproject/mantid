@@ -17,7 +17,6 @@ class EllipticalShell(Patch):
     """
     Elliptical shell patch.
     """
-
     def __str__(self):
         return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, thick={self.thick}, angle={self.angle})"
 
@@ -158,8 +157,10 @@ class MplPainter(object):
         return self._axes.add_patch(
             Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
 
-    def zoom_to(self, artist):
-        """Set the view such that the given artist is in the center
+    def viewlimits(self, artist):
+        """Determine the view limits such that the given artist is in the center
+        with some padding
+        :param artist: An artist to inspect
         """
         # Use the bounding box of the artist with small amount of padding
         # to set the axis limits
@@ -171,13 +172,11 @@ class MplPainter(object):
         xl, xr = ll[0], ur[0]
         yb, yt = ll[1], ur[1]
         padding = max(xr - xl, yt - yb) * self.ZOOM_PAD_FRAC
-        self._axes.set_xlim(xl - padding, xr + padding)
-        self._axes.set_ylim(yb - padding, yt + padding)
+        return ((xl - padding, xr + padding), (yb - padding, yt + padding))
 
 
 class Painted(object):
     """Combine a collection of artists with the painter that created them"""
-
     def __init__(self, painter, artists):
         self._painter = painter
         self._artists = artists
@@ -194,10 +193,9 @@ class Painted(object):
         for artist in self._artists:
             self._painter.remove(artist)
 
-    def zoom_to(self):
+    def viewlimits(self):
         """
-        Place the painted objects at the center of the view.
-        There is an assumption that the final artist represents the "largest"
-        object painted on the screen
+        Determine the view limits such that the artists are in the center
+        with some padding.
         """
-        self._painter.zoom_to(self._artists[-1])
+        return self._painter.viewlimits(self._artists[-1])

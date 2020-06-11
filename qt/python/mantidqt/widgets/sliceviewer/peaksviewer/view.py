@@ -60,6 +60,14 @@ class PeaksViewerView(QWidget):
         self._current_selection = self._selected_index()
         return self._current_selection
 
+    def set_axes_limits(self, xlim, ylim):
+        """
+        Set the view limits on the image axes to the given extents
+        :param xlim: 2-tuple of (xmin, xmax)
+        :param ylim: 2-tuple of (ymin, ymax)
+        """
+        self._sliceinfo_provider.set_axes_limits(xlim, ylim)
+
     def set_peak_color(self, peak_color):
         """
         Set the color of the peak represented in this view
