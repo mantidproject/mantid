@@ -110,8 +110,32 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                 table_ws.setCell(j, col_y, data_y[j])
                 table_ws.setCell(j, col_e, data_e[j])
 
-    def action_copy_bin_to_table(self, table):
-        pass
+    @staticmethod
+    def action_copy_bin_to_table(table):
+        ws = table.model().ws
+        selected_cols = [i.column() for i in table.selectionModel().selectedColumns()]
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.getName() + "_bins")
+        num_rows = ws.getNumberHistograms()
+        table_ws.setRowCount(num_rows)
+        table_ws.addColumn("double", "X")
+        for i, col in enumerate(selected_cols):
+            table_ws.addColumn("double", "YB" + str(col))
+            table_ws.addColumn("double", "YE" + str(col))
+
+            col_y = 2 * i + 1
+            col_e = 2 * i + 2
+
+            for j in range(num_rows):
+                data_y = ws.dataY(j)
+                data_e = ws.dataE(j)
+
+                if i == 0:
+                    if ws.axes() > 1:
+                        table_ws.setCell(j, 0, ws.getAxis(1).getValue(j))
+                    else:
+                        table_ws.setCell(j, 0, j)
+                table_ws.setCell(j, col_y, data_y[col])
+                table_ws.setCell(j, col_e, data_e[col])
 
     def action_copy_cells(self, table):
         self.copy_cells(table)
