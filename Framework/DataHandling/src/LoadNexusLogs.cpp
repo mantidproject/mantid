@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 #include <locale>
 #include <nexus/NeXusException.hpp>
 
@@ -17,6 +18,7 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
+
 
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include <boost/scoped_array.hpp>
@@ -389,6 +391,33 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
     // pass
   }
 }
+namespace {
+// for parsing format
+const std::locale format = std::locale(
+    std::locale::classic(), new boost::posix_time::time_input_facet("%d-%b-%y %H:%M:%S"));
+}
+/**
+* Converts a string with time to conform with ISO8601 unless it already does or conforms with Posix
+* @param time :: The time string to be converted
+*/
+void convertToISO8601(std::string &time) {
+  if (!Types::Core::DateAndTimeHelpers::stringIsISO8601(time) &&
+          !Types::Core::DateAndTimeHelpers::stringIsPosix(time)) {
+    namespace bt = boost::posix_time;
+    bt::ptime pt;
+    std::istringstream is(time);
+    is.imbue(format);
+    is >> pt;
+
+    if (pt != bt::ptime()) {
+      // Converts to ISO
+      std::string s = bt::to_iso_extended_string(pt);
+      time = s;
+    } else {
+      time = "";
+    }
+  }
+}
 
 /**
  * Read the start & end time of the run from the nexus file if they exist.
@@ -401,17 +430,18 @@ void readStartAndEndTime(::NeXus::File &file, API::Run &run) {
     // Read the start and end time strings
     file.openData("start_time");
     std::string startTime = file.getStrData();
+    convertToISO8601(startTime);
     Types::Core::DateAndTime start(startTime);
     file.closeData();
     file.openData("end_time");
     std::string endTime = file.getStrData();
+    convertToISO8601(endTime);
     Types::Core::DateAndTime end(endTime);
     file.closeData();
     run.setStartAndEndTime(start, end);
   } catch (::NeXus::Exception &) {
   }
 }
-
 } // End of anonymous namespace
 
 /// Empty default constructor
