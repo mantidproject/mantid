@@ -263,7 +263,7 @@ class DrillTableWidget(QTableWidget):
             return
         item = self.item(row, column)
         if not item:
-            item = QTableWidgetItem()
+            self.setItem(row, column, QTableWidgetItem())
 
         self.item(row, column).setBackground(brush)
         self.blockSignals(False)
