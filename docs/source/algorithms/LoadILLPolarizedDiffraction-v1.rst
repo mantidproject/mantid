@@ -54,14 +54,14 @@ Output:
    The output has 2 entries
    Each entry has 512 bins (Time of Flight mode) and 134 spectra
 
-**Example - LoadILLDiffraction - D7 NeXuS alignment monochromatic**
+**Example - LoadILLPolarizedDiffraction - D7 NeXuS alignment monochromatic**
 
 .. testcode:: LoadILLPolarizedDiffractionMonoExample
 
    wsGroup = LoadILLPolarizedDiffraction(Filename='ILL/D7/401800.nxs')
    print('The output has {0} entries'.format(wsGroup.getNumberOfEntries()))
    ws1 = wsGroup.getItem(0)
-   print('Each entry has {0} bins (Time of Flight mode) and {1} spectra'.format(ws1.blocksize(), ws1.getNumberHistograms()))
+   print('Each entry has {0} bins (monochromatic mode) and {1} spectra'.format(ws1.blocksize(), ws1.getNumberHistograms()))
 
 Output:
 
