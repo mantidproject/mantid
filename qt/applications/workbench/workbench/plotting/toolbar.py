@@ -7,7 +7,6 @@
 #    This file is part of the mantid workbench.
 #
 #
-from matplotlib.axes import Axes
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from matplotlib.collections import LineCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
@@ -248,7 +247,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 return True
         else:
             return False
-
 
     def set_up_color_selector_toolbar_button(self, fig):
         # check if the action is already in the toolbar

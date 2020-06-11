@@ -15,7 +15,7 @@ from copy import copy
 
 from mantid.simpleapi import CreateSampleWorkspace
 from workbench.plotting.plotscriptgenerator.colorfills import (CFILL_NAME, _get_plot_command_kwargs_from_colorfill,
-                                                               get_plot_command_kwargs, generate_plot_2d_command)
+                                                               generate_plot_2d_command)
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
 CFILL_KWARGS = {
@@ -27,6 +27,7 @@ CFILL_KWARGS = {
 }
 
 MANTID_ONLY_KWARGS = {'distribution': False}
+
 
 class PlotScriptGeneratorColorFillsTest(unittest.TestCase):
     @classmethod
