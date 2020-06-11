@@ -227,12 +227,12 @@ void LoadILLPolarizedDiffraction::loadData() {
 
     // convert the spectrum axis to scattering angle
     if (getProperty("ConvertToScatteringAngle")) {
-      convertSpectrumAxis(workspace);
+      workspace = convertSpectrumAxis(workspace);
     }
     // transpose monochromatic data distribution
     if (getProperty("TransposeMonochromatic") &&
         m_acquisitionMode != TOF_MODE_ON) {
-      transposeMonochromatic(workspace);
+      workspace = transposeMonochromatic(workspace);
     }
 
     // adds the current entry workspace to the output group
