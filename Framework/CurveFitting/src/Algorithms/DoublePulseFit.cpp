@@ -61,13 +61,14 @@ void setMultiDataProperties(
 
 Mantid::API::IFunction_sptr
 getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
-                       double offset) {
+                       double offset, double firstPulseWeight,
+                       double secondPulseWeight) {
   auto clonedFunction = function->clone();
 
-  const double muon_halflife = 2.2;
-  double decay = exp(-offset / muon_halflife);
-  double first_pulse_weighting = decay / (1 + decay);
-  double second_pulse_weighting = 1 / (1 + decay);
+  // const double muon_halflife = 2.2;
+  // double decay = exp(-offset / muon_halflife);
+  // double first_pulse_weighting = decay / (1 + decay);
+  // double second_pulse_weighting = 1 / (1 + decay);
 
   auto convolution =
       std::make_shared<Mantid::CurveFitting::Functions::Convolution>();
@@ -79,10 +80,10 @@ getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
 
   convolution->setAttributeValue("FixResolution", false);
   delta1->setParameter("Centre", -offset);
-  delta1->setParameter("Height", first_pulse_weighting);
+  delta1->setParameter("Height", firstPulseWeight);
   delta1->fixAll();
   delta2->setParameter("Centre", 0.0);
-  delta2->setParameter("Height", second_pulse_weighting);
+  delta2->setParameter("Height", secondPulseWeight);
   delta2->fixAll();
   deltaComposite->addFunction(delta1);
   deltaComposite->addFunction(delta2);
@@ -95,15 +96,15 @@ getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
 
 Mantid::API::IFunction_sptr getDoublePulseFunction(
     std::shared_ptr<const API::MultiDomainFunction> const initialFunction,
-    double offset) {
+    double offset, double firstPulseWeight, double secondPulseWeight) {
   auto doublePulseFunc = std::make_shared<API::MultiDomainFunction>();
   for (size_t domain = 0; domain < initialFunction->getNumberDomains();
        domain++) {
     auto innerFunction = std::dynamic_pointer_cast<API::ParamFunction>(
         initialFunction->getFunction(domain));
     if (innerFunction) {
-      auto twoPulseInnerFunction =
-          getDoublePulseFunction(innerFunction, offset);
+      auto twoPulseInnerFunction = getDoublePulseFunction(
+          innerFunction, offset, firstPulseWeight, secondPulseWeight);
       doublePulseFunc->addFunction(twoPulseInnerFunction);
       doublePulseFunc->setDomainIndex(domain, domain);
     } else {
@@ -215,6 +216,8 @@ void DoublePulseFit::initConcrete() {
                   "(default is false, ignored if CreateOutput is false and "
                   "Output is an empty string).");
   declareProperty("PulseOffset", 0.0, "The time offset between the two pulses");
+  declareProperty("FirstPulseWeight", 1.0, "Weighting of first pulse.");
+  declareProperty("SecondPulseWeight", 1.0, "Weighting of first pulse.");
 }
 
 void DoublePulseFit::execConcrete() {
@@ -225,14 +228,17 @@ void DoublePulseFit::execConcrete() {
   Mantid::API::IFunction_sptr function = getProperty("Function");
   Mantid::API::IFunction_sptr doublePulseFunction;
   auto pulseOffset = getProperty("PulseOffset");
+  auto firstPulseWeight = getProperty("FirstPulseWeight");
+  auto secondPulseWeight = getProperty("SecondPulseWeight");
   if (auto paramFunction =
           std::dynamic_pointer_cast<Mantid::API::ParamFunction>(function)) {
-    doublePulseFunction = getDoublePulseFunction(paramFunction, pulseOffset);
+    doublePulseFunction = getDoublePulseFunction(
+        paramFunction, pulseOffset, firstPulseWeight, secondPulseWeight);
   } else if (auto multiDomainFunction =
                  std::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(
                      function)) {
-    doublePulseFunction =
-        getDoublePulseFunction(multiDomainFunction, pulseOffset);
+    doublePulseFunction = getDoublePulseFunction(
+        multiDomainFunction, pulseOffset, firstPulseWeight, secondPulseWeight);
   } else {
     throw std::runtime_error("Incompatible function form. DoublePulseFit.cpp");
   }

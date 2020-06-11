@@ -20,12 +20,13 @@ public:
     auto initialFunction = FunctionFactory::Instance().createInitialized(
         "name=ExpDecay, Height=5, Lifetime=2");
     auto doublePulseFunction = getDoublePulseFunction(
-        std::dynamic_pointer_cast<ParamFunction>(initialFunction), 5.0);
+        std::dynamic_pointer_cast<ParamFunction>(initialFunction), 5.0, 1.0,
+        2.0);
     TS_ASSERT_EQUALS(
         "composite=Convolution,FixResolution=false,NumDeriv=true;name=ExpDecay,"
         "Height=5,Lifetime=2;(name=DeltaFunction,"
-        "Height=0.110727,Centre=-5,ties=(Height=0.110727,Centre=-5);name="
-        "DeltaFunction,Height=0.889273,Centre=0,ties=(Height=0.889273,Centre=0)"
+        "Height=1,Centre=-5,ties=(Height=1,Centre=-5);name="
+        "DeltaFunction,Height=2,Centre=0,ties=(Height=2,Centre=0)"
         ")",
         doublePulseFunction->asString());
   }
@@ -34,17 +35,17 @@ public:
     auto initialFunction =
         FunctionFactory::Instance().createInitializedMultiDomainFunction(
             "name=ExpDecay, Height=5, Lifetime=2", 2);
-    auto doublePulseFunction = getDoublePulseFunction(initialFunction, 5.0);
+    auto doublePulseFunction =
+        getDoublePulseFunction(initialFunction, 5.0, 1.0, 2.0);
     TS_ASSERT_EQUALS(
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
         "FixResolution=false,NumDeriv=true,$domains=i;name=ExpDecay,Height=5,"
-        "Lifetime=2;(name=DeltaFunction,Height=0.110727,Centre=-5,ties=(Height="
-        "0.110727,Centre=-5);name=DeltaFunction,Height=0.889273,Centre=0,ties=("
-        "Height=0.889273,Centre=0)));(composite=Convolution,FixResolution="
-        "false,NumDeriv=true,$domains=i;name=ExpDecay,Height=5,Lifetime=2;("
-        "name=DeltaFunction,Height=0.110727,Centre=-5,ties=(Height=0.110727,"
-        "Centre=-5);name=DeltaFunction,Height=0.889273,Centre=0,ties=(Height=0."
-        "889273,Centre=0)))",
+        "Lifetime=2;(name=DeltaFunction,Height=1,Centre=-5,ties=(Height=1,"
+        "Centre=-5);name=DeltaFunction,Height=2,Centre=0,ties=(Height=2,Centre="
+        "0)));(composite=Convolution,FixResolution=false,NumDeriv=true,$"
+        "domains=i;name=ExpDecay,Height=5,Lifetime=2;(name=DeltaFunction,"
+        "Height=1,Centre=-5,ties=(Height=1,Centre=-5);name=DeltaFunction,"
+        "Height=2,Centre=0,ties=(Height=2,Centre=0)))",
         doublePulseFunction->asString());
   }
 
@@ -55,7 +56,7 @@ public:
             "(name=ExpDecay, Height=5, Lifetime=2; name=ExpDecay, Height=7, "
             "Lifetime=3)",
             5);
-    TS_ASSERT_THROWS(getDoublePulseFunction(initialFunction, 5.0),
+    TS_ASSERT_THROWS(getDoublePulseFunction(initialFunction, 5.0, 1.0, 2.0),
                      const std::runtime_error &);
   }
 
@@ -64,7 +65,8 @@ public:
     auto initialFunction = FunctionFactory::Instance().createInitialized(
         "name=ExpDecay, Height=5, Lifetime=2");
     auto doublePulseFunction = getDoublePulseFunction(
-        std::dynamic_pointer_cast<ParamFunction>(initialFunction), 5.0);
+        std::dynamic_pointer_cast<ParamFunction>(initialFunction), 5.0, 1.0,
+        2.0);
     auto restored_function = extractInnerFunction(
         std::dynamic_pointer_cast<Mantid::CurveFitting::Functions::Convolution>(
             doublePulseFunction));
@@ -78,7 +80,8 @@ public:
     auto initialFunction =
         FunctionFactory::Instance().createInitializedMultiDomainFunction(
             "name=ExpDecay, Height=5, Lifetime=2", 2);
-    auto doublePulseFunction = getDoublePulseFunction(initialFunction, 5.0);
+    auto doublePulseFunction =
+        getDoublePulseFunction(initialFunction, 5.0, 1.0, 2.0);
     auto restored_function = extractInnerFunction(
         std::dynamic_pointer_cast<MultiDomainFunction>(doublePulseFunction));
 
