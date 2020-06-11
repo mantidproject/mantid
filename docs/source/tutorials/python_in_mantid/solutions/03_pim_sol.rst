@@ -10,9 +10,11 @@ A - plotSpectrum with ISIS Data
 .. plot::
    :include-source:
 
-    # import mantid algorithms and matplotlib
+    # import mantid algorithms, numpy and matplotlib
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
+    import numpy as np
+    from mantid.plots._compatability import plotSpectrum
 
     '''Processing'''
 
@@ -56,9 +58,10 @@ B - Direct Matplotlib with SNS Data
 .. plot::
    :include-source:
 
-    # import mantid algorithms and matplotlib
+    # import mantid algorithms, numpy and matplotlib
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
+    import numpy as np
 
     # Load the data
     run = Load('Training_Exercise3a_SNS.nxs')
@@ -111,14 +114,14 @@ C - 2D and 3D Plot ILL Data
     # Get a figure and axes for 
     figC,axC = plt.subplots(ncols=2, subplot_kw={'projection':'mantid'}, figsize = (6,4))
 
-    # Plot the data as a 2D colorfill
-    c=axC[0].imshow(data,cmap='jet', aspect='auto')
+    # Plot the data as a 2D colorfill: IMPORTANT to set origin to lower
+    c=axC[0].imshow(data,cmap='jet', aspect='auto', origin = 'lower')
 
     # Change the title
     axC[0].set_title("Colorfill")
 
-    # Plot the data as a 2D colorfill
-    c=axC[1].imshow(data,cmap='jet', aspect='auto')
+    # Plot the data as a 2D colorfill: IMPORTANT to set origin to lower
+    c=axC[1].imshow(data,cmap='jet', aspect='auto', origin = 'lower')
 
     # Overlay Contour lines
     axC[1].contour(data, levels=np.linspace(0, 10000, 7), colors='white', alpha=0.5)

@@ -4,11 +4,11 @@
 Python in Mantid: Solution 4
 ============================
 
-Using ISIS Data
-===============
+Manipulating data arrays
+========================
 
-Part One
---------
+A - Create a MatrixWorkspace
+----------------------------
 
 .. code-block:: python
 
@@ -61,8 +61,8 @@ Part One
         
     solution_3 = CreateWorkspace(DataY=new_y, DataX=xRange, NSpec=ws.getNumberHistograms())
 
-Part Two
---------
+B - Create a TableWorkspace
+---------------------------
 
 Using a table workspace for the output.
 
@@ -83,7 +83,7 @@ Using a table workspace for the output.
     table.addColumn('double', 'Min')
     for i in range(ws.getNumberHistograms()):
         y = ws.readY(i)
-        maxY = numpy.max(y)
-        minY = numpy.min(y)
+        maxY = np.max(y)
+        minY = np.min(y)
         specNumber = ws.getSpectrum(i).getSpectrumNo()
         table.addRow([specNumber, maxY, minY])

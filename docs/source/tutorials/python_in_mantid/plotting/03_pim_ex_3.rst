@@ -8,12 +8,12 @@ Python in Mantid: Exercise 3
     :local:
 
 
-A - ISIS Data
-=============
+A - plotSpectrum with ISIS Data
+===============================
 
 #. Load the GEM data set - `GEM40979.raw` using SpectrumMin=431 & SpectrumMax=750
 #. Convert units to dSpacing
-#. Smooth the data using :ref:<algm-SmoothData> using NPoints=20
+#. Smooth the data using :ref:`algm-SmoothData` using NPoints=20
 
 #. Using `plotSpectrum()`, plot workspace indices 0,1,2
 #. Set the x-axis limits to 4 < x < 6
@@ -25,8 +25,8 @@ A - ISIS Data
 #. Give the plot a title
 
 
-B - SNS Data
-============
+B - Direct Matplotlib with SNS Data
+===================================
 
 #. Load the processed CNCS data file Training_Exercise3a_SNS.nxs
 #. Directly using MPL (eg. axes.plot() ), plot the first 5 spectra
@@ -40,11 +40,11 @@ B - SNS Data
 #. Give the plot a title, legend and don't forget to show the plot
 
 
-C - ILL Data
-============
+C - 2D and 3D Plot ILL Data
+===========================
 
 #. Load the IN6 file : in6_data.nxs
-#. :ref:<algm-ExtractSpectra> using X range 470-490 and WorkspaceIndex range 199-209. Use this region of interest for plotting.
+#. :ref:`algm-ExtractSpectra` using X range 470-490 and WorkspaceIndex range 199-209. Use this region of interest for plotting.
 
 #. Produce a figure and axes for subplots with ncols=2, nrows=1, using the mantid projection and also set the figsize = (6,4)
 #. Produce a 2D colorfill plot, using the imshow method, on both subplots (indexed as axes[0] and axes[1])

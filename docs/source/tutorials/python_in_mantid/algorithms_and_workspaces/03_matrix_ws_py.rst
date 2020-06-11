@@ -61,8 +61,8 @@ Loading a Workspace checking it's type, and reading the number of events.
 .. code-block:: python
 
     eventWS = Load(Filename="CNCS_7860_event.nxs")
-    print "Type of Workspace: ", eventWS.id()
-    print  "EventWorkspace called %s contains %s events" %(eventWS.name(), eventWS.getNumberEvents())
+    print("Type of Workspace: ", eventWS.id())
+    print("EventWorkspace called %s contains %s events" %(eventWS.name(), eventWS.getNumberEvents()))
 
 
 Rebinning EventWorkspaces

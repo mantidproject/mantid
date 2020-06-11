@@ -32,21 +32,21 @@ As a shorthand, use +,-,*,/ with either number or another workspace as the secon
 
 .. code-block:: python
 
-	w1 = mtd['workspace1']
-	w2 = mtd['workspace2']
+    w1 = mtd['workspace1']
+    w2 = mtd['workspace2']
 
     # Sum the two workspaces and place the output into a third
-	w3 = w1 + w2
+    w3 = w1 + w2
 
     # Multiply the new workspace by 2 and place the output into a new workspace
-	w4 = w3 * 2
+    w4 = w3 * 2
 
 Replace an input workspaces using +=,-=,*=,/= e.g.
 
 .. code-block:: python
 
     # Multiply a workspace by 2 and replace w1 with the output
-	w1 *= 2.0
+    w1 *= 2.0
 
-   # Add 'workspace2' to 'workspace1' and replace 'workspace1' with the output
-	w1 += w2
+    # Add 'workspace2' to 'workspace1' and replace 'workspace1' with the output
+    w1 += w2

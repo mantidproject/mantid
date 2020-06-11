@@ -11,7 +11,7 @@ Generating a Script for Plotting
 
 A script can also be generated for producing a plot!
 
-* Firsty, use the interface to create and edit a plot in Workbench.
+* Firstly, use the interface to create and edit a plot in Workbench.
 
 * Click on the `Generate a script` |GenerateAScript.png| toolbar button and save the script to file or clipboard.
 

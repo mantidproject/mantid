@@ -5,7 +5,7 @@ Workspaces in Scripts
 =====================
 
 
-The :ref:`Workspaces Toolbox<WorkbenchWorkspaceToolbox>` is used to store and manage workspaces within Mantid. Behind the scences, the Analysis Data Service or ADS is used to control these workspaces. 
+The :ref:`Workspaces Toolbox<WorkbenchWorkspaceToolbox>` is used to store and manage workspaces within Mantid. Behind the scenes, the Analysis Data Service or ADS is used to control these workspaces. 
 
 Below are some examples of how to control workspaces with a script.
 
@@ -75,7 +75,7 @@ Required import:
     # Plot of 3 spectra, and error bars
     plotSpectrum(ws, [0,1,2], error_bars=True)
     
-    # Waterfall plot from two workspaces, with two spectras from each
+    # Waterfall plot from two workspaces, with two spectra from each
     plotSpectrum([ws1, ws2], [0,1], waterfall=True)
 
 Above the selected spectra are called by their Workspace Index. Within Workbench, you may wish to call them by their Spectrum Number:
@@ -84,7 +84,7 @@ Above the selected spectra are called by their Workspace Index. Within Workbench
 
     plotSpectrum(ws,spectrum_nums=[1,2,3],error_bars=True, waterfall=False)
 
-`Explanation of the difference between Workspace Index and Spectrum Number <02_the_matrix_workspace>`
+:ref:`Explanation of the difference between Workspace Index and Spectrum Number <02_the_matrix_workspace>`
 
 
 Workspace Management

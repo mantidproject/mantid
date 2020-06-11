@@ -40,7 +40,7 @@ This workspace can then be carried into another algorithm, :ref:`algm-ConvertUni
 
     run = ConvertUnits(InputWorkspace=run, Target='dSpacing')
 
-will execute the :ref:`algm-ConvertUnits` algorithm with the input workspace set as `run` and the target unit set to `dSpacing`. As the function is assigned to the run variable, the output replaces the input workspace. If a different variable were used the the output would have ended up in workspace name that matches that variable name.
+will execute the :ref:`algm-ConvertUnits` algorithm with the input workspace set as `run` and the target unit set to `dSpacing`. As the function is assigned to the run variable, the output replaces the input workspace. If a different variable were used then the output would have ended up in workspace name that matches that variable name.
 
 
 Keywords

@@ -4,15 +4,8 @@
 Python in Mantid: Exercise 1
 ============================
 
-Using ISIS Data
-===============
-
-Removing the HRPD Prompt Pulse
-------------------------------
-
-The HRPD data contains a spike every 20 milliseconds. While this is nicely localized in time-of-flight, it is not the case upon conversion to d-spacing.
-
-The aim of this exercise is to use Mantid to write a script, not point-and-click, to exclude the contribution from the pulse.
+A - Using ISIS Data
+===================
 
 .. code-block:: python
 
@@ -46,8 +39,8 @@ The aim of this exercise is to use Mantid to write a script, not point-and-click
     plotSpectrum(["focussed-withoutpulse","focussed-withpulse"],0)
 
 
-Using SNS Data
-==============
+B - SNS Data
+============
 
 .. code-block:: python
 
@@ -62,8 +55,8 @@ Using SNS Data
     nevents = compressed.getNumberEvents()
     logger.notice(str(nevents))
 
-Using ILL Data
-==============
+C - ILL Data
+============
 
 .. code-block:: python
 
@@ -77,6 +70,6 @@ Using ILL Data
     MaskDetectors(Workspace = data_merged, SpectraList = bad_spectra)
     scaled = MultiplyRange(data_merged, Factor = 0.95)
     ws = ConvertUnits(scaled, Target = 'DeltaE', EFixed = 4.7728189558864003, EMode = 'Direct')
-    wsCorrected = DetectorEfficiencyCorUser(converted_to_energy)
+    wsCorrected = DetectorEfficiencyCorUser(ws)
 
     print("The correct value in spectrum number {}, bin {} is {:.2f} compared to {:.2f}".format(6,3,wsCorrected.readY(6)[3],ws.readY(6)[3]))

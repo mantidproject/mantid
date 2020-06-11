@@ -31,7 +31,7 @@ To include error bars on a plot, there is an extra argument that can be set to '
 .. code-block:: python
 
     graph_spec = plotSpectrum(RawData, 0, error_bars=True)
-    graph_time = plotBin(RawData, 0)
+    graph_time = plotBin(RawData, 0, error_bars=True)
 
 For setting scales, axis titles, plot titles etc. you can use:
 
@@ -82,7 +82,7 @@ To overplot on the same window:
     graph_spec = plotSpectrum(RawData, 0)
 
     # Overplot on that window, without clearing it
-    plotSpectrum(RawData, 1, window= graph_spce, clearWindow=False)
+    plotSpectrum(RawData, 1, window=graph_spec, clearWindow=False)
 
 
 2D Colourfill and Contour Plots
@@ -102,10 +102,12 @@ To overplot on the same window:
     data = Load('MAR11060')
 
     fig, axes = plt.subplots(subplot_kw={'projection':'mantid'})
-    c = axes.imshow(data, cmap='twilight_r', aspect='auto', norm=LogNorm())
+
+    # IMPORTANT to set origin to lower
+    c = axes.imshow(data, origin = 'lower', cmap='viridis', aspect='auto', norm=LogNorm())
     cbar=fig.colorbar(c)
     cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
-    #fig.show()
+    #plt.show()
 
 
 .. plot::
@@ -124,10 +126,10 @@ To overplot on the same window:
     sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100')
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
-    c = ax.pcolormesh(sqw, cmap='afmhot', norm=LogNorm())
+    c = ax.pcolormesh(sqw, cmap='plasma', norm=LogNorm())
     cbar=fig.colorbar(c)
     cbar.set_label('Intensity (arb. units)') #add text to colorbar
-    #fig.show()
+    #plt.show()
 
 `Contour lines <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.contour.html>`_ can be overlayed on a 2D colorfill:
 
@@ -143,7 +145,9 @@ To overplot on the same window:
     data = Load('SANSLOQCan2D.nxs')
 
     fig, axes = plt.subplots(subplot_kw={'projection':'mantid'})
-    c = axes.imshow(data, cmap='twilight_r', aspect='auto')
+
+    # IMPORTANT to set origin to lower
+    c = axes.imshow(data, origin = 'lower', cmap='viridis', aspect='auto')
 
     # Overlay contours
     axes.contour(data, levels=np.linspace(10, 60, 6), colors='yellow', alpha=0.5)
@@ -176,15 +180,15 @@ To overplot on the same window:
 .. plot::
    :include-source:
 
-    ''' ----------- Contour plot ----------- '''
+    ''' ----------- Wireframe plot ----------- '''
     
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
-    data = Load('SANSLOQCan2D.nxs')
+    data = Load('PG3_733.nxs')
     
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
-    ax.plot_wireframe(data, color='darkorange')
+    ax.plot_wireframe(data, color='green')
     #plt.show()
 
 

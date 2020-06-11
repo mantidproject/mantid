@@ -5,9 +5,9 @@ Running Algorithms - Complex Example
 ====================================
 
 
-* We have seen an example of chaining together two algorithms where just the workspace was passed as input. While this is a powerful use of Mantid it is also possible to extract the workspace data out to numpy, perform some operations and then feed this back into a workspace.
+We have seen an example of chaining together two algorithms where just the workspace was passed as input. While this is a powerful use of Mantid it is also possible to extract the workspace data out to numpy, perform some operations and then feed this back into a workspace.
 
-* The script below shows a more complex example of mixing Mantid's algorithms with numpy
+The script below shows a more complex example of mixing Mantid's algorithms with numpy
 
 .. code-block:: python
 

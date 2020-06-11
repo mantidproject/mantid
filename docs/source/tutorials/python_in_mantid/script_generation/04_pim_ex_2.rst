@@ -6,7 +6,7 @@ Python in Mantid: Exercise 2
 
 The aim of this exercise is to create a general script that can accept user interaction to alter the parameters for future uses
 
-Perform a set of algorithms by pointing and clicking with the MantidPlot menus
+Perform a set of algorithms by pointing and clicking within Mantid
 Use the history window to generate a script based upon the executed algorithms
 Use the dialog functions to make the script more general for future runs.
 
@@ -28,7 +28,7 @@ Here you are going to perform a number of steps in the Mantid user interface to 
 #. :ref:`algm-ConvertUnits` - Do the same for the small_angle data with EMode=Elastic.
 #. :ref:`algm-Rebin` - Rebin the monitor from 2.2 to 10 in log steps of 0.035. To achieve this, the rebin params string will be "2.2,-0.035,10.0".
 #. :ref:`algm-Rebin` - Do the same for the small_angle data.
-#. :ref:`algm-ExtractSingleSpectrum` - Use WorkspaceIndex=1 on the Small_Angle_monitors workspace to pull out the 2nd monitor spectrum, putting the answer back in to the input workspace.
+#. :ref:`algm-ExtractSingleSpectrum` - Use WorkspaceIndex=1 on the Small_Angle_monitors workspace to pull out the 2nd monitor spectrum, putting the answer back into the input workspace.
 #. :ref:`algm-Divide` - Run divide with LHSWorkspace as the small_angle data workspace & RHSWorkspace as the monitor, into an OutputWorkspace called Corrected_data.
 
 Generating a script from a workspace
@@ -45,7 +45,6 @@ Once you have performed an analysis you can easily save it out as a script
 One step further
 ----------------
 
-#. Extract the selected filename from the Load command and print it to the screen with logger.information("message")
 #. Extract the binning params from the first Rebin, print them using the logger, AND use them as the input for the second Rebin
 #. Add comments to your script to explain what it does!
 
@@ -65,7 +64,7 @@ Edit in Options Menu
 
 #. Click on the Gear icon to open the :ref:`Options menu <06_formatting_plots>`
 #. In the Axes tab... Change the title to "My Beautiful Plot"
-#. Set the **x-limits** to 3000-4000, the **y-scale** to `log` and the **y-limits** to 1-2000
+#. Set the **x-limits** to 460-600, the **y-scale** to `log` and the **y-limits** to 1-2000
 #. In the Curves tab... Select spectrum 50 and give this curve "a funky label"
 #. ... for the re-labelled curve, un-hide the error bars and set Capsize = 1.0
 #. ... Select spectrum 300 and change the line color to black
@@ -103,11 +102,10 @@ Plot and Edit
 -------------
 
 #. Double-click on the *normalized* spectrum to plot it
-#. Right-click on *run_monitors_lambda_rebinned* and select Plot > Overplot Spectrum..
+#. Right-click on *run_monitors_lambda_rebinned* and select Plot > Overplot Spectrum.
 #. Also, overplot with *run_lambda_summed* 
 #. In the Options menu (Gear icon)
 #. Set the **x-upper-limit** to 4.5
-#. Set the **y-limits** to 0.1-350000
 #. Set the **y-scale** to log
 #. Click Apply
 

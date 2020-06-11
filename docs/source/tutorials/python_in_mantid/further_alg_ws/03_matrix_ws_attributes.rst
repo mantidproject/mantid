@@ -67,7 +67,7 @@ getSpectrum for info on the structure of a workspace eg. the spectrum number rel
     instrument = ws.getInstrument()
     print(instrument.getName())
 
-:ref:`SpectrumInfo`, :ref:`DetetctorInfo` and :ref:`ComponentInfo` have many other features:
+:ref:`SpectrumInfo`, :ref:`DetectorInfo` and :ref:`ComponentInfo` have many other features:
 
 .. code-block:: python
 

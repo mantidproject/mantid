@@ -90,38 +90,41 @@ We may perform some processing on the data arrays before creating our new worksp
 Creating a MatrixWorkspace
 --------------------------
 
-Use :ref:`CreateWorkspace`, with the correct input arrays.
+Use :ref:`algm-CreateWorkspace`, with the correct input arrays.
 
-E.g. Change the x-axis for TOF from microseconds to miliseconds:
+E.g. Change the x-axis for TOF from microseconds to milliseconds:
 
 .. plot::
    :include-source:
 
-	from mantid.simpleapi import *
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from mantid.plots._compatability import plotSpectrum
 
-	# Load and Read data
-	ws = Load(Filename="HRP39182.RAW")	
-	x = ws.readX(0)
-	y = ws.readY(0)
-	e = ws.readE(0)
+    # Load and Read data
+    ws = Load(Filename="HRP39182.RAW")	
+    x = ws.readX(0)
+    y = ws.readY(0)
+    e = ws.readE(0)
 
-	# Alter the x data
-	new_x = x * 1e-3
+    # Alter the x data
+    new_x = x * 1e-3
 
-	# Create a new Matrix Workspace with the altered data
-	new_ws = CreateWorkspace(DataX=new_x, DataY=y, DataE=e, NSpec=1,UnitX='Label')
+    # Create a new Matrix Workspace with the altered data
+    new_ws = CreateWorkspace(DataX=new_x, DataY=y, DataE=e, NSpec=1,UnitX='Label')
 
-	# Set the Label for the AxisUnit
-	unit = new_ws.getAxis(0).getUnit()
-	unit.setLabel("Time-of-flight", "Milliseconds")
+    # Set the Label for the AxisUnit
+    unit = new_ws.getAxis(0).getUnit()
+    unit.setLabel("Time-of-flight", "Milliseconds")
 
-	# Plot the new workspace
-	plotSpectrum(new_ws,0)
+    # Plot the new workspace
+    plotSpectrum(new_ws,0)
 
 Creating a TableWorkspace
 --------------------------
 
-Use :ref:`CreateEmptyTableWorkspace` and `addColumn()` and `addRow()` as needed.
+Use :ref:`algm-CreateEmptyTableWorkspace` and `addColumn()` and `addRow()` as needed. Refer back to :ref:`04_table_ws_py`
 
 E.g. To read out the value in the first bin for each spectrum:
 

@@ -24,7 +24,7 @@ Returns a string containing the title that was loaded into the workspace.
 Example
 -------
 
-.. testcode:: Workspace Type
+.. code-block:: python
 
     ws = Load(Filename="GEM38370_Focussed.nxs", OutputWorkspace="myWS")
     print(ws.getComment())
@@ -32,12 +32,3 @@ Example
     print(ws.getName())
     print(ws.getTitle())
     print(ws)
-
-Output:
-
-.. testoutput:: LogFilter
-
-	727680
-	myWS
-	38370 Martin,Damay,Mannini MnV2O4 28K _T in cryomag 20-APR-2008 15:33:20
-	myWS
