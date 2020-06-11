@@ -149,7 +149,10 @@ class ParameterController(threading.Thread):
                 try:
                     defaultValue = self._alg.getProperty(p.name).getDefault
                     self._alg.setProperty(p.name, p.value)
-                    self._alg.setProperty(p.name, defaultValue)
+                    try:
+                        self._alg.setProperty(p.name, defaultValue)
+                    except:
+                        pass # in case of mandatory parameter
                     self._signals.okParam.emit(p)
                 except Exception as e:
                     p.errorMsg = str(e)
