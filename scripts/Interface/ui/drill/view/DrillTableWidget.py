@@ -312,7 +312,7 @@ class DrillTableWidget(QTableWidget):
         self.blockSignals(True)
         item = self.item(row, column)
         if not item:
-            item = QTableWidgetItem()
+            self.setItem(row, column, QTableWidgetItem())
 
         self.item(row, column).setToolTip(contents)
         self.blockSignals(False)
