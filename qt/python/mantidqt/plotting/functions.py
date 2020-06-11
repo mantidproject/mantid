@@ -195,16 +195,14 @@ def pcolormesh(workspaces, fig=None):
     workspaces_len = len(workspaces)
     fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig)
 
+    plots = []
     row_idx, col_idx = 0, 0
     for subplot_idx in range(nrows * ncols):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             pcm = pcolormesh_on_axis(ax, ws)
-            if pcm:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
-                colorbar_min = np.nanmin(pcm.get_array())
-                colorbar_max = np.nanmax(pcm.get_array())
-                pcm.set_clim(colorbar_min, colorbar_max)
+            plots.append(pcm)
             if col_idx < ncols - 1:
                 col_idx += 1
             else:
@@ -213,6 +211,13 @@ def pcolormesh(workspaces, fig=None):
         else:
             # nothing here
             ax.axis('off')
+
+    # Colour bar limits are wrong if workspace is ragged. Set them manually.
+    # If there are multiple plots limits are the min and max of all the plots
+    colorbar_min = min(np.nanmin(pt.get_array()) for pt in plots)
+    colorbar_max = max(np.nanmax(pt.get_array()) for pt in plots)
+    for pt in plots:
+        pt.set_clim(colorbar_min, colorbar_max)
 
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)

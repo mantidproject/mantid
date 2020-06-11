@@ -71,7 +71,7 @@ class LRReductionWithReference(DataProcessorAlgorithm):
     def PyInit(self):
         self.copyProperties(LR_ALG_FOR_PROPS, PROPS_TO_COPY)
         self.declareProperty("Refl1DModelParameters", "",
-                             doc="JSON string for Refl1D theoretical model paramters")
+                             doc="JSON string for Refl1D theoretical model parameters")
 
     def PyExec(self):
         try:

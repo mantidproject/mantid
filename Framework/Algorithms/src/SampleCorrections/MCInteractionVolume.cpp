@@ -28,12 +28,15 @@ namespace Algorithms {
  * @param activeRegion Restrict scattering point sampling to this region
  * @param maxScatterAttempts The maximum number of tries to generate a random
  * point within the object. [Default=5000]
+ * @param pointsIn Where to generate the scattering point in
  */
 MCInteractionVolume::MCInteractionVolume(
     const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
-    const size_t maxScatterAttempts)
+    const size_t maxScatterAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_sample(sample.getShape().clone()), m_env(nullptr),
-      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts) {
+      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts),
+      m_pointsIn(pointsIn) {
   if (!m_sample->hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
@@ -66,12 +69,13 @@ const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
  */
 int MCInteractionVolume::getComponentIndex(
     Kernel::PseudoRandomNumberGenerator &rng) const {
-  int componentIndex;
   // the sample has componentIndex -1, env components are number 0 upwards
-  if (m_env) {
-    componentIndex = rng.nextInt(0, static_cast<int>(m_env->nelements())) - 1;
-  } else {
-    componentIndex = -1;
+  int componentIndex = -1;
+  if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
+    const int randomStart =
+        (m_pointsIn == ScatteringPointVicinity::ENVIRONMENTONLY) ? 1 : 0;
+    componentIndex =
+        rng.nextInt(randomStart, static_cast<int>(m_env->nelements())) - 1;
   }
   return componentIndex;
 }

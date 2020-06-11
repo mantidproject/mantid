@@ -22,6 +22,7 @@ Improvements
 - Tile plots are now reloaded correctly by project recovery.
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
+- The ``Python extensions directory`` setting from MantidPlot is now available in Workbench within the Manage User Directories window.
 
 .. figure:: ../../images/wb_invalid_log_shading.png
    :align: right
@@ -42,11 +43,15 @@ Improvements
 - We have neatened up the the slice viewer user interface, to reduce the amount of wasted space and devote more to the data view itself.
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
+  If there are no valid values for that detector the value will appear as invalid (grayed out).
+  It can also now display negative values in workspaces correctly.
 - The gray and plasma colormaps have been added to the instrument view.
+- Slow running algorithms will now display an estimated time to completion in their progress bars.
 - The x-axis tick labels on colorfill plots are now horizontal.
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
-
 - The figure options menu now has a help button which opens the documentation for the menu.
+- Variables assigned in python scripts are now cleared when a script is run in its entirety.
+- User data directories are no longer checked at startup, reducing launch times with slow network drives.
 
 Bugfixes
 ########
@@ -65,13 +70,17 @@ Bugfixes
 - Fixed the default axis scale settings applying to the wrong axis.
 - Performing an overplot by dragging workspaces onto colorfill plots now correctly replaces the workspace.
 - Removed gridlines from the colorbar on colorfill plots.
-- The Instrument View now passes through useful error messages to the workbench if it fails to start, for example if your data contains NaN or infinite values.
+- The Instrument View now passes through useful error messages to the workbench if it fails to start.
 - The correct interpolation now appears in the plot figure options for colorfill plots.
 - Changing the axis scale on a colourfill plot now has the same result if it is done from either the context menu or figure options.
+- The plot guess of the Bk2BkExpConvPV is now correct.
+- A sign error has been fixed in the Bk2Bk2ExpConvPV function.
 - `plt.show()` now shows the most recently created figure.
 - Removed error when changing the normalisation of a ragged workspace with a log scaled colorbar.
 - The SavePlot1D algorithm can now be run in Workbench.
+- Changing the settings on tiled colorbars now applys to all the plots if there is only one colorbar.
 - Colorfill plots now correctly use the workspace name as the plot title.
+- Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
 
 :ref:`Release 5.1.0 <v5.1.0>`

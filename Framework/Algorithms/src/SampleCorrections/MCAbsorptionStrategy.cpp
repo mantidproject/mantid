@@ -25,17 +25,20 @@ namespace Algorithms {
  * @param EMode The energy mode of the instrument
  * @param nevents The number of Monte Carlo events used in the simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
- * point within the object.
+ * @param pointsIn Where to simulate the scattering point
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(
     const IBeamProfile &beamProfile, const API::Sample &sample,
     DeltaEMode::Type EMode, const size_t nevents,
-    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda)
+    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_beamProfile(beamProfile),
-      m_scatterVol(
-          MCInteractionVolume(sample, beamProfile.defineActiveRegion(sample))),
+      m_scatterVol(MCInteractionVolume(sample,
+                                       beamProfile.defineActiveRegion(sample),
+                                       maxScatterPtAttempts, pointsIn)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
       m_error(1.0 / std::sqrt(m_nevents)), m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
@@ -60,7 +63,7 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
 void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                      const Kernel::V3D &finalPos,
                                      const std::vector<double> &lambdas,
-                                     double lambdaFixed,
+                                     const double lambdaFixed,
                                      std::vector<double> &attenuationFactors,
                                      std::vector<double> &attFactorErrors,
                                      MCInteractionStatistics &stats) {
