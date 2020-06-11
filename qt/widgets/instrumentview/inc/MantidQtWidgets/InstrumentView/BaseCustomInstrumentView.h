@@ -20,26 +20,27 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentView
-{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentView {
 public:
-  virtual std::string getFile()=0;
-  virtual void setRunQuietly(const std::string &runNumber)=0;
-  virtual void observeLoadRun(Observer *listener)=0;
-  virtual void warningBox(const std::string &message)=0;
-  virtual void setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument)=0;
-  virtual MantidWidgets::InstrumentWidget *getInstrumentView()=0;
+  virtual std::string getFile() = 0;
+  virtual void setRunQuietly(const std::string &runNumber) = 0;
+  virtual void observeLoadRun(Observer *listener) = 0;
+  virtual void warningBox(const std::string &message) = 0;
+  virtual void
+  setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) = 0;
+  virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
   virtual void
   setUpInstrument(const std::string &fileName,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
-                      &instrument)=0;
-  virtual void addObserver(std::tuple<std::string, Observer *> &listener)=0;
-  virtual void setupInstrumentAnalysisSplitters(QWidget *analysis)=0;
-  virtual void setupHelp()=0;
+                      &instrument) = 0;
+  virtual void addObserver(std::tuple<std::string, Observer *> &listener) = 0;
+  virtual void setupInstrumentAnalysisSplitters(QWidget *analysis) = 0;
+  virtual void setupHelp() = 0;
 };
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView
-    : public QSplitter, virtual IBaseCustomInstrumentView {
+    : public QSplitter,
+      virtual IBaseCustomInstrumentView {
   Q_OBJECT
 
 public:
@@ -51,17 +52,19 @@ public:
     m_loadRunObservable->attach(listener);
   };
   void warningBox(const std::string &message) override;
-  void setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) override{
+  void
+  setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) override {
     m_instrumentWidget = instrument;
   };
-  MantidWidgets::InstrumentWidget *getInstrumentView()override {
+  MantidWidgets::InstrumentWidget *getInstrumentView() override {
     return m_instrumentWidget;
   };
   virtual void
   setUpInstrument(const std::string &fileName,
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
                       &instrument) override;
-  virtual void addObserver(std::tuple<std::string, Observer *> &listener) override {
+  virtual void
+  addObserver(std::tuple<std::string, Observer *> &listener) override {
     (void)listener;
   };
   void setupInstrumentAnalysisSplitters(QWidget *analysis) override;

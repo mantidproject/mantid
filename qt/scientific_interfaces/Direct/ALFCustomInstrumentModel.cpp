@@ -40,7 +40,7 @@ void ALFCustomInstrumentModel::loadAlg(const std::string &name) {
   alg->setProperty("Filename", name);
   alg->setProperty("OutputWorkspace", getTmpName()); // write to tmp ws
   alg->execute();
- }
+}
 
 /*
  * Loads data for use in ALFView
@@ -85,8 +85,8 @@ std::map<std::string, bool> ALFCustomInstrumentModel::isDataValid() {
   auto axis = ws->getAxis(0);
   auto unit = axis->unit()->unitID();
   bool isItDSpace = true;
-  if (unit != "dSpacing"){
-  isItDSpace = false;
+  if (unit != "dSpacing") {
+    isItDSpace = false;
   }
   return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}};
 }

@@ -22,25 +22,24 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView {
 public:
- 
-  virtual void observeFitButton(Observer *listener)=0;
-  virtual std::pair<double, double> getRange()=0;
-  virtual Mantid::API::IFunction_sptr getFunction()=0;
-  virtual void addSpectrum(std::string wsName)=0;
-  virtual void addFitSpectrum(std::string wsName)=0;
-  virtual void addFunction(Mantid::API::IFunction_sptr func)=0;
-  virtual void updateFunction(Mantid::API::IFunction_sptr func)=0;
-  virtual void fitWarning(const std::string &message)=0;
+  virtual void observeFitButton(Observer *listener) = 0;
+  virtual std::pair<double, double> getRange() = 0;
+  virtual Mantid::API::IFunction_sptr getFunction() = 0;
+  virtual void addSpectrum(std::string wsName) = 0;
+  virtual void addFitSpectrum(std::string wsName) = 0;
+  virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
+  virtual void updateFunction(Mantid::API::IFunction_sptr func) = 0;
+  virtual void fitWarning(const std::string &message) = 0;
   virtual QWidget *getQWidget() = 0;
-  virtual void setupPlotFitSplitter(const double &start, const double &end)=0;
-  virtual QWidget *createFitPane(const double &start, const double &end)=0;
+  virtual void setupPlotFitSplitter(const double &start, const double &end) = 0;
+  virtual QWidget *createFitPane(const double &start, const double &end) = 0;
 };
 
-
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView
-    : public QWidget, public IPlotFitAnalysisPaneView {
+    : public QWidget,
+      public IPlotFitAnalysisPaneView {
   Q_OBJECT
 
 public:
@@ -58,8 +57,7 @@ public:
   void addFunction(Mantid::API::IFunction_sptr func) override;
   void updateFunction(Mantid::API::IFunction_sptr func) override;
   void fitWarning(const std::string &message) override;
-  QWidget *getQWidget() override { return static_cast<QWidget*>(this); };
-
+  QWidget *getQWidget() override { return static_cast<QWidget *>(this); };
 
 public slots:
   void doFit();

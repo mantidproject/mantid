@@ -23,16 +23,17 @@ namespace CustomInterfaces {
 class MANTIDQT_DIRECT_DLL IALFCustomInstrumentView
     : public virtual MantidWidgets::IBaseCustomInstrumentView {
 public:
-  virtual void observeExtractSingleTube(Observer *listner)=0;
-  virtual void observeAverageTube(Observer *listner)=0;
+  virtual void observeExtractSingleTube(Observer *listner) = 0;
+  virtual void observeAverageTube(Observer *listner) = 0;
   virtual void addSpectrum(std::string wsName) = 0;
-  virtual void setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) = 0;
+  virtual void
+  setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) = 0;
 };
 
 class DLLExport ALFCustomInstrumentView
     : public MantidWidgets::BaseCustomInstrumentView,
-      public IALFCustomInstrumentView
-  {Q_OBJECT
+      public IALFCustomInstrumentView {
+  Q_OBJECT
 
 public:
   explicit ALFCustomInstrumentView(const std::string &instrument,
@@ -44,7 +45,8 @@ public:
                   std::vector<std::function<bool(std::map<std::string, bool>)>>
                       &binders) override final;
 
-  void addObserver(std::tuple<std::string, Observer *> &listener) override final;
+  void
+  addObserver(std::tuple<std::string, Observer *> &listener) override final;
   void addSpectrum(std::string wsName) override final;
   void setupAnalysisPane(
       MantidWidgets::IPlotFitAnalysisPaneView *analysis) override final;

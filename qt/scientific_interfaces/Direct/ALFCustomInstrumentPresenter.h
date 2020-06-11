@@ -19,7 +19,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class  MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter
+class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter
     : public MantidWidgets::BaseCustomInstrumentPresenter {
   Q_OBJECT
 
@@ -38,6 +38,7 @@ public:
   void loadSideEffects() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
+
 public:
   void setUpInstrumentAnalysisSplitter() override;
 

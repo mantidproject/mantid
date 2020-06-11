@@ -9,12 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "MantidAPI/NumericAxis.h"
+#include "MantidQtWidgets/Common/ObserverPattern.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/NumericAxis.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -33,20 +33,20 @@ public:
   explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
                                             PlotFitAnalysisPaneModel *model) {
     m_addFunc = 0;
-  }; 
-    ~MockPlotFitAnalysisPanePresenter(){}; 
-    MOCK_METHOD0(destructor, void ());
-    MOCK_METHOD0(getView, IPlotFitAnalysisPaneView*());
-    MOCK_METHOD0(getCurrentWS, std::string ());
-    MOCK_METHOD0(clearCurrentWS, void ());
-    MOCK_METHOD0(doFit, void ());
-    MOCK_METHOD1(addSpectrum, void (const std::string &name));
-    // at runtime the cast is done, so mock it ourselves
-    void addFunction(IFunction_sptr func) override {m_addFunc+=1;};
-    int getAddCount(){return m_addFunc;};
+  };
+  ~MockPlotFitAnalysisPanePresenter(){};
+  MOCK_METHOD0(destructor, void());
+  MOCK_METHOD0(getView, IPlotFitAnalysisPaneView *());
+  MOCK_METHOD0(getCurrentWS, std::string());
+  MOCK_METHOD0(clearCurrentWS, void());
+  MOCK_METHOD0(doFit, void());
+  MOCK_METHOD1(addSpectrum, void(const std::string &name));
+  // at runtime the cast is done, so mock it ourselves
+  void addFunction(IFunction_sptr func) override { m_addFunc += 1; };
+  int getAddCount() { return m_addFunc; };
 
 private:
-int m_addFunc;
+  int m_addFunc;
 };
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneView
@@ -56,18 +56,20 @@ public:
                                        const double &end = 5.,
                                        QWidget *parent = nullptr){};
   ~MockPlotFitAnalysisPaneView(){};
-   MOCK_METHOD1(observeFitButton, void(Observer *listener));
-   MOCK_METHOD0(getRange, std::pair<double, double>());
-   MOCK_METHOD0(getFunction, Mantid::API::IFunction_sptr());
-   MOCK_METHOD1(addSpectrum, void(std::string name));
-   MOCK_METHOD1(addFitSpectrum, void(std::string name));
-   MOCK_METHOD1(addFunction, void(Mantid::API::IFunction_sptr));
-   MOCK_METHOD1(updateFunction, void(Mantid::API::IFunction_sptr));
-   MOCK_METHOD1(fitWarning, void(const std::string &message));
-   
-   MOCK_METHOD0(getQWidget, QWidget*());
-   MOCK_METHOD2(setupPlotFitSplitter, void(const double &start, const double &end)); 
-   MOCK_METHOD2(createFitPane, QWidget*(const double &start, const double &end)); 
+  MOCK_METHOD1(observeFitButton, void(Observer *listener));
+  MOCK_METHOD0(getRange, std::pair<double, double>());
+  MOCK_METHOD0(getFunction, Mantid::API::IFunction_sptr());
+  MOCK_METHOD1(addSpectrum, void(std::string name));
+  MOCK_METHOD1(addFitSpectrum, void(std::string name));
+  MOCK_METHOD1(addFunction, void(Mantid::API::IFunction_sptr));
+  MOCK_METHOD1(updateFunction, void(Mantid::API::IFunction_sptr));
+  MOCK_METHOD1(fitWarning, void(const std::string &message));
+
+  MOCK_METHOD0(getQWidget, QWidget *());
+  MOCK_METHOD2(setupPlotFitSplitter,
+               void(const double &start, const double &end));
+  MOCK_METHOD2(createFitPane,
+               QWidget *(const double &start, const double &end));
 };
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneModel
@@ -75,10 +77,14 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneModel
 public:
   MockPlotFitAnalysisPaneModel() { m_count = 0; };
   ~MockPlotFitAnalysisPaneModel(){};
-   IFunction_sptr doFit(const std::string &wsName, const std::pair<double,double> &range, const IFunction_sptr func) override {m_count+=1; return func;};
-   int getCount(){return m_count;}; 
+  IFunction_sptr doFit(const std::string &wsName,
+                       const std::pair<double, double> &range,
+                       const IFunction_sptr func) override {
+    m_count += 1;
+    return func;
+  };
+  int getCount() { return m_count; };
 
 private:
-int m_count;
+  int m_count;
 };
-

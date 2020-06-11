@@ -9,16 +9,16 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
+#include <iostream>
 #include <string>
 #include <utility>
-#include<iostream>
 using namespace Mantid::API;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt;
@@ -37,15 +37,18 @@ public:
   MOCK_METHOD1(warningBox, void(const std::string &message));
 
   MOCK_METHOD1(setInstrumentWidget, void(InstrumentWidget *instrument));
-  MOCK_METHOD0(getInstrumentView, MantidWidgets::InstrumentWidget*());
-  MOCK_METHOD2(setUpInstrument, void(const std::string &fileName,
-                  std::vector<std::function<bool(std::map<std::string, bool>)>>
-                      &instrument));
-  MOCK_METHOD1(addObserver, void(std::tuple<std::string, Observer *> &listener));
+  MOCK_METHOD0(getInstrumentView, MantidWidgets::InstrumentWidget *());
+  MOCK_METHOD2(
+      setUpInstrument,
+      void(const std::string &fileName,
+           std::vector<std::function<bool(std::map<std::string, bool>)>>
+               &instrument));
+  MOCK_METHOD1(addObserver,
+               void(std::tuple<std::string, Observer *> &listener));
   MOCK_METHOD1(setupInstrumentAnalysisSplitters, void(QWidget *analysis));
   MOCK_METHOD0(setupHelp, void());
   // override getQWidget
-  MOCK_METHOD0(getQWidget, QWidget*());
+  MOCK_METHOD0(getQWidget, QWidget *());
 };
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockBaseCustomInstrumentModel

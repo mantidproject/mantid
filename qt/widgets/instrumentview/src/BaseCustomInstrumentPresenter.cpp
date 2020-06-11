@@ -11,8 +11,8 @@
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <functional>
+#include <qobject.h>
 #include <tuple>
-#include<qobject.h>
 
 #include <iostream>
 
@@ -23,7 +23,8 @@ BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
     IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
     IPlotFitAnalysisPanePresenter *analysisPanePresenter)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
-      m_loadRunObserver(nullptr), m_analysisPanePresenter(analysisPanePresenter) {
+      m_loadRunObserver(nullptr),
+      m_analysisPanePresenter(analysisPanePresenter) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
