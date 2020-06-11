@@ -49,6 +49,7 @@ class DrillView(QMainWindow):
 
         self.buffer = list()  # for row cut-copy-paste
         self.invalidCells = set()
+        self.coloredRows = set()
 
     def setup_header(self):
         """
@@ -140,11 +141,7 @@ class DrillView(QMainWindow):
         self.table.rowDeleted.connect(
                 lambda position : self.row_deleted.emit(position)
                 )
-        self.table.cellChanged.connect(
-                lambda row, column :
-                self.data_changed.emit(row, column,
-                                       self.table.getCellContents(row, column))
-                )
+        self.table.cellChanged.connect(self.on_cell_changed)
 
     def closeEvent(self, event):
         """
@@ -385,6 +382,14 @@ class DrillView(QMainWindow):
         """
         manageuserdirectories.ManageUserDirectories(self).exec_()
 
+    def on_cell_changed(self, row, column):
+        if row in self.coloredRows:
+            self.table.removeRowBackground(row)
+            self.coloredRows.remove(row)
+
+        self.data_changed.emit(row, column,
+                               self.table.getCellContents(row, column))
+
     ###########################################################################
     # for model calls                                                         #
     ###########################################################################
@@ -432,6 +437,7 @@ class DrillView(QMainWindow):
         self.columns = columns
         self.table.clear()
         self.invalidCells = set()
+        self.coloredRows = set()
         self.table.setRowCount(0)
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
@@ -502,6 +508,8 @@ class DrillView(QMainWindow):
         Args:
             row (int): the row index
         """
+        if row not in self.coloredRows:
+            self.coloredRows.add(row)
         self.table.setRowBackground(row, self.PROCESSING_COLOR)
 
     def set_row_done(self, row):
@@ -511,6 +519,8 @@ class DrillView(QMainWindow):
         Args:
             row (int): the row index
         """
+        if row not in self.coloredRows:
+            self.coloredRows.add(row)
         self.table.setRowBackground(row, self.OK_COLOR)
 
     def set_row_error(self, row):
@@ -520,6 +530,8 @@ class DrillView(QMainWindow):
         Args:
             row (int): the row index
         """
+        if row not in self.coloredRows:
+            self.coloredRows.add(row)
         self.table.setRowBackground(row, self.ERROR_COLOR)
 
     def set_cell_ok(self, row, columnTitle):
