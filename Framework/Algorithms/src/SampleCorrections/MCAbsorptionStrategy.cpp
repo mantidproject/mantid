@@ -25,19 +25,20 @@ namespace Algorithms {
  * @param EMode The energy mode of the instrument
  * @param nevents The number of Monte Carlo events used in the simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
- * @param logger Logger from parent algorithm to write logging info
- * point within the object.
+ * @param pointsIn Where to simulate the scattering point
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(
     const IBeamProfile &beamProfile, const API::Sample &sample,
     DeltaEMode::Type EMode, const size_t nevents,
     const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda,
-    Kernel::Logger &logger)
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_beamProfile(beamProfile),
-      m_scatterVol(MCInteractionVolume(
-          sample, beamProfile.defineActiveRegion(sample), logger)),
+      m_scatterVol(MCInteractionVolume(sample,
+                                       beamProfile.defineActiveRegion(sample),
+                                       maxScatterPtAttempts, pointsIn)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
       m_error(1.0 / std::sqrt(m_nevents)), m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
@@ -55,13 +56,17 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
  * factors
  * @param attFactorErrors A vector containing the calculated correction factor
  * errors
+ * @param stats A statistics class to hold the statistics on the generated
+ * tracks such as the scattering angle and count of scatter points generated in
+ * each sample or environment part
  */
 void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                      const Kernel::V3D &finalPos,
                                      const std::vector<double> &lambdas,
-                                     double lambdaFixed,
+                                     const double lambdaFixed,
                                      std::vector<double> &attenuationFactors,
-                                     std::vector<double> &attFactorErrors) {
+                                     std::vector<double> &attFactorErrors,
+                                     MCInteractionStatistics &stats) {
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   const auto nbins = static_cast<int>(lambdas.size());
 
@@ -75,7 +80,8 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
         if (m_regenerateTracksForEachLambda || j == 0) {
           const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
           success = m_scatterVol.calculateBeforeAfterTrack(
-              rng, neutron.startPos, finalPos, beforeScatter, afterScatter);
+              rng, neutron.startPos, finalPos, beforeScatter, afterScatter,
+              stats);
         } else {
           success = true;
         }
@@ -108,8 +114,6 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
       } while (true);
     }
   }
-
-  m_scatterVol.generateScatterPointStats();
 
   std::transform(attenuationFactors.begin(), attenuationFactors.end(),
                  attenuationFactors.begin(),

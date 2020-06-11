@@ -59,6 +59,9 @@ class SliceViewerModel:
             return True
         return False
 
+    def get_ws_name(self) -> str:
+        return self._ws.name()
+
     def can_support_nonorthogonal_axes(self) -> bool:
         """
         Query if the workspace can support non-orthogonal axes.

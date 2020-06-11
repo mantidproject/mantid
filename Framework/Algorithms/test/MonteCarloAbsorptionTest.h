@@ -10,6 +10,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
@@ -64,7 +65,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
         Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl");
     // set up a uniform material for whole environment here to give simple case
     params.chemicalSymbol = "Ti-Zr";
-    params.sampleMassDensity = 5.23;
+    params.massDensity = 5.23;
     auto binaryStlReaderEnv = LoadBinaryStl(envPath, scaleType, params);
     std::shared_ptr<MeshObject> environmentShape = binaryStlReaderEnv.readStl();
 
@@ -280,6 +281,26 @@ public:
     addSample(testWS, Environment::SampleOnly);
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+  }
+
+  void test_ignore_masked_spectra() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
+    auto testWS = setUpWS(wsProps);
+    testWS->mutableSpectrumInfo().setMasked(0, true);
+    auto mcAbsorb = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+    auto outputWS = getOutputWorkspace(mcAbsorb);
+    // should still output a spectra but it should also be masked and equal to
+    // zero
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(outputWS->spectrumInfo().isMasked(0), true);
+    auto yData = outputWS->getSpectrum(0).dataY();
+    bool allZero = std::all_of(yData.begin(), yData.end(),
+                               [](double i) { return i == 0; });
+    TS_ASSERT_EQUALS(allZero, true);
   }
 
   //---------------------------------------------------------------------------

@@ -28,19 +28,29 @@ namespace DataObjects {
  *dimensions that are considered when
  *        calculating distance.
  * @param outD :: # of output dimensions
+ * @param eigenvects :: eigenvectors of an ellipsoid (if used)
+ * @param eigenvals :: variances along each eigenvector (if used)
  * @return
  */
-CoordTransformDistance::CoordTransformDistance(const size_t inD,
-                                               const coord_t *center,
-                                               const bool *dimensionsUsed,
-                                               const size_t outD)
+CoordTransformDistance::CoordTransformDistance(
+    const size_t inD, const coord_t *center, const bool *dimensionsUsed,
+    const size_t outD, const std::vector<Kernel::V3D> &eigenvects,
+    const std::vector<double> &eigenvals)
     : CoordTransform(inD, outD) {
-  // Create and copy the arrays.
-  m_center = new coord_t[inD];
-  m_dimensionsUsed = new bool[inD];
+
+  m_center.reserve(inD);
+  m_dimensionsUsed.reserve(inD);
+  m_eigenvals.reserve(inD);
+  m_maxEigenval = 0.0;
   for (size_t d = 0; d < inD; d++) {
-    m_center[d] = center[d];
-    m_dimensionsUsed[d] = dimensionsUsed[d];
+    m_center.push_back(center[d]);
+    m_dimensionsUsed.push_back(dimensionsUsed[d]);
+    if (eigenvals.size() == inD && eigenvects.size() == inD) {
+      // coord transform for n-ellipsoid specified
+      m_eigenvals.push_back(eigenvals[d]);
+      m_eigenvects.push_back(eigenvects[d]);
+      m_maxEigenval = std::max(m_maxEigenval, eigenvals[d]);
+    }
   }
 }
 
@@ -48,16 +58,7 @@ CoordTransformDistance::CoordTransformDistance(const size_t inD,
 /** Virtual cloner
  * @return a copy of this object  */
 CoordTransform *CoordTransformDistance::clone() const {
-  auto out = new CoordTransformDistance(inD, m_center, m_dimensionsUsed);
-  return out;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CoordTransformDistance::~CoordTransformDistance() {
-  delete[] m_center;
-  delete[] m_dimensionsUsed;
+  return new CoordTransformDistance(*this);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -74,10 +75,26 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
                                    coord_t *outVector) const {
   if (outD == 1) {
     coord_t distanceSquared = 0;
-    for (size_t d = 0; d < inD; d++) {
-      if (m_dimensionsUsed[d]) {
-        coord_t dist = inputVector[d] - m_center[d];
-        distanceSquared += (dist * dist);
+    if (m_eigenvals.size() == 3) {
+      // ellipsoid transfrom with ratio of axes given by standard deviation
+      // i.e. sqrt(eigenvals)
+      for (size_t d = 0; d < inD; d++) {
+        // do dot prod with eigenvector
+        coord_t dist = 0.0;
+        for (size_t dd = 0; dd < inD; dd++) {
+          dist += static_cast<coord_t>(m_eigenvects[d][dd]) *
+                  (inputVector[dd] - m_center[dd]);
+        }
+        distanceSquared += (dist * dist) *
+                           static_cast<coord_t>(m_maxEigenval / m_eigenvals[d]);
+      }
+    } else {
+      // nd spherical transform
+      for (size_t d = 0; d < inD; d++) {
+        if (m_dimensionsUsed[d]) {
+          coord_t dist = inputVector[d] - m_center[d];
+          distanceSquared += (dist * dist);
+        }
       }
     }
     /// Return the only output dimension

@@ -21,7 +21,8 @@ using Mantid::API::CoordTransform;
 class CoordTransformDistanceTest : public CxxTest::TestSuite {
 public:
   /** Helper to compare two "vectors" (bare float arrays) */
-  void compare(size_t numdims, coord_t *value, const coord_t *expected) {
+  void compare(size_t numdims, coord_t *value,
+               const std::vector<coord_t> expected) {
     for (size_t i = 0; i < numdims; i++)
       TS_ASSERT_DELTA(value[i], expected[i], 1e-5);
   }
@@ -31,14 +32,14 @@ public:
     bool used[4] = {true, false, true, true};
     CoordTransformDistance ct(4, center, used);
     // A copy was made
-    const coord_t *transformCentres = ct.getCenter();
-    TS_ASSERT_DIFFERS(transformCentres, center);
-    const bool *usedDims = ct.getDimensionsUsed();
-    TS_ASSERT_DIFFERS(ct.getDimensionsUsed(), used);
+    const std::vector<coord_t> transformCentres = ct.getCenter();
+    const std::vector<bool> usedDims = ct.getDimensionsUsed();
     // Contents are good
     compare(4, center, ct.getCenter());
-    for (size_t i = 0; i < 4; i++)
-      TS_ASSERT_EQUALS(used[i], usedDims[i]);
+    for (size_t i = 0; i < 4; i++) {
+      const bool dimUsed = usedDims[i];
+      TS_ASSERT_EQUALS(used[i], dimUsed);
+    }
   }
 
   /** Clone then apply */
@@ -89,6 +90,52 @@ public:
     coord_t in2[2] = {-1, 5};
     TS_ASSERT_THROWS_NOTHING(ct.apply(in2, &out));
     TS_ASSERT_DELTA(out, 4.0, 1e-5);
+  }
+
+  /** Calculate the distance (squared) for ellipsoid*/
+  void test_distance_ellipsoid() {
+    // Build it
+    coord_t center[3] = {1, 2, 3};
+    bool used[3] = {true, true, true};
+    std::vector<Kernel::V3D> eigenvects;
+    std::vector<double> eigenvals;
+    eigenvects.push_back(Kernel::V3D(1.0, 0.0, 0.0));
+    eigenvals.push_back(4);
+    eigenvects.push_back(Kernel::V3D(0.0, 1.0, 0.0));
+    eigenvals.push_back(1);
+    eigenvects.push_back(Kernel::V3D(0.0, 0.0, 1.0));
+    eigenvals.push_back(1);
+
+    CoordTransformDistance ct(3, center, used, 1, /*outD*/
+                              eigenvects, eigenvals);
+
+    coord_t out = 0;
+
+    coord_t in1[3] = {1, 2, 3};
+    TS_ASSERT_THROWS_NOTHING(ct.apply(in1, &out));
+    TS_ASSERT_DELTA(out, 0.0, 1e-5);
+
+    coord_t in2[3] = {1, 2, 4};
+    TS_ASSERT_THROWS_NOTHING(ct.apply(in2, &out));
+    TS_ASSERT_DELTA(out, 4.0, 1e-5);
+
+    coord_t in3[3] = {1, 3, 3};
+    TS_ASSERT_THROWS_NOTHING(ct.apply(in3, &out));
+    TS_ASSERT_DELTA(out, 4.0, 1e-5);
+
+    coord_t in4[3] = {3, 2, 3};
+    TS_ASSERT_THROWS_NOTHING(ct.apply(in4, &out));
+    TS_ASSERT_DELTA(out, 4.0, 1e-5);
+
+    coord_t in5[3] = {1, static_cast<coord_t>(2 + M_SQRT1_2),
+                      static_cast<coord_t>(3 - M_SQRT1_2)};
+    TS_ASSERT_THROWS_NOTHING(ct.apply(in5, &out));
+    TS_ASSERT_DELTA(out, 4.0, 1e-5);
+
+    coord_t in6[3] = {1, static_cast<coord_t>(2 + M_SQRT2),
+                      static_cast<coord_t>(3 - M_SQRT2)};
+    TS_ASSERT_THROWS_NOTHING(ct.apply(in6, &out));
+    TS_ASSERT_DELTA(out, 16.0, 1e-5);
   }
 
   /** Test serialization */

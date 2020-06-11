@@ -15,10 +15,12 @@ class SANSILLReductionTest(unittest.TestCase):
     _facility = None
     _instrument = None
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
 
+    def setUp(self):
         self._facility = config['default.facility']
         self._instrument = config['default.instrument']
 

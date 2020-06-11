@@ -147,16 +147,18 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
   for (const auto &searchPath : searchPaths) {
-    Poco::DirectoryIterator file_it(searchPath);
-    Poco::DirectoryIterator end;
-    for (; file_it != end; ++file_it) {
-      if (boost::regex_search(file_it.name(), matches, re1)) {
-        std::string s = matches[1];
-        int run_number = 0;
-        Poco::NumberParser::tryParse(s, run_number);
-        if (run_number > max_run_number && run_number <= run) {
-          max_run_number = run_number;
-          config_file = file_it.path().toString();
+    if (Poco::File(searchPath).exists()) {
+      Poco::DirectoryIterator file_it(searchPath);
+      Poco::DirectoryIterator end;
+      for (; file_it != end; ++file_it) {
+        if (boost::regex_search(file_it.name(), matches, re1)) {
+          std::string s = matches[1];
+          int run_number = 0;
+          Poco::NumberParser::tryParse(s, run_number);
+          if (run_number > max_run_number && run_number <= run) {
+            max_run_number = run_number;
+            config_file = file_it.path().toString();
+          }
         }
       }
     }

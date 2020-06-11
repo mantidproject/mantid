@@ -933,8 +933,9 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
             QString::fromStdString(componentInfo.name(index)) + '\n';
 
     const double integrated = actor.getIntegratedCounts(index);
-    const QString counts =
-        integrated == -1.0 ? "N/A" : QString::number(integrated);
+    const QString counts = integrated == InstrumentActor::INVALID_VALUE
+                               ? "N/A"
+                               : QString::number(integrated);
     text += "Counts: " + counts + '\n';
     // display info about peak overlays
     text += actor.getParameterInfo(index);
