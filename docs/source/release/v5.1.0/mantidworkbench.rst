@@ -52,6 +52,7 @@ Improvements
 - The figure options menu now has a help button which opens the documentation for the menu.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
+- Added an option to set the default ```drawstyle``` within the workbench settings window. Additionally, the ```linestyle``` can now be set to 'None'.
 
 Bugfixes
 ########
