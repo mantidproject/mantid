@@ -23,21 +23,20 @@ class IFuncMinimizer;
 
 namespace CurveFitting {
 namespace Algorithms {
-MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr
-getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
-                       double offset, double firstPulseWeight,
-                       double secondPulseWeight);
+MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr getDoublePulseFunction(
+    std::shared_ptr<const API::ParamFunction> const &function, double offset,
+    double firstPulseWeight, double secondPulseWeight);
 
 MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr getDoublePulseFunction(
-    std::shared_ptr<const API::MultiDomainFunction> const function,
+    std::shared_ptr<const API::MultiDomainFunction> const &function,
     double offset, double firstPulseWeight, double secondPulseWeight);
 
 MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr extractInnerFunction(
     std::shared_ptr<const Mantid::CurveFitting::Functions::Convolution> const
-        function);
+        &function);
 
 MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr extractInnerFunction(
-    std::shared_ptr<const API::MultiDomainFunction> const function);
+    std::shared_ptr<const API::MultiDomainFunction> const &function);
 /**
 
 A function to fit muon data from a double pulse source. It does this by

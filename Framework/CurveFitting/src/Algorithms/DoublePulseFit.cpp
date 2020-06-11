@@ -59,10 +59,9 @@ void setMultiDataProperties(
                            "_" + std::to_string(i));
 }
 
-Mantid::API::IFunction_sptr
-getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
-                       double offset, double firstPulseWeight,
-                       double secondPulseWeight) {
+Mantid::API::IFunction_sptr getDoublePulseFunction(
+    std::shared_ptr<const API::ParamFunction> const &function, double offset,
+    double firstPulseWeight, double secondPulseWeight) {
   auto clonedFunction = function->clone();
 
   auto convolution =
@@ -90,7 +89,7 @@ getDoublePulseFunction(std::shared_ptr<const API::ParamFunction> const function,
 }
 
 Mantid::API::IFunction_sptr getDoublePulseFunction(
-    std::shared_ptr<const API::MultiDomainFunction> const initialFunction,
+    std::shared_ptr<const API::MultiDomainFunction> const &initialFunction,
     double offset, double firstPulseWeight, double secondPulseWeight) {
   auto doublePulseFunc = std::make_shared<API::MultiDomainFunction>();
   for (size_t domain = 0; domain < initialFunction->getNumberDomains();
@@ -112,12 +111,12 @@ Mantid::API::IFunction_sptr getDoublePulseFunction(
 
 Mantid::API::IFunction_sptr extractInnerFunction(
     std::shared_ptr<const Mantid::CurveFitting::Functions::Convolution> const
-        convolutionFunction) {
+        &convolutionFunction) {
   return convolutionFunction->getFunction(0);
 }
 
 Mantid::API::IFunction_sptr extractInnerFunction(
-    std::shared_ptr<const API::MultiDomainFunction> const doublePulseFunc) {
+    std::shared_ptr<const API::MultiDomainFunction> const &doublePulseFunc) {
   auto extractedFunction = std::make_shared<API::MultiDomainFunction>();
   for (size_t domain = 0; domain < doublePulseFunc->getNumberDomains();
        domain++) {
@@ -144,9 +143,9 @@ DoublePulseFit::DoublePulseFit() : IFittingAlgorithm() {}
  */
 void DoublePulseFit::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")->setDocumentation(
-      "Math expressions defining ties between parameters of "
-      "the fitting function.");
+  getPointerToProperty("Ties")
+      ->setDocumentation("Math expressions defining ties between parameters of "
+                         "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
