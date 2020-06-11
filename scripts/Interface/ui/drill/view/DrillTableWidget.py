@@ -247,6 +247,21 @@ class DrillTableWidget(QTableWidget):
             self.item(row, c).setBackground(brush)
         self.blockSignals(False)
 
+    def removeRowBackground(self, row):
+        """
+        Remove a previously set background color for an entire row.
+
+        Args:
+            row (int): row index
+        """
+        self.blockSignals(True)
+        for c in range(self.columnCount()):
+            item = self.item(row, c)
+            if not item:
+                continue
+            self.setItem(row, c, QTableWidgetItem(item.text()))
+        self.blockSignals(False)
+
     def setCellBackground(self, row, column, color):
         """
         Set the background color of an existing cell. If the cell does not
@@ -266,6 +281,22 @@ class DrillTableWidget(QTableWidget):
             self.setItem(row, column, QTableWidgetItem())
 
         self.item(row, column).setBackground(brush)
+        self.blockSignals(False)
+
+    def removeCellBackground(self, row, column):
+        """
+        Remove a previously set background color for a cell.
+
+        Args:
+            row (int): row index
+            column (int): column index
+        """
+        self.blockSignals(True)
+        item = self.item(row, column)
+        if not item:
+            return
+        item = QTableWidgetItem(item.text())
+        self.setItem(row, column, item)
         self.blockSignals(False)
 
     def setCellToolTip(self, row, column, contents):

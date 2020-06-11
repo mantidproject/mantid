@@ -33,7 +33,6 @@ class DrillView(QMainWindow):
     show_settings = Signal()
 
     # colors for the table rows
-    WHITE = "#FFFFFF"
     OK_COLOR = "#3f00ff00"
     ERROR_COLOR = "#3fff0000"
     PROCESSING_COLOR = "#3fffff00"
@@ -536,7 +535,7 @@ class DrillView(QMainWindow):
                 or (columnTitle not in self.columns)):
             return
         column = self.columns.index(columnTitle)
-        self.table.setCellBackground(row, column, self.WHITE)
+        self.table.removeCellBackground(row, column)
         self.table.setCellToolTip(row, column, "")
         self.invalidCells.discard((row, column))
 
