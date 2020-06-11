@@ -14,6 +14,7 @@
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -284,8 +285,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), efixed.emode(),
                                 nevents, maxScatterPtAttempts,
-                                resimulateTracksForDiffWavelengths, g_log,
-                                pointsIn);
+                                resimulateTracksForDiffWavelengths, pointsIn);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
@@ -324,9 +324,15 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
         j = nbins - lambdaStepSize - 1;
       }
     }
+    MCInteractionStatistics detStatistics(spectrumInfo.detector(i).getID(),
+                                          inputWS.sample());
 
     strategy.calculate(rng, detPos, packedLambdas, lambdaFixed,
-                       packedAttFactors, packedAttFactorErrors);
+                       packedAttFactors, packedAttFactorErrors, detStatistics);
+
+    if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug(detStatistics.generateScatterPointStats());
+    }
 
     for (size_t j = 0; j < packedLambdas.size(); j++) {
       simulationWS.getSpectrum(i)

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -41,18 +42,19 @@ public:
       const IBeamProfile &beamProfile, const API::Sample &sample,
       Kernel::DeltaEMode::Type EMode, const size_t nevents,
       const size_t maxScatterPtAttempts,
-      const bool regenerateTracksForEachLambda, Kernel::Logger &logger,
+      const bool regenerateTracksForEachLambda,
       const MCInteractionVolume::ScatteringPointVicinity pointsIn =
           MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
   void calculate(Kernel::PseudoRandomNumberGenerator &rng,
                  const Kernel::V3D &finalPos,
                  const std::vector<double> &lambdas, const double lambdaFixed,
                  std::vector<double> &attenuationFactors,
-                 std::vector<double> &attFactorErrors);
+                 std::vector<double> &attFactorErrors,
+                 MCInteractionStatistics &stats);
 
 private:
   const IBeamProfile &m_beamProfile;
-  MCInteractionVolume m_scatterVol;
+  const MCInteractionVolume m_scatterVol;
   const size_t m_nevents;
   const size_t m_maxScatterAttempts;
   const double m_error;
