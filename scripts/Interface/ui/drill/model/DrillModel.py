@@ -168,12 +168,14 @@ class DrillModel(QObject):
         self.controller = ParameterController(self.algorithm)
         self.controller.signals.okParam.connect(
                 lambda p : self.param_ok.emit(
-                    p.sample, p.name
+                    p.sample, p.name if p.name in self.columns
+                    else RundexSettings.CUSTOM_OPT_JSON_KEY
                     )
                 )
         self.controller.signals.wrongParam.connect(
                 lambda p : self.param_error.emit(
-                    p.sample, p.name, p.errorMsg
+                    p.sample, p.name if p.name in self.columns
+                    else RundexSettings.CUSTOM_OPT_JSON_KEY, p.errorMsg
                     )
                 )
         self.controller.start()
@@ -252,6 +254,48 @@ class DrillModel(QObject):
             sample (int): sample index if it is a sample specific parameter
         """
         self.controller.addParameter(Parameter(param, value, sample))
+
+    def changeParameter(self, row, column, contents):
+        """
+        Change parameter value. The method is able to parse usual parameters
+        (present in self.columns) and those coming from the custom options. It
+        also submits the new value to the parameters controller.
+
+        Args:
+            row (int): index of the sample in self.samples
+            column (int): index of the parameter in self.columns
+            contents (str): new value
+        """
+        if ((not contents) and (self.columns[column] in self.samples[row])):
+            del self.samples[row][self.columns[column]]
+            self.param_ok.emit(row, self.columns[column])
+            return
+
+        if (self.columns[column] == RundexSettings.CUSTOM_OPT_JSON_KEY):
+            options = dict()
+            for option in contents.split(','):
+                if ('=' not in option):
+                    self.param_error.emit(row, self.columns[column],
+                                          "Badly formatted custom options")
+                    return
+                name = option.split("=")[0]
+                value = option.split("=")[1]
+                # everything is a str, we try to find bool
+                if value in ['true', 'True', 'TRUE']:
+                    value = True
+                if value in ['false', 'False', 'FALSE']:
+                    value = False
+                if (name not in RundexSettings.SETTINGS[self.acquisitionMode]):
+                    self.param_error.emit(row, self.columns[column],
+                                          "Unknown option")
+                    return
+                options[name] = value
+            for (k, v) in options.items():
+                self.checkParameter(k, v, row)
+            self.samples[row][RundexSettings.CUSTOM_OPT_JSON_KEY] = options
+        else:
+            self.samples[row][self.columns[column]] = contents
+            self.checkParameter(self.columns[column], contents, row)
 
     def getProcessingParameters(self, sample):
         """
@@ -364,24 +408,6 @@ class DrillModel(QObject):
 
     def del_row(self, position):
         del self.samples[position]
-
-    def change_data(self, row, column, contents):
-        if (not contents):
-            if (self.columns[column] in self.samples[row]):
-                del self.samples[row][self.columns[column]]
-        elif (self.columns[column] == self.columns[-1]):
-            options = dict()
-            for option in contents.split(","):
-                # ignore bad formatted options
-                if ('=' not in option):
-                    continue
-                options[option.split("=")[0]] = option.split("=")[1]
-            self.samples[row][self.columns[column]] = options
-        else:
-            self.samples[row][self.columns[column]] = contents
-            self.controller.addParameter(Parameter(self.columns[column],
-                                                   contents,
-                                                   row))
 
     def get_rows_contents(self):
         rows = list()

@@ -25,7 +25,7 @@ class DrillModelTest(unittest.TestCase):
             }
 
     COLUMNS = {
-            "a1": ["c1", "c2"],
+            "a1": ["c1", "c2", "CustomOptions"],
             "a2": ["c3", "c4"]
             }
 
@@ -336,6 +336,46 @@ class DrillModelTest(unittest.TestCase):
                                     "int": "test doc",
                                     "float": "test doc",
                                     "bool": "test doc"})
+
+    def test_changeParameter(self):
+        self.model.samples = [{}, {}]
+        self.model.changeParameter(0, 0, "v1")
+        self.assertEqual(self.model.samples[0]["c1"], "v1")
+        self.mController.return_value.addParameter.assert_called_once()
+
+        self.mController.reset_mock()
+        self.model.changeParameter(0, 0, "")
+        self.assertEqual(self.model.samples, [{}, {}])
+        self.mController.return_value.addParameter.assert_not_called()
+
+        # invalid custom option
+        self.mController.reset_mock()
+        samples = [{"c1": "test2", "CustomOptions": {"int": 2}}]
+        self.model.samples = [{"c1": "test2", "CustomOptions": {"int": 2}}]
+        self.model.changeParameter(0,
+                                   self.model.columns.index("CustomOptions"),
+                                   'invalid')
+        self.assertEqual(self.model.samples, samples)
+        self.mController.return_value.addParameter.assert_not_called()
+        self.model.changeParameter(0,
+                                   self.model.columns.index("CustomOptions"),
+                                   'invalid=invalid')
+        self.mController.return_value.addParameter.assert_not_called()
+
+        # valid custom options
+        self.model.changeParameter(0,
+                                   self.model.columns.index("CustomOptions"),
+                                   "int=4")
+        samples[0]["CustomOptions"].update({"int": "4"})
+        self.assertEqual(self.model.samples, samples)
+        self.mController.return_value.addParameter.assert_called_once()
+        self.mController.reset_mock()
+        self.model.changeParameter(0,
+                                   self.model.columns.index("CustomOptions"),
+                                   "str=test_str,bool=True")
+        samples[0]["CustomOptions"] = {"str": "test_str", "bool": True}
+        self.assertEqual(self.model.samples, samples)
+        self.mController.return_value.addParameter.assert_called()
 
     def test_getProcessingParameters(self):
         params = dict()

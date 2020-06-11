@@ -147,14 +147,14 @@ class DrillTest(unittest.TestCase):
             self.view.table.setItem(0, i, item)
             item = QTableWidgetItem("test")
             self.view.table.setItem(1, i, item)
-        item = QTableWidgetItem("test=test")
-        self.view.table.setItem(0, self.view.table.columnCount() - 1, item)
-        item = QTableWidgetItem("test=test")
-        self.view.table.setItem(1, self.view.table.columnCount() - 1, item)
+        #item = QTableWidgetItem("test=test")
+        #self.view.table.setItem(0, self.view.table.columnCount() - 1, item)
+        #item = QTableWidgetItem("test=test")
+        #self.view.table.setItem(1, self.view.table.columnCount() - 1, item)
         self.assertEqual(len(self.model.samples[0]),
-                         self.view.table.columnCount())
+                         self.view.table.columnCount() - 1)
         self.assertEqual(len(self.model.samples[1]),
-                        self.view.table.columnCount())
+                        self.view.table.columnCount() - 1)
 
         # erase row with icon
         self.select_row(0, Qt.NoModifier)

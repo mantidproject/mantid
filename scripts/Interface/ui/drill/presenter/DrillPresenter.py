@@ -33,7 +33,7 @@ class DrillPresenter:
                 lambda position: self.model.del_row(position)
                 )
         self.view.data_changed.connect(
-                lambda row, column, contents: self.model.change_data(
+                lambda row, column, contents: self.model.changeParameter(
                     row, column, contents)
                 )
         self.view.process.connect(self.process)
