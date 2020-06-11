@@ -400,10 +400,12 @@ void readStartAndEndTime(::NeXus::File &file, API::Run &run) {
   try {
     // Read the start and end time strings
     file.openData("start_time");
-    Types::Core::DateAndTime start(file.getStrData());
+    auto startTime = file.getStrData();
+    Types::Core::DateAndTime start(startTime);
     file.closeData();
     file.openData("end_time");
-    Types::Core::DateAndTime end(file.getStrData());
+    auto endTime = file.getStrData();
+    Types::Core::DateAndTime end(endTime);
     file.closeData();
     run.setStartAndEndTime(start, end);
   } catch (::NeXus::Exception &) {
