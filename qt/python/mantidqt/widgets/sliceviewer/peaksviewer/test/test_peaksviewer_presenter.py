@@ -63,7 +63,9 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         centers = ((1, 2, 3), (4, 5, 3.01))
         slice_info = create_slice_info(centers, slice_value=3, slice_width=5)
         test_model = create_peaks_viewer_model(centers, fg_color="r")
-        painter = MagicMock()
+        painter, axes = MagicMock(), MagicMock()
+        axes.get_xlim.return_value = (-1, 1)
+        painter.axes = axes
         test_model.draw_peaks(slice_info, painter)
         mock_view = MagicMock()
         mock_view.painter = painter
@@ -79,7 +81,10 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         slice_info = create_slice_info(centers, slice_value=3, slice_width=5)
         test_model = create_peaks_viewer_model(centers, fg_color="r")
         # draw some peaks first so we can test clearing them
-        painter = MagicMock()
+        painter, axes = MagicMock(), MagicMock()
+        axes.get_xlim.return_value = (-1, 1)
+        painter.axes = axes
+
         test_model.draw_peaks(slice_info, painter)
         # clear draw calls
         painter.cross.reset_mock()

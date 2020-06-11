@@ -82,7 +82,7 @@ class MplPainterTest(unittest.TestCase):
         axes.add_patch.assert_called_once()
         self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=100, alpha=None)
 
-    def test_viewlimits_returns_xy_limits_so_xy_at_center(self):
+    def test_bbox_returns_ll_and_ur_of_containing_box(self):
         artist, axes, bbox, inv_trans = (MagicMock(), ) * 4
         # 1:1 transformation for simplicity
         inv_trans.transform.side_effect = lambda x: x
@@ -91,10 +91,10 @@ class MplPainterTest(unittest.TestCase):
         bbox.min, bbox.max = (1., 1.5), (3., 3.5)
         painter = MplPainter(axes)
 
-        xlim, ylim = painter.viewlimits(artist)
+        ll, ur = painter.bbox(artist)
 
-        self.assertEqual((0.6, 3.4), xlim)
-        self.assertEqual((1.1, 3.9), ylim)
+        self.assertEqual(bbox.min, ll)
+        self.assertEqual(bbox.max, ur)
 
     def test_painted_viewlimits_returns_limits_for_last_artist(self):
         def create_mock_artist(extents):

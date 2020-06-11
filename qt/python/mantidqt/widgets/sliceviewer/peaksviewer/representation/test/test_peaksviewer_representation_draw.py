@@ -25,6 +25,8 @@ def draw_shape(shape_name, shape_info=None):
     """
     peak_origin, fg_color, bg_color = (1, 3, 5), "r", "g"
     peak_shape, slice_info, painter = (MagicMock(), ) * 3
+    painter.axes = MagicMock()
+    painter.axes.get_xlim.return_value = (-1, 1)
     peak_shape.shapeName.return_value = shape_name
     if shape_info is not None:
         peak_shape.toJSON.return_value = shape_info
