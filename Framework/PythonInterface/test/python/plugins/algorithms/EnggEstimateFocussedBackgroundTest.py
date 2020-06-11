@@ -45,19 +45,19 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
     def runTest(self):
 
         # get bg and subtract
-        ws_bg = EnggEstimateFocussedBackground(InputWorkspace='ws', XWindow=3, NIterations=20)
+        ws_bg = EnggEstimateFocussedBackground(InputWorkspace='ws', NIterations=20, XWindow=3)
         ws_diff = self.ws - ws_bg
 
         # test residuals to ensure background is well approximated
-        self.assertLess(np.mean(ws_diff.readY(0)[self.mask]), 0.04)
-        self.assertLess(np.median(ws_diff.readY(0)[self.mask]), 0.02)
+        self.assertAlmostEqual(np.mean(ws_diff.readY(0)[self.mask]), 0, 0.04)
+        self.assertAlmostEqual(np.median(ws_diff.readY(0)[self.mask]), 0, 0.02)
 
         # test too small a window
         with self.assertRaises(RuntimeError):
-            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', XWindow=0.1, NIterations=20)
+            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', NIterations=20, XWindow=0.1)
         # test too large a window
         with self.assertRaises(RuntimeError):
-            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', XWindow=200, NIterations=20)
+            EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', NIterations=20, XWindow=200)
 
 
 if __name__ == '__main__':

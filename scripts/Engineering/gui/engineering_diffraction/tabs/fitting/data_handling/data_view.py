@@ -39,6 +39,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_remove_selected_clicked(self, slot):
         self.button_removeSelected.clicked.connect(slot)
 
+    def set_on_plotBG_clicked(self, slot):
+        self.button_plotBG.clicked.connect(slot)
+
     def set_on_table_cell_changed(self, slot):
         self.table_selection.cellChanged.connect(slot)  # Row, Col
 
@@ -49,7 +52,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank, checked):
+    def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
 
@@ -69,6 +72,35 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         else:
             check_box.setCheckState(QtCore.Qt.Unchecked)
 
+        bgsub_check_box = QtWidgets.QTableWidgetItem()
+        bgsub_check_box.setFlags(bgsub_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        bgsub_check_box.setToolTip('Estimate the background using iterative low-pass (smoothing) filter algorithm')
+        self.table_selection.setItem(row_no, 3, bgsub_check_box)
+        if bgsub:
+            bgsub_check_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            bgsub_check_box.setCheckState(QtCore.Qt.Unchecked)
+
+        niter_item = QtWidgets.QTableWidgetItem(str(niter))
+        niter_item.setFlags(niter_item.flags() | QtCore.Qt.ItemIsEditable)
+        niter_item.setToolTip('The number of iterations in the background estimation')
+        self.table_selection.setItem(row_no, 4, niter_item)
+
+        xwindow_item = QtWidgets.QTableWidgetItem(str(xwindow))
+        xwindow_item.setFlags(xwindow_item.flags() | QtCore.Qt.ItemIsEditable)
+        xwindow_item.setToolTip('The width of the convolution window used for finding the background (in x-axis units)')
+        self.table_selection.setItem(row_no, 5, xwindow_item)
+
+        SG_check_box = QtWidgets.QTableWidgetItem()
+        SG_check_box.setFlags(SG_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        SG_check_box.setToolTip(
+            'Apply linear Savitzky–Golay filter before first iteration of background subtraction (recommended)')
+        self.table_selection.setItem(row_no, 6, SG_check_box)
+        if SG:
+            SG_check_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            SG_check_box.setCheckState(QtCore.Qt.Unchecked)
+
     def remove_table_row(self, row_no):
         self.table_selection.removeRow(row_no)
 
@@ -80,6 +112,13 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         for row in reversed(sorted(selected)):
             self.remove_table_row(row)
         return selected
+
+    def toggle_checkbox(self,row,col):
+        checkbox = self.get_table_item(row, col)
+        checkbox.setCheckState(QtCore.Qt.Unchecked)
+        # get checkbox again as sometimes overwritten
+        checkbox = self.get_table_item(row, col)
+        checkbox.setCheckState(QtCore.Qt.Checked)
 
     # =================
     # Component Getters
@@ -102,6 +141,13 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def get_item_checked(self, row, col):
         return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
+
+    def get_background_params(self, row):
+        isBGsub = self.get_item_checked(row, 3)
+        niter = int(self.get_table_item(row, 4).text())
+        xwindow = float(self.get_table_item(row, 5).text())
+        doSGfilter = self.get_item_checked(row, 6)
+        return [isBGsub, niter, xwindow, doSGfilter]
 
     # =================
     # State Getters

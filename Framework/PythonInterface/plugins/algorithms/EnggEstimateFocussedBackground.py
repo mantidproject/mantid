@@ -33,15 +33,6 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
                              "InputWorkspace)")
 
         self.declareProperty(
-            name="XWindow",
-            defaultValue=1000.0,
-            direction=Direction.Input,
-            validator=FloatBoundedValidator(lower=0.0),
-            doc="Extent of the convolution window in the x-axis for all spectra. A reasonable value is about 4-8 times"
-                " the FWHM of a typical peak/feature to be suppressed (default is reasonable for TOF spectra). This is "
-                "converted to an odd number of points using the median bin width of each spectra.")
-
-        self.declareProperty(
             name="NIterations",
             defaultValue=40,
             direction=Direction.Input,
@@ -49,6 +40,15 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
             doc="Number of iterations of the smoothing procedure to perform. Too few iterations and the background will"
                 " be enhanced in the peak regions. Too many iterations and the background will be unrealistically"
                 " low and not catch the rising edge at low TOF/d-spacing (typical values are in range 20-100).")
+
+        self.declareProperty(
+            name="XWindow",
+            defaultValue=1000.0,
+            direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="Extent of the convolution window in the x-axis for all spectra. A reasonable value is about 4-8 times"
+                " the FWHM of a typical peak/feature to be suppressed (default is reasonable for TOF spectra). This is "
+                "converted to an odd number of points using the median bin width of each spectra.")
 
         self.declareProperty('ApplyFilterSG', True, direction=Direction.Input,
                              doc='Apply a Savitzky–Golay filter with a linear polynomial over the same XWindow before'
@@ -66,8 +66,8 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
 
         # get input
         inws = self.getProperty("InputWorkspace").value
-        xwindow = self.getProperty("XWindow").value
         niter = self.getProperty("NIterations").value
+        xwindow = self.getProperty("XWindow").value
         doSGfilter = self.getProperty('ApplyFilterSG').value
 
         # make output workspace

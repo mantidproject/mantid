@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Engineering.gui.engineering_diffraction.tabs.common import create_error_message
-from mantid.simpleapi import logger
+from mantid.simpleapi import logger, Plus, Minus
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
-
+from matplotlib.pyplot import subplots
 
 class FittingDataPresenter(object):
     def __init__(self, model, view):
@@ -18,13 +18,16 @@ class FittingDataPresenter(object):
 
         self.row_numbers = TwoWayRowDict()  # {ws_name: table_row} and {table_row: ws_name}
         self.plotted = set()  # List of plotted workspace names
+        self.bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
         self.view.set_enable_button_connection(self._enable_load_button)
         self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
+        self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
+        # need something here
 
         # Observable Setup
         self.plot_added_notifier = GenericObservable()
@@ -74,7 +77,7 @@ class FittingDataPresenter(object):
         Load one to many files into mantid that are tracked by the interface.
         :param filenames: Comma separated list of filenames to load
         """
-        self.worker = AsyncTask(self.model.load_files, (filenames, ),
+        self.worker = AsyncTask(self.model.load_files, (filenames,),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._emit_enable_button_signal,
                                 success_cb=self._on_worker_success)
@@ -105,7 +108,12 @@ class FittingDataPresenter(object):
                 if bank == 0:
                     bank = "cropped"
                 checked = name in self.plotted
-                self._add_row_to_table(name, i, run_no, bank, checked)
+                if name in self.bg_params:
+                    print(self.bg_params[name])
+                    self._add_row_to_table(name, i, run_no, bank, checked, *self.bg_params[name])
+                else:
+                    print('Not bg params')
+                    self._add_row_to_table(name, i, run_no, bank, checked)
             except RuntimeError:
                 self._add_row_to_table(name, i)
             self._handle_table_cell_changed(i, 2)
@@ -119,20 +127,71 @@ class FittingDataPresenter(object):
             self.plotted.discard(ws_name)
         self._repopulate_table()
 
+    def _plotBG(self):
+        # make external figure
+        row_numbers = self.view.get_selected_rows()
+        for row in row_numbers:
+            # check bg exists - or make bg?
+            ws_name = ws_name = self.row_numbers[row]
+            print('DEBUG PLOT', row, ws_name)
+            ws = self.model.get_loaded_workspaces()[ws_name]
+            ws_bg = self.model.get_background_workspaces()[ws_name]
+            if ws_bg and self.view.get_item_checked(row, 3):
+                fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
+                                   subplot_kw={'projection': 'mantid'})
+                # background has been subtracted from workspace
+                tmp = Plus(LHSWorkspace=ws_name, RHSWorkspace=ws_bg, StoreInADS=False)
+                ax[0].plot(tmp,'x')
+                ax[0].plot(ws_bg,'-r')
+                ax[1].plot(ws,'x')
+                fig.show()
+
     def _remove_all_tracked_workspaces(self):
         self.clear_workspaces()
         self._remove_all_table_rows()
 
     def _handle_table_cell_changed(self, row, col):
-        if col == 2 and row in self.row_numbers:  # Is from the plot check column
-            ws = self.model.get_loaded_workspaces()[self.row_numbers[row]]
+        if row in self.row_numbers:
             ws_name = self.row_numbers[row]
-            if self.view.get_item_checked(row, col):  # Plot Box is checked
-                self.plot_added_notifier.notify_subscribers(ws)
-                self.plotted.add(ws_name)
-            else:  # Plot box is unchecked
-                self.plot_removed_notifier.notify_subscribers(ws)
-                self.plotted.discard(ws_name)
+            if col == 2:
+                # Plot check box
+                ws = self.model.get_loaded_workspaces()[ws_name]
+                if self.view.get_item_checked(row, col):  # Plot Box is checked
+                    self.plot_added_notifier.notify_subscribers(ws)
+                    self.plotted.add(ws_name)
+                else:  # Plot box is unchecked
+                    self.plot_removed_notifier.notify_subscribers(ws)
+                    self.plotted.discard(ws_name)
+            elif col == 3:
+                # subtract bg
+                if self.view.get_item_checked(row, col):
+                    # subtract bg box checked
+                    self._do_background_subtraction(row)
+                elif self.model.get_background_workspaces()[ws_name]:
+                    # box unchecked and bg exists:
+                    self.bg_params[ws_name][0] = False
+                    Plus(LHSWorkspace=ws_name, RHSWorkspace=self.model.get_background_workspaces()[ws_name],
+                         OutputWorkspace=ws_name)
+            elif col > 3:
+                if self.view.get_item_checked(row, 3):
+                    # bg params changed - revaluate background
+                    self._do_background_subtraction(row)
+
+    def _do_background_subtraction(self, row):
+        ws_name = self.row_numbers[row]
+        ws = self.model.get_loaded_workspaces()[ws_name]
+        ws_bg = self.model.get_background_workspaces()[ws_name]
+        bg_params = self.view.get_background_params(row)
+        bg_changed = False
+        if ws_bg and bg_params != self.bg_params[ws_name]:
+            # add bg back on to data
+            Plus(LHSWorkspace=ws, RHSWorkspace=ws_bg, OutputWorkspace=ws_name)
+            bg_changed = True
+        if bg_changed or not ws_bg:
+            # revaluate background (or evaluate for first time)
+            self.bg_params[ws_name] = bg_params
+            ws_bg = self.model.estimate_background(ws_name, *self.bg_params[ws_name][1:])
+        Minus(LHSWorkspace=ws, RHSWorkspace=ws_bg, OutputWorkspace=ws_name)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
@@ -158,21 +217,22 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False):
+    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=100,
+                          xwindow=1000, SG=True):
         words = ws_name.split("_")
         if run_no is not None and bank is not None:
-            self.view.add_table_row(run_no, bank, checked)
+            self.view.add_table_row(run_no, bank, checked, bgsub, niter, xwindow, SG)
             self.row_numbers[ws_name] = row
         elif len(words) == 4 and words[2] == "bank":
             logger.notice("No sample logs present, determining information from workspace name.")
-            self.view.add_table_row(words[1], words[3], checked)
+            self.view.add_table_row(words[1], words[3], checked, bgsub, niter, xwindow, SG)
             self.row_numbers[ws_name] = row
         else:
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
                 "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
             )
-            self.view.add_table_row(ws_name, "N/A", checked)
+            self.view.add_table_row(ws_name, "N/A", checked, bgsub, niter, xwindow, SG)
             self.row_numbers[ws_name] = row
 
     def _remove_table_row(self, row_no):
@@ -189,6 +249,7 @@ class TwoWayRowDict(dict):
     """
     Two way dictionary used to map rows to workspaces and vice versa.
     """
+
     def __setitem__(self, key, value):
         if key in self:
             del self[key]

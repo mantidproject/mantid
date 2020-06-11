@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground
 
 
 class FittingDataModel(object):
     def __init__(self):
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
+        self._background_workspaces = {}
         self._last_added = []  # List of workspace names loaded in the last load action.
 
     def load_files(self, filenames_string):
@@ -23,6 +24,7 @@ class FittingDataModel(object):
                 ws = Load(filename, OutputWorkspace=ws_name)
                 if ws.getNumberHistograms() == 1:
                     self._loaded_workspaces[ws_name] = ws
+                    self._background_workspaces[ws_name] = None
                     self._last_added.append(ws_name)
                 else:
                     logger.warning(
@@ -35,6 +37,15 @@ class FittingDataModel(object):
 
     def get_loaded_workspaces(self):
         return self._loaded_workspaces
+
+    def get_background_workspaces(self):
+        return self._background_workspaces
+
+    def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
+        ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name+"_bg",
+                                               NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
+        self._background_workspaces[ws_name] = ws_bg
+        return ws_bg
 
     def get_last_added(self):
         return self._last_added
