@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_ALFCUSTOMINSTRUMENTPRESENTERTEST_H_
-#define MANTIDQT_ALFCUSTOMINSTRUMENTPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -48,9 +47,9 @@ public:
   void setUp() override {
     m_model = new NiceMock<MockALFCustomInstrumentModel>();
     m_view = new NiceMock<MockALFCustomInstrumentView>("ALF");
-  m_paneView = new NiceMock<paneViewTest>();
-  m_paneModel = new NiceMock<paneModelTest>();
-  m_pane = new NiceMock<paneTest>(m_paneView, m_paneModel);
+  m_paneView = new NiceMock<MockPlotFitAnalysisPaneView>();
+  m_paneModel = new NiceMock<MockPlotFitAnalysisPaneModel>();
+  m_pane = new NiceMock<MockPlotFitAnalysisPanePresenter>(m_paneView, m_paneModel);
   m_presenter = new ALFCustomInstrumentPresenter(m_view, m_model,m_pane);
   }
 
@@ -154,9 +153,9 @@ void test_averageTube(){
 private:
 NiceMock<MockALFCustomInstrumentModel> *m_model;
   NiceMock<MockALFCustomInstrumentView> *m_view;
-  NiceMock<paneViewTest> *m_paneView;
-  NiceMock<paneModelTest> *m_paneModel;
-  NiceMock<paneTest> *m_pane;
+  NiceMock<MockPlotFitAnalysisPaneView> *m_paneView;
+  NiceMock<MockPlotFitAnalysisPaneModel> *m_paneModel;
+  NiceMock<MockPlotFitAnalysisPanePresenter> *m_pane;
   ALFCustomInstrumentPresenter *m_presenter;
 };
 
