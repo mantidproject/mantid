@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "ALFMock.h"
+#include "ALFCustomInstrumentMocks.h"
 #include "ALFCustomInstrumentModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -31,19 +31,6 @@ namespace{
   const std::string notALFFile = "ZOOM00006113.nxs";
 }
 
-class partALFModelTest : public ALFCustomInstrumentModel{
-public:
-    partALFModelTest():m_loadCount(0),m_transformCount(0){};
-    virtual ~partALFModelTest(){};
-    void loadAlg(const std::string &name) override final {(void) name;m_loadCount+=1;};
-    void transformData() override final {m_transformCount+=1;};
-    int getLoadCount(){return m_loadCount;};
-    int getTransformCount(){return m_transformCount;};
-private:
-    int m_loadCount;
-    int m_transformCount;
-};
-
 class ALFCustomInstrumentModelTest : public CxxTest::TestSuite {
 public:
   ALFCustomInstrumentModelTest() { FrameworkManager::Instance(); }
@@ -52,8 +39,7 @@ public:
 
   static void destroySuite(ALFCustomInstrumentModelTest *suite) { delete suite; }
 
-  void setUp() override {
-  m_model = new partALFModelTest();
+  void setUp() override { m_model = new PartMockALFCustomInstrumentModel();
   }
 
   void tearDown() override {
@@ -62,7 +48,7 @@ public:
   }
 
   void test_loadData() {
-    auto data = mockData("ALF_tmp","ALF",6113,true);
+    auto data = mockALFData("ALF_tmp","ALF",6113,true);
     TS_ASSERT_EQUALS(m_model->getLoadCount(),0); 
 
     std::pair<int, std::string> loadResult = m_model->loadData(notALFFile);
@@ -73,7 +59,7 @@ public:
   }
 
   void test_loadDataNotALF(){
-   auto data = mockData("ALF_tmp","EMU",6113,true);
+    auto data = mockALFData("ALF_tmp", "EMU", 6113, true);
    TS_ASSERT_EQUALS(m_model->getLoadCount(),0); 
 
     std::pair<int, std::string> loadResult = m_model->loadData(notALFFile);
@@ -84,7 +70,7 @@ public:
   }
 
   void test_loadDataDSpace(){
-    auto data = mockData("ALF_tmp","ALF",6113,false);
+    auto data = mockALFData("ALF_tmp", "ALF", 6113, false);
     TS_ASSERT_EQUALS(m_model->getLoadCount(),0); 
 
     std::pair<int, std::string> loadResult = m_model->loadData(notALFFile);
@@ -95,7 +81,7 @@ public:
   }
 
   void test_isDataValid(){  
-    auto data = mockData("ALF_tmp","ALF",6113,true);
+    auto data = mockALFData("ALF_tmp", "ALF", 6113, true);
     std::map<std::string, bool> isDataValid = m_model->isDataValid();
 
     TS_ASSERT(isDataValid["IsValidInstrument"])
@@ -104,14 +90,14 @@ public:
 }
 
   void test_isDataValidNotALF(){
-    auto data = mockData("ALF_tmp","EMU",6113,true);
+  auto data = mockALFData("ALF_tmp", "EMU", 6113, true);
     std::map<std::string, bool> isDataValid = m_model->isDataValid();
     TS_ASSERT(!isDataValid["IsValidInstrument"])
     TS_ASSERT(!isDataValid["IsItDSpace"])
   }
 
   void test_isDataValidDSpace(){
-    auto data = mockData("ALF_tmp","ALF",6113,false);
+    auto data = mockALFData("ALF_tmp", "ALF", 6113, false);
     std::map<std::string, bool> isDataValid = m_model->isDataValid();
 
 
@@ -124,7 +110,7 @@ public:
   }
 
   void test_storeSingleTube(){
-    auto data = mockData("CURVES","ALF",6113,false);
+    auto data = mockALFData("CURVES", "ALF", 6113, false);
 
 
     m_model->storeSingleTube("test");
@@ -140,7 +126,7 @@ public:
  
   void test_averageTube(){
     int run = 6113;
-    auto data = mockData("CURVES","ALF",run,false);
+    auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
@@ -150,8 +136,7 @@ public:
     TS_ASSERT_EQUALS(tmpWS->readY(0)[9],0.2);   
  
     // create another ws to add
-    std::set<long int> masks;
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 1.1, 2.2, 0.01,0.3,masks);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 1.1, 2.2, 0.01,0.3);
     boost::shared_ptr<Instrument> inst = boost::make_shared<Instrument>();
     inst->setName("ALF");
     ws->mutableRun().addProperty("run_number", run,true);
@@ -174,7 +159,7 @@ public:
     TS_ASSERT_DELTA(outputWS->readY(0)[9], 1.2, 0.01);   
 
     // create another ws to add
-    auto ws3 = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 1.1, 3.2, 0.01,0.3,masks);
+    auto ws3 = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 1.1, 3.2, 0.01,0.3);
     inst = boost::make_shared<Instrument>();
     inst->setName("ALF");
     ws3->mutableRun().addProperty("run_number", run,true);
@@ -205,7 +190,7 @@ public:
    // not extracted -> false
    TS_ASSERT(!m_model->hasTubeBeenExtracted(name));
    // create data to store
-   auto data = mockData("CURVES","ALF",6113,false);
+   auto data = mockALFData("CURVES", "ALF", 6113, false);
    m_model->storeSingleTube(name);
    // stored data -> true
    TS_ASSERT(m_model->hasTubeBeenExtracted(name));
@@ -236,7 +221,7 @@ public:
  void test_averageTubeCondition(){
    std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",true},{"isTube", true}};
     int run = 6113;
-    auto data = mockData("CURVES","ALF",run,false);
+   auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
@@ -246,7 +231,7 @@ public:
  void test_averageTubeConditionNotTube(){
     std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",true},{"isTube", false}};
     int run = 6113;
-    auto data = mockData("CURVES","ALF",run,false);
+    auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
@@ -257,7 +242,7 @@ public:
  void test_averageTubeConditionNoPlot(){
     std::map<std::string, bool> conditions = { {"plotStored", false}, {"hasCurve",false},{"isTube", true}};
     int run = 6113;
-    auto data = mockData("CURVES","ALF",run,false);
+    auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
@@ -269,7 +254,7 @@ public:
      std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",true},{"isTube", true}};
     int run = 6113;
     // the extraced ws will exist but average will be 0 -> change runs
-    auto data = mockData("extractedTubes_ALF6113","ALF",run,false);
+    auto data = mockALFData("extractedTubes_ALF6113", "ALF", run, false);
     m_model->setCurrentRun(run);
 
     TS_ASSERT(!m_model->averageTubeCondition(conditions));
@@ -278,7 +263,7 @@ public:
  void test_averageTubeConditionNoWSToAverage(){
      std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",true},{"isTube", true}};
     int run = 6113;
-    auto data = mockData("CURVES","ALF",run,false);
+     auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
@@ -297,7 +282,7 @@ public:
 }
 
 private:
-  partALFModelTest *m_model;
+PartMockALFCustomInstrumentModel *m_model;
 };
 
 #endif /* MANTIDQT_ALFCUSTOMINSTRUMENTMODELTEST_H_ */

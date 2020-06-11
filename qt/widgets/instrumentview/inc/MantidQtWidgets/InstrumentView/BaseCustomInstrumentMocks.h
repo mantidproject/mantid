@@ -14,11 +14,6 @@
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-//#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-//#include "MantidAPI/NumericAxis.h"
-
-//#include "MantidAPI/FrameworkManager.h"
-//#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <string>
@@ -29,65 +24,12 @@ using Mantid::Geometry::Instrument;
 using namespace MantidQt;
 using namespace MantidQt::MantidWidgets;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW baseTest :  public BaseCustomInstrumentPresenter{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockBaseCustomInstrumentView
+    : public MantidQt::MantidWidgets::IBaseCustomInstrumentView {
 public:
-    explicit baseTest(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model, IPlotFitAnalysisPanePresenter *analysis):BaseCustomInstrumentPresenter(view, model, analysis), m_initInstrument(0), m_load(0), m_layout(0),m_sideEffects(0),m_mockInitInstrument(false), m_mockLoad(false), m_mockLayout(false), m_mockSideEffects(false){}; 
-    ~baseTest() {}; 
-
-// turn mocks on
-    void setMockInitInstrument(){m_mockInitInstrument = true;};
-    void setMockLoad(){m_mockLoad = true;};
-    void setMockLayout(){m_mockLayout = true;};
-    void setMockSideEffects(){m_mockSideEffects = true;};
-
-    void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp=nullptr) override {
-    if(m_mockInitInstrument){
-       m_initInstrument+=1;
-}else{
-BaseCustomInstrumentPresenter::initInstrument(setUp);};}
-    void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup=nullptr) override final{
-    if(m_mockLayout == true){ m_layout+=1;}
-    else{ BaseCustomInstrumentPresenter::initLayout(setup);}
-    };
-    void loadAndAnalysis(const std::string &run) override {
-    if(m_mockLoad){m_load+=1;}
-   else{BaseCustomInstrumentPresenter::loadAndAnalysis(run);}};
-
-    void loadSideEffects(){
-    if(m_mockSideEffects){m_sideEffects+=1;}else{
-BaseCustomInstrumentPresenter::loadSideEffects();
-    }}
-
-    // get methods for mocks
-    int getInitInstrumentCount(){return m_initInstrument;};
-    int getLayoutCount(){return m_layout;};
-    int getLoadCount(){return m_load;};
-    int getLoadSideEffectsCount(){return m_sideEffects;};
-
-    // allow tests to get at protected/private functions
-    void setUpInstrumentAnalysisSplitter() override {BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter();};
-    void loadRunNumber() override {BaseCustomInstrumentPresenter::loadRunNumber();};
-   std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument() override{return  BaseCustomInstrumentPresenter::setupInstrument();};
-
-    VoidObserver *loadObserver(){return m_loadRunObserver;};
-    void setCurrent(int run, std::string file){m_currentRun = run; m_currentFile=file;};
-    
-private:
-int m_initInstrument;
-int m_load;
-int m_layout;
-int m_sideEffects;
-
-bool m_mockInitInstrument;
-bool m_mockLoad;
-bool m_mockLayout;
-bool m_mockSideEffects;
-};
-
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW baseViewTest : public MantidQt::MantidWidgets::IBaseCustomInstrumentView{
-public:
-   explicit baseViewTest(const std::string &instrument, QWidget *parent=nullptr){};
-   ~baseViewTest(){};
+  explicit MockBaseCustomInstrumentView(const std::string &instrument,
+                                        QWidget *parent = nullptr){};
+  ~MockBaseCustomInstrumentView(){};
 
   MOCK_METHOD0(getFile, std::string());
   MOCK_METHOD1(setRunQuietly, void(const std::string &runNumber));
@@ -106,10 +48,11 @@ public:
   MOCK_METHOD0(getQWidget, QWidget*());
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW baseModelTest : public MantidQt::MantidWidgets::IBaseCustomInstrumentModel{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockBaseCustomInstrumentModel
+    : public MantidQt::MantidWidgets::IBaseCustomInstrumentModel {
 public:
-  explicit baseModelTest(){};
-  ~baseModelTest(){};
+  explicit MockBaseCustomInstrumentModel(){};
+  ~MockBaseCustomInstrumentModel(){};
 
   MOCK_METHOD0(loadEmptyInstrument, void());
   MOCK_METHOD1(loadData, std::pair<int, std::string>(const std::string &name));
@@ -125,3 +68,91 @@ public:
   MOCK_METHOD0(getWSName, const std::string());
 };
 
+// Allows us to turn on and off mocks to functions from the presenter
+// do not repeat testing
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PartMockBaseCustomInstrumentPresenter
+    : public BaseCustomInstrumentPresenter {
+public:
+  explicit PartMockBaseCustomInstrumentPresenter(
+      IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
+      IPlotFitAnalysisPanePresenter *analysis)
+      : BaseCustomInstrumentPresenter(view, model, analysis),
+        m_initInstrument(0), m_load(0), m_layout(0), m_sideEffects(0),
+        m_mockInitInstrument(false), m_mockLoad(false), m_mockLayout(false),
+        m_mockSideEffects(false){};
+  ~PartMockBaseCustomInstrumentPresenter(){};
+
+  // turn mocks on
+  void setMockInitInstrument() { m_mockInitInstrument = true; };
+  void setMockLoad() { m_mockLoad = true; };
+  void setMockLayout() { m_mockLayout = true; };
+  void setMockSideEffects() { m_mockSideEffects = true; };
+  // override functions so we can call mocked versions
+  void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions>
+                          *setUp = nullptr) override {
+    if (m_mockInitInstrument) {
+      m_initInstrument += 1;
+    } else {
+      BaseCustomInstrumentPresenter::initInstrument(setUp);
+    };
+  }
+
+  void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup =
+                      nullptr) override final {
+    if (m_mockLayout == true) {
+      m_layout += 1;
+    } else {
+      BaseCustomInstrumentPresenter::initLayout(setup);
+    }
+  };
+
+  void loadAndAnalysis(const std::string &run) override {
+    if (m_mockLoad) {
+      m_load += 1;
+    } else {
+      BaseCustomInstrumentPresenter::loadAndAnalysis(run);
+    }
+  };
+
+  void loadSideEffects() {
+    if (m_mockSideEffects) {
+      m_sideEffects += 1;
+    } else {
+      BaseCustomInstrumentPresenter::loadSideEffects();
+    }
+  }
+
+  // get methods for mock results
+  int getInitInstrumentCount() { return m_initInstrument; };
+  int getLayoutCount() { return m_layout; };
+  int getLoadCount() { return m_load; };
+  int getLoadSideEffectsCount() { return m_sideEffects; };
+
+  // allow tests to get at protected/private functions/members
+  void setUpInstrumentAnalysisSplitter() override {
+    BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter();
+  };
+  void loadRunNumber() override {
+    BaseCustomInstrumentPresenter::loadRunNumber();
+  };
+  std::pair<instrumentSetUp, instrumentObserverOptions> *
+  setupInstrument() override {
+    return BaseCustomInstrumentPresenter::setupInstrument();
+  };
+
+  VoidObserver *loadObserver() { return m_loadRunObserver; };
+  void setCurrent(int run, std::string file) {
+    m_currentRun = run;
+    m_currentFile = file;
+  };
+
+private:
+  int m_initInstrument;
+  int m_load;
+  int m_layout;
+  int m_sideEffects;
+  bool m_mockInitInstrument;
+  bool m_mockLoad;
+  bool m_mockLayout;
+  bool m_mockSideEffects;
+};

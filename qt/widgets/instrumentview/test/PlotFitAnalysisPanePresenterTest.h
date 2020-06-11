@@ -22,7 +22,7 @@
 
 #include <string>
 #include <utility>
-#include<iostream>
+
 using namespace Mantid::API;
 using namespace testing;
 using Mantid::Geometry::Instrument;
@@ -30,7 +30,6 @@ using namespace MantidQt::MantidWidgets;
 
 class PlotFitAnalysisPanePresenterTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
   PlotFitAnalysisPanePresenterTest() { FrameworkManager::Instance(); }
 
   static PlotFitAnalysisPanePresenterTest *createSuite() { return new PlotFitAnalysisPanePresenterTest(); }
@@ -38,8 +37,8 @@ public:
   static void destroySuite(PlotFitAnalysisPanePresenterTest *suite) { delete suite; }
 
   void setUp() override {
-  m_view = new NiceMock<paneViewTest>();
-  m_model = new paneModelTest();
+    m_view = new NiceMock<MockPlotFitAnalysisPaneView>();
+    m_model = new MockPlotFitAnalysisPaneModel();
   m_presenter = new PlotFitAnalysisPanePresenter(m_view, m_model);
   }
 
@@ -97,8 +96,8 @@ void test_addSpectrum(){
 }
 
 private:
-  NiceMock<paneViewTest> *m_view;
-  paneModelTest *m_model;
+NiceMock<MockPlotFitAnalysisPaneView> *m_view;
+  MockPlotFitAnalysisPaneModel *m_model;
   PlotFitAnalysisPanePresenter *m_presenter;
 };
 

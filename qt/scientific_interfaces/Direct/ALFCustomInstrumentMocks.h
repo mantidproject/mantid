@@ -31,9 +31,9 @@ using namespace MantidQt::CustomInterfaces;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;
 
-class mockData{
+class mockALFData{
 public:
-   mockData(const std::string &name, const std::string &instName, const int &run, const bool TOF):m_name(name){
+   mockALFData(const std::string &name, const std::string &instName, const int &run, const bool TOF):m_name(name){
      std::set<long int> masks;
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, 0.2, 0.01,0.3,masks);
     //set instrument
@@ -49,7 +49,7 @@ public:
    AnalysisDataService::Instance().addOrReplace(m_name, ws);
  
 }
-  ~mockData(){ 
+  ~mockALFData(){ 
     AnalysisDataService::Instance().remove(m_name);
 }
 private:
@@ -57,11 +57,11 @@ private:
 };
 
 
-
-class FullALFModelTest : public IALFCustomInstrumentModel{
+class MockALFCustomInstrumentModel : public IALFCustomInstrumentModel {
 public:
-    FullALFModelTest(){};
-    ~FullALFModelTest(){};
+    MockALFCustomInstrumentModel(){};
+    ~MockALFCustomInstrumentModel(){};
+
     MOCK_METHOD1(loadAlg, void(const std::string &name));
     MOCK_METHOD0(transformData, void());
     MOCK_METHOD0(isDataValid, std::map<std::string, bool>());
@@ -73,7 +73,6 @@ public:
     MOCK_METHOD0(extractSingleTube, void());
     MOCK_METHOD0(WSName, std::string());
     MOCK_METHOD0(getDefaultFunction, Mantid::API::CompositeFunction_sptr());
-
     MOCK_METHOD0(loadEmptyInstrument, void());
     MOCK_METHOD1(loadData, std::pair<int, std::string>(const std::string &name));
     MOCK_METHOD1(setCurrentRun, void(int &run));
@@ -88,16 +87,16 @@ public:
     MOCK_METHOD0(getWSName, const std::string());
 };
 
-class ALFViewTest : public IALFCustomInstrumentView{//, public IBaseCustomInstrumentView{
+class MockALFCustomInstrumentView : public IALFCustomInstrumentView {
 public:
-    explicit ALFViewTest(const std::string &instrument, QWidget *parent = nullptr) {};
-    ~ALFViewTest(){};
+    explicit MockALFCustomInstrumentView(const std::string &instrument,
+                                       QWidget *parent = nullptr){};
+    ~MockALFCustomInstrumentView(){};
 
     MOCK_METHOD1(observeExtractSingleTube, void(Observer *listner));
     MOCK_METHOD1(observeAverageTube, void(Observer *listner));
     MOCK_METHOD1(addSpectrum, void(std::string name));
     MOCK_METHOD1(setupAnalysisPane, void(IPlotFitAnalysisPaneView *analysis));
-
     MOCK_METHOD0(getFile, std::string());
     MOCK_METHOD1(setRunQuietly, void(const std::string &runNumber));
     MOCK_METHOD1(observeLoadRun, void( Observer *listener));
@@ -111,3 +110,20 @@ public:
    
 };
 
+// want a partial mock of the model - removes the functions that just run algs.
+class PartMockALFCustomInstrumentModel : public ALFCustomInstrumentModel {
+public:
+  PartMockALFCustomInstrumentModel() : m_loadCount(0), m_transformCount(0){};
+  virtual ~PartMockALFCustomInstrumentModel(){};
+  void loadAlg(const std::string &name) override final {
+    (void)name;
+    m_loadCount += 1;
+  };
+  void transformData() override final { m_transformCount += 1; };
+  int getLoadCount() { return m_loadCount; };
+  int getTransformCount() { return m_transformCount; };
+
+private:
+  int m_loadCount;
+  int m_transformCount;
+};

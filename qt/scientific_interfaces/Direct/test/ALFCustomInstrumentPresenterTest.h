@@ -13,7 +13,7 @@
 #include "ALFCustomInstrumentModel.h"
 #include "ALFCustomInstrumentView.h"
 #include "ALFCustomInstrumentPresenter.h"
-#include "ALFMock.h"
+#include "ALFCustomInstrumentMocks.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
@@ -39,7 +39,6 @@ using namespace MantidQt::MantidWidgets;
 
 class ALFCustomInstrumentPresenterTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
   ALFCustomInstrumentPresenterTest() { FrameworkManager::Instance(); }
 
   static ALFCustomInstrumentPresenterTest *createSuite() { return new ALFCustomInstrumentPresenterTest(); }
@@ -47,10 +46,8 @@ public:
   static void destroySuite(ALFCustomInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    //m_workspace = createWorkspace(4, 3);
-    //m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-  m_model = new NiceMock<FullALFModelTest>();
-  m_view = new NiceMock<ALFViewTest>("ALF");
+    m_model = new NiceMock<MockALFCustomInstrumentModel>();
+    m_view = new NiceMock<MockALFCustomInstrumentView>("ALF");
   m_paneView = new NiceMock<paneViewTest>();
   m_paneModel = new NiceMock<paneModelTest>();
   m_pane = new NiceMock<paneTest>(m_paneView, m_paneModel);
@@ -59,16 +56,16 @@ public:
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
-    m_model->~FullALFModelTest();
+    delete m_model;
     delete m_view;
     delete m_paneView;
     m_paneModel = NULL;
     delete m_presenter;
-    m_pane->~paneTest();
+    delete m_pane;
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    return; //SpectraLegacy const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    return; 
   }
   void test_setUpInstrumentAnalysisSplitter(){
   CompositeFunction_sptr composite =
@@ -112,7 +109,7 @@ void test_setupALFInstrument(){
 // cannot compare std::function directly
 // check behaviour instead
    int run = 6113;
-   auto data = mockData("CURVES","ALF",run,false);
+   auto data = mockALFData("CURVES","ALF",run,false);
    m_model->setCurrentRun(run);
  
    std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",true},{"isTube", true}};
@@ -155,8 +152,8 @@ void test_averageTube(){
 }
 
 private:
-  NiceMock<FullALFModelTest> *m_model;
-  NiceMock<ALFViewTest> *m_view;
+NiceMock<MockALFCustomInstrumentModel> *m_model;
+  NiceMock<MockALFCustomInstrumentView> *m_view;
   NiceMock<paneViewTest> *m_paneView;
   NiceMock<paneModelTest> *m_paneModel;
   NiceMock<paneTest> *m_pane;

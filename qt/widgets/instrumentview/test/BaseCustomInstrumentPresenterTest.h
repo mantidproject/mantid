@@ -38,12 +38,14 @@ public:
   static void destroySuite(BaseCustomInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-  m_model = new NiceMock<baseModelTest>();
-  m_view = new NiceMock<baseViewTest>("EMU");
-  m_paneView = new NiceMock<paneViewTest>();
-  m_paneModel = new NiceMock<paneModelTest>();
-  m_pane = new NiceMock<paneTest>(m_paneView, m_paneModel);
-  m_presenter = new baseTest(m_view, m_model, m_pane);
+    m_model = new NiceMock<MockBaseCustomInstrumentModel>();
+    m_view = new NiceMock<MockBaseCustomInstrumentView>("EMU");
+    m_paneView = new NiceMock<MockPlotFitAnalysisPaneView>();
+    m_paneModel = new NiceMock<MockPlotFitAnalysisPaneModel>();
+    m_pane =
+        new NiceMock<MockPlotFitAnalysisPanePresenter>(m_paneView, m_paneModel);
+  m_presenter =
+      new PartMockBaseCustomInstrumentPresenter(m_view, m_model, m_pane);
   }
 
   void tearDown() override {
@@ -53,7 +55,7 @@ public:
     delete m_paneView;
     m_paneModel = NULL;
     delete m_presenter;
-    m_pane->~paneTest();
+    delete m_pane;
   }
 
 
@@ -158,11 +160,11 @@ return;
 }
 
 private:
-  NiceMock<baseViewTest> *m_view;
-  NiceMock<baseModelTest> *m_model;
-  NiceMock<paneModelTest> *m_paneModel;
-  NiceMock<paneViewTest> *m_paneView;
-  NiceMock<paneTest> *m_pane;
-  baseTest *m_presenter;
+  NiceMock<MockBaseCustomInstrumentView> *m_view;
+  NiceMock<MockBaseCustomInstrumentModel> *m_model;
+  NiceMock<MockPlotFitAnalysisPaneModel> *m_paneModel;
+  NiceMock<MockPlotFitAnalysisPaneView> *m_paneView;
+  NiceMock<MockPlotFitAnalysisPanePresenter> *m_pane;
+  PartMockBaseCustomInstrumentPresenter *m_presenter;
 };
 

@@ -27,10 +27,14 @@ using namespace Mantid::API;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW paneTest : public MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPanePresenter
+    : public MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter {
 public:
-    explicit paneTest(IPlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model) {m_addFunc=0;}; 
-    ~paneTest() {}; 
+  explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
+                                            PlotFitAnalysisPaneModel *model) {
+    m_addFunc = 0;
+  }; 
+    ~MockPlotFitAnalysisPanePresenter(){}; 
     MOCK_METHOD0(destructor, void ());
     MOCK_METHOD0(getView, IPlotFitAnalysisPaneView*());
     MOCK_METHOD0(getCurrentWS, std::string ());
@@ -45,10 +49,13 @@ private:
 int m_addFunc;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW paneViewTest : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneView
+    : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView {
 public:
-   explicit paneViewTest(const double &start=1., const double &end=5., QWidget *parent = nullptr){};
-   ~paneViewTest(){};
+  explicit MockPlotFitAnalysisPaneView(const double &start = 1.,
+                                       const double &end = 5.,
+                                       QWidget *parent = nullptr){};
+  ~MockPlotFitAnalysisPaneView(){};
    MOCK_METHOD1(observeFitButton, void(Observer *listener));
    MOCK_METHOD0(getRange, std::pair<double, double>());
    MOCK_METHOD0(getFunction, Mantid::API::IFunction_sptr());
@@ -63,10 +70,11 @@ public:
    MOCK_METHOD2(createFitPane, QWidget*(const double &start, const double &end)); 
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW paneModelTest : public MantidQt::MantidWidgets::PlotFitAnalysisPaneModel{
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneModel
+    : public MantidQt::MantidWidgets::PlotFitAnalysisPaneModel {
 public:
-   paneModelTest(){m_count=0;};
-   ~paneModelTest(){};
+  MockPlotFitAnalysisPaneModel() { m_count = 0; };
+  ~MockPlotFitAnalysisPaneModel(){};
    IFunction_sptr doFit(const std::string &wsName, const std::pair<double,double> &range, const IFunction_sptr func) override {m_count+=1; return func;};
    int getCount(){return m_count;}; 
 
