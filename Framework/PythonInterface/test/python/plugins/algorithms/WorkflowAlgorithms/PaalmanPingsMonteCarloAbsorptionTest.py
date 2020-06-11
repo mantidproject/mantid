@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (Load, DeleteWorkspace, CalculateMonteCarloAbsorption)
+from mantid.simpleapi import (Load, DeleteWorkspace, PaalmanPingsMonteCarloAbsorption)
 
 import unittest
 
 
-class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
+class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     _red_ws = None
     _container_ws = None
@@ -53,9 +53,26 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         if self._indirect_elastic_ws is not None:
             DeleteWorkspace(self._indirect_elastic_ws)
 
+    def _flat_plate_test(self, test_func):
+        self._test_arguments['SampleWidth'] = 2.0
+        self._test_arguments['SampleThickness'] = 2.0
+        test_func('FlatPlate')
+
+    def _cylinder_test(self, test_func):
+        self._test_arguments['SampleRadius'] = 0.5
+        test_func('Cylinder')
+
+    def _annulus_test(self, test_func):
+        self._test_arguments['SampleInnerRadius'] = 1.2
+        self._test_arguments['SampleOuterRadius'] = 1.8
+        test_func('Annulus')
+
     def _setup_flat_plate_container(self):
         self._test_arguments['ContainerFrontThickness'] = 1.5
         self._test_arguments['ContainerBackThickness'] = 1.5
+
+    def _setup_cylinder_container(self):
+        self._test_arguments['ContainerRadius'] = 1.0
 
     def _setup_annulus_container(self):
         self._test_arguments['ContainerInnerRadius'] = 1.0
@@ -77,33 +94,37 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         if spectrum_axis:
             self.assertEqual(corr_ws.getAxis(1).getUnit().unitID(), spectrum_axis)
 
-    def _test_corrections_workspaces(self, workspaces, spectrum_axis=None):
+    def _test_corrections_workspaces(self, workspaces, spectrum_axis=None, with_container=False):
         self.assertNotEquals(workspaces, None)
+        self.assertTrue(isinstance(workspaces, WorkspaceGroup))
+        self.assertEquals(workspaces.getNumberOfEntries(), 4 if with_container else 1)
 
         for workspace in workspaces:
             self._test_corrections_workspace(workspace, spectrum_axis)
 
-    def _run_correction_and_test(self, shape, sample_ws=None, spectrum_axis=None):
+    def _run_correction_and_test(self, shape, sample_ws=None, spectrum_axis=None, with_container=False):
 
         if sample_ws is None:
             sample_ws = self._red_ws
 
         arguments = self._arguments.copy()
         arguments.update(self._test_arguments)
-        corrected = CalculateMonteCarloAbsorption(SampleWorkspace=sample_ws,
-                                                  Shape=shape,
-                                                  **arguments)
-        self._test_corrections_workspaces(corrected, spectrum_axis)
+        corrected = PaalmanPingsMonteCarloAbsorption(SampleWorkspace=sample_ws,
+                                                     Shape=shape,
+                                                     **arguments)
+        self._test_corrections_workspaces(corrected, spectrum_axis, with_container)
 
     def _run_correction_with_container_test(self, shape):
         self._test_arguments.update(self._container_args)
 
         if shape == 'FlatPlate':
             self._setup_flat_plate_container()
-        else:
+        elif shape == 'Cylinder':
+            self._setup_cylinder_container()
+        elif shape == 'Annulus':
             self._setup_annulus_container()
 
-        self._run_correction_and_test(shape)
+        self._run_correction_and_test(shape=shape, with_container=True)
 
     def _run_indirect_elastic_test(self, shape):
         self._expected_unit = "MomentumTransfer"
@@ -128,38 +149,6 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_hist = 18
         self._expected_blocksize = 1
         self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
-
-    def _run_indirect_fws_test_red(self, shape):
-        self._expected_unit = "Wavelength"
-        self._expected_hist = 18
-        self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(2), 'Label')
-
-    def _run_indirect_fws_test_q(self, shape):
-        self._expected_unit = "Wavelength"
-        self._expected_hist = 18
-        self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(1), 'MomentumTransfer')
-
-    def _run_indirect_fws_test_2theta(self, shape):
-        self._expected_unit = "Wavelength"
-        self._expected_hist = 18
-        self._expected_blocksize = 1
-        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
-
-    def _flat_plate_test(self, test_func):
-        self._test_arguments['SampleWidth'] = 2.0
-        self._test_arguments['SampleThickness'] = 2.0
-        test_func('FlatPlate')
-
-    def _annulus_test(self, test_func):
-        self._test_arguments['SampleInnerRadius'] = 1.2
-        self._test_arguments['SampleOuterRadius'] = 1.8
-        test_func('Annulus')
-
-    def _cylinder_test(self, test_func):
-        self._test_arguments['SampleRadius'] = 0.5
-        test_func('Cylinder')
 
     def test_flat_plate_no_container(self):
         self._flat_plate_test(self._run_correction_and_test)

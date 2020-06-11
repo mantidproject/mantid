@@ -44,10 +44,17 @@ struct ScatterPointStat {
 */
 class MANTID_ALGORITHMS_DLL MCInteractionVolume {
 public:
+  enum class ScatteringPointVicinity {
+    SAMPLEANDENVIRONMENT,
+    SAMPLEONLY,
+    ENVIRONMENTONLY
+  };
   MCInteractionVolume(const API::Sample &sample,
                       const Geometry::BoundingBox &activeRegion,
                       Kernel::Logger &logger,
-                      const size_t maxScatterAttempts = 5000);
+                      const size_t maxScatterAttempts = 5000,
+                      const ScatteringPointVicinity pointsIn =
+                          ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
   // No creation from temporaries as we store a reference to the object in
   // the sample
   MCInteractionVolume(const API::Sample &&sample,
@@ -83,6 +90,7 @@ private:
   const Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;
   Kernel::Logger &m_logger;
+  const ScatteringPointVicinity m_pointsIn;
 };
 
 } // namespace Algorithms

@@ -45,8 +45,8 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
                                      "no ChemicalFormula or AtomicNumber is "
                                      "given.";
     }
-    if (isEmpty(params.sampleNumberDensity)) {
-      result["SampleNumberDensity"] =
+    if (isEmpty(params.numberDensity)) {
+      result["NumberDensity"] =
           "The number density must be specified with a use-defined material.";
     }
   } else if (chemicalSymbol && atomicNumber) {
@@ -62,24 +62,20 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
       result["UnitCellVolume"] =
           "UnitCellVolume must be provided with ZParameter";
     }
-    if (!isEmpty(params.sampleNumberDensity)) {
-      result["ZParameter"] =
-          "Cannot give ZParameter with SampleNumberDensity set";
+    if (!isEmpty(params.numberDensity)) {
+      result["ZParameter"] = "Cannot give ZParameter with NumberDensity set";
     }
-    if (!isEmpty(params.sampleMassDensity)) {
-      result["SampleMassDensity"] =
-          "Cannot give SampleMassDensity with ZParameter set";
+    if (!isEmpty(params.massDensity)) {
+      result["MassDensity"] = "Cannot give MassDensity with ZParameter set";
     }
-  } else if (!isEmpty(params.sampleNumberDensity)) {
-    if (!isEmpty(params.sampleMassDensity)) {
-      result["SampleMassDensity"] =
-          "Cannot give SampleMassDensity with SampleNumberDensity set";
+  } else if (!isEmpty(params.numberDensity)) {
+    if (!isEmpty(params.massDensity)) {
+      result["MassDensity"] = "Cannot give MassDensity with NumberDensity set";
     }
     bool canCalculateMassDensity =
-        ((!isEmpty(params.sampleMass)) && (!isEmpty(params.sampleVolume)));
+        ((!isEmpty(params.mass)) && (!isEmpty(params.volume)));
     if (canCalculateMassDensity) {
-      result["SampleMassDensity"] =
-          "Cannot give SampleMassDensity with SampleNumberDensity set";
+      result["MassDensity"] = "Cannot give MassDensity with NumberDensity set";
     }
   }
   return result;
@@ -95,15 +91,14 @@ void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
   setMaterial(params.chemicalSymbol, params.atomicNumber, params.massNumber);
 
   // calculate the mass density if it wasn't provided
-  double massDensity = params.sampleMassDensity;
+  double massDensity = params.massDensity;
   if (isEmpty(massDensity)) {
-    if (!(isEmpty(params.sampleMass) || isEmpty(params.sampleVolume)))
-      massDensity = params.sampleMass / params.sampleVolume;
+    if (!(isEmpty(params.mass) || isEmpty(params.volume)))
+      massDensity = params.mass / params.volume;
   }
 
-  setNumberDensity(massDensity, params.sampleNumberDensity,
-                   params.numberDensityUnit, params.zParameter,
-                   params.unitCellVolume);
+  setNumberDensity(massDensity, params.numberDensity, params.numberDensityUnit,
+                   params.zParameter, params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
                     params.attenuationXSection, params.scatteringXSection,
                     params.attenuationProfileFileName);

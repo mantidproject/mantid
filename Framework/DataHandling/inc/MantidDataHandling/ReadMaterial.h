@@ -36,17 +36,17 @@ public:
     /// The mass number to set, defaults to 0
     int massNumber = 0;
     /// The sample number density to set, defaults to EMPTY_DBL()
-    double sampleNumberDensity = EMPTY_DBL();
+    double numberDensity = EMPTY_DBL();
     /// The zParameter to set, defaults to EMPTY_DBL()
     double zParameter = EMPTY_DBL();
     /// The unit cell volume to set, defaults to EMPTY_DBL()
     double unitCellVolume = EMPTY_DBL();
     /// The sample mass density to set, defaults to EMPTY_DBL()
-    double sampleMassDensity = EMPTY_DBL();
+    double massDensity = EMPTY_DBL();
     /// The sample mass to set, defaults to EMPTY_DBL()
-    double sampleMass = EMPTY_DBL();
+    double mass = EMPTY_DBL();
     /// The sample volume to set, defaults to EMPTY_DBL()
-    double sampleVolume = EMPTY_DBL();
+    double volume = EMPTY_DBL();
     /// The coherent scattering cross section to set, defaults to EMPTY_DBL()
     double coherentXSection = EMPTY_DBL();
     /// The incoherent scattering cross section to set, defaults to EMPTY_DBL()
