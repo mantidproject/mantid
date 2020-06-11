@@ -393,7 +393,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             QtCore.QRegExp(valid_float_regex),
             self.double_pulse_data_edit)
         self.double_pulse_data_edit.setValidator(double_pulse_data_validator)
-        self.double_pulse_data_edit.setText("")
+        self.double_pulse_data_edit.setText("0.0")
 
         self.double_pulse_data_unit_label = QtWidgets.QLabel(self)
         self.double_pulse_data_unit_label.setText(u" \u03BCs (Double pulse ")
