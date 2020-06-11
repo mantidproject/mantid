@@ -89,12 +89,14 @@ def get_plot_cmds(ax, ax_object_var):
                                             cmd=generate_plot_command(artist)))
     return cmds
 
+
 def get_plot_2d_cmd(ax, ax_object_var):
     """Get commands such as imshow or pcolormesh"""
     cmds = []
     for artist in ax.get_tracked_artists():
         cmds.extend(generate_plot_2d_command(artist,ax_object_var))
     return cmds
+
 
 def get_axis_limit_cmds(ax, ax_object_var):
     """Get commands such as axes.set_xlim and axes.set_ylim"""

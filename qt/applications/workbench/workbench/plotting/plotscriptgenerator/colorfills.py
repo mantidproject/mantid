@@ -39,11 +39,10 @@ def generate_plot_2d_command(artist,ax_object_var):
     lines.extend(get_colorbar(artist, CFILL_NAME, ax_object_var))
     return lines
 
+
 def get_colorbar(artist, image_name, ax_object_var):
     lines = []
     if artist.colorbar:
-        locator = None
-
         if isinstance(artist.colorbar.norm, LogNorm):
             lines.append('from matplotlib.colors import LogNorm')
             lines.append('from matplotlib.ticker import LogLocator')
@@ -69,10 +68,12 @@ def get_plot_command_pos_args(artist):
     ws_name = ax.get_artists_workspace_and_spec_num(artist)[0].name()
     return [clean_variable_name(ws_name)]
 
+
 def get_plot_command_kwargs(artist):
     kwargs = _get_plot_command_kwargs_from_colorfill(artist)
     kwargs.update(_get_mantid_specific_plot_kwargs(artist))
     return _remove_kwargs_if_default(kwargs)
+
 
 def _remove_kwargs_if_default(kwargs):
     """Remove kwargs from the given dict if they're the default values"""
@@ -84,6 +85,7 @@ def _remove_kwargs_if_default(kwargs):
             pass
     return kwargs
 
+
 def _get_plot_command_kwargs_from_colorfill(artist):
     props = {key: artist.properties()[key] for key in PLOT_KWARGS}
     props ['cmap'] = artist.colorbar.cmap.name
@@ -93,6 +95,7 @@ def _get_plot_command_kwargs_from_colorfill(artist):
         if not (isinstance(artist, QuadMesh) or isinstance(artist, Poly3DCollection)):
             props['interpolation'] = artist.get_interpolation()
     return props
+
 
 def _get_mantid_specific_plot_kwargs(artist):
     ax = artist.axes

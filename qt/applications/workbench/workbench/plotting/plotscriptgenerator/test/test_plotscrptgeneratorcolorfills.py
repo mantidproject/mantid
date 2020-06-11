@@ -12,9 +12,7 @@ import matplotlib
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from copy import copy
-from matplotlib.container import ErrorbarContainer
 
-from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateSampleWorkspace
 from workbench.plotting.plotscriptgenerator.colorfills import (CFILL_NAME, _get_plot_command_kwargs_from_colorfill,
                                                                get_plot_command_kwargs, generate_plot_2d_command)
