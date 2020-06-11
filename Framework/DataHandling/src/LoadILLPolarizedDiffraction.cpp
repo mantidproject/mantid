@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -250,6 +251,8 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
 
+  Run object;
+
   if (nxStat != NX_ERROR) {
     for (auto workspaceId = 0;
          workspaceId < m_outputWorkspaceGroup->getNumberOfEntries();
@@ -277,9 +280,7 @@ API::MatrixWorkspace_sptr
 LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   const size_t nSpectra = D7_NUMBER_PIXELS + NUMBER_MONITORS;
 
-  API::MatrixWorkspace_sptr workspace;
-
-  workspace = WorkspaceFactory::Instance().create(
+  API::MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
 
   // Set x axis units
@@ -440,8 +441,8 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
  * Converts the spectrum axis to scattering angle
  * @param workspace : workspace to change the
  */
-void LoadILLPolarizedDiffraction::convertSpectrumAxis(
-    API::MatrixWorkspace_sptr &workspace) {
+API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(
+    API::MatrixWorkspace_sptr workspace) {
   IAlgorithm_sptr convertSpectrumAxis =
       createChildAlgorithm("ConvertSpectrumAxis");
   convertSpectrumAxis->initialize();
@@ -450,21 +451,21 @@ void LoadILLPolarizedDiffraction::convertSpectrumAxis(
   convertSpectrumAxis->setProperty("Target", "Theta");
   convertSpectrumAxis->setProperty("EMode", "Direct");
   convertSpectrumAxis->execute();
-  workspace = convertSpectrumAxis->getProperty("OutputWorkspace");
+  return convertSpectrumAxis->getProperty("OutputWorkspace");
 }
 
 /**
  * Transposes given 2D workspace with monochromatic data
  * @param workspace : workspace to be transposed
  */
-void LoadILLPolarizedDiffraction::transposeMonochromatic(
-    API::MatrixWorkspace_sptr &workspace) {
+API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::transposeMonochromatic(
+    API::MatrixWorkspace_sptr workspace) {
   IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", workspace);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
   transpose->execute();
-  workspace = transpose->getProperty("OutputWorkspace");
+  return transpose->getProperty("OutputWorkspace");
 }
 
 } // namespace DataHandling

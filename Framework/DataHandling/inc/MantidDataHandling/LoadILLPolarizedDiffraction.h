@@ -52,8 +52,8 @@ private:
   void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr);
   std::vector<double> prepareAxes(const NeXus::NXEntry &);
 
-  void convertSpectrumAxis(API::MatrixWorkspace_sptr &);
-  void transposeMonochromatic(API::MatrixWorkspace_sptr &);
+  API::MatrixWorkspace_sptr convertSpectrumAxis(API::MatrixWorkspace_sptr);
+  API::MatrixWorkspace_sptr transposeMonochromatic(API::MatrixWorkspace_sptr);
 
   size_t m_numberOfChannels; // number of channels data
   size_t m_acquisitionMode;  // acquisition mode of measurement, 0 -
