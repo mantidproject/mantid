@@ -27,6 +27,14 @@ The specified first good data is used for all calculations.
 * ``From table workspace``: A previously loaded deadtime table may be selected which will then be used in all group and pair calculations.
 * ``From other file``: A file may be selected to load a deadtime table from this will then be used in all group and pair calculations.
 
+**Double Pulse** This controls whether todo a double pulse fit and if so what time offset to use. If checked then :ref:`DoublePulseFit <algm-DoublePulseFit>` is run instead of :ref:`Fit <algm-Fit>`. The PulseOffset parameter is the value entered here. The pulse weightings are set as
+
+.. math:: 
+  N_1 = \frac{x}{1+x} \quad and \quad N_2 = \frac{1}{1+x}.
+
+Where :math:`x = \exp(\frac{-t_s}{\tau})`, :math:`t_s` = time offset, :math:`\tau` = posotive muon halflife, :math:`N_1` = first pulse weighting and :math:`N_2` = second pulse weighting.
+  
+
 Rebin
 ^^^^^
 
