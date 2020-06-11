@@ -100,7 +100,7 @@ public:
 
   MOCK_METHOD1(observeExtractSingleTube, void(Observer *listner));
   MOCK_METHOD1(observeAverageTube, void(Observer *listner));
-  MOCK_METHOD1(addSpectrum, void(std::string name));
+  MOCK_METHOD1(addSpectrum, void(const std::string &name));
   MOCK_METHOD1(setupAnalysisPane, void(IPlotFitAnalysisPaneView *analysis));
   MOCK_METHOD0(getFile, std::string());
   MOCK_METHOD1(setRunQuietly, void(const std::string &runNumber));
