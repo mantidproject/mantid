@@ -83,7 +83,7 @@ class Setting(QObject):
             self._widget.editingFinished.connect(
                     lambda : self.valueChanged.emit(name)
                     )
-            self._setter = lambda v : self._widget.setText(str(v))
+            self._setter = lambda v : self._widget.setText(str(v) if v else "")
             self._getter = self._widget.text
 
     @property
