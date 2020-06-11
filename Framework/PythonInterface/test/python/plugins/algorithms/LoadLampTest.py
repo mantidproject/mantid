@@ -10,7 +10,8 @@ import unittest
 
 class LoadLampTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/LAMP/')
 
     def tearDown(self):

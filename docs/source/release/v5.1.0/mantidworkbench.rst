@@ -52,7 +52,7 @@ Improvements
 - The figure options menu now has a help button which opens the documentation for the menu.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
 - The colorbar on colorfill plots is now labelled.
-
+- User data directories are no longer checked at startup, reducing launch times with slow network drives.
 
 Bugfixes
 ########
