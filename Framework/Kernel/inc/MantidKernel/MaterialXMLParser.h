@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,7 +27,8 @@ public:
   static constexpr const char *MATERIAL_TAG = "material";
 
   Material parse(std::istream &istr) const;
-  Material parse(Poco::XML::Element *node) const;
+  Material parse(Poco::XML::Element *node,
+                 const std::string &XMLFilePath = "") const;
 };
 
 } // namespace Kernel

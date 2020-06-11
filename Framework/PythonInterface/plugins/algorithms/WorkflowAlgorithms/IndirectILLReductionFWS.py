@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 import time
 from mantid import mtd
@@ -207,9 +205,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                          '$/entry0/instrument/Doppler/velocity_profile$ == 1)'
 
         # force sort x-axis, if interpolation is requested
-        if ((self._back_option == 'Interpolate' and self._background_files) or
-                (self._calib_option == 'Interpolate' and self._calibration_files) or
-                (self._back_calib_option == 'Interpolate' and self._background_calib_files)) \
+        if ((self._back_option == 'Interpolate' and self._background_files)
+            or (self._calib_option == 'Interpolate' and self._calibration_files)
+            or (self._back_calib_option == 'Interpolate' and self._background_calib_files)) \
                 and not self._sortX:
             self.log().warning('Interpolation option requested, X-axis will be sorted.')
             self._sortX = True
@@ -627,7 +625,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
             self._set_x_label(wsname)
 
-        for energy, ws_list in iteritems(self._all_runs[label]):
+        for energy, ws_list in self._all_runs[label].items():
             for ws in ws_list:
                 DeleteWorkspace(ws)
 

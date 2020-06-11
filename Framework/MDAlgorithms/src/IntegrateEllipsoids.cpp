@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -226,7 +226,7 @@ const std::string IntegrateEllipsoids::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateEllipsoids::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<WorkspaceUnitValidator>("TOF");
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
@@ -241,7 +241,7 @@ void IntegrateEllipsoids::init() {
                   "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
                   "be indexed with integer HKL values.");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -316,6 +316,9 @@ void IntegrateEllipsoids::init() {
   declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
                   "Half-length of major axis for outer ellipsoidal surface of "
                   "satellite background region");
+
+  declareProperty("GetUBFromPeaksWorkspace", false,
+                  "If true, UB is taken from peak workspace.");
 }
 
 //---------------------------------------------------------------------
@@ -325,9 +328,8 @@ void IntegrateEllipsoids::exec() {
   // get the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");
 
-  EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(wksp);
-  Workspace2D_sptr histoWS = boost::dynamic_pointer_cast<Workspace2D>(wksp);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(wksp);
+  Workspace2D_sptr histoWS = std::dynamic_pointer_cast<Workspace2D>(wksp);
   if (!eventWS && !histoWS) {
     throw std::runtime_error("IntegrateEllipsoids needs either a "
                              "EventWorkspace or Workspace2D as input.");
@@ -362,6 +364,14 @@ void IntegrateEllipsoids::exec() {
   double adaptiveQBackgroundMultiplier = 0.0;
   bool useOnePercentBackgroundCorrection =
       getProperty("UseOnePercentBackgroundCorrection");
+  bool getUB = getProperty("GetUBFromPeaksWorkspace");
+
+  // getUB only valid if peak workspace has a UB matrix
+  if (!(in_peak_ws->sample().hasOrientedLattice()) && getUB) {
+    throw std::runtime_error("Peaks workspace needs a oriented lattice for "
+                             "GetUBFromPeaksWorkspace is true");
+  }
+
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   if (!integrateEdge) {
@@ -415,32 +425,43 @@ void IntegrateEllipsoids::exec() {
     }
   }
 
-  if (indexed_count < 3)
-    throw std::runtime_error(
-        "At least three linearly independent indexed peaks are needed.");
-
   // Get UB using indexed peaks and
   // lab-Q vectors
   Matrix<double> UB(3, 3, false);
   Matrix<double> modUB(3, 3, false);
   Matrix<double> modHKL(3, 3, false);
-  Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
-                                         ModDim, peak_q_list);
-
   int maxOrder = 0;
   bool CT = false;
-  if (peak_ws->sample().hasOrientedLattice()) {
+  if (getUB & peak_ws->sample().hasOrientedLattice()) {
+    if (indexed_count < 1)
+      throw std::runtime_error("At least one indexed peak required.");
     OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
-    lattice.setUB(UB);
-    lattice.setModUB(modUB);
+    auto goniometerMatrix = peak_ws->run().getGoniometerMatrix();
+    // get UB etc. and rotate by goniometer matrix
+    UB = goniometerMatrix * lattice.getUB();
+    modUB = goniometerMatrix * lattice.getModUB();
     modHKL = lattice.getModHKL();
     maxOrder = lattice.getMaxOrder();
     CT = lattice.getCrossTerm();
+  } else {
+    if (indexed_count < 3)
+      throw std::runtime_error(
+          "At least three linearly independent indexed peaks are needed.");
+    Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
+                                           ModDim, peak_q_list);
+    if (peak_ws->sample().hasOrientedLattice()) {
+      OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
+      lattice.setUB(UB);
+      lattice.setModUB(modUB);
+      modHKL = lattice.getModHKL();
+      maxOrder = lattice.getMaxOrder();
+      CT = lattice.getCrossTerm();
+    }
   }
 
   Matrix<double> UBinv(UB);
   UBinv.Invert();
-  UBinv *= (1.0 / (2.0 * M_PI));
+  UBinv *= (1.0 / (2.0 * M_PI)); // if loaded is it already in these units?
 
   std::vector<double> PeakRadiusVector(n_peaks, peak_radius);
   std::vector<double> BackgroundInnerRadiusVector(n_peaks, back_inner_radius);
@@ -601,7 +622,7 @@ void IntegrateEllipsoids::exec() {
         "Workspace2D", histogramNumber, principalaxis1.size(),
         principalaxis1.size());
     Workspace2D_sptr wsProfile2D =
-        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+        std::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
 
     // set output workspace
@@ -659,7 +680,7 @@ void IntegrateEllipsoids::exec() {
             "Workspace2D", histogramNumber, principalaxis1.size(),
             principalaxis1.size());
         Workspace2D_sptr wsProfile2D2 =
-            boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
+            std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
 
@@ -746,8 +767,8 @@ void IntegrateEllipsoids::calculateE1(
 }
 
 void IntegrateEllipsoids::runMaskDetectors(
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
-    std::string values) {
+    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+    const std::string &property, const std::string &values) {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty(property, values);

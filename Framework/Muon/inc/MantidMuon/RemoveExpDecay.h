@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -56,7 +56,8 @@ private:
   HistogramData::Histogram
   removeDecay(const HistogramData::Histogram &histogram) const;
   // calculate Muon normalisation constant
-  double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
+  double calNormalisationConst(const API::MatrixWorkspace_sptr &ws,
+                               int wsIndex);
 };
 
 } // namespace Algorithms

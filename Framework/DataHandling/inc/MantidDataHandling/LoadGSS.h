@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -62,7 +63,7 @@ private:
   double convertToDouble(std::string inputstring);
 
   /// Create an instrument geometry.
-  void createInstrumentGeometry(API::MatrixWorkspace_sptr workspace,
+  void createInstrumentGeometry(const API::MatrixWorkspace_sptr &workspace,
                                 const std::string &instrumentname,
                                 const double &primaryflightpath,
                                 const std::vector<int> &detectorids,

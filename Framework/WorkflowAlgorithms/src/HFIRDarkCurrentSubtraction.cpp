@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -26,7 +26,7 @@ using namespace API;
 using namespace Geometry;
 
 void HFIRDarkCurrentSubtraction::init() {
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
 
@@ -52,12 +52,12 @@ void HFIRDarkCurrentSubtraction::exec() {
   std::string output_message;
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    reductionManager = boost::make_shared<PropertyManager>();
+    reductionManager = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         reductionManager);
   }
@@ -157,8 +157,8 @@ void HFIRDarkCurrentSubtraction::exec() {
 
 /// Get the counting time from a workspace
 /// @param inputWS :: workspace to read the counting time from
-double
-HFIRDarkCurrentSubtraction::getCountingTime(MatrixWorkspace_sptr inputWS) {
+double HFIRDarkCurrentSubtraction::getCountingTime(
+    const MatrixWorkspace_sptr &inputWS) {
   // First, look whether we have the information in the log
   if (inputWS->run().hasProperty("timer")) {
     return inputWS->run().getPropertyValueAsType<double>("timer");

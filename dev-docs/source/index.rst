@@ -115,7 +115,7 @@ Tools
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
-   GettingStartedWithPyCharm
+   PyCharm
    VSCode
    Eclipse
 
@@ -131,7 +131,7 @@ Tools
 :doc:`VisualStudioBuildImpact`
    Provides a script to reduce the impact of Visual Studio on machine performance.
 
-:doc:`GettingStartedWithPyCharm`
+:doc:`PyCharm`
    Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
 
 :doc:`VSCode`
@@ -155,6 +155,7 @@ Testing
    SystemTests
    DataFilesForTesting
    TestingUtilities
+   RunningSanitizers
 
 :doc:`RunningTheUnitTests`
    Details on how to run the suite of unit tests.
@@ -180,6 +181,9 @@ Testing
 :doc:`TestingUtilities`
    Helper utlities used for testing.
 
+:doc:`RunningSanitizers`
+   How to run the various sanitizers locally.
+
 ===============
 GUI Development
 ===============
@@ -187,13 +191,13 @@ GUI Development
 .. toctree::
    :hidden:
 
-   GUIDesignGuidelines
+   MVPDesign
    MVPTutorial/index
    QtDesignerForPython
    MantidUsedIconsTable
    ISISReflectometryInterface
 
-:doc:`GUIDesignGuidelines`
+:doc:`MVPDesign`
    Gives some guidelines to consider when developing a new graphical user interface.
 
 :doc:`MVP Tutorial <MVPTutorial/index>`

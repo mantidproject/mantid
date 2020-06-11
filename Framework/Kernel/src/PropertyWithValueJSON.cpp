@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -146,7 +146,7 @@ std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
  * @throws std::invalid_argument if the Json::Value can't be interpreted
  */
 PropertyManager_sptr createPropertyManager(const Json::Value &keyValues) {
-  auto propMgr = boost::make_shared<PropertyManager>();
+  auto propMgr = std::make_shared<PropertyManager>();
   auto members = keyValues.getMemberNames();
   for (const auto &key : members) {
     const auto &value = keyValues[key];

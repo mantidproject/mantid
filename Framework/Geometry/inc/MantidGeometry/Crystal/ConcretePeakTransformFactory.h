@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -27,14 +27,14 @@ public:
   PeakTransform_sptr
   createTransform(const std::string &xPlotLabel,
                   const std::string &yPlotLabel) const override {
-    return boost::make_shared<PeakTransformProduct>(xPlotLabel, yPlotLabel);
+    return std::make_shared<PeakTransformProduct>(xPlotLabel, yPlotLabel);
   }
 
   /**
   Overriden Factory Method.
   */
   PeakTransform_sptr createDefaultTransform() const override {
-    return boost::make_shared<PeakTransformProduct>();
+    return std::make_shared<PeakTransformProduct>();
   }
 };
 } // namespace Geometry

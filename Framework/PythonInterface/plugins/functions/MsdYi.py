@@ -1,23 +1,14 @@
-'''
-@author Spencer Howells, ISIS
-@date December 05, 2013
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory,
-NScD Oak Ridge National Laboratory & European Spallation Source
-
-pylint: disable=no-init,invalid-name
-
-This file is part of Mantid.
-Mantid Repository : https://github.com/mantidproject/mantid
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
-'''
-from __future__ import (absolute_import, division, print_function)
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
-# The model of Yi et al(J Phys Chem B 1316 5029 2012) takes into account motional heterogeneity.
+# The model of Yi et al(J Phys Chem B 116 5028 2012) takes into account motional heterogeneity.
 # The elastic intensity is proportional to exp(-(1/6)*Q^2*msd)*(1+Q^4*sigma/72)
 # where the mean square displacement msd = <r^2> and sigma^2 is the variance of the msd.
 # In the limit sigma = 0 the model becomes Gaussian.

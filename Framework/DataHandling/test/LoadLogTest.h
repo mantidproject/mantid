@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -130,7 +130,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
 
-    // boost::shared_ptr<Sample> sample = output->getSample();
+    // std::shared_ptr<Sample> sample = output->getSample();
 
     Property *l_property = output->run().getLogData("HRP37129_ICPevent");
     TimeSeriesProperty<std::string> *l_timeSeries =
@@ -173,8 +173,8 @@ public:
     TS_ASSERT(ws->run().hasProperty("str3"));
   }
 
-  void do_test_SNSTextFile(std::string names, std::string units, bool willFail,
-                           bool createWorkspace = true,
+  void do_test_SNSTextFile(const std::string &names, const std::string &units,
+                           bool willFail, bool createWorkspace = true,
                            std::string expectedLastUnit = "Furlongs") {
     // Create an empty workspace and put it in the AnalysisDataService
 

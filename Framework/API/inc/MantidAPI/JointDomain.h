@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,7 +31,7 @@ public:
   size_t getNParts() const override;
   /// Return i-th domain
   const FunctionDomain &getDomain(size_t i) const override;
-  void addDomain(FunctionDomain_sptr domain);
+  void addDomain(const FunctionDomain_sptr &domain);
 
 protected:
   /// Vector with member domains.

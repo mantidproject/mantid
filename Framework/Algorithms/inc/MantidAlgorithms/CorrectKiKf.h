@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -75,7 +75,7 @@ private:
    */
   template <class T>
   void correctKiKfEventHelper(std::vector<T> &wevector, double efixed,
-                              const std::string emodeStr);
+                              const std::string &emodeStr);
   void getEfixedFromParameterMap(double &Efi, int64_t i,
                                  const Mantid::API::SpectrumInfo &spectrumInfo,
                                  const Mantid::Geometry::ParameterMap &pmap);

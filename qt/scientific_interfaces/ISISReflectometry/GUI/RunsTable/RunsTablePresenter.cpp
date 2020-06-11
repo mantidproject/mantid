@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenter.h"
 #include "Common/Map.h"
@@ -189,6 +189,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
       removeRowsAndGroupsFromView(selected);
       removeRowsFromModel(selected);
       ensureAtLeastOneGroupExists();
+      notifyTableChanged();
       notifyRowStateChanged();
       notifySelectionChanged();
     } else {
@@ -209,6 +210,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     removeGroupsFromModel(groupIndicesOrderedLowToHigh);
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
     ensureAtLeastOneGroupExists();
+    notifyTableChanged();
     notifyRowStateChanged();
     notifySelectionChanged();
   } else {
@@ -250,6 +252,7 @@ void RunsTablePresenter::notifyInsertRowRequested() {
   } else {
     m_view->mustSelectGroupOrRow();
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -332,8 +335,17 @@ void RunsTablePresenter::notifyInstrumentChanged(
   m_view->setInstrumentName(instrumentName);
 }
 
+void RunsTablePresenter::setTablePrecision(int &precision) {
+  m_jobViewUpdater.setPrecision(precision);
+}
+
+void RunsTablePresenter::resetTablePrecision() {
+  m_jobViewUpdater.resetPrecision();
+}
+
 void RunsTablePresenter::settingsChanged() {
   m_model.resetState();
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -364,6 +376,7 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
     appendEmptyGroupInView();
     appendEmptyGroupInModel();
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -559,6 +572,7 @@ void RunsTablePresenter::notifyCellTextChanged(
     updateGroupName(itemIndex, column, oldValue, newValue);
   else
     updateRowField(itemIndex, column, oldValue, newValue);
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -586,6 +600,7 @@ void RunsTablePresenter::notifyRowInserted(
   } else if (isRowLocation(newRowLocation)) {
     insertEmptyRowInModel(groupOf(newRowLocation), rowOf(newRowLocation));
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -705,6 +720,7 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
       pasteRowsOntoGroup(replacementRoots);
     else
       pasteRowsOntoRows(replacementRoots);
+    notifyTableChanged();
     notifyRowStateChanged();
     notifySelectionChanged();
   }
@@ -824,6 +840,10 @@ void RunsTablePresenter::setRowStylingForItem(
 
 void RunsTablePresenter::updateProgressBar() {
   m_view->setProgress(m_mainPresenter->percentComplete());
+}
+
+void RunsTablePresenter::notifyTableChanged() {
+  m_mainPresenter->notifyTableChanged();
 }
 
 void RunsTablePresenter::notifyRowStateChanged() {

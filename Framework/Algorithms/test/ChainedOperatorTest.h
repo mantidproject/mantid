@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -70,8 +70,8 @@ public:
     performTest(work_in1, work_in2);
   }
 
-  void performTest(MatrixWorkspace_sptr work_in1,
-                   MatrixWorkspace_sptr work_in2) {
+  void performTest(const MatrixWorkspace_sptr &work_in1,
+                   const MatrixWorkspace_sptr &work_in2) {
     ComplexOpTest alg;
 
     std::string wsNameIn1 = "testChainedOperator_in21";
@@ -98,9 +98,9 @@ public:
   }
 
 private:
-  void checkData(const MatrixWorkspace_sptr work_in1,
-                 const MatrixWorkspace_sptr work_in2,
-                 const MatrixWorkspace_sptr work_out1) {
+  void checkData(const MatrixWorkspace_sptr &work_in1,
+                 const MatrixWorkspace_sptr &work_in2,
+                 const MatrixWorkspace_sptr &work_out1) {
     size_t ws2LoopCount = 0;
     if (work_in2->size() > 0) {
       ws2LoopCount = work_in1->size() / work_in2->size();
@@ -112,9 +112,9 @@ private:
     }
   }
 
-  void checkDataItem(const MatrixWorkspace_sptr work_in1,
-                     const MatrixWorkspace_sptr work_in2,
-                     const MatrixWorkspace_sptr work_out1, size_t i,
+  void checkDataItem(const MatrixWorkspace_sptr &work_in1,
+                     const MatrixWorkspace_sptr &work_in2,
+                     const MatrixWorkspace_sptr &work_out1, size_t i,
                      size_t ws2Index) {
     double sig1 =
         work_in1->readY(i / work_in1->blocksize())[i % work_in1->blocksize()];

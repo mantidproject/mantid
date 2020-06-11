@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -56,9 +56,10 @@ private:
   void exec() override;
   /// Create the output workspace
   API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace);
+  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace);
   /// Return the vertical axis on the workspace, throwing if it is not valid
-  API::Axis *getVerticalAxis(API::MatrixWorkspace_const_sptr workspace) const;
+  API::Axis *
+  getVerticalAxis(const API::MatrixWorkspace_const_sptr &workspace) const;
 };
 
 } // namespace Algorithms

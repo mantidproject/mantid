@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
@@ -69,7 +69,7 @@ double relativeMolecularMass(Material &self) {
 
 void export_Material() {
   register_ptr_to_python<Material *>();
-  register_ptr_to_python<boost::shared_ptr<Material>>();
+  register_ptr_to_python<std::shared_ptr<Material>>();
 
   class_<Material>("Material", no_init)
       .def("name", &Material::name, arg("self"),

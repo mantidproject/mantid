@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,7 +16,7 @@
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ProgressPresenter;
 
@@ -74,6 +74,8 @@ public:
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   int percentComplete() const override;
+  void setRoundPrecision(int &precision) override;
+  void resetRoundPrecision() override;
   void
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyResumeReductionRequested() override;
@@ -94,10 +96,13 @@ public:
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyTableChanged() override;
   void settingsChanged() override;
 
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isOverwritingTablePrevented() const override;
+  bool isOverwriteBatchPrevented() const override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
@@ -145,7 +150,6 @@ private:
 
   /// searching
   bool search(ISearcher::SearchType searchType);
-  void populateSearchResults(Mantid::API::ITableWorkspace_sptr results);
   bool searchInProgress() const;
   /// autoreduction
   bool requireNewAutoreduction() const;

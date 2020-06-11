@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -33,7 +33,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView
       public IRunsView {
   Q_OBJECT
 public:
-  QtRunsView(QWidget *parent, RunsTableViewFactory makeView);
+  QtRunsView(QWidget *parent, const RunsTableViewFactory &makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
@@ -73,11 +73,12 @@ public:
   std::string getSearchInstrument() const override;
   void setSearchInstrument(std::string const &instrumentName) override;
   std::string getSearchString() const override;
+  std::string getSearchCycle() const override;
   int getLiveDataUpdateInterval() const override;
 
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const override;
 
   // Live data monitor
@@ -90,8 +91,8 @@ private:
   /// Implement our own timer event to trigger autoreduction
   void timerEvent(QTimerEvent *event) override;
 
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   void setSelected(QComboBox &box, std::string const &str);
 

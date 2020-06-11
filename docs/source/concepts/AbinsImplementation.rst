@@ -18,6 +18,10 @@ hacking Abins.
 Deprecation plans
 -----------------
 
+- Support for VASP OUTCAR files is currently included for validation
+  and troubleshooting purposes. Users are recommended to use the
+  vasprun.xml file input.
+
 - The *pkt_per_peak* and *fwhm* parameters in
   ``AbinsParameters.sampling`` are no longer in use and should be
   removed in a future release.

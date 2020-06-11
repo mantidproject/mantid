@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/ExtractPolarizationEfficiencies.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -60,7 +60,7 @@ createWorkspace(std::vector<double> const &x, std::vector<double> const &y,
   Points xVals(x);
   Counts yVals(y);
   CountStandardDeviations eVals(e.empty() ? std::vector<double>(y.size()) : e);
-  auto retVal = boost::make_shared<Workspace2D>();
+  auto retVal = std::make_shared<Workspace2D>();
   retVal->initialize(1, Histogram(xVals, yVals, eVals));
   return retVal;
 }

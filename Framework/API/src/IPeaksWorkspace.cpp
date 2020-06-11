@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -38,7 +38,7 @@ namespace Mantid {
 namespace Kernel {
 
 template <>
-DLLExport Mantid::API::IPeaksWorkspace_sptr
+MANTID_API_DLL Mantid::API::IPeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(
     const std::string &name) const {
   auto *prop =
@@ -55,7 +55,7 @@ IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(
 }
 
 template <>
-DLLExport Mantid::API::IPeaksWorkspace_const_sptr
+MANTID_API_DLL Mantid::API::IPeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_const_sptr>(
     const std::string &name) const {
   auto *prop =

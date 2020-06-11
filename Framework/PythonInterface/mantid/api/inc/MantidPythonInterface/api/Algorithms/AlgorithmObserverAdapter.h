@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,7 +26,8 @@ public:
   AlgorithmObserverAdapter &
   operator=(const AlgorithmObserverAdapter &) = delete;
   void progressHandle(const API::IAlgorithm *alg, double p,
-                      const std::string &msg) override;
+                      const std::string &msg, const double estimatedTime,
+                      const int progressPrecision) override;
   void startingHandle(API::IAlgorithm_sptr alg) override;
   void finishHandle(const API::IAlgorithm *alg) override;
   void errorHandle(const API::IAlgorithm *alg,

@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "Plotter.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -66,7 +65,7 @@ void Plotter::reflectometryPlot(
         Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::Workspace>(workspace);
     if (const auto workspaceGroup =
-            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
                 workspaceObject)) {
       for (auto index = 0u; index < workspaceGroup->size(); ++index) {
         actualWorkspaces.emplace_back(

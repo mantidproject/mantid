@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ThresholdMD.h"
 #include "MantidAPI/Progress.h"
@@ -54,7 +54,7 @@ void ThresholdMD::init() {
   propOptions.emplace_back(GreaterThan());
 
   declareProperty("Condition", LessThan(),
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Selected threshold condition. Any value which does meet "
                   "this condition with respect to the ReferenceValue will be "
                   "overwritten.");
@@ -98,7 +98,7 @@ void ThresholdMD::exec() {
     alg->setProperty("InputWorkspace", inputWS);
     alg->executeAsChildAlg();
     IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-    outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+    outWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
   }
 
   const int64_t nPoints = inputWS->getNPoints();

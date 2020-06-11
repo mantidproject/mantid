@@ -36,7 +36,7 @@ Usage
        'HighAngleBkgOffset': 10,
        'HighAngleBkgWidth': 50,
    }
-   
+
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
@@ -45,14 +45,14 @@ Usage
    directFgd = ReflectometryILLSumForeground(
        Inputworkspace=direct,
        WavelengthRange=[2, 15])
-   
+
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectLineWorkspace=direct,
        **settings
    )
-   
+
    reflectivityLambda = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
@@ -62,10 +62,10 @@ Usage
    reflectivityQ = ReflectometryILLConvertToQ(
        InputWorkspace=reflectivityLambda,
        # The next line is not needed if SumInQ was used in foreground summation
-       DirectForegroundWorkspace=directFgd,         
+       DirectForegroundWorkspace=directFgd,
        GroupingQFraction=0.4
    )
-   
+
    # The data is now in Q
    print('Reflectivity X unit: ' + reflectivityQ.getAxis(0).getUnit().unitID())
    print('Is reflectivityLambda histogram? {}'.format(reflectivityLambda.isHistogramData()))
@@ -84,7 +84,7 @@ Output:
    Is reflectivityLambda histogram? True
    Is reflectivityQ histogram? False
    Number of bins in reflectivityLambda: 416
-   Number of points in reflectivityQ: 190
+   Number of points in reflectivityQ: 260
    Has reflectivityQ Dx? True
 
 **Example - polarized reduction**
@@ -187,10 +187,10 @@ Output:
 .. testoutput:: PolarizedEx
 
    X unit in R00: MomentumTransfer
-   Number of points in R00: 190
+   Number of points in R00: 260
    X unit in R11: MomentumTransfer
-   Number of points in R11: 190
-   Size of Q resolution data: 190
+   Number of points in R11: 260
+   Size of Q resolution data: 260
 
 .. categories::
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/NexusTester.h"
 #include "MantidAPI/FileProperty.h"
@@ -66,7 +66,7 @@ void NexusTester::init() {
   std::vector<std::string> types{"Zeros", "Incrementing Numbers",
                                  "Random Numbers"};
   declareProperty("FakeData", "Incrementing Numbers",
-                  boost::make_shared<StringListValidator>(types),
+                  std::make_shared<StringListValidator>(types),
                   "For writing: type of fake data to generate.");
 
   declareProperty(
@@ -100,7 +100,7 @@ void NexusTester::exec() {
   // Size of the chunk in number of integers
   size_t chunkSize = ChunkSizeKb * 1024 / sizeof(uint32_t);
   // ----------- Generate the fake data -----------------------------
-  auto fakeData = new uint32_t[chunkSize];
+  auto fakeData = std::vector<uint32_t>(chunkSize);
   if (FakeDataType == "Zeros") {
     for (size_t i = 0; i < chunkSize; i++)
       fakeData[i] = 0;
@@ -133,7 +133,7 @@ void NexusTester::exec() {
     for (int i = 0; i < NumChunks; i++) {
       std::vector<int64_t> startDims;
       startDims.emplace_back(i * int64_t(chunkSize));
-      file.putSlab(fakeData, startDims, chunkDims);
+      file.putSlab(fakeData.data(), startDims, chunkDims);
       prog.report();
     }
     file.close();
@@ -172,7 +172,7 @@ void NexusTester::exec() {
       file.openData("FakeData");
       std::vector<int64_t> startDims;
       startDims.emplace_back(i * int64_t(chunkSize));
-      file.getSlab(fakeData, startDims, chunkDims);
+      file.getSlab(fakeData.data(), startDims, chunkDims);
       prog.report();
       file.closeData();
     }
@@ -186,8 +186,6 @@ void NexusTester::exec() {
                    << " MB/sec (data), " << MBperSec * CompressionFactor
                    << " MB/sec (file)\n";
   }
-
-  delete[] fakeData;
 }
 
 } // namespace DataHandling

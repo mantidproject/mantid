@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -22,7 +22,7 @@ class IAlgorithm;
   @date 30/03/2011
 */
 class MANTID_API_DLL AlgorithmHasProperty
-    : public Kernel::TypedValidator<boost::shared_ptr<IAlgorithm>> {
+    : public Kernel::TypedValidator<std::shared_ptr<IAlgorithm>> {
 public:
   AlgorithmHasProperty(const std::string &propName);
   std::string getType() const;
@@ -30,7 +30,7 @@ public:
 
 protected:
   std::string
-  checkValidity(const boost::shared_ptr<IAlgorithm> &value) const override;
+  checkValidity(const std::shared_ptr<IAlgorithm> &value) const override;
 
 private:
   /// Store the property name

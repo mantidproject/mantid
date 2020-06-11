@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Set of general purpose functions which are related to the SANSState approach."""
-
-from __future__ import (absolute_import, division, print_function)
 
 from sans.common.enums import (DetectorType)
 from sans.common.xml_parsing import (get_monitor_names_from_idf_file, get_named_elements_from_ipf_file)

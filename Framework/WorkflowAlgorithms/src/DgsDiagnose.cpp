@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -87,7 +87,7 @@ void DgsDiagnose::exec() {
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
@@ -180,7 +180,7 @@ void DgsDiagnose::exec() {
     dvCompWS = detVan->getProperty("OutputWorkspace");
     detVanCompWS.reset();
   } else {
-    dvCompWS = boost::shared_ptr<MatrixWorkspace>();
+    dvCompWS = std::shared_ptr<MatrixWorkspace>();
   }
 
   // Process the sample data if any of the sample checks are requested.
@@ -195,7 +195,7 @@ void DgsDiagnose::exec() {
       cloneWs->setProperty("OutputWorkspace", sampleInternal);
       cloneWs->executeAsChildAlg();
       tmp = cloneWs->getProperty("OutputWorkspace");
-      sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
+      sampleWS = std::static_pointer_cast<MatrixWorkspace>(tmp);
     }
 
     IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
@@ -217,7 +217,7 @@ void DgsDiagnose::exec() {
     integrate->executeAsChildAlg();
     totalCountsWS = integrate->getProperty("OutputWorkspace");
   } else {
-    totalCountsWS = boost::shared_ptr<MatrixWorkspace>();
+    totalCountsWS = std::shared_ptr<MatrixWorkspace>();
   }
 
   // Create the background workspace if necessary
@@ -257,13 +257,13 @@ void DgsDiagnose::exec() {
       backgroundIntWS /= dvWS;
     }
   } else {
-    backgroundIntWS = boost::shared_ptr<MatrixWorkspace>();
+    backgroundIntWS = std::shared_ptr<MatrixWorkspace>();
   }
 
   // Handle case where one of the other tests (checkBkg or rejectZeroBkg)
   // are requested, but not createPsdBleed.
   if (!createPsdBleed) {
-    sampleWS = boost::shared_ptr<MatrixWorkspace>();
+    sampleWS = std::shared_ptr<MatrixWorkspace>();
   }
 
   IAlgorithm_sptr diag = this->createChildAlgorithm("DetectorDiagnostic");
@@ -344,7 +344,7 @@ void DgsDiagnose::exec() {
     }
   }
 
-  MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
+  MaskWorkspace_sptr m = std::dynamic_pointer_cast<MaskWorkspace>(maskWS);
   g_log.information() << "Number of masked pixels = " << m->getNumberMasked()
                       << '\n';
 

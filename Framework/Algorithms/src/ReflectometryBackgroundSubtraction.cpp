@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAlgorithms/ReflectometryBackgroundSubtraction.h"
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/AnalysisDataService.h"
@@ -51,7 +50,8 @@ const std::string ReflectometryBackgroundSubtraction::summary() const {
  * background
  */
 void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
-    MatrixWorkspace_sptr inputWS, const std::vector<specnum_t> &spectraList) {
+    const MatrixWorkspace_sptr &inputWS,
+    const std::vector<specnum_t> &spectraList) {
 
   auto alg = this->createChildAlgorithm("GroupDetectors");
   alg->setProperty("InputWorkspace", inputWS);
@@ -110,7 +110,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   // Matrix workspace as cannot transpose an event workspace
 
   DataObjects::EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
   MatrixWorkspace_sptr outputWorkspace;
   if (eventW) {
     auto convert = createChildAlgorithm("ConvertToMatrixWorkspace");
@@ -157,7 +157,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
  * @param indexList :: the ranges of the background region
  */
 void ReflectometryBackgroundSubtraction::calculatePixelBackground(
-    MatrixWorkspace_sptr inputWS, const std::vector<double> &indexList) {
+    const MatrixWorkspace_sptr &inputWS, const std::vector<double> &indexList) {
 
   const std::vector<int> backgroundRange{static_cast<int>(indexList.front()),
                                          static_cast<int>(indexList.back())};
@@ -193,7 +193,7 @@ void ReflectometryBackgroundSubtraction::init() {
   // Input workspace
   auto inputWSProp = std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "InputWorkspace", "An input workspace", Direction::Input,
-      boost::make_shared<CommonBinsValidator>());
+      std::make_shared<CommonBinsValidator>());
   const auto &inputWSPropRef = *inputWSProp;
   declareProperty(std::move(inputWSProp), "An input workspace.");
 
@@ -218,19 +218,19 @@ void ReflectometryBackgroundSubtraction::init() {
   std::vector<std::string> backgroundTypes = {"PerDetectorAverage",
                                               "Polynomial", "AveragePixelFit"};
   declareProperty("BackgroundCalculationMethod", "PerDetectorAverage",
-                  boost::make_shared<StringListValidator>(backgroundTypes),
+                  std::make_shared<StringListValidator>(backgroundTypes),
                   "The type of background reduction to perform.",
                   Direction::Input);
 
   // polynomial properties
-  auto nonnegativeInt = boost::make_shared<BoundedValidator<int>>();
+  auto nonnegativeInt = std::make_shared<BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
   declareProperty("DegreeOfPolynomial", 0, nonnegativeInt,
                   "Degree of the fitted polynomial.");
   std::array<std::string, 2> costFuncOpts{
       {"Least squares", "Unweighted least squares"}};
   declareProperty("CostFunction", "Least squares",
-                  boost::make_shared<ListValidator<std::string>>(costFuncOpts),
+                  std::make_shared<ListValidator<std::string>>(costFuncOpts),
                   "The cost function to be passed to the Fit algorithm.");
 
   setPropertySettings(

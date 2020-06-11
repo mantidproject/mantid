@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -59,13 +59,13 @@ public:
   detail::ThreadingBackend &backend() const;
 
 private:
-  Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
+  Communicator(std::shared_ptr<detail::ThreadingBackend> backend,
                const int rank);
 
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::communicator m_communicator;
 #endif
-  boost::shared_ptr<detail::ThreadingBackend> m_backend;
+  std::shared_ptr<detail::ThreadingBackend> m_backend;
   int m_rank{0};
 
   // For accessing constructor with threading backend.

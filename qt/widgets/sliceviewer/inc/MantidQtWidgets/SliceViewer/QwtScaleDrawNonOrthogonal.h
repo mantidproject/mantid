@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,7 +20,7 @@ public:
 
   QwtScaleDrawNonOrthogonal(
       QwtPlot *plot, ScreenDimension screenDimension,
-      Mantid::API::IMDWorkspace_sptr workspace, size_t dimX, size_t dimY,
+      const Mantid::API::IMDWorkspace_sptr &workspace, size_t dimX, size_t dimY,
       Mantid::Kernel::VMD slicePoint,
       MantidQt::SliceViewer::NonOrthogonalOverlay *gridPlot);
 
@@ -32,7 +32,8 @@ public:
   void updateSlicePoint(Mantid::Kernel::VMD newSlicepoint);
 
 private:
-  void setTransformationMatrices(Mantid::API::IMDWorkspace_sptr workspace);
+  void
+  setTransformationMatrices(const Mantid::API::IMDWorkspace_sptr &workspace);
   qreal getScreenBottomInXyz() const;
   qreal getScreenLeftInXyz() const;
 

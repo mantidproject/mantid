@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLReflectometry.h"
 
@@ -65,7 +65,7 @@ constexpr double mmToMeter(const double x) { return x * 1.e-3; }
  */
 Mantid::API::ITableWorkspace_sptr
 createPeakPositionTable(const PeakInfo &info) {
-  auto table = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+  auto table = std::make_shared<Mantid::DataObjects::TableWorkspace>();
   table->addColumn("double", "DetectorAngle");
   table->addColumn("double", "DetectorDistance");
   table->addColumn("double", "PeakCentre");
@@ -247,7 +247,7 @@ void LoadILLReflectometry::init() {
                   "User defined Bragg angle in degrees");
   const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength",
-                  boost::make_shared<StringListValidator>(availableUnits),
+                  std::make_shared<StringListValidator>(availableUnits),
                   "X unit of the OutputWorkspace");
 }
 
@@ -705,9 +705,9 @@ double LoadILLReflectometry::reflectometryPeak() {
   // generate Gaussian
   auto func =
       API::FunctionFactory::Instance().createFunction("CompositeFunction");
-  auto sum = boost::dynamic_pointer_cast<API::CompositeFunction>(func);
+  auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussian = boost::dynamic_pointer_cast<API::IPeakFunction>(func);
+  auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
   gaussian->setHeight(height);
   gaussian->setCentre(centreByMax);
   gaussian->setFwhm(fwhm);
@@ -719,8 +719,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   // call Fit child algorithm
   API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   fit->initialize();
-  fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<API::IFunction>(sum));
+  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
   fit->setProperty("InputWorkspace", integralWS);
   fit->setProperty("StartX", centreByMax - 3 * fwhm);
   fit->setProperty("EndX", centreByMax + 3 * fwhm);
@@ -802,7 +801,7 @@ void LoadILLReflectometry::initPixelWidth() {
     throw std::runtime_error("IDF should have a single 'detector' component.");
   }
   auto detector =
-      boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
+      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(
           detectorPanels.front());
   double widthInLogs;
   if (m_instrument != Supported::FIGARO) {
@@ -810,18 +809,18 @@ void LoadILLReflectometry::initPixelWidth() {
     widthInLogs = mmToMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-      m_log.warning() << "NeXus pixel width (mppx) " << widthInLogs
-                      << " differs from the IDF. Using the IDF value "
-                      << m_pixelWidth << '\n';
+      m_log.information() << "NeXus pixel width (mppx) " << widthInLogs
+                          << " differs from the IDF. Using the IDF value "
+                          << m_pixelWidth << '\n';
     }
   } else {
     m_pixelWidth = std::abs(detector->ystep());
     widthInLogs = mmToMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-      m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs
-                      << " differs from the IDF. Using the IDF value "
-                      << m_pixelWidth << '\n';
+      m_log.information() << "NeXus pixel width (mppy) " << widthInLogs
+                          << " differs from the IDF. Using the IDF value "
+                          << m_pixelWidth << '\n';
     }
   }
 }
@@ -984,13 +983,22 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     double pairCentre;
     double pairSeparation;
     try {
-      pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
-      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
+      pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp"); // in [m]
+      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100; // in [m]
+      m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap",
+                                                 pairSeparation, "meter", true);
+      m_localWorkspace->mutableRun().addProperty(
+          "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
     } catch (std::runtime_error &) {
       try {
-        pairCentre = mmToMeter(
-            doubleFromRun("VirtualChopper.MidChopper_Sample_distance"));
-        pairSeparation = doubleFromRun("Distance.ChopperGap");
+        pairCentre = mmToMeter(doubleFromRun(
+            "VirtualChopper.MidChopper_Sample_distance"));     // in [m]
+        pairSeparation = doubleFromRun("Distance.ChopperGap"); // in [m]
+        m_localWorkspace->mutableRun().addProperty(
+            "Distance.ChopperGap", pairSeparation, "meter", true);
+        m_localWorkspace->mutableRun().addProperty(
+            "VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
+            true);
       } catch (std::runtime_error &) {
         throw std::runtime_error(
             "Unable to extract chopper to sample distance");

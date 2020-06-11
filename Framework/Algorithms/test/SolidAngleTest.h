@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -102,9 +102,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve(inputSpace));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF");
 
@@ -148,9 +147,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve(inputSpace));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF")
 
@@ -203,9 +201,9 @@ public:
         output2 = AnalysisDataService::Instance().retrieve(outputWorkspace2));
 
     Workspace2D_sptr output2D_1 =
-        boost::dynamic_pointer_cast<Workspace2D>(output1);
+        std::dynamic_pointer_cast<Workspace2D>(output1);
     Workspace2D_sptr output2D_2 =
-        boost::dynamic_pointer_cast<Workspace2D>(output2);
+        std::dynamic_pointer_cast<Workspace2D>(output2);
     const size_t numberOfSpectra1 = output2D_1->getNumberHistograms();
     const size_t numberOfSpectra2 = output2D_2->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra1, numberOfSpectra2);
@@ -213,7 +211,7 @@ public:
     auto spectrumInfo2 = output2D_2->spectrumInfo();
     for (size_t i = 0; i < numberOfSpectra1; i++) {
       // all values after the start point of the second workspace should match
-      if (!(spectrumInfo2.isMasked(i) || spectrumInfo2.isMasked(i))) {
+      if (!(spectrumInfo1.isMasked(i) || spectrumInfo2.isMasked(i))) {
         TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(i)[0]);
       }
     }

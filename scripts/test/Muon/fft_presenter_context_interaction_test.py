@@ -1,13 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
 from mantid.api import FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -18,6 +18,7 @@ from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view_new
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 
 from Muon.GUI.Common.utilities.algorithm_utils import convert_to_field
+
 
 def retrieve_combobox_info(combo_box):
     output_list = []

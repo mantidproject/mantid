@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
@@ -41,16 +39,16 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.parameter_display_combo.blockSignals(True)
         name = self.parameter_display_combo.currentText()
         self.parameter_display_combo.clear()
-
         self.parameter_display_combo.addItems(data_list)
 
         index = self.parameter_display_combo.findText(name)
-        self.parameter_display_combo.blockSignals(False)
 
         if index != -1:
             self.parameter_display_combo.setCurrentIndex(index)
         else:
             self.parameter_display_combo.setCurrentIndex(0)
+
+        self.parameter_display_combo.blockSignals(False)
 
     def increment_display_combo_box(self):
         index = self.parameter_display_combo.currentIndex()
@@ -155,8 +153,11 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def set_slot_for_simul_fit_specifier_changed(self, slot):
         self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
-    def set_slot_for_fit_options_changed(self, slot):
-        self.fit_options_table.cellChanged.connect(slot)
+    def set_slot_for_minimiser_changed(self, slot):
+        self.minimizer_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_evaluation_type_changed(self, slot):
+        self.evaluation_combo.currentIndexChanged.connect(slot)
 
     @property
     def display_workspace(self):

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,7 +10,7 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <sstream>
 
@@ -202,9 +202,9 @@ private:
 };
 
 /// A shared pointer to a BoundingBox
-using BoundingBox_sptr = boost::shared_ptr<BoundingBox>;
+using BoundingBox_sptr = std::shared_ptr<BoundingBox>;
 /// A shared pointer to a const BoundingBox
-using BoundingBox_const_sptr = boost::shared_ptr<const BoundingBox>;
+using BoundingBox_const_sptr = std::shared_ptr<const BoundingBox>;
 
 /// Print out the bounding box values to a stream.
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,

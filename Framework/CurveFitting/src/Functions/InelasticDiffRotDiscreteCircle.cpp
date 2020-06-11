@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
@@ -141,10 +141,10 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
  * @param ws Pointer to workspace
  */
 void InelasticDiffRotDiscreteCircle::setWorkspace(
-    boost::shared_ptr<const API::Workspace> ws) {
+    std::shared_ptr<const API::Workspace> ws) {
   m_qValueCache.clear();
 
-  auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+  auto workspace = std::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (!workspace)
     return;
 

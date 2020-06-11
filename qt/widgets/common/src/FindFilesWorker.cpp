@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -44,7 +44,7 @@ FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
  * 1. Files are found directly by the FileFinder.  This is the default case.
  * 2. Files are found using the specified algorithm property.  In this case, a
  *    class user must have specified the algorithm and property via
- *    MWRunFiles::setAlgorithmProperty().
+ *    FileFinderWidget::setAlgorithmProperty().
  */
 void FindFilesWorker::run() {
   // Reset result member vars.

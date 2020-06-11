@@ -1,22 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid::Kernel;
 
 using namespace Mantid::API;
-
-using namespace std;
 
 namespace Mantid {
 namespace CurveFitting {
@@ -33,13 +34,13 @@ DECLARE_FUNCTION(Bk2BkExpConvPV)
 // ----------------------------
 /** Constructor and Desctructor
  */
-Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0), mLowTOF(0.0), mUpperTOF(0.0) {}
+Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0) {}
 
 /** Initialize:  declare paraemters
  */
 void Bk2BkExpConvPV::init() {
-  declareParameter("TOF_h", -0.0);
-  declareParameter("Height", 1.0);
+  declareParameter("X0", -0.0);
+  declareParameter("Intensity", 0.0);
   declareParameter("Alpha", 1.0);
   declareParameter("Beta", 1.0);
   declareParameter("Sigma2", 1.0);
@@ -48,13 +49,28 @@ void Bk2BkExpConvPV::init() {
 
 /** Set peak height
  */
-void Bk2BkExpConvPV::setHeight(const double h) { setParameter("Height", h); }
+void Bk2BkExpConvPV::setHeight(const double h) {
+  setParameter("Intensity", 1);
+  double h0 = height();
+
+  // avoid divide by zero
+  double minCutOff = 100.0 * std::numeric_limits<double>::min();
+  if (h0 >= 0 && h0 < minCutOff)
+    h0 = minCutOff;
+  else if (h0 < 0 && h0 > -minCutOff)
+    h0 = -minCutOff;
+
+  setParameter("Intensity", h / h0);
+}
 
 /** Get peak height
  */
 double Bk2BkExpConvPV::height() const {
-  double height = this->getParameter("Height");
-  return height;
+  double height[1];
+  double peakCentre[1];
+  peakCentre[0] = this->getParameter("X0");
+  this->functionLocal(height, peakCentre, 1);
+  return height[0];
 }
 
 /** Get peak's FWHM
@@ -80,14 +96,28 @@ void Bk2BkExpConvPV::setFwhm(const double w) {
 
 /** Set peak center
  */
-void Bk2BkExpConvPV::setCentre(const double c) { setParameter("TOF_h", c); }
+void Bk2BkExpConvPV::setCentre(const double c) { setParameter("X0", c); }
 
 /** Center
  */
-double Bk2BkExpConvPV::centre() const {
-  double tofh = getParameter("TOF_h");
+double Bk2BkExpConvPV::centre() const { return getParameter("X0"); }
 
-  return tofh;
+void Bk2BkExpConvPV::setMatrixWorkspace(
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
+  if (workspace) {
+    // convert alpha and beta to correct units so inital guess is resonable
+    auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    const auto centre = getParameter("X0");
+    const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
+    if (scaleFactor != 0) {
+      if (isActive(parameterIndex("Alpha")))
+        setParameter("Alpha", getParameter("Alpha") / scaleFactor);
+      if (isActive(parameterIndex("Beta")))
+        setParameter("Beta", getParameter("Beta") / scaleFactor);
+    }
+  }
+  IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }
 
 /** Implement the peak calculating formula
@@ -99,8 +129,8 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
   const double beta = this->getParameter("Beta");
   const double sigma2 = this->getParameter("Sigma2");
   const double gamma = this->getParameter("Gamma");
-  const double height = this->getParameter("Height");
-  const double tof_h = this->getParameter("TOF_h");
+  const double intensity = this->getParameter("Intensity");
+  const double x0 = this->getParameter("X0");
 
   double invert_sqrt2sigma = 1.0 / sqrt(2.0 * sigma2);
   double N = alpha * beta * 0.5 / (alpha + beta);
@@ -108,20 +138,18 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
   double H, eta;
   calHandEta(sigma2, gamma, H, eta);
 
-  /*
-  g_log.debug() << "DB1143:  nData = " << nData << " From " << xValues[0] << "
-  To " << xValues[nData-1]
-                << " TOF_h = " << tof_h << " Height = " << height << " alpha = "
-  << alpha << " beta = "
-                << beta << " H = " << H << " eta = " << eta << '\n';
-                */
+  g_log.debug() << "DB1143:  nData = " << nData << " From " << xValues[0]
+                << " To " << xValues[nData - 1] << " X0 = " << x0
+                << " Intensity = " << intensity << " alpha = " << alpha
+                << " beta = " << beta << " H = " << H << " eta = " << eta
+                << '\n';
 
   // 2. Do calculation for each data point
   for (size_t id = 0; id < nData; ++id) {
-    double dT = xValues[id] - tof_h;
+    double dT = xValues[id] - x0;
     double omega =
         calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
-    out[id] = height * omega;
+    out[id] = intensity * omega;
   }
 }
 
@@ -131,7 +159,7 @@ void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian * /*jacobian*/,
                                         const double * /*xValues*/,
                                         const size_t /*nData*/) {
   throw Mantid::Kernel::Exception::NotImplementedError(
-      "functionDerivLocal is not implemented for IkedaCarpenterPV.");
+      "functionDerivLocal is not implemented for Bk2BkExpConvPV.");
 }
 
 /** Numerical derivative
@@ -157,15 +185,15 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha,
   double z = (beta * sigma2 - x) * invert_sqrt2sigma;
 
   // 2. Calculate
-  double omega1 =
-      (1 - eta) * N * (exp(u) * gsl_sf_erfc(y) + std::exp(v) * gsl_sf_erfc(z));
+  double omega1 = (1 - eta) * N *
+                  (exp(u + gsl_sf_log_erfc(y)) + exp(v + gsl_sf_log_erfc(z)));
   double omega2;
   if (eta < 1.0E-8) {
     omega2 = 0.0;
   } else {
     omega2 = 2 * N * eta / M_PI * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
   }
-  double omega = omega1 + omega2;
+  double omega = omega1 - omega2;
 
   return omega;
 }
@@ -180,13 +208,13 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
 
   if (fabs(az) < 1.0E-8) {
     // If z = 0, then the result is infinity... diverge!
-    complex<double> r(1.0E300, 0.0);
+    std::complex<double> r(1.0E300, 0.0);
     e1 = r;
   } else if (az <= 10.0 || (rz < 0.0 && az < 20.0)) {
     // Some interesting region, equal to integrate to infinity, converged
-    complex<double> r(1.0, 0.0);
+    std::complex<double> r(1.0, 0.0);
     e1 = r;
-    complex<double> cr = r;
+    std::complex<double> cr = r;
 
     for (size_t k = 0; k < 150; ++k) {
       auto dk = double(k);
@@ -200,16 +228,16 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
 
     e1 = -e1 - log(z) + (z * e1);
   } else {
-    complex<double> ct0(0.0, 0.0);
+    std::complex<double> ct0(0.0, 0.0);
     for (int k = 120; k > 0; --k) {
-      complex<double> dk(double(k), 0.0);
+      std::complex<double> dk(double(k), 0.0);
       ct0 = dk / (10.0 + dk / (z + ct0));
     } // ENDFOR k
 
     e1 = 1.0 / (z + ct0);
     e1 = e1 * exp(-z);
     if (rz < 0.0 && fabs(imag(z)) < 1.0E-10) {
-      complex<double> u(0.0, 1.0);
+      std::complex<double> u(0.0, 1.0);
       e1 = e1 - (M_PI * u);
     }
   }

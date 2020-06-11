@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=unused-import
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import *
+
 
 class SelectNexusFilesByMetadataTest(unittest.TestCase):
 
@@ -65,11 +64,11 @@ class SelectNexusFilesByMetadataTest(unittest.TestCase):
 
     def test_string_criteria(self):
 
-        filelist = 'ILLD33_001030.nxs'
+        filelist = 'ILL/D33/001030.nxs'
         criteria = '$entry0/D33/name$ == "D33"'
         res = SelectNexusFilesByMetadata(FileList=filelist,NexusCriteria=criteria)
         outfiles = res.split(',')
-        self.assertTrue(outfiles[0].endswith('ILLD33_001030.nxs'),'Should be the file name')
+        self.assertTrue(outfiles[0].endswith('001030.nxs'),'Should be the file name')
 
 if __name__=="__main__":
     # run the test if only if the required package is present
@@ -78,4 +77,3 @@ if __name__=="__main__":
         unittest.main()
     except ImportError:
         pass
-

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -28,9 +28,13 @@ public:
                           const std::string &spDetTopic,
                           const std::string &sampleEnvTopic,
                           const std::string &chopperTopic);
-  ~KafkaHistoStreamDecoder();
+  ~KafkaHistoStreamDecoder() override;
+  // Disable copies since multiple subscribers will cause problems
   KafkaHistoStreamDecoder(const KafkaHistoStreamDecoder &) = delete;
   KafkaHistoStreamDecoder &operator=(const KafkaHistoStreamDecoder &) = delete;
+
+  // Allow moves though, since we only keep one copy still
+  KafkaHistoStreamDecoder(KafkaHistoStreamDecoder &&) noexcept;
 
   bool hasData() const noexcept override;
   bool hasReachedEndOfRun() noexcept override { return !m_capturing; }
@@ -39,8 +43,7 @@ private:
   void captureImplExcept() override;
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
-  void initLocalCaches(const std::string &rawMsgBuffer,
-                       const RunStartStruct &runStartData) override;
+  void initLocalCaches(const RunStartStruct &runStartData) override;
 
   void sampleDataFromMessage(const std::string &buffer) override;
 

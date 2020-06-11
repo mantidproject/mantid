@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -54,8 +54,9 @@ private:
   /// Load in the RKH file for that has the correction information
   API::MatrixWorkspace_sptr loadInFile(const std::string &corrFile);
   /// Multiply or divide the input workspace as specified by the user
-  void doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
-                     API::MatrixWorkspace_sptr rhs, const std::string &algName,
+  void doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs,
+                     const API::MatrixWorkspace_sptr &rhs,
+                     const std::string &algName,
                      API::MatrixWorkspace_sptr &result);
 };
 } // namespace Algorithms

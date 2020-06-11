@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -11,8 +11,8 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -36,8 +36,8 @@
 #include <QMessageBox>
 #include <QSettings>
 
-#include <limits>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
@@ -55,10 +55,6 @@ bool isPhysicalView() {
 }
 
 } // namespace
-
-const size_t InstrumentActor::INVALID_INDEX =
-    std::numeric_limits<size_t>::max();
-double InstrumentActor::m_tolerance = 0.00001;
 
 /**
  * Constructor. Creates a tree of GLActors. Each actor is responsible for
@@ -140,7 +136,7 @@ InstrumentActor::~InstrumentActor() { saveSettings(); }
  * value is ignored.
  */
 void InstrumentActor::setUpWorkspace(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
+    const std::shared_ptr<const Mantid::API::MatrixWorkspace> &sharedWorkspace,
     double scaleMin, double scaleMax) {
   m_WkspBinMinValue = DBL_MAX;
   m_WkspBinMaxValue = -DBL_MAX;
@@ -257,7 +253,7 @@ MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const {
  */
 void InstrumentActor::setMaskMatrixWorkspace(
     MatrixWorkspace_sptr wsMask) const {
-  m_maskWorkspace = wsMask;
+  m_maskWorkspace = std::move(wsMask);
 }
 
 void InstrumentActor::invertMaskWorkspace() const {
@@ -266,16 +262,15 @@ void InstrumentActor::invertMaskWorkspace() const {
   const std::string maskName = "__InstrumentActor_MaskWorkspace_invert";
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       maskName, getMaskMatrixWorkspace());
-  Mantid::API::IAlgorithm *invertAlg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(
-          "BinaryOperateMasks", -1);
+  auto invertAlg =
+      AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
   invertAlg->setChild(true);
   invertAlg->setPropertyValue("InputWorkspace1", maskName);
   invertAlg->setPropertyValue("OutputWorkspace", maskName);
   invertAlg->setPropertyValue("OperationType", "NOT");
   invertAlg->execute();
 
-  m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  m_maskWorkspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
   Mantid::API::AnalysisDataService::Instance().remove(maskName);
 }
@@ -289,7 +284,7 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspace() const {
   if (!m_maskWorkspace) {
     initMaskHelper();
   }
-  return boost::dynamic_pointer_cast<IMaskWorkspace>(m_maskWorkspace);
+  return std::dynamic_pointer_cast<IMaskWorkspace>(m_maskWorkspace);
 }
 
 /**
@@ -300,7 +295,7 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspace() const {
 IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const {
   if (!m_maskWorkspace)
     return IMaskWorkspace_sptr();
-  return boost::dynamic_pointer_cast<IMaskWorkspace>(m_maskWorkspace);
+  return std::dynamic_pointer_cast<IMaskWorkspace>(m_maskWorkspace);
 }
 
 /**
@@ -311,9 +306,7 @@ void InstrumentActor::applyMaskWorkspace() {
   if (m_maskWorkspace) {
     // Mask detectors
     try {
-      Mantid::API::IAlgorithm *alg =
-          Mantid::API::FrameworkManager::Instance().createAlgorithm(
-              "MaskDetectors", -1);
+      auto alg = AlgorithmManager::Instance().create("MaskDetectors", -1);
       alg->setPropertyValue("Workspace", wsName);
       alg->setProperty("MaskedWorkspace", m_maskWorkspace);
       alg->execute();
@@ -438,7 +431,7 @@ void InstrumentActor::setIntegrationRange(const double &xmin,
 double InstrumentActor::getIntegratedCounts(size_t index) const {
   auto i = getWorkspaceIndex(index);
   if (i == INVALID_INDEX)
-    return -1.0;
+    return InstrumentActor::INVALID_VALUE;
   return m_specIntegrs.at(i);
 }
 
@@ -602,14 +595,13 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 
   try {
     // rebin all spectra to the same binning
-    Mantid::API::IAlgorithm *alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Rebin", -1);
+    auto alg = AlgorithmManager::Instance().create("Rebin", -1);
     alg->setProperty("InputWorkspace", dws);
     alg->setPropertyValue("OutputWorkspace", outName);
     alg->setPropertyValue("Params", params);
     alg->execute();
 
-    ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(outName));
     Mantid::API::AnalysisDataService::Instance().remove(outName);
 
@@ -784,16 +776,14 @@ void InstrumentActor::setAutoscaling(bool on) {
  */
 Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
   const std::string maskName = "__InstrumentActor_MaskWorkspace";
-  Mantid::API::IAlgorithm *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",
-                                                                -1);
+  auto alg = AlgorithmManager::Instance().create("ExtractMask", -1);
   alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
   alg->setLogging(false);
   alg->execute();
 
   Mantid::API::MatrixWorkspace_sptr maskWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
   Mantid::API::AnalysisDataService::Instance().remove(maskName);
   return maskWorkspace;
@@ -855,21 +845,21 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
   //  std::cerr<<"To   "<<Xto<<Yto<<Zto<<'\n';
 
   double sZ = Zfrom.scalar_prod(Zto);
-  if (fabs(sZ - 1) < m_tolerance) // vectors the same
+  if (fabs(sZ - 1) < TOLERANCE) // vectors the same
   {
     double sX = Xfrom.scalar_prod(Xto);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) {
+    } else if (fabs(sX + 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180, Zfrom);
     } else {
       R = Mantid::Kernel::Quat(Xfrom, Xto);
     }
-  } else if (fabs(sZ + 1) < m_tolerance) // rotated by 180 degrees
+  } else if (fabs(sZ + 1) < TOLERANCE) // rotated by 180 degrees
   {
-    if (fabs(Xfrom.scalar_prod(Xto) - 1) < m_tolerance) {
+    if (fabs(Xfrom.scalar_prod(Xto) - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180., Xfrom);
-    } else if (fabs(Yfrom.scalar_prod(Yto) - 1) < m_tolerance) {
+    } else if (fabs(Yfrom.scalar_prod(Yto) - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(180., Yfrom);
     } else {
       R = Mantid::Kernel::Quat(180., Xto) * Mantid::Kernel::Quat(Xfrom, Xto);
@@ -881,15 +871,15 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     const auto X1 = normalize(Zfrom.cross_prod(Zto));
 
     double sX = Xfrom.scalar_prod(Xto);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R = Mantid::Kernel::Quat(Zfrom, Zto);
       return;
     }
 
     sX = Xfrom.scalar_prod(X1);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R1 = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
+    } else if (fabs(sX + 1) < TOLERANCE) // 180 degree rotation
     {
       R1 = Mantid::Kernel::Quat(180., Zfrom);
     } else {
@@ -906,9 +896,9 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     // Rotation R3 around ZZ by gamma
     Mantid::Kernel::Quat R3;
     sX = Xto.scalar_prod(X1);
-    if (fabs(sX - 1) < m_tolerance) {
+    if (fabs(sX - 1) < TOLERANCE) {
       R3 = Mantid::Kernel::Quat();
-    } else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
+    } else if (fabs(sX + 1) < TOLERANCE) // 180 degree rotation
     {
       R3 = Mantid::Kernel::Quat(180., Zto);
     } else {
@@ -1022,6 +1012,11 @@ void InstrumentActor::calculateIntegratedSpectra(
   // Use the workspace function to get the integrated spectra
   workspace.getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue,
                                  wholeRange());
+  // replace any values that are not finite
+  std::replace_if(m_specIntegrs.begin(), m_specIntegrs.end(),
+                  [](double x) { return !std::isfinite(x); },
+                  InstrumentActor::INVALID_VALUE);
+
   m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
 }
 
@@ -1055,17 +1050,9 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
     m_DataMinValue = DBL_MAX;
     m_DataMaxValue = -DBL_MAX;
 
-    if (std::any_of(m_specIntegrs.begin(), m_specIntegrs.end(),
-                    [](double val) { return !std::isfinite(val); }))
-      throw std::runtime_error(
-          "The workspace contains values that cannot be displayed (infinite "
-          "or NaN).\n"
-          "Please run ReplaceSpecialValues algorithm for correction.");
-
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // Ignore monitors if multiple detectors aren't grouped.
-    // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < m_specIntegrs.size(); i++) {
       const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
       if (spectrumDefinition.size() == 1 &&
@@ -1075,6 +1062,8 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
       auto sum = m_specIntegrs[i];
 
+      if (sum == InstrumentActor::INVALID_VALUE)
+        continue;
       if (sum < m_DataMinValue)
         m_DataMinValue = sum;
       if (sum > m_DataMaxValue)
@@ -1141,7 +1130,7 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
 
   // walk out from the selected component
   const Mantid::Geometry::IComponent *paramComp = comp.get();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parentComp;
+  std::shared_ptr<const Mantid::Geometry::IComponent> parentComp;
   while (paramComp) {
     auto id = paramComp->getComponentID();
     auto &compParamNames = mapCmptToNameVector[id];

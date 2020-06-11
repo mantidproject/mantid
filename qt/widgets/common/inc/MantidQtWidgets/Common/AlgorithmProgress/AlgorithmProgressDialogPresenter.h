@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,8 +36,9 @@ public:
                                    AlgorithmProgressModel &model);
 
   void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID, double progress,
-                             QString message) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID, const double progress,
+                             const QString message, const double estimatedTime,
+                             const int progressPrecision) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
   size_t getNumberTrackedAlgorithms();
 

@@ -13,7 +13,7 @@
 #include "IEnggDiffractionUserMsg.h"
 #include "ui_EnggDiffMultiRunFittingWidget.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 
@@ -27,7 +27,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingQtWidget
 
 public:
   EnggDiffMultiRunFittingQtWidget(
-      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
+      std::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
@@ -35,11 +35,11 @@ public:
 
   boost::optional<RunLabel> getSelectedRunLabel() const override;
 
-  void plotFittedPeaks(
-      const std::vector<boost::shared_ptr<QwtData>> &curve) override;
+  void
+  plotFittedPeaks(const std::vector<std::shared_ptr<QwtData>> &curve) override;
 
   void
-  plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
+  plotFocusedRun(const std::vector<std::shared_ptr<QwtData>> &curve) override;
 
   void plotToSeparateWindow(
       const std::string &focusedRunName,
@@ -56,9 +56,9 @@ public:
   void setEnabled(const bool enabled) override;
 
   void setMessageProvider(
-      boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;
+      std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;
 
-  void setPresenter(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
+  void setPresenter(std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
                         presenter) override;
 
   bool showFitResultsSelected() const override;
@@ -93,13 +93,13 @@ private:
 
   std::unique_ptr<QwtPlotZoomer> m_zoomTool;
 
-  boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
+  std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
 
-  boost::shared_ptr<IEnggDiffractionPythonRunner> m_pythonRunner;
+  std::shared_ptr<IEnggDiffractionPythonRunner> m_pythonRunner;
 
   Ui::EnggDiffMultiRunFittingWidget m_ui;
 
-  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
+  std::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 };
 
 } // namespace CustomInterfaces

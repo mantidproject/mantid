@@ -18,6 +18,7 @@ set(REDUCTION_SRC_FILES
     FloodCorrections.cpp
     Instrument.cpp
     MonitorCorrections.cpp
+    BackgroundSubtraction.cpp
     PolarizationCorrections.cpp
     RangeInLambda.cpp
     RunsTable.cpp
@@ -50,6 +51,7 @@ set(REDUCTION_INC_FILES
     FloodCorrections.h
     Instrument.h
     MonitorCorrections.h
+    BackgroundSubtraction.h
     PolarizationCorrections.h
     RangeInLambda.h
     ReductionType.h

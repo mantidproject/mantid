@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,10 +31,12 @@ public:
   }
   static void destroySuite(LoadILLDiffractionTest *suite) { delete suite; }
 
-  void setUp() override {
+  LoadILLDiffractionTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+  }
 
+  void setUp() override {
     m_oldFacility = ConfigService::Instance().getFacility().name();
     ConfigService::Instance().setFacility("ILL");
 
@@ -325,7 +327,7 @@ public:
     TS_ASSERT_DELTA(theta, 147.55, 0.001)
   }
 
-  void do_test_D2B_single_file(std::string dataType) {
+  void do_test_D2B_single_file(const std::string &dataType) {
     // Test a D2B detector scan file with 25 detector positions
 
     const int NUMBER_OF_TUBES = 128;

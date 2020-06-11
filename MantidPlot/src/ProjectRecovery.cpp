@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ProjectRecovery.h"
 
@@ -43,6 +43,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <ctime>
+#include <fstream>
 #include <iomanip>
 #include <mutex>
 #include <signal.h>
@@ -264,7 +265,7 @@ Poco::File addLockFile(const Poco::Path &lockFilePath) {
  */
 bool checkIfEmptyGroup(const Mantid::API::Workspace_sptr &ws) {
   if (auto groupWS =
-          boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+          std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
     if (groupWS->isEmpty()) {
       g_log.debug("Empty group was present when recovery ran so was removed");
       return true;
@@ -339,7 +340,8 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
   }
 }
 
-bool ProjectRecovery::clearAllCheckpoints(Poco::Path path) const noexcept {
+bool ProjectRecovery::clearAllCheckpoints(const Poco::Path &path) const
+    noexcept {
   try {
     Poco::File(path).remove(true);
     return true;

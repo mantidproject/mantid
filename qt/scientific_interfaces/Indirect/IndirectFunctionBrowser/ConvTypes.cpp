@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvTypes.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -56,6 +62,7 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::TW_TAU, "Tau"},
     {ParamID::TW_CENTRE, "Centre"},
     {ParamID::DELTA_HEIGHT, "Height"},
+    {ParamID::DELTA_CENTER, "Centre"},
     {ParamID::TEMPERATURE, "Temp"},
     {ParamID::SE_HEIGHT, "Height"},
     {ParamID::SE_TAU, "Tau"},
@@ -139,7 +146,7 @@ std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
     {true,
      {"DeltaFunction",
       "DeltaFunction",
-      {ParamID::DELTA_HEIGHT, ParamID::DELTA_HEIGHT}}},
+      {ParamID::DELTA_HEIGHT, ParamID::DELTA_CENTER}}},
 };
 
 template <>

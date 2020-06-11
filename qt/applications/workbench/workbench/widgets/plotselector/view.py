@@ -1,20 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import, print_function
-
 import re
 from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QHeaderView, QLineEdit,
                             QMenu, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
-from mantid.py3compat.enum import IntEnum
+from enum import IntEnum
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.flowlayout import FlowLayout

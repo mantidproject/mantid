@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/CatalogGetDataSets.h"
 #include "MantidAPI/CatalogManager.h"
@@ -18,7 +18,7 @@ DECLARE_ALGORITHM(CatalogGetDataSets)
 /// Initialisation methods
 void CatalogGetDataSets::init() {
   declareProperty("InvestigationId", "",
-                  boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
+                  std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "ID of the selected investigation");
   declareProperty("Session", "",
                   "The session information of the catalog to use.");

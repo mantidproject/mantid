@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SumOverlappingTubes.h"
 
@@ -44,7 +44,7 @@ using namespace Kernel;
 
 void SumOverlappingTubes::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "InputWorkspaces", boost::make_shared<ADSValidator>()),
+                      "InputWorkspaces", std::make_shared<ADSValidator>()),
                   "The names of the input workspaces as a list. You may also "
                   "group workspaces using the GUI or [[GroupWorkspaces]], and "
                   "specify the name of the group instead.");
@@ -53,13 +53,13 @@ void SumOverlappingTubes::init() {
                   "Name of the output workspace.");
   std::vector<std::string> outputTypes{"2DTubes", "2D", "1D"};
   declareProperty("OutputType", "2D",
-                  boost::make_shared<StringListValidator>(outputTypes),
+                  std::make_shared<StringListValidator>(outputTypes),
                   "Whether to have the output in raw 2D, with no "
                   "Debye-Scherrer cone correction, 2D or 1D.");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
           "ScatteringAngleBinning", "0.05",
-          boost::make_shared<RebinParamsValidator>(), Direction::Input),
+          std::make_shared<RebinParamsValidator>(), Direction::Input),
       "A comma separated list of the first scattering angle, the scattering "
       "angle step size and the final scattering angle. Optionally this can "
       "also be a single number, which is the angle step size. In this case, "
@@ -71,7 +71,7 @@ void SumOverlappingTubes::init() {
       "If true the negative scattering angles are cropped (ignored).");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "HeightAxis", boost::make_shared<RebinParamsValidator>(true, true)),
+          "HeightAxis", std::make_shared<RebinParamsValidator>(true, true)),
       "A comma separated list of the first y value, the y value step size and "
       "the final y value. This can also be a single number, which "
       "is the y value step size. In this case, the boundary of binning will "
@@ -89,7 +89,7 @@ void SumOverlappingTubes::init() {
                       "SplitCounts", false, Direction::Input),
                   "A flag to split the counts between adjacent bins");
   auto toleranceValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
+      std::make_shared<BoundedValidator<double>>(0.0, 0.0);
   toleranceValidator->clearUpper();
   declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
                   "The relative tolerance for the scattering angles before the "
@@ -117,7 +117,7 @@ void SumOverlappingTubes::exec() {
   auto newAxis = std::make_unique<NumericAxis>(m_heightAxis);
   newAxis->setUnit("Label");
   auto yLabelUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(newAxis->unit());
+      std::dynamic_pointer_cast<Kernel::Units::Label>(newAxis->unit());
   yLabelUnit->setLabel("Height", "m");
   newAxis->unit() = yLabelUnit;
   outputWS->replaceAxis(1, std::move(newAxis));
@@ -125,8 +125,8 @@ void SumOverlappingTubes::exec() {
   outputWS->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWS->getAxis(0)->unit();
-  boost::shared_ptr<Units::Label> xLabel =
-      boost::dynamic_pointer_cast<Units::Label>(xUnit);
+  std::shared_ptr<Units::Label> xLabel =
+      std::dynamic_pointer_cast<Units::Label>(xUnit);
   xLabel->setLabel("Scattering Angle", "degrees");
 
   const auto normalisation = performBinning(outputWS);

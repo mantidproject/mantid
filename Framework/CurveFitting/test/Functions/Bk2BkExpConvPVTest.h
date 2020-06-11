@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -29,8 +29,8 @@ public:
 
     Bk2BkExpConvPV peak;
     peak.initialize();
-    peak.setParameter("Height", 100.0);
-    peak.setParameter("TOF_h", 400.0);
+    peak.setParameter("Intensity", 100.0);
+    peak.setParameter("X0", 400.0);
     peak.setParameter("Alpha", 1.0);
     peak.setParameter("Beta", 1.5);
     peak.setParameter("Sigma2", 200.0);

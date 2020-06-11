@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,7 +23,8 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
 */
-class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL LevenbergMarquardtMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer() override;

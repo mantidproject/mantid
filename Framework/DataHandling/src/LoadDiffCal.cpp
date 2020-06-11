@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadDiffCal.h"
 
@@ -132,7 +132,7 @@ bool endswith(const std::string &str, const std::string &ending) {
 }
 
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
-                        GroupingWorkspace_sptr wksp) {
+                        const GroupingWorkspace_sptr &wksp) {
   alg->declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
@@ -141,7 +141,7 @@ void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
 }
 
 void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
-                       MaskWorkspace_sptr wksp) {
+                       const MaskWorkspace_sptr &wksp) {
   alg->declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
@@ -150,7 +150,7 @@ void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
 }
 
 void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
-                      ITableWorkspace_sptr wksp) {
+                      const ITableWorkspace_sptr &wksp) {
   alg->declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "OutputCalWorkspace", prefix + "_cal", Direction::Output),
@@ -219,7 +219,7 @@ void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
   Progress progress(this, .4, .6, numDet);
 
   GroupingWorkspace_sptr wksp =
-      boost::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+      std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
   wksp->setTitle(m_filename);
   wksp->mutableRun().addProperty("Filename", m_filename);
 
@@ -244,7 +244,7 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   Progress progress(this, .6, .8, numDet);
 
   MaskWorkspace_sptr wksp =
-      boost::make_shared<DataObjects::MaskWorkspace>(m_instrument);
+      std::make_shared<DataObjects::MaskWorkspace>(m_instrument);
   wksp->setTitle(m_filename);
   wksp->mutableRun().addProperty("Filename", m_filename);
 
@@ -284,7 +284,7 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
   double tofMax = getProperty("TofMax");
   bool useTofMax = !isEmpty(tofMax);
 
-  ITableWorkspace_sptr wksp = boost::make_shared<DataObjects::TableWorkspace>();
+  ITableWorkspace_sptr wksp = std::make_shared<DataObjects::TableWorkspace>();
   wksp->setTitle(m_filename);
   wksp->addColumn("int", "detid");
   wksp->addColumn("double", "difc");
@@ -389,7 +389,7 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
         "Do not have an instrument defined before loading separate grouping");
   }
   GroupingWorkspace_sptr wksp =
-      boost::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+      std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
 
   if (filename.find(".cal") != std::string::npos) {
     auto alg = createChildAlgorithm("LoadDiffCal");
@@ -444,7 +444,7 @@ void LoadDiffCal::runLoadCalFile() {
     MatrixWorkspace_sptr wksp = alg->getProperty("OutputMaskWorkspace");
     setMaskWSProperty(
         this, m_workspaceName,
-        boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(wksp));
+        std::dynamic_pointer_cast<DataObjects::MaskWorkspace>(wksp));
   }
 
   if (makeGroupWS) {

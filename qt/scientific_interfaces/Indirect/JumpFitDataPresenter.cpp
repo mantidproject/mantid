@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataPresenter.h"
 #include "JumpFitDataTablePresenter.h"
@@ -16,7 +16,7 @@ namespace IDA {
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
-    IFQFitObserver *fQTemplateBrowser)
+    IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view,
                                std::make_unique<JumpFitDataTablePresenter>(
                                    model, view->getDataTable())),
@@ -39,7 +39,8 @@ JumpFitDataPresenter::JumpFitDataPresenter(
 
   updateParameterSelectionEnabled();
   m_notifier = Notifier<IFQFitObserver>();
-  m_notifier.subscribe(fQTemplateBrowser);
+  m_notifier.subscribe(SingleFunctionTemplateBrowser);
+  showParameterComboBoxes();
 }
 
 void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
@@ -55,20 +56,20 @@ void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
 }
 
 void JumpFitDataPresenter::handleMultipleInputSelected() {
-  hideParameterComboBoxes();
-  m_notifier.notify(
-      [](IFQFitObserver &obs) { obs.updateDataType(DataType::ALL); });
+  m_notifier.notify([](IFQFitObserver &obs) {
+    obs.updateAvailableFunctions(availableFits.at(DataType::ALL));
+  });
 }
 
 void JumpFitDataPresenter::handleSingleInputSelected() {
-  showParameterComboBoxes();
   m_dataIndex = TableDatasetIndex{0};
   std::string currentText = m_cbParameterType->currentText().toStdString();
   auto dataType = m_cbParameterType->currentText() == QString("Width")
                       ? DataType::WIDTH
                       : DataType::EISF;
-  m_notifier.notify(
-      [&dataType](IFQFitObserver &obs) { obs.updateDataType(dataType); });
+  m_notifier.notify([&dataType](IFQFitObserver &obs) {
+    obs.updateAvailableFunctions(availableFits.at(dataType));
+  });
 }
 
 void JumpFitDataPresenter::hideParameterComboBoxes() {
@@ -139,11 +140,12 @@ void JumpFitDataPresenter::handleParameterTypeChanged(
     const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
   updateAvailableParameters(parameter);
+  emit dataChanged();
   auto dataType =
       parameter == QString("Width") ? DataType::WIDTH : DataType::EISF;
-  m_notifier.notify(
-      [&dataType](IFQFitObserver &obs) { obs.updateDataType(dataType); });
-  emit dataChanged();
+  m_notifier.notify([&dataType](IFQFitObserver &obs) {
+    obs.updateAvailableFunctions(availableFits.at(dataType));
+  });
 }
 
 void JumpFitDataPresenter::setDialogParameterNames(

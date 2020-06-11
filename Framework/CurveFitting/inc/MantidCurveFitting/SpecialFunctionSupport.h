@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include <cmath>
 #include <complex>
 #include <functional>
@@ -28,7 +28,7 @@ namespace SpecialFunctionSupport {
 /// Compute exp(z)*E1(z) where z is complex and E1(z) is the Exponential
 /// Integral
 std::complex<double>
-    DLLExport exponentialIntegral(const std::complex<double> &z);
+    MANTID_CURVEFITTING_DLL exponentialIntegral(const std::complex<double> &z);
 
 } // namespace SpecialFunctionSupport
 } // namespace CurveFitting

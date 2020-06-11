@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -22,7 +22,7 @@ using namespace Mantid::Geometry;
 
 class PointGroupTest : public CxxTest::TestSuite {
 public:
-  void check_point_group(std::string name, V3D hkl, size_t numEquiv,
+  void check_point_group(const std::string &name, V3D hkl, size_t numEquiv,
                          V3D *equiv) {
     PointGroup_sptr testedPointGroup =
         PointGroupFactory::Instance().createPointGroup(name);

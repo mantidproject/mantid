@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -121,7 +121,7 @@ protected:
   @param ws :: Pointer to the workspace to be deleted.
   */
   virtual void preDeleteHandle(const std::string &wsName,
-                               const Mantid::API::Workspace_sptr ws) {
+                               const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
@@ -138,7 +138,7 @@ protected:
   @param ws :: The shared pointer to the workspace to be added.
   */
   virtual void addHandle(const std::string &wsName,
-                         const Mantid::API::Workspace_sptr ws) {
+                         const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
@@ -149,7 +149,7 @@ protected:
   @param ws :: The shared pointer to the workspace to be deleted.
   */
   virtual void afterReplaceHandle(const std::string &wsName,
-                                  const Mantid::API::Workspace_sptr ws) {
+                                  const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }

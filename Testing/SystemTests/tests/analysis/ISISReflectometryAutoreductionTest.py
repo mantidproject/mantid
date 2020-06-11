@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 System Test for ISIS Reflectometry autoreduction
@@ -249,10 +249,7 @@ def MakeTuples(rlist):
         if len(split_title) != 3:
             split_title = re.split("~", idx)
             if len(split_title) != 2:
-                logger.warning(
-                    'cannot transfer ' +
-                    idx +
-                    ' title is not in the right form ')
+                logger.warning('cannot transfer ' + idx + ' title is not in the right form ')
             else:
                 theta = 0
                 split_title.append(theta)  # Append a dummy theta value.

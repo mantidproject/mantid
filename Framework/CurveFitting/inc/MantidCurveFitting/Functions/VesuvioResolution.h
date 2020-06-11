@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -64,9 +64,8 @@ public:
   /// Ensure the object is ready to be fitted
   void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wsIndex, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wsIndex, double startX, double endX) override;
   /// Pre-calculate the resolution components values
   void cacheResolutionComponents(const Algorithms::DetectorParams &detpar,
                                  const ResolutionParams &respar);
@@ -97,7 +96,7 @@ private:
   /// Store the mass values
   double m_mass;
   /// Voigt function
-  boost::shared_ptr<API::IPeakFunction> m_voigt;
+  std::shared_ptr<API::IPeakFunction> m_voigt;
   /// Total resolution width
   double m_resolutionSigma;
   /// Lorentz FWHM

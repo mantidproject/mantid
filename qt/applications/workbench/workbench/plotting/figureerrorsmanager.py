@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 """
@@ -103,9 +103,10 @@ class FigureErrorsManager(object):
 
     @staticmethod
     def toggle_errors(curve, view_props):
-        hide_errors = view_props.hide_errors or view_props.hide
-        setattr(curve, 'hide_errors', hide_errors)
-        set_errorbars_hidden(curve, hide_errors)
+        if curve_has_errors(curve):
+            hide_errors = view_props.hide_errors or view_props.hide
+            setattr(curve, 'hide_errors', hide_errors)
+            set_errorbars_hidden(curve, hide_errors)
 
     @classmethod
     def replot_curve(cls, ax, curve, plot_kwargs):
@@ -115,12 +116,13 @@ class FigureErrorsManager(object):
                 if axis:
                     plot_kwargs['axis'] = axis
             try:
-                new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
+                new_curve = ax.replot_artist(curve, errorbars=curve_has_errors(curve), **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes
                 new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
         else:
             new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
-        setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
+        if hasattr(new_curve, 'errorevery'):
+            setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
         return new_curve
 
     @staticmethod

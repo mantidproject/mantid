@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -99,10 +99,9 @@ public:
 };
 
 /// Shared pointer to IDetector
-using IDetector_sptr = boost::shared_ptr<Mantid::Geometry::IDetector>;
+using IDetector_sptr = std::shared_ptr<Mantid::Geometry::IDetector>;
 /// Shared pointer to IDetector (const version)
-using IDetector_const_sptr =
-    boost::shared_ptr<const Mantid::Geometry::IDetector>;
+using IDetector_const_sptr = std::shared_ptr<const Mantid::Geometry::IDetector>;
 
 } // namespace Geometry
 } // namespace Mantid

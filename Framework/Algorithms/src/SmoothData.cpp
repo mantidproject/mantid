@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SmoothData.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -29,7 +29,7 @@ void SmoothData::init() {
                                             Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   std::vector<int> npts0{3};
-  auto min = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
+  auto min = std::make_shared<Kernel::ArrayBoundedValidator<int>>();
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(
@@ -73,11 +73,12 @@ void SmoothData::exec() {
     int npts = nptsGroup[0];
     if (groupWS) {
       const int group = validateSpectrumInGroup(static_cast<size_t>(i));
-      if (group < 0)
+      if (group == -1) {
         npts = 3;
-      else
-        // group is never 0. We can safely subtract.
+      } else {
+        assert(group != 0);
         npts = nptsGroup[group - 1];
+      }
     }
     if (npts >= vecSize) {
       g_log.error("The number of averaging points requested is larger than the "
@@ -103,7 +104,7 @@ void SmoothData::exec() {
 
   // Set the output workspace to its property
   setProperty("OutputWorkspace", outputWorkspace);
-}
+} // namespace Algorithms
 //=============================================================================
 /** Verify that all the contributing detectors to a spectrum belongs to the same
  * group

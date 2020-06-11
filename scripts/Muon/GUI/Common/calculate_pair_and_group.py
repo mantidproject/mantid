@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
 def calculate_group_data(context, group_name, run, rebin, workspace_name):
-    processed_data = _run_pre_processing(context, run, rebin)
+    processed_data = get_pre_process_workspace_name(run, context)
 
     params = _get_MuonGroupingCounts_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
@@ -21,7 +19,7 @@ def calculate_group_data(context, group_name, run, rebin, workspace_name):
 
 
 def calculate_pair_data(context, pair_name, run, rebin, workspace_name):
-    processed_data = _run_pre_processing(context, run, rebin)
+    processed_data = get_pre_process_workspace_name(run, context)
 
     params = _get_MuonPairingAsymmetry_parameters(context, pair_name, run)
     params["InputWorkspace"] = processed_data
@@ -31,20 +29,27 @@ def calculate_pair_data(context, pair_name, run, rebin, workspace_name):
 
 
 def estimate_group_asymmetry_data(context, group_name, run, rebin, workspace_name, unormalised_workspace_name):
-    processed_data = _run_pre_processing(context, run, rebin)
+    processed_data = get_pre_process_workspace_name(run, context)
 
     params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
-    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params, workspace_name, unormalised_workspace_name)
+    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params, workspace_name,
+                                                                                        unormalised_workspace_name)
 
     return group_asymmetry, group_asymmetry_unnorm
 
 
-def _run_pre_processing(context, run, rebin):
+def run_pre_processing(context, run, rebin):
     params = _get_pre_processing_params(context, run, rebin)
     params["InputWorkspace"] = context.data_context.loaded_workspace_as_group(run)
     processed_data = algorithm_utils.run_MuonPreProcess(params)
     return processed_data
+
+
+def get_pre_process_workspace_name(run, context) -> str:
+    instrument = context.data_context.instrument
+    workspace_name = "".join(["__", instrument, str(run[0]), "_pre_processed_data"])
+    return workspace_name
 
 
 def _get_pre_processing_params(context, run, rebin):
@@ -63,7 +68,8 @@ def _get_pre_processing_params(context, run, rebin):
         if context.gui_context['TimeZeroFromFile']:
             time_offset = 0.0
         else:
-            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context['TimeZero']
+            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context[
+                'TimeZero']
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
@@ -83,6 +89,9 @@ def _get_pre_processing_params(context, run, rebin):
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
         pass
+
+    pre_process_params["OutputWorkspace"] = get_pre_process_workspace_name(run, context)
+
     return pre_process_params
 
 
@@ -136,7 +145,8 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
     if 'GroupRangeMax' in context.gui_context:
         params['AsymmetryTimeMax'] = context.gui_context['GroupRangeMax']
     else:
-        params['AsymmetryTimeMax'] = max(context.data_context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
+        params['AsymmetryTimeMax'] = max(
+            context.data_context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
 
     if context.data_context.is_multi_period() and 'SummedPeriods' in context.gui_context:
         summed_periods = context.gui_context["SummedPeriods"]

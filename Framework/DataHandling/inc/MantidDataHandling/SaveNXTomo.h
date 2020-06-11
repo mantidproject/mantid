@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -87,16 +87,16 @@ private:
   ::NeXus::File setupFile();
 
   /// Writes a single workspace into the file
-  void writeSingleWorkspace(const DataObjects::Workspace2D_sptr workspace,
+  void writeSingleWorkspace(const DataObjects::Workspace2D_sptr &workspace,
                             ::NeXus::File &nxFile);
 
   /// Write various pieces of data from the workspace log with checks on the
   /// structure of the nexus file
-  void writeLogValues(const DataObjects::Workspace2D_sptr workspace,
+  void writeLogValues(const DataObjects::Workspace2D_sptr &workspace,
                       ::NeXus::File &nxFile, int thisFileInd);
-  void writeIntensityValue(const DataObjects::Workspace2D_sptr workspace,
+  void writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace,
                            ::NeXus::File &nxFile, int thisFileInd);
-  void writeImageKeyValue(const DataObjects::Workspace2D_sptr workspace,
+  void writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace,
                           ::NeXus::File &nxFile, int thisFileInd);
 
   /// Main exec routine, called for group or individual workspace processing.

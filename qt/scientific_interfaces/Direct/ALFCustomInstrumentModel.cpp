@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "ALFCustomInstrumentModel.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -204,7 +203,7 @@ void ALFCustomInstrumentModel::extractSingleTube() {
 CompositeFunction_sptr ALFCustomInstrumentModel::getDefaultFunction() {
 
   CompositeFunction_sptr composite =
-      boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
+      std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
           Mantid::API::FunctionFactory::Instance().createFunction(
               "CompositeFunction"));
 

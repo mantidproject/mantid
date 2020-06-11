@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -102,7 +103,7 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
 void setMonitorWorkspace(MatrixWorkspace &self,
                          const boost::python::object &value) {
 
-  MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr monWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       Mantid::PythonInterface::ExtractWorkspace(value)());
   self.setMonitorWorkspace(monWS);
 }
@@ -111,8 +112,8 @@ void setMonitorWorkspace(MatrixWorkspace &self,
  *
  *@return weak pointer to monitor workspace used by python
  */
-boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
-  return boost::weak_ptr<Workspace>(self.monitorWorkspace());
+std::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
+  return std::weak_ptr<Workspace>(self.monitorWorkspace());
 }
 /**
  * Clear monitor workspace attached to for current workspace.
@@ -295,6 +296,43 @@ boost::python::tuple findY(MatrixWorkspace &self, double value, tuple start) {
   return make_tuple(idx.first, idx.second);
 }
 
+/**
+ * Gets the bin edges from one matrix workspace and applies them to another
+ * workspace.
+ * @param self :: The MatrixWorkspace whose bin edges are being set.
+ * @param ws :: The MatrixWorkspace from which the bin edges are retrieved.
+ * @param getIndex :: The index from which the bin edges are retrieved.
+ * @param setIndex :: The index at which the bin edges are being set.
+ */
+void applyBinEdgesFromAnotherWorkspace(MatrixWorkspace &self,
+                                       const MatrixWorkspace &ws,
+                                       const size_t getIndex,
+                                       const size_t setIndex) {
+  self.setBinEdges(setIndex, ws.binEdges(getIndex));
+}
+
+/**
+ * Gets the points from one matrix workspace and applies them to another
+ * workspace.
+ * @param self :: The MatrixWorkspace whose points are being set.
+ * @param ws :: The MatrixWorkspace from which the points are retrieved.
+ * @param getIndex :: The index from which the points are retrieved.
+ * @param setIndex :: The index at which the points are being set.
+ */
+void applyPointsFromAnotherWorkspace(MatrixWorkspace &self,
+                                     const MatrixWorkspace &ws,
+                                     const size_t getIndex,
+                                     const size_t setIndex) {
+  self.setPoints(setIndex, ws.points(getIndex));
+}
+
+std::vector<size_t>
+getIndicesFromDetectorIDs(MatrixWorkspace &self,
+                          const boost::python::list &detIDs) {
+  return self.getIndicesFromDetectorIDs(
+      Converters::PySequenceToVector<int>(detIDs)());
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -335,6 +373,10 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("spec_no")),
            "Returns workspace index correspondent to the given spectrum "
            "number. Throws if no such spectrum is present in the workspace")
+      .def("getIndicesFromDetectorIDs", &getIndicesFromDetectorIDs,
+           (arg("self"), arg("detID_list")),
+           "Returns a list of workspace indices from the corrresponding "
+           "detector IDs.")
       .def("getDetector", &MatrixWorkspace::getDetector,
            return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),
@@ -410,6 +452,14 @@ void export_MatrixWorkspace() {
       .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
            "Replaces one of the workspace's axes with the new one provided.")
+      .def("applyBinEdgesFromAnotherWorkspace",
+           &applyBinEdgesFromAnotherWorkspace,
+           (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),
+           "Sets the bin edges at setIndex to be the bin edges of ws at "
+           "getIndex.")
+      .def("applyPointsFromAnotherWorkspace", &applyPointsFromAnotherWorkspace,
+           (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),
+           "Sets the points at setIndex to be the points of ws at getIndex.")
 
       //--------------------------------------- Read spectrum data
       //-------------------------

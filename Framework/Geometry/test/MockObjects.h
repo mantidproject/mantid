@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * MockObjects.h
@@ -116,8 +116,11 @@ public:
   MOCK_CONST_METHOD0(getIntensity, double());
   MOCK_CONST_METHOD0(getSigmaIntensity, double());
   MOCK_CONST_METHOD0(getIntensityOverSigma, double());
+  MOCK_CONST_METHOD0(getAbsorptionWeightedPathLength, double());
   MOCK_METHOD1(setIntensity, void(double m_Intensity));
   MOCK_METHOD1(setSigmaIntensity, void(double m_SigmaIntensity));
+  MOCK_METHOD1(setAbsorptionWeightedPathLength,
+               void(double m_AbsorptionWeightedPathLength));
   MOCK_CONST_METHOD0(getBinCount, double());
   MOCK_METHOD1(setBinCount, void(double m_BinCount));
   MOCK_CONST_METHOD0(getGoniometerMatrix, Mantid::Kernel::Matrix<double>());

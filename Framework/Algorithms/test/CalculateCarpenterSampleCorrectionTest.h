@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CalculateCarpenterSampleCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -85,8 +85,7 @@ public:
 
     // convert to wavelength
     auto convertUnitsAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "ConvertUnits");
+        Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
     convertUnitsAlg->setProperty("Target", "Wavelength");
@@ -124,8 +123,8 @@ public:
     // Check the correction workspaces in the group
     Workspace_sptr absPtr = test_output_WS->getItem(0);
     Workspace_sptr msPtr = test_output_WS->getItem(1);
-    auto absWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
-    auto msWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
+    auto absWksp = std::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
+    auto msWksp = std::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
     TS_ASSERT(absWksp);
     TS_ASSERT(msWksp);
 
@@ -141,8 +140,7 @@ public:
       TS_ASSERT_DELTA(abs_corr_actual[i], abs_corr_expected[i], 0.00001);
 
     // Check applying absorption correction
-    auto divide =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Divide");
+    auto divide = Mantid::API::AlgorithmManager::Instance().create("Divide");
     divide->initialize();
     divide->setPropertyValue("LHSWorkspace", "TestInputWS");
     divide->setPropertyValue("RHSWorkspace", absWksp->getName());
@@ -170,7 +168,7 @@ public:
 
     // Check applying multiple scattering correction
     auto multiply =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Multiply");
+        Mantid::API::AlgorithmManager::Instance().create("Multiply");
     multiply->initialize();
     multiply->setPropertyValue("LHSWorkspace", "TestInputWS");
     multiply->setPropertyValue("RHSWorkspace", msWksp->getName());
@@ -189,8 +187,7 @@ public:
       TS_ASSERT_DELTA(ms_ws_actual[i], ms_ws_expected[i], 0.00001);
 
     // Check full correction comparison
-    auto minus =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Minus");
+    auto minus = Mantid::API::AlgorithmManager::Instance().create("Minus");
     minus->initialize();
     minus->setPropertyValue("LHSWorkspace", "TestAbsWS");
     minus->setPropertyValue("RHSWorkspace", "TestMultScatWS");
@@ -247,13 +244,13 @@ public:
             outName));
     // Check the correction workspaces in the group
     auto absWksp =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
     auto msWksp =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
     TS_ASSERT(absWksp);
     TS_ASSERT(msWksp);
 
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outputWS);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outputWS);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // Check absorption correction

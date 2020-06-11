@@ -1,34 +1,15 @@
 #!/usr/bin/env python
-
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import argparse
 import os
 import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
-
-from six import itervalues
-try:
-    # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-    # Remove this when everything is switched to qtpy
-    import sip
-    sip.setapi('QString', 2)
-    sip.setapi('QVariant', 2)
-    sip.setapi('QDate', 2)
-    sip.setapi('QDateTime', 2)
-    sip.setapi('QTextStream', 2)
-    sip.setapi('QTime', 2)
-    sip.setapi('QUrl', 2)
-except (AttributeError, ImportError):
-    # PyQt < v4.6
-    pass
 
 # Prevents erros in systemtests that use matplotlib directly
 os.environ['MPLBACKEND'] = 'Agg'
@@ -327,7 +308,7 @@ def main():
     if options.dry_run:
         print()
         print("Tests that would be executed:")
-        for suites in itervalues(test_list):
+        for suites in test_list.values():
             for suite in suites:
                 print('  ' + suite.name)
     elif not options.clean:

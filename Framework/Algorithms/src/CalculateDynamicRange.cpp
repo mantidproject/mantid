@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateDynamicRange.h"
 #include "MantidAPI/Run.h"
@@ -57,7 +57,7 @@ const std::string CalculateDynamicRange::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CalculateDynamicRange::init() {
-  auto unitValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto unitValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::InOut, unitValidator),
                   "An input workspace.");
@@ -73,9 +73,9 @@ void CalculateDynamicRange::init() {
  * @param indices : the list of workspace indices
  * @param compName : the name of the detector component
  */
-void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
-                                             const std::vector<size_t> &indices,
-                                             const std::string &compName = "") {
+void CalculateDynamicRange::calculateQMinMax(
+    const MatrixWorkspace_sptr &workspace, const std::vector<size_t> &indices,
+    const std::string &compName = "") {
   const auto &spectrumInfo = workspace->spectrumInfo();
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();
@@ -135,8 +135,7 @@ void CalculateDynamicRange::exec() {
       instrument->getDetectorsInBank(dets, compName);
       if (dets.empty()) {
         const auto component = instrument->getComponentByName(compName);
-        const auto det =
-            boost::dynamic_pointer_cast<const IDetector>(component);
+        const auto det = std::dynamic_pointer_cast<const IDetector>(component);
         if (!det) {
           g_log.error() << "No detectors found in component '" << compName
                         << "'\n";
@@ -146,9 +145,9 @@ void CalculateDynamicRange::exec() {
       }
       if (!dets.empty()) {
         detIDs.reserve(dets.size());
-        for (const auto &det : dets) {
-          detIDs.emplace_back(det->getID());
-        }
+        std::transform(dets.begin(), dets.end(), std::back_inserter(detIDs),
+                       [](const auto &det) { return det->getID(); });
+
         const auto indices = workspace->getIndicesFromDetectorIDs(detIDs);
         calculateQMinMax(workspace, indices, compName);
       }

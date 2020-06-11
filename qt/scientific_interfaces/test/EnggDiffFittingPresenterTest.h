@@ -15,6 +15,8 @@
 #include "EnggDiffFittingViewMock.h"
 #include "EnggDiffractionParamMock.h"
 #include <cxxtest/TestSuite.h>
+#include <utility>
+
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces;
@@ -40,8 +42,9 @@ public:
 
   EnggDiffFittingPresenterNoThread(
       IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
-      boost::shared_ptr<IEnggDiffractionParam> mainParam)
-      : EnggDiffFittingPresenter(view, std::move(model), nullptr, mainParam) {}
+      std::shared_ptr<IEnggDiffractionParam> mainParam)
+      : EnggDiffFittingPresenter(view, std::move(model), nullptr,
+                                 std::move(mainParam)) {}
 
 private:
   // not async at all
@@ -309,7 +312,7 @@ public:
   void test_browse_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -338,7 +341,7 @@ public:
   void test_browse_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -373,7 +376,7 @@ public:
   void test_save_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -400,7 +403,7 @@ public:
   void test_save_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),

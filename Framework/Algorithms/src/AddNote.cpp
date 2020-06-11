@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AddNote.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -76,12 +76,12 @@ void AddNote::init() {
                   "An InOut workspace that will store the new log information");
 
   declareProperty("Name", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "A String name for either a new time series log to be "
                   "created or an existing name to update",
                   Direction::Input);
 
-  auto dtv = boost::make_shared<DateTimeValidator>();
+  auto dtv = std::make_shared<DateTimeValidator>();
   dtv->allowEmpty(true);
 
   declareProperty(
@@ -92,7 +92,7 @@ void AddNote::init() {
       Direction::Input);
 
   declareProperty(
-      "Value", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Value", "", std::make_shared<MandatoryValidator<std::string>>(),
       "A String value for the series log at the given time", Direction::Input);
 
   declareProperty(

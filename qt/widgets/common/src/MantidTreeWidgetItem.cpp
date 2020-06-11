@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
@@ -25,7 +25,7 @@ MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget *parent)
 /**Constructor.
  * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
  */
-MantidTreeWidgetItem::MantidTreeWidgetItem(QStringList list,
+MantidTreeWidgetItem::MantidTreeWidgetItem(const QStringList &list,
                                            MantidTreeWidget *parent)
     : QTreeWidgetItem(list), m_parent(parent), m_sortPos(0) {}
 

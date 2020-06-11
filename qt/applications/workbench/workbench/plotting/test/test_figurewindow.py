@@ -1,22 +1,22 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
 import unittest
 
 import matplotlib
-matplotlib.use('Qt5Agg')  # noqa  # we need Qt for events to work
-import matplotlib.pyplot as plt
-
-from mantid import plots  # noqa  # register mantid projection
-from mantid.py3compat.mock import Mock, patch
+from mantid import plots  # noqa: F401  # need mantid projection
+from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figurewindow import FigureWindow
+
+matplotlib.use('Qt5Agg')
+import matplotlib.pyplot as plt  # noqa: E402
 
 
 @start_qapplication
@@ -45,9 +45,11 @@ class Test(unittest.TestCase):
 
     def test_drag_and_drop_adds_plot_to_correct_axes(self):
         ax = self.fig.get_axes()[1]
+        dpi_ratio = self.fig.canvas.devicePixelRatio() or 1
         # Find the center of the axes and simulate a drop event there
-        ax_x_centre = (ax.xaxis.clipbox.x1 + ax.xaxis.clipbox.x0)/2
-        ax_y_centre = (ax.yaxis.clipbox.y1 + ax.yaxis.clipbox.y0)/2
+        # Need to use Qt logical pixels to factor in dpi
+        ax_x_centre = (ax.xaxis.clipbox.min[0] + ax.xaxis.clipbox.width*0.5)/dpi_ratio
+        ax_y_centre = (ax.xaxis.clipbox.min[1] + ax.xaxis.clipbox.height*0.5)/dpi_ratio
         mock_event = Mock(pos=lambda: Mock(x=lambda: ax_x_centre, y=lambda: ax_y_centre))
         mock_event.mimeData().text.return_value = "ws"
         with patch('workbench.plotting.figurewindow.QMainWindow.dropEvent'):

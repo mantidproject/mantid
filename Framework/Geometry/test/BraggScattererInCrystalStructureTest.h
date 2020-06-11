@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -78,7 +78,7 @@ public:
   }
 
   void testUnitCellStringValidator() {
-    IValidator_sptr validator = boost::make_shared<UnitCellStringValidator>();
+    IValidator_sptr validator = std::make_shared<UnitCellStringValidator>();
 
     // non-working examples
     TS_ASSERT_DIFFERS(validator->isValid("1.0"), "");
@@ -97,8 +97,8 @@ public:
 
 private:
   BraggScattererInCrystalStructure_sptr getDefaultScatterer() {
-    boost::shared_ptr<MockBraggScatterer> mockScatterer =
-        boost::make_shared<MockBraggScatterer>();
+    std::shared_ptr<MockBraggScatterer> mockScatterer =
+        std::make_shared<MockBraggScatterer>();
     EXPECT_CALL(*mockScatterer,
                 afterScattererPropertySet(A<const std::string &>()))
         .WillRepeatedly(Return());

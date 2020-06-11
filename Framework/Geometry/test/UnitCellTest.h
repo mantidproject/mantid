@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -169,5 +169,54 @@ public:
 
     TS_ASSERT_DIFFERS(precisionLimit.c(), precisionLimitOther.c());
     TS_ASSERT_DELTA(precisionLimit.c(), precisionLimitOther.c(), 1e-9);
+  }
+
+  void test_equals_when_unitcell_identical() {
+    const UnitCell a(2.0, 4.0, 5.0, 90.0, 100.0, 102.0);
+    const UnitCell b(a);
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equals_when_unitcell_differs_in_a() {
+    const UnitCell a(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
+    UnitCell b(a);
+    b.seta(2.0);
+    TS_ASSERT_DIFFERS(a, b);
+  }
+
+  void test_not_equals_when_unitcell_differs_in_b() {
+    const UnitCell a(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
+    UnitCell b(a);
+    b.setb(2.0);
+    TS_ASSERT_DIFFERS(a, b);
+  }
+
+  void test_not_equals_when_unitcell_differs_in_c() {
+    const UnitCell a(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
+    UnitCell b(a);
+    b.setc(2.0);
+    TS_ASSERT_DIFFERS(a, b);
+  }
+
+  void test_not_equals_when_unitcell_differs_in_alpha() {
+    const UnitCell a(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
+    UnitCell b(a);
+    b.setalpha(100);
+    TS_ASSERT_DIFFERS(a, b);
+  }
+
+  void test_not_equals_when_unitcell_differs_in_beta() {
+    const UnitCell a(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
+    UnitCell b(a);
+    b.setbeta(100);
+    TS_ASSERT_DIFFERS(a, b);
+  }
+
+  void test_not_equals_when_unitcell_differs_in_gamma() {
+    const UnitCell a(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
+    UnitCell b(a);
+    b.setgamma(100);
+    TS_ASSERT_DIFFERS(a, b);
   }
 };

@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import sys
@@ -27,8 +26,8 @@ class SANSWideAngleCorrection(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("SampleData", "", direction = Direction.Input),
-                             "A workspace cropped to the detector to be reduced (the SAME as the input to [[Q1D]]); "+
-                             "used to verify the solid angle. The workspace is not modified, just inspected.")
+                             "A workspace cropped to the detector to be reduced (the SAME as the input to [[Q1D]]); "
+                             + "used to verify the solid angle. The workspace is not modified, just inspected.")
         self.declareProperty(MatrixWorkspaceProperty("TransmissionData","",direction=Direction.Input),
                              "The transmission data calculated, referred to as <math>T_0</math> in equations in discussion section")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","",direction=Direction.Output),

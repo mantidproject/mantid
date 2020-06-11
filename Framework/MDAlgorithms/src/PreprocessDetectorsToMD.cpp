@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -29,7 +29,7 @@ PreprocessDetectorsToMD::PreprocessDetectorsToMD()
 
 /** Initialize the algorithm's properties. */
 void PreprocessDetectorsToMD::init() {
-  auto ws_valid = boost::make_shared<Kernel::CompositeValidator>();
+  auto ws_valid = std::make_shared<Kernel::CompositeValidator>();
   // workspace needs instrument
   ws_valid->add<API::InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units
@@ -102,7 +102,7 @@ void PreprocessDetectorsToMD::exec() {
       this->getProperty("UpdateMasksInfo")) {
     std::string wsName = this->getPointerToProperty("OutputWorkspace")->value();
     if (API::AnalysisDataService::Instance().doesExist(wsName)) {
-      targWS = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+      targWS = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
           API::AnalysisDataService::Instance().retrieve(wsName));
       if (targWS) {
         auto *pMasksArray = targWS->getColDataArray<int>("detMask");
@@ -131,13 +131,13 @@ void PreprocessDetectorsToMD::exec() {
 }
 
 /** helper method to create resulting table workspace */
-boost::shared_ptr<DataObjects::TableWorkspace>
+std::shared_ptr<DataObjects::TableWorkspace>
 PreprocessDetectorsToMD::createTableWorkspace(
     const API::MatrixWorkspace_const_sptr &inputWS) {
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
-  auto targWS = boost::make_shared<TableWorkspace>(nHist);
+  auto targWS = std::make_shared<TableWorkspace>(nHist);
   // detectors positions
   targWS->addColumn("V3D", "DetDirections");
   // sample-detector distance;
@@ -399,7 +399,7 @@ void PreprocessDetectorsToMD::buildFakeDetectorsPositions(
 /// function checks if source workspace still has information about detectors.
 /// Some ws (like rebinned one) do not have this information any more.
 bool PreprocessDetectorsToMD::isDetInfoLost(
-    Mantid::API::MatrixWorkspace_const_sptr inWS2D) const {
+    const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) const {
   auto pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
   // if this is numeric axis, then the detector's information has been lost:
   return pYAxis != nullptr;

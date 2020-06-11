@@ -43,7 +43,7 @@ class ScriptingLangDialog : public QDialog, public Scripted {
 
 public:
   ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent,
-                      Qt::WFlags fl = nullptr);
+                      const Qt::WFlags &fl = nullptr);
 
 public slots:
   void updateLangList();

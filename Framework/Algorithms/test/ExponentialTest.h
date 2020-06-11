@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -77,7 +77,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        evout = boost::dynamic_pointer_cast<EventWorkspace>(
+        evout = std::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("test_ev_out")));
 
     TS_ASSERT(!evout); // should not be an event workspace
@@ -98,8 +98,8 @@ public:
 
 private:
   // loopOrientation 0=Horizontal, 1=Vertical
-  void checkData(MatrixWorkspace_sptr work_in1,
-                 MatrixWorkspace_sptr work_out1) {
+  void checkData(const MatrixWorkspace_sptr &work_in1,
+                 const MatrixWorkspace_sptr &work_out1) {
 
     for (size_t i = 0; i < work_out1->size(); i++) {
       double sig1 =
@@ -123,7 +123,7 @@ private:
     }
   }
   // loopOrientation 0=Horizontal, 1=Vertical
-  void setError(MatrixWorkspace_sptr work_in1) {
+  void setError(const MatrixWorkspace_sptr &work_in1) {
 
     for (size_t i = 0; i < work_in1->size(); i++) {
       double sig1 =

@@ -25,7 +25,7 @@ set(
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/InterfaceManager.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MantidDesktopServices.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MessageDisplay.h
-  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MWRunFiles.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FileFinderWidget.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
@@ -105,6 +105,7 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                      Qt4::QtCore
                      Qt4::QtGui
                      Qt4::QtOpenGL
+		     Qt4::Qscintilla
                      Qwt5
                      ${PYTHON_LIBRARIES}
                    FOLDER Qt4

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,14 +42,15 @@ private:
   void runPostProcessing();
 
   void replaceChunk(Mantid::API::Workspace_sptr chunkWS);
-  void addChunk(Mantid::API::Workspace_sptr chunkWS);
-  void addMatrixWSChunk(API::Workspace_sptr accumWS,
-                        API::Workspace_sptr chunkWS);
+  void addChunk(const Mantid::API::Workspace_sptr &chunkWS);
+  void addMatrixWSChunk(const API::Workspace_sptr &accumWS,
+                        const API::Workspace_sptr &chunkWS);
   void addMDWSChunk(API::Workspace_sptr &accumWS,
                     const API::Workspace_sptr &chunkWS);
-  void appendChunk(Mantid::API::Workspace_sptr chunkWS);
-  API::Workspace_sptr appendMatrixWSChunk(API::Workspace_sptr accumWS,
-                                          Mantid::API::Workspace_sptr chunkWS);
+  void appendChunk(const Mantid::API::Workspace_sptr &chunkWS);
+  API::Workspace_sptr
+  appendMatrixWSChunk(API::Workspace_sptr accumWS,
+                      const Mantid::API::Workspace_sptr &chunkWS);
   void updateDefaultBinBoundaries(API::Workspace *workspace);
 
   /// The "accumulation" workspace = after adding, but before post-processing

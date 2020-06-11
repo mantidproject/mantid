@@ -1,8 +1,6 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR}
                       ${HDF5_INCLUDE_DIRS})
 
   include_directories(../../TestHelpers/inc ../../DataHandling/inc
@@ -31,8 +29,7 @@ if(CXXTEST_FOUND)
                         MDAlgorithms
                         Nexus
                         ${MUPARSER_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES}
+                        gmock
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES})
 

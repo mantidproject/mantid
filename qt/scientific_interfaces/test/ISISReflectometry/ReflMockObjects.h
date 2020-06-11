@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -29,7 +29,6 @@
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
@@ -39,8 +38,8 @@
 #include <QMap>
 #include <QString>
 #include <QVariant>
-#include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
+#include <memory>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace Mantid::API;
@@ -78,15 +77,22 @@ public:
   MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());
+  MOCK_METHOD1(notifySetRoundPrecision, void(int &));
+  MOCK_METHOD0(notifyResetRoundPrecision, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
+  MOCK_CONST_METHOD0(getUnsavedBatchFlag, bool());
+  MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
+  MOCK_CONST_METHOD0(isBatchUnsaved, bool());
+  MOCK_METHOD1(setBatchUnsaved, void(bool));
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -113,12 +119,18 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD0(notifyTableChanged, void());
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_CONST_METHOD0(isOperationPrevented, bool());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(isOverwritingTablePrevented, bool());
+  MOCK_CONST_METHOD0(isOverwriteBatchPrevented, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
+  MOCK_METHOD1(setRoundPrecision, void(int &));
+  MOCK_METHOD0(resetRoundPrecision, void());
   MOCK_METHOD0(notifySearchComplete, void());
 };
 
@@ -194,19 +206,23 @@ public:
 class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
-  MOCK_METHOD3(search,
-               Mantid::API::ITableWorkspace_sptr(const std::string &,
-                                                 const std::string &,
-                                                 SearchType searchType));
-  MOCK_METHOD3(startSearchAsync,
-               bool(const std::string &, const std::string &, SearchType));
+  MOCK_METHOD4(search,
+               SearchResults(const std::string &, const std::string &,
+                             const std::string &, SearchType searchType));
+  MOCK_METHOD4(startSearchAsync, bool(const std::string &, const std::string &,
+                                      const std::string &, SearchType));
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
-  MOCK_METHOD2(setSearchResultError, void(int, const std::string &));
   MOCK_METHOD0(reset, void());
-  MOCK_CONST_METHOD3(searchSettingsChanged,
+  MOCK_CONST_METHOD4(searchSettingsChanged,
                      bool(const std::string &, const std::string &,
-                          SearchType));
+                          const std::string &, SearchType));
+};
+
+class MockSearcherSubscriber : public SearcherSubscriber {
+public:
+  MOCK_METHOD0(notifySearchComplete, void());
+  MOCK_METHOD0(notifySearchFailed, void());
 };
 
 class MockRunNotifier : public IRunNotifier {
@@ -223,8 +239,7 @@ public:
 
 class MockSearchModel : public ISearchModel {
 public:
-  MOCK_METHOD2(addDataFromTable,
-               void(Mantid::API::ITableWorkspace_sptr, const std::string &));
+  MOCK_METHOD1(mergeNewResults, void(SearchResults const &));
   MOCK_CONST_METHOD1(getRowData, SearchResult const &(int));
   MOCK_METHOD2(setError, void(int, std::string const &));
   MOCK_METHOD0(clear, void());
@@ -239,6 +254,7 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+  MOCK_METHOD0(askUserDiscardChanges, bool());
   MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));
   MOCK_METHOD1(askUserForSaveFileName, std::string(const std::string &));
 };
@@ -315,6 +331,8 @@ public:
   MOCK_METHOD0(getAlgorithms,
                std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
+  MOCK_CONST_METHOD0(getProcessPartial, bool());
+  MOCK_CONST_METHOD0(getProcessAll, bool());
 };
 
 class MockBatchJobAlgorithm : public IBatchJobAlgorithm,

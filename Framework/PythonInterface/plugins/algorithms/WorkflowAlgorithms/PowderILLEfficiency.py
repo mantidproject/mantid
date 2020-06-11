@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import math
 import numpy as np
 import numpy.ma as ma
@@ -807,6 +805,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         if self._out_response:
             RenameWorkspace(InputWorkspace=response_ws, OutputWorkspace=self._out_response)
             self.setProperty('OutputResponseWorkspace', self._out_response)
+
 
 #Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderILLEfficiency)

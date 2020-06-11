@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/FunctionGenerator.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/FortranDefs.h"
 
 namespace Mantid {
@@ -16,7 +17,8 @@ namespace Functions {
 /**
 Calculates crystal field spectra.
 */
-class DLLExport CrystalFieldMultiSpectrum : public API::FunctionGenerator {
+class MANTID_CURVEFITTING_DLL CrystalFieldMultiSpectrum
+    : public API::FunctionGenerator {
 public:
   CrystalFieldMultiSpectrum();
   std::string name() const override { return "CrystalFieldMultiSpectrum"; }

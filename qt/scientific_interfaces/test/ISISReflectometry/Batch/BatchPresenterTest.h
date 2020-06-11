@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -43,7 +43,7 @@ public:
         m_instrument(makeEmptyInstrument()),
         m_runsTable(m_instruments, 0.1, ReductionJobs()),
         m_slicing(), m_mockAlgorithmsList{
-                         boost::make_shared<MockBatchJobAlgorithm>()} {
+                         std::make_shared<MockBatchJobAlgorithm>()} {
     Mantid::API::FrameworkManager::Instance();
   }
 
@@ -113,6 +113,74 @@ public:
   void testOtherPresentersUpdatedWhenReductionResumed() {
     auto presenter = makePresenter();
     expectReductionResumed();
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testJobRunnerGetProcessAll() {
+    auto presenter = makePresenter();
+    TS_ASSERT_EQUALS(m_jobRunner->getProcessAll(), false);
+    expectReductionResumed();
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testJobRunnerGetProcessPartial() {
+    auto presenter = makePresenter();
+    TS_ASSERT_EQUALS(m_jobRunner->getProcessPartial(), false);
+    expectReductionResumed();
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testWarnProcessAllWhenReductionResumedOptionChecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessAllChecked())
+        .WillByDefault(Return(true));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessAllPrevented())
+        .Times(1)
+        .WillOnce(Return(true));
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testNoWarnProcessAllWhenReductionResumedOptionUnchecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessAllChecked())
+        .WillByDefault(Return(false));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessAllPrevented())
+        .Times(1)
+        .WillOnce(Return(false));
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testWarnProcessPartialGroupWhenReductionResumedOptionChecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessPartialGroupChecked())
+        .WillByDefault(Return(true));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented())
+        .Times(1)
+        .WillOnce(Return(true));
+    presenter->notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testNoWarnProcessPartialGroupWhenReductionResumedOptionUnchecked() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnProcessPartialGroupChecked())
+        .WillByDefault(Return(false));
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented())
+        .Times(1)
+        .WillOnce(Return(false));
     presenter->notifyResumeReductionRequested();
     verifyAndClear();
   }
@@ -303,7 +371,7 @@ public:
   void testNotifyAlgorithmStarted() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
     EXPECT_CALL(*m_jobRunner, algorithmStarted(algorithm))
         .Times(1)
@@ -317,7 +385,7 @@ public:
   void testNotifyAlgorithmComplete() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
     EXPECT_CALL(*m_jobRunner, algorithmComplete(algorithm))
         .Times(1)
@@ -331,7 +399,7 @@ public:
   void testOutputWorkspacesSavedOnAlgorithmComplete() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_savePresenter, shouldAutosave())
         .Times(1)
         .WillOnce(Return(true));
@@ -351,7 +419,7 @@ public:
   void testOutputWorkspacesNotSavedIfAutosaveDisabled() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_savePresenter, shouldAutosave())
         .Times(1)
         .WillOnce(Return(false));
@@ -368,7 +436,7 @@ public:
   void testNotifyAlgorithmError() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
-        boost::make_shared<MockBatchJobAlgorithm>();
+        std::make_shared<MockBatchJobAlgorithm>();
     auto const errorMessage = std::string("test error");
     auto row = makeRow();
     EXPECT_CALL(*m_jobRunner, algorithmError(algorithm, errorMessage))
@@ -436,6 +504,21 @@ public:
         .Times(1)
         .WillOnce(Return(progress));
     TS_ASSERT_EQUALS(presenter->percentComplete(), progress);
+    verifyAndClear();
+  }
+
+  void testRunsPresenterNotifiesSetRoundPrecision() {
+    auto presenter = makePresenter();
+    auto prec = 2;
+    EXPECT_CALL(*m_runsPresenter, setRoundPrecision(prec));
+    presenter->notifySetRoundPrecision(prec);
+    verifyAndClear();
+  }
+
+  void testRunsPresenterNotifiesResetRoundPrecision() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, resetRoundPrecision());
+    presenter->notifyResetRoundPrecision();
     verifyAndClear();
   }
 
@@ -508,6 +591,8 @@ private:
     // The mock job runner should by default return our default algorithms list
     ON_CALL(*m_jobRunner, getAlgorithms())
         .WillByDefault(Return(m_mockAlgorithmsList));
+    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(false));
+    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(false));
     // The mock runs presenter should by default return true when autoreduction
     // is resumed
     ON_CALL(*m_runsPresenter, resumeAutoreduction())
@@ -523,6 +608,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_instrumentPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_savePresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_jobRunner));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }
 
   void expectReductionResumed() {

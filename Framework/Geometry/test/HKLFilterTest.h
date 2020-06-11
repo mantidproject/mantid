@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,7 +14,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -46,7 +46,7 @@ public:
   }
 
   void testUnaryLogicOperation() {
-    HKLFilter_const_sptr filter = boost::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr filter = std::make_shared<MockHKLFilter>();
 
     TS_ASSERT_THROWS_NOTHING(MockHKLFilterUnaryLogicOperation op(filter));
 
@@ -59,8 +59,8 @@ public:
   }
 
   void testBinaryLogicOperation() {
-    HKLFilter_const_sptr lhs = boost::make_shared<MockHKLFilter>();
-    HKLFilter_const_sptr rhs = boost::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr lhs = std::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr rhs = std::make_shared<MockHKLFilter>();
 
     TS_ASSERT_THROWS_NOTHING(MockHKLFilterBinaryLogicOperation op(lhs, rhs));
 
@@ -78,8 +78,8 @@ public:
   }
 
   void testHKLFilterNot() {
-    boost::shared_ptr<const MockHKLFilter> filter =
-        boost::make_shared<MockHKLFilter>();
+    std::shared_ptr<const MockHKLFilter> filter =
+        std::make_shared<MockHKLFilter>();
 
     EXPECT_CALL(*filter, isAllowed(_))
         .WillOnce(Return(true))
@@ -91,31 +91,31 @@ public:
     TS_ASSERT_EQUALS(notFilter.isAllowed(V3D(1, 1, 1)), true);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(
-        boost::const_pointer_cast<MockHKLFilter>(filter).get()));
+        std::const_pointer_cast<MockHKLFilter>(filter).get()));
   }
 
   void testHKLFilterNotOperator() {
-    HKLFilter_const_sptr filter = boost::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr filter = std::make_shared<MockHKLFilter>();
 
     HKLFilter_const_sptr notFilter = ~filter;
 
-    boost::shared_ptr<const HKLFilterNot> notFilterCasted =
-        boost::dynamic_pointer_cast<const HKLFilterNot>(notFilter);
+    std::shared_ptr<const HKLFilterNot> notFilterCasted =
+        std::dynamic_pointer_cast<const HKLFilterNot>(notFilter);
     TS_ASSERT(notFilterCasted);
 
     TS_ASSERT_EQUALS(notFilterCasted->getOperand(), filter);
   }
 
   void testHKLFilterAnd() {
-    boost::shared_ptr<const MockHKLFilter> lhs =
-        boost::make_shared<MockHKLFilter>();
+    std::shared_ptr<const MockHKLFilter> lhs =
+        std::make_shared<MockHKLFilter>();
     EXPECT_CALL(*lhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true));
 
-    boost::shared_ptr<const MockHKLFilter> rhs =
-        boost::make_shared<MockHKLFilter>();
+    std::shared_ptr<const MockHKLFilter> rhs =
+        std::make_shared<MockHKLFilter>();
     EXPECT_CALL(*rhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false));
@@ -127,19 +127,19 @@ public:
     TS_ASSERT_EQUALS(andFilter.isAllowed(V3D(1, 1, 1)), false);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(
-        boost::const_pointer_cast<MockHKLFilter>(lhs).get()));
+        std::const_pointer_cast<MockHKLFilter>(lhs).get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(
-        boost::const_pointer_cast<MockHKLFilter>(rhs).get()));
+        std::const_pointer_cast<MockHKLFilter>(rhs).get()));
   }
 
   void testHKLFilterAndOperator() {
-    HKLFilter_const_sptr lhs = boost::make_shared<MockHKLFilter>();
-    HKLFilter_const_sptr rhs = boost::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr lhs = std::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr rhs = std::make_shared<MockHKLFilter>();
 
     HKLFilter_const_sptr andFilter = lhs & rhs;
 
-    boost::shared_ptr<const HKLFilterAnd> andFilterCasted =
-        boost::dynamic_pointer_cast<const HKLFilterAnd>(andFilter);
+    std::shared_ptr<const HKLFilterAnd> andFilterCasted =
+        std::dynamic_pointer_cast<const HKLFilterAnd>(andFilter);
 
     TS_ASSERT(andFilterCasted);
 
@@ -148,16 +148,16 @@ public:
   }
 
   void testHKLFilterOr() {
-    boost::shared_ptr<const MockHKLFilter> lhs =
-        boost::make_shared<MockHKLFilter>();
+    std::shared_ptr<const MockHKLFilter> lhs =
+        std::make_shared<MockHKLFilter>();
     EXPECT_CALL(*lhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(false));
 
-    boost::shared_ptr<const MockHKLFilter> rhs =
-        boost::make_shared<MockHKLFilter>();
+    std::shared_ptr<const MockHKLFilter> rhs =
+        std::make_shared<MockHKLFilter>();
     EXPECT_CALL(*rhs, isAllowed(_))
         .WillOnce(Return(false))
         .WillOnce(Return(true));
@@ -170,19 +170,19 @@ public:
     TS_ASSERT_EQUALS(orFilter.isAllowed(V3D(1, 1, 1)), true);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(
-        boost::const_pointer_cast<MockHKLFilter>(lhs).get()));
+        std::const_pointer_cast<MockHKLFilter>(lhs).get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(
-        boost::const_pointer_cast<MockHKLFilter>(rhs).get()));
+        std::const_pointer_cast<MockHKLFilter>(rhs).get()));
   }
 
   void testHKLFilterOrOperator() {
-    HKLFilter_const_sptr lhs = boost::make_shared<MockHKLFilter>();
-    HKLFilter_const_sptr rhs = boost::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr lhs = std::make_shared<MockHKLFilter>();
+    HKLFilter_const_sptr rhs = std::make_shared<MockHKLFilter>();
 
     HKLFilter_const_sptr orFilter = lhs | rhs;
 
-    boost::shared_ptr<const HKLFilterOr> orFilterCasted =
-        boost::dynamic_pointer_cast<const HKLFilterOr>(orFilter);
+    std::shared_ptr<const HKLFilterOr> orFilterCasted =
+        std::dynamic_pointer_cast<const HKLFilterOr>(orFilter);
 
     TS_ASSERT(orFilterCasted);
 

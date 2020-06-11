@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -252,15 +252,14 @@ void LoadMD::exec() {
       g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
       transform_alg->setProperty("InputWorkspace",
-                                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+                                 std::dynamic_pointer_cast<IMDWorkspace>(ws));
       transform_alg->setProperty("Scaling", scaling);
       transform_alg->executeAsChildAlg();
       IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
-      ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
+      ws = std::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
     }
     // Save to output
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    setProperty("OutputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(ws));
   } else {
     // MDHistoWorkspace case.
     this->loadHisto();
@@ -275,7 +274,8 @@ void LoadMD::exec() {
  * @param ws
  * @param dataType
  */
-void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
+void LoadMD::loadSlab(const std::string &name, void *data,
+                      const MDHistoWorkspace_sptr &ws,
                       NeXus::NXnumtype dataType) {
   m_file->openData(name);
   if (m_file->getInfo().type != dataType)
@@ -311,10 +311,10 @@ void LoadMD::loadHisto() {
   MDHistoWorkspace_sptr ws;
   // If display normalization has been provided. Use that.
   if (m_visualNormalization) {
-    ws = boost::make_shared<MDHistoWorkspace>(m_dims,
-                                              m_visualNormalization.get());
+    ws =
+        std::make_shared<MDHistoWorkspace>(m_dims, m_visualNormalization.get());
   } else {
-    ws = boost::make_shared<MDHistoWorkspace>(
+    ws = std::make_shared<MDHistoWorkspace>(
         m_dims); // Whatever MDHistoWorkspace defaults to.
   }
 
@@ -329,7 +329,7 @@ void LoadMD::loadHisto() {
     ws->history().loadNexus(m_file.get());
   }
 
-  this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+  this->loadAffineMatricies(std::dynamic_pointer_cast<IMDWorkspace>(ws));
 
   if (m_saveMDVersion == 2)
     m_file->openGroup("data", "NXdata");
@@ -364,15 +364,15 @@ void LoadMD::loadHisto() {
     g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace",
-                               boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+                               std::dynamic_pointer_cast<IMDWorkspace>(ws));
     transform_alg->setProperty("Scaling", scaling);
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
-    ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+    ws = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   }
 
   // Save to output
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(ws));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -431,7 +431,7 @@ void LoadMD::loadDimensions2() {
             MDFrameArgument(frame, units));
     m_file->getData(axis);
     m_file->closeData();
-    m_dims.emplace_back(boost::make_shared<MDHistoDimension>(
+    m_dims.emplace_back(std::make_shared<MDHistoDimension>(
         long_name, splitAxes[d - 1], *mdFrame,
         static_cast<coord_t>(axis.front()), static_cast<coord_t>(axis.back()),
         axis.size() - 1));
@@ -522,7 +522,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     ws->history().loadNexus(m_file.get());
   }
 
-  this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+  this->loadAffineMatricies(std::dynamic_pointer_cast<IMDWorkspace>(ws));
 
   m_file->closeGroup();
   m_file->close();
@@ -552,7 +552,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // ---------------------------------------- DEAL WITH BOXES
   // ------------------------------------
   if (fileBackEnd) { // TODO:: call to the file format factory
-    auto loader = boost::shared_ptr<API::IBoxControllerIO>(
+    auto loader = std::shared_ptr<API::IBoxControllerIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
     bc->setFileBacked(loader, m_filename);
@@ -634,7 +634,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  * appropriate coordinate transform and set those on the workspace.
  * @param ws : workspace to set the coordinate transforms on
  */
-void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws) {
+void LoadMD::loadAffineMatricies(const IMDWorkspace_sptr &ws) {
   std::map<std::string, std::string> entries;
   m_file->getEntries(entries);
 
@@ -655,7 +655,7 @@ void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws) {
  * @param entry_name : the entry point in the NeXus file to read
  * @return the coordinate transform object
  */
-CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
+CoordTransform *LoadMD::loadAffineMatrix(const std::string &entry_name) {
   m_file->openData(entry_name);
   std::vector<coord_t> vec;
   m_file->getData<coord_t>(vec);
@@ -686,7 +686,8 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
  * Set MDFrames for workspaces from legacy files
  * @param ws:: poitner to the workspace which needs to be corrected
  */
-void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
+void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(
+    const API::IMDWorkspace_sptr &ws) {
 
   g_log.information()
       << "LoadMD: Encountered a legacy file which has a mismatch between "
@@ -761,7 +762,7 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
  * where
  * all MDFrames were stored as MDFrames
  */
-void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
+void LoadMD::checkForRequiredLegacyFixup(const API::IMDWorkspace_sptr &ws) {
   // Check if the special coordinate is not none
   auto isQBasedSpecialCoordinateSystem = true;
   if (m_coordSystem == Mantid::Kernel::SpecialCoordinateSystem::None) {
@@ -787,7 +788,7 @@ void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
 /**
  * Find scaling for Q dimensions
  */
-std::vector<double> LoadMD::qDimensions(API::IMDWorkspace_sptr ws) {
+std::vector<double> LoadMD::qDimensions(const API::IMDWorkspace_sptr &ws) {
   std::vector<double> scaling(m_numDims);
   for (size_t d = 0; d < m_numDims; d++) {
     std::string dimd = ws->getDimension(d)->getName();

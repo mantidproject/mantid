@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -19,7 +19,8 @@ namespace Functions {
   convoluted with an instrument resolution function that is approximated by a
   Voigt function.
 */
-class DLLExport GramCharlierComptonProfile : public ComptonProfile {
+class MANTID_CURVEFITTING_DLL GramCharlierComptonProfile
+    : public ComptonProfile {
 public:
   /// Default constructor required by factory
   GramCharlierComptonProfile();
@@ -56,9 +57,8 @@ private:
   void convoluteVoigt(double *result, const size_t nData,
                       const std::vector<double> &profile) const;
   /// Called by the framework when a workspace is set
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
   /// Pre-calculate the Y-space values
   void cacheYSpaceValues(const HistogramData::Points &tseconds,
                          const Algorithms::DetectorParams &detpar) override;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -34,8 +34,8 @@ public:
   std::string type() const override { return "DetectorComponent"; }
 
   Detector(const std::string &name, int id, IComponent *parent);
-  Detector(const std::string &name, int id, boost::shared_ptr<IObject> shape,
-           IComponent *parent);
+  Detector(const std::string &name, int id,
+           const std::shared_ptr<IObject> &shape, IComponent *parent);
   // functions inherited from IObjectComponent
   Component *clone() const override { return new Detector(*this); }
 

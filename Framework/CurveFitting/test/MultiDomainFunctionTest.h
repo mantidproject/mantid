@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,7 +20,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -42,11 +42,11 @@ public:
   MultiDomainFunctionTest() { FrameworkManager::Instance(); }
 
   void test_multidomain() {
-    boost::shared_ptr<JointDomain> domain;
+    std::shared_ptr<JointDomain> domain;
     TS_ASSERT_THROWS_NOTHING(domain =
                                  Mantid::TestHelpers::makeMultiDomainDomain3());
 
-    auto values = boost::make_shared<FunctionValues>(*domain);
+    auto values = std::make_shared<FunctionValues>(*domain);
     const double A0 = 0, A1 = 1, A2 = 2;
     const double B0 = 1, B1 = 2, B2 = 3;
 
@@ -66,7 +66,7 @@ public:
     }
     values->setFitWeights(1);
 
-    boost::shared_ptr<MultiDomainFunction> multi;
+    std::shared_ptr<MultiDomainFunction> multi;
     TS_ASSERT_THROWS_NOTHING(
         multi = Mantid::TestHelpers::makeMultiDomainFunction3());
   }

@@ -1,26 +1,23 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-import six
 import unittest
 import numpy as np
 from mantid.simpleapi import logger
-from AbinsModules import IOmodule, AbinsTestHelpers
+from abins import IO, test_helpers
 
 
-class AbinsIOmoduleTest(unittest.TestCase):
+class IOTest(unittest.TestCase):
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["Cars", "temphgfrt"])
+        test_helpers.remove_output_files(list_of_names=["Cars", "temphgfrt"])
 
     @staticmethod
     def _save_stuff():
-        saver = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
+        saver = IO(input_filename="Cars.foo", group_name="Volksvagen")
 
         # add some attributes
         saver.add_attribute("Fuel", 100)
@@ -44,23 +41,23 @@ class AbinsIOmoduleTest(unittest.TestCase):
         saver.save()
 
     def _save_wrong_attribute(self):
-        poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
         poor_saver.add_attribute("BadPassengers", np.array([4]))
         self.assertRaises(ValueError, poor_saver.save)
 
     def _save_wrong_dataset(self):
-        poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
         poor_saver.add_data("BadPassengers", 4)
         self.assertRaises(ValueError, poor_saver.save)
 
     def _wrong_filename(self):
-        self.assertRaises(ValueError, IOmodule, input_filename=1, group_name="goodgroup")
+        self.assertRaises(ValueError, IO, input_filename=1, group_name="goodgroup")
 
     def _wrong_groupname(self):
-        self.assertRaises(ValueError, IOmodule, input_filename="goodfile", group_name=1)
+        self.assertRaises(ValueError, IO, input_filename="goodfile", group_name=1)
 
     def _wrong_file(self):
-        poor_loader = IOmodule(input_filename="bumCars", group_name="nice_group")
+        poor_loader = IO(input_filename="bumCars", group_name="nice_group")
         self.assertRaises(IOError, poor_loader.load, list_of_attributes="one_attribute")
 
     def _loading_attributes(self):
@@ -102,31 +99,6 @@ class AbinsIOmoduleTest(unittest.TestCase):
 
         self.assertRaises(ValueError, self.loader.load, list_of_datasets=1)
 
-    def _py2_unicode_laundering(self):
-        if six.PY2:
-            unit_data_list = [u'1 Å', u'2 Å', u'3 Å']
-            cleaned_data_list = IOmodule._convert_unicode_to_str(unit_data_list)
-            self.assertNotIn(u'2 Å', cleaned_data_list)
-            self.assertIn('2 \xc3\x85', cleaned_data_list)
-
-            unit_data_nested = [[u'1 Å', u'2 Å'], [u'3 Å', u'4 Å']]
-            cleaned_data_nested = IOmodule._convert_unicode_to_str(unit_data_nested)
-            self.assertNotIn(u'3 Å', cleaned_data_nested[1])
-            self.assertIn('3 \xc3\x85', cleaned_data_nested[1])
-
-            unit_data_dict = {u'1 Å': 1, u'2 Å': 2,
-                              'tens': {u'10 Å': 10, u'20 Å': 20}}
-            cleaned_data_dict = IOmodule._convert_unicode_to_str(unit_data_dict)
-            self.assertNotIn(u'2 Å', cleaned_data_dict)
-            self.assertNotIn(u'10 Å', cleaned_data_dict['tens'])
-            self.assertIn('10 \xc3\x85', cleaned_data_dict['tens'])
-
-            for item in ('x', 1, 2.34, (1, 2)):
-                self.assertEqual(IOmodule._convert_unicode_to_str(item), item)
-
-            self.assertIsInstance(IOmodule._convert_unicode_to_str(np.ones(5)),
-                                  np.ndarray)
-
     def runTest(self):
 
         self._save_stuff()
@@ -134,7 +106,7 @@ class AbinsIOmoduleTest(unittest.TestCase):
         self._save_wrong_attribute()
         self._save_wrong_dataset()
 
-        self.loader = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
+        self.loader = IO(input_filename="Cars.foo", group_name="Volksvagen")
 
         self._wrong_filename()
         self._wrong_groupname()
@@ -144,7 +116,6 @@ class AbinsIOmoduleTest(unittest.TestCase):
         self._loading_datasets()
         self._loading_structured_datasets()
 
-        self._py2_unicode_laundering()
 
 if __name__ == '__main__':
     unittest.main()

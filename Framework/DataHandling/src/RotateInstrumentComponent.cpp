@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -57,20 +57,19 @@ void RotateInstrumentComponent::init() {
 void RotateInstrumentComponent::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   DataObjects::PeaksWorkspace_sptr inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputW->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "MatrixWorkspace provided as input");
   } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = std::const_pointer_cast<Instrument>(inputP->getInstrument());
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");

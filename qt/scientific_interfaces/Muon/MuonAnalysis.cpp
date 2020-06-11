@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysis.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -60,6 +60,7 @@
 #include <QVariant>
 
 #include <fstream>
+#include <utility>
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
@@ -85,7 +86,7 @@ void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
   Workspace_sptr ws_ptr =
       AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      std::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
   const auto xMin = *min_element(xData.begin(), xData.end());
@@ -328,7 +329,7 @@ void MuonAnalysis::initLayout() {
 
   // file input
   connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this,
-          SLOT(inputFileChanged_MWRunFiles()));
+          SLOT(inputFileChanged_FileFinderWidget()));
 
   connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this,
           SLOT(setTimeZeroState(int)));
@@ -604,7 +605,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   options.timeLimits.second = finishTime();
   options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
   options.plotType = plotType;
-  options.wsName = wsName;
+  options.wsName = std::move(wsName);
   const auto *table =
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
@@ -1138,7 +1139,7 @@ void MuonAnalysis::updatePairTable() {
 /**
  * Slot called when the input file is changed.
  */
-void MuonAnalysis::inputFileChanged_MWRunFiles() {
+void MuonAnalysis::inputFileChanged_FileFinderWidget() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
   allowLoading(true);
@@ -1180,11 +1181,11 @@ void MuonAnalysis::handleInputFileChanges() {
  * @param loadResult :: Various loaded parameters as returned by load()
  * @return Used grouping for populating grouping table
  */
-boost::shared_ptr<GroupResult>
-MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
-  auto result = boost::make_shared<GroupResult>();
+std::shared_ptr<GroupResult>
+MuonAnalysis::getGrouping(const std::shared_ptr<LoadResult> &loadResult) const {
+  auto result = std::make_shared<GroupResult>();
 
-  boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
+  std::shared_ptr<Mantid::API::Grouping> groupingToUse;
   Instrument_const_sptr instr =
       firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
@@ -1202,7 +1203,7 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   if (!reloadNecessary && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
-    groupingToUse = boost::make_shared<Mantid::API::Grouping>(
+    groupingToUse = std::make_shared<Mantid::API::Grouping>(
         m_groupingHelper.parseGroupingTable());
   } else {
     // Need to load a new grouping
@@ -1221,15 +1222,14 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
         g_log.warning("Using grouping loaded from NeXus file.");
         ITableWorkspace_sptr groupingTable;
 
-        if (!(groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+        if (!(groupingTable = std::dynamic_pointer_cast<ITableWorkspace>(
                   loadResult->loadedGrouping))) {
-          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+          auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
               loadResult->loadedGrouping);
           groupingTable =
-              boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+              std::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
         }
-        groupingToUse =
-            boost::make_shared<Mantid::API::Grouping>(groupingTable);
+        groupingToUse = std::make_shared<Mantid::API::Grouping>(groupingTable);
         groupingToUse->description = "Grouping from Nexus file";
       } else {
         g_log.warning(
@@ -1247,8 +1247,8 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
 /**
  * Input file changed. Update GUI accordingly. Note this method does no check of
  * input filename assumed
- * done elsewhere depending on e.g. whether filename came from MWRunFiles or
- * 'get current run' button.
+ * done elsewhere depending on e.g. whether filename came from FileFinderWidget
+ * or 'get current run' button.
  *
  * @param files :: All file names for the files loading.
  */
@@ -1265,14 +1265,14 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   m_updating = true;
   m_uiForm.tabWidget->setTabEnabled(3, false);
 
-  boost::shared_ptr<LoadResult> loadResult;
-  boost::shared_ptr<GroupResult> groupResult;
+  std::shared_ptr<LoadResult> loadResult;
+  std::shared_ptr<GroupResult> groupResult;
   ITableWorkspace_sptr deadTimes;
   Workspace_sptr correctedGroupedWS;
 
   try {
     // Load the new file(s)
-    loadResult = boost::make_shared<LoadResult>(m_dataLoader.loadFiles(files));
+    loadResult = std::make_shared<LoadResult>(m_dataLoader.loadFiles(files));
 
     try // to get the dead time correction
     {
@@ -1940,7 +1940,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   Workspace_const_sptr ws_ptr =
       AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_const_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
   auto lower = m_uiForm.timeAxisStartAtInput->text().toDouble();
@@ -2220,13 +2220,13 @@ double MuonAnalysis::timeZero() {
  * size
  * @return Params string to pass to rebin
  */
-std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin) {
+std::string MuonAnalysis::rebinParams(const Workspace_sptr &wsForRebin) {
   MuonAnalysisOptionTab::RebinType rebinType = m_optionTab->getRebinType();
 
   if (rebinType == MuonAnalysisOptionTab::NoRebin) {
     return "";
   } else if (rebinType == MuonAnalysisOptionTab::FixedRebin) {
-    MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
+    MatrixWorkspace_sptr ws = firstPeriod(std::move(wsForRebin));
     double binSize = ws->x(0)[1] - ws->x(0)[0];
 
     double stepSize = m_optionTab->getRebinStep();
@@ -2749,7 +2749,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
   m_currentTab = newTab;
 }
-void MuonAnalysis::updateNormalization(QString name) {
+void MuonAnalysis::updateNormalization(const QString &name) {
   m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/AlgorithmManager.h"
@@ -21,8 +21,9 @@ namespace MantidWidgets {
 namespace DataProcessor {
 struct EXPORT_OPT_MANTIDQT_COMMON PostprocessingStep {
 public:
-  PostprocessingStep(QString options);
-  PostprocessingStep(QString options, PostprocessingAlgorithm algorithm,
+  PostprocessingStep(const QString &options);
+  PostprocessingStep(const QString &options,
+                     const PostprocessingAlgorithm &algorithm,
                      std::map<QString, QString> map);
 
   void postProcessGroup(const QString &outputWSName,

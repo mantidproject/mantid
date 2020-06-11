@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -42,8 +42,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -234,10 +234,10 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     // We take a *copy* of the ParameterMap since we are modifying it by setting
     // a pointer to our DetectorInfo, and in case it contains legacy parameters
     // such as positions or rotations.
-    m_parmap = boost::make_shared<ParameterMap>(*instr->getParameterMap());
+    m_parmap = std::make_shared<ParameterMap>(*instr->getParameterMap());
   } else {
     sptr_instrument = instr;
-    m_parmap = boost::make_shared<ParameterMap>();
+    m_parmap = std::make_shared<ParameterMap>();
   }
   m_parmap->setInstrument(sptr_instrument.get());
 }
@@ -711,7 +711,7 @@ double ExperimentInfo::getEFixed(const detid_t detID) const {
  * @return The current efixed value
  */
 double ExperimentInfo::getEFixed(
-    const boost::shared_ptr<const Geometry::IDetector> detector) const {
+    const std::shared_ptr<const Geometry::IDetector> &detector) const {
   populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
   if (emode == Kernel::DeltaEMode::Direct) {
@@ -944,8 +944,10 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
   std::vector<std::string> pathNames;
   if (!matchingFiles.empty()) {
     pathNames.reserve(matchingFiles.size());
-    for (auto &elem : matchingFiles)
-      pathNames.emplace_back(std::move(elem.second));
+
+    std::transform(matchingFiles.begin(), matchingFiles.end(),
+                   std::back_inserter(pathNames),
+                   [](const auto &elem) { return elem.second; });
   } else {
     pathNames.emplace_back(std::move(mostRecentFile));
   }

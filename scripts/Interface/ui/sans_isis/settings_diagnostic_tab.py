@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab view.
 
@@ -11,11 +11,9 @@ from the individual rows in the data table. This view is useful for checking the
 and helps the developer to identify issues.
 """
 
-from __future__ import (absolute_import, division, print_function)
 from abc import ABCMeta, abstractmethod
 import os
 from qtpy import QtWidgets
-from six import with_metaclass, PY3
 
 from mantidqt.utils.qt import load_ui
 
@@ -23,14 +21,13 @@ from mantid import UsageService
 from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
 
-if PY3:
-    unicode = str
+unicode = str
 
 Ui_SettingsDiagnosticTab, _ = load_ui(__file__, "settings_diagnostic_tab.ui")
 
 
 class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
-    class SettingsDiagnosticTabListener(with_metaclass(ABCMeta, object)):
+    class SettingsDiagnosticTabListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to for the diagnostic tab
         """

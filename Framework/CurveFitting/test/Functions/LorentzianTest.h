@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,7 +13,7 @@
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 using Mantid::CurveFitting::Functions::Lorentzian;
 
 class LorentzianTest : public CxxTest::TestSuite {
@@ -141,8 +141,8 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableLorentzian> createTestLorentzian() {
-    auto func = boost::make_shared<TestableLorentzian>();
+  std::shared_ptr<TestableLorentzian> createTestLorentzian() {
+    auto func = std::make_shared<TestableLorentzian>();
     func->initialize();
     func->setParameter("Amplitude", 2.0);
     func->setParameter("FWHM", 5);

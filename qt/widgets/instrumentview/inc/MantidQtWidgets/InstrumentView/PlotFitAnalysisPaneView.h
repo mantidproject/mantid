@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -50,6 +50,7 @@ public:
   void observeFitButton(Observer *listener) override {
     m_fitObservable->attach(listener);
   };
+
   std::pair<double, double> getRange() override;
   Mantid::API::IFunction_sptr getFunction() override;
   void addSpectrum(std::string wsName) override;
@@ -58,6 +59,7 @@ public:
   void updateFunction(Mantid::API::IFunction_sptr func) override;
   void fitWarning(const std::string &message) override;
   QWidget *getQWidget() override { return static_cast<QWidget*>(this); };
+
 
 public slots:
   void doFit();

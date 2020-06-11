@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -32,9 +32,9 @@ public:
   ConvToMDSelector(ConverterType tp = DEFAULT);
   /// function which selects the convertor depending on workspace type and
   /// (possibly, in a future) some workspace properties
-  boost::shared_ptr<ConvToMDBase>
-  convSelector(API::MatrixWorkspace_sptr inputWS,
-               boost::shared_ptr<ConvToMDBase> &currentSolver) const;
+  std::shared_ptr<ConvToMDBase>
+  convSelector(const API::MatrixWorkspace_sptr &inputWS,
+               std::shared_ptr<ConvToMDBase> &currentSolver) const;
 
 private:
   ConverterType converterType;

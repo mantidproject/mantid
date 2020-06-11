@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -45,6 +45,8 @@ public:
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   getAlgorithms() = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
+  virtual bool getProcessPartial() const = 0;
+  virtual bool getProcessAll() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -15,7 +15,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -90,7 +90,7 @@ public:
 
   /// set the observer for refinement
   virtual void
-  setObserver(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
+  setObserver(std::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
 };
 
 } // namespace CustomInterfaces

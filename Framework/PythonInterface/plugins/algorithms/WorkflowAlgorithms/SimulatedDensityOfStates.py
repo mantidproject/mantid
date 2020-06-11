@@ -1,13 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines, redefined-builtin
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
-
 import numpy as np
 import re
 import os.path
@@ -38,17 +35,11 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _num_branches = None
     _element_isotope = dict()
 
-#----------------------------------------------------------------------------------------
-
     def category(self):
         return "Simulation"
 
-#----------------------------------------------------------------------------------------
-
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
-
-#----------------------------------------------------------------------------------------
 
     def PyInit(self):
         # Declare properties
@@ -105,9 +96,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace.")
 
-
-#----------------------------------------------------------------------------------------
-
     def validateInputs(self):
         """
         Performs input validation.
@@ -153,8 +141,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
 
         return issues
-
-#----------------------------------------------------------------------------------------
 
     def PyExec(self):
         # Run the algorithm
@@ -232,8 +218,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
-#----------------------------------------------------------------------------------------
-
     def _get_properties(self):
         """
         Set the properties passed to the algorithm
@@ -246,9 +230,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._ions_of_interest = self.getProperty('Ions').value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions_of_interest) > 0)
-
-
-#----------------------------------------------------------------------------------------
 
     def _read_file(self):
         """
@@ -266,8 +247,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             return self._read_data_from_file(castep_filename)
         else:
             raise RuntimeError('No valid data file')
-
-#----------------------------------------------------------------------------------------
 
     def _create_ion_table(self, unit_cell, ions):
         """
@@ -302,8 +281,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                               ion['cartesian_coord'][2],
                               ion['isotope_number']])
 
-#----------------------------------------------------------------------------------------
-
     def _create_bond_table(self, bonds):
         """
         Creates a bond table from the bond data obtained when the castep file is read
@@ -327,9 +304,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                                bond['atom_b'][1],
                                bond['length'],
                                bond['population']])
-
-
-#----------------------------------------------------------------------------------------
 
     def _calculate_partial_dos(self, ions, frequencies, eigenvectors, weights):
         """
@@ -373,8 +347,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             group = ','.join(partial_ws_names)
             s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
-#----------------------------------------------------------------------------------------
-
     def _calculate_total_dos_with_scale(self, ions, frequencies, eigenvectors, weights):
         """
         Calculate the complete Density of States for all the ions of interest to the user with scaled intensities
@@ -396,8 +368,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # Rename the summed workspace, this will be the output
         s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
-#----------------------------------------------------------------------------------------
-
     def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
         Converts fractional coordinates to Cartesian coordinates given the unit
@@ -409,8 +379,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         for ion in ions:
             cell_pos = ion['fract_coord'] * unit_cell
             ion['cartesian_coord'] = np.apply_along_axis(np.sum, 0, cell_pos)
-
-#----------------------------------------------------------------------------------------
 
     def _draw_peaks(self, xmin, hist, peaks):
         """
@@ -458,8 +426,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         return dos
 
-#----------------------------------------------------------------------------------------
-
     def _draw_sticks(self, peaks, dos_shape):
         """
         Draw a stick diagram for peaks.
@@ -476,8 +442,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             dos[index] = stick_intensity
 
         return dos
-
-#----------------------------------------------------------------------------------------
 
     def _compute_partial_ion_workflow(self, partial_ions, frequencies, eigenvectors, weights):
         """
@@ -572,7 +536,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         return partial_workspaces, total_workspace
 
-#----------------------------------------------------------------------------------------
     def _parse_chemical_and_ws_name(self, ion_name, isotope):
         """
         @param ion_name     :: Name of the element used
@@ -601,8 +564,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             return chemical, chemical + element_index
         else:
             return ion_name, ion_name
-
-#----------------------------------------------------------------------------------------
 
     def _compute_partial(self, ion_numbers, frequencies, eigenvectors, weights):
         """
@@ -638,9 +599,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         intensities = np.asarray(intensities)
         return self._compute_DOS(frequencies, intensities, weights)
-
-
-#----------------------------------------------------------------------------------------
 
     def _compute_DOS(self, frequencies, intensities, weights):
         """
@@ -707,8 +665,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         return out_ws
 
-#----------------------------------------------------------------------------------------
-
     def _create_dos_workspace(self, data_x, dos, dos_sticks, out_name):
         ws = s_api.CreateWorkspace(DataX=data_x,
                                    DataY=np.ravel(np.array([dos, dos_sticks])),
@@ -720,8 +676,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         unitx = ws.getAxis(0).setUnit("Label")
         unitx.setLabel("Energy Shift", 'cm^-1')
         return ws
-
-#----------------------------------------------------------------------------------------
 
     def _compute_raman(self, frequencies, intensities, weights):
         """
@@ -758,8 +712,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         return self._compute_DOS(frequencies, x_sections, weights)
 
-#----------------------------------------------------------------------------------------
-
     def _read_data_from_file(self, file_name):
         """
         Select the appropriate file parser and check data was successfully
@@ -790,8 +742,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             raise ValueError("Failed to load any frequencies from file.")
 
         return file_data
-
-#------------------------------------------------------------------------------------------
 
 
 try:

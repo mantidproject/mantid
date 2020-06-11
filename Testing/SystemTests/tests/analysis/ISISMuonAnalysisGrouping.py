@@ -1,21 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
-
 #----------------------------------------------------------------------
 
 
-class ISISMuonAnalysisGrouping(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply

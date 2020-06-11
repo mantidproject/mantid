@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
@@ -11,6 +11,7 @@
 #include <QSizePolicy>
 #include <QSpacerItem>
 #include <QVBoxLayout>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -90,8 +91,8 @@ void ALFCustomInstrumentView::setupAnalysisPane(
   BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis->getQWidget());
 }
 
-void ALFCustomInstrumentView::addSpectrum(std::string wsName) {
-  m_analysisPane->addSpectrum(wsName);
+void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) {
+  m_analysisPane->addSpectrum(std::move(wsName));
 }
 
 } // namespace CustomInterfaces

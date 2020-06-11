@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -108,7 +108,7 @@ public:
                      double &radius, double &height) const override {
     m_shape->GetObjectGeom(type, vectors, innerRadius, radius, height);
   }
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
+  std::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();
   }
 
@@ -131,9 +131,9 @@ private:
 };
 
 /// Typdef for a shared pointer
-using Container_sptr = boost::shared_ptr<Container>;
+using Container_sptr = std::shared_ptr<Container>;
 /// Typdef for a shared pointer to a const object
-using Container_const_sptr = boost::shared_ptr<const Container>;
+using Container_const_sptr = std::shared_ptr<const Container>;
 
 } // namespace Geometry
 } // namespace Mantid

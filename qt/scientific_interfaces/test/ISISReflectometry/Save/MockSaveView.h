@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "../../../ISISReflectometry/GUI/Save/ISaveView.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -17,6 +17,7 @@ namespace ISISReflectometry {
 class MockSaveView : public ISaveView {
 public:
   MOCK_METHOD1(subscribe, void(SaveViewSubscriber *));
+  MOCK_METHOD0(connectSaveSettingsWidgets, void());
   MOCK_CONST_METHOD0(getSavePath, std::string());
   MOCK_CONST_METHOD1(setSavePath, void(const std::string &));
   MOCK_CONST_METHOD0(getPrefix, std::string());

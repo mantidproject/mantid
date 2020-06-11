@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -69,7 +69,7 @@ public:
   void registerOwningPresenter(UpdateableOnDemand * /*owner*/) override {}
   void zoomToPeak(const int /*peakIndex*/) override {}
   bool isHidden() const override { return true; }
-  void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/)
+  void reInitialize(std::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/)
       override { /*Do nothing*/
   }
   bool contentsDifferent(const PeaksPresenter * /*other*/) const override {

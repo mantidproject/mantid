@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/AnalysisDataService.h"
@@ -39,7 +39,7 @@ public:
 
     auto workspace = AnalysisDataService::Instance().retrieve(WSName);
     EventWorkspace_sptr events =
-        boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+        std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TS_ASSERT(events);
     auto inst = events->getInstrument();
     TS_ASSERT(inst);
@@ -93,7 +93,7 @@ public:
     // Get pointers to the new workspace
     auto workspace_new = AnalysisDataService::Instance().retrieve("events_new");
     EventWorkspace_sptr events_new =
-        boost::dynamic_pointer_cast<EventWorkspace>(workspace_new);
+        std::dynamic_pointer_cast<EventWorkspace>(workspace_new);
     TS_ASSERT(events_new)
     auto inst_new = events_new->getInstrument();
     TS_ASSERT(inst_new);

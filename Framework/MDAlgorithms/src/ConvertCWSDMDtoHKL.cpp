@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 
@@ -130,7 +130,7 @@ void ConvertCWSDMDtoHKL::exec() {
   m_outputWS =
       createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
   // Experiment info
-  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
   expinfo->mutableRun().setGoniometer(
       inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
@@ -169,7 +169,8 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
  * number of detectors
  */
 void ConvertCWSDMDtoHKL::exportEvents(
-    IMDEventWorkspace_sptr mdws, std::vector<Kernel::V3D> &vec_event_qsample,
+    const IMDEventWorkspace_sptr &mdws,
+    std::vector<Kernel::V3D> &vec_event_qsample,
     std::vector<signal_t> &vec_event_signal,
     std::vector<detid_t> &vec_event_det) {
   // Set the size of the output vectors
@@ -348,7 +349,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
 
   // Creates a new instance of the MDEventInserter to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Go though each spectrum to conver to MDEvent
@@ -373,7 +374,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
   return mdws;
 }
 
-void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> vec_hkl,
+void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> &vec_hkl,
                                   std::vector<double> &extentMins,
                                   std::vector<double> &extentMaxs) {
   assert(extentMins.size() == 3);

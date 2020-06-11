@@ -15,7 +15,6 @@ add_subdirectory(Muon)
 add_subdirectory(ISISSANS)
 add_subdirectory(ISISReflectometry)
 add_subdirectory(Indirect)
-add_subdirectory(EnggDiffraction)
 add_subdirectory(DynamicPDF)
 
 # Testing - These should be split out by library
@@ -26,21 +25,12 @@ set(TEST_FILES
     test/ALCLatestFileFinderTest.h
     test/ALCPeakFittingModelTest.h
     test/ALCPeakFittingPresenterTest.h
-    test/EnggDiffGSASFittingModelTest.h
-    test/EnggDiffGSASFittingPresenterTest.h
-    test/EnggDiffMultiRunFittingWidgetModelTest.h
-    test/EnggDiffMultiRunFittingWidgetPresenterTest.h
-    test/EnggDiffFittingModelTest.h
-    test/EnggDiffFittingPresenterTest.h
-    test/EnggDiffractionPresenterTest.h
-    test/EnggVanadiumCorrectionsModelTest.h
     test/IO_MuonGroupingTest.h
     test/MuonAnalysisDataLoaderTest.h
     test/MuonAnalysisFitDataPresenterTest.h
     test/MuonAnalysisFitFunctionPresenterTest.h
     test/MuonAnalysisHelperTest.h
     test/MuonAnalysisResultTableCreatorTest.h
-    test/RunMapTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
@@ -66,8 +56,10 @@ set(TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
     test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
     test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
+    test/ISISReflectometry/Runs/QtCatalogSearcherTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
+    test/ISISReflectometry/Options/OptionsDialogPresenterTest.h
     test/ISISReflectometry/Runs/SearchResultTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
     test/ISISReflectometry/Common/ClipboardTest.h
@@ -103,8 +95,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    DataObjects
                    PythonInterfaceCore
                    ${PYTHON_LIBRARIES}
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   gmock
                    ${POCO_LIBRARIES}
                    ${Boost_LIBRARIES}
                  QT4_LINK_LIBS
@@ -114,7 +105,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    MantidScientificInterfacesDirect
                    MantidScientificInterfacesMuon
                    MantidScientificInterfacesISISReflectometry
-                   MantidScientificInterfacesEnggDiffraction
                    MantidScientificInterfacesMultiDatasetFit
                    MantidQtWidgetsCommon
                  PARENT_DEPENDENCIES
@@ -127,6 +117,8 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Batch/BatchPresenterTest.h
     test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
     test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
+    test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
+    test/ISISReflectometry/Options/OptionsDialogPresenterTest.h
     test/ISISReflectometry/Reduction/GroupTest.h
     test/ISISReflectometry/Reduction/ValidateRowTest.h
     test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
@@ -166,8 +158,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ${CORE_MANTIDLIBS}
                    DataObjects
                    PythonInterfaceCore
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   gmock
                    ${POCO_LIBRARIES}
                    ${Boost_LIBRARIES}
                    ${PYTHON_LIBRARIES}

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 
@@ -838,7 +838,7 @@ void FitOptionsBrowser::displayProperty(const QString &propertyName,
 /**
  * Adds the property with the given name to a blacklist of properties to hide
  */
-bool FitOptionsBrowser::addPropertyToBlacklist(QString name) {
+bool FitOptionsBrowser::addPropertyToBlacklist(const QString &name) {
   if (!m_propertyNameMap.contains(name)) {
     return false;
   }

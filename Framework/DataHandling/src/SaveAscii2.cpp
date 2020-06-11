@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -53,9 +52,9 @@ void SaveAscii2::init() {
                                                  FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
-  auto mustBeZeroGreater = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeZeroGreater = std::make_shared<BoundedValidator<int>>();
   mustBeZeroGreater->setLower(0);
   declareProperty(
       "WorkspaceIndexMin", EMPTY_INT(), mustBeZeroGreater,
@@ -97,7 +96,7 @@ void SaveAscii2::init() {
   }
 
   declareProperty("Separator", "CSV",
-                  boost::make_shared<StringListValidator>(sepOptions),
+                  std::make_shared<StringListValidator>(sepOptions),
                   "The separator between data columns in the data file. The "
                   "possible values are \"CSV\", \"Tab\", "
                   "\"Space\", \"SemiColon\", \"Colon\" or \"UserDefined\".");
@@ -138,9 +137,9 @@ void SaveAscii2::init() {
 void SaveAscii2::exec() {
   // Get the workspace
   Workspace_const_sptr ws = getProperty("InputWorkspace");
-  m_ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  m_ws = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   ITableWorkspace_const_sptr tws =
-      boost::dynamic_pointer_cast<const ITableWorkspace>(ws);
+      std::dynamic_pointer_cast<const ITableWorkspace>(ws);
 
   // Get the properties valid for all workspaces
   const bool writeHeader = getProperty("ColumnHeader");
@@ -406,7 +405,7 @@ void SaveAscii2::populateQMetaData() {
     if (!spectrumInfo.isMonitor(i)) {
       theta = 0.5 * spectrumInfo.twoTheta(i);
       try {
-        boost::shared_ptr<const Geometry::IDetector> detector(
+        std::shared_ptr<const Geometry::IDetector> detector(
             &spectrumInfo.detector(i), NoDeleting());
         efixed = m_ws->getEFixed(detector);
       } catch (std::runtime_error &) {
@@ -474,7 +473,7 @@ bool SaveAscii2::findElementInUnorderedStringVector(
   return std::find(vector.cbegin(), vector.cend(), toFind) != vector.cend();
 }
 
-void SaveAscii2::writeTableWorkspace(ITableWorkspace_const_sptr tws,
+void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws,
                                      const std::string &filename,
                                      bool appendToFile, bool writeHeader,
                                      int prec, bool scientific,

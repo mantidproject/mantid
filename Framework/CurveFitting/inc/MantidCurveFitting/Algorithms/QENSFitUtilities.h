@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
@@ -17,7 +16,7 @@ namespace API {
 
 void renameWorkspacesInQENSFit(
     Algorithm *qensFit, IAlgorithm_sptr renameAlgorithm,
-    WorkspaceGroup_sptr outputGroup, std::string const &outputBaseName,
+    const WorkspaceGroup_sptr &outputGroup, std::string const &outputBaseName,
     std::string const &groupSuffix,
     std::function<std::string(std::size_t)> const &getNameSuffix);
 

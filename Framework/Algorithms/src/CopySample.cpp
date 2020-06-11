@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CopySample.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -88,7 +88,7 @@ void CopySample::exec() {
   Sample sample;
   // get input sample
   MultipleExperimentInfos_sptr inMDWS =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(inWS);
+      std::dynamic_pointer_cast<MultipleExperimentInfos>(inWS);
   if (inMDWS != nullptr) // it is an MD workspace
   {
     int inputSampleNumber = getProperty("MDInputSampleNumber");
@@ -109,7 +109,7 @@ void CopySample::exec() {
                  ->sample();
   } else // peaks workspace or matrix workspace
   {
-    ExperimentInfo_sptr ei = boost::dynamic_pointer_cast<ExperimentInfo>(inWS);
+    ExperimentInfo_sptr ei = std::dynamic_pointer_cast<ExperimentInfo>(inWS);
     if (!ei)
       throw std::invalid_argument("Wrong type of input workspace");
     sample = ei->sample();
@@ -124,7 +124,7 @@ void CopySample::exec() {
 
   // Sample copy;
   MultipleExperimentInfos_sptr outMDWS =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(outWS);
+      std::dynamic_pointer_cast<MultipleExperimentInfos>(outWS);
   if (outMDWS != nullptr) {
     int outputSampleNumber = getProperty("MDOutputSampleNumber");
     if ((outputSampleNumber == EMPTY_INT()) ||
@@ -153,7 +153,7 @@ void CopySample::exec() {
     }
   } else // peaks workspace or matrix workspace
   {
-    ExperimentInfo_sptr ei = boost::dynamic_pointer_cast<ExperimentInfo>(outWS);
+    ExperimentInfo_sptr ei = std::dynamic_pointer_cast<ExperimentInfo>(outWS);
     if (!ei)
       throw std::invalid_argument("Wrong type of output workspace");
     copyParameters(sample, ei->mutableSample(), copyName, copyMaterial,
@@ -180,7 +180,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
       // Reset to lhs material
       rhsMaterial = to.getMaterial();
     }
-    auto rhsObject = boost::shared_ptr<IObject>(
+    auto rhsObject = std::shared_ptr<IObject>(
         from.getShape().cloneWithMaterial(rhsMaterial));
     to.setShape(rhsObject);
     to.setGeometryFlag(from.getGeometryFlag());
@@ -188,7 +188,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
     to.setThickness(from.getThickness());
     to.setWidth(from.getWidth());
   } else if (materialFlag) {
-    auto lhsObject = boost::shared_ptr<IObject>(
+    auto lhsObject = std::shared_ptr<IObject>(
         to.getShape().cloneWithMaterial(from.getMaterial()));
     to.setShape(lhsObject);
   }

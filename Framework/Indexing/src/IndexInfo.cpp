@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/RoundRobinPartitioner.h"
@@ -174,7 +174,8 @@ void IndexInfo::setSpectrumDefinitions(
  * indices. Validation requires access to the instrument and thus cannot be done
  * internally in IndexInfo, i.e., spectrum definitions must be set by hand. */
 void IndexInfo::setSpectrumDefinitions(
-    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
+    const Kernel::cow_ptr<std::vector<SpectrumDefinition>>
+        &spectrumDefinitions) {
   if (!spectrumDefinitions || (size() != spectrumDefinitions->size()))
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum definitions");

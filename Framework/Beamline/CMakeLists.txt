@@ -62,7 +62,7 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(Beamline PUBLIC ${CMAKE_BINARY_DIR}/Framework/Beamline)
-generate_mantid_export_header(Beamline)
+generate_mantid_export_header(Beamline FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS

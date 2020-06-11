@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -17,6 +17,7 @@
 #include <QCoreApplication>
 #include <QSharedPointer>
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -63,7 +64,7 @@ FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
  * worker objects
  */
 void FindFilesThreadPoolManager::setAllocator(ThreadAllocator allocator) {
-  m_workerAllocator = allocator;
+  m_workerAllocator = std::move(allocator);
 }
 
 void FindFilesThreadPoolManager::createWorker(

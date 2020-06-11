@@ -361,12 +361,12 @@ private:
 
     m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
 
-    auto mockMultiRunWidgetPresenter_sptr = boost::make_shared<
+    auto mockMultiRunWidgetPresenter_sptr = std::make_shared<
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetPresenter>>();
     m_mockMultiRunWidgetPtr = mockMultiRunWidgetPresenter_sptr.get();
 
     auto mockParam_sptr =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     m_mockParamPtr = mockParam_sptr.get();
 
     auto pres_uptr = std::make_unique<EnggDiffGSASFittingPresenter>(

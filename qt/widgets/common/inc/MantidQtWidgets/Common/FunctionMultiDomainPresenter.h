@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -62,9 +62,9 @@ public:
   void setLocalParameterValue(const QString &parName, int i, double value,
                               double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
-  void setLocalParameterTie(const QString &parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   void setLocalParameterConstraint(const QString &parName, int i,
-                                   QString constraint);
+                                   const QString &constraint);
   QStringList getGlobalParameters() const;
   void setGlobalParameters(const QStringList &globals);
   QStringList getLocalParameters() const;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
 #include "MantidAPI/FunctionDomain.h"
@@ -28,7 +28,7 @@ namespace {
 // Does the actual calculation of the magnetic moment
 void calculate(double *out, const double *xValues, const size_t nData,
                const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector Hdir, const double Hmag,
+               const DoubleFortranVector &Hdir, const double Hmag,
                const double convfact) {
   const double k_B = PhysicalConstants::BoltzmannConstant;
   DoubleFortranVector en;

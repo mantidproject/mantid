@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/shared_ptr.hpp>
 #include <complex>
+#include <memory>
 
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TypedValidator.h"
@@ -22,7 +22,7 @@ using StructureFactor = std::complex<double>;
 
 class BraggScatterer;
 
-using BraggScatterer_sptr = boost::shared_ptr<BraggScatterer>;
+using BraggScatterer_sptr = std::shared_ptr<BraggScatterer>;
 
 /**
     @class BraggScatterer

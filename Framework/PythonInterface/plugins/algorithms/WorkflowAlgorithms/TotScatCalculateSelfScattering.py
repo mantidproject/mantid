@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.simpleapi import (CalculatePlaczekSelfScattering, ConvertToDistribution, ConvertUnits, CreateWorkspace,
                               DeleteWorkspace, DiffractionFocussing, Divide, ExtractSpectra, FitIncidentSpectrum,
                               LoadCalFile, SetSample)
@@ -47,12 +45,15 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                              doc='Geometry of the sample material.')
         self.declareProperty(name='SampleMaterial', defaultValue={},
                              doc='Chemical formula for the sample material.')
+        self.declareProperty(name='CrystalDensity', defaultValue=0.0,
+                             doc='The crystalographic density of the material.')
 
     def PyExec(self):
         raw_ws = self.getProperty('InputWorkspace').value
         sample_geometry = self.getPropertyValue('SampleGeometry')
         sample_material = self.getPropertyValue('SampleMaterial')
         cal_file_name = self.getPropertyValue('CalFileName')
+        crystal_density = self.getPropertyValue('CrystalDensity')
         SetSample(InputWorkspace=raw_ws,
                   Geometry=sample_geometry,
                   Material=sample_material)
@@ -78,7 +79,8 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                                           BinningForFit=[min_x, 10 * width_x, max_x],
                                           FitSpectrumWith="CubicSpline")
         self_scattering_correction = CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
-                                                                    IncidentSpecta=fit_spectra)
+                                                                    IncidentSpecta=fit_spectra,
+                                                                    CrystalDensity=crystal_density)
         cal_workspace = LoadCalFile(InputWorkspace=self_scattering_correction,
                                     CalFileName=cal_file_name,
                                     Workspacename='cal_workspace',

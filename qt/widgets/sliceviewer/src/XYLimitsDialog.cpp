@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/XYLimitsDialog.h"
 #include "MantidKernel/UnitLabel.h"
@@ -27,14 +27,16 @@ XYLimitsDialog::~XYLimitsDialog() {}
 //------------------------------------------------------------------------------------------
 /** Set the labels for the X dimensions
  * @param dim : IMDDimension */
-void XYLimitsDialog::setXDim(Mantid::Geometry::IMDDimension_const_sptr dim) {
+void XYLimitsDialog::setXDim(
+    const Mantid::Geometry::IMDDimension_const_sptr &dim) {
   ui.lblXName->setText(QString::fromStdString(dim->getName()));
   ui.lblXUnits->setText(toQStringInternal(dim->getUnits().utf8()));
 }
 
 /** Set the labels for the Y dimensions
  * @param dim : IMDDimension */
-void XYLimitsDialog::setYDim(Mantid::Geometry::IMDDimension_const_sptr dim) {
+void XYLimitsDialog::setYDim(
+    const Mantid::Geometry::IMDDimension_const_sptr &dim) {
   ui.lblYName->setText(QString::fromStdString(dim->getName()));
   ui.lblYUnits->setText(toQStringInternal(dim->getUnits().utf8()));
 }

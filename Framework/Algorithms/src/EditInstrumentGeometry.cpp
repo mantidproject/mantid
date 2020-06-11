@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
 #include "MantidAPI/ISpectrum.h"
@@ -56,7 +56,7 @@ void EditInstrumentGeometry::init() {
       "indices). The list must be either empty or have a size "
       "equal to input workspace's histogram number. ");
 
-  auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
+  auto required = std::make_shared<MandatoryValidator<std::vector<double>>>();
 
   // Vector for L2
   declareProperty(
@@ -284,7 +284,7 @@ void EditInstrumentGeometry::exec() {
   }
 
   // Create a new instrument from scratch any way.
-  auto instrument = boost::make_shared<Geometry::Instrument>(name);
+  auto instrument = std::make_shared<Geometry::Instrument>(name);
   if (!bool(instrument)) {
     stringstream errss;
     errss << "Trying to use a Parametrized Instrument as an Instrument.";

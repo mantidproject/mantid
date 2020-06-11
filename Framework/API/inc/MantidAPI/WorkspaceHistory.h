@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -63,11 +63,11 @@ public:
   /// Add an operator== that compares algorithm historys
   bool operator==(const WorkspaceHistory &otherHistory) const;
   /// Create an algorithm from a history record at a given index
-  boost::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
+  std::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
   /// Convenience function for retrieving the last algorithm
-  boost::shared_ptr<IAlgorithm> lastAlgorithm() const;
+  std::shared_ptr<IAlgorithm> lastAlgorithm() const;
   /// Create a flat view of the workspaces algorithm history
-  boost::shared_ptr<HistoryView> createView() const;
+  std::shared_ptr<HistoryView> createView() const;
 
   /// Pretty print the entire history
   void printSelf(std::ostream &, const int indent = 0) const;
@@ -81,7 +81,7 @@ private:
   /// Recursive function to load the algorithm history tree from file
   void loadNestedHistory(
       ::NeXus::File *file,
-      AlgorithmHistory_sptr parent = boost::shared_ptr<AlgorithmHistory>());
+      AlgorithmHistory_sptr parent = std::shared_ptr<AlgorithmHistory>());
   /// Parse an algorithm history string loaded from file
   AlgorithmHistory_sptr parseAlgorithmHistory(const std::string &rawData);
   /// Find the history entries at this level in the file.

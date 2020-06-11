@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,7 +41,7 @@ public:
   virtual void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
   Mantid::API::IMDWorkspace_const_sptr getWorkspace() const;
 
-  void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
+  void setOverlayWorkspace(const Mantid::API::IMDWorkspace_const_sptr &ws);
 
   QwtDoubleInterval range() const override;
   void setRange(const QwtDoubleInterval &range);

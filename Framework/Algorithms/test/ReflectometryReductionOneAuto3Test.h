@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -46,16 +46,15 @@ private:
     lAlg->execute();
     Workspace_sptr temp = lAlg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr matrixWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+        std::dynamic_pointer_cast<MatrixWorkspace>(temp);
     if (matrixWS)
       return matrixWS;
 
-    WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(temp);
     if (group) {
       Workspace_sptr temp = group->getItem(0);
       MatrixWorkspace_sptr matrixWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+          std::dynamic_pointer_cast<MatrixWorkspace>(temp);
       if (matrixWS)
         return matrixWS;
     }
@@ -156,10 +155,10 @@ public:
     MatrixWorkspace_sptr third = m_TOF->clone();
     MatrixWorkspace_sptr fourth = m_TOF->clone();
 
-    WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(first);
     inputWSGroup->addWorkspace(second);
-    WorkspaceGroup_sptr transWSGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr transWSGroup = std::make_shared<WorkspaceGroup>();
     transWSGroup->addWorkspace(first);
     transWSGroup->addWorkspace(second);
     transWSGroup->addWorkspace(third);
@@ -189,11 +188,11 @@ public:
     MatrixWorkspace_sptr third = m_TOF->clone();
     MatrixWorkspace_sptr fourth = m_TOF->clone();
 
-    WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr inputWSGroup = std::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(first);
-    WorkspaceGroup_sptr firstWSGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr firstWSGroup = std::make_shared<WorkspaceGroup>();
     firstWSGroup->addWorkspace(second);
-    WorkspaceGroup_sptr secondWSGroup = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr secondWSGroup = std::make_shared<WorkspaceGroup>();
     secondWSGroup->addWorkspace(third);
     secondWSGroup->addWorkspace(fourth);
     AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
@@ -1431,7 +1430,7 @@ public:
     auto inputWS2 =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     inputWS2 *= 2.0;
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(inputWS1);
     group->addWorkspace(inputWS2);
     AnalysisDataService::Instance().addOrReplace("input", group);
@@ -1456,9 +1455,9 @@ public:
     alg.execute();
     WorkspaceGroup_sptr out =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
-    auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
+    auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 4.5, 0.000001);
-    auto out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
+    auto out2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
     TS_ASSERT_DELTA(out2->y(0)[0], 9.0, 0.000001);
     AnalysisDataService::Instance().clear();
   }
@@ -1490,13 +1489,13 @@ public:
     WorkspaceGroup_sptr out =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     TS_ASSERT(out);
-    auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
+    auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 90.0, 0.001);
-    auto out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
+    auto out2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
     TS_ASSERT_DELTA(out2->y(0)[0], 80.0, 0.001);
-    auto out3 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(2));
+    auto out3 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(2));
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 0.003);
-    auto out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
+    auto out4 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 0.003);
 
     AnalysisDataService::Instance().clear();
@@ -1528,13 +1527,13 @@ public:
     WorkspaceGroup_sptr out =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     TS_ASSERT(out);
-    auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
+    auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 90.0, 1e-15);
-    auto out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
+    auto out2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
     TS_ASSERT_DELTA(out2->y(0)[0], 80.0, 1e-15);
-    auto out3 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(2));
+    auto out3 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(2));
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 1e-15);
-    auto out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
+    auto out4 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 1e-14);
     AnalysisDataService::Instance().clear();
   }
@@ -1594,9 +1593,8 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr
-  createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
-                       size_t n = 4) {
+  MatrixWorkspace_sptr createFloodWorkspace(
+      const Mantid::Geometry::Instrument_const_sptr &instrument, size_t n = 4) {
     size_t detid = 1;
     auto flood = create2DWorkspace(int(n), 1);
     if (n == 4) {

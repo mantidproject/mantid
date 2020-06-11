@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -228,7 +228,8 @@ public:
 
 private:
   void headingsTests(std::ifstream &in, std::string &fullline,
-                     bool propertiesLogs = false, std::string sep = "\t") {
+                     bool propertiesLogs = false,
+                     const std::string &sep = "\t") {
     getline(in, fullline);
     TS_ASSERT_EQUALS(fullline, "MFT");
     getline(in, fullline);

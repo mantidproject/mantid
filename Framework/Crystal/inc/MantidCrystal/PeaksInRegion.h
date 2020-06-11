@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,7 +14,7 @@ namespace Crystal {
 /** PeaksInRegion : Find peaks that are either inside a box region, or that have
   a radius of sufficent size, that they intersect the box.
 */
-class DLLExport PeaksInRegion : public PeaksIntersection {
+class MANTID_CRYSTAL_DLL PeaksInRegion : public PeaksIntersection {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

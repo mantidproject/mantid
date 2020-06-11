@@ -4,14 +4,14 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
-  IndirectDataTablePresenterTest.h
   IndirectDataValidationHelperTest.h
+  IndirectDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
+  IndirectFitDataModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
-  IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
   IndirectFittingModelTest.h
@@ -25,6 +25,9 @@ set(
   JumpFitDataPresenterTest.h
   JumpFitModelTest.h
 )
+
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesIndirectTest
@@ -47,8 +50,7 @@ mtd_add_qt_tests(
     ${CORE_MANTIDLIBS}
     CurveFitting
     DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
   QT4_LINK_LIBS

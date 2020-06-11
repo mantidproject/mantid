@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/ParamFunction.h"
@@ -26,16 +26,16 @@ public:
   static void destroySuite(Poldi2DFunctionTest *suite) { delete suite; }
 
   void testTypes() {
-    boost::shared_ptr<Poldi2DFunction> function2D =
-        boost::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D =
+        std::make_shared<Poldi2DFunction>();
 
-    TS_ASSERT(boost::dynamic_pointer_cast<CompositeFunction>(function2D));
-    TS_ASSERT(boost::dynamic_pointer_cast<IFunction1DSpectrum>(function2D));
+    TS_ASSERT(std::dynamic_pointer_cast<CompositeFunction>(function2D));
+    TS_ASSERT(std::dynamic_pointer_cast<IFunction1DSpectrum>(function2D));
   }
 
   void testSummation() {
-    boost::shared_ptr<Poldi2DFunction> function2D =
-        boost::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D =
+        std::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -63,8 +63,8 @@ public:
   }
 
   void testIterationBehavior() {
-    boost::shared_ptr<Poldi2DFunction> function2D =
-        boost::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D =
+        std::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -96,8 +96,8 @@ public:
   }
 
   void testPoldiFunction1D() {
-    boost::shared_ptr<Poldi2DFunction> function2D =
-        boost::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D =
+        std::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new TestPoldiFunction1D);

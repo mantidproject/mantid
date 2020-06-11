@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import (absolute_import, unicode_literals)
-
 import io
 import os.path
 import sys
@@ -327,6 +325,7 @@ class PythonFileInterpreterPresenter(QObject):
             line_from, _, _, _ = editor.getSelection()
         else:
             # run everything in the file
+            self.model.reset_context()
             code_str = editor.text()
             line_from = 0
         return code_str, line_from

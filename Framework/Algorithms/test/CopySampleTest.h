@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -48,7 +48,7 @@ public:
         0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
     auto kit = std::make_unique<SampleEnvironment>(
         envName,
-        boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
+        std::make_shared<Container>(ShapeFactory().createShape(canShape)));
     sample.setEnvironment(std::move(kit));
     sample.setOrientedLattice(
         std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));

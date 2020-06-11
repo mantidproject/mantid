@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
@@ -8,11 +14,10 @@
 #include "MockAlgorithmProgressWidget.h"
 
 #include <QCoreApplication>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -97,12 +102,13 @@ public:
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
     EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
-    EXPECT_CALL(*mockView.get(), updateProgress(3.0, QString(""))).Times(1);
+    EXPECT_CALL(*mockView.get(), updateProgress(3.0, QString(""), 0., 0))
+        .Times(1);
 
     auto pres = mockView->m_presenter.get();
     pres->algorithmStartedSlot(algorithmIDpretender);
     // Algorithm reports a progress update
-    pres->updateProgressBarSlot(algorithmIDpretender, 3.0, "");
+    pres->updateProgressBarSlot(algorithmIDpretender, 3.0, "", 0., 0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
   void testUpdateProgressBar_NotUpdatedIfAlgorithmNotBeingTracked() {
@@ -111,11 +117,12 @@ public:
     int testInt2 = 666;
     void *secondAlgorithmID = &testInt2;
     EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
-    EXPECT_CALL(*mockView.get(), updateProgress(3.0, QString(""))).Times(0);
+    EXPECT_CALL(*mockView.get(), updateProgress(3.0, QString(""), 0., 0))
+        .Times(0);
 
     auto pres = mockView->m_presenter.get();
     pres->algorithmStartedSlot(algorithmIDpretender);
-    pres->updateProgressBarSlot(secondAlgorithmID, 3.0, "");
+    pres->updateProgressBarSlot(secondAlgorithmID, 3.0, "", 0., 0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
   void testRealAlgorithmRunning() {
@@ -129,7 +136,7 @@ public:
     // Another thing to note: 0.0 progress is NOT reported
     for (const auto prog : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
       EXPECT_CALL(*mockView.get(),
-                  updateProgress(DoubleEq(prog), emptyQString));
+                  updateProgress(DoubleEq(prog), emptyQString, 0., 0));
     }
     EXPECT_CALL(*mockView.get(), algorithmEnded()).Times(1);
 

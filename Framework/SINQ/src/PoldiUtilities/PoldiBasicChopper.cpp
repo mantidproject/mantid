@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 
@@ -23,7 +23,7 @@ PoldiBasicChopper::PoldiBasicChopper()
 void PoldiBasicChopper::loadConfiguration(
     Geometry::Instrument_const_sptr poldiInstrument) {
   Geometry::ICompAssembly_const_sptr chopperGroup =
-      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+      std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           poldiInstrument->getComponentByName(std::string("chopper")));
 
   size_t numberOfSlits = chopperGroup->nelements();

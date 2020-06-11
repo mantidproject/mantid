@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -156,7 +156,7 @@ public:
   void test_construct_bad_workspace_columns() {
     const DimensionedTable table(0, 0);
     try {
-      auto p = boost::make_shared<Projection>(table);
+      auto p = std::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch (std::runtime_error &e) {
       TS_ASSERT_EQUALS(
@@ -170,7 +170,7 @@ public:
   void test_construct_bad_workspace_no_rows() {
     const DimensionedTable table(4, 0);
     try {
-      auto p = boost::make_shared<Projection>(table);
+      auto p = std::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch (std::runtime_error &e) {
       TS_ASSERT_EQUALS(
@@ -184,7 +184,7 @@ public:
   void test_construct_bad_workspace_too_many_rows() {
     const DimensionedTable table(4, 4);
     try {
-      auto p = boost::make_shared<Projection>(table);
+      auto p = std::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch (std::runtime_error &e) {
       TS_ASSERT_EQUALS(
@@ -198,7 +198,7 @@ public:
   void test_construct_good_workspace() {
     const GoodTable table;
     Projection_sptr p;
-    TS_ASSERT_THROWS_NOTHING(p = boost::make_shared<Projection>(table));
+    TS_ASSERT_THROWS_NOTHING(p = std::make_shared<Projection>(table));
 
     TS_ASSERT_EQUALS(p->U(), V3D(1, 1, 0));
     TS_ASSERT_EQUALS(p->V(), V3D(-1, 1, 0));

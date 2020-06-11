@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 // Mantid headers from other projects
 // N/A
 // 3rd party library headers
@@ -35,8 +36,9 @@ namespace Functions {
     @date 12/10/2016
 */
 
-class DLLExport FunctionQDepends : virtual public Mantid::API::IFunction1D,
-                                   virtual public Mantid::API::ParamFunction {
+class MANTID_CURVEFITTING_DLL FunctionQDepends
+    : virtual public Mantid::API::IFunction1D,
+      virtual public Mantid::API::ParamFunction {
 
 public:
   /* -------------------
@@ -47,8 +49,8 @@ public:
   setAttribute(const std::string &attName,
                const Mantid::API::IFunction::Attribute &attValue) override;
   void setMatrixWorkspace(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
-      size_t wi, double startX, double endX) override;
+      std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
+      double startX, double endX) override;
 
 private:
   std::vector<double>

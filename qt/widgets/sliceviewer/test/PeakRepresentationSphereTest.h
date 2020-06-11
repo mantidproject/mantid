@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -263,10 +263,10 @@ public:
       for (int y = 0; y < sizeInAxis; ++y) {
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
-          m_peaks.emplace_back(boost::make_shared<
-                               PeakRepresentationSphereExposeProtectedWrapper>(
-              peakOrigin, radius, innerBackgroundRadius,
-              outerBackgroundRadius));
+          m_peaks.emplace_back(
+              std::make_shared<PeakRepresentationSphereExposeProtectedWrapper>(
+                  peakOrigin, radius, innerBackgroundRadius,
+                  outerBackgroundRadius));
         }
       }
     }
@@ -322,7 +322,7 @@ public:
 
 private:
   using PeaksRepresentationSphere_sptr =
-      boost::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
+      std::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
   using VecPeaksRepresentationSphere =
       std::vector<PeaksRepresentationSphere_sptr>;
 

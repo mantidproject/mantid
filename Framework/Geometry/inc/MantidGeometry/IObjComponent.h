@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -84,7 +84,7 @@ public:
   virtual void initDraw() const = 0;
 
   /// Returns the shape of the Object
-  virtual const boost::shared_ptr<const IObject> shape() const = 0;
+  virtual const std::shared_ptr<const IObject> shape() const = 0;
   /// Returns the material of the Object
   virtual const Kernel::Material material() const = 0;
 
@@ -103,9 +103,9 @@ private:
 };
 
 /// Shared pointer to IObjComponent
-using IObjComponent_sptr = boost::shared_ptr<IObjComponent>;
+using IObjComponent_sptr = std::shared_ptr<IObjComponent>;
 /// Shared pointer to IObjComponent (const version)
-using IObjComponent_const_sptr = boost::shared_ptr<const IObjComponent>;
+using IObjComponent_const_sptr = std::shared_ptr<const IObjComponent>;
 
 } // namespace Geometry
 } // namespace Mantid

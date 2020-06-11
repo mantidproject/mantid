@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 #include "MantidAPI/Run.h"
@@ -19,6 +19,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/regex.hpp>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -263,7 +264,7 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   auto frame = createMDFrameForNonAxisAligned(units, basis);
 
   // Create the output dimension
-  auto out = boost::make_shared<MDHistoDimension>(
+  auto out = std::make_shared<MDHistoDimension>(
       name, name, *frame, static_cast<coord_t>(min), static_cast<coord_t>(max),
       numBins);
 
@@ -631,7 +632,7 @@ void SlicingAlgorithm::createTransform() {
   if (!m_inWS)
     throw std::runtime_error("SlicingAlgorithm::createTransform(): input "
                              "MDWorkspace must be set first!");
-  if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_inWS))
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(m_inWS))
     throw std::runtime_error(this->name() +
                              " cannot be run on a MatrixWorkspace!");
 
@@ -640,8 +641,8 @@ void SlicingAlgorithm::createTransform() {
 
   // Refer to the original workspace. Make sure that is possible
   if (m_inWS->numOriginalWorkspaces() > 0)
-    m_originalWS = boost::dynamic_pointer_cast<IMDWorkspace>(
-        m_inWS->getOriginalWorkspace());
+    m_originalWS =
+        std::dynamic_pointer_cast<IMDWorkspace>(m_inWS->getOriginalWorkspace());
   if (m_originalWS) {
     if (m_axisAligned)
       throw std::runtime_error(
@@ -661,7 +662,7 @@ void SlicingAlgorithm::createTransform() {
 
     // Fail if the MDHistoWorkspace was modified by binary operation
     DataObjects::MDHistoWorkspace_sptr inHisto =
-        boost::dynamic_pointer_cast<DataObjects::MDHistoWorkspace>(m_inWS);
+        std::dynamic_pointer_cast<DataObjects::MDHistoWorkspace>(m_inWS);
     if (inHisto) {
       if (inHisto->getNumExperimentInfo() > 0) {
         const Run &run = inHisto->getExperimentInfo(0)->run();
@@ -903,7 +904,7 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
  * @returns the unique pointer
  */
 Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(
-    std::string units, Mantid::Kernel::VMD basisVector) const {
+    const std::string &units, const Mantid::Kernel::VMD &basisVector) const {
   // Get set of basis vectors
   auto oldBasis = getOldBasis(m_inWS->getNumDims());
 
@@ -911,7 +912,8 @@ Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(
   auto indicesWithProjection = getIndicesWithProjection(basisVector, oldBasis);
 
   // Extract MDFrame
-  return extractMDFrameForNonAxisAligned(indicesWithProjection, units);
+  return extractMDFrameForNonAxisAligned(indicesWithProjection,
+                                         std::move(units));
 }
 
 std::vector<Mantid::Kernel::VMD>
@@ -964,7 +966,7 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
  */
 Mantid::Geometry::MDFrame_uptr
 SlicingAlgorithm::extractMDFrameForNonAxisAligned(
-    std::vector<size_t> indicesWithProjection, std::string units) const {
+    std::vector<size_t> indicesWithProjection, const std::string &units) const {
   if (indicesWithProjection.empty()) {
     g_log.warning() << "Slicing Algorithm: Chosen vector does not "
                        "project on any vector of the old basis.";

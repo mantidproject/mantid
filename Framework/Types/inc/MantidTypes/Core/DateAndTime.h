@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -45,9 +45,9 @@ public:
   DateAndTime(const int32_t seconds, const int32_t nanoseconds);
   DateAndTime(const int64_t seconds, const int64_t nanoseconds);
   DateAndTime(const std::string &ISO8601_string);
-  DateAndTime(const boost::posix_time::ptime _ptime);
+  DateAndTime(const boost::posix_time::ptime &_ptime);
 
-  void set_from_ptime(boost::posix_time::ptime _ptime);
+  void set_from_ptime(const boost::posix_time::ptime &_ptime);
   boost::posix_time::ptime to_ptime() const;
 
   void set_from_time_t(std::time_t _timet);
@@ -59,7 +59,7 @@ public:
   void setFromISO8601(const std::string &str);
   std::string toSimpleString() const;
   std::string
-  toFormattedString(const std::string format = "%Y-%b-%d %H:%M:%S") const;
+  toFormattedString(const std::string &format = "%Y-%b-%d %H:%M:%S") const;
   std::string toISO8601String() const;
 
   /// Stream output operator
@@ -112,7 +112,7 @@ public:
   static DateAndTime getCurrentTime();
   static DateAndTime maximum();
   static DateAndTime minimum();
-  static double secondsFromDuration(time_duration duration);
+  static double secondsFromDuration(const time_duration &duration);
   static time_duration durationFromSeconds(double duration);
   static int64_t nanosecondsFromDuration(const time_duration &td);
   static int64_t nanosecondsFromSeconds(double sec);
@@ -151,14 +151,10 @@ inline DateAndTime::DateAndTime() : _nanoseconds(0) {}
 /** Construct a date from nanoseconds.
  * @param total_nanoseconds :: nanoseconds since Jan 1, 1990 (our epoch).
  */
-inline DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
+inline DateAndTime::DateAndTime(const int64_t total_nanoseconds)
+    : _nanoseconds{
+          std::clamp(total_nanoseconds, MIN_NANOSECONDS, MAX_NANOSECONDS)} {
   // Make sure that you cannot construct a date that is beyond the limits...
-  if (total_nanoseconds > MAX_NANOSECONDS)
-    _nanoseconds = MAX_NANOSECONDS;
-  else if (total_nanoseconds < MIN_NANOSECONDS)
-    _nanoseconds = MIN_NANOSECONDS;
-  else
-    _nanoseconds = total_nanoseconds;
 }
 
 /** + operator to add time.
@@ -183,8 +179,8 @@ inline DateAndTime DateAndTime::operator+(const double sec) const {
  */
 inline int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
   const double nano = sec * 1e9;
-  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
-  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
+  constexpr auto minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr auto maximum = static_cast<double>(MAX_NANOSECONDS);
   // Use these limits to avoid integer overflows
   if (nano > maximum)
     return MAX_NANOSECONDS;

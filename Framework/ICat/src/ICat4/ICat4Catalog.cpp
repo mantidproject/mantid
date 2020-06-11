@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidAPI/CatalogFactory.h"
@@ -44,7 +44,7 @@ API::CatalogSession_sptr ICat4Catalog::login(const std::string &username,
   // Created the session object here in order to set the endpoint, which is used
   // in setICATProxySettings.
   // We can then manually set the sessionID later if it exists.
-  m_session = boost::make_shared<API::CatalogSession>("", facility, endpoint);
+  m_session = std::make_shared<API::CatalogSession>("", facility, endpoint);
 
   // Securely set, including soap-endpoint.
   ICATPortBindingProxy icat;

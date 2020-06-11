@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <functional>
 #include <thread>
@@ -32,8 +32,8 @@ public:
   void run(Function &&f, Args &&... args);
 
 private:
-  boost::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_backend;
-  boost::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_serialBackend;
+  std::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_backend;
+  std::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_serialBackend;
 };
 
 template <class Function, class... Args>

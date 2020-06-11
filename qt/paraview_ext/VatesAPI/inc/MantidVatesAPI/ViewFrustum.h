@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
 #include <cfloat>
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -161,8 +161,8 @@ void ViewFrustum::initializeMatrix(Mantid::Kernel::Matrix<T> &matrix,
 }
 
 /// shared pointer to the view frustum
-using ViewFrustum_sptr = boost::shared_ptr<Mantid::VATES::ViewFrustum>;
+using ViewFrustum_sptr = std::shared_ptr<Mantid::VATES::ViewFrustum>;
 using ViewFrustum_const_sptr =
-    boost::shared_ptr<const Mantid::VATES::ViewFrustum>;
+    std::shared_ptr<const Mantid::VATES::ViewFrustum>;
 } // namespace VATES
 } // namespace Mantid

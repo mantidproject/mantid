@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidAPI/Axis.h"
@@ -24,12 +24,13 @@ GNU_DIAG_OFF("conversion")
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
-#include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <chrono>
 #include <json/json.h>
 #include <numeric>
+#include <utility>
+
 #include <tbb/parallel_sort.h>
 
 using namespace Mantid::Types;
@@ -51,7 +52,6 @@ const std::string RUN_NUMBER_PROPERTY = "run_number";
 const std::string RUN_START_PROPERTY = "run_start";
 
 // File identifiers from flatbuffers schema
-const std::string RUN_MESSAGE_ID = "y2gw";
 const std::string EVENT_MESSAGE_ID = "ev42";
 const std::string SAMPLE_MESSAGE_ID = "f142";
 
@@ -120,8 +120,9 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic,
     const std::string &monitorTopic, const std::size_t bufferThreshold)
-    : IKafkaStreamDecoder(broker, eventTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic, monitorTopic),
+    : IKafkaStreamDecoder(std::move(broker), eventTopic, runInfoTopic,
+                          spDetTopic, sampleEnvTopic, chopperTopic,
+                          monitorTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "
@@ -152,6 +153,17 @@ KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {
    * capture has fully completed before local state is deleted.
    */
   stopCapture();
+}
+
+KafkaEventStreamDecoder::KafkaEventStreamDecoder(
+    KafkaEventStreamDecoder &&o) noexcept
+    : IKafkaStreamDecoder(std::move(o)),
+      m_intermediateBufferFlushThreshold(o.m_intermediateBufferFlushThreshold) {
+
+  std::scoped_lock lck(m_intermediateBufferMutex, m_mutex);
+  m_localEvents = std::move(o.m_localEvents);
+  m_receivedEventBuffer = std::move(o.m_receivedEventBuffer);
+  m_receivedPulseBuffer = std::move(o.m_receivedPulseBuffer);
 }
 
 /**
@@ -200,7 +212,7 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
     std::swap(m_localEvents.front(), temp);
     return temp;
   } else if (m_localEvents.size() > 1) {
-    auto group = boost::make_shared<API::WorkspaceGroup>();
+    auto group = std::make_shared<API::WorkspaceGroup>();
     size_t index(0);
     for (auto &filledBuffer : m_localEvents) {
       auto temp = createBufferWorkspace<DataObjects::EventWorkspace>(
@@ -220,17 +232,14 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
 void KafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture starting");
 
-  // Load spectra-detector and runstart struct then initialise the cache
+  // Load runstart struct then initialise the cache
   std::string buffer;
   std::string runBuffer;
   int64_t offset;
   int32_t partition;
   std::string topicName;
-  if (m_spDetStream) {
-    m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
-  }
   auto runStartStruct = getRunStartMessage(runBuffer);
-  initLocalCaches(buffer, runStartStruct);
+  initLocalCaches(runStartStruct);
 
   m_interrupt = false; // Allow MonitorLiveData or user to interrupt
   m_endRun = false; // Indicates to MonitorLiveData that end of run is reached
@@ -560,14 +569,14 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
  * events
  */
 void KafkaEventStreamDecoder::initLocalCaches(
-    const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+    const RunStartStruct &runStartData) {
   m_runId = runStartData.runId;
 
   const auto jsonGeometry = runStartData.nexusStructure;
   const auto instName = runStartData.instrumentName;
 
   DataObjects::EventWorkspace_sptr eventBuffer;
-  if (rawMsgBuffer.empty()) {
+  if (!runStartData.detSpecMapSpecified) {
     /* Load the instrument to get the number of spectra :c */
     auto ws =
         API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
@@ -575,7 +584,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
     const auto nspec = ws->getInstrument()->getNumberDetectors();
 
     // Create buffer
-    eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+    eventBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
                                                  1));
     eventBuffer->setInstrument(ws->getInstrument());
@@ -585,24 +594,11 @@ void KafkaEventStreamDecoder::initLocalCaches(
         Kernel::UnitFactory::Instance().create("TOF");
     eventBuffer->setYUnit("Counts");
   } else {
-    /* Parse mapping from stream */
-    auto spDetMsg = GetSpectraDetectorMapping(
-        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-    auto nudet = spDetMsg->detector_id()->size();
-    if (nudet != nspec) {
-      std::ostringstream os;
-      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-            "spectra/detector mapping. Expected matched length arrays but "
-            "found nspec="
-         << nspec << ", ndet=" << nudet;
-      throw std::runtime_error(os.str());
-    }
-
     // Create buffer
     eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
-        "EventWorkspace", static_cast<size_t>(spDetMsg->n_spectra()),
-        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+        "EventWorkspace", runStartData.numberOfSpectra,
+        runStartData.spectrumNumbers.data(), runStartData.detectorIDs.data(),
+        static_cast<uint32_t>(runStartData.detectorIDs.size()));
   }
 
   // Load the instrument if possible but continue if we can't

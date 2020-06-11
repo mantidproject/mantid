@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -25,6 +24,7 @@ class Logger;
 } // namespace Kernel
 namespace Algorithms {
 class IBeamProfile;
+class MonteCarloAbsorption;
 
 /**
   Implements the algorithm for calculating the correction factor for
@@ -37,18 +37,18 @@ class IBeamProfile;
 */
 class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy {
 public:
-  MCAbsorptionStrategy(const IBeamProfile &beamProfile,
-                       const API::Sample &sample,
-                       Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                       const int nlambda, const size_t maxScatterPtAttempts,
-                       const bool useSparseInstrument,
-                       const InterpolationOption &interpolateOpt,
-                       const bool regenerateTracksForEachLambda,
-                       Kernel::Logger &logger);
+  MCAbsorptionStrategy(
+      const IBeamProfile &beamProfile, const API::Sample &sample,
+      Kernel::DeltaEMode::Type EMode, const size_t nevents,
+      const size_t maxScatterPtAttempts,
+      const bool regenerateTracksForEachLambda, Kernel::Logger &logger,
+      const MCInteractionVolume::ScatteringPointVicinity pointsIn =
+          MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
   void calculate(Kernel::PseudoRandomNumberGenerator &rng,
                  const Kernel::V3D &finalPos,
-                 Mantid::HistogramData::Points lambdas, double lambdaFixed,
-                 Mantid::API::ISpectrum &attenuationFactorsSpectrum);
+                 const std::vector<double> &lambdas, const double lambdaFixed,
+                 std::vector<double> &attenuationFactors,
+                 std::vector<double> &attFactorErrors);
 
 private:
   const IBeamProfile &m_beamProfile;
@@ -57,9 +57,6 @@ private:
   const size_t m_maxScatterAttempts;
   const double m_error;
   const Kernel::DeltaEMode::Type m_EMode;
-  const int m_nlambda;
-  const bool m_useSparseInstrument;
-  const InterpolationOption &m_interpolateOpt;
   const bool m_regenerateTracksForEachLambda;
 };
 

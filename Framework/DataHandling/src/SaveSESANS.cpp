@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveSESANS.h"
 
@@ -61,7 +61,7 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
  * Initialise the algorithm
  */
 void SaveSESANS::init() {
-  auto validOrientation = boost::make_shared<Kernel::StringListValidator>(
+  auto validOrientation = std::make_shared<Kernel::StringListValidator>(
       std::set<std::string>{"X", "Y", "Z"});
 
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(

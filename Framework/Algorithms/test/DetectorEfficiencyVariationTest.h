@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -19,10 +19,10 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <fstream>
 #include <ios>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -80,7 +80,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(
                                  "DetEfficVariTestWSO"));
     MatrixWorkspace_sptr outputMat =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT(outputMat);
     TS_ASSERT_EQUALS(outputMat->YUnit(), "");
 
@@ -112,8 +112,8 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
     Workspace_sptr spaceB =
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
-    Workspace2D_sptr inputA = boost::dynamic_pointer_cast<Workspace2D>(spaceA);
-    Workspace2D_sptr inputB = boost::dynamic_pointer_cast<Workspace2D>(spaceB);
+    Workspace2D_sptr inputA = std::dynamic_pointer_cast<Workspace2D>(spaceA);
+    Workspace2D_sptr inputB = std::dynamic_pointer_cast<Workspace2D>(spaceB);
     BinEdges x(NXs, HistogramData::LinearGenerator(0.0, 1000.0));
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;

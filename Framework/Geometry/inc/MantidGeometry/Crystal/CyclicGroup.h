@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/DllConfig.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 
 namespace Mantid {
@@ -74,8 +74,8 @@ protected:
   generateAllOperations(const SymmetryOperation &operation) const;
 };
 
-using CyclicGroup_sptr = boost::shared_ptr<CyclicGroup>;
-using CyclicGroup_const_sptr = boost::shared_ptr<const CyclicGroup>;
+using CyclicGroup_sptr = std::shared_ptr<CyclicGroup>;
+using CyclicGroup_const_sptr = std::shared_ptr<const CyclicGroup>;
 
 } // namespace Geometry
 } // namespace Mantid

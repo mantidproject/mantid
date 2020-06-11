@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -36,7 +36,7 @@ using namespace HistogramData;
 
 /// Initialisation method
 void ConvertUnits::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -48,16 +48,16 @@ void ConvertUnits::init() {
   // Extract the current contents of the UnitFactory to be the allowed values of
   // the Target property
   declareProperty("Target", "",
-                  boost::make_shared<StringListValidator>(
+                  std::make_shared<StringListValidator>(
                       UnitFactory::Instance().getConvertibleUnits()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
@@ -110,7 +110,7 @@ void ConvertUnits::exec() {
                           << "), so just pointing the output workspace "
                              "property to the input workspace.\n";
       setProperty("OutputWorkspace",
-                  boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+                  std::const_pointer_cast<MatrixWorkspace>(inputWS));
       return;
     } else {
       // Clone the workspace.
@@ -120,7 +120,7 @@ void ConvertUnits::exec() {
       duplicate->setProperty("InputWorkspace", inputWS);
       duplicate->execute();
       Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-      auto outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      auto outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
       setProperty("OutputWorkspace", outputWs);
       return;
     }
@@ -140,7 +140,7 @@ void ConvertUnits::exec() {
       convToHist->setProperty("InputWorkspace", inputWS);
       convToHist->execute();
       MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
-      correctWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      correctWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
       if (!correctWS->isHistogramData()) {
         throw std::runtime_error(
@@ -165,7 +165,7 @@ void ConvertUnits::exec() {
     convtoPoints->setProperty("InputWorkspace", outputWS);
     convtoPoints->execute();
     MatrixWorkspace_sptr temp = convtoPoints->getProperty("OutputWorkspace");
-    outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     if (outputWS->isHistogramData()) {
       throw std::runtime_error(
@@ -186,7 +186,7 @@ void ConvertUnits::exec() {
  * @return A pointer to a MatrixWorkspace_sptr that contains the converted units
  */
 MatrixWorkspace_sptr
-ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
+ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr &inputWS) {
 
   // A WS holding BinEdges cannot have less than 2 values, as a bin has
   // 2 edges, having less than 2 values would mean that the WS contains Points
@@ -251,14 +251,14 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
  *  @param inputWS The input workspace
  */
 void ConvertUnits::setupMemberVariables(
-    const API::MatrixWorkspace_const_sptr inputWS) {
+    const API::MatrixWorkspace_const_sptr &inputWS) {
   m_numberOfSpectra = inputWS->getNumberHistograms();
   // In the context of this algorithm, we treat things as a distribution if
   // the flag is set AND the data are not dimensionless
   m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
   // Check if its an event workspace
   m_inputEvents =
-      (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != nullptr);
+      (std::dynamic_pointer_cast<const EventWorkspace>(inputWS) != nullptr);
 
   m_inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");
@@ -271,7 +271,7 @@ void ConvertUnits::setupMemberVariables(
  *  @param inputWS The input workspace
  */
 API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
-    const API::MatrixWorkspace_const_sptr inputWS) {
+    const API::MatrixWorkspace_const_sptr &inputWS) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // If input and output workspaces are NOT the same, create a new workspace
@@ -328,7 +328,7 @@ void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
  *  @returns A shared pointer to the output workspace
  */
 MatrixWorkspace_sptr
-ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
+ConvertUnits::convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS,
                              const double &factor, const double &power) {
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
   auto numberOfSpectra_i =
@@ -358,7 +358,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
   }
 
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   // If we get to here then the bins weren't aligned and each spectrum is
@@ -537,7 +537,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   auto &outSpectrumInfo = outputWS->mutableSpectrumInfo();
@@ -603,7 +603,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
 /// Calls Rebin as a Child Algorithm to align the bins
 API::MatrixWorkspace_sptr
-ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace) {
+ConvertUnits::alignBins(const API::MatrixWorkspace_sptr &workspace) {
   if (communicator().size() != 1)
     throw std::runtime_error(
         "ConvertUnits: Parallel support for aligning bins not implemented.");
@@ -623,7 +623,7 @@ ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace) {
 /// The Rebin parameters should cover the full range of the converted unit,
 /// with the same number of bins
 const std::vector<double> ConvertUnits::calculateRebinParams(
-    const API::MatrixWorkspace_const_sptr workspace) const {
+    const API::MatrixWorkspace_const_sptr &workspace) const {
   const auto &spectrumInfo = workspace->spectrumInfo();
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
@@ -650,8 +650,8 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
 /** Reverses the workspace if X values are in descending order
  *  @param WS The workspace to operate on
  */
-void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
-  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
+void ConvertUnits::reverse(const API::MatrixWorkspace_sptr &WS) {
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(WS);
   auto isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
   if (WS->isCommonBins() && !isInputEvents) {
@@ -700,7 +700,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
  *  @return The workspace after bins have been removed
  */
 API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
-    const Mantid::API::MatrixWorkspace_const_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   MatrixWorkspace_sptr result;
 
   const auto &spectrumInfo = workspace->spectrumInfo();
@@ -786,7 +786,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 /** Divide by the bin width if workspace is a distribution
  *  @param outputWS The workspace to operate on
  */
-void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr outputWS) {
+void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr &outputWS) {
   const size_t outSize = outputWS->blocksize();
 
   for (size_t i = 0; i < m_numberOfSpectra; ++i) {

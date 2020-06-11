@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTab.h"
-#include "ui_IqtFit.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -19,6 +18,7 @@
 #include <QtCore>
 
 #include <algorithm>
+#include <utility>
 
 /// Logger
 Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
@@ -177,9 +177,6 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(
     IndirectFitPropertyBrowser *browser) {
   browser->init();
   m_fitPropertyBrowser = browser;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_fitPropertyBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
-#endif
 }
 
 void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
@@ -263,7 +260,7 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
 size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
     const std::string &functionName) const {
   auto fittingFunction = m_fittingModel->getFittingFunction();
-  if (fittingFunction->nFunctions() > 0)
+  if (fittingFunction && fittingFunction->nFunctions() > 0)
     return getNumberOfSpecificFunctionContained(
         functionName, fittingFunction->getFunction(0).get());
   else
@@ -372,7 +369,8 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
     m_fittingAlgorithm.reset();
   } else
     m_fittingModel->addSingleFitOutput(m_fittingAlgorithm,
-                                       m_currentTableDatasetIndex);
+                                       m_currentTableDatasetIndex,
+                                       m_singleFitWorkspaceIndex);
 }
 
 /**
@@ -444,7 +442,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 paramWsName);
         auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
+        if (rowCount == static_cast<int>(m_fittingModel->getNumberOfDomains()))
           m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
       } else {
         IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
@@ -526,6 +524,7 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
                                        WorkspaceIndex spectrum) {
   if (validate()) {
+    m_singleFitWorkspaceIndex = spectrum;
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
@@ -643,7 +642,7 @@ void IndirectFitAnalysisTab::setEditResultVisible(bool visible) {
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
-    IAlgorithm_sptr fitAlgorithm) const {
+    const IAlgorithm_sptr &fitAlgorithm) const {
   fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
   fitAlgorithm->setProperty("MaxIterations",
                             m_fitPropertyBrowser->maxIterations());
@@ -674,14 +673,14 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
 void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateSingleFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -697,7 +696,7 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 QStringList IndirectFitAnalysisTab::getDatasetNames() const {
   QStringList datasetNames;
   auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
-  for (int i{0}; i < numberWorkspaces.value; ++i) {
+  for (size_t i{0}; i < numberWorkspaces.value; ++i) {
     TableDatasetIndex index{i};
     auto const name =
         QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
@@ -711,7 +710,7 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
 
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
@@ -737,7 +736,7 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
   m_plotPresenter->updateAvailableSpectra();
   m_dataPresenter->updateSpectraInTable(i);
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   setModelFitFunction();
@@ -751,13 +750,14 @@ void IndirectFitAnalysisTab::respondToSingleResolutionLoaded() {
 }
 
 void IndirectFitAnalysisTab::respondToDataChanged() {
-  updateResultOptions();
   updateDataReferences();
+  m_fittingModel->removeFittingData();
   m_spectrumPresenter->updateSpectra();
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
   updateParameterEstimationData();
+  updateResultOptions();
 }
 
 void IndirectFitAnalysisTab::respondToSingleDataViewSelected() {
@@ -784,7 +784,6 @@ void IndirectFitAnalysisTab::respondToDataRemoved() {
 void IndirectFitAnalysisTab::respondToSelectedFitDataChanged(
     TableDatasetIndex i) {
   m_spectrumPresenter->setActiveModelIndex(i);
-  updateParameterValues();
 }
 
 void IndirectFitAnalysisTab::respondToNoFitDataSelected() {

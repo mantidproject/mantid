@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -66,10 +66,10 @@ void ConvertAxesToRealSpace::init() {
   fillUnitMap(propOptions, m_unitMap, "signed2theta", "rad");
 
   declareProperty("VerticalAxis", "y",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "What will be the vertical axis ?\n");
   declareProperty("HorizontalAxis", "2theta",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "What will be the horizontal axis?\n");
 
   declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
@@ -190,8 +190,8 @@ void ConvertAxesToRealSpace::exec() {
 
   outputWs->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWs->getAxis(0)->unit();
-  boost::shared_ptr<Units::Label> xlabel =
-      boost::dynamic_pointer_cast<Units::Label>(xUnit);
+  std::shared_ptr<Units::Label> xlabel =
+      std::dynamic_pointer_cast<Units::Label>(xUnit);
   xlabel->setLabel(axisVector[0].label, m_unitMap[axisVector[0].label]);
 
   MantidVec &yRef = y.access();
@@ -199,8 +199,8 @@ void ConvertAxesToRealSpace::exec() {
   fillAxisValues(yRef, axisVector[1], false);
 
   auto yAxis = std::make_unique<NumericAxis>(yRef);
-  boost::shared_ptr<Units::Label> ylabel =
-      boost::dynamic_pointer_cast<Units::Label>(
+  std::shared_ptr<Units::Label> ylabel =
+      std::dynamic_pointer_cast<Units::Label>(
           UnitFactory::Instance().create("Label"));
   ylabel->setLabel(axisVector[1].label, m_unitMap[axisVector[1].label]);
   yAxis->unit() = ylabel;

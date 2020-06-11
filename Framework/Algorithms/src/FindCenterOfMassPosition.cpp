@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindCenterOfMassPosition.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -30,7 +30,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void FindCenterOfMassPosition::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -39,7 +39,7 @@ void FindCenterOfMassPosition::init() {
                   "If not empty, a table workspace of that "
                   "name will contain the center of mass position.");
 
-  auto positiveInt = boost::make_shared<BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
   declareProperty("NPixelX", 192, positiveInt,
                   "Number of detector pixels in the X direction.");
@@ -54,7 +54,7 @@ void FindCenterOfMassPosition::init() {
       "center of mass "
       "of the scattering data will be computed by excluding the beam area.");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("BeamRadius", 20.0, positiveDouble,
                   "Radius of the beam area, in pixels, used the exclude the "
@@ -216,7 +216,7 @@ void FindCenterOfMassPosition::exec() {
     setPropertyValue("OutputWorkspace", output);
 
     Mantid::API::ITableWorkspace_sptr m_result =
-        boost::make_shared<TableWorkspace>();
+        std::make_shared<TableWorkspace>();
     m_result->addColumn("str", "Name");
     m_result->addColumn("double", "Value");
 
@@ -229,8 +229,7 @@ void FindCenterOfMassPosition::exec() {
   } else {
     // Store the results using an ArrayProperty
     declareProperty(std::make_unique<ArrayProperty<double>>(
-        "CenterOfMass", boost::make_shared<NullValidator>(),
-        Direction::Output));
+        "CenterOfMass", std::make_shared<NullValidator>(), Direction::Output));
     std::vector<double> center_of_mass;
     center_of_mass.emplace_back(center_x);
     center_of_mass.emplace_back(center_y);

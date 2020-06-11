@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,6 +13,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Matrix;
@@ -55,7 +57,7 @@ public:
 
   static void ShowLatticeParameters(Matrix<double> UB) {
     Matrix<double> UB_inv(3, 3, false);
-    UB_inv = UB;
+    UB_inv = std::move(UB);
     UB_inv.Invert();
     V3D a_dir(UB_inv[0][0], UB_inv[0][1], UB_inv[0][2]);
     V3D b_dir(UB_inv[1][0], UB_inv[1][1], UB_inv[1][2]);
@@ -73,7 +75,8 @@ public:
     std::cout << "-------------------------------------------\n";
   }
 
-  static void ShowIndexingStats(Matrix<double> UB, std::vector<V3D> q_vectors,
+  static void ShowIndexingStats(const Matrix<double> &UB,
+                                const std::vector<V3D> &q_vectors,
                                 double required_tolerance) {
     std::vector<V3D> miller_indices;
     std::vector<V3D> indexed_qs;

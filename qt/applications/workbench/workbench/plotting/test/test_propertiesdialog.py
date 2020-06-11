@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 # system imports
 import unittest
@@ -17,8 +16,13 @@ import matplotlib
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+from unittest.mock import MagicMock
+
+from mantid.api import WorkspaceFactory
 from mantidqt.utils.qt.testing import start_qapplication
-from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor
+from mantidqt.plotting.functions import pcolormesh
+from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor, ColorbarAxisEditor
 
 
 @start_qapplication
@@ -46,6 +50,27 @@ class PropertiesDialogTest(unittest.TestCase):
         # test scale
         self.assertEqual(xEditor._memento.log, False)
         self.assertEqual(yEditor._memento.log, True)
+
+    def test_changes_apply_to_all_colorfill_plots_if_one_colorbar(self):
+        ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1, YLength=5, XLength=5)
+        fig = pcolormesh([ws, ws])
+        # there should be 3 axes: 2 colorfill plots and 1 colorbar
+        self.assertEqual(3, len(fig.axes))
+
+        colorbarEditor = ColorbarAxisEditor(fig.canvas, fig.axes[2])
+
+        min_value = 1.0
+        max_value = 2.0
+        colorbarEditor.ui.editor_min.text = MagicMock(return_value=min_value)
+        colorbarEditor.ui.editor_max.text = MagicMock(return_value=max_value)
+        colorbarEditor.ui.logBox.isChecked = MagicMock(return_value=True)
+
+        colorbarEditor.changes_accepted()
+
+        for ax in range(2):
+            self.assertEqual(min_value, fig.axes[ax].collections[0].norm.vmin)
+            self.assertEqual(max_value, fig.axes[ax].collections[0].norm.vmax)
+            self.assertTrue(isinstance(fig.axes[ax].collections[0].norm, LogNorm))
 
 
 if __name__ == '__main__':

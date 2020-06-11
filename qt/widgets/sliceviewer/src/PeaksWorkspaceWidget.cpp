@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeaksWorkspaceWidget.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -12,6 +12,7 @@
 #include <QColorDialog>
 #include <QPlastiqueStyle>
 #include <QSortFilterProxyModel>
+#include <utility>
 
 namespace {
 QColor getSelectedColor() {
@@ -40,9 +41,10 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
     const std::string &coordinateSystem,
     PeakViewColor defaultForegroundPeakViewColor,
     PeakViewColor defaultBackgroundPeakViewColor, PeaksViewer *parent)
-    : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
-      m_foregroundPeakViewColor(defaultForegroundPeakViewColor),
-      m_backgroundPeakViewColor(defaultBackgroundPeakViewColor),
+    : QWidget(parent), m_ws(std::move(ws)),
+      m_coordinateSystem(coordinateSystem),
+      m_foregroundPeakViewColor(std::move(defaultForegroundPeakViewColor)),
+      m_backgroundPeakViewColor(std::move(defaultBackgroundPeakViewColor)),
       m_parent(parent) {
 
   ui.setupUi(this);
@@ -340,7 +342,7 @@ std::string PeaksWorkspaceWidget::getWSName() const {
  * @param ws : Workspace to redisplay with
  */
 void PeaksWorkspaceWidget::workspaceUpdate(
-    Mantid::API::IPeaksWorkspace_const_sptr ws) {
+    const Mantid::API::IPeaksWorkspace_const_sptr &ws) {
   // Only if we provide a peaks workspace for replacement.
   if (ws) {
     m_ws = ws;
@@ -360,7 +362,7 @@ void PeaksWorkspaceWidget::workspaceUpdate(
  * @param index : Index of the table newly selected
  */
 void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index,
-                                            QModelIndex /*unused*/) {
+                                            const QModelIndex & /*unused*/) {
   if (index.isValid()) {
     index = m_tableModel->mapToSource(index);
     emit zoomToPeak(this->m_ws, index.row());

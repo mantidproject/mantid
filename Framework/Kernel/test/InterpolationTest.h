@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,17 +31,11 @@ public:
    */
   InterpolationTest() {
     // values for setting up the interpolation
-    m_tableXValues.emplace_back(200.0);
-    m_tableXValues.emplace_back(201.0);
-    m_tableXValues.emplace_back(202.0);
-    m_tableXValues.emplace_back(203.0);
-    m_tableXValues.emplace_back(204.0);
-
-    m_tableYValues.emplace_back(50);
-    m_tableYValues.emplace_back(60);
-    m_tableYValues.emplace_back(100);
-    m_tableYValues.emplace_back(300);
-    m_tableYValues.emplace_back(400);
+    m_tableValues.emplace_back(DataXY(200.0, 50));
+    m_tableValues.emplace_back(DataXY(201.0, 60));
+    m_tableValues.emplace_back(DataXY(202.0, 100));
+    m_tableValues.emplace_back(DataXY(203.0, 300));
+    m_tableValues.emplace_back(DataXY(204.0, 400));
 
     // bulk values for interpolation test
     m_interpolationXValues.emplace_back(200.5);
@@ -99,9 +93,9 @@ public:
   void testAddPointOrdered() {
     Interpolation interpolation;
 
-    // Add points from values in vectors in correct order.
-    for (size_t i = 0; i < m_tableXValues.size(); ++i) {
-      interpolation.addPoint(m_tableXValues[i], m_tableYValues[i]);
+    // Add points from values in vector in correct order.
+    for (size_t i = 0; i < m_tableValues.size(); ++i) {
+      interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
     }
 
     // Check correctness of interpolation for different cases
@@ -117,10 +111,23 @@ public:
 
     for (std::vector<size_t>::const_iterator i = insertionOrder.begin();
          i != insertionOrder.end(); ++i) {
-      interpolation.addPoint(m_tableXValues[*i], m_tableYValues[*i]);
+      interpolation.addPoint(m_tableValues[*i].first, m_tableValues[*i].second);
     }
 
     checkInterpolationResults(interpolation);
+  }
+
+  void testAddPointDuplicates() {
+    TestableInterpolation interpolation;
+
+    // Add points from values in vector twice.
+    for (size_t i = 0; i < m_tableValues.size(); ++i) {
+      interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
+      interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
+    }
+
+    TS_ASSERT_EQUALS(
+        std::distance(interpolation.cbegin(), interpolation.cend()), 5);
   }
 
   void testEmpty() {
@@ -175,39 +182,62 @@ public:
   void testFindIndexOfNextLargerValue() {
     TestableInterpolation interpolation;
 
+    // take values from constructor
+    for (size_t i = 0; i < m_tableValues.size(); ++i) {
+      interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
+    }
+
     // lower limit - can be treated like general case
     TS_ASSERT_EQUALS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 200.0), 1);
+        std::distance(interpolation.cbegin(),
+                      interpolation.findIndexOfNextLargerValue(200.0)),
+        1);
 
     // Exact interpolation points
     TS_ASSERT_EQUALS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 201.0), 2);
+        std::distance(interpolation.cbegin(),
+                      interpolation.findIndexOfNextLargerValue(201.0)),
+        2);
     TS_ASSERT_EQUALS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 202.0), 3);
+        std::distance(interpolation.cbegin(),
+                      interpolation.findIndexOfNextLargerValue(202.0)),
+        3);
     TS_ASSERT_EQUALS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 203.0), 4);
+        std::distance(interpolation.cbegin(),
+                      interpolation.findIndexOfNextLargerValue(203.0)),
+        4);
 
     // Arbitrary interpolation points
     TS_ASSERT_EQUALS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 200.5), 1);
+        std::distance(interpolation.cbegin(),
+                      interpolation.findIndexOfNextLargerValue(200.5)),
+        1);
     TS_ASSERT_EQUALS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 201.25), 2);
+        std::distance(interpolation.cbegin(),
+                      interpolation.findIndexOfNextLargerValue(201.25)),
+        2);
     TS_ASSERT_EQUALS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 203.5), 4);
+        std::distance(interpolation.cbegin(),
+                      interpolation.findIndexOfNextLargerValue(203.5)),
+        4);
+  }
 
-    // upper limit - must be covered as edge case before this can ever be
-    // called.
-    TS_ASSERT_THROWS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 204.0),
-        const std::range_error &);
+  void testCBegin() {
+    TestableInterpolation interpolation;
+    // take values from constructor
+    for (size_t i = 0; i < m_tableValues.size(); ++i) {
+      interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
+    }
+    TS_ASSERT_EQUALS(interpolation.cbegin()->first, 200.0)
+  }
 
-    // outside interpolation limits - edge cases as well
-    TS_ASSERT_THROWS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 199),
-        const std::range_error &);
-    TS_ASSERT_THROWS(
-        interpolation.findIndexOfNextLargerValue(m_tableXValues, 2000.0),
-        const std::range_error &);
+  void testCEnd() {
+    TestableInterpolation interpolation;
+    // take values from constructor
+    for (size_t i = 0; i < m_tableValues.size(); ++i) {
+      interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
+    }
+    TS_ASSERT_EQUALS(std::prev(interpolation.cend())->first, 204.0)
   }
 
   void testInterpolationWithTooFewValues() {
@@ -215,25 +245,25 @@ public:
     Interpolation interpolationOne;
     interpolationOne.addPoint(200, 2.0);
 
-    for (double m_tableXValue : m_tableXValues) {
+    for (DataXY m_tableValue : m_tableValues) {
       // When there are zero values in the interpolation, it returns 0.0
-      checkValue(interpolationZero, m_tableXValue, 0.0,
+      checkValue(interpolationZero, m_tableValue.first, 0.0,
                  "zero interpolation values");
 
       // With one value, it returns this one value for any x.
-      checkValue(interpolationOne, m_tableXValue, 2.0,
+      checkValue(interpolationOne, m_tableValue.first, 2.0,
                  "one interpolation value");
     }
   }
 
 private:
-  Interpolation getInitializedInterpolation(std::string xUnit,
-                                            std::string yUnit) {
+  Interpolation getInitializedInterpolation(const std::string &xUnit,
+                                            const std::string &yUnit) {
     Interpolation interpolation;
 
     // take values from constructor
-    for (size_t i = 0; i < m_tableXValues.size(); ++i) {
-      interpolation.addPoint(m_tableXValues[i], m_tableYValues[i]);
+    for (size_t i = 0; i < m_tableValues.size(); ++i) {
+      interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
     }
 
     interpolation.setXUnit(xUnit);
@@ -251,18 +281,18 @@ private:
   }
 
   void checkValueAtLowerLimit(const Interpolation &interpolation) {
-    checkValue(interpolation, m_tableXValues.front(), m_tableYValues.front(),
-               "at lower limit");
+    checkValue(interpolation, m_tableValues.front().first,
+               m_tableValues.front().second, "at lower limit");
   }
 
   void checkValueAtUpperLimit(const Interpolation &interpolation) {
-    checkValue(interpolation, m_tableXValues.back(), m_tableYValues.back(),
-               "at upper limit");
+    checkValue(interpolation, m_tableValues.back().first,
+               m_tableValues.back().second, "at upper limit");
   }
 
   void checkValuesAtExactBulkPoints(const Interpolation &interpolation) {
-    for (size_t i = 1; i < m_tableXValues.size() - 1; ++i) {
-      checkValue(interpolation, m_tableXValues[i], m_tableYValues[i],
+    for (size_t i = 1; i < m_tableValues.size() - 1; ++i) {
+      checkValue(interpolation, m_tableValues[i].first, m_tableValues[i].second,
                  "at interpolation point");
     }
   }
@@ -286,17 +316,16 @@ private:
    * It takes a string argument to make it more obvious where the problem is.
    */
   void checkValue(const Interpolation &interpolation, double x, double y,
-                  std::string testedRange) {
+                  const std::string &testedRange) {
     std::ostringstream errorString;
     errorString << "Interpolation error " << testedRange;
 
     TSM_ASSERT_EQUALS(errorString.str().c_str(), interpolation.value(x), y);
   }
 
-  // These two vectors contain the data points from which the interpolation is
+  // This vector contains the data points from which the interpolation is
   // constructed
-  std::vector<double> m_tableXValues;
-  std::vector<double> m_tableYValues;
+  std::vector<DataXY> m_tableValues;
 
   // Two vectors with test values for the "bulk", e.g. no values at the limits
   // and

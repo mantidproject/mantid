@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,6 +16,7 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL SaveViewSubscriber {
 public:
+  virtual void notifySettingsChanged() = 0;
   virtual void notifyPopulateWorkspaceList() = 0;
   virtual void notifyFilterWorkspaceList() = 0;
   virtual void notifyPopulateParametersList() = 0;
@@ -37,6 +38,7 @@ public:
   virtual ~ISaveView() = default;
   virtual void subscribe(SaveViewSubscriber *notifyee) = 0;
 
+  virtual void connectSaveSettingsWidgets() = 0;
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;
   virtual std::string getPrefix() const = 0;

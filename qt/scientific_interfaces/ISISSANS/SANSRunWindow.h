@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -144,19 +144,20 @@ private:
   void appendRowToMaskTable(const QString &type, const QString &detector,
                             const QString &details);
   void readNumberOfEntries(const QString &RunStep,
-                           API::MWRunFiles *const output);
+                           API::FileFinderWidget *const output);
   QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();
   /// Get the component distances
   void componentLOQDistances(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
       double &lms, double &lsda, double &lsdb);
   /// Enable/disable user interaction
   void setProcessingState(const States action);
   /// Check for workspace name in the AnalysisDataService
   bool workspaceExists(const QString &ws_name) const;
   Mantid::API::MatrixWorkspace_sptr
-  getGroupMember(Mantid::API::Workspace_const_sptr in, const int member) const;
+  getGroupMember(const Mantid::API::Workspace_const_sptr &in,
+                 const int member) const;
   /// Construct a QStringList of the currently loaded workspaces
   QStringList currentWorkspaceList() const;
   /// Is the user file loaded
@@ -168,11 +169,11 @@ private:
   void setGeometryDetails();
   /// Set the SANS2D geometry
   void setSANS2DGeometry(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
       int wscode);
   /// Set LOQ geometry
   void setLOQGeometry(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
       int wscode);
   /// Mark an error on a label
   void markError(QLabel *label);
@@ -182,10 +183,11 @@ private:
   bool runAssign(int key, QString &logs);
   /// Load a scatter sample file or can run via Python objects using the passed
   /// Python command
-  bool assignDetBankRun(API::MWRunFiles &runFile, const QString &assignFn);
-  /// runs that contain only monitor counts can be direct or transmission runs
-  bool assignMonitorRun(API::MWRunFiles &trans, API::MWRunFiles &direct,
+  bool assignDetBankRun(API::FileFinderWidget &runFile,
                         const QString &assignFn);
+  /// runs that contain only monitor counts can be direct or transmission runs
+  bool assignMonitorRun(API::FileFinderWidget &trans,
+                        API::FileFinderWidget &direct, const QString &assignFn);
   /// Get the detectors' names
   void fillDetectNames(QComboBox *output);
   QStringList getSaveAlgs();
@@ -207,7 +209,7 @@ private:
   bool browseForFile(const QString &box_title, QLineEdit *file_field,
                      QString file_filter = QString());
   /// Add a csv line to the batch grid
-  int addBatchLine(QString csv_line, QString separator = "");
+  int addBatchLine(const QString &csv_line, QString separator = "");
   /// Save the batch file
   QString saveBatchGrid(const QString &filename = "");
   /// Check that the workspace can have the zero errors removed
@@ -345,7 +347,7 @@ private:
   /// The workspace containing the can run
   QString m_experCan;
   /// List of all run entry widgets, which are on tab page 1
-  std::vector<API::MWRunFiles *> m_runFiles;
+  std::vector<API::FileFinderWidget *> m_runFiles;
   /// There validators are searched before a reduction begins. Where there is a
   /// problem focus goes to the widget linked to a validator whose tab is also
   /// stored in the pair. Disabling a validator QLabel disables checking that
@@ -445,7 +447,7 @@ private:
   /// Check setting for wavelengths and Q values
   void checkWaveLengthAndQValues(bool &isValid, QString &message,
                                  QLineEdit *min, QLineEdit *max,
-                                 QComboBox *selection, QString type);
+                                 QComboBox *selection, const QString &type);
   /// Checks if the save settings are valid for a particular workspace
   bool areSaveSettingsValid(const QString &workspaceName);
   /// Update the beam center fields
@@ -458,26 +460,29 @@ private:
   /// correct setting and displays it
   void retrieveQResolutionAperture();
   /// General getter for aperture settings of Q Resolution
-  QString retrieveQResolutionGeometry(QString command);
+  QString retrieveQResolutionGeometry(const QString &command);
   /// Write the QResolution GUI changes to a python script
   void writeQResolutionSettingsToPythonScript(QString &pythonCode);
   /// Write single line for Q Resolution
   void writeQResolutionSettingsToPythonScriptSingleEntry(
-      QString value, QString code_entry, const QString lineEnding,
-      QString &py_code) const;
+      const QString &value, const QString &code_entry,
+      const QString &lineEnding, QString &py_code) const;
   /// Sets the cirucular aperture, ie labels and populates the values with what
   /// is available from the user file
   void setupQResolutionCircularAperture();
   /// Sets the rectuanular aperture
-  void setupQResolutionRectangularAperture(QString h1, QString w1, QString h2,
-                                           QString w2);
+  void setupQResolutionRectangularAperture(const QString &h1, const QString &w1,
+                                           const QString &h2,
+                                           const QString &w2);
   /// Set the rectangular aperture
   void setupQResolutionRectangularAperture();
   /// Set the aperture type
   void setQResolutionApertureType(QResoluationAperture apertureType,
-                                  QString a1H1Label, QString a2H2Label,
-                                  QString a1H1, QString a2H2,
-                                  QString toolTipA1H1, QString toolTipA2H2,
+                                  const QString &a1H1Label,
+                                  const QString &a2H2Label, const QString &a1H1,
+                                  const QString &a2H2,
+                                  const QString &toolTipA1H1,
+                                  const QString &toolTipA2H2,
                                   bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
@@ -494,7 +499,8 @@ private:
   /// Generic addition of background correction to python script
   void addBackgroundCorrectionToPythonScript(
       QString &pythonCode,
-      MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings setting,
+      const MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings
+          &setting,
       bool isTimeBased);
   /// Check if the user file has a valid user file extension
   bool hasUserFileValidFileExtension();

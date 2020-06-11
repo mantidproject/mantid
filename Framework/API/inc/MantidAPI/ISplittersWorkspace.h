@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -64,10 +64,10 @@ private:
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace
-using ISplittersWorkspace_sptr = boost::shared_ptr<ISplittersWorkspace>;
+using ISplittersWorkspace_sptr = std::shared_ptr<ISplittersWorkspace>;
 /// Typedef for a shared pointer to \c const \c TableWorkspace
 using ISplittersWorkspace_const_sptr =
-    boost::shared_ptr<const ISplittersWorkspace>;
+    std::shared_ptr<const ISplittersWorkspace>;
 
 } // namespace API
 } // namespace Mantid

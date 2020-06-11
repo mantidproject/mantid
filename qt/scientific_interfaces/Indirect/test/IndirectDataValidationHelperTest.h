@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -45,8 +45,9 @@ std::string emptyWorkspaceGroupError() {
          " is empty.";
 }
 
-MatrixWorkspace_sptr convertWorkspace2DToMatrix(Workspace2D_sptr workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+MatrixWorkspace_sptr
+convertWorkspace2DToMatrix(const Workspace2D_sptr &workspace) {
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 MatrixWorkspace_sptr
@@ -57,7 +58,7 @@ createMatrixWorkspace(std::size_t const &numberOfHistograms,
 }
 
 TableWorkspace_sptr createTableWorkspace(std::size_t const &size) {
-  return boost::make_shared<TableWorkspace>(size);
+  return std::make_shared<TableWorkspace>(size);
 }
 
 } // namespace
@@ -218,14 +219,14 @@ public:
 
   void
   test_that_validateDataIsACorrectionsFile_will_fail_if_the_workspace_group_is_empty() {
-    m_ads.addOrReplace(WORKSPACE_NAME, boost::make_shared<WorkspaceGroup>());
+    m_ads.addOrReplace(WORKSPACE_NAME, std::make_shared<WorkspaceGroup>());
     assertThatTheDataIsInvalid(WORKSPACE_NAME, ERROR_LABEL,
                                validateDataIsACorrectionsFile);
   }
 
   void
   test_that_validateDataIsACorrectionsFile_will_return_the_correct_error_message_if_the_workspace_group_is_empty() {
-    m_ads.addOrReplace(WORKSPACE_NAME, boost::make_shared<WorkspaceGroup>());
+    m_ads.addOrReplace(WORKSPACE_NAME, std::make_shared<WorkspaceGroup>());
     assertErrorMessage(WORKSPACE_NAME, ERROR_LABEL,
                        validateDataIsACorrectionsFile,
                        emptyWorkspaceGroupError());

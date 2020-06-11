@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
@@ -17,7 +17,7 @@ using namespace boost::python;
 
 namespace {
 SpaceGroup_sptr getSpaceGroup(CrystalStructure &self) {
-  return boost::const_pointer_cast<SpaceGroup>(self.spaceGroup());
+  return std::const_pointer_cast<SpaceGroup>(self.spaceGroup());
 }
 
 std::vector<std::string> getScatterers(const CrystalStructure &self) {

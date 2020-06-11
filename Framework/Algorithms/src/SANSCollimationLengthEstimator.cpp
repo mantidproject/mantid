@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,7 +22,7 @@ Mantid::Kernel::Logger g_log("SANSCollimationLengthEstimator");
  * @param val: a value as a string
  * @returns true if it is convertible else false
  */
-bool checkForDouble(std::string val) {
+bool checkForDouble(const std::string &val) {
   auto isDouble = false;
   try {
     boost::lexical_cast<double>(val);
@@ -45,7 +45,7 @@ using namespace API;
  * @returns the collimation length
  */
 double SANSCollimationLengthEstimator::provideCollimationLength(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
   // If the instrument does not have a correction specified then set the length
   // to 4
   const double defaultLColim = 4.0;
@@ -104,7 +104,7 @@ double SANSCollimationLengthEstimator::provideCollimationLength(
  * length
  */
 double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(
-    MatrixWorkspace_sptr inOutWS, const double L1,
+    const MatrixWorkspace_sptr &inOutWS, const double L1,
     const double collimationLengthCorrection) const {
   auto lCollim = L1 - collimationLengthCorrection;
 

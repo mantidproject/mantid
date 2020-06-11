@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -78,9 +78,9 @@ protected:
   void init() override;
   void exec() override;
 
-  void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
+  void outputYandEValues(const API::MatrixWorkspace_const_sptr &inputW,
                          const HistogramData::BinEdges &XValues_new,
-                         API::MatrixWorkspace_sptr outputW);
+                         const API::MatrixWorkspace_sptr &outputW);
   HistogramData::Histogram
   cubicInterpolation(const HistogramData::Histogram &oldHistogram,
                      const HistogramData::BinEdges &xNew) const;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
@@ -20,6 +20,7 @@
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -67,7 +68,7 @@ which will be used as dimensions.
 */
 void MDWSDescription::buildFromMatrixWS(
     const API::MatrixWorkspace_sptr &pWS, const std::string &QMode,
-    const std::string dEMode,
+    const std::string &dEMode,
     const std::vector<std::string> &dimPropertyNames) {
   m_InWS = pWS;
   // fill additional dimensions values, defined by workspace properties;
@@ -125,7 +126,7 @@ void MDWSDescription::buildFromMatrixWS(
 }
 
 void MDWSDescription::setWS(API::MatrixWorkspace_sptr otherMatrixWS) {
-  m_InWS = otherMatrixWS;
+  m_InWS = std::move(otherMatrixWS);
 }
 /// Method checks if input workspace has defined goniometer
 bool MDWSDescription::hasGoniometer() const {
@@ -349,7 +350,7 @@ std::string MDWSDescription::getEModeStr() const {
  *properties) for current multidimensional event
  */
 void MDWSDescription::fillAddProperties(
-    Mantid::API::MatrixWorkspace_const_sptr inWS2D,
+    const Mantid::API::MatrixWorkspace_const_sptr &inWS2D,
     const std::vector<std::string> &dimPropertyNames,
     std::vector<coord_t> &AddCoord) {
   size_t nDimPropNames = dimPropertyNames.size();
@@ -398,13 +399,12 @@ void MDWSDescription::checkMinMaxNdimConsistent(
 }
 
 /** function retrieves copy of the oriented lattice from the workspace */
-boost::shared_ptr<Geometry::OrientedLattice>
-MDWSDescription::getOrientedLattice(
-    Mantid::API::MatrixWorkspace_const_sptr inWS2D) {
+std::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice(
+    const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) {
   // try to get the WS oriented lattice
-  boost::shared_ptr<Geometry::OrientedLattice> orl;
+  std::shared_ptr<Geometry::OrientedLattice> orl;
   if (inWS2D->sample().hasOrientedLattice())
-    orl = boost::shared_ptr<Geometry::OrientedLattice>(
+    orl = std::shared_ptr<Geometry::OrientedLattice>(
         new Geometry::OrientedLattice(inWS2D->sample().getOrientedLattice()));
 
   return orl;
@@ -432,7 +432,7 @@ Geometry::MDFrame_uptr MDWSDescription::getFrame(size_t d) const {
  * Sets the frame.
  * @param frameKey : Frame key desired.
  */
-void MDWSDescription::setFrame(const std::string frameKey) {
+void MDWSDescription::setFrame(const std::string &frameKey) {
   m_frameKey = frameKey;
 }
 

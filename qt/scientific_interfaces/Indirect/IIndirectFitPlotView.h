@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,7 +27,7 @@ public:
   virtual void watchADS(bool watch) = 0;
 
   virtual WorkspaceIndex getSelectedSpectrum() const = 0;
-  virtual TableRowIndex getSelectedSpectrumIndex() const = 0;
+  virtual FitDomainIndex getSelectedSpectrumIndex() const = 0;
   virtual TableDatasetIndex getSelectedDataIndex() const = 0;
   virtual TableDatasetIndex dataSelectionSize() const = 0;
   virtual bool isPlotGuessChecked() const = 0;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,7 +27,7 @@
 #include "MantidQtWidgets/SliceViewer/QwtScaleDrawNonOrthogonal.h"
 #include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
 #include "ui_SliceViewer.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qwt_color_map.h>
 #include <qwt_plot.h>
 #include <qwt_plot_spectrogram.h>
@@ -85,11 +85,11 @@ public:
   ~SliceViewer() override;
 
   void setWorkspace(const QString &wsName);
-  void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  void setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws);
   Mantid::API::IMDWorkspace_sptr getWorkspace();
   void showControls(bool visible);
   void zoomBy(double factor);
-  void loadColorMap(QString filename = QString());
+  void loadColorMap(const QString &filename = QString());
   LineOverlay *getLineOverlay() { return m_lineOverlay; }
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
   int getDimX() const;
@@ -130,7 +130,7 @@ public:
   void refreshRebin();
 
   /// Methods relating to peaks overlays.
-  boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
+  std::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
   ProxyCompositePeaksPresenter *
   setPeaksWorkspaces(const QStringList &list); // For python binding
   void clearPeaksWorkspaces();                 // For python binding
@@ -143,7 +143,7 @@ public:
   /* Methods associated with workspace observers. Driven by SliceViewerWindow */
   void peakWorkspaceChanged(
       const std::string &wsName,
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
+      std::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
 
   /// Load the state of the slice viewer from a Mantid project file
   void loadFromProject(const std::string &lines);
@@ -392,7 +392,7 @@ private:
   bool m_rebinLocked;
 
   /// Md Settings for color maps
-  boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
+  std::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
 
   /// Logger
   Mantid::Kernel::Logger m_logger;
@@ -408,9 +408,9 @@ private:
   bool m_canSwitchScales; // stops qwtScaleDraw() from occuring in first set up
 
   // -------------------------- Controllers ------------------------
-  boost::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;
+  std::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;
 
-  boost::shared_ptr<ProxyCompositePeaksPresenter> m_proxyPeaksPresenter;
+  std::shared_ptr<ProxyCompositePeaksPresenter> m_proxyPeaksPresenter;
 
   /// Pointer to widget used for peaks sliding.
   DimensionSliceWidget *m_peaksSliderWidget;

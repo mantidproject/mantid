@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -47,15 +47,15 @@ const std::string CreateMDHistoWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateMDHistoWorkspace::init() {
-  auto validator = boost::make_shared<CompositeValidator>();
-  validator->add(boost::make_shared<BoundedValidator<int>>(1, 9));
-  validator->add(boost::make_shared<MandatoryValidator<int>>());
+  auto validator = std::make_shared<CompositeValidator>();
+  validator->add(std::make_shared<BoundedValidator<int>>(1, 9));
+  validator->add(std::make_shared<MandatoryValidator<int>>());
   auto mandatoryIntArrayValidator =
-      boost::make_shared<MandatoryValidator<std::vector<int>>>();
+      std::make_shared<MandatoryValidator<std::vector<int>>>();
   auto mandatoryDoubleArrayValidator =
-      boost::make_shared<MandatoryValidator<std::vector<double>>>();
+      std::make_shared<MandatoryValidator<std::vector<double>>>();
   auto mandatoryStrArrayValidator =
-      boost::make_shared<MandatoryValidator<std::vector<std::string>>>();
+      std::make_shared<MandatoryValidator<std::vector<std::string>>>();
 
   declareProperty(std::make_unique<ArrayProperty<double>>(
                       "SignalInput", mandatoryDoubleArrayValidator),

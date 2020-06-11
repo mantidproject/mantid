@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -52,8 +52,8 @@ public:
   void setDatasetNames(const QStringList &names);
   void setErrorsEnabled(bool enabled);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
-  void
-  setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setResolution(
+      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setBackgroundA0(double value);
   void setQValues(const std::vector<double> &qValues);
 

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cmath>
 #include <numeric>
 
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -62,7 +68,7 @@ FunctionDomain_sptr getFakeDomain(int startY, int endY) {
   // Ensure that the steps are not subdivided to keep testing simple
   // by making 1 step for each value including the starting val
   const int numSteps = endY - startY + 1;
-  return boost::make_shared<FunctionDomain1DVector>(startY, endY, numSteps);
+  return std::make_shared<FunctionDomain1DVector>(startY, endY, numSteps);
 }
 
 FunctionValues_sptr getFakeValues(const std::vector<double> &nValues,
@@ -71,7 +77,7 @@ FunctionValues_sptr getFakeValues(const std::vector<double> &nValues,
   // sane
   assert(domain.size() == nValues.size() &&
          "The number of points must match domain size");
-  auto funcValues = boost::make_shared<FunctionValues>(domain);
+  auto funcValues = std::make_shared<FunctionValues>(domain);
 
   for (size_t i = 0; i < nValues.size(); i++) {
     funcValues->setFitData(i, nValues[i]);
@@ -80,8 +86,8 @@ FunctionValues_sptr getFakeValues(const std::vector<double> &nValues,
   return funcValues;
 }
 
-boost::shared_ptr<UserFunction> getFakeFunction() {
-  auto func = boost::make_shared<UserFunction>();
+std::shared_ptr<UserFunction> getFakeFunction() {
+  auto func = std::make_shared<UserFunction>();
   // By using x as our custom fitting formula we effectively map x->y
   // within the CostFuncPoisson method
   func->setAttributeValue("Formula", "x");
@@ -177,7 +183,7 @@ public:
 
     const size_t numPoints = 10;
 
-    auto domain = boost::make_shared<FunctionDomain1DVector>(
+    auto domain = std::make_shared<FunctionDomain1DVector>(
         (cutOffPoint / numPoints), cutOffPoint, numPoints);
 
     std::vector<double> fakeVals(numPoints);
@@ -204,7 +210,7 @@ public:
     FunctionDomain_sptr domain = getFakeDomain(1, 3);
     FunctionValues_sptr vals = getFakeValues({1, 2, 3}, *domain);
 
-    auto mockFunction = boost::make_shared<UserFunction>();
+    auto mockFunction = std::make_shared<UserFunction>();
     mockFunction->setAttributeValue("Formula", "x");
 
     CostFuncPoisson testInstance;
@@ -226,7 +232,7 @@ public:
 
     FunctionValues_sptr vals = getFakeValues({1, 2}, *domain);
 
-    auto mockFunction = boost::make_shared<UserFunction>();
+    auto mockFunction = std::make_shared<UserFunction>();
     mockFunction->setAttributeValue("Formula", "x + a + b");
     mockFunction->setParameter("a", 0);
     mockFunction->setParameter("b", 0);
@@ -243,7 +249,7 @@ public:
     FunctionDomain_sptr domain = getFakeDomain(6, 8);
     FunctionValues_sptr vals = getFakeValues({10, 2, 1.5}, *domain);
 
-    auto mockFunction = boost::make_shared<UserFunction>();
+    auto mockFunction = std::make_shared<UserFunction>();
     mockFunction->setAttributeValue("Formula", "x + a + b");
     mockFunction->setParameter("a", 1);
     mockFunction->setParameter("b", 1);
@@ -264,7 +270,7 @@ public:
     FunctionDomain_sptr domain = getFakeDomain(1, 3);
     FunctionValues_sptr vals = getFakeValues({1, 2, 3}, *domain);
 
-    auto mockFunction = boost::make_shared<UserFunction>();
+    auto mockFunction = std::make_shared<UserFunction>();
     mockFunction->setAttributeValue("Formula", "x + a + b");
     mockFunction->setParameter("a", 1);
     mockFunction->setParameter("b", 100);
@@ -287,7 +293,7 @@ public:
     FunctionDomain_sptr domain = getFakeDomain(-1, 1);
     FunctionValues_sptr vals = getFakeValues({1, 2, 3}, *domain);
 
-    auto mockFunction = boost::make_shared<UserFunction>();
+    auto mockFunction = std::make_shared<UserFunction>();
     mockFunction->setAttributeValue("Formula", "x + a + b");
     mockFunction->setParameter("a", 0);
     mockFunction->setParameter("b", 0);

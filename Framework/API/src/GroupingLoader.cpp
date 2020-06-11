@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -15,7 +15,8 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
-#include <boost/make_shared.hpp>
+#include <memory>
+#include <utility>
 
 using namespace Poco::XML;
 
@@ -27,7 +28,7 @@ namespace API {
  * @param instrument :: [input] Instrument
  */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument)
-    : m_instrument(instrument) {}
+    : m_instrument(std::move(instrument)) {}
 
 /** Constructor with field direction
  * @param instrument :: [input] Instrument
@@ -35,7 +36,8 @@ GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument)
  */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument,
                                const std::string &mainFieldDirection)
-    : m_instrument(instrument), m_mainFieldDirection(mainFieldDirection) {}
+    : m_instrument(std::move(instrument)),
+      m_mainFieldDirection(mainFieldDirection) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -46,9 +48,9 @@ GroupingLoader::~GroupingLoader() = default;
  * Attempts to load a grouping information referenced by IDF.
  * @return Grouping information
  */
-boost::shared_ptr<Grouping> GroupingLoader::getGroupingFromIDF() const {
+std::shared_ptr<Grouping> GroupingLoader::getGroupingFromIDF() const {
   std::string parameterName = "Default grouping file";
-  auto loadedGrouping = boost::make_shared<Grouping>();
+  auto loadedGrouping = std::make_shared<Grouping>();
 
   // Special case for MUSR or CHRONUS, because it has two possible groupings
   if (m_instrument->getName() == "MUSR" ||
@@ -231,12 +233,12 @@ void GroupingLoader::loadGroupingFromXML(const std::string &filename,
  * Returns a "dummy" grouping: a single group with all the detectors in it.
  * @return Grouping information
  */
-boost::shared_ptr<Grouping> GroupingLoader::getDummyGrouping() {
+std::shared_ptr<Grouping> GroupingLoader::getDummyGrouping() {
   // Group with all the detectors
   std::ostringstream all;
   all << "1-" << m_instrument->getNumberDetectors();
 
-  auto dummyGrouping = boost::make_shared<Mantid::API::Grouping>();
+  auto dummyGrouping = std::make_shared<Mantid::API::Grouping>();
   dummyGrouping->description = "Dummy grouping";
   dummyGrouping->groupNames.emplace_back("all");
   dummyGrouping->groups.emplace_back(all.str());
@@ -248,7 +250,7 @@ boost::shared_ptr<Grouping> GroupingLoader::getDummyGrouping() {
  * Construct a Grouping from a table
  * @param table :: [input] Table to construct from
  */
-Grouping::Grouping(ITableWorkspace_sptr table) {
+Grouping::Grouping(const ITableWorkspace_sptr &table) {
   for (size_t row = 0; row < table->rowCount(); ++row) {
     std::vector<int> detectors = table->cell<std::vector<int>>(row, 0);
 
@@ -277,7 +279,7 @@ Grouping::Grouping(ITableWorkspace_sptr table) {
  * @return A grouping table as accepted by MuonGroupDetectors
  */
 ITableWorkspace_sptr Grouping::toTable() const {
-  auto newTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+  auto newTable = std::dynamic_pointer_cast<ITableWorkspace>(
       WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   newTable->addColumn("vector_int", "Detectors");

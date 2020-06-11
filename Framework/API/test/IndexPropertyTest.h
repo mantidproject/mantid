@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,8 +14,8 @@
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <numeric>
 
 using namespace Mantid::Kernel;
@@ -44,7 +44,7 @@ public:
     WorkspaceProperty<Workspace> wkspProp("InputWorkspace", "",
                                           Direction::Input);
 
-    auto ws = boost::make_shared<TableWorkspaceTester>();
+    auto ws = std::make_shared<TableWorkspaceTester>();
     wkspProp = ws;
 
     IndexProperty indexProp("IndexSet", wkspProp, m_itypeProp);

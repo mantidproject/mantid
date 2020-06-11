@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -98,7 +98,7 @@ public:
 
   void testSetX() {
     double aNumber = 5.3;
-    auto v = boost::make_shared<HistogramData::HistogramX>(
+    auto v = std::make_shared<HistogramData::HistogramX>(
         nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
@@ -138,8 +138,8 @@ public:
 
   void testSetCounts() {
     double aNumber = 5.7;
-    auto v = boost::make_shared<HistogramData::HistogramY>(nbins, aNumber);
-    auto e = boost::make_shared<HistogramData::HistogramE>(nbins, aNumber * 2);
+    auto v = std::make_shared<HistogramData::HistogramY>(nbins, aNumber);
+    auto e = std::make_shared<HistogramData::HistogramE>(nbins, aNumber * 2);
     TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
     TS_ASSERT_THROWS_NOTHING(ws->setCountStandardDeviations(0, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
@@ -232,7 +232,7 @@ public:
 
   /** Get spectrum() */
   void testGetSpectrum() {
-    boost::shared_ptr<MatrixWorkspace> ws = boost::make_shared<Workspace2D>();
+    std::shared_ptr<MatrixWorkspace> ws = std::make_shared<Workspace2D>();
     ws->initialize(4, 1, 1);
     TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(0));
     TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(3));

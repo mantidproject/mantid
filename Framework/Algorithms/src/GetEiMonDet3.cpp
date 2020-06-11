@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetEiMonDet3.h"
 
@@ -92,12 +92,12 @@ const static std::string PULSE_INTERVAL("pulse_interval");
  *
  */
 void GetEiMonDet3::init() {
-  auto tofWorkspace = boost::make_shared<Kernel::CompositeValidator>();
+  auto tofWorkspace = std::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
   auto mandatoryIntProperty =
-      boost::make_shared<Kernel::MandatoryValidator<int>>();
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+      std::make_shared<Kernel::MandatoryValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
   declareWorkspaceInputProperties<API::MatrixWorkspace,

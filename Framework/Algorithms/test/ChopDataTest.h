@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -67,7 +67,7 @@ public:
     // Get workspace group output by algorithm
     Mantid::API::WorkspaceGroup_sptr wsgroup;
     TS_ASSERT_THROWS_NOTHING(
-        wsgroup = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+        wsgroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "chopdatatest_output")));
 
@@ -79,11 +79,11 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr output4;
 
     TS_ASSERT_THROWS_NOTHING(
-        output1 = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        output1 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(wsnames[0])));
 
     TS_ASSERT_THROWS_NOTHING(
-        output4 = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        output4 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(wsnames[3])));
 
     TS_ASSERT_EQUALS(output1->getNumberHistograms(), nHist);

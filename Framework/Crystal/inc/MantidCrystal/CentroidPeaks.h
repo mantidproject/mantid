@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -20,7 +20,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class DLLExport CentroidPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CentroidPeaks : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaks"; };
@@ -45,7 +45,7 @@ private:
   void exec() override;
   void integrate();
   void integrateEvent();
-  int findPixelID(std::string bankName, int col, int row);
+  int findPixelID(const std::string &bankName, int col, int row);
   void removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS);
   void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
   Geometry::Instrument_const_sptr inst;

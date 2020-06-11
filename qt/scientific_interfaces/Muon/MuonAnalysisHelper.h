@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -50,7 +50,7 @@ MANTIDQT_MUONINTERFACE_DLL void setDoubleValidator(QLineEdit *field,
 
 /// Returns a first period MatrixWorkspace in a run workspace
 MANTIDQT_MUONINTERFACE_DLL Mantid::API::MatrixWorkspace_sptr
-firstPeriod(Mantid::API::Workspace_sptr ws);
+firstPeriod(const Mantid::API::Workspace_sptr &ws);
 
 /// Validates the field and returns the value
 MANTIDQT_MUONINTERFACE_DLL double
@@ -58,11 +58,13 @@ getValidatedDouble(QLineEdit *field, const QString &defaultValue,
                    const QString &valueDescr, Mantid::Kernel::Logger &log);
 
 /// Returns a number of periods in a run workspace
-MANTIDQT_MUONINTERFACE_DLL size_t numPeriods(Mantid::API::Workspace_sptr ws);
+MANTIDQT_MUONINTERFACE_DLL size_t
+numPeriods(const Mantid::API::Workspace_sptr &ws);
 
 /// Print various information about the run
 MANTIDQT_MUONINTERFACE_DLL void
-printRunInfo(Mantid::API::MatrixWorkspace_sptr runWs, std::ostringstream &out);
+printRunInfo(const Mantid::API::MatrixWorkspace_sptr &runWs,
+             std::ostringstream &out);
 
 /// Get a run label for the workspace
 MANTIDQT_MUONINTERFACE_DLL std::string
@@ -97,11 +99,12 @@ MANTIDQT_MUONINTERFACE_DLL void replaceLogValue(const std::string &wsName,
 
 /// Finds all of the values for a log
 MANTIDQT_MUONINTERFACE_DLL std::vector<std::string>
-findLogValues(const Mantid::API::Workspace_sptr ws, const std::string &logName);
+findLogValues(const Mantid::API::Workspace_sptr &ws,
+              const std::string &logName);
 
 /// Finds the range of values for a log
 MANTIDQT_MUONINTERFACE_DLL std::pair<std::string, std::string> findLogRange(
-    const Mantid::API::Workspace_sptr ws, const std::string &logName,
+    const Mantid::API::Workspace_sptr &ws, const std::string &logName,
     bool (*isLessThan)(const std::string &first, const std::string &second));
 
 /// Finds the range of values for a log for a vector of workspaces
@@ -112,8 +115,8 @@ MANTIDQT_MUONINTERFACE_DLL std::pair<std::string, std::string> findLogRange(
 
 /// Concatenates time-series log of one workspace with the second
 MANTIDQT_MUONINTERFACE_DLL void
-appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
-                     boost::shared_ptr<Mantid::API::Workspace> resultant,
+appendTimeSeriesLogs(const std::shared_ptr<Mantid::API::Workspace> &toAppend,
+                     const std::shared_ptr<Mantid::API::Workspace> &resultant,
                      const std::string &logName);
 
 /// Parse analysis workspace name
@@ -130,8 +133,8 @@ runNumberString(const std::string &workspaceName, const std::string &firstRun);
 
 /// Decide if grouping needs to be reloaded
 MANTIDQT_MUONINTERFACE_DLL bool isReloadGroupingNecessary(
-    const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
-    const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace);
+    const std::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
+    const std::shared_ptr<Mantid::API::Workspace> &loadedWorkspace);
 
 /// Parse run label into instrument and runs
 MANTIDQT_MUONINTERFACE_DLL void parseRunLabel(const std::string &label,
@@ -140,7 +143,7 @@ MANTIDQT_MUONINTERFACE_DLL void parseRunLabel(const std::string &label,
 
 /// Get colors for workspaces to go in table
 MANTIDQT_MUONINTERFACE_DLL QMap<int, QColor> getWorkspaceColors(
-    const std::vector<boost::shared_ptr<Mantid::API::Workspace>> &workspaces);
+    const std::vector<std::shared_ptr<Mantid::API::Workspace>> &workspaces);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are

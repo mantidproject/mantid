@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,7 +16,7 @@
 #include <boost/python/object.hpp>
 // older versions of boost::python seem to require this last, after the object
 // include
-#include <boost/python/converter/shared_ptr_deleter.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -53,7 +53,7 @@ public:
       : m_classObject(classObject) {}
 
   /// Creates an instance of the object as shared_ptr to the Base type
-  boost::shared_ptr<Base> createInstance() const override;
+  std::shared_ptr<Base> createInstance() const override;
 
   /// Creates an instance of the object as raw pointer to the Base type
   Base *createUnwrappedInstance() const override;
@@ -68,13 +68,13 @@ private:
  * @returns A shared_ptr to Base.
  */
 template <typename Base>
-boost::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
+std::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
   using namespace boost::python;
   GlobalInterpreterLock gil;
 
   object instance = m_classObject();
   // The instantiator assumes that the exported type uses a
-  // HeldType=boost::shared_ptr<Adapter>,
+  // HeldType=std::shared_ptr<Adapter>,
   // where Adapter inherits from Base,
   // see
   // http://www.boost.org/doc/libs/1_42_0/libs/python/doc/v2/class.html#class_-spec.
@@ -86,9 +86,9 @@ boost::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
   // the
   // Python object or we get a segfault when deleting the objects on later
   // versions of Python 2.7
-  auto instancePtr = extract<boost::shared_ptr<Base>>(instance)();
+  auto instancePtr = extract<std::shared_ptr<Base>>(instance)();
   auto *deleter =
-      boost::get_deleter<converter::shared_ptr_deleter, Base>(instancePtr);
+      std::get_deleter<converter::shared_ptr_deleter, Base>(instancePtr);
   instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
   return instancePtr;
 }

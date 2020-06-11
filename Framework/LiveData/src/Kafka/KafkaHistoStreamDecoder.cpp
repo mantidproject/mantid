@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -28,6 +28,8 @@ GNU_DIAG_OFF("conversion")
 GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
+
+#include <utility>
 
 namespace {
 const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
@@ -59,8 +61,8 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic)
-    : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic, ""),
+    : IKafkaStreamDecoder(std::move(broker), histoTopic, runInfoTopic,
+                          spDetTopic, sampleEnvTopic, chopperTopic, ""),
       m_workspace() {}
 
 /**
@@ -68,6 +70,15 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
  * Stops capturing from the stream
  */
 KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() = default;
+
+KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
+    KafkaHistoStreamDecoder &&rval) noexcept
+    : IKafkaStreamDecoder(std::move(rval)) {
+  {
+    std::lock_guard lck(m_mutex);
+    m_buffer = std::move(rval.m_buffer);
+  }
+}
 
 /**
  * Check if there is data available to extract
@@ -145,8 +156,7 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
   int32_t partition;
   std::string topicName;
   auto runStartStruct = getRunStartMessage(runBuffer);
-  m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
-  initLocalCaches(buffer, runStartStruct);
+  initLocalCaches(runStartStruct);
 
   // Keep track of whether we've reached the end of a run
   std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
@@ -205,21 +215,21 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 }
 
 void KafkaHistoStreamDecoder::initLocalCaches(
-    const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+    const RunStartStruct &runStartData) {
   m_runId = runStartData.runId;
 
   const auto jsonGeometry = runStartData.nexusStructure;
   const auto instName = runStartData.instrumentName;
 
   DataObjects::Workspace2D_sptr histoBuffer;
-  if (rawMsgBuffer.empty()) {
+  if (!runStartData.detSpecMapSpecified) {
     /* Load the instrument to get the number of spectra :c */
     auto ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
     loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
     const auto nspec = ws->getInstrument()->getNumberDetectors();
 
     // Create buffer
-    histoBuffer = boost::static_pointer_cast<DataObjects::Workspace2D>(
+    histoBuffer = std::static_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", nspec, 2, 1));
     histoBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");
@@ -231,23 +241,11 @@ void KafkaHistoStreamDecoder::initLocalCaches(
         Kernel::UnitFactory::Instance().create("TOF");
     histoBuffer->setYUnit("Counts");
   } else {
-    auto spDetMsg = GetSpectraDetectorMapping(
-        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-    auto nudet = spDetMsg->detector_id()->size();
-    if (nudet != nspec) {
-      std::ostringstream os;
-      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-            "spectra/detector mapping. Expected matched length arrays but "
-            "found nspec="
-         << nspec << ", ndet=" << nudet;
-      throw std::runtime_error(os.str());
-    }
-
     // Create buffer
     histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
-        "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
-        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+        "Workspace2D", runStartData.numberOfSpectra,
+        runStartData.spectrumNumbers.data(), runStartData.detectorIDs.data(),
+        static_cast<uint32_t>(runStartData.detectorIDs.size()));
   }
 
   // Load the instrument if possible but continue if we can't

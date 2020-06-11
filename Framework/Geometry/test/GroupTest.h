@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,7 +13,7 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -359,8 +359,8 @@ public:
     twoFoldY.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
 
-    Group_const_sptr one = boost::make_shared<const Group>(inversion);
-    Group_const_sptr two = boost::make_shared<const Group>(twoFoldY);
+    Group_const_sptr one = std::make_shared<const Group>(inversion);
+    Group_const_sptr two = std::make_shared<const Group>(twoFoldY);
 
     Group_const_sptr three = one * two;
     TS_ASSERT_EQUALS(three->order(), 4);

@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 import os
 from unittest import TestCase, main
 
@@ -42,7 +40,11 @@ class ConfigUserManager(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
-            os.remove(self.cfg.filename)
+            filename = self.cfg.filename
+            # Force QSettings destructor to run before
+            # deleting the file as it will just recreate it
+            del self.cfg
+            os.remove(filename)
         except:
             # File does not exist so it has been deleted already
             # This seems to happen when the whole module is ran in PyCharm
@@ -67,8 +69,11 @@ class ConfigUserTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            os.remove(cls.cfg.filename)
+            filename = cls.cfg.filename
+            # Force QSettings destructor to run before
+            # deleting the file as it will just recreate it
             del cls.cfg
+            os.remove(filename)
         except OSError:
             pass
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/DateAndTime.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -42,13 +42,13 @@ private:
   /// Pointer to the actual ComponentInfo object (non-wrapping part).
   std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
   /// Collection of component ids
-  boost::shared_ptr<const std::vector<Geometry::IComponent *>> m_componentIds;
+  std::shared_ptr<const std::vector<Geometry::IComponent *>> m_componentIds;
   /// Map of component ids to indexes
-  boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
+  std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
       m_compIDToIndex;
 
   /// Shapes for each component
-  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
+  std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>>
       m_shapes;
 
   BoundingBox componentBoundingBox(const size_t index,
@@ -76,12 +76,11 @@ public:
 
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
-      boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+      std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
-      boost::shared_ptr<
-          const std::unordered_map<Geometry::IComponent *, size_t>>
+      std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
           componentIdToIndexMap,
-      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
+      std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>>
           shapes);
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo

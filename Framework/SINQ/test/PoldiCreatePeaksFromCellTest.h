@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -60,7 +60,7 @@ public:
     TS_ASSERT(ws);
 
     ITableWorkspace_sptr tableWs =
-        boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+        std::dynamic_pointer_cast<ITableWorkspace>(ws);
 
     TS_ASSERT(tableWs);
     // There should be 68 unique reflections for this cell and d-range.

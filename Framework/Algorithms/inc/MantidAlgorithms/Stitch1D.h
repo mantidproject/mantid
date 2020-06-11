@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -84,7 +84,7 @@ private:
   /// Mask out everything but the data in the ranges, but do it inplace.
   void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Add back in any special values
-  void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
+  void reinsertSpecialValues(const Mantid::API::MatrixWorkspace_sptr &ws);
   /// Range tolerance
   static const double range_tolerance;
   /// Scaling factors

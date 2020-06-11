@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
-using MantidQt::API::MWRunFiles;
+using MantidQt::API::FileFinderWidget;
 using MantidQt::MantidWidgets::DataSelector;
 using MantidQt::MantidWidgets::WorkspaceSelector;
 
@@ -46,8 +46,9 @@ public:
   /// Check that the given WorkspaceSelector is not empty.
   bool checkWorkspaceSelectorIsNotEmpty(const QString &name,
                                         WorkspaceSelector *workspaceSelector);
-  /// Check that the given MWRunFiles widget has valid files.
-  bool checkMWRunFilesIsValid(const QString &name, MWRunFiles *widget);
+  /// Check that the given FileFinderWidget widget has valid files.
+  bool checkFileFinderWidgetIsValid(const QString &name,
+                                    FileFinderWidget *widget);
   /// Check that the given DataSelector widget has valid input.
   bool checkDataSelectorIsValid(const QString &name, DataSelector *widget,
                                 bool silent = false);
@@ -80,12 +81,13 @@ public:
   /// Checks the number of histograms in a workspace
   bool checkWorkspaceNumberOfHistograms(QString const &workspaceName,
                                         std::size_t const &validSize);
-  bool checkWorkspaceNumberOfHistograms(Mantid::API::MatrixWorkspace_sptr,
-                                        std::size_t const &validSize);
+  bool
+  checkWorkspaceNumberOfHistograms(const Mantid::API::MatrixWorkspace_sptr &,
+                                   std::size_t const &validSize);
   /// Checks the number of bins in a workspace
   bool checkWorkspaceNumberOfBins(QString const &workspaceName,
                                   std::size_t const &validSize);
-  bool checkWorkspaceNumberOfBins(Mantid::API::MatrixWorkspace_sptr,
+  bool checkWorkspaceNumberOfBins(const Mantid::API::MatrixWorkspace_sptr &,
                                   std::size_t const &validSize);
   /// Checks that a workspace group contains valid matrix workspace's
   bool checkWorkspaceGroupIsValid(QString const &groupName,
@@ -107,7 +109,7 @@ public:
 private:
   /// Gets a workspace from the ADS
   template <typename T = Mantid::API::MatrixWorkspace>
-  boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
+  std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
 
   /// Any raised error messages.
   QStringList m_errorMessages;
@@ -148,7 +150,7 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
  * @return The workspace
  */
 template <typename T>
-boost::shared_ptr<T>
+std::shared_ptr<T>
 UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(
       workspaceName);

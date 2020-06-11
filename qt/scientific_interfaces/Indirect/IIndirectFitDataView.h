@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -28,7 +28,6 @@ public:
   virtual bool isMultipleDataTabSelected() const = 0;
   virtual bool isResolutionHidden() const = 0;
   virtual void setResolutionHidden(bool hide) = 0;
-  virtual void setStartAndEndHidden(bool hidden) = 0;
   virtual void disableMultipleDataTab() = 0;
 
   virtual std::string getSelectedSample() const = 0;

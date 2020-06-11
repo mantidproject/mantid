@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RayTracerTester.h"
 #include "MantidAPI/FileProperty.h"
@@ -52,7 +52,7 @@ void RayTracerTester::exec() {
 
   MatrixWorkspace_sptr mws = alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", mws);
-  Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(mws);
+  Workspace2D_sptr ws = std::dynamic_pointer_cast<Workspace2D>(mws);
 
   detid2index_map detTowi = ws->getDetectorIDToWorkspaceIndexMap();
   for (size_t i = 0; i < ws->getNumberHistograms(); i++)

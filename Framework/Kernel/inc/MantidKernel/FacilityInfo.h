@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,7 +15,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <string>
 #include <vector>
@@ -75,7 +75,7 @@ public:
   /// Returns a vector of the names of the available compute resources
   std::vector<std::string> computeResources() const;
   /// Returns the RemoteJobManager for the named compute resource
-  boost::shared_ptr<RemoteJobManager>
+  std::shared_ptr<RemoteJobManager>
   getRemoteJobManager(const std::string &name) const;
   /// Returns the catalogInfo class.
   const CatalogInfo &catalogInfo() const { return m_catalogs; }
@@ -121,7 +121,7 @@ private:
 
   // TODO: remove RemoteJobManager form here (trac ticket #11373)
   using ComputeResourcesMap =
-      std::map<std::string, boost::shared_ptr<RemoteJobManager>>;
+      std::map<std::string, std::shared_ptr<RemoteJobManager>>;
   ComputeResourcesMap m_computeResources; ///< list of compute resources
                                           ///(clusters, etc...) available at
                                           /// this facility

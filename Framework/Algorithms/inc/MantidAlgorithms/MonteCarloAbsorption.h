@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 
 namespace Mantid {
 namespace API {
@@ -24,6 +25,8 @@ class Instrument;
 
 namespace Algorithms {
 class DetectorGridDefinition;
+class MCInteractionVolume;
+
 /**
   Calculates attenuation due to absorption and scattering in a sample +
   its environment using a Monte Carlo algorithm.
@@ -58,7 +61,8 @@ private:
                const bool simulateTracksForEachWavelength, const int seed,
                const InterpolationOption &interpolateOpt,
                const bool useSparseInstrument,
-               const size_t maxScatterPtAttempts);
+               const size_t maxScatterPtAttempts,
+               const MCInteractionVolume::ScatteringPointVicinity pointsIn);
   API::MatrixWorkspace_uptr
   createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::unique_ptr<IBeamProfile>

@@ -163,8 +163,8 @@ EnggVanadiumCorrectionsModel::loadTableWorkspace(
 
 void EnggVanadiumCorrectionsModel::saveCorrectionsToCache(
     const std::string &runNumber,
-    const Mantid::API::MatrixWorkspace_sptr curvesWorkspace,
-    const Mantid::API::ITableWorkspace_sptr integratedWorkspace) const {
+    const Mantid::API::MatrixWorkspace_sptr &curvesWorkspace,
+    const Mantid::API::ITableWorkspace_sptr &integratedWorkspace) const {
   const auto curvesFilename = generateCurvesFilename(runNumber);
   saveNexus(curvesFilename, curvesWorkspace);
 
@@ -174,7 +174,7 @@ void EnggVanadiumCorrectionsModel::saveCorrectionsToCache(
 
 void EnggVanadiumCorrectionsModel::saveNexus(
     const std::string &filename,
-    const Mantid::API::Workspace_sptr workspace) const {
+    const Mantid::API::Workspace_sptr &workspace) const {
   auto save = Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
   save->initialize();
   save->setProperty("InputWorkspace", workspace);

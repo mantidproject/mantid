@@ -1,17 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABCMeta, abstractmethod
-
-from six import with_metaclass
 
 from sans.state.AllStates import AllStates
 
 
-class IStateParser(with_metaclass(ABCMeta)):
+class IStateParser(metaclass=ABCMeta):
     def get_all_states(self):  # -> AllStates
         all_states = AllStates()
         all_states.data = self.get_state_data()

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -59,7 +59,7 @@ double stringToRoundedNumber(const std::string &s) {
  */
 bool isValidPropertyValue(Mantid::Kernel::Property *prop,
                           const std::string &value) {
-  const auto guineaPig = boost::shared_ptr<Property>(prop->clone());
+  const auto guineaPig = std::shared_ptr<Property>(prop->clone());
   return guineaPig->setValue(value).empty();
 }
 

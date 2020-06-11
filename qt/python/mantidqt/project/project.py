@@ -1,23 +1,23 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import os
 
 from qtpy.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, WorkspaceGroup
 from mantid.kernel import ConfigService
+from mantid.plots import MantidAxes
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
+from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresenter
 
 
 class Project(AnalysisDataServiceObserver):
@@ -37,11 +37,14 @@ class Project(AnalysisDataServiceObserver):
         # Last save locations
         self.last_project_location = None
 
+        # whether to discard workspaces that have only been loaded when saving the project
+        self.save_altered_workspaces_only = False
+
         self.observeAll(True)
 
         self.project_file_ext = ".mtdproj"
         self.mplot_project_file_ext = ".mantid"
-        self.valid_file_exts = [self.project_file_ext,self.mplot_project_file_ext]
+        self.valid_file_exts = [self.project_file_ext, self.mplot_project_file_ext]
 
         self.plot_gfm = globalfiguremanager_instance
         self.plot_gfm.add_observer(self)
@@ -52,6 +55,7 @@ class Project(AnalysisDataServiceObserver):
 
     def load_settings_from_config(self, config):
         self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
+        self.save_altered_workspaces_only = config.get('project', 'save_altered_workspaces_only')
 
     @property
     def saved(self):
@@ -65,13 +69,14 @@ class Project(AnalysisDataServiceObserver):
     def is_loading(self):
         return self.__is_loading
 
-    def save(self):
+    def save(self, conf=None):
         """
         The function that is called if the save button is clicked on the mainwindow
+        :param: conf: an optional UserConfig to which the user's input will be saved (if the save dialog is shown).
         :return: True; if the user cancels
         """
         if self.last_project_location is None:
-            return self.save_as()
+            return self.open_project_save_dialog(conf)
         else:
             # Offer an are you sure? overwriting GUI
             answer = self._offer_overwriting_gui()
@@ -82,22 +87,22 @@ class Project(AnalysisDataServiceObserver):
                 task.start()
             elif answer == QMessageBox.No:
                 # Save with a new name
-                return self.save_as()
+                return self.open_project_save_dialog(conf)
             else:
                 # Cancel clicked
                 return True
 
-    def save_as(self):
+    def open_project_save_dialog(self, conf=None):
         """
         The function that is called if the save as... button is clicked on the mainwindow
+        :param: conf: an optional UserConfig to which the user's input will be saved.
         :return: True; if the user cancels.
         """
-        path = self._save_file_dialog()
-        if path is None:
-            # Cancel close dialogs
-            return True
+        self.saving_cancelled = False
+        ProjectSaveDialogPresenter(self, conf)
+        return self.saving_cancelled
 
-        # todo: get a list of workspaces but to be implemented on GUI implementation
+    def save_as(self, path):
         self.last_project_location = path
         task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
         task.start()
@@ -114,13 +119,18 @@ class Project(AnalysisDataServiceObserver):
                                       QMessageBox.Yes)
 
     def _save_file_dialog(self):
-        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
+        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave,
+                                  file_mode=QFileDialog.AnyFile,
                                   file_filter="Project files ( *" + self.project_file_ext + ")")
 
     def _save(self):
         self.__is_saving = True
         try:
             workspaces_to_save = self._get_workspace_names_to_save()
+
+            if self.save_altered_workspaces_only:
+                workspaces_to_save = self._filter_unaltered_workspaces(workspaces_to_save)
+
             # Calculate the size of the workspaces in the project.
             project_size = self._get_project_size(workspaces_to_save)
             warning_size = int(ConfigService.getString("projectSaving.warningSize"))
@@ -130,6 +140,10 @@ class Project(AnalysisDataServiceObserver):
                 result = self._offer_large_size_confirmation()
             if result is None or result != QMessageBox.Cancel:
                 plots_to_save = self.plot_gfm.figs
+
+                if self.save_altered_workspaces_only:
+                    plots_to_save = self._filter_plots_with_unaltered_workspaces(plots_to_save, workspaces_to_save)
+
                 interfaces_to_save = self.interface_populating_function()
                 project_saver = ProjectSaver(self.project_file_ext)
                 project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
@@ -152,6 +166,38 @@ class Project(AnalysisDataServiceObserver):
         for group_ws in group_workspaces:
             workspaces_in_groups_names.extend(group_ws.getNames())
         return [name for name in workspace_names if name not in workspaces_in_groups_names]
+
+    @staticmethod
+    def _filter_unaltered_workspaces(workspace_names):
+        """
+        Removes workspaces whose history contains Load and nothing else.
+        :param workspace_names: a list of workspace names
+        :return: the filtered list of workspace names.
+        """
+        workspaces = AnalysisDataService.retrieveWorkspaces(workspace_names)
+        altered_workspace_names = []
+        for ws in workspaces:
+            history = ws.getHistory()
+            if not (history.size() == 1 and history.getAlgorithm(0).name() == "Load"):
+                altered_workspace_names.append(ws.name())
+
+        return altered_workspace_names
+
+    @staticmethod
+    def _filter_plots_with_unaltered_workspaces(plots, workspaces):
+        """
+        :param plots: a dictionary of figure managers.
+        :param workspaces: a list of workspace names.
+        :return: a dictionary of figure managers containing plots that only use the workspaces in workspaces.
+        """
+        plots_copy = plots.copy()
+        for i, plot in plots_copy.items():
+            # check that every axes only uses workspaces that are being saved, otherwise delete the plot
+            if not all(all(ws in workspaces for ws in ax.tracked_workspaces if isinstance(ax, MantidAxes))
+                       for ax in plot.canvas.figure.axes):
+                del plots[i]
+
+        return plots
 
     @staticmethod
     def inform_user_not_possible():

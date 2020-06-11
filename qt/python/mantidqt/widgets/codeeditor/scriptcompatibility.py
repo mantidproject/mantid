@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -49,10 +49,10 @@ def check_future_import(content):
 
 def mantid_algorithm_used_without_import(content):
     for attr in dir(simpleapi):
-        if (not attr.startswith('_') and attr == attr.title() and
-                attr_called(attr, content) and not
-                attr_imported(attr, content)):
-                return True
+        if (not attr.startswith('_') and attr == attr.title()
+                and attr_called(attr, content)
+                and not attr_imported(attr, content)):
+            return True
     return False
 
 

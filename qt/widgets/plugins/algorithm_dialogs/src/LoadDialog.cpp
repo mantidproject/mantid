@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
@@ -27,7 +27,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using MantidQt::API::MWRunFiles;
+using MantidQt::API::FileFinderWidget;
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -340,7 +340,7 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
 
   // Boolean properties use the name labels differently
   if (const auto *fileType = dynamic_cast<const FileProperty *>(prop)) {
-    auto *fileFinder = new MWRunFiles(parent);
+    auto *fileFinder = new FileFinderWidget(parent);
     inputWidget = fileFinder;
     fileFinder->setLabelText(propName);
     fileFinder->isForRunFiles(false);

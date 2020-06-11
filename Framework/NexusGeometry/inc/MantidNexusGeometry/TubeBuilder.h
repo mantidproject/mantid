@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidNexusGeometry/DllConfig.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -25,11 +25,12 @@ Colinear detectors with cylindrical shape.
 class MANTID_NEXUSGEOMETRY_DLL TubeBuilder {
 public:
   TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
-              Eigen::Vector3d firstDetectorPosition, int firstDetectorId);
+              const Eigen::Vector3d &firstDetectorPosition,
+              int firstDetectorId);
   const Eigen::Vector3d &tubePosition() const;
   const std::vector<Eigen::Vector3d> &detPositions() const;
   const std::vector<int> &detIDs() const;
-  boost::shared_ptr<const Mantid::Geometry::IObject> shape() const;
+  std::shared_ptr<const Mantid::Geometry::IObject> shape() const;
   double tubeHeight() const;
   double tubeRadius() const;
   bool addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID);

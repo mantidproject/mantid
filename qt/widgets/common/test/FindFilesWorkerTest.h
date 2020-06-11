@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -14,7 +14,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
-using MantidQt::API::FakeMWRunFiles;
+using MantidQt::API::FakeFileFinderWidget;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesWorker;
@@ -129,8 +129,8 @@ private:
     return parameters;
   }
 
-  FakeMWRunFiles *createWidget(FindFilesWorker *worker) {
-    auto widget = new FakeMWRunFiles();
+  FakeFileFinderWidget *createWidget(FindFilesWorker *worker) {
+    auto widget = new FakeFileFinderWidget();
     widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
                     widget,
                     SLOT(inspectThreadResult(const FindFilesSearchResults &)),

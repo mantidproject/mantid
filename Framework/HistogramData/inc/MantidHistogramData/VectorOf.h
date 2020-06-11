@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -75,7 +75,7 @@ public:
   /// Copy construct from cow_ptr. Lightweight, stored object will be shared.
   explicit VectorOf(const Kernel::cow_ptr<CowType> &other) : m_data(other) {}
   /// Copy construct from shared_ptr. Lightweight, stored object will be shared.
-  explicit VectorOf(const boost::shared_ptr<CowType> &other) : m_data(other) {}
+  explicit VectorOf(const std::shared_ptr<CowType> &other) : m_data(other) {}
   /// Copy construct stored object from data.
   explicit VectorOf(const CowType &data)
       : m_data(Kernel::make_cow<CowType>(data)) {}
@@ -90,7 +90,7 @@ public:
   }
   /// Copy assignment from shared_ptr. Lightweight, stored object will be
   /// shared.
-  VectorOf &operator=(const boost::shared_ptr<CowType> &other) & {
+  VectorOf &operator=(const std::shared_ptr<CowType> &other) & {
     m_data = other;
     return *this;
   }

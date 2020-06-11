@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -29,8 +29,8 @@ namespace Geometry {
   range of d-values and the reflection conditions of a space group:
 
     HKLFilter_const_sptr filter =
-        boost::make_shared<HKLFilterDRange>(unitCell, 0.5)
-      & boost::make_shared<HKLFilterSpaceGroup>(spaceGroup);
+        std::make_shared<HKLFilterDRange>(unitCell, 0.5)
+      & std::make_shared<HKLFilterSpaceGroup>(spaceGroup);
 
     HKLGenerator gen(unitCell, 0.5);
     std::vector<V3D> hkls;
@@ -42,7 +42,7 @@ namespace Geometry {
   reflection conditions of a space group:
 
     HKLFilter_const_sptr sgFilter =
-        boost::make_shared<HKLFilterSpaceGroup>(spaceGroup);
+        std::make_shared<HKLFilterSpaceGroup>(spaceGroup);
 
     auto matchingHKLCount = std::count_if(hkls.begin(), hkls.end(),
                                           sgFilter->fn());

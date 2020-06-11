@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -22,7 +22,7 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 13/1/2010
 */
-class DLLExport BFGS_Minimizer : public DerivMinimizer {
+class MANTID_CURVEFITTING_DLL BFGS_Minimizer : public DerivMinimizer {
 public:
   /// Constructor.
   BFGS_Minimizer() : DerivMinimizer() {}

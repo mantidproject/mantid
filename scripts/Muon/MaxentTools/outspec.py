@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from Muon.MaxentTools.zft import ZFT
 
@@ -56,7 +54,7 @@ def OUTSPEC(
         mylog.debug("Points:{0}".format(npts))
         mylog.debug("Last half sum:{0}".format(bum))
     # add in backgrounds (no dead time adjustment yet)
-    guess = ((guess + np.outer(DETECT_e, DETECT_d)) /
-             RUNDATA_fnorm)  # convert from 10Mevent normalisation to original stats
+    guess = ((guess + np.outer(DETECT_e, DETECT_d))
+             / RUNDATA_fnorm)  # convert from 10Mevent normalisation to original stats
 
     return test, guess

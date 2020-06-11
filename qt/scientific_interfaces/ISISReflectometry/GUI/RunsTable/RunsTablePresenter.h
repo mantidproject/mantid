@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #pragma once
 #include "../Runs/IRunsPresenter.h"
 #include "Common/Clipboard.h"
@@ -38,6 +37,8 @@ public:
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void setTablePrecision(int &precision) override;
+  void resetTablePrecision() override;
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides
@@ -154,6 +155,8 @@ private:
   void setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath,
                             Item const &item);
   void updateProgressBar();
+
+  void notifyTableChanged();
 
   bool isProcessing() const;
   bool isAutoreducing() const;

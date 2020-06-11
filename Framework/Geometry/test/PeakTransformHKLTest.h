@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidGeometry/Crystal/PeakTransformHKL.h"
 #include "MockObjects.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -228,7 +228,7 @@ public:
     PeakTransform_sptr clone = A.clone();
 
     TSM_ASSERT("Clone product is the wrong type.",
-               boost::dynamic_pointer_cast<PeakTransformHKL>(clone) != nullptr);
+               std::dynamic_pointer_cast<PeakTransformHKL>(clone) != nullptr);
 
     // Test indirectly via what the transformations produce.
     V3D productA = A.transform(V3D(0, 1, 2));
@@ -244,7 +244,7 @@ public:
   void test_factory() {
     // Create the benchmark.
     PeakTransform_sptr expectedProduct =
-        boost::make_shared<PeakTransformHKL>("H", "K");
+        std::make_shared<PeakTransformHKL>("H", "K");
 
     // Use the factory to create a product.
     PeakTransformHKLFactory factory;
@@ -252,8 +252,7 @@ public:
 
     // Check the type of the output product object.
     TSM_ASSERT("Factory product is the wrong type.",
-               boost::dynamic_pointer_cast<PeakTransformHKL>(product) !=
-                   nullptr);
+               std::dynamic_pointer_cast<PeakTransformHKL>(product) != nullptr);
 
     // Now test that the benchmark and the factory product are equivalent.
     // Test indirectly via what the transformations produce.

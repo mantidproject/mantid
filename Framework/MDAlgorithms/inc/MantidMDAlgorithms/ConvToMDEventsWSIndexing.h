@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   enum MD_EVENT_TYPE { LEAN, REGULAR, NONE };
 
   size_t initialize(const MDWSDescription &WSD,
-                    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                    std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                     bool ignoreZeros) override;
   // Interface function
   void appendEventsFromInputWS(API::Progress *pProgress,

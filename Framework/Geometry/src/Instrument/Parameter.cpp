@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
@@ -82,10 +82,10 @@ std::string Parameter::getShortDescription() const {
  *   @return A pointer to the created parameter
  *   @throw runtime_error if the type has not been registered
  */
-boost::shared_ptr<Parameter>
+std::shared_ptr<Parameter>
 ParameterFactory::create(const std::string &className,
                          const std::string &name) {
-  boost::shared_ptr<Parameter> p;
+  std::shared_ptr<Parameter> p;
   FactoryMap::const_iterator it = s_map.find(className);
   if (it != s_map.end())
     p = it->second->createInstance();

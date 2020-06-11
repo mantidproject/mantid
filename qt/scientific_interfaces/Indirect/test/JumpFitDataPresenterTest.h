@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitDataView.h"
-#include "IndirectFunctionBrowser/FQTemplateBrowser.h"
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "JumpFitDataPresenter.h"
 #include "JumpFitModel.h"
 
@@ -77,7 +77,6 @@ public:
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
-  MOCK_METHOD1(setStartAndEndHidden, void(bool hidden));
   MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
   MOCK_METHOD1(setStartX, void(double startX));
   MOCK_METHOD1(setEndX, void(double endX));
@@ -107,9 +106,10 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };
 
-class FQTemplateBrowserMock : public IFQFitObserver {
-  MOCK_METHOD1(updateDataType, void(DataType dataType));
-  MOCK_METHOD1(spectrumChanged, void(int spec));
+class SingleFunctionTemplateBrowserMock : public IFQFitObserver {
+  MOCK_METHOD1(updateAvailableFunctions,
+               void(const std::map<std::string, std::string>
+                        &functionInitialisationStrings));
 };
 
 /// Mock object to mock the model
@@ -137,7 +137,8 @@ public:
     m_ParameterCombo = createComboBox(getJumpParameters());
     m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
     m_ParameterLabel = createLabel(PARAMETER_LABEL);
-    m_FQTemplateBrowser = std::make_unique<FQTemplateBrowserMock>();
+    m_SingleFunctionTemplateBrowser =
+        std::make_unique<SingleFunctionTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
@@ -146,7 +147,8 @@ public:
         std::move(m_ParameterTypeCombo.get()),
         std::move(m_ParameterCombo.get()),
         std::move(m_ParameterTypeLabel.get()),
-        std::move(m_ParameterLabel.get()), m_FQTemplateBrowser.get());
+        std::move(m_ParameterLabel.get()),
+        m_SingleFunctionTemplateBrowser.get());
 
     SetUpADSWithWorkspace m_ads(
         "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
@@ -210,7 +212,8 @@ private:
   std::unique_ptr<QComboBox> m_ParameterCombo;
   std::unique_ptr<QLabel> m_ParameterTypeLabel;
   std::unique_ptr<QLabel> m_ParameterLabel;
-  std::unique_ptr<FQTemplateBrowserMock> m_FQTemplateBrowser;
+  std::unique_ptr<SingleFunctionTemplateBrowserMock>
+      m_SingleFunctionTemplateBrowser;
 
   std::unique_ptr<MockJumpFitDataView> m_view;
   std::unique_ptr<MockJumpFitModel> m_model;

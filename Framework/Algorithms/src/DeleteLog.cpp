@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DeleteLog.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -34,7 +34,7 @@ void DeleteLog::init() {
       "In/out workspace containing the logs. The workspace is "
       "modified in place");
   declareProperty("Name", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(), "",
+                  std::make_shared<MandatoryValidator<std::string>>(), "",
                   Direction::Input);
 }
 

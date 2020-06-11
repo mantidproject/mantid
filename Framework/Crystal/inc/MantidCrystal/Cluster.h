@@ -1,16 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -18,20 +19,19 @@ namespace Crystal {
 
 /** Cluster : Image cluster used by connected component labeling
  */
-class DLLExport Cluster : public ICluster {
+class MANTID_CRYSTAL_DLL Cluster : public ICluster {
 
 public:
   /// Constructor
   Cluster(const size_t &label);
 
   /// integrate the cluster
-  ClusterIntegratedValues
-  integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws)
-      const override;
+  ClusterIntegratedValues integrate(
+      std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Apply labels to the workspace
   void
-  writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
+  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Get the cluster label
   size_t getLabel() const override;

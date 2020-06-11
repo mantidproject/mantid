@@ -262,8 +262,7 @@ mtd_add_qt_tests(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
   QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon

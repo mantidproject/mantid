@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,6 +16,7 @@
 
 #include <gmock/gmock.h>
 
+using Mantid::Algorithms::ComponentScatterPoint;
 using Mantid::Algorithms::MCInteractionVolume;
 using namespace ::testing;
 using namespace Mantid::Kernel;
@@ -292,9 +293,10 @@ public:
         .WillOnce(Return(0.55))
         .WillOnce(Return(0.65))
         .WillOnce(Return(0.70));
-    V3D comp1Point;
+    ComponentScatterPoint comp1Point;
     TS_ASSERT_THROWS_NOTHING(comp1Point = interactor.generatePoint(rng));
-    TS_ASSERT(kit->isValid(comp1Point));
+    TS_ASSERT(kit->isValid(comp1Point.scatterPoint));
+    TS_ASSERT_EQUALS(comp1Point.componentIndex, 0);
     Mock::VerifyAndClearExpectations(&rng);
 
     // Selects second component
@@ -307,10 +309,11 @@ public:
         .WillOnce(Return(0.55))
         .WillOnce(Return(0.65))
         .WillOnce(Return(0.70));
-    V3D comp2Point;
+    ComponentScatterPoint comp2Point;
     TS_ASSERT_THROWS_NOTHING(comp2Point = interactor2.generatePoint(rng));
-    TS_ASSERT(comp2Point != comp1Point);
-    TS_ASSERT(kit->isValid(comp2Point));
+    TS_ASSERT(comp2Point.scatterPoint != comp1Point.scatterPoint);
+    TS_ASSERT(kit->isValid(comp2Point.scatterPoint));
+    TS_ASSERT_EQUALS(comp2Point.componentIndex, 1);
     Mock::VerifyAndClearExpectations(&rng);
 
     // Selects third component
@@ -322,11 +325,12 @@ public:
         .WillOnce(Return(0.55))
         .WillOnce(Return(0.65))
         .WillOnce(Return(0.70));
-    V3D comp3Point;
+    ComponentScatterPoint comp3Point;
     TS_ASSERT_THROWS_NOTHING(comp3Point = interactor3.generatePoint(rng));
-    TS_ASSERT(comp3Point != comp2Point);
-    TS_ASSERT(comp3Point != comp1Point);
-    TS_ASSERT(kit->isValid(comp3Point));
+    TS_ASSERT(comp3Point.scatterPoint != comp2Point.scatterPoint);
+    TS_ASSERT(comp3Point.scatterPoint != comp1Point.scatterPoint);
+    TS_ASSERT(kit->isValid(comp3Point.scatterPoint));
+    TS_ASSERT_EQUALS(comp3Point.componentIndex, 2);
     Mock::VerifyAndClearExpectations(&rng);
   }
 
@@ -358,7 +362,8 @@ private:
   Mantid::Kernel::Logger g_log{"MCInteractionVolumeTest"};
 
   void TestGeneratedTracks(const V3D startPos, const V3D endPos,
-                           const Track beforeScatter, const Track afterScatter,
+                           const Track &beforeScatter,
+                           const Track &afterScatter,
                            const Mantid::Geometry::IObject &shape) {
     // check the generated tracks share the same start point (the scatter point)
     TS_ASSERT_EQUALS(beforeScatter.startPoint(), afterScatter.startPoint());

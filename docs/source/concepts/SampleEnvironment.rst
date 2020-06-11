@@ -25,8 +25,13 @@ A sample environment is defined by:
 At a minimum a sample environment is expected to define a container with both its
 geometry and composition.
 
-XML Definition File
--------------------
+An environment definition is contained within a file using XML syntax. The file
+can be an explicit definition of the properties of each environment component or
+it can contain a reference to a CAD file in .3mf format that contains all the required
+information about the environment components
+
+XML Definition File - Explicit Definition
+-----------------------------------------
 
 An environment definition is contained within a file using XML syntax. A minimal
 structure with a single container defined using CSG geometry would have the following form:
@@ -114,6 +119,14 @@ map to the arguments of a similar name on the :ref:`SetSampleMaterial <algm-SetS
 - ``cohscatterxsec``
 - ``incohscatterxsec``
 - ``absorptionxsec``
+- ``attenuationprofile``
+
+Mantid will search for the filename supplied in the attenuationprofile attribute in the
+following places (in order):
+
+- If a full path is supplied in the filename attribute then it will be used
+- Mantid will then check in the same directory as the environment definition file
+- Mantid will then check in the data search directories
 
 Non-container Components
 ------------------------
@@ -186,5 +199,45 @@ the other environment components. This is achieved by specifying a translation o
 The translation tag has an attribute vector which is a comma separated list of x, y, z coordinates.
 The rotation tag has available attributes xdegrees, ydegrees, zdegrees which all take a rotation specified
 in degrees
+
+XML Definition File - 3MF Definition
+-----------------------------------------
+
+The .3mf file format is a 3D printing format that allows multiple meshes with their relative orientations to be stored in a single file along with information on the scale
+used for vertex coordinates and metadata about the material properties. Further details on the format are available here:
+
+https://3mf.io/
+
+If all the information on the geometry of the environment components is available in a single .3mf file this can be referenced in the sample environment xml file instead
+of supplying the full details as described above.
+
+The following xml example shows this type of reference:
+
+.. code-block:: xml
+
+    <!-- Filename: 3MFExample.xml -->
+    <environmentspec>
+      <fullspecification filename="Assembled.3mf"/>
+    </environmentspec>
+
+If a relative path or filename is supplied for the 3mf file name, Mantid searches in the same set of
+directories that are described above for .stl files.
+
+The materials must have their names set to the material's chemical formula in order for the material
+data to be imported into Mantid. Additional properties such as the density should be specified in brackets
+after the name:
+
+eg B4-C (massdensity='2.52', cohscatterxsec='10')
+
+While there are a wide range of CAD tools available that support import and export from .3mf format,
+support for saving material information into .3mf format is more limited. The material information
+can be easily added to the .3mf files however by editing the file in a text editor:
+
+- change the .3mf file extension to .zip
+- extract the file called 3dmodel.model
+- edit the <basematerials> content near the top of the file
+
+The 3mf file can optionally include the geometry of the sample as well as the environment. The mesh
+corresponding to the sample should be given the name 'sample' in the 3mf file.
 
 .. categories:: Concepts

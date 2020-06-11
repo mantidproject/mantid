@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IWorkspaceProperty.h"
@@ -23,12 +22,13 @@
 #include <QScrollArea>
 
 #include <algorithm>
+#include <utility>
+
 #include <vector>
 
 using namespace Mantid::Kernel;
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
-using Mantid::API::AlgorithmProxy;
 using Mantid::API::FrameworkManager;
 using Mantid::API::IWorkspaceProperty;
 
@@ -98,7 +98,7 @@ Mantid::API::IAlgorithm_sptr AlgorithmPropertiesWidget::getAlgorithm() {
  *
  * @param algo :: IAlgorithm bare ptr */
 void AlgorithmPropertiesWidget::setAlgorithm(
-    Mantid::API::IAlgorithm_sptr algo) {
+    const Mantid::API::IAlgorithm_sptr &algo) {
   if (!algo)
     return;
   saveInput();
@@ -118,15 +118,14 @@ QString AlgorithmPropertiesWidget::getAlgorithmName() const {
  * @param name :: The algorithm name*/
 void AlgorithmPropertiesWidget::setAlgorithmName(QString name) {
   FrameworkManager::Instance();
-  m_algoName = name;
+  m_algoName = std::move(name);
   try {
     Algorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
-    auto algProxy = boost::make_shared<AlgorithmProxy>(alg);
-    algProxy->initialize();
+    alg->initialize();
 
     // Set the algorithm ptr. This will redo the layout
-    this->setAlgorithm(algProxy);
+    this->setAlgorithm(alg);
   } catch (std::runtime_error &) {
   }
 }

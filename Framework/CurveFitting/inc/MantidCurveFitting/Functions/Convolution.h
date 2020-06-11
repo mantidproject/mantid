@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,8 +10,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
-#include <boost/shared_array.hpp>
+#include "MantidCurveFitting/DllConfig.h"
 #include <cmath>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -24,7 +25,7 @@ Performes convolution of two functions.
 @author Roman Tolchenov, Tessella plc
 @date 28/01/2010
 */
-class DLLExport Convolution : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL Convolution : public API::CompositeFunction {
 public:
   /**
    * Class for helping to read the transformed data. It represent an output of

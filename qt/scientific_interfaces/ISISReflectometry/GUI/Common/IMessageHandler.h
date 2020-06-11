@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,6 +23,7 @@ public:
                             const std::string &title) = 0;
   virtual bool askUserYesNo(const std::string &prompt,
                             const std::string &title) = 0;
+  virtual bool askUserDiscardChanges() = 0;
   virtual std::string askUserForSaveFileName(std::string const &filter) = 0;
   virtual std::string askUserForLoadFileName(std::string const &filter) = 0;
 };

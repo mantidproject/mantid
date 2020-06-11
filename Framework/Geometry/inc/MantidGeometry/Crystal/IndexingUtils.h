@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /* File: Indexing_Utils.h */
 
@@ -238,8 +238,8 @@ public:
   /// Choose the direction in a list of directions, that is most nearly
   /// perpendicular to planes with the specified spacing in reciprocal space.
   static int SelectDirection(Kernel::V3D &best_direction,
-                             const std::vector<Kernel::V3D> q_vectors,
-                             const std::vector<Kernel::V3D> direction_list,
+                             const std::vector<Kernel::V3D> &q_vectors,
+                             const std::vector<Kernel::V3D> &direction_list,
                              double plane_spacing, double required_tolerance);
 
   /// Get the lattice parameters for the specified orientation matrix
