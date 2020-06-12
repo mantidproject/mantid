@@ -356,8 +356,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_input_ws.getName.return_value = "mock_ws"
         mock_input_ws.getNumberHistograms.return_value = 2
         mock_input_ws.axes.return_value = 1
-        mock_input_ws.dataY.return_value = [2, 2]
-        mock_input_ws.dataE.return_value = [1, 1]
+        mock_input_ws.readY.return_value = [2, 2]
+        mock_input_ws.readE.return_value = [1, 1]
 
         mock_table.model().ws = mock_input_ws
 
@@ -398,9 +398,9 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_input_ws = Mock()
         mock_input_ws.getName.return_value = "mock_ws"
         mock_input_ws.blocksize.return_value = 2
-        mock_input_ws.dataX.return_value = [3, 3]
-        mock_input_ws.dataY.return_value = [2, 2]
-        mock_input_ws.dataE.return_value = [1, 1]
+        mock_input_ws.readX.return_value = [3, 3]
+        mock_input_ws.readY.return_value = [2, 2]
+        mock_input_ws.readE.return_value = [1, 1]
 
         mock_table.model().ws = mock_input_ws
 
