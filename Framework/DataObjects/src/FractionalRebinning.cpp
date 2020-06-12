@@ -696,7 +696,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
  * @param outputWS Reference to the rebinned output workspace
  */
 void finalizeFractionalRebin(RebinnedOutput &outputWS) {
-  // rebinToFractionalOutput() leaves the data in an unfinalized state 
+  // rebinToFractionalOutput() leaves the data in an unfinalized state
   // with squared errors
   outputWS.setFinalized(false);
   outputWS.setSqrdErrors(true);
