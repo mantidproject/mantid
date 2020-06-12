@@ -166,50 +166,6 @@ class DrillTest(unittest.TestCase):
         self.view.actionErase.trigger()
         self.assertEqual(len(self.model.samples[1]), 0)
 
-    def test_cut_copy_paste(self):
-        self.presenter.instrumentChanged("D22")
-
-        # add contents
-        for i in range(self.view.table.columnCount() - 1):
-            item = QTableWidgetItem(str(i))
-            self.view.table.setItem(0, i, item)
-        item = QTableWidgetItem("test=test")
-        self.view.table.setItem(0, self.view.table.columnCount() - 1, item)
-        reference = self.model.samples[0]
-
-        # cut - paste with icon
-        self.select_row(0, Qt.NoModifier)
-        QTest.mouseClick(self.view.cut, Qt.LeftButton)
-        self.assertEqual(len(self.model.samples), 0)
-        QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        self.assertEqual(len(self.model.samples), 1)
-        self.assertEqual(self.model.samples[0], reference)
-
-        # cut - paste with menu
-        self.select_row(0, Qt.NoModifier)
-        self.view.actionCutRow.trigger()
-        self.assertEqual(len(self.model.samples), 0)
-        self.view.actionPasteRow.trigger()
-        self.assertEqual(len(self.model.samples), 1)
-        self.assertEqual(self.model.samples[0], reference)
-
-        # copy - paste with icon
-        self.select_row(0, Qt.NoModifier)
-        QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        self.assertEqual(len(self.model.samples), 2)
-        self.assertEqual(self.model.samples[0], self.model.samples[1])
-        self.assertEqual(self.model.samples[1], reference)
-
-        # copy - paste with menu
-        self.view.table.deleteRow(1)
-        self.select_row(0, Qt.NoModifier)
-        self.view.actionCopyRow.trigger()
-        self.view.actionPasteRow.trigger()
-        self.assertEqual(len(self.model.samples), 2)
-        self.assertEqual(self.model.samples[0], self.model.samples[1])
-        self.assertEqual(self.model.samples[1], reference)
-
     def test_copy_fill(self):
         self.view.table.addRow(0)
         self.view.table.addRow(0)

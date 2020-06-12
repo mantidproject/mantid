@@ -50,44 +50,159 @@ class DrillViewTest(unittest.TestCase):
         c2.close.assert_called_once()
         c3.close.assert_not_called()
 
-    def test_copySelectedRows(self):
-        self.assertEqual(self.view.buffer, list())
-        self.view.table.getSelectedRows.return_value = [0, 1]
-        self.view.table.getRowContents.return_value = ["test1", "test2"]
-        self.view.cut_selected_rows()
-        self.assertEqual(self.view.buffer, [["test1", "test2"],
-                                            ["test1", "test2"]])
+    def test_getSelectionShape(self):
+        # no selection
+        selection = []
+        shape = self.view._getSelectionShape(selection)
+        self.assertEqual(shape, (0, 0))
 
-    def test_cutSelectedRows(self):
-        self.assertEqual(self.view.buffer, list())
-        self.view.table.getSelectedRows.return_value = [0, 1]
-        self.view.table.getRowContents.return_value = ["test1", "test2"]
-        self.view.cut_selected_rows()
-        self.assertEqual(self.view.buffer, [["test1", "test2"],
-                                            ["test1", "test2"]])
+        # valid selection
+        selection = [(0, 0), (0, 1), (0, 2),
+                     (1, 0), (1, 1), (1, 2)]
+        shape = self.view._getSelectionShape(selection)
+        self.assertEqual(shape, (2, 3))
+        selection = [(0, 0), (0, 1),
+                     (1, 0), (1, 1),
+                     (2, 0), (2, 1)]
+        shape = self.view._getSelectionShape(selection)
+        self.assertEqual(shape, (3, 2))
 
-    def test_pasteRows(self):
-        self.assertEqual(self.view.buffer, list())
-        self.view.buffer = [["test1", "test2"],
-                            ["test3", "test4"]]
-        self.view.table.getLastSelectedRow.return_value = 0
-        self.view.paste_rows()
-        self.view.table.getLastSelectedRow.called_once()
-        self.view.table.getLastRow.asset_not_called()
-        self.view.table.addRow.assert_called()
-        self.view.table.setRowContents.assert_called()
-        calls = [mock.call(1, ["test1", "test2"]),
-                 mock.call(2, ["test3", "test4"])]
-        self.view.table.setRowContents.assert_has_calls(calls)
-        self.assertEqual(self.view.buffer, [["test1", "test2"],
-                                            ["test3", "test4"]])
+        # invalid selection
+        selection = [(0, 0), (0, 1), (0, 2),
+                     (1, 0), (1, 1)]
+        shape = self.view._getSelectionShape(selection)
+        self.assertEqual(shape, (0, 0))
+        selection = [(0, 0), (0, 1), (10, 10)]
+        shape = self.view._getSelectionShape(selection)
+        self.assertEqual(shape, (0, 0))
+
+    def test_copySelectedCells(self):
+        # no selection
+        self.view.table.getSelectedCells.return_value = []
+        self.view.copySelectedCells()
+        self.assertEqual(self.view.buffer, [])
+        self.assertEqual(self.view.bufferShape, ())
+        self.view.table.getCellContents.assert_not_called()
+
+        # valid selection
+        self.view.table.getSelectedCells.return_value = [(0, 0)]
+        self.view.table.getCellContents.return_value = "test"
+        self.view.copySelectedCells()
+        self.assertEqual(self.view.buffer, ["test"])
+        self.assertEqual(self.view.bufferShape, (1, 1))
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
+                                                         (1, 0), (1, 1)]
+        self.view.table.getCellContents.return_value = "test"
+        self.view.copySelectedCells()
+        self.view.table.getCellContents.assert_called()
+        self.assertEqual(self.view.buffer, ["test", "test", "test", "test"])
+        self.assertEqual(self.view.bufferShape, (2, 2))
+
+        # invalid selection
+        self.view.table.reset_mock()
+        self.view.table.getSelectedCells.return_value = [(0, 0), (10, 10)]
+        self.view.copySelectedCells()
+        self.view.table.getCellContents.assert_not_called()
+
+        # empty values
+        self.view.table.reset_mock()
+        self.view.buffer = ["test"]
+        self.view.bufferShape = (1, 1)
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
+                                                         (1, 0), (1, 1)]
+        self.view.table.getCellContents.return_value = ""
+        self.view.copySelectedCells()
+        self.view.table.getCellContents.assert_called()
+        self.assertEqual(self.view.buffer, ["test"])
+        self.assertEqual(self.view.bufferShape, (1, 1))
+
+    def test_cutSelectedCells(self):
+        # no selection
+        self.view.table.getSelectedCells.return_value = []
+        self.view.cutSelectedCells()
+        self.assertEqual(self.view.buffer, [])
+        self.assertEqual(self.view.bufferShape, ())
+        self.view.table.getCellContents.assert_not_called()
+
+        # valid selection
+        self.view.table.getSelectedCells.return_value = [(0, 0)]
+        self.view.table.getCellContents.return_value = "test"
+        self.view.cutSelectedCells()
+        self.assertEqual(self.view.buffer, ["test"])
+        self.assertEqual(self.view.bufferShape, (1, 1))
+        self.view.table.eraseCell.assert_called_once_with(0, 0)
 
         self.view.table.reset_mock()
-        self.view.table.getLastSelectedRow.return_value = -1
-        self.view.table.getLastRow.return_value = 0
-        self.view.paste_rows()
-        self.view.table.getLastSelectedRow.called_once()
-        self.view.table.getLastRow.called_once()
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
+                                                         (1, 0), (1, 1)]
+        self.view.table.getCellContents.return_value = "test"
+        self.view.cutSelectedCells()
+        self.assertEqual(self.view.buffer, ["test", "test", "test", "test"])
+        self.assertEqual(self.view.bufferShape, (2, 2))
+        calls = [mock.call(0, 0), mock.call(0, 1),
+                 mock.call(1, 0), mock.call(1, 1)]
+        self.view.table.eraseCell.assert_has_calls(calls)
+
+        # invalid selection
+        self.view.table.reset_mock()
+        self.view.table.getSelectedCells.return_value = [(0, 0), (10, 10)]
+        self.view.table.getCellContents.assert_not_called()
+        self.view.table.eraseCell.assert_not_called()
+
+    def test_pasteCells(self):
+        # no selection
+        self.view.buffer = ["test"]
+        self.view.bufferShape = (1, 1)
+        self.view.table.getSelectedCells.return_value = []
+        self.view.pasteCells()
+        self.view.table.setCellContents.assert_not_called()
+
+        # empty buffer
+        self.view.table.reset_mock()
+        self.view.buffer = []
+        self.view.bufferShape = ()
+        self.view.pasteCells()
+        self.view.table.setCellContents.assert_not_called()
+
+        # valid selection
+        self.view.buffer = ["test"]
+        self.view.bufferShape = (1, 1)
+        self.view.table.reset_mock()
+        self.view.table.getSelectedCells.return_value = [(1, 1)]
+        self.view.pasteCells()
+        self.view.table.setCellContents.assert_called_once()
+
+        self.view.table.reset_mock()
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
+                                                         (1, 0), (1, 1)]
+        self.view.pasteCells()
+        calls = [mock.call(0, 0, "test"), mock.call(0, 1, "test"),
+                 mock.call(1, 0, "test"), mock.call(1, 1, "test")]
+        self.view.table.setCellContents.assert_has_calls(calls)
+
+        self.view.buffer = ["test00", "test01",
+                            "test10", "test11"]
+        self.view.bufferShape = (2, 2)
+        self.view.table.reset_mock()
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
+                                                         (1, 0), (1, 1)]
+        self.view.pasteCells()
+        calls = [mock.call(0, 0, "test00"), mock.call(0, 1, "test01"),
+                 mock.call(1, 0, "test10"), mock.call(1, 1, "test11")]
+        self.view.table.setCellContents.assert_has_calls(calls)
+
+    def test_eraseSelectedCells(self):
+        # no selection
+        self.view.table.getSelectedCells.return_value = []
+        self.view.eraseSelectedCells()
+        self.view.table.eraseCell.assert_not_called()
+        self.view.table.getSelectedCells.return_value = [(0, 0),
+                                                         (0, 1),
+                                                         (2, 1)]
+        # selection
+        self.view.eraseSelectedCells()
+        calls = [mock.call(0, 0), mock.call(0, 1), mock.call(2, 1)]
+        self.view.table.eraseCell.assert_has_calls(calls)
 
     def test_addRowAfter(self):
         # add one row (defautlt value)
@@ -123,19 +238,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.del_selected_rows()
         calls = [mock.call(2), mock.call(1), mock.call(0)]
         self.view.table.deleteRow.assert_has_calls(calls)
-
-    def test_eraseSelectedCells(self):
-        # no selection
-        self.view.table.getSelectedCells.return_value = []
-        self.view.erase_selected_cells()
-        self.view.table.eraseCell.assert_not_called()
-        self.view.table.getSelectedCells.return_value = [(0, 0),
-                                                         (0, 1),
-                                                         (2, 1)]
-        # selection
-        self.view.erase_selected_cells()
-        calls = [mock.call(0, 0), mock.call(0, 1), mock.call(2, 1)]
-        self.view.table.eraseCell.assert_has_calls(calls)
 
     def test_processSelectedRows(self):
         self.view.process = mock.Mock()
@@ -208,19 +310,19 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.setCellContents.assert_has_calls(calls)
 
     def test_keyPressEvent(self):
-        self.view.copy_selected_rows = mock.Mock()
-        self.view.cut_selected_rows = mock.Mock()
-        self.view.paste_rows = mock.Mock()
-        self.view.erase_selected_cells = mock.Mock()
+        self.view.copySelectedCells = mock.Mock()
+        self.view.cutSelectedCells = mock.Mock()
+        self.view.pasteCells = mock.Mock()
+        self.view.eraseSelectedCells = mock.Mock()
 
         QTest.keyClick(self.view, Qt.Key_C, Qt.ControlModifier)
-        self.view.copy_selected_rows.assert_called_once()
+        self.view.copySelectedCells.assert_called_once()
         QTest.keyClick(self.view, Qt.Key_X, Qt.ControlModifier)
-        self.view.cut_selected_rows.assert_called_once()
+        self.view.cutSelectedCells.assert_called_once()
         QTest.keyClick(self.view, Qt.Key_V, Qt.ControlModifier)
-        self.view.paste_rows.assert_called_once()
+        self.view.pasteCells.assert_called_once()
         QTest.keyClick(self.view, Qt.Key_Delete, Qt.NoModifier)
-        self.view.erase_selected_cells.assert_called_once()
+        self.view.eraseSelectedCells.assert_called_once()
 
     def test_showDirectoryManager(self):
         self.view.show_directory_manager()

@@ -47,7 +47,8 @@ class DrillView(QMainWindow):
         self.setup_header()
         self.setup_table()
 
-        self.buffer = list()  # for row cut-copy-paste
+        self.buffer = list()  # for cells cut-copy-paste
+        self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
         self.invalidCells = set()
         self.coloredRows = set()
 
@@ -61,10 +62,10 @@ class DrillView(QMainWindow):
         self.actionSettings.triggered.connect(self.show_settings)
         self.actionAddRow.triggered.connect(self.add_row_after)
         self.actionDelRow.triggered.connect(self.del_selected_rows)
-        self.actionCopyRow.triggered.connect(self.copy_selected_rows)
-        self.actionCutRow.triggered.connect(self.cut_selected_rows)
-        self.actionPasteRow.triggered.connect(self.paste_rows)
-        self.actionErase.triggered.connect(self.erase_selected_cells)
+        self.actionCopyRow.triggered.connect(self.copySelectedCells)
+        self.actionCutRow.triggered.connect(self.cutSelectedCells)
+        self.actionPasteRow.triggered.connect(self.pasteCells)
+        self.actionErase.triggered.connect(self.eraseSelectedCells)
         self.actionProcessRow.triggered.connect(self.process_selected_rows)
         self.actionProcessAll.triggered.connect(self.process_all_rows)
         self.actionStopProcessing.triggered.connect(
@@ -94,16 +95,16 @@ class DrillView(QMainWindow):
                 )
 
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
-        self.paste.clicked.connect(self.paste_rows)
+        self.paste.clicked.connect(self.pasteCells)
 
         self.copy.setIcon(icons.get_icon("mdi.content-copy"))
-        self.copy.clicked.connect(self.copy_selected_rows)
+        self.copy.clicked.connect(self.copySelectedCells)
 
         self.cut.setIcon(icons.get_icon("mdi.content-cut"))
-        self.cut.clicked.connect(self.cut_selected_rows)
+        self.cut.clicked.connect(self.cutSelectedCells)
 
         self.erase.setIcon(icons.get_icon("mdi.eraser"))
-        self.erase.clicked.connect(self.erase_selected_cells)
+        self.erase.clicked.connect(self.eraseSelectedCells)
 
         self.deleterow.setIcon(icons.get_icon("mdi.table-row-remove"))
         self.deleterow.clicked.connect(self.del_selected_rows)
@@ -160,48 +161,107 @@ class DrillView(QMainWindow):
     # actions                                                                 #
     ###########################################################################
 
-    def copy_selected_rows(self):
+    def _getSelectionShape(self, selection):
         """
-        Copy the selected rows in a local buffer.
-        """
-        UsageService.registerFeatureUsage(
-                FeatureType.Feature, ["Drill", "Copy rows button"], False)
-        rows = self.table.getSelectedRows()
-        if not rows:
-            return
-        self.buffer = list()
-        for row in rows:
-            self.buffer.append(self.table.getRowContents(row))
+        Get the shape of the selection, the number of rows and the number of
+        columns.
 
-    def cut_selected_rows(self):
-        """
-        Cut the selected rows.
-        """
-        UsageService.registerFeatureUsage(
-                FeatureType.Feature, ["Drill", "Cut rows button"], False)
-        rows = self.table.getSelectedRows()
-        if not rows:
-            return
-        self.buffer = list()
-        for row in rows:
-            self.buffer.append(self.table.getRowContents(row))
-        self.del_selected_rows()
+        Args:
+            selection (list(tuple(int, int))): list of selected cells indexes
 
-    def paste_rows(self):
+        Returns:
+            tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
+                             selection is empty or discontinuous
         """
-        Paste the buffer in new rows after the selected ones. If no row
-        selected, paste at the end of the table.
+        if not selection:
+            return (0, 0)
+        rmin = selection[0][0]
+        rmax = rmin
+        cmin = selection[0][1]
+        cmax = cmin
+        for item in selection:
+            if item[0] > rmax:
+                rmax = item[0]
+            if item[1] > cmax:
+                cmax = item[1]
+        shape = (rmax - rmin + 1, cmax - cmin + 1)
+        if shape[0] * shape[1] != len(selection):
+            return (0, 0)
+        else:
+            return shape
+
+    def copySelectedCells(self):
         """
-        UsageService.registerFeatureUsage(
-                FeatureType.Feature, ["Drill", "Paste rows button"], False)
-        position = self.table.getLastSelectedRow()
-        if (position == -1):
-            position = self.table.getLastRow()
-        position += 1
-        for row_contents in self.buffer:
-            self.table.addRow(position)
-            self.table.setRowContents(position, row_contents)
-            position += 1
+        Copy in the local buffer the content of the selected cells. The
+        selection has to be valid, otherwise the buffer is not modified.
+        If the selection concerns only empty cells, the buffer is not modified.
+        """
+        cells = self.table.getSelectedCells()
+        if not cells:
+            return
+        cells.sort()
+        shape = self._getSelectionShape(cells)
+        if shape == (0, 0):
+            QMessageBox.warning(self, "Selection error",
+                                "Please select adjacent cells")
+            return
+        tmpBufferShape = shape
+        tmpBuffer = list()
+        empty = True
+        for cell in cells:
+            contents = self.table.getCellContents(cell[0], cell[1])
+            if contents:
+                empty = False
+            tmpBuffer.append(contents)
+        # avoid filling the buffer with *only* empty values
+        if not empty:
+            self.buffer = tmpBuffer
+            self.bufferShape = tmpBufferShape
+
+    def cutSelectedCells(self):
+        """
+        Copy in the local buffer the content of the selected cells and empty
+        them. If the selection is not valid or concerns only empty cells, the
+        buffer is not modified.
+        """
+        self.copySelectedCells()
+        self.eraseSelectedCells()
+
+    def pasteCells(self):
+        """
+        Paste the buffer in selected cells. If the buffer contains only one
+        cell, its contents is pasted on every selected cells. Otherwise, the
+        shape of the selected cells has to match the buffer shape.
+        """
+        if not self.buffer:
+            return
+        cells = self.table.getSelectedCells()
+        if not cells:
+            QMessageBox.warning(self, "Paste error", "No cell selected")
+            return
+        cells.sort()
+        shape = self._getSelectionShape(cells)
+        if self.bufferShape == (1, 1) and shape != (0, 0):
+            for cell in cells:
+                self.table.setCellContents(cell[0], cell[1], self.buffer[0])
+        elif shape == self.bufferShape and shape != (0, 0):
+            for i in range(len(cells)):
+                self.table.setCellContents(cells[i][0], cells[i][1],
+                                           self.buffer[i])
+        elif self.buffer and shape != self.bufferShape and shape != (0, 0):
+            QMessageBox.warning(self, "Paste error",
+                                "The selection does not correspond to the "
+                                + "clipboard contents ("
+                                + str(self.bufferShape[0]) + " rows * "
+                                + str(self.bufferShape[1]) + " columns)")
+
+    def eraseSelectedCells(self):
+        """
+        Erase the contents of the selected cells.
+        """
+        indexes = self.table.getSelectedCells()
+        for (r, c) in indexes:
+            self.table.eraseCell(r, c)
 
     def add_row_after(self):
         """
@@ -225,14 +285,6 @@ class DrillView(QMainWindow):
         rows = sorted(rows, reverse=True)
         for row in rows:
             self.table.deleteRow(row)
-
-    def erase_selected_cells(self):
-        """
-        Erase the contents of the selected cells.
-        """
-        indexes = self.table.getSelectedCells()
-        for (r, c) in indexes:
-            self.table.eraseCell(r, c)
 
     def process_selected_rows(self):
         """
@@ -366,15 +418,15 @@ class DrillView(QMainWindow):
         """
         if (event.key() == Qt.Key_C
                 and event.modifiers() == Qt.ControlModifier):
-            self.copy_selected_rows()
+            self.copySelectedCells()
         elif (event.key() == Qt.Key_X
                 and event.modifiers() == Qt.ControlModifier):
-            self.cut_selected_rows()
+            self.cutSelectedCells()
         elif (event.key() == Qt.Key_V
                 and event.modifiers() == Qt.ControlModifier):
-            self.paste_rows()
+            self.pasteCells()
         elif (event.key() == Qt.Key_Delete):
-            self.erase_selected_cells()
+            self.eraseSelectedCells()
 
     def show_directory_manager(self):
         """
