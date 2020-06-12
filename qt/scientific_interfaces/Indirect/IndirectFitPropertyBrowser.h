@@ -71,6 +71,7 @@ public:
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setBackgroundA0(double value);
+  void setHiddenProperties(std::vector<std::string>);
 
 public slots:
   void fit();
