@@ -39,7 +39,7 @@ public:
                                const std::string &);
   void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
                              const std::string &entryName = "");
-  void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
+  void dumpNexusAttributes(NXhandle nxfileID);
   std::string dateTimeInIsoFormat(const std::string &);
 
   void moveComponent(const API::MatrixWorkspace_sptr &ws,
