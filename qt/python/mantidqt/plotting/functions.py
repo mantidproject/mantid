@@ -25,6 +25,7 @@ from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
                                        create_subplots,raise_if_not_sequence
 from mantid.kernel import Logger
+from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -221,7 +222,11 @@ def pcolormesh(workspaces, fig=None):
 
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
-    fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
+
+    axes = axes.ravel()
+    colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
+    add_colorbar_label(colorbar, axes)
+
     fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     #assert a minimum size, otherwise we can lose axis labels
     size = fig.get_size_inches()

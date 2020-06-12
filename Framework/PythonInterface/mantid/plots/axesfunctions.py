@@ -92,6 +92,7 @@ def _setLabels2D(axes,
     else:
         axes.set_xlabel(labels[1])
         axes.set_ylabel(labels[2])
+    axes.colorbar_label = labels[0]
     if xscale is None and hasattr(workspace, 'isCommonLogBins') and workspace.isCommonLogBins():
         axes.set_xscale('log')
     elif xscale is not None:
