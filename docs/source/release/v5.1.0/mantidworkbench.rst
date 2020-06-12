@@ -51,7 +51,7 @@ Improvements
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 - The figure options menu now has a help button which opens the documentation for the menu.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
-- The colorbar on colorfill plots is now labelled.
+- The colorbar on colorfill plots is now labelled, and the label can be set in the figure options.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
 
 Bugfixes
