@@ -282,6 +282,7 @@ set(SRC_FILES
     src/SANSCollimationLengthEstimator.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
+    src/SampleCorrections/MCInteractionStatistics.cpp
     src/SampleCorrections/MCInteractionVolume.cpp
     src/SampleCorrections/MayersSampleCorrection.cpp
     src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
@@ -634,6 +635,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
+    inc/MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h
     inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h

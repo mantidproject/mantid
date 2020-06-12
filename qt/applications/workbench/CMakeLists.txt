@@ -13,7 +13,7 @@ add_python_package(workbench
 )
 
 set_target_properties(workbench PROPERTIES
-                      VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${PYTHON_EXECUTABLE}>
+                      VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
                       VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
                       VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
                       )
@@ -123,7 +123,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
 install (CODE "
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${PYTHON_EXECUTABLE} ${ParaView_DIR}
+                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${Python_EXECUTABLE} ${ParaView_DIR}
                     RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
     if(NOT install_name_tool_result EQUAL 0)
       message(\"\${_out}\")

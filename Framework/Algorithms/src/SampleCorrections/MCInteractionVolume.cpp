@@ -26,16 +26,17 @@ namespace Algorithms {
  * @param sample A reference to a sample object that defines a valid shape
  * & material
  * @param activeRegion Restrict scattering point sampling to this region
- * @param logger Logger to write debug information on scatter pt stats
  * @param maxScatterAttempts The maximum number of tries to generate a random
  * point within the object. [Default=5000]
+ * @param pointsIn Where to generate the scattering point in
  */
 MCInteractionVolume::MCInteractionVolume(
     const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
-    Kernel::Logger &logger, const size_t maxScatterAttempts)
+    const size_t maxScatterAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_sample(sample.getShape().clone()), m_env(nullptr),
       m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts),
-      m_logger(logger) {
+      m_pointsIn(pointsIn) {
   if (!m_sample->hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
@@ -49,10 +50,6 @@ MCInteractionVolume::MCInteractionVolume(
     }
   } catch (std::runtime_error &) {
     // swallow this as no defined environment from getEnvironment
-  }
-
-  if (m_env) {
-    m_envScatterPoints.resize(m_env->nelements(), {0, 0});
   }
 }
 
@@ -71,13 +68,14 @@ const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
  * @return The randomly selected component index
  */
 int MCInteractionVolume::getComponentIndex(
-    Kernel::PseudoRandomNumberGenerator &rng) {
-  int componentIndex;
+    Kernel::PseudoRandomNumberGenerator &rng) const {
   // the sample has componentIndex -1, env components are number 0 upwards
-  if (m_env) {
-    componentIndex = rng.nextInt(0, static_cast<int>(m_env->nelements())) - 1;
-  } else {
-    componentIndex = -1;
+  int componentIndex = -1;
+  if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
+    const int randomStart =
+        (m_pointsIn == ScatteringPointVicinity::ENVIRONMENTONLY) ? 1 : 0;
+    componentIndex =
+        rng.nextInt(randomStart, static_cast<int>(m_env->nelements())) - 1;
   }
   return componentIndex;
 }
@@ -92,7 +90,7 @@ int MCInteractionVolume::getComponentIndex(
  */
 
 boost::optional<Kernel::V3D> MCInteractionVolume::generatePointInObjectByIndex(
-    int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) {
+    int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) const {
   boost::optional<Kernel::V3D> pointGenerated{boost::none};
   if (componentIndex == -1) {
     pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
@@ -101,47 +99,6 @@ boost::optional<Kernel::V3D> MCInteractionVolume::generatePointInObjectByIndex(
                          .generatePointInObject(rng, m_activeRegion, 1);
   }
   return pointGenerated;
-}
-
-/**
- * Update the scatter point counts
- * @param componentIndex Index of the sample/environment component where
- * the sample is -1
- * @param pointUsed Whether the generated point is actually used in the
- * simulation. If no valid tracks before and after scatter are generated
- * the point will be discarded
- */
-void MCInteractionVolume::UpdateScatterPointCounts(int componentIndex,
-                                                   bool pointUsed) {
-  ScatterPointStat *StatToUpdate;
-  if (componentIndex == -1) {
-    StatToUpdate = &m_sampleScatterPoints;
-  } else {
-    StatToUpdate = &m_envScatterPoints[componentIndex];
-  }
-  if (pointUsed) {
-    StatToUpdate->usedPointCount++;
-  } else {
-    StatToUpdate->generatedPointCount++;
-  }
-}
-
-/**
- * Update the scattering angle statistics
- * @param toStart Vector from scatter point to point on beam profile where
- * @param scatteredDirec Vector from scatter point to detector
- */
-void MCInteractionVolume::UpdateScatterAngleStats(V3D toStart,
-                                                  V3D scatteredDirec) {
-  double scatterAngleDegrees = scatteredDirec.angle(-toStart) * 180. / M_PI;
-  double delta = scatterAngleDegrees - m_scatterAngleMean;
-  int totalScatterPoints = m_sampleScatterPoints.usedPointCount;
-  for (auto stat : m_envScatterPoints) {
-    totalScatterPoints += stat.usedPointCount;
-  }
-  m_scatterAngleMean += delta / totalScatterPoints;
-  m_scatterAngleM2 += delta * (scatterAngleDegrees - m_scatterAngleMean);
-  m_scatterAngleSD = sqrt(m_scatterAngleM2 / totalScatterPoints);
 }
 
 /**
@@ -154,8 +111,8 @@ void MCInteractionVolume::UpdateScatterAngleStats(V3D toStart,
  * @return A struct containing the generated point and the index of the
  * component containing the scatter point
  */
-ComponentScatterPoint
-MCInteractionVolume::generatePoint(Kernel::PseudoRandomNumberGenerator &rng) {
+ComponentScatterPoint MCInteractionVolume::generatePoint(
+    Kernel::PseudoRandomNumberGenerator &rng) const {
   for (size_t i = 0; i < m_maxScatterAttempts; i++) {
     int componentIndex = getComponentIndex(rng);
     boost::optional<Kernel::V3D> pointGenerated =
@@ -179,12 +136,15 @@ MCInteractionVolume::generatePoint(Kernel::PseudoRandomNumberGenerator &rng) {
  * outside of the "volume")
  * @param beforeScatter Out parameter to return generated before scatter track
  * @param afterScatter Out parameter to return generated after scatter track
+ * @param stats A statistics class to hold the statistics on the generated
+ * tracks such as the scattering angle and count of scatter points generated in
+ * each sample or environment part
  * @return Whether before/after tracks were successfully generated
  */
 bool MCInteractionVolume::calculateBeforeAfterTrack(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
     const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
-    Geometry::Track &afterScatter) {
+    Geometry::Track &afterScatter, MCInteractionStatistics &stats) const {
   // Generate scatter point. If there is an environment present then
   // first select whether the scattering occurs on the sample or the
   // environment. The attenuation for the path leading to the scatter point
@@ -194,7 +154,7 @@ bool MCInteractionVolume::calculateBeforeAfterTrack(
   ComponentScatterPoint scatterPos;
 
   scatterPos = generatePoint(rng);
-  UpdateScatterPointCounts(scatterPos.componentIndex, false);
+  stats.UpdateScatterPointCounts(scatterPos.componentIndex, false);
 
   const auto toStart = normalize(startPos - scatterPos.scatterPoint);
   beforeScatter = Track(scatterPos.scatterPoint, toStart);
@@ -207,7 +167,7 @@ bool MCInteractionVolume::calculateBeforeAfterTrack(
   if (nlinks == 0) {
     return false;
   }
-  UpdateScatterPointCounts(scatterPos.componentIndex, true);
+  stats.UpdateScatterPointCounts(scatterPos.componentIndex, true);
 
   // Now track to final destination
   const V3D scatteredDirec = normalize(endPos - scatterPos.scatterPoint);
@@ -216,7 +176,7 @@ bool MCInteractionVolume::calculateBeforeAfterTrack(
   if (m_env) {
     m_env->interceptSurfaces(afterScatter);
   }
-  UpdateScatterAngleStats(toStart, scatteredDirec);
+  stats.UpdateScatterAngleStats(toStart, scatteredDirec);
   return true;
 }
 
@@ -247,62 +207,6 @@ double MCInteractionVolume::calculateAbsorption(const Track &beforeScatter,
 
   return calculateAttenuation(beforeScatter, lambdaBefore) *
          calculateAttenuation(afterScatter, lambdaAfter);
-}
-
-/**
- * Log a debug string summarising which parts of the environment
- * the simulated scatter points occurred in
- */
-void MCInteractionVolume::generateScatterPointStats() {
-  if (m_logger.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-    std::stringstream scatterPointSummary;
-    scatterPointSummary << std::fixed;
-    scatterPointSummary << std::setprecision(2);
-
-    scatterPointSummary << "Scatter point counts:" << std::endl;
-
-    int totalScatterPointsGenerated = m_sampleScatterPoints.generatedPointCount;
-    int totalScatterPointsUsed = m_sampleScatterPoints.usedPointCount;
-    for (auto stat : m_envScatterPoints) {
-      totalScatterPointsGenerated += stat.generatedPointCount;
-      totalScatterPointsUsed += stat.usedPointCount;
-    }
-
-    scatterPointSummary << "Total scatter points generated: "
-                        << totalScatterPointsGenerated << std::endl;
-    scatterPointSummary << "Total scatter points used: "
-                        << totalScatterPointsUsed << std::endl;
-
-    if (m_env && (m_env->nelements() > 0)) {
-      double percentage =
-          static_cast<double>(m_sampleScatterPoints.usedPointCount) /
-          totalScatterPointsUsed * 100;
-      scatterPointSummary << "Sample: " << m_sampleScatterPoints.usedPointCount
-                          << " (" << percentage << "%)" << std::endl;
-
-      for (std::vector<int>::size_type i = 0; i < m_envScatterPoints.size();
-           i++) {
-        percentage = static_cast<double>(m_envScatterPoints[i].usedPointCount) /
-                     totalScatterPointsUsed * 100;
-        scatterPointSummary
-            << "Environment part " << i << " (" << m_env->getComponent(i).id()
-            << "): " << m_envScatterPoints[i].usedPointCount << " ("
-            << percentage << "%)" << std::endl;
-      }
-    }
-    scatterPointSummary << "Scattering angle mean (degrees)="
-                        << m_scatterAngleMean << std::endl;
-    scatterPointSummary << "Scattering angle sd (degrees)=" << m_scatterAngleSD
-                        << std::endl;
-    m_logger.debug(scatterPointSummary.str());
-
-    // reset the counters
-    m_sampleScatterPoints = {0, 0};
-    std::fill(m_envScatterPoints.begin(), m_envScatterPoints.end(),
-              ScatterPointStat{0, 0});
-    m_scatterAngleMean = 0;
-    m_scatterAngleM2 = 0;
-  }
 }
 
 } // namespace Algorithms

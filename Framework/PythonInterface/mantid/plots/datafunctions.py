@@ -1075,6 +1075,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     image.set_norm(scale(vmin=vmin, vmax=vmax))
 
     if image.colorbar:
+        label = image.colorbar._label
         image.colorbar.remove()
         locator = None
         if scale == LogNorm:
@@ -1084,7 +1085,19 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
                                              "as the range between min value and max value is too large")
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
-        figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar.set_label(label)
+
+
+def add_colorbar_label(colorbar, axes):
+    """
+    Adds a label to the colorbar if every axis on the figure has the same label.
+    :param colorbar: the colorbar to label.
+    :param axes: the axes that the colorbar belongs to.
+    """
+    colorbar_labels = [ax.colorbar_label for ax in axes if hasattr(ax, 'colorbar_label')]
+    if colorbar_labels.count(colorbar_labels[0]) == len(colorbar_labels):
+        colorbar.set_label(colorbar_labels[0])
 
 
 def get_images_from_figure(figure):

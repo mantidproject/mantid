@@ -116,7 +116,7 @@ class FigureErrorsManager(object):
                 if axis:
                     plot_kwargs['axis'] = axis
             try:
-                new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
+                new_curve = ax.replot_artist(curve, errorbars=curve_has_errors(curve), **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes
                 new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
         else:

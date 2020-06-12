@@ -201,8 +201,7 @@ mkdir -p $BUILD_DIR
 
 # Tidy build dir
 rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-find ${BUILD_DIR:?}/qt -name 'ui_*.h' -delete
-find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
+find ${BUILD_DIR:?} \( -name 'ui_*.h' -o -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
