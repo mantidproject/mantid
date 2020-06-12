@@ -18,9 +18,11 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneModel {
 
 public:
+  PlotFitAnalysisPaneModel(){};
+  ~PlotFitAnalysisPaneModel(){};
   virtual IFunction_sptr doFit(const std::string &wsName,
                                const std::pair<double, double> &range,
-                               const IFunction_sptr &func);
+                               const IFunction_sptr func);
 };
 
 } // namespace MantidWidgets

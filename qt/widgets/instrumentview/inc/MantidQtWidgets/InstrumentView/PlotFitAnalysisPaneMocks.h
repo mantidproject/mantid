@@ -59,8 +59,8 @@ public:
   MOCK_METHOD1(observeFitButton, void(Observer *listener));
   MOCK_METHOD0(getRange, std::pair<double, double>());
   MOCK_METHOD0(getFunction, Mantid::API::IFunction_sptr());
-  MOCK_METHOD1(addSpectrum, void(const std::string name));
-  MOCK_METHOD1(addFitSpectrum, void(const std::string name));
+  MOCK_METHOD1(addSpectrum, void(const std::string &name));
+  MOCK_METHOD1(addFitSpectrum, void(const std::string &name));
   MOCK_METHOD1(addFunction, void(Mantid::API::IFunction_sptr));
   MOCK_METHOD1(updateFunction, void(const Mantid::API::IFunction_sptr));
   MOCK_METHOD1(fitWarning, void(const std::string &message));

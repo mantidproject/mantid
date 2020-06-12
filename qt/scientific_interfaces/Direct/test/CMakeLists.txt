@@ -33,6 +33,7 @@ mtd_add_qt_tests(
     ${PYTHON_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
+    gmock
   QT4_LINK_LIBS
     Qt4::QtOpenGL
     Qwt5
