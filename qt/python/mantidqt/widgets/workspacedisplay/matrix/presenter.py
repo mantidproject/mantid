@@ -86,11 +86,11 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.copy_bin_values(table, ws_read, num_rows)
 
     def action_copy_spectrum_to_table(self, table):
-        ws = table.model().ws
         selected_rows = [i.row() for i in table.selectionModel().selectedRows()]
         if not selected_rows:
             self.notify_no_selection_to_copy()
             return
+        ws = table.model().ws
         table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.getName() + "_spectra")
         num_rows = ws.blocksize()
         table_ws.setRowCount(num_rows)
@@ -113,11 +113,11 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                 table_ws.setCell(j, col_e, data_e[j])
 
     def action_copy_bin_to_table(self, table):
-        ws = table.model().ws
         selected_cols = [i.column() for i in table.selectionModel().selectedColumns()]
         if not selected_cols:
             self.notify_no_selection_to_copy()
             return
+        ws = table.model().ws
         table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.getName() + "_bins")
         num_rows = ws.getNumberHistograms()
         table_ws.setRowCount(num_rows)
