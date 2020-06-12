@@ -36,8 +36,8 @@ if(CXXTEST_FOUND)
                         PythonKernelModule
                         PythonAPIModule
                         ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
-                        ${PYTHON_LIBRARIES})
+                        ${POCO_LIBRARIES})
+
   add_dependencies(FrameworkTests ${_pythoninterface_test_target_name})
   # Add to the 'UnitTests' group in VS
   set_property(TARGET ${_pythoninterface_test_target_name} PROPERTY FOLDER "UnitTests")

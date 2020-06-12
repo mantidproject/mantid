@@ -1,6 +1,6 @@
-# CMake version check. Require CMake 3.13 - Required for add_link_options
-# 3.15 is required on Windows, but is not available to RHEL yet
-cmake_minimum_required(VERSION 3.13)
+# CMake version check. 3.14 mimimum available from EPEL.
+# 3.15 is required on Windows, but is not available in EPEL yet.
+cmake_minimum_required(VERSION 3.14)
 
 # Define the project name.
 project(Mantid)
@@ -120,12 +120,14 @@ if(ENABLE_MANTIDPLOT)
   set(QT_USE_IMPORTED_TARGETS ON)
   find_package(Qt4
                COMPONENTS QtCore
+                          QtDesigner
                           QtGui
                           QtOpenGL
-                          QtXml
+                          QtScript
                           QtSvg
+                          QtXml
                REQUIRED)
-
+  find_package(QScintillaQt4 REQUIRED)
   find_package(Qwt5 REQUIRED)
   if(QWT5_VERSION VERSION_LESS 5.0
      OR QWT5_VERSION VERSION_EQUAL 6.0
@@ -133,8 +135,7 @@ if(ENABLE_MANTIDPLOT)
     message(FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}")
   endif()
 
-  if(PYTHON_VERSION_MAJOR EQUAL 3 AND
-     UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
+  if(UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
     set(USE_PRIVATE_SIPPYQT4 ON)
     include(ExternalSipPyQt4)
   else()
@@ -154,6 +155,7 @@ if(ENABLE_WORKBENCH)
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
   endif()
+  find_package(QScintillaQt5 REQUIRED)
   find_package(PyQt5 REQUIRED)
   find_package(SIP REQUIRED)
   separate_arguments(PYQT5_SIP_FLAGS)
@@ -245,7 +247,7 @@ if (ENABLE_DOCS)
   find_package(Sphinx 1.2)
   if(SPHINX_FOUND)
     # run python to see if the theme is installed
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+    execute_process(COMMAND ${Python_EXECUTABLE} -c
                             "import sphinx_bootstrap_theme"
                     OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
                     ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
@@ -253,7 +255,7 @@ if (ENABLE_DOCS)
                     ERROR_STRIP_TRAILING_WHITESPACE)
     if(SPHINX_BOOTSTRAP_THEME_ERR)
       message(ERROR " Did not find sphinx_bootstrap_theme")
-      message(STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+      message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
       message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
       message(
         FATAL_ERROR
@@ -402,45 +404,24 @@ if(ENABLE_CPACK)
       set(CPACK_RPM_PACKAGE_REQUIRES
           "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
     endif()
-
-    if(PYTHON_VERSION_MAJOR EQUAL 3)
-      set(
-        CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},"
-        "boost169-python3,"
-        "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
-        "python36-six,python36-PyYAML,python36-requests,python36-toml,"
-        "python36-ipython,python36-ipython-notebook"
-      )
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},python36-QtPy,"
-            "python36-matplotlib-qt4,python36-ipython-gui")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
-            "python36-matplotlib-qt5,python36-psutil,python36-ipython-gui")
-      endif()
-    else()
-      set(
-        CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},"
-        "boost169-python2,"
-        "numpy,scipy,h5py >= 2.3.1,PyCifRW >= 4.2.1,"
-        "python-enum34,python-six,PyYAML,python-requests,"
-        "python-ipython >= 1.1.0,python-ipython-notebook"
-      )
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},sip >= 4.18,PyQt4,python2-QtPy,"
-            "python2-matplotlib-qt4 >= 1.5.2,python-ipython-gui")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},python2-qt5,python2-QtPy,"
-            "python2-matplotlib-qt4 >= 1.5.2,python-psutil,python-ipython-gui")
-      endif()
+    # python requirements
+    set(
+      CPACK_RPM_PACKAGE_REQUIRES
+      "${CPACK_RPM_PACKAGE_REQUIRES},"
+      "boost169-python3,"
+      "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
+      "python36-six,python36-PyYAML,python36-requests,python36-toml,"
+      "python36-ipython,python36-ipython-notebook"
+    )
+    if(ENABLE_MANTIDPLOT)
+      set(CPACK_RPM_PACKAGE_REQUIRES
+          "${CPACK_RPM_PACKAGE_REQUIRES},python36-QtPy,"
+          "python36-matplotlib-qt4,python36-ipython-gui")
+    endif()
+    if(ENABLE_WORKBENCH)
+      set(CPACK_RPM_PACKAGE_REQUIRES
+          "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
+          "python36-matplotlib-qt5,python36-psutil,python36-ipython-gui")
     endif()
 
     string(REPLACE ";"
@@ -482,18 +463,7 @@ if(ENABLE_CPACK)
           "libqtwebkit4")
     endif()
 
-    if("${UNIX_CODENAME}" STREQUAL "xenial")
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl2,"
-          "liboce-foundation10,liboce-modeling10,"
-          "libqscintilla2-12v5,"
-          "ipython-notebook,"
-          "libhdf5-cpp-11")
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqt5scintilla2-12v5")
-      endif()
-    else() # bionic and newer
+    if("${UNIX_CODENAME}" STREQUAL "bionic")
       set(CPACK_DEBIAN_PACKAGE_DEPENDS
           "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
           "liboce-foundation11,liboce-modeling11,"
@@ -504,54 +474,33 @@ if(ENABLE_CPACK)
         set(CPACK_DEBIAN_PACKAGE_DEPENDS
             "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
       endif()
+    else()
+      message(WARNING "Unsupported Debian-like OS: ${UNIX_CODENAME}. Packaging is unlikely to work correctly.")
+    endif()
+    # python requirements
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
+        "python3-numpy,"
+        "python3-requests,"
+        "python3-sip,"
+        "python3-six,"
+        "python3-matplotlib,"
+        "python3-qtpy,"
+        "python3-scipy,"
+        "python3-toml,"
+        "python3-pycifrw (>= 4.2.1),"
+        "python3-yaml,"
+        "ipython3-qtconsole") # transitional package for bionic
+
+    if(ENABLE_MANTIDPLOT)
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS
+          "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4")
+    endif()
+    if(ENABLE_WORKBENCH)
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS
+          "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5,python3-psutil")
     endif()
 
-    if(PYTHON_VERSION_MAJOR EQUAL 3)
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
-          "python3-numpy,"
-          "python3-requests,"
-          "python3-sip,"
-          "python3-six,"
-          "python3-matplotlib,"
-          "python3-qtpy,"
-          "python3-scipy,"
-          "python3-toml,"
-          "python3-pycifrw (>= 4.2.1),"
-          "python3-yaml,"
-          "ipython3-qtconsole") # transitional package for bionic
-
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5,python3-psutil")
-      endif()
-    else() # python 2
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
-          "python-numpy,"
-          "python-requests,"
-          "python-sip,"
-          "python-six,"
-          "python-matplotlib,"
-          "python-qtpy,"
-          "python-scipy,"
-          "python-pycifrw (>= 4.2.1),"
-          "python-yaml,"
-          "ipython-qtconsole")
-
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt4")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-pyqt5,python-psutil")
-      endif()
-    endif()
     # parse list to string required for deb package
     string(REPLACE ";"
                    ","
