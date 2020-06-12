@@ -392,7 +392,13 @@ class DrillModelTest(unittest.TestCase):
 
     def test_process(self):
         self.model.samples = [{}]
-        self.model.process([0])
+        try:
+            self.model.process([0])
+        except DrillException as e:
+            assert True
+            self.assertEqual(e.elements[0][0], 0)
+        else:
+            assert False
         self.mDrillTask.assert_not_called()
         self.model.tasksPool.addProcess.assert_not_called()
         self.mDrillTask.reset_mock()
@@ -416,7 +422,7 @@ class DrillModelTest(unittest.TestCase):
         self.model.samples = [{"c1": "v1"}, {"c1": "v1"}]
         try:
             self.model.process([0, 1])
-        except DrillException as a:
+        except DrillException:
             assert True
         else:
             assert False

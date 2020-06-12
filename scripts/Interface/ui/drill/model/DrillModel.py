@@ -338,11 +338,11 @@ class DrillModel(QObject):
         """
         # to be sure that the pool is cleared
         self.tasksPool.abortProcessing()
-        # TODO: check the elements before algorithm submission
         tasks = list()
         errors = list()
         for e in elements:
             if (e >= len(self.samples)) or (not self.samples[e]):
+                errors.append((e, "Empty row"))
                 continue
             kwargs = self.getProcessingParameters(e)
             try:
