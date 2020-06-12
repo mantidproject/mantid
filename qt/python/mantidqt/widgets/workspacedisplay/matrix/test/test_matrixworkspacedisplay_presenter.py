@@ -366,7 +366,6 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         # (2 Selected Bins * 2 Spectra * 2 Cols per bin) + 2 spectra names
         self.assertEqual(mock_table_ws.setCell.call_count, 10)
 
-
     @patch("mantidqt.widgets.workspacedisplay.matrix.presenter.MatrixWorkspaceDisplay.notify_no_selection_to_copy")
     def test_action_copy_spectrum_to_table_no_selection(self, mock_notify):
         _, mock_table, _, presenter = self.common_setup_action_plot(table_has_selection=False)
