@@ -257,18 +257,21 @@ class DrillModel(QObject):
 
     def changeParameter(self, row, column, contents):
         """
-        Change parameter value. The method is able to parse usual parameters
-        (present in self.columns) and those coming from the custom options. It
-        also submits the new value to the parameters controller.
+        Change parameter value and update the model samples. The method is able
+        to parse usual parameters (present in self.columns) and those coming
+        from the custom options. It submits the new value to the parameters
+        controller to check it. In case of empty value, the param_ok signal is
+        sent without any submission to the controller.
 
         Args:
             row (int): index of the sample in self.samples
             column (int): index of the parameter in self.columns
             contents (str): new value
         """
-        if ((not contents) and (self.columns[column] in self.samples[row])):
-            del self.samples[row][self.columns[column]]
+        if (not contents):
             self.param_ok.emit(row, self.columns[column])
+            if (self.columns[column] in self.samples[row]):
+                del self.samples[row][self.columns[column]]
             return
 
         if (self.columns[column] == RundexSettings.CUSTOM_OPT_JSON_KEY):
