@@ -167,7 +167,7 @@
       <item>
        <widget class="QToolButton" name="cut">
         <property name="toolTip">
-         <string>Cut selected row(s)</string>
+         <string>Cut selected cell(s)</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -183,7 +183,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Copy selected row(s)</string>
+         <string>Copy selected cell(s)</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -199,7 +199,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Paste row(s)</string>
+         <string>Paste cell(s)</string>
         </property>
         <property name="text">
          <string>...</string>
