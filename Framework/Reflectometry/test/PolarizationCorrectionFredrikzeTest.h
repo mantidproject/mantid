@@ -88,20 +88,21 @@ public:
                                         const std::string &pp,
                                         const std::string &alpha = "",
                                         const std::string &ap = "") {
-    CreatePolarizationEfficiencies alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setPropertyValue("Rho", rho);
-    alg.setPropertyValue("Pp", pp);
+    auto alg = AlgorithmManager::Instance().createUnmanaged(
+        "CreatePolarizationEfficiencies");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setPropertyValue("Rho", rho);
+    alg->setPropertyValue("Pp", pp);
     if (!ap.empty()) {
-      alg.setPropertyValue("Ap", ap);
-      alg.setPropertyValue("Alpha", alpha);
+      alg->setPropertyValue("Ap", ap);
+      alg->setPropertyValue("Alpha", alpha);
     }
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.execute();
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    alg->setPropertyValue("OutputWorkspace", "dummy");
+    alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     return outWS;
   }
 
@@ -339,17 +340,19 @@ public:
     auto Rho = Pa / Pp;
     auto Alpha = Aa / Ap;
 
-    Mantid::Reflectometry::JoinISISPolarizationEfficiencies join_eff;
-    join_eff.initialize();
-    join_eff.setChild(true);
-    join_eff.setRethrows(true);
-    join_eff.setProperty("Pp", Pp);
-    join_eff.setProperty("Ap", Ap);
-    join_eff.setProperty("Rho", Rho);
-    join_eff.setProperty("Alpha", Alpha);
-    join_eff.setPropertyValue("OutputWorkspace", "dummy");
-    join_eff.execute();
-    MatrixWorkspace_sptr efficiencies = join_eff.getProperty("OutputWorkspace");
+    auto join_eff = AlgorithmManager::Instance().createUnmanaged(
+        "JoinISISPolarizationEfficiencies");
+    join_eff->initialize();
+    join_eff->setChild(true);
+    join_eff->setRethrows(true);
+    join_eff->setProperty("Pp", Pp);
+    join_eff->setProperty("Ap", Ap);
+    join_eff->setProperty("Rho", Rho);
+    join_eff->setProperty("Alpha", Alpha);
+    join_eff->setPropertyValue("OutputWorkspace", "dummy");
+    join_eff->execute();
+    MatrixWorkspace_sptr efficiencies =
+        join_eff->getProperty("OutputWorkspace");
     TS_ASSERT(efficiencies);
 
     auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.

@@ -134,7 +134,7 @@ set(FRAMEWORK_LIBS
     RemoteJobManagers
     SINQ
     Muon
-	Reflectometry)
+    Reflectometry)
 
 add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 
