@@ -22,8 +22,14 @@ class ImageProperties(dict):
     @classmethod
     def from_image(cls, image):
         props = dict()
-        props['label'] = image.get_label()
-        cmap_name = image.cmap.name if hasattr(image,"cmap") else image.get_cmap().name
+
+        props['label'] = ""
+        for ax in image.figure.axes:
+            for img in ax.images:
+                if img.colorbar:
+                    props['label'] = img.colorbar._label
+
+        cmap_name = image.cmap.name if hasattr(image, "cmap") else image.get_cmap().name
         props['colormap'] = cmap_name
         props['reverse_colormap'] = False
         if props['colormap'].endswith('_r'):
