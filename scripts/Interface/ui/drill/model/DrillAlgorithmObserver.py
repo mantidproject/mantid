@@ -5,12 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import time
-
-from qtpy.QtCore import QObject, Signal, QThreadPool
+from qtpy.QtCore import QObject, Signal
 
 from mantid.api import AlgorithmObserver
-import mantid.simpleapi as sapi
+
 
 class DrillAlgorithmObserverSignals(QObject):
     """

@@ -7,16 +7,14 @@
 
 import os
 
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QHeaderView, \
-                           QAbstractItemView, QTableWidgetItem, QMessageBox, \
-                           QDialog
-from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
 from qtpy.QtCore import *
 from qtpy import uic
 
 from mantidqt.widgets import manageuserdirectories, instrumentselector
-from mantid.kernel import UsageService, FeatureType, config, logger
+from mantid.kernel import config  # noqa
 from mantidqt import icons
+
 
 class DrillView(QMainWindow):
 

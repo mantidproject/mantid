@@ -7,8 +7,6 @@
 
 from qtpy.QtCore import QObject, Signal, QThreadPool
 
-from mantid.api import AlgorithmObserver
-import mantid.simpleapi as sapi
 
 class DrillAlgorithmPoolSignals(QObject):
     """
