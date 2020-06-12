@@ -34,8 +34,6 @@ Algorithms
 Data Handling
 -------------
 
-- Modified :ref:`LoadHelper <algm-LoadHelper>` to read metadata from a chosen entry name provided as ``std::string`` argument 
-
 - Added a case to :ref:`Load <algm-Load>` to handle ``WorkspaceGroup`` as the output type
 
 - Added an algorithm, :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` that reads raw NeXuS ILL D7 instrument data
