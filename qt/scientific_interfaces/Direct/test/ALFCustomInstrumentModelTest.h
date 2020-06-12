@@ -138,7 +138,7 @@ public:
     // create another ws to add
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
         1, 10, false, 1.1, 2.2, 0.01, 0.3);
-    boost::shared_ptr<Instrument> inst = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst = std:::make_shared<Instrument>();
     inst->setName("ALF");
     ws->mutableRun().addProperty("run_number", run, true);
     ws->setInstrument(inst);
@@ -163,7 +163,7 @@ public:
     // create another ws to add
     auto ws3 = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
         1, 10, false, 1.1, 3.2, 0.01, 0.3);
-    inst = boost::make_shared<Instrument>();
+    inst = std::make_shared<Instrument>();
     inst->setName("ALF");
     ws3->mutableRun().addProperty("run_number", run, true);
     ws3->setInstrument(inst);
@@ -297,4 +297,3 @@ private:
   PartMockALFCustomInstrumentModel *m_model;
 };
 
-#endif /* MANTIDQT_ALFCUSTOMINSTRUMENTMODELTEST_H_ */

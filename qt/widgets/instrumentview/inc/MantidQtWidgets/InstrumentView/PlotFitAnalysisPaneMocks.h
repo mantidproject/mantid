@@ -23,6 +23,8 @@
 #include <string>
 #include <utility>
 
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
 using namespace Mantid::API;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;

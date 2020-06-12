@@ -25,6 +25,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <iostream>
 #include <string>
@@ -170,4 +172,3 @@ private:
   ALFCustomInstrumentPresenter *m_presenter;
 };
 
-#endif /* MANTIDQT_ALFCUSTOMINSTRUMENTPRESENTERTEST_H_ */

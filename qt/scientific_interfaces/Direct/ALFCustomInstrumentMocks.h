@@ -26,6 +26,8 @@
 #include <string>
 #include <utility>
 
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using Mantid::Geometry::Instrument;
@@ -36,11 +38,10 @@ public:
   mockALFData(const std::string &name, const std::string &instName,
               const int &run, const bool TOF)
       : m_name(name) {
-    std::set<long int> masks;
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
-        1, 10, false, 0.1, 0.2, 0.01, 0.3, masks);
+        1, 10, false, 0.1, 0.2, 0.01, 0.3);
     // set instrument
-    boost::shared_ptr<Instrument> inst = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst = std::make_shared<Instrument>();
     inst->setName(instName);
     // set run
     ws->mutableRun().addProperty("run_number", run, true);
