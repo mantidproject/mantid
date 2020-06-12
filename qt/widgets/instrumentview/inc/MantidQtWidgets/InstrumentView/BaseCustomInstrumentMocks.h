@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <iostream>
 #include <string>

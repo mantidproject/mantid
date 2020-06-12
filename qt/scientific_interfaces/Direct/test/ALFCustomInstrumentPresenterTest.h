@@ -74,7 +74,7 @@ public:
   }
   void test_setUpInstrumentAnalysisSplitter() {
     CompositeFunction_sptr composite =
-        boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
+        std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
             Mantid::API::FunctionFactory::Instance().createFunction(
                 "CompositeFunction"));
 

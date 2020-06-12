@@ -19,6 +19,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <string>
 #include <utility>
