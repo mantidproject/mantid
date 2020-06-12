@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include "DllOption.h"
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
@@ -36,8 +36,8 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPanePresenter
 public:
   explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
                                             PlotFitAnalysisPaneModel *model) {
-    (void) model;
-    (void) view;
+    (void)model;
+    (void)view;
     m_addFunc = 0;
   };
   ~MockPlotFitAnalysisPanePresenter(){};
@@ -48,7 +48,10 @@ public:
   MOCK_METHOD0(doFit, void());
   MOCK_METHOD1(addSpectrum, void(const std::string &name));
   // at runtime the cast is done, so mock it ourselves
-  void addFunction(IFunction_sptr func) override { (void) func; m_addFunc += 1; };
+  void addFunction(IFunction_sptr func) override {
+    (void)func;
+    m_addFunc += 1;
+  };
   int getAddCount() { return m_addFunc; };
 
 private:
@@ -60,11 +63,11 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneView
 public:
   explicit MockPlotFitAnalysisPaneView(const double &start = 1.,
                                        const double &end = 5.,
-                                       QWidget *parent = nullptr){
- (void) start;
- (void) end;
- (void) parent;
-};
+                                       QWidget *parent = nullptr) {
+    (void)start;
+    (void)end;
+    (void)parent;
+  };
   ~MockPlotFitAnalysisPaneView(){};
   MOCK_METHOD1(observeFitButton, void(Observer *listener));
   MOCK_METHOD0(getRange, std::pair<double, double>());
@@ -91,8 +94,8 @@ public:
                        const std::pair<double, double> &range,
                        const IFunction_sptr func) override {
     m_count += 1;
-    (void) wsName;
-    (void) range;
+    (void)wsName;
+    (void)range;
     return func;
   };
   int getCount() { return m_count; };

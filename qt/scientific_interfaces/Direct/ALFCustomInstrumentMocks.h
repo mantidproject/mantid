@@ -97,7 +97,10 @@ public:
 class MockALFCustomInstrumentView : public IALFCustomInstrumentView {
 public:
   explicit MockALFCustomInstrumentView(const std::string &instrument,
-                                       QWidget *parent = nullptr){(void) instrument; (void) parent;};
+                                       QWidget *parent = nullptr) {
+    (void)instrument;
+    (void)parent;
+  };
   ~MockALFCustomInstrumentView(){};
 
   MOCK_METHOD1(observeExtractSingleTube, void(Observer *listner));
