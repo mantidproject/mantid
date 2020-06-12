@@ -296,4 +296,3 @@ public:
 private:
   PartMockALFCustomInstrumentModel *m_model;
 };
-

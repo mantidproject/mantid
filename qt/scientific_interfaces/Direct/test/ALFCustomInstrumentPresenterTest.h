@@ -21,12 +21,12 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 
 #include <iostream>
 #include <string>
@@ -171,4 +171,3 @@ private:
   NiceMock<MockPlotFitAnalysisPanePresenter> *m_pane;
   ALFCustomInstrumentPresenter *m_presenter;
 };
-
