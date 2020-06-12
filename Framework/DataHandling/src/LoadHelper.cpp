@@ -377,7 +377,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
  * Show attributes attached to the current Nexus entry
  *
  * @param nxfileID The Nexus entry
- * @param indentStr Indent spaces do display nexus entries as a tree
  *
  */
 void LoadHelper::dumpNexusAttributes(NXhandle nxfileID) {
