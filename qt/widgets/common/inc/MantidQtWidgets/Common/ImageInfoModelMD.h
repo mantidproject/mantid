@@ -25,9 +25,9 @@ public:
   each of the numeric values
   @return a vector containing pairs of strings
   */
-  std::vector<std::string> getInfoList(const double x, const double y,
-                                       const double signal,
-                                       bool getValues = true) override;
+  std::vector<QString> getInfoList(const double x, const double y,
+                                   const double signal,
+                                   bool getValues = true) override;
 
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override {
     UNUSED_ARG(ws);

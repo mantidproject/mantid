@@ -9,6 +9,9 @@
 #include "DllOption.h"
 
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include <QString>
 #include <vector>
 
 namespace MantidQt {
@@ -28,16 +31,17 @@ public:
   headers and '-' for each of the values
   @return a vector containing pairs of strings
   */
-  virtual std::vector<std::string> getInfoList(const double x, const double y,
-                                               const double signal,
-                                               bool getValues = true) = 0;
+  virtual std::vector<QString> getInfoList(const double x, const double y,
+                                           const double signal,
+                                           bool getValues = true) = 0;
 
   virtual void setWorkspace(const Mantid::API::Workspace_sptr &ws) = 0;
 
 protected:
-  void addNameAndValue(const std::string &label, std::vector<std::string> &list,
+  void addNameAndValue(const std::string &label, std::vector<QString> &list,
                        const double value, const int precision,
-                       bool includeValue = true);
+                       bool includeValue = true,
+                       Mantid::Kernel::Unit_sptr units = nullptr);
 };
 
 } // namespace MantidWidgets

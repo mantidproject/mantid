@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 
+#include <QRegExp>
 #include <iomanip>
 #include <sstream>
 
@@ -14,16 +16,24 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 void ImageInfoModel::addNameAndValue(const std::string &label,
-                                     std::vector<std::string> &list,
+                                     std::vector<QString> &list,
                                      const double value, const int precision,
-                                     bool includeValue) {
-  std::ostringstream valueString;
-  if (includeValue)
-    valueString << std::setprecision(precision) << value;
-  else
-    valueString << "-";
-  list.emplace_back(label);
-  list.emplace_back(valueString.str());
+                                     bool includeValue,
+                                     Mantid::Kernel::Unit_sptr units) {
+  std::wstring unit;
+  auto headerLabel = QString::fromStdString(label);
+  if (units && !(unit = units->label().utf8()).empty()) {
+    headerLabel += "(" + MantidQt::API::toQStringInternal(unit) + ")";
+  }
+  list.emplace_back(headerLabel);
+
+  if (includeValue) {
+    QString valueString = QString::number(value, 'f', precision);
+    // remove any trailing zeros after decimal place
+    valueString.replace(QRegExp("(\\.\\d*[1-9])(0+)$|\\.0+$"), "\\1");
+    list.emplace_back(valueString);
+  } else
+    list.emplace_back(QString("-"));
 }
 
 } // namespace MantidWidgets

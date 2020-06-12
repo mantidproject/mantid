@@ -18,9 +18,9 @@ namespace MantidWidgets {
 ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view)
     : m_view(std::move(view)) {}
 
-std::vector<std::string> ImageInfoPresenter::getInfoList(const double x,
-                                                         const double y,
-                                                         const double z) {
+std::vector<QString> ImageInfoPresenter::getInfoList(const double x,
+                                                     const double y,
+                                                     const double z) {
   bool getValues(true);
   if (x == DBL_MAX || y == DBL_MAX || z == DBL_MAX)
     getValues = false;

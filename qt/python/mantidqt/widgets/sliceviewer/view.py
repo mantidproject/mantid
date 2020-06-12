@@ -54,7 +54,7 @@ class SliceViewerDataView(QWidget):
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
-        self.dimensions_layout.addWidget(self.dimensions, 0, 0, 2, 1)
+        self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
 
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
@@ -62,11 +62,14 @@ class SliceViewerDataView(QWidget):
 
         self.image_info_widget = ImageInfoWidget(self.ws_type, self)
         self.track_cursor = QCheckBox("Track Cursor", self)
+        self.track_cursor.setToolTip("Update the image readout table when the cursor is over the plot. "
+                                     "If unticked the table will update only when the plot is clicked")
         if self.ws_type == 'MDE':
             self.colorbar_layout.addWidget(self.image_info_widget, alignment=Qt.AlignCenter)
-            self.colorbar_layout.addWidget(self.track_cursor, alignment=Qt.AlignCenter)
+            self.colorbar_layout.addWidget(self.track_cursor)
         else:
-            self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight | Qt.AlignBottom)
+            self.dimensions_layout.setHorizontalSpacing(10)
+            self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
             self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
         self.track_cursor.setChecked(True)
 
@@ -100,7 +103,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar.colorbarChanged.connect(self.update_line_plot_limits)
         # make width larger to fit image readout table
         if self.ws_type == 'MDE':
-            self.colorbar.setMaximumWidth(170)
+            self.colorbar.setMaximumWidth(155)
 
         # MPL toolbar
         self.toolbar_layout = QHBoxLayout()

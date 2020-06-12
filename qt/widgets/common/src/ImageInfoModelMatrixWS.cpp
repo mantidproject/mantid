@@ -13,6 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cfloat>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -28,14 +29,17 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-ImageInfoModelMatrixWS::ImageInfoModelMatrixWS() : m_workspace(nullptr) {}
+ImageInfoModelMatrixWS::ImageInfoModelMatrixWS()
+    : m_workspace(nullptr), m_spectrumInfo(nullptr), m_xMin(DBL_MAX),
+      m_xMax(DBL_MIN) {}
 
 // Creates a list containing pairs of strings with information about the
 // coordinates in the workspace.
-std::vector<std::string>
-ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
-                                    const double signal, bool getValues) {
-  std::vector<std::string> list;
+std::vector<QString> ImageInfoModelMatrixWS::getInfoList(const double x,
+                                                         const double specNum,
+                                                         const double signal,
+                                                         bool getValues) {
+  std::vector<QString> list;
 
   if (!m_workspace) {
     return list;
@@ -62,7 +66,7 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
   const auto &old_unit = m_workspace->getAxis(0)->unit();
   if (old_unit) {
     x_label = old_unit->caption();
-    addNameAndValue(x_label, list, x, 3, getValues);
+    addNameAndValue(x_label, list, x, 4, getValues, old_unit);
   }
 
   const auto &spec = m_workspace->getSpectrum(wsIndex);
@@ -97,10 +101,10 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
     two_theta = m_spectrumInfo->twoTheta(wsIndex);
     azi = m_spectrumInfo->detector(wsIndex).getPhi();
   }
-  addNameAndValue("L2", list, l2, 4, getValues);
-  addNameAndValue("TwoTheta", list, two_theta * Mantid::Geometry::rad2deg, 2,
-                  getValues);
-  addNameAndValue("Azimuthal", list, azi * Mantid::Geometry::rad2deg, 2,
+  addNameAndValue("L2(m)", list, l2, 4, getValues);
+  addNameAndValue("TwoTheta(Deg)", list, two_theta * Mantid::Geometry::rad2deg,
+                  2, getValues);
+  addNameAndValue("Azimuthal(Deg)", list, azi * Mantid::Geometry::rad2deg, 2,
                   getValues);
 
   int emode(0);
@@ -147,21 +151,22 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
   const double tof =
       old_unit->convertSingleToTOF(x, l1, l2, two_theta, emode, efixed, delta);
   if (x_label != "Time-of-flight") {
-    addNameAndValue("Time-of-flight", list, tof, 1, getValues);
+    const auto tof_unit = UnitFactory::Instance().create("TOF");
+    addNameAndValue("Time-of-flight", list, tof, 4, getValues, tof_unit);
   }
 
   if (x_label != "Wavelength") {
     const auto wl_unit = UnitFactory::Instance().create("Wavelength");
     const double wavelength = wl_unit->convertSingleFromTOF(
         tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("Wavelength", list, wavelength, 4, getValues);
+    addNameAndValue("Wavelength", list, wavelength, 4, getValues, wl_unit);
   }
 
   if (x_label != "Energy") {
     const auto e_unit = UnitFactory::Instance().create("Energy");
     const double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                        emode, efixed, delta);
-    addNameAndValue("Energy", list, energy, 4, getValues);
+    addNameAndValue("Energy", list, energy, 4, getValues, e_unit);
   }
 
   if (x_label != "d-Spacing" &&
@@ -169,21 +174,21 @@ ImageInfoModelMatrixWS::getInfoList(const double x, const double specNum,
     const auto d_unit = UnitFactory::Instance().create("dSpacing");
     const double d_spacing = d_unit->convertSingleFromTOF(
         tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("d-Spacing", list, d_spacing, 4, getValues);
+    addNameAndValue("d-Spacing", list, d_spacing, 4, getValues, d_unit);
   }
 
   if (x_label != "q" && (two_theta != 0.0 || !getValues)) {
     const auto q_unit = UnitFactory::Instance().create("MomentumTransfer");
     const double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
                                                       emode, efixed, delta);
-    addNameAndValue("|Q|", list, mag_q, 4, getValues);
+    addNameAndValue("|Q|", list, mag_q, 4, getValues, q_unit);
   }
 
   if (x_label != "DeltaE" && (two_theta != 0.0 && emode != 0)) {
     const auto deltaE_unit = UnitFactory::Instance().create("DeltaE");
     const double delta_E = deltaE_unit->convertSingleFromTOF(
         tof, l1, l2, two_theta, emode, efixed, delta);
-    addNameAndValue("DeltaE", list, delta_E, 4, getValues);
+    addNameAndValue("DeltaE", list, delta_E, 4, getValues, deltaE_unit);
   }
   return list;
 }

@@ -25,8 +25,7 @@ public:
 
     auto list = model.getInfoList(2, 4, 7);
 
-    const std::array<std::string, 6> expectList{"x", "2",      "y",
-                                                "4", "Signal", "7"};
+    const std::array<QString, 6> expectList{"x", "2", "y", "4", "Signal", "7"};
     TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);
@@ -38,8 +37,7 @@ public:
 
     auto list = model.getInfoList(2, 4, 7, false);
 
-    const std::array<std::string, 6> expectList{"x", "-",      "y",
-                                                "-", "Signal", "-"};
+    const std::array<QString, 6> expectList{"x", "-", "y", "-", "Signal", "-"};
     TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
       TS_ASSERT_EQUALS(expectList[i], list[i]);

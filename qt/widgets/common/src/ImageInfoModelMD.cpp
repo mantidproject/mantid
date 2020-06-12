@@ -10,11 +10,11 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-std::vector<std::string> ImageInfoModelMD::getInfoList(const double x,
-                                                       const double y,
-                                                       const double signal,
-                                                       bool getValues) {
-  std::vector<std::string> list;
+std::vector<QString> ImageInfoModelMD::getInfoList(const double x,
+                                                   const double y,
+                                                   const double signal,
+                                                   bool getValues) {
+  std::vector<QString> list;
   addNameAndValue("x", list, x, 4, getValues);
   addNameAndValue("y", list, y, 4, getValues);
   addNameAndValue("Signal", list, signal, 4, getValues);

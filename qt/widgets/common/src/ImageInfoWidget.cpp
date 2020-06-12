@@ -22,7 +22,6 @@ ImageInfoWidget::ImageInfoWidget(const std::string &workspace_type,
                                  QWidget *parent)
     : IImageInfoWidget(parent),
       m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
-
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 #endif
@@ -47,7 +46,7 @@ void ImageInfoWidget::updateTable(const double x, const double y,
   auto row = 0;
   auto column = 0;
   for (const auto &item : info) {
-    auto cell = new QTableWidgetItem(QString::fromStdString(item));
+    auto cell = new QTableWidgetItem(item);
     setItem(row, column, cell);
     cell->setFlags(Qt::ItemIsSelectable);
     row++;
@@ -64,5 +63,4 @@ void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) {
   updateTable();
 }
 } // namespace MantidWidgets
-
 } // namespace MantidQt

@@ -9,12 +9,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::DataObjects;
+using MantidQt::API::toQStringInternal;
 
 class ImageInfoModelMatrixWSTest : public CxxTest::TestSuite {
 public:
@@ -33,12 +35,29 @@ public:
     model.setWorkspace(workspace);
 
     auto list = model.getInfoList(2, 4, 7);
-    const std::array<std::string, 22> expectList{
-        "Signal",    "7",      "Spec Num",  "4",         "Time-of-flight",
-        "2",         "Det ID", "4",         "L2",        "5.009",
-        "TwoTheta",  "3.4",    "Azimuthal", "90",        "Wavelength",
-        "0.0003164", "Energy", "8.173e+08", "d-Spacing", "0.00528",
-        "|Q|",       "1190"};
+    const std::array<QString, 22> expectList{
+        "Signal",
+        "7",
+        "Spec Num",
+        "4",
+        "Time-of-flight" + toQStringInternal(L"(\u03bcs)"),
+        "2",
+        "Det ID",
+        "4",
+        "L2(m)",
+        "5.009",
+        "TwoTheta(Deg)",
+        "3.43",
+        "Azimuthal(Deg)",
+        "90",
+        "Wavelength" + toQStringInternal(L"(\u212b)"),
+        "0.0003",
+        "Energy(meV)",
+        "817312177.3087",
+        "d-Spacing" + toQStringInternal(L"(\u212b)"),
+        "0.0053",
+        "|Q|" + toQStringInternal(L"(\u212b\u207b\u00b9)"),
+        "1190.0137"};
 
     TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
@@ -55,8 +74,13 @@ public:
 
     auto list = model.getInfoList(2, 4, 7);
 
-    const std::array<std::string, 6> expectList{
-        "Signal", "7", "Spec Num", "4", "Time-of-flight", "2"};
+    const std::array<QString, 6> expectList{"Signal",
+                                            "7",
+                                            "Spec Num",
+                                            "4",
+                                            "Time-of-flight" +
+                                                toQStringInternal(L"(\u03bcs)"),
+                                            "2"};
 
     TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
@@ -99,11 +123,29 @@ public:
 
     auto list = model.getInfoList(2, 4, 7, false);
 
-    const std::array<std::string, 22> expectList{
-        "Signal",    "-", "Spec Num",   "-", "Time-of-flight", "-",
-        "Det ID",    "-", "L2",         "-", "TwoTheta",       "-",
-        "Azimuthal", "-", "Wavelength", "-", "Energy",         "-",
-        "d-Spacing", "-", "|Q|",        "-"};
+    const std::array<QString, 22> expectList{
+        "Signal",
+        "-",
+        "Spec Num",
+        "-",
+        "Time-of-flight" + toQStringInternal(L"(\u03bcs)"),
+        "-",
+        "Det ID",
+        "-",
+        "L2(m)",
+        "-",
+        "TwoTheta(Deg)",
+        "-",
+        "Azimuthal(Deg)",
+        "-",
+        "Wavelength" + toQStringInternal(L"(\u212b)"),
+        "-",
+        "Energy(meV)",
+        "-",
+        "d-Spacing" + toQStringInternal(L"(\u212b)"),
+        "-",
+        "|Q|" + toQStringInternal(L"(\u212b\u207b\u00b9)"),
+        "-"};
 
     TS_ASSERT_EQUALS(expectList.size(), list.size())
     for (size_t i = 0; i < list.size(); ++i) {
