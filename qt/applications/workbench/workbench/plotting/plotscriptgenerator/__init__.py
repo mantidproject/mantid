@@ -19,7 +19,7 @@ from workbench.plotting.plotscriptgenerator.figure import generate_subplots_comm
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
-from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.plotting.figuretype import FigureType, axes_type
 
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "axes"
@@ -56,7 +56,7 @@ def generate_script(fig, exclude_headers=False):
         if not isinstance(ax, MantidAxes):
             continue
         ax_object_var = get_axes_object_variable(ax)
-        if figure_type(fig) in [FigureType.Image]:
+        if axes_type(ax) in [FigureType.Image]:
             plot_commands.extend(get_plot_2d_cmd(ax, ax_object_var))  # ax.imshow or pcolormesh
         else:
             if not curve_in_ax(ax):

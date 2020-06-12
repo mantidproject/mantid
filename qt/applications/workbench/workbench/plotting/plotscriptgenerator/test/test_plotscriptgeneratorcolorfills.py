@@ -35,13 +35,14 @@ class PlotScriptGeneratorColorFillsTest(unittest.TestCase):
         cls.test_ws = CreateSampleWorkspace(OutputWorkspace='PlotScriptGeneratorColorFillsTest_test_ws')
 
     def setUp(self):
-        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
 
     def tearDown(self):
         plt.close()
 
     def test_get_plot_command_kwargs_from_colourfill_returns_dict_with_correct_properties(self):
         cfill = self.ax.imshow(self.test_ws, **CFILL_KWARGS)
+        self.fig.colorbar(cfill,ax=[self.ax])
         plot_commands_dict = _get_plot_command_kwargs_from_colorfill(cfill)
         for key, value in CFILL_KWARGS.items():
             self.assertEqual(value, plot_commands_dict[key])
@@ -50,7 +51,8 @@ class PlotScriptGeneratorColorFillsTest(unittest.TestCase):
         kwargs = copy(CFILL_KWARGS)
         kwargs.update(MANTID_ONLY_KWARGS)
         cfill = self.ax.imshow(self.test_ws, **CFILL_KWARGS)
-        output = generate_plot_2d_command(cfill)
+        self.fig.colorbar(cfill,ax=[self.ax])
+        output = generate_plot_2d_command(cfill,"axes")
         arg_string = convert_args_to_string([self.test_ws], kwargs)
         expected_command = [f"{CFILL_NAME} = axes.imshow({arg_string})",
                             f"{CFILL_NAME}.set_norm(plt.Normalize(vmin=",
