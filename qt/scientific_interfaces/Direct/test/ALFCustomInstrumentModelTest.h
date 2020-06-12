@@ -138,7 +138,7 @@ public:
     // create another ws to add
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
         1, 10, false, 1.1, 2.2, 0.01, 0.3);
-    std::shared_ptr<Instrument> inst = std:::make_shared<Instrument>();
+    std::shared_ptr<Instrument> inst = std:: : make_shared<Instrument>();
     inst->setName("ALF");
     ws->mutableRun().addProperty("run_number", run, true);
     ws->setInstrument(inst);
@@ -296,4 +296,3 @@ public:
 private:
   PartMockALFCustomInstrumentModel *m_model;
 };
-
