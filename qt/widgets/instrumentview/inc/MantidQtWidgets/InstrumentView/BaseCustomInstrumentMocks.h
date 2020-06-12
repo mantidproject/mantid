@@ -10,12 +10,12 @@
 #include <gmock/gmock.h>
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #include <iostream>
 #include <string>
