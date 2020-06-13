@@ -223,8 +223,8 @@ class SliceViewerDataView(QWidget):
 
         gs = gridspec.GridSpec(1, 1)
         image_axes.set_position(gs[0].get_position(self.fig))
-        set_artist_property(image_axes.get_xticklabels(), visible=True)
-        set_artist_property(image_axes.get_yticklabels(), visible=True)
+        image_axes.xaxis.tick_bottom()
+        image_axes.yaxis.tick_left()
         self.axx, self.axy = None, None
 
         self.mpl_toolbar.update()  # sync list of axes in navstack
