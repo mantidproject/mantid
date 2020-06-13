@@ -154,8 +154,9 @@ class SliceViewer(object):
 
     def data_limits_changed(self):
         """Notify data limits on image axes have changed"""
-        self.new_plot()
-        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
+        if self.model.get_ws_type() == WS_TYPE.MDE:
+            self.new_plot()
+            self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def show_all_data_requested(self):
         """Instructs the view to show all data"""

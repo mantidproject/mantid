@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 import unittest
+from unittest.mock import MagicMock
 
 import matplotlib as mpl
 mpl.use('Agg')  # noqa
@@ -30,12 +31,20 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
                                               Names='Dim1,Dim2,Dim3',
                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
                                               OutputWorkspace='ws_MD_2d')
+        cls.hkl_ws = CreateMDWorkspace(Dimensions=3,
+                                       Extents='-10,10,-10,10,-10,10',
+                                       Names='A,B,C',
+                                       Units='r.l.u.,r.l.u.,r.l.u.',
+                                       Frames='HKL,HKL,HKL',
+                                       OutputWorkspace='hkl_ws')
+        expt_info = CreateSampleWorkspace()
+        cls.hkl_ws.addExperimentInfo(expt_info)
+        SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
 
     def test_deleted_on_close(self):
         pres = SliceViewer(self.histo_ws)
         self.assert_widget_created()
         pres.view.close()
-        del pres
 
         QApplication.processEvents()
         QApplication.processEvents()
@@ -43,15 +52,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_no_toplevel_widgets()
 
     def test_enable_nonorthogonal_view_disables_lineplots_if_enabled(self):
-        hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                   Extents='-10,10,-10,10,-10,10',
-                                   Names='A,B,C',
-                                   Units='r.l.u.,r.l.u.,r.l.u.',
-                                   Frames='HKL,HKL,HKL')
-        expt_info = CreateSampleWorkspace()
-        hkl_ws.addExperimentInfo(expt_info)
-        SetUB(hkl_ws, 1, 1, 1, 90, 90, 90)
-        pres = SliceViewer(hkl_ws)
+        pres = SliceViewer(self.hkl_ws)
         line_plots_action, non_ortho_action = toolbar_actions(
             pres, (ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES))
         line_plots_action.trigger()
@@ -63,6 +64,26 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(non_ortho_action.isChecked())
         self.assertFalse(line_plots_action.isChecked())
         self.assertFalse(line_plots_action.isEnabled())
+
+        pres.view.close()
+
+    def test_data_limits_changed_call_for_MDHisto_does_not_create_new_plot(self):
+        pres = SliceViewer(self.histo_ws)
+        new_plot_mock = MagicMock()
+        pres.new_plot = new_plot_mock
+        pres.data_limits_changed()
+
+        new_plot_mock.assert_not_called()
+
+        pres.view.close()
+
+    def test_data_limits_changed_call_for_MDE_creates_new_plot(self):
+        pres = SliceViewer(self.hkl_ws)
+        new_plot_mock = MagicMock()
+        pres.new_plot = new_plot_mock
+        pres.data_limits_changed()
+
+        new_plot_mock.assert_called_once()
 
         pres.view.close()
 
