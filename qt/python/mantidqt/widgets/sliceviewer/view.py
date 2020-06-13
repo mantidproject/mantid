@@ -96,6 +96,7 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
+        self.canvas.mpl_connect('button_release_event', self.mouse_release)
         self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
         self.canvas.mpl_connect('button_press_event', self.mouse_click)
         self.create_axes_orthogonal()
@@ -450,6 +451,10 @@ class SliceViewerDataView(QWidget):
             signal = self.update_image_data(event.xdata, event.ydata, self.line_plots)
             if self.track_cursor.checkState() == Qt.Checked:
                 self.update_image_table_widget(event.xdata, event.ydata, signal)
+
+    def mouse_release(self, event):
+        if event.button == 3 and event.inaxes == self.ax:
+            self.on_home_clicked()
 
     def mouse_outside_image(self, _):
         """
