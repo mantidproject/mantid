@@ -111,7 +111,7 @@ class SliceViewerModel:
         """
         workspace = self._get_ws()
         bin_limits = _binning_limits(workspace, slicepoint, limits)
-        params = {}
+        params = {'EnableLogging': False}
         for n in range(workspace.getNumDims()):
             dimension = workspace.getDimension(n)
             slice_pt = slicepoint[n]

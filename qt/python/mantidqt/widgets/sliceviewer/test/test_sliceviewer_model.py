@@ -245,7 +245,8 @@ class SliceViewerModelTest(unittest.TestCase):
                                            OutputWorkspace='ws_MDE_3D_rebinned',
                                            AlignedDim0='h,-3,3,1',
                                            AlignedDim1='k,-4,4,2',
-                                           AlignedDim2='l,-2.0,2.0,1')
+                                           AlignedDim2='l,-2.0,2.0,1',
+                                           EnableLogging=False)
         mock_binmd.reset_mock()
         self.assertEqual(model._get_ws(), self.ws_MDE_3D)
         self.assertEqual(model.get_ws_type(), WS_TYPE.MDE)
@@ -284,7 +285,8 @@ class SliceViewerModelTest(unittest.TestCase):
                            OutputWorkspace='ws_MDE_3D_rebinned',
                            AlignedDim0='h,-2,2,1',
                            AlignedDim1='k,-1,1,2',
-                           AlignedDim2='l,-2.0,2.0,1')
+                           AlignedDim2='l,-2.0,2.0,1',
+                           EnableLogging=False)
         mock_binmd.assert_called_once_with(**call_params)
         mock_binmd.reset_mock()
 
