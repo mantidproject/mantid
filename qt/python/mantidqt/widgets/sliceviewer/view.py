@@ -183,6 +183,8 @@ class SliceViewerDataView(QWidget):
         """
         if self.line_plots:
             return
+
+        self.line_plots = True
         image_axes = self.ax
         if image_axes is None:
             return
@@ -210,6 +212,8 @@ class SliceViewerDataView(QWidget):
         """
         if not self.line_plots:
             return
+
+        self.line_plots = False
         image_axes = self.ax
         if image_axes is None:
             return
@@ -342,7 +346,6 @@ class SliceViewerDataView(QWidget):
 
     def on_line_plots_toggle(self, state):
         self.presenter.line_plots(state)
-        self.line_plots = state
 
     def on_non_orthogonal_axes_toggle(self, state):
         """
