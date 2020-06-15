@@ -223,7 +223,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
   }
 
   Instrument_sptr instr(new Instrument);
-  ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
+  Component *samplePos = new Component("sample-pos", instr.get());
   instr->add(samplePos);
   instr->markAsSamplePos(samplePos);
 

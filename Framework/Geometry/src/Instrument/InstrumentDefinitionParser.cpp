@@ -1167,8 +1167,16 @@ void InstrumentDefinitionParser::appendAssembly(
   // location elements
 
   Element *pType = getTypeElement[pCompElem->getAttribute("type")];
-  if (pType->hasAttribute("outline") &&
-      pType->getAttribute("outline") != "no") {
+  std::string category;
+  if (pType->hasAttribute("is"))
+    category = pType->getAttribute("is");
+  if (category == "SamplePos" || category == "samplePos") {
+    ass = new Geometry::CompAssembly(
+        InstrumentDefinitionParser::getNameOfLocationElement(pLocElem,
+                                                             pCompElem),
+        parent);
+  } else if (pType->hasAttribute("outline") &&
+             pType->getAttribute("outline") != "no") {
     ass = new Geometry::ObjCompAssembly(
         InstrumentDefinitionParser::getNameOfLocationElement(pLocElem,
                                                              pCompElem),
@@ -1193,10 +1201,6 @@ void InstrumentDefinitionParser::appendAssembly(
       ass, pLocElem,
       m_instrument
           ->getLogfileCache()); // params specified within specific <location>
-
-  std::string category;
-  if (pType->hasAttribute("is"))
-    category = pType->getAttribute("is");
 
   // check if special Component
   if (category == "SamplePos" || category == "samplePos") {
@@ -1811,19 +1815,25 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   } else {
     //-------------- Not a Detector, RectangularDetector or Structured Detector
     //------------------------------
-    std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
-        pLocElem, pCompElem);
+    IComponent *comp;
+    if (category == "SamplePos" || category == "samplePos") {
+      // check if special SamplePos Component
+      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
+          pLocElem, pCompElem);
+      comp = new Geometry::Component(name, parent);
+      m_instrument->markAsSamplePos(comp);
+    } else {
+      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
+          pLocElem, pCompElem);
 
-    auto comp =
-        new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);
+      comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName],
+                                        parent);
+    }
     parent->add(comp);
 
-    // check if special Source or SamplePos Component
+    // check if special Source Component
     if (category == "Source" || category == "source") {
       m_instrument->markAsSource(comp);
-    }
-    if (category == "SamplePos" || category == "samplePos") {
-      m_instrument->markAsSamplePos(comp);
     }
 
     // set location for this newly added comp and set facing if specified in

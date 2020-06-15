@@ -145,16 +145,6 @@
 
   <type name="nickel-holder" is="SamplePos">
     <properties />
-    
-    <sphere id="some-shape1">
-      <centre x="0.0"  y="0.0" z="0.0" />
-      <radius val="0.03" />
-    </sphere>
-    <sphere id="some-shape2">
-      <centre x="10.0"  y="0.0" z="0.0" />
-      <radius val="0.03" />
-    </sphere>    
-    <algebra val="some-shape1 : some-shape2" />  <!-- union example -->
   </type>
 
   <!-- Detectors types -->

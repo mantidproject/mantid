@@ -60,7 +60,7 @@ private:
     instrument->add(source);
     instrument->markAsSource(source);
 
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    Component *sample = new Component("some-surface-holder");
     source->setPos(V3D(15, 0, 0));
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
