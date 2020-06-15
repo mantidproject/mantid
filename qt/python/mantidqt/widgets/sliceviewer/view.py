@@ -42,7 +42,6 @@ class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
 
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
-
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super().__init__(parent)
 
@@ -67,8 +66,9 @@ class SliceViewerDataView(QWidget):
 
         self.image_info_widget = ImageInfoWidget(self.ws_type, self)
         self.track_cursor = QCheckBox("Track Cursor", self)
-        self.track_cursor.setToolTip("Update the image readout table when the cursor is over the plot. "
-                                     "If unticked the table will update only when the plot is clicked")
+        self.track_cursor.setToolTip(
+            "Update the image readout table when the cursor is over the plot. "
+            "If unticked the table will update only when the plot is clicked")
         if self.ws_type == 'MDE':
             self.colorbar_layout.addWidget(self.image_info_widget, alignment=Qt.AlignCenter)
             self.colorbar_layout.addWidget(self.track_cursor)
@@ -96,10 +96,9 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
-        self.canvas.mpl_connect('button_release_event', self.mouse_release)
         self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
         self.canvas.mpl_connect('button_press_event', self.mouse_click)
-        self.create_axes_orthogonal()
+        self.canvas.mpl_connect('button_release_event', self.mouse_release)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
@@ -139,11 +138,14 @@ class SliceViewerDataView(QWidget):
     def nonorthogonal_mode(self):
         return self.nonortho_tr is not None
 
-    def create_axes_orthogonal(self):
+    def create_axes_orthogonal(self, redraw_on_zoom=False):
+        """Create a standard set of orthogonal axes
+        :param redraw_on_zoom: If True then when scroll zooming the canvas is redrawn immediately
+        """
         self.clear_figure()
         self.nonortho_tr = None
         self.ax = self.fig.add_subplot(111, projection='mantid')
-        self.enable_zoom_on_mouse_scroll()
+        self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
         if self.grid_on:
             self.ax.grid(self.grid_on)
         if self.line_plots:
@@ -162,18 +164,20 @@ class SliceViewerDataView(QWidget):
                                      1,
                                      grid_helper=GridHelperCurveLinear(
                                          (self.nonortho_tr, transform.inv_tr)))
-        self.enable_zoom_on_mouse_scroll()
+        # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
+        self.enable_zoom_on_mouse_scroll(redraw=False)
         self.set_grid_on()
         self.fig.add_subplot(self.ax)
         self.plot_MDH = self.plot_MDH_nonorthogonal
 
         self.canvas.draw_idle()
 
-    def enable_zoom_on_mouse_scroll(self):
+    def enable_zoom_on_mouse_scroll(self, redraw):
         """Enable zoom on scroll the mouse wheel for the created axes
+        :param redraw: Pass through to redraw option in enable_zoom_on_scroll
         """
         self.canvas.enable_zoom_on_scroll(self.ax,
-                                          redraw=False,
+                                          redraw=redraw,
                                           toolbar=self.mpl_toolbar,
                                           callback=self.on_data_limits_changed)
 
@@ -455,10 +459,6 @@ class SliceViewerDataView(QWidget):
             if self.track_cursor.checkState() == Qt.Checked:
                 self.update_image_table_widget(event.xdata, event.ydata, signal)
 
-    def mouse_release(self, event):
-        if event.button == 3 and event.inaxes == self.ax:
-            self.on_home_clicked()
-
     def mouse_outside_image(self, _):
         """
         Indicates that the mouse have moved outside of an axes.
@@ -473,6 +473,10 @@ class SliceViewerDataView(QWidget):
                 and event.inaxes == self.ax and event.button == 1:
             signal = self.update_image_data(event.xdata, event.ydata)
             self.update_image_table_widget(event.xdata, event.ydata, signal)
+
+    def mouse_release(self, event):
+        if event.button == 3 and event.inaxes == self.ax:
+            self.on_home_clicked()
 
     def update_image_table_widget(self, xdata, ydata, signal):
         if signal is not None:
@@ -555,7 +559,6 @@ class SliceViewerDataView(QWidget):
 
 class SliceViewerView(QWidget):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
-
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super().__init__(parent)
 

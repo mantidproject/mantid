@@ -44,6 +44,9 @@ class SliceViewer(object):
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent)
+        self.view.data_view.create_axes_orthogonal(
+            redraw_on_zoom=(self.model.get_ws_type() == WS_TYPE.MATRIX))
+
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
