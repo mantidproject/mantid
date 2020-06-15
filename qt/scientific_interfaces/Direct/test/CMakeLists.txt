@@ -76,5 +76,6 @@ mtd_add_qt_tests(
     MantidQtWidgetsCommon
     MantidQtWidgetsInstrumentView
     MantidQtWidgetsPlotting
+    MatnidQtWidgetsMplCpp
   PARENT_DEPENDENCIES
     GUITests)
