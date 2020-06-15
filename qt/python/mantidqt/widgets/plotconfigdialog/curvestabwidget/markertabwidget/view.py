@@ -104,11 +104,5 @@ class MarkerTabWidgetView(QWidget):
         self.apply_to_all_button.setEnabled(enable)
 
     def set_colour_fields_enabled(self, style):
-        if 'face' not in MARKER_STYLES[style]:
-            self.face_color_selector_widget.setDisabled(True)
-        else:
-            self.face_color_selector_widget.setDisabled(False)
-        if 'edge' not in MARKER_STYLES[style]:
-            self.edge_color_selector_widget.setDisabled(True)
-        else:
-            self.edge_color_selector_widget.setDisabled(False)
+        self.face_color_selector_widget.setDisabled('face' not in MARKER_STYLES[style])
+        self.face_color_selector_widget.setDisabled('edge' not in MARKER_STYLES[style])
