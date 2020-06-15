@@ -56,6 +56,28 @@ class PythonFileInterpreterTest(unittest.TestCase):
                 self.assertEqual(w.clear_key_binding(key_combo), None,
                                  msg=fail_msg)
 
+    def test_variables_reset(self):
+        w = PythonFileInterpreter(content='x=\'this is a string\'\r\nprint(x)')
+        w.execute_async()
+        self.assertTrue('x' in w._presenter.model._globals_ns.keys())
+
+        w._presenter.is_executing = False
+        w._presenter.view.editor.hasSelectedText = mock.MagicMock()
+        w._presenter.view.editor.hasSelectedText.return_value = True
+        w._presenter.view.editor.selectedText = mock.MagicMock()
+        w._presenter.view.editor.selectedText.return_value = 'print(x)'
+        w._presenter.view.editor.getSelection = mock.MagicMock()
+        w._presenter.view.editor.getSelection.return_value = [0, 0, 0, 0]
+        w.execute_async()
+        self.assertTrue('x' in w._presenter.model._globals_ns.keys())
+
+        w._presenter.view.editor.text = mock.MagicMock()
+        w._presenter.view.editor.text.return_value = 'print(x)'
+        w._presenter.is_executing = False
+        w._presenter.view.editor.hasSelectedText.return_value = False
+        w.execute_async()
+        self.assertFalse('x' in w._presenter.model._globals_ns.keys())
+
 
 if __name__ == '__main__':
     unittest.main()

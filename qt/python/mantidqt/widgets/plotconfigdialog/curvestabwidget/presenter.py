@@ -127,6 +127,14 @@ class CurvesTabWidgetPresenter:
             curve_index = ax.get_lines().index(curve[0])
             errorbar = True
 
+        # When you remove the curve on a waterfall plot, the remaining curves are repositioned so that they are
+        # equally spaced apart. However since the curve is being replotted we don't want that to happen, so here
+        # the waterfall offsets are set to 0 so the plot appears to be non-waterfall. The offsets are then re-set
+        # after the curve is replotted.
+        if waterfall:
+            x_offset, y_offset = ax.waterfall_x_offset, ax.waterfall_y_offset
+            ax.waterfall_x_offset = ax.waterfall_y_offset = 0
+
         new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
 
@@ -141,6 +149,8 @@ class CurvesTabWidgetPresenter:
         ax.lines.insert(curve_index, ax.lines.pop())
 
         if waterfall:
+            # Set the waterfall offsets to what they were previously.
+            ax.waterfall_x_offset, ax.waterfall_y_offset = x_offset, y_offset
             if check_line_colour:
                 # curve can be either a Line2D or an ErrorContainer and the colour is accessed differently for each.
                 if not errorbar:

@@ -129,6 +129,24 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_blocksize = 1
         self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
 
+    def _run_indirect_fws_test_red(self, shape):
+        self._expected_unit = "Wavelength"
+        self._expected_hist = 18
+        self._expected_blocksize = 1
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(2), 'Label')
+
+    def _run_indirect_fws_test_q(self, shape):
+        self._expected_unit = "Wavelength"
+        self._expected_hist = 18
+        self._expected_blocksize = 1
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(1), 'MomentumTransfer')
+
+    def _run_indirect_fws_test_2theta(self, shape):
+        self._expected_unit = "Wavelength"
+        self._expected_hist = 18
+        self._expected_blocksize = 1
+        self._run_correction_and_test(shape, self._indirect_fws_ws.getItem(0), 'Degrees')
+
     def _flat_plate_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0
         self._test_arguments['SampleThickness'] = 2.0

@@ -91,9 +91,6 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 // Always ignore bin dir
 *:*${CMAKE_BINARY_DIR}/*
 
-// For some reason upstream libs sometimes end up in the check results
-*:*/usr/include/*
-
 // All ANN files as they are upstream anyway
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
 

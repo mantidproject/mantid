@@ -10,10 +10,11 @@
 import datetime
 
 import numpy as np
-from matplotlib.collections import PolyCollection
+from matplotlib.collections import PolyCollection, QuadMesh
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -1029,6 +1030,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     image.set_norm(scale(vmin=vmin, vmax=vmax))
 
     if image.colorbar:
+        label = image.colorbar._label
         image.colorbar.remove()
         locator = None
         if scale == LogNorm:
@@ -1038,4 +1040,39 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
                                              "as the range between min value and max value is too large")
         figure.subplots_adjust(wspace=0.5, hspace=0.5)
-        figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar.set_label(label)
+
+
+def add_colorbar_label(colorbar, axes):
+    """
+    Adds a label to the colorbar if every axis on the figure has the same label.
+    :param colorbar: the colorbar to label.
+    :param axes: the axes that the colorbar belongs to.
+    """
+    colorbar_labels = [ax.colorbar_label for ax in axes if hasattr(ax, 'colorbar_label')]
+    if colorbar_labels.count(colorbar_labels[0]) == len(colorbar_labels):
+        colorbar.set_label(colorbar_labels[0])
+
+
+def get_images_from_figure(figure):
+    """Return a list of images in the given figure excluding any colorbar images"""
+    axes = figure.get_axes()
+
+    all_images = []
+    for ax in axes:
+        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
+                                   or isinstance(col, Poly3DCollection)]
+
+    # remove any colorbar images
+    colorbars = [img.colorbar.solids for img in all_images if img.colorbar]
+    images = [img for img in all_images if img not in colorbars]
+    return images
+
+
+def get_axes_from_figure(figure):
+    """Return a list of axes in the given figure excluding any colorbar axes"""
+    images = get_images_from_figure(figure)
+    axes = [img.axes for img in images]
+
+    return axes

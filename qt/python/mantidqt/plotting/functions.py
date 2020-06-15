@@ -25,6 +25,7 @@ from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
                                        create_subplots,raise_if_not_sequence
 from mantid.kernel import Logger
+from mantid.plots.datafunctions import add_colorbar_label
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -195,16 +196,14 @@ def pcolormesh(workspaces, fig=None):
     workspaces_len = len(workspaces)
     fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig)
 
+    plots = []
     row_idx, col_idx = 0, 0
     for subplot_idx in range(nrows * ncols):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             pcm = pcolormesh_on_axis(ax, ws)
-            if pcm:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
-                colorbar_min = np.nanmin(pcm.get_array())
-                colorbar_max = np.nanmax(pcm.get_array())
-                pcm.set_clim(colorbar_min, colorbar_max)
+            plots.append(pcm)
             if col_idx < ncols - 1:
                 col_idx += 1
             else:
@@ -214,9 +213,20 @@ def pcolormesh(workspaces, fig=None):
             # nothing here
             ax.axis('off')
 
+    # Colour bar limits are wrong if workspace is ragged. Set them manually.
+    # If there are multiple plots limits are the min and max of all the plots
+    colorbar_min = min(np.nanmin(pt.get_array()) for pt in plots)
+    colorbar_max = max(np.nanmax(pt.get_array()) for pt in plots)
+    for pt in plots:
+        pt.set_clim(colorbar_min, colorbar_max)
+
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
-    fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
+
+    axes = axes.ravel()
+    colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
+    add_colorbar_label(colorbar, axes)
+
     fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     #assert a minimum size, otherwise we can lose axis labels
     size = fig.get_size_inches()
