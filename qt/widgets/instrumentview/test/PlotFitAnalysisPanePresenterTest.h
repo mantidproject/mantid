@@ -52,17 +52,6 @@ public:
     delete m_presenter;
   }
 
-  void test_addInstrument() {
-    return;
-    // this is only called as part of initLayout
-    //  EXPECT_CALL(*m_pane, getView()).Times(1);
-    //  m_presenter->addInstrument();
-    // want to check initLayout is called from base class or mock base class
-    // funcs?
-  }
-
-  void test_startup() { return; }
-
   void test_doFit() {
     std::string name = "test";
     // set name via addSpectrum

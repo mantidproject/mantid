@@ -67,8 +67,6 @@ public:
     TS_ASSERT_EQUALS(m_presenter->getLayoutCount(), 1);
   }
 
-  void test_startup() { return; }
-
   void test_initLayout() {
 
     EXPECT_CALL(*m_view, observeLoadRun(m_presenter->loadObserver())).Times(1);
@@ -151,8 +149,6 @@ public:
     m_presenter->loadRunNumber();
     TS_ASSERT_EQUALS(m_presenter->getLoadCount(), 0);
   }
-
-  void test_initInstrument() { return; }
 
 private:
   NiceMock<MockBaseCustomInstrumentView> *m_view;

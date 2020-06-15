@@ -69,9 +69,6 @@ public:
     delete m_pane;
   }
 
-  void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    return;
-  }
   void test_setUpInstrumentAnalysisSplitter() {
     CompositeFunction_sptr composite =
         std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(

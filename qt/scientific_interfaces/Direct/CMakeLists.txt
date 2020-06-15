@@ -8,6 +8,7 @@ set(MOC_FILES
     ALFView.h
     ALFCustomInstrumentView.h
     ALFCustomInstrumentPresenter.h
+    ALFCustomInstrumentModel.h
     ALFCustomInstrumentMocks.h)
     
 set(INC_FILES

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -31,7 +30,7 @@ using namespace Mantid::API;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPanePresenter
+class MockPlotFitAnalysisPanePresenter
     : public MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter {
 public:
   explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
@@ -58,7 +57,7 @@ private:
   int m_addFunc;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneView
+class MockPlotFitAnalysisPaneView
     : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView {
 public:
   explicit MockPlotFitAnalysisPaneView(const double &start = 1.,
@@ -85,7 +84,7 @@ public:
                QWidget *(const double &start, const double &end));
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockPlotFitAnalysisPaneModel
+class MockPlotFitAnalysisPaneModel
     : public MantidQt::MantidWidgets::PlotFitAnalysisPaneModel {
 public:
   MockPlotFitAnalysisPaneModel() { m_count = 0; };
