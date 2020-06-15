@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from matplotlib.axes import Axes
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -25,9 +26,8 @@ class ImageProperties(dict):
 
         props['label'] = ""
         for ax in image.figure.axes:
-            for img in ax.images:
-                if img.colorbar:
-                    props['label'] = img.colorbar._label
+            if type(ax) == Axes:
+                props['label'] = ax.yaxis.label.get_text()
 
         cmap_name = image.cmap.name if hasattr(image, "cmap") else image.get_cmap().name
         props['colormap'] = cmap_name
