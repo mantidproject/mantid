@@ -35,6 +35,8 @@ class PlotsSettingsTest(unittest.TestCase):
 
         mock_ConfigService.getString.assert_has_calls([call(PlotSettings.NORMALIZATION),
                                                        call(PlotSettings.SHOW_TITLE),
+                                                       call(PlotSettings.SHOW_MINOR_TICKS),
+                                                       call(PlotSettings.SHOW_MINOR_GRIDLINES),
                                                        call(PlotSettings.X_AXES_SCALE),
                                                        call(PlotSettings.Y_AXES_SCALE),
                                                        call(PlotSettings.LINE_STYLE),
@@ -215,6 +217,34 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_error_every_changed(5)
         mock_ConfigService.setString.assert_called_once_with(PlotSettings.ERROR_EVERY, "5")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_show_minor_ticks_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_show_minor_ticks_changed(Qt.Checked)
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.SHOW_MINOR_TICKS, "On")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_show_minor_ticks_changed(Qt.Unchecked)
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.SHOW_MINOR_TICKS, "Off")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_show_minor_gridlines_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_show_minor_gridlines_changed(Qt.Checked)
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.SHOW_MINOR_GRIDLINES, "On")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_show_minor_gridlines_changed(Qt.Unchecked)
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.SHOW_MINOR_GRIDLINES, "Off")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_legend_every_changed(self, mock_ConfigService):
