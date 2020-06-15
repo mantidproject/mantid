@@ -33,7 +33,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockBaseCustomInstrumentView
     : public MantidQt::MantidWidgets::IBaseCustomInstrumentView {
 public:
   explicit MockBaseCustomInstrumentView(const std::string &instrument,
-                                        QWidget *parent = nullptr){(void) instrument; (void) parent};
+                                        QWidget *parent = nullptr){(void) instrument; (void) parent;};
   ~MockBaseCustomInstrumentView(){};
 
   MOCK_METHOD0(getFile, std::string());

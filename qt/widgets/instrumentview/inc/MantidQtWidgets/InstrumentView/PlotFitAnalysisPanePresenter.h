@@ -19,7 +19,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPanePresenter {
 
 public:
   IPlotFitAnalysisPanePresenter(){};
-  ~IPlotFitAnalysisPanePresenter(){};
+  virtual ~IPlotFitAnalysisPanePresenter(){};
   virtual void destructor() = 0;
   virtual IPlotFitAnalysisPaneView *getView() = 0;
   virtual std::string getCurrentWS() = 0;

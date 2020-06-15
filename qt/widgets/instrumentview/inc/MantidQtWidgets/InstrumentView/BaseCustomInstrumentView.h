@@ -22,6 +22,8 @@ namespace MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentView {
 public:
+  IBaseCustomInstrumentView(){};
+  virtual ~IBaseCustomInstrumentView(){};
   virtual std::string getFile() = 0;
   virtual void setRunQuietly(const std::string &runNumber) = 0;
   virtual void observeLoadRun(Observer *listener) = 0;

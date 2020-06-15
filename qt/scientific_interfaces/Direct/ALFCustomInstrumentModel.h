@@ -20,6 +20,8 @@ class DLLExport IALFCustomInstrumentModel
     : public virtual MantidWidgets::IBaseCustomInstrumentModel {
 
 public:
+  IALFCustomInstrumentModel(){}
+  virtual ~IALFCustomInstrumentModel(){};
   // virtual so we can patch them later
   virtual void loadAlg(const std::string &name) = 0;
   virtual void transformData() = 0;

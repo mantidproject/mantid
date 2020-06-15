@@ -17,6 +17,8 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentModel {
 
 public:
+  IBaseCustomInstrumentModel(){};
+  virtual ~IBaseCustomInstrumentModel(){};
   virtual void loadEmptyInstrument() = 0;
   virtual std::pair<int, std::string> loadData(const std::string &name) = 0;
   virtual void setCurrentRun(int &run) = 0;

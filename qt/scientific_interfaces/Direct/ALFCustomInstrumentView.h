@@ -23,6 +23,8 @@ namespace CustomInterfaces {
 class MANTIDQT_DIRECT_DLL IALFCustomInstrumentView
     : public virtual MantidWidgets::IBaseCustomInstrumentView {
 public:
+  IALFCustomInstrumentView(){};
+  virtual ~IALFCustomInstrumentView(){};
   virtual void observeExtractSingleTube(Observer *listner) = 0;
   virtual void observeAverageTube(Observer *listner) = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
