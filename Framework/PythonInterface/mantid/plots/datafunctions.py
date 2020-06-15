@@ -342,17 +342,22 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
     return x, y, dy, dx
 
 
-def get_detectors_indices(workspace):
+def get_bin_indices(workspace):
     """
-    Find the detectors' spectrum indices
+    Find the bins' indices, without these of the monitors if there is some.
     (ie every detector which is not a monitor)
 
     :param workspace: a Workspace2D or an EventWorkspace
-    :return : the detectors' spectrum indices as a range if possible, else as a numpy array
+    :return : the bins' indices as a range if possible, else as a numpy array
     """
     total_range = workspace.getNumberHistograms()
-    spectrum_info = workspace.spectrumInfo()
-    monitors_indices = [i for i in range(total_range) if spectrum_info.hasDetectors(i) and spectrum_info.isMonitor(i)]
+    try:
+        spectrum_info = workspace.spectrumInfo()
+    except:
+        return range(total_range)
+
+    monitors_indices = [index for index in range(total_range)
+                        if spectrum_info.hasDetectors(index) and spectrum_info.isMonitor(index)]
     monitor_count = len(monitors_indices)
 
     # If possible, ie the detectors' indices are continuous, we return a range.
@@ -360,12 +365,12 @@ def get_detectors_indices(workspace):
     range_start = -1
     range_end = total_range
     is_range = True
-    for index, i in enumerate(monitors_indices):
-        if index == i:
-            range_start = i
+    for index, monitor_index in enumerate(monitors_indices):
+        if index == monitor_index:
+            range_start = monitor_index
         else:
-            if monitor_count - index == total_range - i and monitors_indices[-1] == total_range - 1:
-                range_end = i
+            if monitor_count - index == total_range - monitor_index and monitors_indices[-1] == total_range - 1:
+                range_end = monitor_index
             else:
                 is_range = False
             break
@@ -386,16 +391,16 @@ def get_bins(workspace, wkspIndex, withDy=False):
     :param withDy: if True, it will return the error in the "counts", otherwise None
 
     """
-    x = get_detectors_indices(workspace)
-    y = []
+    bins = get_bin_indices(workspace)
+    y_values = []
     dy = [] if withDy else None
-    for i in x:
-        y.append(workspace.readY(int(i))[wkspIndex])
+    for bin_index in bins:
+        y_values.append(workspace.readY(int(bin_index))[wkspIndex])
         if withDy:
-            dy.append(workspace.readE(int(i))[wkspIndex])
+            dy.append(workspace.readE(int(bin_index))[wkspIndex])
 
     dx = None
-    return x, y, dy, dx
+    return bins, y_values, dy, dx
 
 
 def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
@@ -462,9 +467,9 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
     except:
         sp_info = None
 
-    for i in range(num_hist):
-        if not(sp_info and sp_info.hasDetectors(i) and sp_info.isMonitor(i)):
-            xtmp = workspace.readX(i)
+    for spectrum_index in range(num_hist):
+        if not(sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
+            xtmp = workspace.readX(spectrum_index)
             if workspace.isHistogramData():
                 # input x is edges
                 xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
@@ -478,25 +483,25 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
     num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
     x_centers = np.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-    z = np.empty([num_hist, num_edges], dtype=np.float64)
+    counts = np.empty([num_hist, num_edges], dtype=np.float64)
 
-    for i in range(num_hist):
+    for spectrum_index in range(num_hist):
         centers, ztmp, _, _ = mantid.plots.datafunctions.get_spectrum(
-            workspace, i, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
-        f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
-        if not (sp_info and sp_info.hasDetectors(i) and sp_info.isMonitor(i)):
-            z[i] = f(x_centers)
+            workspace, spectrum_index, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
+        interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
+        if not (sp_info and sp_info.hasDetectors(spectrum_index) and sp_info.isMonitor(spectrum_index)):
+            counts[spectrum_index] = interpolation_function(x_centers)
         else:
-            z[i, :] = np.nan
+            counts[spectrum_index, :] = np.nan
 
     if histogram2D:
         x = mantid.plots.datafunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
     if transpose:
-        return y.T, x.T, z.T
+        return y.T, x.T, counts.T
     else:
-        return x, y, z
+        return x, y, counts
 
 
 def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):
