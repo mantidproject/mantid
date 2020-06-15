@@ -131,8 +131,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
