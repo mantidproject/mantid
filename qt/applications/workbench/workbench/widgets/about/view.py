@@ -20,6 +20,20 @@ class AboutView(QDialog):
         super(AboutView, self).__init__(parent)
         self.background_pixmap = QPixmap(':/images/First_use_Background.png')
         self.mantid_pixmap = QPixmap(':/images/mantid_smaller.png')
+        self.lbl_version = QLabel()
+        self.clb_release_notes = QCommandLinkButton()
+        self.clb_sample_datasets = QCommandLinkButton()
+        self.clb_mantid_introduction = QCommandLinkButton()
+        self.clb_python_introduction = QCommandLinkButton()
+        self.clb_python_in_mantid = QCommandLinkButton()
+        self.clb_extending_mantid = QCommandLinkButton()
+        self.cb_facility = QComboBox()
+        self.cb_instrument = QComboBox()
+        self.pb_manage_user_directories = QPushButton()
+        self.chk_allow_usage_data = QCheckBox()
+        self.lbl_privacy_policy = QLabel()
+        self.chk_do_not_show_until_next_release = QCheckBox()
+        self.pb_close = QPushButton()
         self.setupUI()
         self.customize_layout(version_text, date_text)
         self.presenter = presenter
@@ -36,7 +50,7 @@ class AboutView(QDialog):
                                                   Qt.SmoothTransformation)
         qp = QPainter()
         qp.begin(self)
-        qp.drawPixmap(0,0,scaled_background)
+        qp.drawPixmap(0, 0, scaled_background)
         qp.drawPixmap(self.width() - scaled_mantid.width(), self.height()-scaled_mantid.height(), scaled_mantid)
         qp.end()
 
@@ -67,12 +81,6 @@ class AboutView(QDialog):
 QLabel{{
     font: {self.rescale_w(14)}px;
 }}
-QCheckbox{{
-    font: {self.rescale_w(16)}px;
-}}
-QCombobox{{
-    font: {self.rescale_w(14)}px;
-}}
 QPushButton{{
     font: {self.rescale_w(14)}px;
 }}
@@ -86,66 +94,65 @@ QCommandLinkButton:hover {{
 }}""")
 
         # version label section at th etop
-        self.parentLayout = QVBoxLayout()
-        self.topSpacer = QSpacerItem(self.rescale_w(20),self.rescale_h(70),vPolicy = QSizePolicy.Fixed)
-        self.parentLayout.addSpacerItem(self.topSpacer)
-        self.lblVersion = QLabel(self)
-        self.lblVersion.setText("version ")
-        self.lblVersion.setIndent(self.rescale_w(115))
-        self.lblVersion.setStyleSheet(f"""color: rgb(215, 215, 215);
+        parent_layout = QVBoxLayout()
+        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(70),vPolicy=QSizePolicy.Fixed))
+        self.lbl_version.setText("version ")
+        self.lbl_version.setIndent(self.rescale_w(115))
+        self.lbl_version.setStyleSheet(f"""color: rgb(215, 215, 215);
 font: {self.rescale_w(28)}pt;
 font-weight: bold;
 font-size: {self.rescale_w(28)}px""")
-        self.parentLayout.addWidget(self.lblVersion)
-        self.parentLayout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(40),vPolicy = QSizePolicy.MinimumExpanding))
+        parent_layout.addWidget(self.lbl_version)
+        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(40),
+                                                vPolicy=QSizePolicy.MinimumExpanding))
 
         # split into the two columns
-        self.twoBoxLayout = QHBoxLayout()
+        two_box_layout = QHBoxLayout()
         # left side Welcome and Tutorial
-        leftLayout = QVBoxLayout()
-        leftLayout.setContentsMargins(self.rescale_w(5), 0, self.rescale_w(10), 0)
-        leftLayout.setSpacing(0)
+        left_layout = QVBoxLayout()
+        left_layout.setContentsMargins(self.rescale_w(5), 0, self.rescale_w(10), 0)
+        left_layout.setSpacing(0)
         # welcome label
-        lblWelcome = QLabel()
-        lblWelcome.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_w(28)}px;")
-        lblWelcome.setText("Welcome")
-        leftLayout.addWidget(lblWelcome)
+        lbl_welcome = QLabel()
+        lbl_welcome.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_w(28)}px;")
+        lbl_welcome.setText("Welcome")
+        left_layout.addWidget(lbl_welcome)
         # release notes
-        self.clbReleaseNotes = self.create_command_link_button("Release Notes",
-                                                               ':/images/Notepad-Bloc-notes-icon-48x48.png')
-        leftLayout.addWidget(self.clbReleaseNotes)
+        self.setup_command_link_button(self.clb_release_notes, "Release Notes",
+                                        ':/images/Notepad-Bloc-notes-icon-48x48.png')
+        left_layout.addWidget(self.clb_release_notes)
         # sample datasets
-        self.clbSampleDatasets = self.create_command_link_button("Sample Datasets",
-                                                                 ':/images/download-icon-48x48.png')
-        leftLayout.addWidget(self.clbSampleDatasets)
+        self.setup_command_link_button(self.clb_sample_datasets, "Sample Datasets",
+                                        ':/images/download-icon-48x48.png')
+        left_layout.addWidget(self.clb_sample_datasets)
         # Tutorials Label
-        lblTutorials = QLabel()
-        lblTutorials.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_w(28)}px;")
-        lblTutorials.setText("Tutorials")
-        leftLayout.addWidget(lblTutorials)
+        lbl_tutorials = QLabel()
+        lbl_tutorials.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_w(28)}px;")
+        lbl_tutorials.setText("Tutorials")
+        left_layout.addWidget(lbl_tutorials)
         # Mantid Introduction
-        self.clbMantidIntroduction = self.create_command_link_button("Mantid Introduction",
-                                                                     ':/images/Misc-Tutorial-icon-48x48.png')
-        leftLayout.addWidget(self.clbMantidIntroduction)
+        self.setup_command_link_button(self.clb_mantid_introduction, "Mantid Introduction",
+                                       ':/images/Misc-Tutorial-icon-48x48.png')
+        left_layout.addWidget(self.clb_mantid_introduction)
         # Introduction to python
-        self.clbPythonIntroduction = self.create_command_link_button("Introduction to Python",
-                                                                     ':/images/Python-icon-48x48.png')
-        leftLayout.addWidget(self.clbPythonIntroduction)
+        self.setup_command_link_button(self.clb_python_introduction, "Introduction to Python",
+                                       ':/images/Python-icon-48x48.png')
+        left_layout.addWidget(self.clb_python_introduction)
         # Python in Mantid
-        self.clbPythonInMantid = self.create_command_link_button("Python In Mantid",
-                                                                 ':/images/Circle_cog_48x48.png')
-        leftLayout.addWidget(self.clbPythonInMantid)
+        self.setup_command_link_button(self.clb_python_in_mantid, "Python In Mantid",
+                                       ':/images/Circle_cog_48x48.png')
+        left_layout.addWidget(self.clb_python_in_mantid)
         # Extending Mantid with python
-        self.clbExtendingMantid = self.create_command_link_button("Extending Mantid with Python",
-                                                                  ':/images/Plugin-Python-icon-48x48.png')
-        leftLayout.addWidget(self.clbExtendingMantid)
+        self.setup_command_link_button(self.clb_extending_mantid, "Extending Mantid with Python",
+                                       ':/images/Plugin-Python-icon-48x48.png')
+        left_layout.addWidget(self.clb_extending_mantid)
 
         # right hand side Setup and facility icons
-        rightLayout = QVBoxLayout()
-        rightLayout.setSpacing(0)
+        right_layout = QVBoxLayout()
+        right_layout.setSpacing(0)
         # personal setup
-        grpPersonalSetup = QGroupBox()
-        grpPersonalSetup.setStyleSheet(f"""QGroupBox {{
+        grp_personal_setup = QGroupBox()
+        grp_personal_setup.setStyleSheet(f"""QGroupBox {{
      border: {self.rescale_w(3)}px solid  rgb(38, 128, 20);;
      border-radius: {self.rescale_w(10)}px;
      background-color: rgb(240, 240, 240);
@@ -160,135 +167,133 @@ QGroupBox QComboBox{{
 }}
 font: {self.rescale_w(12)}px;
 """)
-        grpPersonalSetupLayout = QVBoxLayout()
-        grpPersonalSetupLayout.setContentsMargins(self.rescale_w(9),
+        grp_personal_setup_layout = QVBoxLayout()
+        grp_personal_setup_layout.setContentsMargins(self.rescale_w(9),
                                                   self.rescale_h(1),
                                                   self.rescale_w(9),
                                                   self.rescale_h(9))
-        grpPersonalSetupLayout.setSpacing(0)
-        grpPersonalSetup.setLayout(grpPersonalSetupLayout)
-        lblPersonalSetup = QLabel()
-        lblPersonalSetup.setStyleSheet(f"color: rgb(38, 128, 20);\nfont-size: {self.rescale_w(18)}px;")
-        lblPersonalSetup.setText("Personal Setup")
-        lblPersonalSetup.setAlignment(Qt.AlignHCenter)
-        grpPersonalSetupLayout.addWidget(lblPersonalSetup)
-        personalSetupFormLayout = QFormLayout()
-        personalSetupFormLayout.setHorizontalSpacing(self.rescale_w(5))
-        personalSetupFormLayout.setVerticalSpacing(self.rescale_h(5))
-        personalSetupFormLayout.setLabelAlignment(Qt.AlignRight)
+        grp_personal_setup_layout.setSpacing(0)
+        grp_personal_setup.setLayout(grp_personal_setup_layout)
+        lbl_personal_setup = QLabel()
+        lbl_personal_setup.setStyleSheet(f"color: rgb(38, 128, 20);\nfont-size: {self.rescale_w(18)}px;")
+        lbl_personal_setup.setText("Personal Setup")
+        lbl_personal_setup.setAlignment(Qt.AlignHCenter)
+        grp_personal_setup_layout.addWidget(lbl_personal_setup)
+        personal_setup_form_layout = QFormLayout()
+        personal_setup_form_layout.setHorizontalSpacing(self.rescale_w(5))
+        personal_setup_form_layout.setVerticalSpacing(self.rescale_h(5))
+        personal_setup_form_layout.setLabelAlignment(Qt.AlignRight)
         # default Facility
-        lblDefaultFacilty = QLabel()
-        lblDefaultFacilty.setText("Default Facility")
-        self.cbFacility = QComboBox()
-        personalSetupFormLayout.addRow(lblDefaultFacilty,self.cbFacility)
+        lbl_default_facilty = QLabel()
+        lbl_default_facilty.setText("Default Facility")
+        personal_setup_form_layout.addRow(lbl_default_facilty, self.cb_facility)
         # default instrument
-        lblDefaultInstrument = QLabel()
-        lblDefaultInstrument.setText("Default Instrument")
-        self.cbInstrument = QComboBox()
-        personalSetupFormLayout.addRow(lblDefaultInstrument,self.cbInstrument)
+        lbl_default_instrument = QLabel()
+        lbl_default_instrument.setText("Default Instrument")
+        personal_setup_form_layout.addRow(lbl_default_instrument, self.cb_instrument)
         # Set Data Directories
-        lblMUD = QLabel()
-        lblMUD.setText("Set data directories")
-        self.pbMUD = QPushButton()
-        self.pbMUD.setText("Manage User Directories")
-        personalSetupFormLayout.addRow(lblMUD,self.pbMUD)
+        lbl_mud = QLabel()
+        lbl_mud.setText("Set data directories")
+        self.pb_manage_user_directories.setText("Manage User Directories")
+        personal_setup_form_layout.addRow(lbl_mud, self.pb_manage_user_directories)
         # Usage data
-        lblAllowUsageData = QLabel()
-        lblAllowUsageData.setText("Report Usage Data")
+        lbl_allow_usage_data = QLabel()
+        lbl_allow_usage_data.setText("Report Usage Data")
         usagelayout = QHBoxLayout()
-        usagelayout.setContentsMargins(0,0,0,0)
-        self.chkAllowUsageData = QCheckBox()
-        self.chkAllowUsageData.setChecked(True)
-        self.chkAllowUsageData.setStyleSheet(f"padding: {self.rescale_w(4)}px;")
-        usagelayout.addWidget(self.chkAllowUsageData)
-        usagelayout.addSpacerItem(QSpacerItem(self.rescale_w(40),self.rescale_h(20),hPolicy = QSizePolicy.Expanding))
-        self.lblPrivacyPolicy = QLabel()
-        self.lblPrivacyPolicy.setText(r'<html><head/><body><p><a href="https://www.mantidproject.org/MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid"><span style=" text-decoration: underline; color:#0000ff;">Privacy Policy</span></a></p></body></html>')
-        #self.lblPrivacyPolicy.textFormat(QTextFormat.RichText)
-        self.lblPrivacyPolicy.setOpenExternalLinks(False)
-        usagelayout.addWidget(self.lblPrivacyPolicy)
-        personalSetupFormLayout.addRow(lblAllowUsageData,usagelayout)
-        grpPersonalSetupLayout.addLayout(personalSetupFormLayout)
-        rightLayout.addWidget(grpPersonalSetup)
-        rightLayout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(40),vPolicy = QSizePolicy.Expanding))
+        usagelayout.setContentsMargins(0, 0, 0, 0)
+        self.chk_allow_usage_data.setChecked(True)
+        self.chk_allow_usage_data.setStyleSheet(f"padding: {self.rescale_w(4)}px;")
+        usagelayout.addWidget(self.chk_allow_usage_data)
+        usagelayout.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy=QSizePolicy.Expanding))
+        self.lbl_privacy_policy.setText(r'<html><head/><body><p>'
+                                      r'<a href="https://www.mantidproject.org/MantidProject:Privacy_policy'
+                                      r'#Usage_Data_recorded_in_Mantid">'
+                                      r'<span style=" text-decoration: underline; color:#0000ff;">'
+                                      r'Privacy Policy</span></a></p></body></html>')
+        self.lbl_privacy_policy.setOpenExternalLinks(False)
+        usagelayout.addWidget(self.lbl_privacy_policy)
+        personal_setup_form_layout.addRow(lbl_allow_usage_data,usagelayout)
+        grp_personal_setup_layout.addLayout(personal_setup_form_layout)
+        right_layout.addWidget(grp_personal_setup)
+        right_layout.addSpacerItem(QSpacerItem(self.rescale_w(20), self.rescale_h(40), vPolicy=QSizePolicy.Expanding))
 
         # facility icons
         # Row one
-        iconlayout1 = QHBoxLayout()
-        iconlayout1.setContentsMargins(0,self.rescale_h(10),0,0)
-        iconlayout1.setSpacing(0)
-        iconlayout1.addWidget(self.create_label_with_image(112, 50, ':/images/ISIS_Logo_Transparent.gif'))
-        iconlayout1.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy = QSizePolicy.Fixed))
-        iconlayout1.addWidget(self.create_label_with_image(94, 50, ':/images/ess_logo_transparent_small.png'))
-        iconlayout1.addSpacerItem(QSpacerItem(self.rescale_w(40),20,hPolicy = QSizePolicy.Expanding))
-        rightLayout.addLayout(iconlayout1)
+        icon_layout_top = QHBoxLayout()
+        icon_layout_top.setContentsMargins(0, self.rescale_h(10), 0, 0)
+        icon_layout_top.setSpacing(0)
+        icon_layout_top.addWidget(self.create_label_with_image(112, 50, ':/images/ISIS_Logo_Transparent.gif'))
+        icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
+        icon_layout_top.addWidget(self.create_label_with_image(94, 50, ':/images/ess_logo_transparent_small.png'))
+        icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(40), 20,hPolicy=QSizePolicy.Expanding))
+        right_layout.addLayout(icon_layout_top)
         # Row two
-        iconlayout2 = QHBoxLayout()
-        iconlayout2.setContentsMargins(0,self.rescale_h(10),0,0)
-        iconlayout2.setSpacing(0)
-        iconlayout2.addWidget(self.create_label_with_image(200, 30, ':/images/Ornl_hfir_sns_logo_small.png'))
-        iconlayout2.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy = QSizePolicy.Expanding))
-        rightLayout.addLayout(iconlayout2)
+        icon_layout_middle = QHBoxLayout()
+        icon_layout_middle.setContentsMargins(0, self.rescale_h(10), 0, 0)
+        icon_layout_middle.setSpacing(0)
+        icon_layout_middle.addWidget(self.create_label_with_image(200, 30, ':/images/Ornl_hfir_sns_logo_small.png'))
+        icon_layout_middle.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20),
+                                                     hPolicy=QSizePolicy.Expanding))
+        right_layout.addLayout(icon_layout_middle)
         # Row three
-        iconlayout3 = QHBoxLayout()
-        iconlayout3.setContentsMargins(0,self.rescale_h(10),0,0)
-        iconlayout3.setSpacing(0)
-        iconlayout3.addWidget(self.create_label_with_image(110, 40, ':/images/Tessella_Logo_Transparent.gif'))
-        iconlayout3.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy = QSizePolicy.Fixed))
-        iconlayout3.addWidget(self.create_label_with_image(50, 50, ':/images/ILL_logo.png'))
-        iconlayout3.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy = QSizePolicy.Fixed))
-        iconlayout3.addWidget(self.create_label_with_image(92, 50, ':/images/CSNS_Logo_Short.png'))
-        iconlayout3.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy = QSizePolicy.Expanding))
-        rightLayout.addLayout(iconlayout3)
+        icon_layout_bottom = QHBoxLayout()
+        icon_layout_bottom.setContentsMargins(0, self.rescale_h(10), 0, 0)
+        icon_layout_bottom.setSpacing(0)
+        icon_layout_bottom.addWidget(self.create_label_with_image(110, 40, ':/images/Tessella_Logo_Transparent.gif'))
+        icon_layout_bottom.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
+        icon_layout_bottom.addWidget(self.create_label_with_image(50, 50, ':/images/ILL_logo.png'))
+        icon_layout_bottom.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
+        icon_layout_bottom.addWidget(self.create_label_with_image(92, 50, ':/images/CSNS_Logo_Short.png'))
+        icon_layout_bottom.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20),
+                                                     hPolicy=QSizePolicy.Expanding))
+        right_layout.addLayout(icon_layout_bottom)
 
         # end the two box layout
-        self.twoBoxLayout.addLayout(leftLayout)
-        self.twoBoxLayout.addLayout(rightLayout)
-        self.parentLayout.addLayout(self.twoBoxLayout)
+        two_box_layout.addLayout(left_layout)
+        two_box_layout.addLayout(right_layout)
+        parent_layout.addLayout(two_box_layout)
 
         # footer
-        footerLayout = QHBoxLayout()
+        footer_layout = QHBoxLayout()
         # do not show again
-        doNotShowLayout = QVBoxLayout()
-        doNotShowLayout.setContentsMargins(self.rescale_w(15),0,0,0)
-        doNotShowLayout.setSpacing(2)
-        lblUpdate = QLabel()
-        lblUpdate.setMinimumSize(self.rescale_w(400),0)
-        lblUpdate.setStyleSheet("color: rgb(25,125,25);")
-        lblUpdate.setText('You can revisit this dialog by selecting "About" on the Help menu.')
-        lblUpdate.setAlignment(Qt.AlignBottom)
-        doNotShowLayout.addWidget(lblUpdate)
+        do_not_show_layout = QVBoxLayout()
+        do_not_show_layout.setContentsMargins(self.rescale_w(15), 0, 0, 0)
+        do_not_show_layout.setSpacing(self.rescale_w(2))
+        do_not_show_layout.addSpacerItem(QSpacerItem(1,self.rescale_h(1), vPolicy=QSizePolicy.Expanding))
+        lbl_update = QLabel()
+        lbl_update.setMinimumSize(self.rescale_w(400),0)
+        lbl_update.setStyleSheet("color: rgb(25,125,25);")
+        lbl_update.setText('You can revisit this dialog by selecting "About" on the Help menu.')
+        lbl_update.setAlignment(Qt.AlignBottom)
+        do_not_show_layout.addWidget(lbl_update)
 
-        doNotShowCheckboxLayout = QHBoxLayout()
-        doNotShowCheckboxLayout.setSpacing(self.rescale_w(7))
-        self.chkDoNotShowUntilNextRelease = QCheckBox()
-        self.chkDoNotShowUntilNextRelease.setChecked(True)
-        doNotShowCheckboxLayout.addWidget(self.chkDoNotShowUntilNextRelease)
-        doNotShowCheckboxLayout.addSpacerItem(QSpacerItem(self.rescale_w(3), self.rescale_h(2), hPolicy = QSizePolicy.Fixed))
-        lblDoNotShow = QLabel()
-        lblDoNotShow.setStyleSheet("color: rgb(25,125,25);")
-        lblDoNotShow.setText('Do not show again until next release')
-        doNotShowCheckboxLayout.addWidget(lblDoNotShow)
-        doNotShowCheckboxLayout.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy = QSizePolicy.Expanding))
-        doNotShowLayout.addLayout(doNotShowCheckboxLayout)
-        footerLayout.addLayout(doNotShowLayout)
+        do_not_show_checkbox_layout = QHBoxLayout()
+        self.chk_do_not_show_until_next_release.setChecked(True)
+        do_not_show_checkbox_layout.addWidget(self.chk_do_not_show_until_next_release)
+        do_not_show_checkbox_layout.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(2),
+                                                              hPolicy=QSizePolicy.Fixed))
+        lbl_do_not_show = QLabel()
+        lbl_do_not_show.setStyleSheet("color: rgb(25,125,25);")
+        lbl_do_not_show.setText('Do not show again until next release')
+        do_not_show_checkbox_layout.addWidget(lbl_do_not_show)
+        do_not_show_checkbox_layout.addSpacerItem(QSpacerItem(self.rescale_w(40),10, hPolicy=QSizePolicy.Expanding))
+        do_not_show_layout.addLayout(do_not_show_checkbox_layout)
+        footer_layout.addLayout(do_not_show_layout)
 
         # Close button
-        closeButtonLayout = QVBoxLayout()
-        closeButtonLayout.addSpacerItem(QSpacerItem(20,self.rescale_h(15),vPolicy = QSizePolicy.Expanding))
-        self.pbClose = QPushButton()
-        self.pbClose.setText("Close")
-        self.pbClose.setDefault(True)
-        closeButtonLayout.addWidget(self.pbClose)
-        footerLayout.addLayout(closeButtonLayout)
-        footerLayout.addSpacerItem(QSpacerItem(self.rescale_w(100), self.rescale_h(20), hPolicy = QSizePolicy.Fixed))
-        self.parentLayout.addLayout(footerLayout)
-        self.setLayout(self.parentLayout)
+        close_button_layout = QVBoxLayout()
+        close_button_layout.addSpacerItem(QSpacerItem(20,self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
+        self.pb_close.setText("Close")
+        self.pb_close.setDefault(True)
+        close_button_layout.addWidget(self.pb_close)
+        footer_layout.addLayout(close_button_layout)
+        footer_layout.addSpacerItem(QSpacerItem(self.rescale_w(100), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
+        parent_layout.addLayout(footer_layout)
+        self.setLayout(parent_layout)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-    def create_command_link_button(self, text, image_location, width = 40, height = 40):
-        link_button = QCommandLinkButton()
+    def setup_command_link_button(self, link_button, text, image_location, width=40, height=40):
         link_button.setText(text)
         link_button.setIconSize(QSize(self.rescale_w(width), self.rescale_h(height)))
         link_button.setIcon(QIcon(QPixmap(image_location)))
@@ -310,7 +315,7 @@ font: {self.rescale_w(12)}px;
         if date_text and len(version_text) < 10:
             # strip off the first few characters that will be "day, "
             version_label += " ({0})".format(date_text[5:])
-        self.lblVersion.setText(self.lblVersion.text() + version_label)
+        self.lbl_version.setText(self.lbl_version.text() + version_label)
 
     def closeEvent(self, event):
         self.presenter.action_close()
