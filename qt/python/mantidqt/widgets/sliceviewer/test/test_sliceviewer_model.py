@@ -187,6 +187,7 @@ class SliceViewerModelTest(unittest.TestCase):
                                                     units=('MomentumTransfer', 'EnergyTransfer',
                                                            'Angstrom'),
                                                     isq=(False, False, False))
+        self.ws_MD_3D.name.return_value = 'ws_MD_3D'
         self.ws_MDE_3D = _create_mock_mdeventworkspace(ndims=3,
                                                        coords=SpecialCoordinateSystem.NONE,
                                                        extents=(-3, 3, -4, 4, -5, 5),
@@ -442,6 +443,25 @@ class SliceViewerModelTest(unittest.TestCase):
         self._assert_supports_peaks_overlay(True, IMDEventWorkspace, ndims=3)
         self._assert_supports_peaks_overlay(True, IMDHistoWorkspace, ndims=3)
 
+    def test_mdeventworkspace_supports_dynamic_rebinning(self):
+        self._assert_supports_dynamic_rebinning(True,
+                                                IMDEventWorkspace,
+                                                has_original_workspace=True)
+        self._assert_supports_dynamic_rebinning(True,
+                                                IMDEventWorkspace,
+                                                has_original_workspace=False)
+
+    def test_mdhistoworkspace_supports_dynamic_rebinning(self):
+        self._assert_supports_dynamic_rebinning(True,
+                                                IMDHistoWorkspace,
+                                                has_original_workspace=True)
+        self._assert_supports_dynamic_rebinning(False,
+                                                IMDHistoWorkspace,
+                                                has_original_workspace=False)
+
+    def test_matrixworkspace_does_not_dynamic_rebinning(self):
+        self._assert_supports_dynamic_rebinning(False, MatrixWorkspace)
+
     def test_create_non_orthogonal_transform_raises_error_if_not_supported(self):
         model = SliceViewerModel(
             _create_mock_workspace(MatrixWorkspace,
@@ -541,6 +561,65 @@ class SliceViewerModelTest(unittest.TestCase):
                           slicepoint=(None, None, 0, 0),
                           transpose=False)
 
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_rebin_mdhistworkspace_calls_binmd(self, mock_binmd):
+        orig_ws = self.ws_MD_3D
+        model = SliceViewerModel(orig_ws)
+
+        model.rebin(slicepoint=(None, 0, None), limits=((-1, 1), (-2, 2)))
+
+        mock_binmd.assert_called_once_with(InputWorkspace=self.ws_MD_3D,
+                                           OutputWorkspace='ws_MD_3D_rebinned',
+                                           AxisAligned=False,
+                                           EnableLogging=False,
+                                           BasisVector0='Dim1,MomentumTransfer,1.0,0.0,0.0',
+                                           BasisVector1='Dim2,EnergyTransfer,0.0,1.0,0.0',
+                                           BasisVector2='Dim3,Angstrom,0.0,0.0,1.0',
+                                           OutputExtents='-1,1,-10,10,-2,2',
+                                           OutputBins='5,5,4')
+
+        self.assertEqual(
+            mock_binmd.return_value,
+            model._get_ws(),
+            msg='Expected internal workspace reference to have been overwritten by result of BinMD')
+
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_rebin_mdhistworkspace_twice_uses_same_output_wsname(self, mock_binmd):
+        orig_ws = self.ws_MD_3D
+        model = SliceViewerModel(orig_ws)
+        mock_rebinned_first = MagicMock(getNumDims=lambda: 3)
+        mock_binmd.return_value = mock_rebinned_first
+
+        model.rebin(slicepoint=(None, 0, None), limits=((-1, 1), (-2, 2)))
+        model.rebin(slicepoint=(None, 0, None), limits=((-0.5, 0.5), (-2, 2)))
+        self.assertEqual(2, mock_binmd.call_count)
+        self.assertEqual(self.ws_MD_3D.name() + '_rebinned',
+                         mock_binmd.call_args[-1]['OutputWorkspace'])
+
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_rebin_mdeventworkspace_does_nothing(self, mock_binmd):
+        orig_ws = self.ws_MDE_3D
+        model = SliceViewerModel(orig_ws)
+
+        model.rebin(slicepoint=(None, None, 0.),
+                    bin_params=[100, 100, 1],
+                    limits=(-1, 1, -2, 2, -3, 3))
+
+        mock_binmd.assert_not_called()
+        self.assertEqual(orig_ws, model._get_ws())
+
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_rebin_matrixworkspace_does_nothing(self, mock_binmd):
+        orig_ws = self.ws2d_histo
+        model = SliceViewerModel(orig_ws)
+
+        model.rebin(slicepoint=(None, None, 0.),
+                    bin_params=[100, 100, 1],
+                    limits=(-1, 1, -2, 2, -3, 3))
+
+        mock_binmd.assert_not_called()
+        self.assertEqual(orig_ws, model._get_ws())
+
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords,
                                              has_oriented_lattice):
@@ -554,6 +633,18 @@ class SliceViewerModelTest(unittest.TestCase):
                                     ndims=ndims)
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_peaks_overlays())
+
+    def _assert_supports_dynamic_rebinning(self, expectation, ws_type, has_original_workspace=None):
+        ws = _create_mock_workspace(ws_type,
+                                    coords=SpecialCoordinateSystem.QLab,
+                                    has_oriented_lattice=False,
+                                    ndims=3)
+        if ws_type == MatrixWorkspace:
+            ws.hasOriginalWorkspace.return_value = False
+        elif has_original_workspace is not None:
+            ws.hasOriginalWorkspace.return_value = has_original_workspace
+        model = SliceViewerModel(ws)
+        self.assertEqual(expectation, model.can_support_dynamic_rebinning())
 
 
 if __name__ == '__main__':

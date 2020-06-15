@@ -59,6 +59,7 @@ class SliceViewerTest(unittest.TestCase):
         self.model = mock.Mock(spec=SliceViewerModel)
         self.model.get_ws = mock.Mock()
         self.model.get_data = mock.Mock()
+        self.model.rebin = mock.Mock()
 
     def test_sliceviewer_MDH(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
@@ -207,6 +208,27 @@ class SliceViewerTest(unittest.TestCase):
         self.model.get_dim_limits.assert_called_once_with([None, None, 0.5],
                                                           data_view.dimensions.transpose)
         data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
+
+    def test_data_limits_changed_creates_new_plot_if_dynamic_rebinning_supported(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.can_support_dynamic_rebinning.return_value = True
+        new_plot_mock = mock.MagicMock()
+        presenter.new_plot = new_plot_mock
+
+        presenter.data_limits_changed()
+
+        new_plot_mock.assert_called_once()
+        self.model.rebin.assert_called_once()
+
+    def test_data_limits_changed_does_not_create_new_plot_if_dynamic_rebinning_not_supported(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.can_support_dynamic_rebinning.return_value = False
+        new_plot_mock = mock.MagicMock()
+        presenter.new_plot = new_plot_mock
+
+        presenter.data_limits_changed()
+
+        new_plot_mock.assert_not_called()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(

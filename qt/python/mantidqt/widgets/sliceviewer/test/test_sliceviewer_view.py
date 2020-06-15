@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 import unittest
-from unittest.mock import MagicMock
 
 import matplotlib as mpl
 mpl.use('Agg')  # noqa
@@ -64,26 +63,6 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(non_ortho_action.isChecked())
         self.assertFalse(line_plots_action.isChecked())
         self.assertFalse(line_plots_action.isEnabled())
-
-        pres.view.close()
-
-    def test_data_limits_changed_call_for_MDHisto_does_not_create_new_plot(self):
-        pres = SliceViewer(self.histo_ws)
-        new_plot_mock = MagicMock()
-        pres.new_plot = new_plot_mock
-        pres.data_limits_changed()
-
-        new_plot_mock.assert_not_called()
-
-        pres.view.close()
-
-    def test_data_limits_changed_call_for_MDE_creates_new_plot(self):
-        pres = SliceViewer(self.hkl_ws)
-        new_plot_mock = MagicMock()
-        pres.new_plot = new_plot_mock
-        pres.data_limits_changed()
-
-        new_plot_mock.assert_called_once()
 
         pres.view.close()
 

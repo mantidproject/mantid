@@ -19,6 +19,7 @@ from .transform import NonOrthogonalTransform
 
 # Constants
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
+LOG_BINMD_CALLS = False
 
 
 class WS_TYPE(Enum):
@@ -46,13 +47,17 @@ class SliceViewerModel:
             raise ValueError("only works for MatrixWorkspace and MDWorkspace")
 
         self._ws = ws
+        self._rebinned_name = self.get_ws_name() + '_rebinned'
 
+        self.rebin = _noop
         if self.get_ws_type() == WS_TYPE.MDE:
             self.get_ws = self.get_ws_MDE
             self.get_data = self.get_data_MDE
         else:
             self.get_ws = self._get_ws
             self.get_data = self.get_data_MDH
+            if self.get_ws_type() == WS_TYPE.MDH:
+                self.rebin = self.rebin_MDH
 
     def can_normalize_workspace(self) -> bool:
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
@@ -93,6 +98,17 @@ class SliceViewerModel:
 
         return False
 
+    def can_support_dynamic_rebinning(self) -> bool:
+        """
+        Check if the given workspace can multiple BinMD calls.
+        """
+        try:
+            return self.get_ws_type() == WS_TYPE.MDE or self._get_ws().hasOriginalWorkspace(0)
+        except AttributeError:
+            pass
+
+        return False
+
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
         return self._ws.getSpecialCoordinateSystem()
@@ -102,7 +118,6 @@ class SliceViewerModel:
                    bin_params: Sequence[float],
                    limits: Optional[tuple] = None):
         """
-        :param workspace: An MDEventWorkspace
         :param slicepoint: ND sequence of either None or float. A float defines the point
                         in that dimension for the slice.
         :param bin_params: ND sequence containing the number of bins for each dimension
@@ -111,7 +126,7 @@ class SliceViewerModel:
         """
         workspace = self._get_ws()
         bin_limits = _binning_limits(workspace, slicepoint, limits)
-        params = {'EnableLogging': False}
+        params = {'EnableLogging': LOG_BINMD_CALLS}
         for n in range(workspace.getNumDims()):
             dimension = workspace.getDimension(n)
             slice_pt = slicepoint[n]
@@ -123,9 +138,7 @@ class SliceViewerModel:
                 nbins = 1
             params[f'AlignedDim{n}'] = f'{dimension.name},{dim_min},{dim_max},{nbins}'
 
-        return BinMD(InputWorkspace=self._get_ws(),
-                     OutputWorkspace=self._get_ws().name() + '_rebinned',
-                     **params)
+        return BinMD(InputWorkspace=self._get_ws(), OutputWorkspace=self._rebinned_name, **params)
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
@@ -229,6 +242,43 @@ class SliceViewerModel:
                                                    x_proj=proj_matrix[:, display_indices[0]],
                                                    y_proj=proj_matrix[:, display_indices[1]])
 
+    def rebin_MDH(self, slicepoint: Sequence[Optional[float]], limits: Sequence[tuple]):
+        """Rebin an MDHistoWorkspace by going back to the original MDEventWorkspace but setting
+        new limits on the output extents. It replaces the internal workspace object with the new
+        MDHistoWorkspace generated.
+        :param slicepoint: ND sequence of either None or float. A float defines the point
+                        in that dimension for the slice.
+        :param bin_params: ND sequence containing the number of bins for each dimension
+        :param limits: An optional 2-tuple sequence containing limits for plotting dimensions. If
+                       not provided the full extent of each dimension is used
+        """
+        def to_str(seq: Sequence):
+            return ','.join(map(str, seq))
+
+        # BinMD requires non-axis aligned binning when binning an MDHistoWorkspace from the original
+        # MDEventWorkspace
+        workspace = self._get_ws()
+        limits = _binning_limits(workspace, slicepoint, limits)
+        ndims = workspace.getNumDims()
+        ws_basis = np.eye(ndims)
+        output_extents, output_bins = [], []
+        params = {'AxisAligned': False, 'EnableLogging': LOG_BINMD_CALLS}
+        for n in range(ndims):
+            dimension = workspace.getDimension(n)
+            basis_vec_n = to_str(ws_basis[:, n])
+            nbins = dimension.getNBins()
+            dim_min, dim_max = limits[n]
+            params[f'BasisVector{n}'] = f'{dimension.name},{dimension.getUnits()},{basis_vec_n}'
+            output_extents.append(dim_min)
+            output_extents.append(dim_max)
+            output_bins.append(nbins)
+        params['OutputExtents'] = to_str(output_extents)
+        params['OutputBins'] = to_str(output_bins)
+
+        self._ws = BinMD(InputWorkspace=self._get_ws(),
+                         OutputWorkspace=self._rebinned_name,
+                         **params)
+
     # private api
     def _get_ws(self):
         return self._ws
@@ -246,7 +296,6 @@ def _binning_limits(workspace,
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     """
-
     bin_limits = [(dim.getMinimum(), dim.getMaximum())
                   for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
     if limits is not None:
@@ -255,3 +304,8 @@ def _binning_limits(workspace,
         bin_limits[slicepoint.index(None, display_idx + 1)] = limits[1]
 
     return bin_limits
+
+
+def _noop(*args, **kwargs):
+    """A noop function
+    """
