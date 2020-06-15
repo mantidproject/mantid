@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 from PyQt5.QtWidgets import QCommandLinkButton
-from qtpy.QtCore import Qt, QSize, QPoint
+from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QPixmap, QIcon, QGuiApplication, QPainter
-from qtpy.QtWidgets import qApp, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QLabel, QDialog, \
+from qtpy.QtWidgets import QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QLabel, QDialog, \
     QGroupBox, QFormLayout, QComboBox, QPushButton, QCheckBox
 
 REFERENCE_HEIGHT = 642
@@ -56,6 +56,7 @@ class AboutView(QDialog):
 
     def rescale_w(self, value):
         return int(value * (self.width() / REFERENCE_WIDTH))
+
     def rescale_h(self, value):
         return int(value * (self.height() / REFERENCE_HEIGHT))
 
@@ -119,11 +120,11 @@ font-size: {self.rescale_w(28)}px""")
         left_layout.addWidget(lbl_welcome)
         # release notes
         self.setup_command_link_button(self.clb_release_notes, "Release Notes",
-                                        ':/images/Notepad-Bloc-notes-icon-48x48.png')
+                                       ':/images/Notepad-Bloc-notes-icon-48x48.png')
         left_layout.addWidget(self.clb_release_notes)
         # sample datasets
         self.setup_command_link_button(self.clb_sample_datasets, "Sample Datasets",
-                                        ':/images/download-icon-48x48.png')
+                                       ':/images/download-icon-48x48.png')
         left_layout.addWidget(self.clb_sample_datasets)
         # Tutorials Label
         lbl_tutorials = QLabel()
@@ -163,15 +164,14 @@ QGroupBox QLabel{{
 }}
 QGroupBox QComboBox{{
     font: {self.rescale_w(12)}px;
-    color: rgb(121, 121, 121);
 }}
 font: {self.rescale_w(12)}px;
 """)
         grp_personal_setup_layout = QVBoxLayout()
         grp_personal_setup_layout.setContentsMargins(self.rescale_w(9),
-                                                  self.rescale_h(1),
-                                                  self.rescale_w(9),
-                                                  self.rescale_h(9))
+                                                     self.rescale_h(1),
+                                                     self.rescale_w(9),
+                                                     self.rescale_h(9))
         grp_personal_setup_layout.setSpacing(0)
         grp_personal_setup.setLayout(grp_personal_setup_layout)
         lbl_personal_setup = QLabel()
@@ -206,10 +206,10 @@ font: {self.rescale_w(12)}px;
         usagelayout.addWidget(self.chk_allow_usage_data)
         usagelayout.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy=QSizePolicy.Expanding))
         self.lbl_privacy_policy.setText(r'<html><head/><body><p>'
-                                      r'<a href="https://www.mantidproject.org/MantidProject:Privacy_policy'
-                                      r'#Usage_Data_recorded_in_Mantid">'
-                                      r'<span style=" text-decoration: underline; color:#0000ff;">'
-                                      r'Privacy Policy</span></a></p></body></html>')
+                                        r'<a href="https://www.mantidproject.org/MantidProject:Privacy_policy'
+                                        r'#Usage_Data_recorded_in_Mantid">'
+                                        r'<span style=" text-decoration: underline; color:#0000ff;">'
+                                        r'Privacy Policy</span></a></p></body></html>')
         self.lbl_privacy_policy.setOpenExternalLinks(False)
         usagelayout.addWidget(self.lbl_privacy_policy)
         personal_setup_form_layout.addRow(lbl_allow_usage_data,usagelayout)
