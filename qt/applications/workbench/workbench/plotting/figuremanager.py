@@ -347,16 +347,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            if isinstance(ax, Axes3D) or not hasattr(ax, 'show_minor_gridlines'):
+            if type(ax) == Axes:
+                # Colorbar
+                continue
+            elif isinstance(ax, Axes3D) or not hasattr(ax, 'show_minor_gridlines'):
                 # The grid toggle function for 3D plots doesn't let you choose between major and minor lines.
                 ax.grid(on)
-            elif not type(ax) == Axes:
-                if on:
-                    which = 'both' if ax.show_minor_gridlines else 'major'
-                    ax.grid(on, which=which)
-                else:
-                    # If gridlines are being disabled, always disable major and minor.
-                    ax.grid(on, which='both')
+            else:
+                which = 'both' if ax.show_minor_gridlines else 'major'
+                ax.grid(on, which=which)
         canvas.draw_idle()
 
     def fit_toggle(self):
