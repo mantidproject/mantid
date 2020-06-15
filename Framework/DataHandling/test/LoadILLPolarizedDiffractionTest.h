@@ -132,7 +132,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850"))
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+        alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -365,7 +365,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "401800"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
@@ -413,7 +413,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "Nexus"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
@@ -461,7 +461,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "YIGFile"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("YIGFilename", "YIG_IPF.xml"))
@@ -633,7 +633,7 @@ public:
     m_alg.initialize();
     m_alg.setChild(true);
     m_alg.setPropertyValue("Filename", "395850");
-    m_alg.setPropertyValue("OutputWorkspace", "__");
+    m_alg.setPropertyValue("OutputWorkspace", "_outWS");
     m_alg.setPropertyValue("PositionCalibration", "Nexus");
   }
 
