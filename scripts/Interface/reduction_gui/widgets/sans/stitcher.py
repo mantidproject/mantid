@@ -346,8 +346,7 @@ class StitcherWidget(BaseWidget):
         if not os.path.isdir(str(self._output_dir)):
             self._output_dir = os.path.expanduser("~")
         FileName = QFileDialog.getOpenFileName(self, title, self._output_dir,
-                                               "Reduced XML files (*.xml);; Reduced Nexus files"
-                                               " (*.nxs);; All files (*)")
+                                               "Reduced txt files (*.txt);; All files (*)")
         if isinstance(FileName,tuple):
             FileName = FileName[0]
         fname = QFileInfo(FileName).filePath()

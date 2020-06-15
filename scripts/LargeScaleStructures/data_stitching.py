@@ -25,7 +25,7 @@ else:
         pass
 if IS_IN_MANTIDGUI:
     from qtpy import QtCore
-
+    from mantid.plots._compatability import plotSpectrum
 
 class RangeSelector(object):
     """
@@ -44,11 +44,11 @@ class RangeSelector(object):
             self._ws_output_base = None
             self._graph = "Range Selector"
 
-        def disconnect(self):
-            if IS_IN_MANTIDGUI:
-                mantidplot.app.disconnect(mantidplot.app.mantidUI,
-                                          QtCore.SIGNAL("x_range_update(double,double)"),
-                                          self._call_back)
+        #def disconnect(self):
+            #if IS_IN_MANTIDGUI:
+            #mantidplot.app.disconnect(mantidplot.app.mantidUI,
+            #                          QtCore.SIGNAL("x_range_update(double,double)"),
+            #                          self._call_back)
 
         def connect(self, ws, call_back, xmin=None, xmax=None,
                     range_min=None, range_max=None, x_title=None,
@@ -61,35 +61,31 @@ class RangeSelector(object):
             self._call_back = call_back
             self._ws_output_base = ws_output_base
 
-            mantidplot.app.connect(mantidplot.app.mantidUI,
-                                   QtCore.SIGNAL("x_range_update(double,double)"),
-                                   self._call_back)
-            g = mantidplot.graph(self._graph)
+            #mantidplot.app.connect(mantidplot.app.mantidUI,
+            #                       QtCore.SIGNAL("x_range_update(double,double)"),
+            #                       self._call_back)
 
-            if g is not None:
-                g.close()
-
-            g = mantidplot.plotSpectrum(ws, [0], True)
-            g.setName(self._graph)
-            l = g.activeLayer()
+            g = plotSpectrum(ws, [0], True)
+            g.suptitle(self._graph)
+            l = g.axes[0]
             try:
                 title = ws[0].replace("_", " ")
                 title.strip()
             except:
                 title = " "
-            l.setTitle(" ")
-            l.setCurveTitle(0, title)
+            l.set_title(title)
             if log_scale:
-                l.logYlinX()
+                l.yscale('log')
+                l.xscale('linear')
             if x_title is not None:
-                l.setXTitle(x_title)
+                l.set_xlabel(x_title)
             if xmin is not None and xmax is not None:
-                l.setScale(2, xmin, xmax)
+                l.set_xlim(xmin, xmax)
 
-            if range_min is not None and range_max is not None:
-                mantidplot.selectMultiPeak(g, False, range_min, range_max)
-            else:
-                mantidplot.selectMultiPeak(g, False)
+            #if range_min is not None and range_max is not None:
+            #    mantidplot.selectMultiPeak(g, False, range_min, range_max)
+            #else:
+            #    mantidplot.selectMultiPeak(g, False)
 
     @classmethod
     def connect(cls, ws, call_back, xmin=None, xmax=None,

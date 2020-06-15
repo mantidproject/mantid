@@ -10,9 +10,8 @@
 
 #include <QColor>
 #include <QPointF>
-
+#include <QPainterPath>
 class QPainter;
-class QPainterPath;
 class QMouseEvent;
 class QWheelEvent;
 
