@@ -70,8 +70,7 @@ mtd_add_qt_tests(
     ${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
     gmock
-  QT5_LINK_LIBS
-    Qt5::QtOpenGL
+  QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesDirect
     MantidQtWidgetsCommon
