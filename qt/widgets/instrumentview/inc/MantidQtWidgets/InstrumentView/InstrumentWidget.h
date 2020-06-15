@@ -160,7 +160,7 @@ public:
   void addTab(const std::string &tabName);
   void hideHelp();
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
-  bool isIntegrable() { return m_shouldIntegrate; }
+  bool isIntegrable() const { return m_shouldIntegrate; }
 
 signals:
   void enableLighting(bool /*_t1*/);

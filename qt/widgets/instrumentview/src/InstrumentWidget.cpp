@@ -1569,8 +1569,11 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
 
   if (tsv.selectLine("EnergyTransfer")) {
     double min, max;
-    tsv >> min >> max;
-    setBinRange(min, max);
+    bool isIntegrable;
+    tsv >> min >> max >> isIntegrable;
+    if (isIntegrable) {
+      setBinRange(min, max);
+    }
   }
 
   if (tsv.selectSection("Surface")) {

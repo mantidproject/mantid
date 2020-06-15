@@ -51,6 +51,8 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
     QList<QVariant> energyTransferList;
     energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
     energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
+    bool isInt = obj.isIntegrable();
+    energyTransferList.append(QVariant(isInt));
     map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
     map.insert(QString("surface"),
@@ -158,6 +160,9 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
                      QVariant(tab->m_ring_rectangle->isChecked()));
   activeTools.insert(QString("freeDrawButton"),
                      QVariant(tab->m_free_draw->isChecked()));
+  activeTools.insert(QString("pixelButton"),
+                     QVariant(tab->m_pixel->isChecked()));
+  activeTools.insert(QString("tubeButton"), QVariant(tab->m_tube->isChecked()));
   map.insert(QString("activeTools"), QVariant(activeTools));
 
   activeType.insert(QString("maskingOn"),
