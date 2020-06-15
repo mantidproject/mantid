@@ -185,6 +185,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     data.load();
 
     // Assign detector counts
+    PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
     for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS);
          ++pixel_no) {
       auto &spectrum = workspace->mutableY(pixel_no);
