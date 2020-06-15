@@ -7,8 +7,8 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 #include <boost/python/class.hpp>

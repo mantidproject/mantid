@@ -13,7 +13,6 @@ set(
 )
 
 if(ENABLE_MANTIDPLOT)
-  find_package(Qt4 COMPONENTS QtScript REQUIRED)
   mtd_add_qt_library (TARGET_NAME MantidQtIcons
                       QT_VERSION 4
                       SRC ${SRC_FILES}

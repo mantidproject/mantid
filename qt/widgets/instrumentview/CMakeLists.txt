@@ -188,7 +188,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 
-find_package(BoostPython REQUIRED)
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    QT_VERSION 5
                    SRC
@@ -213,8 +212,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      ${CORE_MANTIDLIBS}
                      PythonInterfaceCore
                      ${POCO_LIBRARIES}
-                     ${Boost_LIBRARIES}
-                     ${PYTHON_LIBRARIES}
                      ${OPENGL_gl_LIBRARY}
                      ${OPENGL_glu_LIBRARY}
                    QT5_LINK_LIBS

@@ -41,7 +41,7 @@ if ( PYLINT_FOUND )
   set ( PYLINT_NTHREADS 8 CACHE STRING "Number of processes used for running pylint" )
 
   add_custom_target ( pylintcheck
-                      COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format="${PYLINT_MSG_TEMPLATE}"
+                      COMMAND ${Python_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format="${PYLINT_MSG_TEMPLATE}"
                               --output=${PYLINT_OUTPUT_DIR}
                               --rcfile=${PYLINT_CFG_FILE}
                               --mantidpath=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
