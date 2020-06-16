@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTab.h"
-#include "ui_IqtFit.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -178,9 +177,6 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(
     IndirectFitPropertyBrowser *browser) {
   browser->init();
   m_fitPropertyBrowser = browser;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_fitPropertyBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
-#endif
 }
 
 void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {

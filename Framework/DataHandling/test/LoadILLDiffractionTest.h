@@ -31,10 +31,12 @@ public:
   }
   static void destroySuite(LoadILLDiffractionTest *suite) { delete suite; }
 
-  void setUp() override {
+  LoadILLDiffractionTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+  }
 
+  void setUp() override {
     m_oldFacility = ConfigService::Instance().getFacility().name();
     ConfigService::Instance().setFacility("ILL");
 

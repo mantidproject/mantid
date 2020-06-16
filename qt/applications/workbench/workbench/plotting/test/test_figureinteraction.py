@@ -26,7 +26,7 @@ from mantid.plots import MantidAxes
 from unittest.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
-from mantidqt.plotting.functions import plot, pcolormesh_from_names
+from mantidqt.plotting.functions import plot, pcolormesh_from_names, plot_contour, pcolormesh
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figureinteraction import FigureInteraction, LogNorm
 
@@ -199,7 +199,7 @@ class FigureInteractionTest(unittest.TestCase):
     def test_toggle_normalization_with_errorbars(self):
         self._test_toggle_normalization(errorbars_on=True, plot_kwargs={'distribution': True})
 
-    def test_correct_yunit_label_when_overplotting_after_normaliztion_toggle(self):
+    def test_correct_yunit_label_when_overplotting_after_normalization_toggle(self):
         # The earlier version of Matplotlib on RHEL throws an error when performing the second
         # plot in this test, if the lines have errorbars. The error occurred when it attempted
         # to draw an interactive legend. Plotting without errors still fulfills the purpose of this
@@ -402,44 +402,6 @@ class FigureInteractionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(fig.axes[0].images[-1].norm, LogNorm))
 
-    # Private methods
-    def _create_mock_fig_manager_to_accept_right_click(self):
-        fig_manager = MagicMock()
-        canvas = MagicMock()
-        type(canvas).buttond = PropertyMock(return_value={Qt.RightButton: 3})
-        fig_manager.canvas = canvas
-        return fig_manager
-
-    def _create_mock_right_click(self):
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
-        type(mouse_event).button = PropertyMock(return_value=3)
-        return mouse_event
-
-    def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
-        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
-                   plot_kwargs=plot_kwargs)
-        mock_canvas = MagicMock(figure=fig)
-        fig_manager_mock = MagicMock(canvas=mock_canvas)
-        fig_interactor = FigureInteraction(fig_manager_mock)
-
-        # Earlier versions of matplotlib do not store the data assciated with a
-        # line with high precision and hence we need to set a lower tolerance
-        # when making comparisons of this data
-        if matplotlib.__version__ < "2":
-            decimal_tol = 1
-        else:
-            decimal_tol = 7
-
-        ax = fig.axes[0]
-        fig_interactor._toggle_normalization(ax)
-        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
-        assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3], decimal=decimal_tol)
-        self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
-        fig_interactor._toggle_normalization(ax)
-        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
-        assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
-        self.assertEqual("Counts", ax.get_ylabel())
-
     @patch('workbench.plotting.figureinteraction.QMenu', autospec=True)
     @patch('workbench.plotting.figureinteraction.figure_type', autospec=True)
     def test_right_click_gives_marker_menu_when_hovering_over_one(self, mocked_figure_type, mocked_qmenu_cls):
@@ -635,7 +597,6 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertEqual(1, self.interactor.redraw_annotations.call_count)
 
     def test_toggle_normalisation_on_contour_plot_maintains_contour_line_colour(self):
-        from mantidqt.plotting.functions import plot_contour
         from mantid.plots.legend import convert_color_to_hex
         ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="test_ws")
         fig = plot_contour([ws])
@@ -650,6 +611,62 @@ class FigureInteractionTest(unittest.TestCase):
 
         self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
                             for col in fig.get_axes()[0].collections))
+
+    def test_toggle_normalisation_applies_to_all_images_if_one_colorbar(self):
+        fig = pcolormesh([self.ws, self.ws])
+
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+
+        # there should be 3 axes, 2 colorplots and 1 colorbar
+        self.assertEqual(3, len(fig.axes))
+        fig.axes[0].tracked_workspaces.values()
+        self.assertTrue(fig.axes[0].tracked_workspaces['ws'][0].is_normalized)
+        self.assertTrue(fig.axes[1].tracked_workspaces['ws'][0].is_normalized)
+
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertFalse(fig.axes[0].tracked_workspaces['ws'][0].is_normalized)
+        self.assertFalse(fig.axes[1].tracked_workspaces['ws'][0].is_normalized)
+
+ # Private methods
+    def _create_mock_fig_manager_to_accept_right_click(self):
+        fig_manager = MagicMock()
+        canvas = MagicMock()
+        type(canvas).buttond = PropertyMock(return_value={Qt.RightButton: 3})
+        fig_manager.canvas = canvas
+        return fig_manager
+
+    def _create_mock_right_click(self):
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
+        type(mouse_event).button = PropertyMock(return_value=3)
+        return mouse_event
+
+    def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
+        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
+                   plot_kwargs=plot_kwargs)
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+
+        # Earlier versions of matplotlib do not store the data assciated with a
+        # line with high precision and hence we need to set a lower tolerance
+        # when making comparisons of this data
+        if matplotlib.__version__ < "2":
+            decimal_tol = 1
+        else:
+            decimal_tol = 7
+
+        ax = fig.axes[0]
+        fig_interactor._toggle_normalization(ax)
+        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
+        assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3], decimal=decimal_tol)
+        self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
+        fig_interactor._toggle_normalization(ax)
+        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
+        assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
+        self.assertEqual("Counts", ax.get_ylabel())
 
 
 if __name__ == '__main__':

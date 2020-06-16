@@ -437,8 +437,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
-        self.setPeakHeightOf(fun, height)
         self.setPeakFwhmOf(fun, fwhm)
+        if height != 0:
+            self.setPeakHeightOf(fun, height)
         self.peak_ids[peak_id] = fun
 
     @Slot(int, float, float)
@@ -507,6 +508,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for prefix in self.getPeakPrefixes():
             c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
                 prefix), self.getPeakFwhmOf(prefix)
+            if w > (self.endX() - self.startX()):
+                w = (self.endX() - self.startX())/20.
+                self.setPeakFwhmOf(prefix, w)
             if prefix in peaks:
                 self.tool.update_peak(peaks[prefix], c, h, w)
                 del peaks[prefix]
@@ -532,8 +536,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.peak_ids.update(peak_ids)
             for prefix, c, h, w in peak_updates:
                 self.setPeakCentreOf(prefix, c)
-                self.setPeakHeightOf(prefix, h)
                 self.setPeakFwhmOf(prefix, w)
+                self.setPeakHeightOf(prefix, h)
         self.update_guess()
 
     @Slot(str)

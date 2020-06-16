@@ -8,7 +8,7 @@
 
 #include "IndirectFitAnalysisTab.h"
 #include "MSDFitModel.h"
-#include "ui_MSDFit.h"
+#include "ui_IndirectFitTab.h"
 
 #include "MantidAPI/IFunction.h"
 
@@ -38,7 +38,7 @@ private:
   EstimationDataSelector getEstimationDataSelector() const override;
   std::string fitTypeString() const;
   MSDFitModel *m_msdFittingModel;
-  std::unique_ptr<Ui::MSDFit> m_uiForm;
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

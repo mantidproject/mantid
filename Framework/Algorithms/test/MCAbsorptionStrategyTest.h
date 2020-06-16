@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -18,6 +19,7 @@
 #include "MonteCarloTesting.h"
 
 using Mantid::Algorithms::MCAbsorptionStrategy;
+using Mantid::Algorithms::MCInteractionStatistics;
 
 class MCAbsorptionStrategyTest : public CxxTest::TestSuite {
 public:
@@ -44,7 +46,7 @@ public:
     const size_t nevents(10), maxTries(100);
     MCAbsorptionStrategy mcabsorb(testBeamProfile, testSampleSphere,
                                   Mantid::Kernel::DeltaEMode::Type::Direct,
-                                  nevents, maxTries, false, g_log);
+                                  nevents, maxTries, false);
     // 3 random numbers per event expected
     MockRNG rng;
     EXPECT_CALL(rng, nextValue())
@@ -62,8 +64,9 @@ public:
     std::vector<double> lambdas = {lambdaBefore};
     std::vector<double> attenuationFactors = {0};
     std::vector<double> attenuationFactorErrors = {0};
+    MCInteractionStatistics trackStatistics(-1, testSampleSphere);
     mcabsorb.calculate(rng, endPos, lambdas, lambdaFixed, attenuationFactors,
-                       attenuationFactorErrors);
+                       attenuationFactorErrors, trackStatistics);
     TS_ASSERT_DELTA(0.0043828472, attenuationFactors[0], 1e-08);
     TS_ASSERT_DELTA(1.0 / std::sqrt(nevents), attenuationFactorErrors[0],
                     1e-08);
@@ -87,7 +90,7 @@ public:
     const size_t nevents(10), maxTries(1);
     MCAbsorptionStrategy mcabs(testBeamProfile, testThinAnnulus,
                                Mantid::Kernel::DeltaEMode::Type::Direct,
-                               nevents, maxTries, false, g_log);
+                               nevents, maxTries, false);
     MockRNG rng;
     EXPECT_CALL(rng, nextValue()).WillRepeatedly(Return(0.5));
     const double lambdaBefore(2.5), lambdaAfter(3.5);
@@ -96,9 +99,10 @@ public:
     std::vector<double> lambdas = {lambdaBefore};
     std::vector<double> attenuationFactors = {0};
     std::vector<double> attenuationFactorErrors = {0};
+    MCInteractionStatistics trackStatistics(-1, testThinAnnulus);
     TS_ASSERT_THROWS(mcabs.calculate(rng, endPos, lambdas, lambdaFixed,
                                      attenuationFactors,
-                                     attenuationFactorErrors),
+                                     attenuationFactorErrors, trackStatistics),
                      const std::runtime_error &)
   }
 

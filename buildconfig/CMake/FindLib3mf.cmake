@@ -18,7 +18,7 @@ endif()
 # handle the QUIETLY and REQUIRED arguments and set LIB3MF_FOUND to TRUE if
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( lib3mf DEFAULT_MSG LIB3MF_LIBRARIES LIB3MF_INCLUDE_DIR )
+find_package_handle_standard_args( Lib3mf DEFAULT_MSG LIB3MF_LIBRARIES LIB3MF_INCLUDE_DIR )
 
 mark_as_advanced ( LIB3MF_INCLUDE_DIR
                    LIB3MF_LIB

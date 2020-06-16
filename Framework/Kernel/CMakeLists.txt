@@ -508,11 +508,6 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 
-# For older gcc versions (<4.5) if we do not put stdc++ first then things crash
-# when an exceptions are thrown in Python.
-if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
-  target_link_libraries(Kernel LINK_PRIVATE stdc++)
-endif()
 target_link_libraries(Kernel
                       PUBLIC
                       ${NEXUS_LIBRARIES}

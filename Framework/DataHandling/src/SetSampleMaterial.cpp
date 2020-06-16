@@ -137,12 +137,12 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.chemicalSymbol = getPropertyValue("ChemicalFormula");
   params.atomicNumber = getProperty("AtomicNumber");
   params.massNumber = getProperty("MassNumber");
-  params.sampleNumberDensity = getProperty("SampleNumberDensity");
+  params.numberDensity = getProperty("SampleNumberDensity");
   params.zParameter = getProperty("ZParameter");
   params.unitCellVolume = getProperty("UnitCellVolume");
-  params.sampleMassDensity = getProperty("SampleMassDensity");
-  params.sampleMass = getProperty("SampleMass");
-  params.sampleVolume = getProperty("SampleVolume");
+  params.massDensity = getProperty("SampleMassDensity");
+  params.mass = getProperty("SampleMass");
+  params.volume = getProperty("SampleVolume");
   params.coherentXSection = getProperty("CoherentXSection");
   params.incoherentXSection = getProperty("IncoherentXSection");
   params.attenuationXSection = getProperty("AttenuationXSection");

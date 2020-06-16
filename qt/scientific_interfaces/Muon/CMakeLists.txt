@@ -189,7 +189,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
-                     ${PYTHON_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
                    MTD_QT_LINK_LIBS

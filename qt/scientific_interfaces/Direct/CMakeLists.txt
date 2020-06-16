@@ -48,7 +48,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
 
-find_package(BoostPython REQUIRED)
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    QT_VERSION 5
                    SRC

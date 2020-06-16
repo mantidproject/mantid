@@ -325,6 +325,7 @@ class PythonFileInterpreterPresenter(QObject):
             line_from, _, _, _ = editor.getSelection()
         else:
             # run everything in the file
+            self.model.reset_context()
             code_str = editor.text()
             line_from = 0
         return code_str, line_from
