@@ -272,22 +272,22 @@ class DrillViewTest(unittest.TestCase):
         self.view.process.emit.assert_has_calls(calls)
 
     def test_loadRundex(self):
-        self.view.rundex_loaded = mock.Mock()
+        self.view.rundexLoaded = mock.Mock()
         self.mFileDialog.getOpenFileName.return_value = ("test", "test")
         self.view.load_rundex()
-        self.view.rundex_loaded.emit.assert_called_once_with("test")
+        self.view.rundexLoaded.emit.assert_called_once_with("test")
 
     def test_saveRundexAs(self):
-        self.view.rundex_saved = mock.Mock()
+        self.view.rundexSaved = mock.Mock()
         self.mFileDialog.getSaveFileName.return_value = ("test", "test")
         self.view.saveRundexAs()
-        self.view.rundex_saved.emit.assert_called_once_with("test")
+        self.view.rundexSaved.emit.assert_called_once_with("test")
 
     def test_saveRundex(self):
-        self.view.rundex_saved = mock.Mock()
+        self.view.rundexSaved = mock.Mock()
         self.view.rundexFile = "test"
         self.view.saveRundex()
-        self.view.rundex_saved.emit.assert_called_once_with("test")
+        self.view.rundexSaved.emit.assert_called_once_with("test")
         self.mFileDialog.getSaveFileName.assert_not_called()
 
     def test_automaticFilling(self):

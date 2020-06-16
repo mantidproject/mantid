@@ -18,17 +18,77 @@ from mantidqt import icons
 
 class DrillView(QMainWindow):
 
-    # Signals that the view can send and data that they include
-    instrument_changed = Signal(str)       # the instrument
-    acquisition_mode_changed = Signal(str) # the acquisition mode
-    row_added = Signal(int)                # the row index
-    row_deleted = Signal(int)              # the row index
-    data_changed = Signal(int, int, str)   # the row and column indexes and the contents
-    process = Signal(list)                 # the list of row indexes
-    process_stopped = Signal()
-    rundex_loaded = Signal(str)            # the path and filename
-    rundex_saved = Signal(str)             # the path and filename
-    show_settings = Signal()
+    ###########################################################################
+    # Signals                                                                 #
+    ###########################################################################
+
+    """
+    Sent when the instrument changes.
+    Args:
+        str: instrument name
+    """
+    instrumentChanged = Signal(str)
+
+    """
+    Sent when the acquisition mode changes.
+    Args:
+        str: acquisition mode name
+    """
+    acquisitionModeChanged = Signal(str)
+
+    """
+    Sent when a row is added to the table.
+    Args:
+        int: row index
+    """
+    rowAdded = Signal(int)
+
+    """
+    Sent when a row is deleted from the table.
+    Args:
+        int: row index
+    """
+    rowDeleted = Signal(int)
+
+    """
+    Sent when a cell contents has changed.
+    Args:
+        int: row index
+        int: column index
+        str: new cell contents
+    """
+    dataChanged = Signal(int, int, str)
+
+    """
+    Sent when the user asks for a row processing.
+    Args:
+        int: row index
+    """
+    process = Signal(list)
+
+    """
+    Sent when the user wants to stop the current processing.
+    """
+    processStopped = Signal()
+
+    """
+    Sent when the user asks for data loading from file.
+    Args:
+        str: rundex file name
+    """
+    rundexLoaded = Signal(str)
+
+    """
+    Sent when the user aks for data saving.
+    Args:
+        str: file name
+    """
+    rundexSaved = Signal(str)
+
+    """
+    Sent when the user asks for the settings window.
+    """
+    showSettings = Signal()
 
     # colors for the table rows
     OK_COLOR = "#3f00ff00"
@@ -60,7 +120,7 @@ class DrillView(QMainWindow):
         self.actionSaveAs.triggered.connect(self.saveRundexAs)
         self.actionSave.triggered.connect(self.saveRundex)
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
-        self.actionSettings.triggered.connect(self.show_settings)
+        self.actionSettings.triggered.connect(self.showSettings)
         self.actionClose.triggered.connect(self.close)
         self.actionAddRow.triggered.connect(self.add_row_after)
         self.actionDelRow.triggered.connect(self.del_selected_rows)
@@ -71,7 +131,7 @@ class DrillView(QMainWindow):
         self.actionProcessRow.triggered.connect(self.process_selected_rows)
         self.actionProcessAll.triggered.connect(self.process_all_rows)
         self.actionStopProcessing.triggered.connect(
-                lambda : self.process_stopped.emit()
+                lambda : self.processStopped.emit()
                 )
 
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
@@ -91,7 +151,7 @@ class DrillView(QMainWindow):
 
         self.settings.setIcon(icons.get_icon("mdi.settings"))
         self.settings.clicked.connect(
-                lambda : self.show_settings.emit()
+                lambda : self.showSettings.emit()
                 )
 
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
@@ -129,7 +189,7 @@ class DrillView(QMainWindow):
 
         self.stop.setIcon(icons.get_icon("mdi.stop"))
         self.stop.clicked.connect(
-                lambda : self.process_stopped.emit()
+                lambda : self.processStopped.emit()
                 )
 
     def setup_table(self):
@@ -176,7 +236,7 @@ class DrillView(QMainWindow):
         """
         if self.isWindowModified():
             self._saveDataQuestion()
-        self.instrument_changed.emit(instrument)
+        self.instrumentChanged.emit(instrument)
 
     def _changeAcquisitionMode(self, acquisitionMode):
         """
@@ -187,7 +247,7 @@ class DrillView(QMainWindow):
         """
         if self.isWindowModified():
             self._saveDataQuestion()
-        self.acquisition_mode_changed.emit(acquisitionMode)
+        self.acquisitionModeChanged.emit(acquisitionMode)
 
     def _getSelectionShape(self, selection):
         """
@@ -303,7 +363,7 @@ class DrillView(QMainWindow):
         n = self.nrows.value()
         for i in range(n):
             self.table.addRow(position + 1)
-            self.row_added.emit(position + 1)
+            self.rowAdded.emit(position + 1)
             position += 1
             self.setWindowModified(True)
 
@@ -315,7 +375,7 @@ class DrillView(QMainWindow):
         rows = sorted(rows, reverse=True)
         for row in rows:
             self.table.deleteRow(row)
-            self.row_deleted.emit(row)
+            self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
     def process_selected_rows(self):
@@ -357,7 +417,7 @@ class DrillView(QMainWindow):
                 )
         if not filename[0]:
             return
-        self.rundex_loaded.emit(filename[0])
+        self.rundexLoaded.emit(filename[0])
         self.setWindowModified(False)
 
     def saveRundexAs(self):
@@ -369,7 +429,7 @@ class DrillView(QMainWindow):
                 )
         if not filename[0]:
             return
-        self.rundex_saved.emit(filename[0])
+        self.rundexSaved.emit(filename[0])
         self.setWindowModified(False)
         self.rundexFile = filename[0]
 
@@ -379,7 +439,7 @@ class DrillView(QMainWindow):
         been used to import or export the current data.
         """
         if self.rundexFile:
-            self.rundex_saved.emit(self.rundexFile)
+            self.rundexSaved.emit(self.rundexFile)
             self.setWindowModified(False)
         else:
             self.saveRundexAs()
@@ -485,8 +545,8 @@ class DrillView(QMainWindow):
             self.table.removeRowBackground(row)
             self.coloredRows.remove(row)
 
-        self.data_changed.emit(row, column,
-                               self.table.getCellContents(row, column))
+        self.dataChanged.emit(row, column,
+                              self.table.getCellContents(row, column))
         self.setWindowModified(True)
 
     ###########################################################################
@@ -560,7 +620,7 @@ class DrillView(QMainWindow):
             self.blockSignals(False)
         else:
             self.table.addRow(0)
-            self.row_added.emit(0)
+            self.rowAdded.emit(0)
 
     def setRundexFile(self, filename):
         """

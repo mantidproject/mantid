@@ -24,25 +24,25 @@ class DrillPresenter:
         self.view.set_available_instruments(self.model.getAvailableTechniques())
 
         # view signals connection
-        self.view.instrument_changed.connect(self.instrumentChanged)
-        self.view.acquisition_mode_changed.connect(self.acquisitionModeChanged)
-        self.view.row_added.connect(
+        self.view.instrumentChanged.connect(self.instrumentChanged)
+        self.view.acquisitionModeChanged.connect(self.acquisitionModeChanged)
+        self.view.rowAdded.connect(
                 lambda position: self.model.add_row(position)
                 )
-        self.view.row_deleted.connect(
+        self.view.rowDeleted.connect(
                 lambda position: self.model.del_row(position)
                 )
-        self.view.data_changed.connect(
+        self.view.dataChanged.connect(
                 lambda row, column, contents: self.model.changeParameter(
                     row, column, contents)
                 )
         self.view.process.connect(self.process)
-        self.view.process_stopped.connect(self.stopProcessing)
-        self.view.rundex_loaded.connect(self.rundexLoaded)
-        self.view.rundex_saved.connect(
+        self.view.processStopped.connect(self.stopProcessing)
+        self.view.rundexLoaded.connect(self.rundexLoaded)
+        self.view.rundexSaved.connect(
                 lambda filename: self.model.exportRundexData(filename)
                 )
-        self.view.show_settings.connect(self.settingsWindow)
+        self.view.showSettings.connect(self.settingsWindow)
 
         # model signals connection
         self.model.process_started.connect(
