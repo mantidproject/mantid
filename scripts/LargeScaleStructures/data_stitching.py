@@ -24,8 +24,9 @@ else:
     except(ImportError, ImportWarning):
         pass
 if IS_IN_MANTIDGUI:
-    from qtpy import QtCore
+    from qtpy.QtCore import QObject, Signal, Slot
     from mantid.plots._compatability import plotSpectrum
+    from mantidqt.plotting.markers import RangeMarker
 
 class RangeSelector(object):
     """
@@ -34,17 +35,21 @@ class RangeSelector(object):
     """
     __instance = None
 
-    class _Selector(object):
+    class _Selector(QObject):
         """
             Selector class for selecting ranges in Mantidplot
         """
 
+        #fit_range_changed = Signal(list)
+
         def __init__(self):
+            super().__init__()
             self._call_back = None
             self._ws_output_base = None
             self._graph = "Range Selector"
 
-        #def disconnect(self):
+        def disconnect(self):
+            pass
             #if IS_IN_MANTIDGUI:
             #mantidplot.app.disconnect(mantidplot.app.mantidUI,
             #                          QtCore.SIGNAL("x_range_update(double,double)"),
@@ -82,10 +87,15 @@ class RangeSelector(object):
             if xmin is not None and xmax is not None:
                 l.set_xlim(xmin, xmax)
 
-            #if range_min is not None and range_max is not None:
-            #    mantidplot.selectMultiPeak(g, False, range_min, range_max)
-            #else:
-            #    mantidplot.selectMultiPeak(g, False)
+            if range_min is not None and range_max is not None:
+                self.fit_range = RangeMarker(l.figure.canvas, 'green', range_min, range_max)
+            else:
+                self.fit_range = RangeMarker(l.figure.canvas, 'green', 0.0, 0.0)
+
+            self.fit_range.range_changed.connect(self.fit_range_changed)
+            self.fit_range.set_visible(True)
+            self.fit_range.redraw()
+
 
     @classmethod
     def connect(cls, ws, call_back, xmin=None, xmax=None,
