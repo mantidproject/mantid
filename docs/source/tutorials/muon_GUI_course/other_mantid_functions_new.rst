@@ -46,7 +46,7 @@ This data is further separated into more sub-workspaces, these are listed below.
 *   **NAME12345 Pairs MA** these workspaces contain the Pairs (such as 'long' which is created by default) specified in the *Grouping Options* tab of the interface (see the Grouping section in :ref:`the_tabs` for more).
     Each workspace's name contains the name of the pair it holds data for. 
 
-**Fitting Results MA** contains the workspaces produced when data is fitted, the spectra and tables within are named with the convention 'NAME12345; Group/Pair Asym; Asymmetry; MA; Fitted; FunctionName'. 
+*   **Fitting Results MA** contains the workspaces produced when data is fitted, the spectra and tables within are named with the convention 'NAME12345; Group/Pair Asym; Asymmetry; MA; Fitted; FunctionName'. 
     In order, the parts of these names correspond to: the data run, the group or pair fitted, the fact the data is asymmetry, that it is from Muon Analysis, that it has been 
     fitted, and what function(s) were used. Data in Fitting Results MA is split into the following sub-workspaces:
 
@@ -76,8 +76,8 @@ hold a workspace history which lists the algorithms that have been applied to th
 
 To load a raw data file *without using* the Mantid Analysis GUI, and examine its content:
 
-    1. In the 'Workspaces' pane, click Load>File
-    2. Load the file HIFI00062798.nxs from the Reference Material folder by using the Browse button - See Figure 4.
+1. In the 'Workspaces' pane, click Load>File
+2. Load the file HIFI00062798.nxs from the Reference Material folder by using the Browse button - See Figure 4.
 
 .. figure:: /images/load_file2.gif
     :align: center
@@ -147,19 +147,19 @@ bottom of the workspace list pane can be used.
 
 Follow the instructions below to try this
 
-    1. Load the workspace HIFI00062798.nxs, see `Loading Data`_ for more on how to do this.
-    2. Using the drop-down menu next to the Execute button, type or select SaveAscii, and click Execute. This is shown in Figure 8.
+1. Load the workspace HIFI00062798.nxs, see `Loading Data`_ for more on how to do this.
+2. Using the drop-down menu next to the Execute button, type or select SaveAscii, and click Execute. This is shown in Figure 8.
 
-    .. figure:: /images/save_ascii2.gif
-        :align: center
+.. figure:: /images/save_ascii2.gif
+    :align: center
 
-        Figure 8: Where to find the SaveAscii Algorithm.
+    Figure 8: Where to find the SaveAscii Algorithm.
 
-    3. The SaveAscii Input Dialog box - shown in Figure should appear. Select a directory (for the written data file) and specify a file name. 
-    4. Note the workspace to be exported can be selected from the uppermost dropdown list, next to InputWorkspace, in this case let us leave it as HIFI00062798. 
-    5. Define which workspace spectra to export using the WorkspaceIndexMin and WorkspaceIndexMax inputs. Use these to save spectra 10 and 11.
-    6. Choose the type of data separator used in the file (CSV is usually a reliable option), add comments and uncheck the WriteXError box.
-    7. Export the spectra.
+3. The SaveAscii Input Dialog box - shown in Figure should appear. Select a directory (for the written data file) and specify a file name. 
+4. Note the workspace to be exported can be selected from the uppermost dropdown list, next to InputWorkspace, in this case let us leave it as HIFI00062798. 
+5. Define which workspace spectra to export using the WorkspaceIndexMin and WorkspaceIndexMax inputs. Use these to save spectra 10 and 11.
+6. Choose the type of data separator used in the file (CSV is usually a reliable option), add comments and uncheck the WriteXError box.
+7. Export the spectra.
 
 Overlaying and Styling Plots
 ============================
@@ -170,10 +170,10 @@ from the workspace pane.
 
 To try this follow these instructions:
 
-    1. Load the HIFI00062798 workspace and plot spectrum number 10 from the workspace panel, as described in `Loading Data`_ .
-    2. Go to the 'Plots' menu by clicking the button of the same name in the bottom left of the window, and ensure that the plot of spectrum 10 is selected in bold.
-    3. Return to the workspaces panel and right click on the HIFI00062798 workspace, as before going to Plot but this time selecting 'Overplot Spectrum...' rather than 'Spectrum...'. Plot spectrum 20.
-    4. Spectrum 20 should now be visible on the spectrum 10 plot along with the original data. This process is shown in Figure 9 below.
+1. Load the HIFI00062798 workspace and plot spectrum number 10 from the workspace panel, as described in `Loading Data`_ .
+2. Go to the 'Plots' menu by clicking the button of the same name in the bottom left of the window, and ensure that the plot of spectrum 10 is selected in bold.
+3. Return to the workspaces panel and right click on the HIFI00062798 workspace, as before going to Plot but this time selecting 'Overplot Spectrum...' rather than 'Spectrum...'. Plot spectrum 20.
+4. Spectrum 20 should now be visible on the spectrum 10 plot along with the original data. This process is shown in Figure 9 below.
 
 .. figure:: /images/overlay2.gif
     :align: center
@@ -186,18 +186,18 @@ Plot Styles
 The plot style a data set can be selected 
 using the gear icon at the top of the plot window, this will open the Figure options menu.
 
-    To demonstrate changing a plot's markers and curve colour follow these instructions:
+To demonstrate changing a plot's markers and curve colour follow these instructions:
 
-    1. Spectrum 20 of HIFI00062798 should already have been plotted, via the Workspaces pane. If not, do so now.
-    2. Click the gear icon above the plot, this will bring up a new Figure options window for the data set.
-    3. Go to the Curves tab and use the Color (RGBA) option under Line to change the colour from Blue to Red. Click on the coloured square to change it.
-    4. Click Apply to view the changes and save the selected option.
-    5. To change the marker style - by default none are shown - use the Style drop-down menu under the Marker heading in bold, use this now to change the marker style to square. Again, click Apply.
+1. Spectrum 20 of HIFI00062798 should already have been plotted, via the Workspaces pane. If not, do so now.
+2. Click the gear icon above the plot, this will bring up a new Figure options window for the data set.
+3. Go to the Curves tab and use the Color (RGBA) option under Line to change the colour from Blue to Red. Click on the coloured square to change it.
+4. Click Apply to view the changes and save the selected option.
+5. To change the marker style - by default none are shown - use the Style drop-down menu under the Marker heading in bold, use this now to change the marker style to square. Again, click Apply.
 
-    .. figure:: /images/othermantidfunctionsfig10.gif
-        :align: center
+.. figure:: /images/othermantidfunctionsfig10.gif
+    :align: center
 
-        Figure 10: How to change the line colour and marker style of a plot.
+    Figure 10: How to change the line colour and marker style of a plot.
 
 Editing Axes
 ------------
@@ -206,26 +206,26 @@ One can also change the axis settings, such as the maximum and minimum values, a
 The axis limits can be changed either through the Figure options menu, or by double clicking on the relevant axis, while other .
 See the instructions below for an example on how to change the X-Axis limits and set the Y-Scale to logarithmic.
 
-    1. Load the MUSR00024563 dataset using the muon analysis GUI. How to do this is described in the Home section of :ref:`the_tabs`.
-	2. Plot the backwards counts in the Workspace pane
-    3. Open the Figure options menu, or **or** double click on the X axis to Edit axis.
-    4. In the Axes tab of the Figure options, set the value in the box labelled Upper Limit to 16 **or** do the same for the box labelled Max in the Edit axis dialog.
-    5. Press Apply, **or** click the OK button.
-    6. In the Y-Axis section of the figure options, use the Scale drop-down menu and change the setting to log **or** double click on the Y axis and tick the box labelled Log.
-    7. Click OK and observe the changes to the plot, this process is shown for the Figure options in Figure 11, and the Edit axis in Figure 12. 
+1. Load the MUSR00024563 dataset using the muon analysis GUI. How to do this is described in the Home section of :ref:`the_tabs`.
+2. Plot the backwards counts in the Workspace pane
+3. Open the Figure options menu, or **or** double click on the X axis to Edit axis.
+4. In the Axes tab of the Figure options, set the value in the box labelled Upper Limit to 16 **or** do the same for the box labelled Max in the Edit axis dialog.
+5. Press Apply, **or** click the OK button.
+6. In the Y-Axis section of the figure options, use the Scale drop-down menu and change the setting to log **or** double click on the Y axis and tick the box labelled Log.
+7. Click OK and observe the changes to the plot, this process is shown for the Figure options in Figure 11, and the Edit axis in Figure 12. 
 
-    .. figure:: /images/othermantidfunctionsfig11.gif
-        :align: center
+.. figure:: /images/othermantidfunctionsfig11.gif
+    :align: center
 
-        Figure 11: Changing the X-Axis scale limits and setting the Y-Axis to logarithmic settings using the Figure options menu.
+    Figure 11: Changing the X-Axis scale limits and setting the Y-Axis to logarithmic settings using the Figure options menu.
 		
 
 .. figure:: /images/othermantidfunctionsfig12.gif
-        :align: center
+    :align: center
 
-        Figure 12:  Changing the X-Axis scale limits and setting the Y-Axis to logarithmic using the Edit axis dialog. 
-        Note that if the scale limits include negative values when doing this, Mantid 
-        will automatically use a 'symmetrical log' scale, which allows for negative values by having a range around 0 where
-        the scale is linear not logarithmic.
+    Figure 12:  Changing the X-Axis scale limits and setting the Y-Axis to logarithmic using the Edit axis dialog. 
+    Note that if the scale limits include negative values when doing this, Mantid 
+    will automatically use a 'symmetrical log' scale, which allows for negative values by having a range around 0 where
+    the scale is linear not logarithmic.
 
 

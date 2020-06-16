@@ -25,13 +25,13 @@ Loading a Workspace
 To load a file either: **Browse** or **Load Current Run** or simply type a run number (assuming you have defined the directory(ies) in which your files are stored)
 When typing a run number, or using the Load Current Run option, first select the desired instrument from the dropdown list. 
     
-    To demonstrate: 
+To demonstrate: 
     
-    1. Select MUSR in the instrument drop-down menu
-    2. Type run number 24563 in the Loading section and press enter, note this can only be done if the correct reference material folder was selected in :ref:`getting_started`.
-    3. This process shown in Figure 2(a), a plot of the data should appear similar to the one in Figure 2(d). 
+1. Select MUSR in the instrument drop-down menu
+2. Type run number 24563 in the Loading section and press enter, note this can only be done if the correct reference material folder was selected in :ref:`getting_started`.
+3. This process shown in Figure 2(a), a plot of the data should appear similar to the one in Figure 2(d). 
     
-    *NB the plot's appearance will vary based on the Time axis and Rebin data values as described later in this section and* :ref:`other_mantid_functions` 
+*NB the plot's appearance will vary based on the Time axis and Rebin data values as described later in this section and* :ref:`other_mantid_functions` 
 
 .. figure:: /images/load_gui2.gif
     :align: center
@@ -62,12 +62,12 @@ plot is set to show the asymmetry by default, which is the normalised ratio of t
 However, data collected only in the Forward, or Backward, detector banks can be viewed
 alone by adjusting the Group/Group Pair option. 
 
-    To try this, follow the instructions below:
+To try this, follow the instructions below:
 
-    1.  The MUSR00024563 file should already be loaded, if not do so now as described above 
-    2.  Go to the drop-down menu in the Groups and Pairs section of the home tab and change its setting from the default (long) 
-        to just the backward (bwd) or forward (fwd) detector arrays 
-    3.  Observe and consider the difference in the plot. This is shown in Figure 2(c).
+1.  The MUSR00024563 file should already be loaded, if not do so now as described above 
+2.  Go to the drop-down menu in the Groups and Pairs section of the home tab and change its setting from the default (long) 
+    to just the backward (bwd) or forward (fwd) detector arrays 
+3.  Observe and consider the difference in the plot. This is shown in Figure 2(c).
 
 .. figure:: /images/change_group2.gif
     :align: center
@@ -80,10 +80,10 @@ Plot Type
 Though the plot type shows asymmetry by default it can be changed to show positron counts against time using the Plot Type drop-down menu, which can be found in the Plotting section of the Home tab. 
 To demonstrate this, follow the example below.
 
-    1.  MUSR00024563.nxs should still be loaded from the previous task; if not, re-load the file.
-    2.  Ensure that the Group / Pair drop-down menu is set to either 'bwd' or 'fwd', as the plot type will not change if this is set to 'long'.
-    3.  Underneath the Plot Data section, in the Plot Type box change the type from 'Asymmetry' to 'Counts'. 
-        There should be a change in the data plot. See Figure 2(d) for the process.
+1.  MUSR00024563.nxs should still be loaded from the previous task; if not, re-load the file.
+2.  Ensure that the Group / Pair drop-down menu is set to either 'bwd' or 'fwd', as the plot type will not change if this is set to 'long'.
+3.  Underneath the Plot Data section, in the Plot Type box change the type from 'Asymmetry' to 'Counts'. 
+There should be a change in the data plot. See Figure 2(d) for the process.
 
 .. figure:: /images/plot_type2.gif
     :align: center
@@ -108,16 +108,16 @@ given value (entered in the Steps box to the right) or Variable, for binning
 with various steps. When entering values in the Steps box, do so as for parameters in the 
 :ref:`Rebin <algm-Rebin>` algorithm.
 
-    For example, to set the plot to a fixed bin-width of choice, follow the instructions below
+For example, to set the plot to a fixed bin-width of choice, follow the instructions below
     
-    1.  Load HIFI run number 00062798 (as described above).
-    2.  In the rebin section of the Home tab, use the drop-down menu and change its value from None to Fixed.
-    3.  In the box adjacent to it, input a suitable value - 10 is suggested - and press enter. This will cause a new workspace, HIFI62798; Pair Asym; long; Rebin; #1, to appear in HIFI62798 Pairs.
-    4.  The effect of rebinning is best viewed on only a certain portion of the data, use the Figure options as described in the Overlaying and Styling Plots section of :ref:`other_mantid_functions`
-    5.  Navigate to, HIFI62798; Pair Asym; long; Rebin; #1, then right click it and select Plot > Overplot spectrum with errors, 
-        the rebinned data should appear in orange over the unbinned dataset. If this does not happen, check the Loading Data section of :ref:`other_mantid_functions` 
-        and ensure the plotting has been carried out correctly. 
-        An example of this process is shown in Figure 5(c) below.
+1.  Load HIFI run number 00062798 (as described above).
+2.  In the rebin section of the Home tab, use the drop-down menu and change its value from None to Fixed.
+3.  In the box adjacent to it, input a suitable value - 10 is suggested - and press enter. This will cause a new workspace, HIFI62798; Pair Asym; long; Rebin; #1, to appear in HIFI62798 Pairs.
+4.  The effect of rebinning is best viewed on only a certain portion of the data, use the Figure options as described in the Overlaying and Styling Plots section of :ref:`other_mantid_functions`
+5.  Navigate to, HIFI62798; Pair Asym; long; Rebin; #1, then right click it and select Plot > Overplot spectrum with errors, 
+    the rebinned data should appear in orange over the unbinned dataset. If this does not happen, check the Loading Data section of :ref:`other_mantid_functions` 
+    and ensure the plotting has been carried out correctly. 
+    An example of this process is shown in Figure 5(c) below.
 
 .. figure:: /images/rebin2.gif
     :align: center
@@ -157,28 +157,28 @@ A Group Pair is a combination of two different detector groups. For example, the
 and bwd are in a pair called 'long'. This combines the detectors from both groups in order to be able to view them together, for example
 for the MuSR equipment this default case means viewing all 64 detectors. A detector group pair can include any two groups found in the group table. 
 
-    To try assigning new detector groups and pairs with the MUSR00024563 file (see `Home`_ for how to load files), 
-    follow the instructions below. For assistance, see figures 4(b) and 4(c).
+To try assigning new detector groups and pairs with the MUSR00024563 file (see `Home`_ for how to load files), 
+follow the instructions below. For assistance, see figures 4(b) and 4(c).
 
-    1.  First, go to the Grouping tab in the mantid muon GUI.
-    2.  Under the box labelled 'Description:', there is a table of the existing groups, with 'Group Name', 'Detector IDs' and 'N Detectors' as columns. 
-        'bwd' and 'fwd' should already be saved as groups.
-    3.  In the blank space under the existing group names, right click and enter the name 'sample_fwd'. This will be one of our new groups.
-    4.  Assign this new group Detector IDs of 1-2, in the blank space in the same row. Ndet will then fill automatically.
-    5.  Repeat this process to also add a group called 'sample_bwd' with Detector IDs of 10-11.
+1.  First, go to the Grouping tab in the mantid muon GUI.
+2.  Under the box labelled 'Description:', there is a table of the existing groups, with 'Group Name', 'Detector IDs' and 'N Detectors' as columns. 
+'bwd' and 'fwd' should already be saved as groups.
+3.  In the blank space under the existing group names, right click and enter the name 'sample_fwd'. This will be one of our new groups.
+4.  Assign this new group Detector IDs of 1-2, in the blank space in the same row. Ndet will then fill automatically.
+5.  Repeat this process to also add a group called 'sample_bwd' with Detector IDs of 10-11.
 
-    .. figure:: /images/adding_groups2.gif
-        :align: center
+.. figure:: /images/adding_groups2.gif
+    :align: center
 
-        Figure 4(b): How to add a new detector group using the Muon analysis GUI.
+    Figure 4(b): How to add a new detector group using the Muon analysis GUI.
         
-            *NB any string of numbers can be defined as Detector IDs, so long as they are within the number of detectors on the equipment 
-            used. E.g. '1,3-5,15,17-18' would be valid.*
+*NB any string of numbers can be defined as Detector IDs, so long as they are within the number of detectors on the equipment 
+used. E.g. '1,3-5,15,17-18' would be valid.*
     
-    6.  At the bottom of the tab there should be a table containing the default 'long' pair details. The columns in this table read 'Pair Name', 'Group 1', 'Group 2', 'Alpha', and 'Guess Alpha'.
-    7.  In the blank space under 'long' in the Name column, right click and enter a name for the new pair, such as 'sample_long'. 
-    8.  In the same row as the new pair, in the Forward drop down list select 'sample_fwd' and the Backward list select 'sample_bwd'. To update the Alpha value, click Guess Alpha. This process is 
-        shown in figure 4(c) below.
+6.  At the bottom of the tab there should be a table containing the default 'long' pair details. The columns in this table read 'Pair Name', 'Group 1', 'Group 2', 'Alpha', and 'Guess Alpha'.
+7.  In the blank space under 'long' in the Name column, right click and enter a name for the new pair, such as 'sample_long'. 
+8.  In the same row as the new pair, in the Forward drop down list select 'sample_fwd' and the Backward list select 'sample_bwd'. To update the Alpha value, click Guess Alpha. This process is 
+shown in figure 4(c) below.
 
 
 .. figure:: /images/group_pair2.gif
@@ -262,12 +262,12 @@ To select a function right click in the white box beneath where 'Fit Status' is 
 A new window will appear with several drop-down titles; 'Background', 'Calibrate' etc.; this is the MantidPlot-Fit dialog box, 
 from which one can select a function to use.
 
-    Follow the following instructions for an example of fitting: 
+Follow the following instructions for an example of fitting: 
     
-    1. Load the HIFI00062798 file from the reference material folder in the `Home`_ tab. 
-    2. Open the Fitting tab and right click in the functions box and select Add Function.
-    3. Right click and go to the Muon drop-down title in the MantidPlot-Fit dialogue box.
-    4. Select ExpDecayOsc and press the fit button. This process is shown in figure 7(a), and the resulting plot should resemble Figure 7(b).
+1. Load the HIFI00062798 file from the reference material folder in the `Home`_ tab. 
+2. Open the Fitting tab and right click in the functions box and select Add Function.
+3. Right click and go to the Muon drop-down title in the MantidPlot-Fit dialogue box.
+4. Select ExpDecayOsc and press the fit button. This process is shown in figure 7(a), and the resulting plot should resemble Figure 7(b).
 
 .. figure:: /images/fit_function2.gif
     :align: center
@@ -291,12 +291,12 @@ Factors such as the time range fitted and fixing constraint boundaries can be ad
 Once the user is happy with the initial fit parameters, clicking Fit will fit the chosen function
 to the data. The fit parameters will then be updated. 
 
-    To illustrate this: 
+To illustrate this: 
 
-    1. If not already done, load the HIFI00062798 file and add ExpDecayOsc function (see above for instructions).
-    2. Adjust the fit limits in the lower table, for instance set start and end times of 0.2 and 12 :math:`{\mu s}` respectively.
-    3. Click on the large Fit button top of the tab. This process is shown in Figure 7(c). Note that a better fit can be achieved if Alpha is guessed via the `Grouping`_ tab.
-    4. The resulting plot should look like Figure 7(d).
+1. If not already done, load the HIFI00062798 file and add ExpDecayOsc function (see above for instructions).
+2. Adjust the fit limits in the lower table, for instance set start and end times of 0.2 and 12 :math:`{\mu s}` respectively.
+3. Click on the large Fit button top of the tab. This process is shown in Figure 7(c). Note that a better fit can be achieved if Alpha is guessed via the `Grouping`_ tab.
+4. The resulting plot should look like Figure 7(d).
 
 .. figure:: /images/fit_scale2.gif
     :align: center
@@ -311,11 +311,11 @@ to the data. The fit parameters will then be updated.
 Each fit parameter can also be bound by certain fit limits (+/- 10% of its starting value, +/- 50% or
 a custom value), fixed at a specific user determined value, or tied together using some functional form.
 
-    To demonstrate setting bound limits:
+To demonstrate setting bound limits:
      
-    1. Go to the function name and ensure the top down arrow is clicked so all fit parameters are 
-    visible.
-    2. Right click the parameter 'A' and select Constraints > 50%. The parameter, 'A', now has both of its' upper and lower bounds fixed at 50%.
+1. Go to the function name and ensure the top down arrow is clicked so all fit parameters are 
+visible.
+2. Right click the parameter 'A' and select Constraints > 50%. The parameter, 'A', now has both of its' upper and lower bounds fixed at 50%.
 
 Composite Functions
 -------------------
@@ -323,35 +323,35 @@ Composite Functions
 Data will sometimes require a function which is made up of multiple other functions, these combinations can be through addition or multiplication.
 To create a fit function involving adding and multiplying functions, follow the examples below.
 
-    1.  Load the EMU00019631.nxs file
-    2.  Add the function StaticKuboToyabe to the data, using the method from `Using Fit Functions`_. 
-    3.  Repeat the same method to add a second function, ExpDecayMuon, to the same data set. Simply adding a function creates a composite where all functions are summed. See Figure 7(e) for the process.
+1.  Load the EMU00019631.nxs file
+2.  Add the function StaticKuboToyabe to the data, using the method from `Using Fit Functions`_. 
+3.  Repeat the same method to add a second function, ExpDecayMuon, to the same data set. Simply adding a function creates a composite where all functions are summed. See Figure 7(e) for the process.
     
-    .. figure:: /images/add_functions2.gif
-        :align: center
+.. figure:: /images/add_functions2.gif
+    :align: center
 
-        Figure 7(e): How to add two functions together. 
+    Figure 7(e): How to add two functions together. 
     
-    4.  At this point, it is possible to fit the composite function to the data. Do so now, and consider the quality of the fit between from X=0 and X=12 
-        (see Overlaying and Styling Plots in :ref:`other_mantid_functions` for changing plot limits).
+4.  At this point, it is possible to fit the composite function to the data. Do so now, and consider the quality of the fit between from X=0 and X=12 
+(see Overlaying and Styling Plots in :ref:`other_mantid_functions` for changing plot limits).
 
-    .. figure:: /images/add_functions_plot.PNG
-        :align: center
+.. figure:: /images/add_functions_plot.PNG
+    :align: center
 
-        Figure 7(f): A plot of the ExpDecayMuon and StaticKuboToyabe functions added together and fitted to EMU19631. 
+    Figure 7(f): A plot of the ExpDecayMuon and StaticKuboToyabe functions added together and fitted to EMU19631. 
     
-    5.  It should be clear that the sum of these functions does not properly model the oscillations in the data set, to rectify this a product function can be used.       
-    6.  Add the ProductFunction function (from the General function type), and remove ExpDecayMuon by right clicking on it and selecting remove function.
-    7.  Right click on the newly added ProductFunction and add two functions to it - ExpDecayMuon and GausOsc.
-    8.  The total function now consists of :math:`StaticKuboToyabe + (ExpDecayMuon * GausOsc)`. 
-        (The perceptive reader may have noticed that the same effect can be achieved by adding StaticKuboToyabe and GausOsc, this is true, however it would not demonstrate the use of the ProductFunction)
-    9.  Fit the new function to the data, note that Chi squared has decreased from 6.844 to 1.02 - the new fit function is a much better fit to the data. (Note: for a view of the plot with only this fit,
-        plot the workspace 'EMU19631; Pair Asym; long; MA; Fitted; StaticKuboToyabe, Productfunction')
+5.  It should be clear that the sum of these functions does not properly model the oscillations in the data set, to rectify this a product function can be used.       
+6.  Add the ProductFunction function (from the General function type), and remove ExpDecayMuon by right clicking on it and selecting remove function.
+7.  Right click on the newly added ProductFunction and add two functions to it - ExpDecayMuon and GausOsc.
+8.  The total function now consists of :math:`StaticKuboToyabe + (ExpDecayMuon * GausOsc)`. 
+(The perceptive reader may have noticed that the same effect can be achieved by adding StaticKuboToyabe and GausOsc, this is true, however it would not demonstrate the use of the ProductFunction)
+9.  Fit the new function to the data, note that Chi squared has decreased from 6.844 to 1.02 - the new fit function is a much better fit to the data. (Note: for a view of the plot with only this fit,
+plot the workspace 'EMU19631; Pair Asym; long; MA; Fitted; StaticKuboToyabe, Productfunction')
 
-    .. figure:: /images/multiply_functions2.gif
-        :align: center
+.. figure:: /images/multiply_functions2.gif
+    :align: center
 
-        Figure 7(g): How to add a function which is a product of two other functions to a third.
+    Figure 7(g): How to add a function which is a product of two other functions to a third.
 
 Sequentially Fitting Multiple Datasets
 --------------------------------------
@@ -366,16 +366,16 @@ would select ‘EMU19631; Pair; long; Asym; #1’.*
 Multiple workspaces can be selected in different combinations using the 'Select data to fit' menu. This is located to the right of the Single, Sequential and Simultaneous Fit options.
 Selecting many workspaces is useful for when using the sequential option, which allows Mantid to fit one function with a consistent set of parameters to a range of data sets. 
 
-    Follow the instructions below in order to sequentially fit a function to a range of data. 
+Follow the instructions below in order to sequentially fit a function to a range of data. 
 
-    1.  Load the data sets from EMU00019631-EMU00019634.
-    2.  Set up a function where StaticKuboToyabe and ExpDecayMuon are added together.
-    3.  Under the 'Fit' button, check the circle labelled Sequential Fit.
-    4.  To make a custom selection of data to fit, click the Select data to fit button; the check boxes in the menu which opens allows data to be selected. 
-        For this example, select the four 'Pair Asym; long' data sets loaded in step 1.
-    5.  To confirm the choice of data and leave the menu, click 'Select' at the bottom left of the window, the data can then be fitted by pressing the Fit button as before. 
-        Note that the GUI currently plots all data to a single window, which may not be ideal for sequential fits, see Loading Data in :ref:`basics_of_data_reductions` to
-        find out how to instead plot data directly from the workspace.
+1.  Load the data sets from EMU00019631-EMU00019634.
+2.  Set up a function where StaticKuboToyabe and ExpDecayMuon are added together.
+3.  Under the 'Fit' button, check the circle labelled Sequential Fit.
+4.  To make a custom selection of data to fit, click the Select data to fit button; the check boxes in the menu which opens allows data to be selected. 
+For this example, select the four 'Pair Asym; long' data sets loaded in step 1.
+5.  To confirm the choice of data and leave the menu, click 'Select' at the bottom left of the window, the data can then be fitted by pressing the Fit button as before. 
+Note that the GUI currently plots all data to a single window, which may not be ideal for sequential fits, see Loading Data in :ref:`basics_of_data_reductions` to
+find out how to instead plot data directly from the workspace.
 
 .. figure:: /images/sequential_fit2.gif
     :align: center
@@ -418,17 +418,17 @@ The first option in this section is the Function Name drop-down menu, selecting 
 to them in the table below. By default, checking the box next to a workspace in this table means its Log Values will be present in the results table. This can be changed with the Include/Exclude option
 (if Exclude is selected from the drop-down menu, checked workspaces will be the only ones *not* included in the table). The view can also be customised to only show selected workspaces.
 
-    As an exercise, follow the instructions below in order to produce a results table for a single individual or sequential fit.
+As an exercise, follow the instructions below in order to produce a results table for a single individual or sequential fit.
 
-    1.  Load the HIFI00062798 file from the reference folder, guess alpha as described in `Grouping`_ then fit the ExpDecayOsc function to it. 
-        To instead demonstrate a sequential fit table, load the EMU00019631-4 files, don't guess alpha, and then perform a sequential fit of ExpDecayOsc on those files.
-        (See `Using Fit Functions`_ for instructions on single and sequential fits.)
-    2.  In the Results tab, the default individual fit table should already be set up. Check that the Function Name and workspace(s) selected in the lower part of the tab show the
-        fit function and data used so far, respectively.
-    3.  Use the table in the 'Log Values' section to select parameters to include in the results table. This is done by checking the box next to them - try this now for 
-        run number and Temp_Sample.
-    4.  Pick a name for the table, then click Output Results. See figure 8(b) for the process for an individual fit, and 8(c) for sequential.
-    5. To view a table, right click it in the workspaces pane and Show Data.
+1.  Load the HIFI00062798 file from the reference folder, guess alpha as described in `Grouping`_ then fit the ExpDecayOsc function to it. 
+To instead demonstrate a sequential fit table, load the EMU00019631-4 files, don't guess alpha, and then perform a sequential fit of ExpDecayOsc on those files.
+(See `Using Fit Functions`_ for instructions on single and sequential fits.)
+2.  In the Results tab, the default individual fit table should already be set up. Check that the Function Name and workspace(s) selected in the lower part of the tab show the
+fit function and data used so far, respectively.
+3.  Use the table in the 'Log Values' section to select parameters to include in the results table. This is done by checking the box next to them - try this now for 
+run number and Temp_Sample.
+4.  Pick a name for the table, then click Output Results. See figure 8(b) for the process for an individual fit, and 8(c) for sequential.
+5. To view a table, right click it in the workspaces pane and Show Data.
 
 .. figure:: /images/individual_results_table2.gif
     :align: center
@@ -446,18 +446,18 @@ Plotting from a Results Table
 Once a results table has been created, there are now different sets of parameters available for individual analysis. In Mantid, it is possible to plot different parameters 
 against each other, to see the relationship between the two. 
 
-    Follow the instructions below in order to plot a graph from parameters in a Results Table. 
+Follow the instructions below in order to plot a graph from parameters in a Results Table. 
 
-    1.  Files EMU00019631.nxs to EMU00019634.nxs should already have been loaded, sequentially fitted and a Results Table produced from them during the last section. 
-        If not then load the files, fit and produce a table. 
-    2.  This example plots Temp_Sample against Lambda, which should automatically be assigned to the X and Y axes by Mantid (labelled X1 and Y1 respectively) click on Temp_Sample to select it. 
+1.  Files EMU00019631.nxs to EMU00019634.nxs should already have been loaded, sequentially fitted and a Results Table produced from them during the last section. 
+If not then load the files, fit and produce a table. 
+2.  This example plots Temp_Sample against Lambda, which should automatically be assigned to the X and Y axes by Mantid (labelled X1 and Y1 respectively) click on Temp_Sample to select it. 
         
-    *NB If data is not automatically assigned to the desired axes this can be changed manually. As an example, if in step 2. Temp_Sample was not already assigned to X, 
-    it could be right clicked after selection and then 'Set as X'. This process is shown in 8(d). There are also other options such as to assign data to the Y axis, or Y error.*
+*NB If data is not automatically assigned to the desired axes this can be changed manually. As an example, if in step 2. Temp_Sample was not already assigned to X, 
+it could be right clicked after selection and then 'Set as X'. This process is shown in 8(d). There are also other options such as to assign data to the Y axis, or Y error.*
     
-    3.  Next, hold down the 'Ctrl' key and click on the Lambda column to select this column as well as Temp_Sample.    
-    4.  Right click one of the columns and follow Plot > Line and Symbol. This will bring up a plot of Temp_Sample on the X axis and Lambda on the Y axis. See Figure 8(d) for the process.
-    5.  The axis titles may not be entirely correct, so it may be best to change them. To do this, just double click the title and re-write it.
+3.  Next, hold down the 'Ctrl' key and click on the Lambda column to select this column as well as Temp_Sample.    
+4.  Right click one of the columns and follow Plot > Line and Symbol. This will bring up a plot of Temp_Sample on the X axis and Lambda on the Y axis. See Figure 8(d) for the process.
+5.  The axis titles may not be entirely correct, so it may be best to change them. To do this, just double click the title and re-write it.
 
 .. figure:: /images/plot_results_table2.gif
     :align: center

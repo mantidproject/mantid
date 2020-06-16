@@ -24,13 +24,12 @@ Loading a Workspace
 
 To load a file either: **Browse** or **Load Current Run** or simply type a run number (assuming you have defined the directory(ies) in which your files are stored)
 When typing a run number, or using the Load Current Run option, first select the desired instrument from the dropdown list. 
+ 
+To demonstrate: 
+1. Select MUSR in the instrument drop-down menu
+2. Type run number 24563 in the Loading section and press enter, note this can only be done if the correct reference material folder was selected in :ref:`getting_started`. This process shown in Figure 16.
     
-    To demonstrate: 
-    
-    1. Select MUSR in the instrument drop-down menu
-    2. Type run number 24563 in the Loading section and press enter, note this can only be done if the correct reference material folder was selected in :ref:`getting_started`. This process shown in Figure 16.
-    
-    *NB the plot's appearance will vary based on the Time axis and Rebin data values as described later in this section and* :ref:`other_mantid_functions` 
+*NB the plot's appearance will vary based on the Time axis and Rebin data values as described later in this section and* :ref:`other_mantid_functions` 
 
 .. figure:: /images/thetabshomefig16.gif
     :align: center
@@ -53,23 +52,19 @@ given value (entered in the Steps box to the right) or Variable, for binning
 with various steps. When entering values in the Steps box, do so as for parameters in the 
 :ref:`Rebin <algm-Rebin>` algorithm.
 
-    For example, to set the plot to a fixed bin-width of choice, follow the instructions below
-    
-    1.  Load HIFI run number 00062798 (as described above).
-    2.  In the rebin section of the Home tab, use the drop-down menu and change its value from None to Fixed.
-    3.  In the box adjacent to it, input a suitable value - 10 is suggested - and press enter. This will cause a new workspace, HIFI62798; Pair Asym; long; Rebin to appear in HIFI62798 Pairs.
-    4.  The effect of rebinning is best viewed on only a certain portion of the data, use the Figure options as described in the Overlaying and Styling Plots section of :ref:`other_mantid_functions`
-    5.  Go to the workspace pane and plot HIFI62798; Pair Asym; long.
-	6.	Navigate to, HIFI62798; Pair Asym; long; Rebin; #1, then right click it and select Plot > Overplot spectrum with errors, 
-        the rebinned data should appear in orange over the unbinned dataset. If this does not happen, check the Loading Data section of :ref:`other_mantid_functions` 
-        and ensure the plotting has been carried out correctly. 
-        An example of this process is shown in Figure 17 below.
+For example, to set the plot to a fixed bin-width of choice, follow the instructions below
+
+1.  Load HIFI run number 00062798 (as described above).
+2.  In the rebin section of the Home tab, use the drop-down menu and change its value from None to Fixed.
+3.  In the box adjacent to it, input a suitable value - 10 is suggested - and press enter. This will cause a new workspace, HIFI62798; Pair Asym; long; Rebin to appear in HIFI62798 Pairs.
+4.  The effect of rebinning is best viewed on only a certain portion of the data, use the Figure options as described in the Overlaying and Styling Plots section of :ref:`other_mantid_functions`
+5.  Go to the workspace pane and plot HIFI62798; Pair Asym; long.
+6.	Navigate to, HIFI62798; Pair Asym; long; Rebin; #1, then right click it and select Plot > Overplot spectrum with errors, the rebinned data should appear in orange over the unbinned dataset. If this does not happen, check the Loading Data section of :ref:`other_mantid_functions` and ensure the plotting has been carried out correctly. An example of this process is shown in Figure 17 below.
 
 .. figure:: /images/thetabshomefig17.gif
     :align: center
 
     Figure 17: How to re-bin data, in this example from a width of 10 to 20 on the HIFI00062798
     dataset.
-
 
 A summary of each input field in the Home tab, and a description of its function(s) can be found in :ref:`Muon_Analysis-ref` under Home.
