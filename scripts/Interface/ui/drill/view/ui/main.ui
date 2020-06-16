@@ -393,7 +393,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionLoadRundex"/>
     <addaction name="actionSaveAs"/>
@@ -403,7 +403,7 @@
    </widget>
    <widget class="QMenu" name="menuProcess">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actionAddRow"/>
     <addaction name="actionDelRow"/>
@@ -414,7 +414,7 @@
    </widget>
    <widget class="QMenu" name="menuProcess_2">
     <property name="title">
-     <string>Process</string>
+     <string>&amp;Process</string>
     </property>
     <addaction name="actionProcessRow"/>
     <addaction name="actionProcessAll_2"/>
@@ -422,7 +422,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
    </widget>
    <addaction name="menuFile"/>
