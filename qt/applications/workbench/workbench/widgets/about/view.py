@@ -54,6 +54,26 @@ class AboutView(QDialog):
         qp.drawPixmap(self.width() - scaled_mantid.width(), self.height()-scaled_mantid.height(), scaled_mantid)
         qp.end()
 
+    def determine_dialog_dimensions(self):
+        width = REFERENCE_WIDTH
+        height = REFERENCE_HEIGHT
+
+        # gets the width of the screen where the main window is
+        screen = None
+        if hasattr(QGuiApplication,"screenAt"):
+            screen = QGuiApplication.screenAt(self.parent().geometry().center())
+        else:
+            screen = QGuiApplication.prmaryScreen()
+
+        if screen is not None:
+            screen_width = screen.size().width()
+            # the proportion of the whole window size for the about screen
+            window_scaling = 0.4
+            width = int(
+                screen_width * window_scaling) if screen_width * window_scaling > REFERENCE_WIDTH else REFERENCE_WIDTH
+            height = int(REFERENCE_HEIGHT * (width / REFERENCE_WIDTH))
+        return width, height
+
     def rescale_w(self, value):
         return int(value * (self.width() / REFERENCE_WIDTH))
 
@@ -61,17 +81,7 @@ class AboutView(QDialog):
         return int(value * (self.height() / REFERENCE_HEIGHT))
 
     def setupUI(self):
-        width = REFERENCE_WIDTH
-        height = REFERENCE_HEIGHT
-
-        # gets the width of the screen where the main window is
-        screen = QGuiApplication.screenAt(self.parent().geometry().center())
-        if screen is not None:
-            screen_width = screen.size().width()
-            # the proportion of the whole window size for the about screen
-            window_scaling = 0.4
-            width = int(screen_width * window_scaling) if screen_width * window_scaling > REFERENCE_WIDTH else REFERENCE_WIDTH
-            height = int(REFERENCE_HEIGHT * (width/REFERENCE_WIDTH))
+        width, height  = self.determine_dialog_dimensions()
 
         self.setMinimumSize(width, height)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -292,6 +302,7 @@ font: {self.rescale_w(12)}px;
         self.setLayout(parent_layout)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+
 
     def setup_command_link_button(self, link_button, text, image_location, width=40, height=40):
         link_button.setText(text)
