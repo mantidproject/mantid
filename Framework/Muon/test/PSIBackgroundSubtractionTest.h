@@ -99,6 +99,25 @@ public:
 
   void test_that_algorithm_does_not_execute_if_invalid_workspace_type() {
     PSIBackgroundSubtraction alg;
+    auto ws = createCountsTestWorkspace(2, 100);
+    IAlgorithm_sptr groupingAlg =
+        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupingAlg->initialize();
+    groupingAlg->setProperty("InputWorkspaces", ws);
+    groupingAlg->setPropertyValue("OutputWorkspace", "group");
+    groupingAlg->execute();
+
+    WorkspaceGroup_sptr group = groupingAlg->getProperty("OutputWorkspace");
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", group);
+
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    clearADS();
+  }
+
+  void test_that_algorithm_does_not_execute_if_invalid_y_label() {
+    PSIBackgroundSubtraction alg;
     auto ws = createInvalidTestWorkspace(2, 100);
 
     alg.initialize();
