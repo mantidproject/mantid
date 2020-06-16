@@ -78,12 +78,10 @@ class DrillView(QMainWindow):
         self.instrumentselector.setToolTip("Instrument")
         self.toolbar.insertWidget(0, self.instrumentselector, 0, Qt.AlignLeft)
         self.instrumentselector.instrumentSelectionChanged.connect(
-                lambda i : self.instrument_changed.emit(i)
-                )
+                self._changeInstrument)
 
         self.modeSelector.currentTextChanged.connect(
-                lambda a : self.acquisition_mode_changed.emit(a)
-                )
+                self._changeAcquisitionMode)
 
         self.datadirs.setIcon(icons.get_icon("mdi.folder"))
         self.datadirs.clicked.connect(self.show_directory_manager)
@@ -154,6 +152,8 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
+        if self.isWindowModified():
+            self._saveDataQuestion()
         children = self.findChildren(QDialog)
         for child in children:
             child.close()
@@ -162,6 +162,38 @@ class DrillView(QMainWindow):
     ###########################################################################
     # actions                                                                 #
     ###########################################################################
+
+    def _saveDataQuestion(self):
+        """
+        Opens a popup message asking if the user wants to save its data.
+        """
+        q = QMessageBox.question(self, "DrILL: Unsaved data", "You have "
+                                 + "unsaved modifications, do you want to save "
+                                 + "them before?")
+        if (q == QMessageBox.Yes):
+            self.saveRundex()
+
+    def _changeInstrument(self, instrument):
+        """
+        Triggered when the instrument selection changed.
+
+        Args:
+            instrument(str): instrument name
+        """
+        if self.isWindowModified():
+            self._saveDataQuestion()
+        self.instrument_changed.emit(instrument)
+
+    def _changeAcquisitionMode(self, acquisitionMode):
+        """
+        Triggered when the acquisition mode is changed.
+
+        Args:
+            acquisitionMode(str): acquisition mode name
+        """
+        if self.isWindowModified():
+            self._saveDataQuestion()
+        self.acquisition_mode_changed.emit(acquisitionMode)
 
     def _getSelectionShape(self, selection):
         """
