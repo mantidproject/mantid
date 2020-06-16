@@ -81,12 +81,14 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         else:
             bgsub_check_box.setCheckState(QtCore.Qt.Unchecked)
 
-        niter_item = QtWidgets.QTableWidgetItem(str(niter))
+        niter_item = QtWidgets.QTableWidgetItem()
+        niter_item.setData(QtCore.Qt.EditRole, int(niter))
         niter_item.setFlags(niter_item.flags() | QtCore.Qt.ItemIsEditable)
         niter_item.setToolTip('The number of iterations in the background estimation')
         self.table_selection.setItem(row_no, 4, niter_item)
 
-        xwindow_item = QtWidgets.QTableWidgetItem(str(xwindow))
+        xwindow_item = QtWidgets.QTableWidgetItem()
+        xwindow_item.setData(QtCore.Qt.EditRole, float(xwindow))
         xwindow_item.setFlags(xwindow_item.flags() | QtCore.Qt.ItemIsEditable)
         xwindow_item.setToolTip('The width of the convolution window used for finding the background (in x-axis units)')
         self.table_selection.setItem(row_no, 5, xwindow_item)
@@ -155,3 +157,12 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def is_searching(self):
         return self.finder_data.isSearching()
+
+    # # =================
+    # # validators
+    # # =================
+    # class IntDelegate(QtWidgets.QItemDelegate):
+    #     def createEditor(self, parent, option, index):
+    #         w = QtWigdets.Q
+    #         w.setInputMask("HH")
+    #         return w
