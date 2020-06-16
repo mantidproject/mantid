@@ -120,7 +120,9 @@ class DrillView(QMainWindow):
         self.actionSaveAs.triggered.connect(self.saveRundexAs)
         self.actionSave.triggered.connect(self.saveRundex)
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
-        self.actionSettings.triggered.connect(self.showSettings)
+        self.actionSettings.triggered.connect(
+                lambda : self.showSettings.emit()
+                )
         self.actionClose.triggered.connect(self.close)
         self.actionAddRow.triggered.connect(self.add_row_after)
         self.actionDelRow.triggered.connect(self.del_selected_rows)
