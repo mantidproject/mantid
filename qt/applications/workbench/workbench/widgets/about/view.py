@@ -303,7 +303,6 @@ font: {self.rescale_w(12)}px;
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-
     def setup_command_link_button(self, link_button, text, image_location, width=40, height=40):
         link_button.setText(text)
         link_button.setIconSize(QSize(self.rescale_w(width), self.rescale_h(height)))
