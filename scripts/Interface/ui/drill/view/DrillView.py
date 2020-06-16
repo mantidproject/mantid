@@ -61,6 +61,7 @@ class DrillView(QMainWindow):
         self.actionSave.triggered.connect(self.saveRundex)
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
         self.actionSettings.triggered.connect(self.show_settings)
+        self.actionClose.triggered.connect(self.close)
         self.actionAddRow.triggered.connect(self.add_row_after)
         self.actionDelRow.triggered.connect(self.del_selected_rows)
         self.actionCopyRow.triggered.connect(self.copySelectedCells)

@@ -224,8 +224,7 @@ class MainWindow(QMainWindow):
         action_open = create_action(self,
                                     "Open Script",
                                     on_triggered=self.open_file,
-                                    shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+O")
         action_load_project = create_action(self, "Open Project", on_triggered=self.load_project)
         action_save_script = create_action(self,
                                            "Save Script",
@@ -251,8 +250,7 @@ class MainWindow(QMainWindow):
         action_quit = create_action(self,
                                     "&Quit",
                                     on_triggered=self.close,
-                                    shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut="Ctrl+Q")
         self.file_menu_actions = [
             action_open, action_load_project, None, action_save_script, action_save_script_as,
             action_generate_ws_script, None, action_save_project, action_save_project_as, None,

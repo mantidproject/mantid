@@ -400,6 +400,8 @@
     <addaction name="actionSave"/>
     <addaction name="actionManageDirectories"/>
     <addaction name="actionSettings"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuProcess">
     <property name="title">
@@ -433,6 +435,9 @@
   <action name="actionLoadRundex">
    <property name="text">
     <string>Load rundex</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionProcessSelected">
@@ -511,6 +516,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>
