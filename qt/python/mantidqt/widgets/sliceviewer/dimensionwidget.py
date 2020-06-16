@@ -22,6 +22,7 @@ class State(Enum):
 class DimensionWidget(QWidget):
     dimensionsChanged = Signal()
     valueChanged = Signal()
+
     """
     Hold all the individual dimensions
 
@@ -84,7 +85,6 @@ class DimensionWidget(QWidget):
                     d.set_state(State.NONE)
 
         self.check_transpose()
-
         self.dimensionsChanged.emit()
 
     def check_transpose(self):
