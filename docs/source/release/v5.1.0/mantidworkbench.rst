@@ -41,7 +41,17 @@ Improvements
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 - We have neatened up the the slice viewer user interface, to reduce the amount of wasted space and devote more to the data view itself.
-- A table has been added to the slice viewer containing information about the the pixel the mouse is over.
+- We have implemented the interactive  plot details functionality from the SpectrumViewer in Mantidplot into the slice viewer there is now a table of details that update as you move your cursor over the data this includes the diension value and signal for multidimensional workspaces, and for matrix workspaces with a spectrum axis:
+   - Signal
+   - Spectra Number
+   - Detector ID
+   - Two Theta
+   - Azimuthal Angle
+   - Time of Flight
+   - Wavelength
+   - Energy
+   - d-Spacing
+   - Mod Q
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
   If there are no valid values for that detector the value will appear as invalid (grayed out).
