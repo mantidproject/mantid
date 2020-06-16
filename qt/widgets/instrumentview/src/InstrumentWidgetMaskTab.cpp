@@ -520,25 +520,67 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
   std::vector<size_t> detectorId{pickID};
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   auto wsMask = actor.getMaskWorkspace();
-  if (m_pixel->isChecked()) {
-    actor.addMaskBinsData(detectorId);
 
-    Mantid::detid_t detId = actor.getDetID(pickID);
+  // two cases : either we are on roi mode, or on masking mode
+  if (m_masking_on->isChecked()) {
+    // then either we are on single pixel picking mode, on on tube picking mode
+    if (m_pixel->isChecked()) {
+      actor.addMaskBinsData(detectorId);
 
-    // try to mask the detector, ignore any failure
-    try {
-      wsMask->setMasked(detId);
-    } catch (...) {
+      Mantid::detid_t detId = actor.getDetID(pickID);
+
+      // try to mask the detector, ignore any failure
+      try {
+        wsMask->setMasked(detId);
+      } catch (...) {
+      }
+    } else if (m_tube->isChecked()) {
+      if (!componentInfo.hasParent(pickID)) {
+        return;
+      }
+      auto parent = componentInfo.parent(pickID);
+      auto detectors = componentInfo.detectorsInSubtree(parent);
+      actor.addMaskBinsData(detectors);
+
+      for (auto det : detectors) {
+        Mantid::detid_t detId = actor.getDetID(det);
+        try {
+          wsMask->setMasked(detId);
+        } catch (...) {
+        }
+      }
     }
-  } else if (m_tube->isChecked()) {
-    if (!componentInfo.hasParent(pickID)) {
-      return;
-    }
-    auto parent = componentInfo.parent(pickID);
-    auto detectors = componentInfo.detectorsInSubtree(parent);
-    actor.addMaskBinsData(detectors);
+  } else if (m_roi_on->isChecked()) {
 
-    for (auto det : detectors) {
+    // first, find the oldest ancestor
+    auto ancestorID = pickID;
+    while (componentInfo.hasParent(ancestorID)) {
+      ancestorID = componentInfo.parent(ancestorID);
+    }
+
+    auto detectorsToMask = componentInfo.detectorsInSubtree(ancestorID);
+
+    if (m_pixel->isChecked()) {
+      // remove the picked pixel from the list of detectors to mask
+      std::remove(detectorsToMask.begin(), detectorsToMask.end(), pickID);
+
+    } else if (m_tube->isChecked()) {
+      if (!componentInfo.hasParent(pickID)) {
+        return;
+      }
+      auto parent = componentInfo.parent(pickID);
+      auto detectorsToKeep = componentInfo.detectorsInSubtree(parent);
+
+      // remove all the detectors from the picked tube from the list of
+      // detectors to mask
+      for (auto toKeep : detectorsToKeep) {
+        std::remove(detectorsToMask.begin(), detectorsToMask.end(), toKeep);
+      }
+    }
+    // then mask selected detectors
+    actor.addMaskBinsData(detectorsToMask);
+
+    for (auto det : detectorsToMask) {
       Mantid::detid_t detId = actor.getDetID(det);
       try {
         wsMask->setMasked(detId);
