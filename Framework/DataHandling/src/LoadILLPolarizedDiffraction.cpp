@@ -219,11 +219,10 @@ void LoadILLPolarizedDiffraction::loadData() {
       workspace->mutableX(monitor_no) = axis;
     }
 
-    // load the instrument if it has not been created
+    // load the instrument
     loadInstrument(workspace);
 
-    // rotate detectors to their position during measurement if position
-    // calibration is requested
+    // rotate detectors to their position during measurement
     moveTwoTheta(entry, workspace);
 
     // convert the spectrum axis to scattering angle
