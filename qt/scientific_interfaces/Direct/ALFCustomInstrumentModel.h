@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
-#include "DllConfig.h"
 
 #include <map>
 #include <string>
