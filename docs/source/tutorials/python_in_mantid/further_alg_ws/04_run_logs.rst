@@ -37,7 +37,7 @@ Filtering
 =========
 
 Note that you may find the algorithms :ref:`algm-FilterByLogValue` or :ref:`algm-FilterByTime`
-The LogFilter class can be used to filter logs using other logs. For instance, a log value describes a sine wave (Right-click > **Show Sample logs** on the Loaded ws below).
+The LogFilter class can be used to filter logs using other logs. For instance, a log value describes a sine wave (Right-click > **Show Sample logs** on the Loaded workspace below).
 
 Two additional logs mask out the positive and negative portions of this log. We can filter according to either.
 

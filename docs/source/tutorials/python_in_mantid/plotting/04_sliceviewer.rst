@@ -30,5 +30,5 @@ Loading a multi-dimensional workspace and plotting a default slice from it.
     sv = svw.getSlicer()
     sv.setPeaksWorkspaces(['peaksws'])
 
-For more details on the available functionality see the SliceViewer documentation
+For more details on the available functionality see the `SliceViewer documentation <https://www.mantidproject.org/MantidPlot:_SliceViewer>`_.
 

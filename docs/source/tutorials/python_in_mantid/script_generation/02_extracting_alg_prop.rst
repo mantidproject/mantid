@@ -4,7 +4,7 @@
 Extracting Algorithm Properties
 ===============================
 
-After an algorithm has been executed the properties remain available to access as long as the produced workspace is in existence.
+After an algorithm has been executed, the properties remain accessible for as long as the output workspace exists.
 Algorithms return their output properties as a tuple, which python can unpack automatically, for example:
 
 .. code-block:: python
@@ -22,6 +22,7 @@ To access input properties, use the :ref:`workspace history <Workspace-Workspace
     filename = algorithm.getPropertyValue("Filename")
 
 For some algorithms, such as :ref:`algm-Rebin`, you can get properties without accessing algorithm history.
+
 .. code-block:: python
 
     rebin_alg = Rebin('input_ws',Params='1,5,100')

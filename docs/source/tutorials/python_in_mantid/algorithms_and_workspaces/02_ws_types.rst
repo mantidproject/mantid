@@ -5,7 +5,7 @@ Workspace Types Via Python
 ==========================
 
 
-A Workspace object will always be one of these Python types :ref:`ITableWorkspace <04_table_ws_py>`, :ref:`MatrixWorkspace <03_matrix_ws_py>`, :ref:`WorkspaceGroup <05_group_ws_py>` or :ref:`MDWorkspace`. The MatrixWorkspace is the most commonly used and is often referred to simply as a :ref:`workspace`. Usage of the MDWorkspace is not required for this course.
+A Workspace object will always be one of the following Python types: :ref:`ITableWorkspace <04_table_ws_py>`, :ref:`MatrixWorkspace <03_matrix_ws_py>`, :ref:`WorkspaceGroup <05_group_ws_py>` or :ref:`MDWorkspace`. The MatrixWorkspace is the most commonly used type and is often referred to simply as a :ref:`workspace`. Usage of the MDWorkspace is not required for this course.
 
 All Workspace types have at least these methods:
 

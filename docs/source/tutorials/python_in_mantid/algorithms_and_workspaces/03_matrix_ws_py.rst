@@ -5,7 +5,7 @@ MatrixWorkspace with Python
 ===========================
 
 
-:ref:`MatrixWorkspaces <MatrixWorkspace>` are the most frequently used workspace type in Mantid. The two most commonly used implementations are :ref:`Workspace2D` and :ref:`EventWorkspace`. A :ref:`Workspace2D` stores the data in a histogram form (most commonly) or as point data for each spectra, an :ref:`EventWorkspace` stores a list of raw observations against each spectra. More detail can be found by looking at the individual workspace pages for these workspace types.
+:ref:`MatrixWorkspaces <MatrixWorkspace>` are the most frequently used workspace type in Mantid. The two most commonly used implementations are :ref:`Workspace2D` and :ref:`EventWorkspace`. A :ref:`Workspace2D` stores the data in either a histogram form (most commonly) or as point data for each spectrum, whereas an :ref:`EventWorkspace` stores a list of raw observations against each spectrum. More detail can be found by looking at the individual workspace pages for these workspace types.
 
 .. figure:: /images/MatrixWorkspaceHierachy.png
    :alt: MatrixWorkspaceHierachy

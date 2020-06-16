@@ -5,7 +5,7 @@ WorkspaceGroup with Python
 ===========================
 
 
-A :ref:`WorkspaceGroup` is a workspace which acts as a container for other workspaces. A WorkspaceGroup may be formed from any type of workspace and constructed on an arbitrary basis. :ref:`WorkspaceGroups <WorkspaceGroup>` are also used to store multi-period data at ISIS.
+A :ref:`WorkspaceGroup` is a workspace type that acts as a container for other workspaces. A WorkspaceGroup may be formed from any type of workspace and constructed on an arbitrary basis. :ref:`WorkspaceGroups <WorkspaceGroup>` are also used to store multi-period data at ISIS.
 
 "*A workspace group is essentially an array of workspaces*."
 

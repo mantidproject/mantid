@@ -4,7 +4,7 @@
 Settings
 ========
 
-Mantid's main configuration occurs through files called properties files. There are two (3 on Linux) that allow customisation of Mantid (read in this order):
+Mantid's main configuration occurs through properties files. There are two (three on Linux) that allow customisation of Mantid (read in this order):
 
 * Mantid.properties (found in the bin directory) - Default settings, replaced with each version of Mantid
 * Mantid.system.properties (linux only) - System-wide settings for multi-user systems.
@@ -17,10 +17,10 @@ The settings within these files occur as key-value pairs, i.e the default instru
 	default.instrument = INST_NAME
 	# Note, this is not a Python command
 
-where INST_NAME would be the value of the default, for example 'LARMOR'.
+where INST_NAME is the name of the default instrument, for example 'LARMOR'.
 
 
-All settings specified in these files are accessible via python through the config object, which can be imported from the mantid module. For example, to access the above setting do
+All settings specified in these files are accessible via python through the config object, which can be imported from the mantid module. For example, to access the default instrument:
 
 .. code-block:: python
 
@@ -28,10 +28,10 @@ All settings specified in these files are accessible via python through the conf
 	 
 	default_inst_name = config['default.instrument']
 
-It looks like and can be used just like a Python dictionary where the key on the left-hand side of the equals in the properties file is used to access the value in the "dictionary".
+The config object behaves like a Python dictionary, where each setting in the properties file is used as a key to obtain its value from the config object.
 
 
-The dictionary-like manner can also be used to update settings, i.e.
+The dictionary-like manner can also be used to update settings, e.g.
 
 .. code-block:: python
 

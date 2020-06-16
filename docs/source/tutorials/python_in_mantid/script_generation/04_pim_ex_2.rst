@@ -21,7 +21,7 @@ A - Processing ISIS Data
 Running an analysis Manually
 ----------------------------
 
-Here you are going to perform a number of steps in the Mantid user interface to correct some LOQ data by the incident beam monitor. For more information in a specific algorithm, click on its name.
+Here you are going to perform a number of steps in the Mantid user interface to correct a LOQ dataset using the incident beam monitor. For more information in a specific algorithm, click on its name.
 
 #. :ref:`algm-Load` - Use the LOQ48097.raw file, set the OutputWorkspace to `Small_Angle` and set LoadMonitors to Separate.
 #. :ref:`algm-ConvertUnits` - Convert the units for the Monitor workspace to wavelength with EMode=Elastic.

@@ -4,9 +4,9 @@
 Algorithm Help
 ==============
 
-Each of the algorithm functions has help that can be generated using the Python `help()` command.
+Each of the algorithm functions has help documentation, which can be accessed using the Python `help()` command.
 
-To show the details of a particular algorithm use the help command with the algorithm name as an argument.
+To show the purpose of a particular algorithm and examine the expected inputs, we may use the help command with the algorithm name as an argument.
 
 For example
 

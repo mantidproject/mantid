@@ -34,8 +34,8 @@ Workspace data can be read as numpy arrays, spectrum by spectrum:
 
 Warning
 -------
-**Be careful**: the outputs of *read* (y,x,e) are only **views into the data held by the workspace,** `ws`. If `ws` is deleted, the contents of x,y,e will be nonsense (the random contents of the memory locations formerly used for `ws`).
-If you need x,y,e to persist longer than ws, use the *extract*, which creates a copy of the data in `ws` into y,x,e.
+**Be careful**: the outputs of *read* (y,x,e) are only **views into the data held by the workspace,** `ws`. If `ws` is deleted, the contents of x,y,e will be invalid (the random contents of the memory locations formerly used for `ws`).
+If you need x,y,e data to persist longer than the workspace, use the *extract* methods, which create a copy of the data in `ws` into y,x,e.
 
 Extract
 -------
@@ -44,12 +44,14 @@ The data from all spectra can be obtained as a mutable multi-dimensional array i
 
 .. code-block:: python
 
-	ws = Load(Filename="HRP39182.RAW")
-	x = ws.extractX()
+    ws = Load(Filename="HRP39182.RAW")
+    x = ws.extractX()
+    y = ws.extractY()
+    e = ws.extractE()
 
-	print(x.shape)
-	print(y.shape)
-	print(e.shape)
+    print(x.shape)
+    print(y.shape)
+    print(e.shape)
 
 Since the *extract* methods return multi-dimensional numpy arrays. So to use  *extract* in a similar way to *read*, you need to `slice these arrays with indexing <https://numpy.org/doc/1.18/reference/arrays.indexing.html>`_. 
 
@@ -65,7 +67,7 @@ E.g. instead of `ws.readX(5)` you should use:
 Nested Looping
 ==============
 
-This allows access to the individual bins in each spectrum. e.g. To sum the y-values in each spectrum:
+This allows access to the individual bins in each spectrum. E.g. to sum the y-values in each spectrum:
 
 .. code-block:: python
 

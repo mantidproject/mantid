@@ -43,7 +43,7 @@ Workspace Objects
 
 There is a lot of information about workspaces that can be accessed.
 
-Below is a brief overview, but you may prefer:
+Below is a brief overview of the most commonly used functionality, for further details see:
 
 * :ref:`An exhaustive list <mantid.api.MatrixWorkspace>`
 * :ref:`A wider explanation <MatrixWorkspace>`
@@ -73,16 +73,6 @@ getSpectrum for info on the structure of a workspace eg. the spectrum number rel
 
     info = ws.spectrumInfo()
     print(info.hasDetectors(0))
-
-Other :ref:`Workspace Properties <Workspace-Properties_Workspaces>`
-
-.. code-block:: python
-
-    print("getMemorySize = " + str(myWS.getMemorySize()))
-
-You have already come across :ref:`getHistory <Workspace_History>`
-
-:ref:`getRun <Run>` is discussed next ...
 
 
 Useful links

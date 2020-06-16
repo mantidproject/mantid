@@ -4,9 +4,7 @@
 Instrument View Control
 =======================
 
-#The MantidPlot instrument window viewing the GEM instrument
-
-* When a workspace is loaded for a particular instrument, a virtual geometry is also created. The instrument view window within MantidPlot uses 3D rendering to visualize this geometry.
+* When a workspace is loaded for a particular instrument, a virtual geometry is also created. The instrument view window within Mantid uses 3D rendering to visualize this geometry.
 
 * Various aspects of this window are controllable from a Python script. This functionality is most useful for performing a set of operations before raising the window.
 

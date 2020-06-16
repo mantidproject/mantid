@@ -14,7 +14,7 @@ A - ISIS Data
 
 The HRPD data contains a spike (pulse) every 20 milliseconds. While this is nicely localized in time-of-flight, it is not the case upon conversion to d-spacing.
 
-The aim of this exercise is to use Mantid to write a script, not point-and-click, to exclude the contribution from the pulse.
+The aim of this exercise is to use Mantid to write a script, which excludes this contribution from the pulse.
 
 #. :ref:`algm-Load` - Load the given HRPD data set, HRP39182.RAW into a workspace called 'HRP39182'
 #. :ref:`algm-MaskBins` - Mask out the bins corresponding to the pulse with XMin=19990 and XMax=20040
