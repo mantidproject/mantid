@@ -136,12 +136,6 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        self.table.rowAdded.connect(
-                lambda position : self.row_added.emit(position)
-                )
-        self.table.rowDeleted.connect(
-                lambda position : self.row_deleted.emit(position)
-                )
         self.table.cellChanged.connect(self.on_cell_changed)
 
     def closeEvent(self, event):
@@ -309,6 +303,7 @@ class DrillView(QMainWindow):
         n = self.nrows.value()
         for i in range(n):
             self.table.addRow(position + 1)
+            self.row_added.emit(position + 1)
             position += 1
             self.setWindowModified(True)
 
@@ -320,6 +315,7 @@ class DrillView(QMainWindow):
         rows = sorted(rows, reverse=True)
         for row in rows:
             self.table.deleteRow(row)
+            self.row_deleted.emit(row)
             self.setWindowModified(True)
 
     def process_selected_rows(self):
@@ -564,6 +560,7 @@ class DrillView(QMainWindow):
             self.blockSignals(False)
         else:
             self.table.addRow(0)
+            self.row_added.emit(0)
 
     def setRundexFile(self, filename):
         """

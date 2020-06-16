@@ -140,7 +140,7 @@ class DrillTest(unittest.TestCase):
     def test_erase_row(self):
         self.presenter.instrumentChanged("D22")
 
-        self.view.table.addRow(0)
+        self.view.add_row_after()
         # add contents (last column has a special treatment !)
         for i in range(self.view.table.columnCount() - 1):
             item = QTableWidgetItem("test")
@@ -167,8 +167,8 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(len(self.model.samples[1]), 0)
 
     def test_copy_fill(self):
-        self.view.table.addRow(0)
-        self.view.table.addRow(0)
+        self.view.add_row_after()
+        self.view.add_row_after()
         n_rows = self.view.table.rowCount()
         self.assertEqual(n_rows, 3)
         # one cell filling
@@ -200,8 +200,8 @@ class DrillTest(unittest.TestCase):
             self.assertEqual(self.view.table.item(r, column).text(), test_str)
 
     def test_increment_fill(self):
-        self.view.table.addRow(0)
-        self.view.table.addRow(0)
+        self.view.add_row_after()
+        self.view.add_row_after()
         n_rows = self.view.table.rowCount()
         self.assertEqual(n_rows, 3)
         # one cell filling

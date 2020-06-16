@@ -18,9 +18,6 @@ class DrillTableWidget(QTableWidget):
     the custom header and delegate and expose some useful functions.
     """
 
-    rowAdded = Signal(int)
-    rowDeleted = Signal(int)
-
     def __init__(self, parent=None):
         super(DrillTableWidget, self).__init__(parent)
         header = DrillHeaderView(self)
@@ -49,7 +46,6 @@ class DrillTableWidget(QTableWidget):
         if ((position < 0) or (position > n_rows)):
             return
         self.insertRow(position)
-        self.rowAdded.emit(position)
 
     def deleteRow(self, position):
         """
@@ -62,7 +58,6 @@ class DrillTableWidget(QTableWidget):
         if ((position < 0) or (position >= n_rows)):
             return
         self.removeRow(position)
-        self.rowDeleted.emit(position)
 
     def eraseRow(self, position):
         """
