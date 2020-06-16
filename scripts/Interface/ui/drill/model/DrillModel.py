@@ -378,7 +378,7 @@ class DrillModel(QObject):
         self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
 
         # global settings
-        self.settings = json_data[RundexSettings.SETTINGS_JSON_KEY]
+        self.settings.update(json_data[RundexSettings.SETTINGS_JSON_KEY])
 
         # samples
         self.samples = list()

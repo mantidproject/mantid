@@ -441,16 +441,10 @@ class DrillModelTest(unittest.TestCase):
         self.model.importRundexData("test")
         self.mOpen.assert_called_once_with("test")
         self.mJson.load.assert_called_once()
-        self.assertEqual(self.model.settings, dict())
+        self.assertDictEqual(self.model.settings, self.SETTINGS["a1"])
         self.assertEqual(self.model.samples, list())
         self.assertEqual(self.model.instrument, "i1")
         self.assertEqual(self.model.acquisitionMode, "a1")
-
-        self.mJson.load.return_value.update({
-            "GlobalSettings": self.ACQUISITION_MODES
-            })
-        self.model.importRundexData("test")
-        self.assertEqual(self.model.settings, self.ACQUISITION_MODES)
 
     def test_exportRundexData(self):
         self.model.exportRundexData("test")
