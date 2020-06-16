@@ -164,6 +164,7 @@ class DrillPresenter:
         """
         Update the view (header and table) from the model.
         """
+        self.view.setRundexFile(self.model.rundexFile)
         # update the header
         self.view.set_available_modes(
                 self.model.getAvailableAcquisitionModes())

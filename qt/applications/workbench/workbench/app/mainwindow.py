@@ -230,8 +230,7 @@ class MainWindow(QMainWindow):
         action_save_script = create_action(self,
                                            "Save Script",
                                            on_triggered=self.save_script,
-                                           shortcut="Ctrl+S",
-                                           shortcut_context=Qt.ApplicationShortcut)
+                                           shortcut="Ctrl+S")
         action_save_script_as = create_action(self,
                                               "Save Script as...",
                                               on_triggered=self.save_script_as)

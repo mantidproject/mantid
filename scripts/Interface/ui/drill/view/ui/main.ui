@@ -396,7 +396,8 @@
      <string>File</string>
     </property>
     <addaction name="actionLoadRundex"/>
-    <addaction name="actionSaveRundex"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="actionSave"/>
     <addaction name="actionManageDirectories"/>
     <addaction name="actionSettings"/>
    </widget>
@@ -444,9 +445,9 @@
     <string>Process selected rows</string>
    </property>
   </action>
-  <action name="actionSaveRundex">
+  <action name="actionSaveAs">
    <property name="text">
-    <string>Save rundex</string>
+    <string>Save rundex as</string>
    </property>
   </action>
   <action name="actionManageDirectories">
@@ -502,6 +503,14 @@
   <action name="actionDelRow">
    <property name="text">
     <string>Remove selected row(s)</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save rundex</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

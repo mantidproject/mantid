@@ -49,6 +49,7 @@ class DrillModel(QObject):
         self.samples = list()
         self.settings = dict()
         self.controller = None
+        self.rundexFile = None
 
         # set the instrument and default acquisition mode
         self.setInstrument(config['default.instrument'])
@@ -80,6 +81,7 @@ class DrillModel(QObject):
         Args:
             instrument (str): instrument name
         """
+        self.rundexFile = None
         self.samples = list()
         self.settings = dict()
 
@@ -134,6 +136,7 @@ class DrillModel(QObject):
                 or (mode not in RundexSettings.ACQUISITION_MODES[
                     self.instrument])):
             return
+        self.rundexFile = None
         self.samples = list()
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
@@ -380,6 +383,7 @@ class DrillModel(QObject):
         self.samples = list()
         for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
             self.samples.append(sample)
+        self.rundexFile = filename
 
     def exportRundexData(self, filename):
         """
@@ -402,6 +406,16 @@ class DrillModel(QObject):
 
         with open(filename, 'w') as json_file:
             json.dump(json_data, json_file, indent=4)
+        self.rundexFile = filename
+
+    def getRundexFile(self):
+        """
+        Get the current rundex file.
+
+        Returns:
+            str: rundex file
+        """
+        return self.rundexFile
 
     def get_columns(self):
         return self.columns if self.columns is not None else list()

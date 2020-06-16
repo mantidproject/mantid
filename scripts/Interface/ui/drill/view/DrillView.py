@@ -7,7 +7,7 @@
 
 import os
 
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
+from qtpy.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QDialog
 from qtpy.QtCore import *
 from qtpy import uic
 
@@ -36,7 +36,7 @@ class DrillView(QMainWindow):
     PROCESSING_COLOR = "#3fffff00"
 
     def __init__(self):
-        super(DrillView, self).__init__()
+        super(DrillView, self).__init__(None, Qt.Window)
         self.here = os.path.dirname(os.path.realpath(__file__))
 
         # setup ui
@@ -44,18 +44,21 @@ class DrillView(QMainWindow):
                 'Interface.ui.drill.main.DrillTableWidget')
         self.setup_header()
         self.setup_table()
+        self.setFocus()
 
         self.buffer = list()  # for cells cut-copy-paste
         self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
         self.invalidCells = set()
         self.coloredRows = set()
+        self.rundexFile = None
 
     def setup_header(self):
         """
         Setup the window header. Set the buttons icons and connect the signals.
         """
         self.actionLoadRundex.triggered.connect(self.load_rundex)
-        self.actionSaveRundex.triggered.connect(self.save_rundex)
+        self.actionSaveAs.triggered.connect(self.saveRundexAs)
+        self.actionSave.triggered.connect(self.saveRundex)
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
         self.actionSettings.triggered.connect(self.show_settings)
         self.actionAddRow.triggered.connect(self.add_row_after)
@@ -111,7 +114,7 @@ class DrillView(QMainWindow):
         self.addrow.clicked.connect(self.add_row_after)
 
         self.save.setIcon(icons.get_icon("mdi.file-export"))
-        self.save.clicked.connect(self.save_rundex)
+        self.save.clicked.connect(self.saveRundexAs)
 
         self.help.setIcon(icons.get_icon("mdi.help"))
         self.help.clicked.connect(self.display_help)
@@ -325,7 +328,7 @@ class DrillView(QMainWindow):
             return
         self.rundex_loaded.emit(filename[0])
 
-    def save_rundex(self):
+    def saveRundexAs(self):
         """
         Ask for the saving of the table in a rundex file.
         """
@@ -335,6 +338,17 @@ class DrillView(QMainWindow):
         if not filename[0]:
             return
         self.rundex_saved.emit(filename[0])
+        self.rundexFile = filename[0]
+
+    def saveRundex(self):
+        """
+        Save in the current rundex file. The current file is the one which has
+        been used to import or export the current data.
+        """
+        if self.rundexFile:
+            self.rundex_saved.emit(self.rundexFile)
+        else:
+            self.saveRundexAs()
 
     def display_help(self):
         pass
@@ -510,6 +524,15 @@ class DrillView(QMainWindow):
             self.blockSignals(False)
         else:
             self.table.addRow(0)
+
+    def setRundexFile(self, filename):
+        """
+        Set the current rundex filename.
+
+        Args:
+            filename: rundex file name.
+        """
+        self.rundexFile = filename
 
     def set_progress(self, n, nmax):
         """
