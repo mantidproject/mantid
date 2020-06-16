@@ -278,6 +278,7 @@ class DrillView(QMainWindow):
         for i in range(n):
             self.table.addRow(position + 1)
             position += 1
+            self.setWindowModified(True)
 
     def del_selected_rows(self):
         """
@@ -287,6 +288,7 @@ class DrillView(QMainWindow):
         rows = sorted(rows, reverse=True)
         for row in rows:
             self.table.deleteRow(row)
+            self.setWindowModified(True)
 
     def process_selected_rows(self):
         """
@@ -328,6 +330,7 @@ class DrillView(QMainWindow):
         if not filename[0]:
             return
         self.rundex_loaded.emit(filename[0])
+        self.setWindowModified(False)
 
     def saveRundexAs(self):
         """
@@ -339,6 +342,7 @@ class DrillView(QMainWindow):
         if not filename[0]:
             return
         self.rundex_saved.emit(filename[0])
+        self.setWindowModified(False)
         self.rundexFile = filename[0]
 
     def saveRundex(self):
@@ -348,6 +352,7 @@ class DrillView(QMainWindow):
         """
         if self.rundexFile:
             self.rundex_saved.emit(self.rundexFile)
+            self.setWindowModified(False)
         else:
             self.saveRundexAs()
 
@@ -454,6 +459,7 @@ class DrillView(QMainWindow):
 
         self.data_changed.emit(row, column,
                                self.table.getCellContents(row, column))
+        self.setWindowModified(True)
 
     ###########################################################################
     # for model calls                                                         #
@@ -507,6 +513,7 @@ class DrillView(QMainWindow):
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
         self.table.resizeColumnsToContents()
+        self.setWindowModified(False)
 
     def fill_table(self, rows_contents):
         """
