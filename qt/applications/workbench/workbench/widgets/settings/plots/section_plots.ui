@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>575</width>
-    <height>498</height>
+    <width>801</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,8 +33,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>538</width>
-        <height>505</height>
+        <width>760</width>
+        <height>612</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -377,6 +377,39 @@
               </item>
               <item>
                <widget class="QSpinBox" name="error_every">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="legend_box">
+           <property name="title">
+            <string>Legend</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="legend_location_label">
+                <property name="text">
+                 <string>Default legend location</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="legend_location">
                 <property name="maximumSize">
                  <size>
                   <width>202</width>

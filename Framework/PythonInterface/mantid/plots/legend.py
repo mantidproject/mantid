@@ -16,6 +16,7 @@ import matplotlib
 from matplotlib import colors
 from matplotlib.patches import BoxStyle
 
+from mantid.kernel import ConfigService
 from mantid.plots.utility import legend_set_draggable
 
 
@@ -133,10 +134,17 @@ class LegendProperties(dict):
 
     @classmethod
     def create_legend(cls, props, ax):
+        if ConfigService.getString('plots.LegendLocation'):
+            loc = ConfigService.getString('plots.LegendLocation')
+        else:
+            loc = 'best'
+
         if not props:
-            legend_set_draggable(ax.legend(), True)
+            legend_set_draggable(ax.legend(loc=loc), True)
             return
 
+        if 'loc' not in props.keys():
+            props['loc'] = loc
         if int(matplotlib.__version__[0]) >= 2:
             legend = ax.legend(ncol=props['columns'],
                                prop={'size': props['entries_size']},
@@ -153,7 +161,8 @@ class LegendProperties(dict):
                                labelspacing=props['label_spacing'],
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
-                               columnspacing=props['column_spacing'])
+                               columnspacing=props['column_spacing'],
+                               loc=props['loc'])
         else:
             legend = ax.legend(ncol=props['columns'],
                                prop={'size': props['entries_size']},
@@ -168,7 +177,8 @@ class LegendProperties(dict):
                                labelspacing=props['label_spacing'],
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
-                               columnspacing=props['column_spacing'])
+                               columnspacing=props['column_spacing'],
+                               loc=props['loc'])
 
         title = legend.get_title()
         title.set_fontname(props['title_font'])
