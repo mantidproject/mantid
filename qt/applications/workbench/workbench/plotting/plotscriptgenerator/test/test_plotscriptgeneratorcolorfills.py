@@ -52,12 +52,13 @@ class PlotScriptGeneratorColorFillsTest(unittest.TestCase):
         kwargs.update(MANTID_ONLY_KWARGS)
         cfill = self.ax.imshow(self.test_ws, **CFILL_KWARGS)
         self.fig.colorbar(cfill,ax=[self.ax])
-        output = generate_plot_2d_command(cfill,"axes")
+        output, headers = generate_plot_2d_command(cfill,"axes")
         arg_string = convert_args_to_string([self.test_ws], kwargs)
         expected_command = [f"{CFILL_NAME} = axes.imshow({arg_string})",
                             f"{CFILL_NAME}.set_norm(plt.Normalize(vmin=",
                             f"cbar = fig.colorbar({CFILL_NAME}, ax=[axes], pad=0.06)"]
         self.assertEqual(len(expected_command), len(output))
+        self.assertEqual(len(headers), 0)
         for line_no in range(len(output)):
             # only compare to the length of the expected output
             # as one line is truncated on purpose

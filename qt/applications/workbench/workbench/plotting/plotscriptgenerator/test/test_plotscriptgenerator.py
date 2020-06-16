@@ -24,7 +24,8 @@ GEN_SUBPLOTS_CMD = 'workbench.plotting.plotscriptgenerator.generate_subplots_com
 GEN_AXIS_LIMIT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_axis_limit_commands'
 GET_AUTOSCALE_LIMITS = 'workbench.plotting.plotscriptgenerator.axes.get_autoscale_limits'
 
-SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
+SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
+                 "from mantid.api import AnalysisDataService\n"
                  "\n"
                  "ADS.retrieve(...)\n"
                  "\n"
