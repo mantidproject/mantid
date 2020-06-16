@@ -37,7 +37,7 @@ public:
   static LoadILLSANSTest *createSuite() { return new LoadILLSANSTest(); }
   static void destroySuite(LoadILLSANSTest *suite) { delete suite; }
 
-  void setUp() override {
+  LoadILLSANSTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D11/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D33/");

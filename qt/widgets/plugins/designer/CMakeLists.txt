@@ -1,7 +1,3 @@
-# Require additional Qt packages
-find_package(Qt4 COMPONENTS QtDesigner REQUIRED)
-include(${QT_USE_FILE})
-
 set(SRC_FILES src/DesignerPlugin.cpp src/PluginCollectionInterface.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -10,6 +6,9 @@ set(INC_FILES
     inc/MantidQtWidgets/Plugins/Designer/PluginCollectionInterface.h)
 
 set(MOC_FILES ${INC_FILES})
+
+# Moc needs the include directores for the designer before running
+include_directories(SYSTEM ${QT_QTDESIGNER_INCLUDE_DIR})
 
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsPluginsDesigner
                    QT_VERSION 4
@@ -21,6 +20,8 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsPluginsDesigner
                      LIBRARY_NAME=MantidQtWidgetsPluginsDesigner
                    INCLUDE_DIRS
                      inc
+                     ../../common
+                     ../../plotting
                    LINK_LIBS
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}

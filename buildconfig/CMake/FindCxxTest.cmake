@@ -133,7 +133,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${CXXTEST_PYTHON_FILES} ${CXXTEST_TESTGEN_EXECUTABLE}
-        COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
+        COMMAND ${Python_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
          ${_printer} --world ${_cxxtest_testname} ${_cxxtest_include} -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
@@ -150,7 +150,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       add_custom_command(
         OUTPUT  ${_cxxtest_cpp}
         DEPENDS ${_cxxtest_h} ${CXXTEST_PYTHON_FILES} ${CXXTEST_TESTGEN_EXECUTABLE}
-        COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --part
+        COMMAND ${Python_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --part
         --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
 	)
 

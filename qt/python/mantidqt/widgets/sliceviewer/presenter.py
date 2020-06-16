@@ -52,7 +52,11 @@ class SliceViewer(object):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_nonorthogonal_axes_button()
 
+        if self.model.get_ws_type() == WS_TYPE.MATRIX:
+            self.view.data_view.image_info_widget.setWorkspace(ws)
+
         self.view.setWindowTitle(f"SliceViewer - {self.model.get_ws_name()}")
+
         self.new_plot()
 
     def new_plot_MDH(self):
