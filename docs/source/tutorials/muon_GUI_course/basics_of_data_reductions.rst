@@ -55,11 +55,11 @@ the correction of detector deadtime see: Kilcoyne, RAL report RAL-94-080 (1994).
 
     To observe the effect of dead time, follow the instructions below:
 
-    1.  Open the Muon Analysis GUI and make sure 'none' is selected for Dead Time Correction (in the Instrument section of the in the Home :ref:`Tab<the_tabs>`)
+    1.  Open the Muon Analysis GUI and make sure 'none' is selected for Dead Time Correction (in the Instrument section of the Home :ref:`Tab<the_tabs>`)
     2.  Load data file EMU00034998.nxs using the GUI. 
-    3.  This example is best viewed with a fixed rebin with steps of 10, make this change now as described the Home :ref:`Tab<the_tabs>` section on Data Binning.
+    3.  This example is best viewed with a fixed rebin with steps of 10, select Fixed from the dropdown menu and then type 10 into the box.
     4.  To compare this data to some with dead time correction, its name must be changed so that Mantid does not automatically update the workspace. 
-        Go to the workspaces pane and navigate via Muon Data > EMU34998 > EMU34998 Pairs, and right click on the Rebin dataset, then select Rename and pick a suitable new
+        Go to the workspaces pane and navigate via EMU34998 > EMU34998 Pairs, and right click on the Rebin dataset, then select Rename and pick a suitable new
         name such as 'NoDeadTime', then click on Run.
     5.  Plot this data as described by Loading Data in :ref:`other_mantid_functions`.
     6.  The effect of the dead time correction is most apparent in the first 16 :math:`{\mu s}`, to easily view this portion of the data, use the Figure Options to set the plot's
@@ -68,7 +68,7 @@ the correction of detector deadtime see: Kilcoyne, RAL report RAL-94-080 (1994).
     8.  Return to the EMU34998 Pairs workspace as in step 4. There should now be a new Rebin dataset along with the renamed one, Overplot this new spectrum onto the plot of NoDeadTime
         (see Overlaying Data and Changing Plot Style section of :ref:`other_mantid_functions` for this process). Consider the differences between the two curves.
 
-.. figure:: /images/dead_time_correction2.gif
+.. figure:: /images/datareductionfig14.gif
     :align: center
 
     Figure 14: The effect of dead time correction on a data set. 
@@ -90,13 +90,13 @@ to be 1. However, the Guess Alpha tool allows for a more accurate determination 
     
     3. To generate :math:`{\alpha}` click on Guess Alpha. This process is shown in Figure 15.
 
-    .. figure:: /images/guess_alpha2.gif
+    .. figure:: /images/datareductionfig15.gif
         :align: center
 
         Figure 15: How to use the Guess Alpha tool in the Muon Analysis GUI.
         
     What has happened? (reloading the data file might be needed to observe the changes.) 
     
-    4. Try creating the "sample_long" group as described in the Grouping Options section of :ref:`the_tabs` and guessing alpha with this group highlighted rather than "long". Consider the changes that can be observed.
+    4. Try creating the "sample_long" group as described in :ref:`the_tabs_grouping` and guessing alpha with this group highlighted rather than "long". Consider the changes that can be observed.
 
 
