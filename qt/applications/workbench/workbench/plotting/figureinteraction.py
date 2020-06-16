@@ -716,6 +716,11 @@ class FigureInteraction(object):
                 colorbar_max = np.nanmax(ax.images[-1].get_array())
                 for image in ax.images:
                     image.set_clim(colorbar_min, colorbar_max)
+
+                    # Update the colorbar label
+                    cb = image.colorbar
+                    if cb:
+                        datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
                     self._change_colorbar_axes(LogNorm)
 
