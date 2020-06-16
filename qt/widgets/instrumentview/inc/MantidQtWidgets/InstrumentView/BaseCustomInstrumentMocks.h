@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -29,7 +28,7 @@ using Mantid::Geometry::Instrument;
 using namespace MantidQt;
 using namespace MantidQt::MantidWidgets;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockBaseCustomInstrumentView
+class MockBaseCustomInstrumentView
     : public MantidQt::MantidWidgets::IBaseCustomInstrumentView {
 public:
   explicit MockBaseCustomInstrumentView(const std::string &instrument,
@@ -59,7 +58,7 @@ public:
   MOCK_METHOD0(getQWidget, QWidget *());
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MockBaseCustomInstrumentModel
+class MockBaseCustomInstrumentModel
     : public MantidQt::MantidWidgets::IBaseCustomInstrumentModel {
 public:
   explicit MockBaseCustomInstrumentModel(){};
@@ -81,7 +80,7 @@ public:
 
 // Allows us to turn on and off mocks to functions from the presenter
 // do not repeat testing
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PartMockBaseCustomInstrumentPresenter
+class PartMockBaseCustomInstrumentPresenter
     : public BaseCustomInstrumentPresenter {
 public:
   explicit PartMockBaseCustomInstrumentPresenter(
