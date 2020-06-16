@@ -66,6 +66,7 @@ Improvements
 - The colorbar on colorfill plots is now labelled.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
 - Added an option to set the default ```drawstyle``` within the workbench settings window. Additionally, the ```linestyle``` can now be set to 'None'.
+- Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
 
 Bugfixes
 ########
