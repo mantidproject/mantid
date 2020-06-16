@@ -201,6 +201,7 @@ class RundexSettings(object):
     # Json keys
     INSTRUMENT_JSON_KEY = "Instrument"
     TECHNIQUE_JSON_KEY = "Technique"
+    MODE_JSON_KEY = "AcquisitionMode"
     SETTINGS_JSON_KEY = "GlobalSettings"
     SAMPLES_JSON_KEY = "Samples"
     CUSTOM_OPT_JSON_KEY = "CustomOptions"

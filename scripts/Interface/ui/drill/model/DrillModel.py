@@ -375,6 +375,7 @@ class DrillModel(QObject):
             json_data = json.load(json_file)
 
         self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
+        self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
 
         # global settings
         self.settings = json_data[RundexSettings.SETTINGS_JSON_KEY]
@@ -394,7 +395,7 @@ class DrillModel(QObject):
         """
         json_data = dict()
         json_data[RundexSettings.INSTRUMENT_JSON_KEY] = self.instrument
-        json_data[RundexSettings.TECHNIQUE_JSON_KEY] = self.acquisitionMode
+        json_data[RundexSettings.MODE_JSON_KEY] = self.acquisitionMode
 
         # global settings
         json_data[RundexSettings.SETTINGS_JSON_KEY] = self.settings
