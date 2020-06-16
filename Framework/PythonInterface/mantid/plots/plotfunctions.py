@@ -323,6 +323,8 @@ def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, 
 def _add_default_plot_kwargs_from_settings(plot_kwargs, errors):
     if 'linestyle' not in plot_kwargs:
         plot_kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
+    if 'drawstyle' not in plot_kwargs:
+        plot_kwargs['drawstyle'] = ConfigService.getString("plots.line.DrawStyle")
     if 'linewidth' not in plot_kwargs:
         plot_kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
     if 'marker' not in plot_kwargs:
