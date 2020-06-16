@@ -41,6 +41,17 @@ Improvements
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 - We have neatened up the the slice viewer user interface, to reduce the amount of wasted space and devote more to the data view itself.
+- We have implemented the interactive  plot details functionality from the SpectrumViewer in Mantidplot into the slice viewer there is now a table of details that update as you move your cursor over the data this includes the diension value and signal for multidimensional workspaces, and for matrix workspaces with a spectrum axis:
+   - Signal
+   - Spectra Number
+   - Detector ID
+   - Two Theta
+   - Azimuthal Angle
+   - Time of Flight
+   - Wavelength
+   - Energy
+   - d-Spacing
+   - Mod Q
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
   If there are no valid values for that detector the value will appear as invalid (grayed out).
@@ -51,9 +62,11 @@ Improvements
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 - The figure options menu now has a help button which opens the documentation for the menu.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
+- Monitors are no longer shown on bin and colorfill plots.
 - The colorbar on colorfill plots is now labelled.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
 - When choosing a marker in the figure options, if one of the marker colours would not be used that selection is disabled.
+- Added an option to set the default ```drawstyle``` within the workbench settings window. Additionally, the ```linestyle``` can now be set to 'None'.
 
 Bugfixes
 ########
