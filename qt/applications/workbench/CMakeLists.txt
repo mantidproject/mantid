@@ -95,6 +95,7 @@ set(TEST_FILES
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py
+    workbench/widgets/settings/test/test_settings_model.py
     workbench/widgets/settings/test/test_settings_presenter.py
     workbench/widgets/settings/test/test_settings_view.py
     workbench/widgets/settings/general/test/test_general_settings.py
