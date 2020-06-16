@@ -175,41 +175,39 @@ void XIntegrationScrollBar::updateMinMax() {
 
 //---------------------------------------------------------------------------------//
 
-XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow,
-                                         bool hidden)
+XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
     : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0),
-      m_totalMaximum(1), m_minimum(0), m_maximum(1), m_hidden(hidden) {
+      m_totalMaximum(1), m_minimum(0), m_maximum(1) {
   // if the integration control panel is hidden, most of the fields should not
   // be declared
-  if (!hidden) {
-    auto *layout = new QHBoxLayout();
-    m_minText = new QLineEdit(this);
-    m_minText->setMaximumWidth(100);
-    m_minText->setToolTip("Minimum x value");
-    m_maxText = new QLineEdit(this);
-    m_maxText->setMaximumWidth(100);
-    m_maxText->setToolTip("Maximum x value");
-    m_units = new QLabel("TOF", this);
-    m_setWholeRange = new QPushButton("Reset");
-    m_setWholeRange->setToolTip("Reset integration range to maximum");
-    m_scrollBar = new XIntegrationScrollBar(this);
 
-    layout->addWidget(m_units, 0);
-    layout->addWidget(m_minText, 0);
-    layout->addWidget(m_scrollBar, 1);
-    layout->addWidget(m_maxText, 0);
-    layout->addWidget(m_setWholeRange, 0);
-    setLayout(layout);
+  auto *layout = new QHBoxLayout();
+  m_minText = new QLineEdit(this);
+  m_minText->setMaximumWidth(100);
+  m_minText->setToolTip("Minimum x value");
+  m_maxText = new QLineEdit(this);
+  m_maxText->setMaximumWidth(100);
+  m_maxText->setToolTip("Maximum x value");
+  m_units = new QLabel("TOF", this);
+  m_setWholeRange = new QPushButton("Reset");
+  m_setWholeRange->setToolTip("Reset integration range to maximum");
+  m_scrollBar = new XIntegrationScrollBar(this);
 
-    connect(m_scrollBar, SIGNAL(changed(double, double)), this,
-            SLOT(sliderChanged(double, double)));
-    connect(m_scrollBar, SIGNAL(running(double, double)), this,
-            SLOT(sliderRunning(double, double)));
-    connect(m_minText, SIGNAL(editingFinished()), this, SLOT(setMinimum()));
-    connect(m_maxText, SIGNAL(editingFinished()), this, SLOT(setMaximum()));
-    connect(m_setWholeRange, SIGNAL(clicked()), this, SLOT(setWholeRange()));
-    updateTextBoxes();
-  }
+  layout->addWidget(m_units, 0);
+  layout->addWidget(m_minText, 0);
+  layout->addWidget(m_scrollBar, 1);
+  layout->addWidget(m_maxText, 0);
+  layout->addWidget(m_setWholeRange, 0);
+  setLayout(layout);
+
+  connect(m_scrollBar, SIGNAL(changed(double, double)), this,
+          SLOT(sliderChanged(double, double)));
+  connect(m_scrollBar, SIGNAL(running(double, double)), this,
+          SLOT(sliderRunning(double, double)));
+  connect(m_minText, SIGNAL(editingFinished()), this, SLOT(setMinimum()));
+  connect(m_maxText, SIGNAL(editingFinished()), this, SLOT(setMaximum()));
+  connect(m_setWholeRange, SIGNAL(clicked()), this, SLOT(setWholeRange()));
+  updateTextBoxes();
 }
 
 void XIntegrationControl::sliderChanged(double minimum, double maximum) {
@@ -255,10 +253,9 @@ void XIntegrationControl::setRange(double minimum, double maximum) {
   m_minimum = minimum;
   m_maximum = maximum;
   double w = m_totalMaximum - m_totalMinimum;
-  if (!m_hidden) {
-    m_scrollBar->set((m_minimum - m_totalMinimum) / w,
-                     (m_maximum - m_totalMinimum) / w);
-  }
+  m_scrollBar->set((m_minimum - m_totalMinimum) / w,
+                   (m_maximum - m_totalMinimum) / w);
+
   updateTextBoxes();
   emit changed(m_minimum, m_maximum);
 }

@@ -53,8 +53,8 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
   const auto energyTransferList = map[QString("energyTransfer")].toList();
   const auto min = energyTransferList[0].toDouble();
   const auto max = energyTransferList[1].toDouble();
-  if (energyTransferList.size() > 2) {
-    const auto isIntegrable = energyTransferList[2].toBool();
+  if (energyTransferList.size() == 3) {
+    const bool isIntegrable = energyTransferList[2].toBool();
     if (isIntegrable) {
       obj.setBinRange(min, max);
     }

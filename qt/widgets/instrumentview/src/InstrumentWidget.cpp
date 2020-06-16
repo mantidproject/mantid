@@ -166,8 +166,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
     m_shouldIntegrate = true;
   }
 
-  m_xIntegration = new XIntegrationControl(this, !m_shouldIntegrate);
   if (m_shouldIntegrate) {
+    m_xIntegration = new XIntegrationControl(this);
     mainLayout->addWidget(m_xIntegration);
     connect(m_xIntegration, SIGNAL(changed(double, double)), this,
             SLOT(setIntegrationRange(double, double)));
@@ -184,7 +184,6 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   infoLayout->setStretchFactor(mInteractionInfo, 1);
   infoLayout->setStretchFactor(m_help, 0);
   mainLayout->addLayout(infoLayout);
-
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
 
@@ -888,7 +887,9 @@ void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
  * python.
  */
 void InstrumentWidget::setBinRange(double xmin, double xmax) {
-  m_xIntegration->setRange(xmin, xmax);
+  if (m_shouldIntegrate) {
+    m_xIntegration->setRange(xmin, xmax);
+  }
 }
 
 /**
@@ -1256,12 +1257,12 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_maskTab = new InstrumentWidgetMaskTab(this);
   connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
+  m_maskTab->loadSettings(settings);
+
   if (m_shouldIntegrate) {
     connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
             SLOT(changedIntegrationRange(double, double)));
   }
-  m_maskTab->loadSettings(settings);
-
   // Instrument tree controls
   m_treeTab = new InstrumentWidgetTreeTab(this);
   m_treeTab->loadSettings(settings);
