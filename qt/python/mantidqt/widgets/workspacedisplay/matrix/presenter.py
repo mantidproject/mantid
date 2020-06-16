@@ -91,7 +91,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             self.notify_no_selection_to_copy()
             return
         ws = table.model().ws
-        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.getName() + "_spectra")
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_spectra")
         num_rows = ws.blocksize()
         table_ws.setRowCount(num_rows)
         for i, row in enumerate(selected_rows):
@@ -118,7 +118,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             self.notify_no_selection_to_copy()
             return
         ws = table.model().ws
-        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.getName() + "_bins")
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_bins")
         num_rows = ws.getNumberHistograms()
         table_ws.setRowCount(num_rows)
         table_ws.addColumn("double", "X")
