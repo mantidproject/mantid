@@ -9,6 +9,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
+#include "DllConfig.h"
 
 #include <map>
 #include <string>
@@ -16,7 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class DLLExport IALFCustomInstrumentModel
+class MANTIDQT_DIRECT_DLL IALFCustomInstrumentModel
     : public virtual MantidWidgets::IBaseCustomInstrumentModel {
 
 public:

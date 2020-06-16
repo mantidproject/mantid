@@ -32,7 +32,7 @@ public:
   setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) = 0;
 };
 
-class DLLExport ALFCustomInstrumentView
+class MANTIDQT_DIRECT_DLL ALFCustomInstrumentView
     : public MantidWidgets::BaseCustomInstrumentView,
       public IALFCustomInstrumentView {
   Q_OBJECT
