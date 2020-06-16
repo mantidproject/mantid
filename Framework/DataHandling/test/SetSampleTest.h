@@ -69,6 +69,14 @@ public:
                             "     </sphere>"
                             "    </samplegeometry>"
                             "   </container>"
+                            "   <container id =\"10mm_empty\" material=\"van\">"
+                            "    <geometry>"
+                            "     <sphere id=\"sp-1\">"
+                            "      <radius val=\"0.1\"/>"
+                            "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
+                            "     </sphere>"
+                            "    </geometry>"
+                            "   </container>"
                             "  </containers>"
                             " </components>"
                             "</environmentspec>";
@@ -76,6 +84,30 @@ public:
     std::ofstream goodStream(envFile.path(), std::ios_base::out);
     goodStream << xml;
     goodStream.close();
+
+    const std::string xml_fixed =
+        "<environmentspec>"
+        " <materials>"
+        "  <material id=\"van\" formula=\"V\"/>"
+        " </materials>"
+        " <components>"
+        "  <containers>"
+        "   <container id=\"10mm\" material=\"van\">"
+        "    <geometry>"
+        "     <stlfile filename = \"Sphere10units.stl\" scale =\"mm\" >"
+        "     </stlfile>"
+        "    </geometry>"
+        "    <samplestlfile filename =\"Sphere10units.stl\" scale =\"mm\" >"
+        "    </samplestlfile>"
+        "   </container>"
+        "  </containers>"
+        " </components>"
+        "</environmentspec>";
+    Poco::File envFileFixed(
+        Poco::Path(testDirec, m_envName + "_fixedgeometry.xml"));
+    std::ofstream goodStreamFixed(envFileFixed.path(), std::ios_base::out);
+    goodStreamFixed << xml_fixed;
+    goodStreamFixed.close();
   }
 
   ~SetSampleTest() {
@@ -167,7 +199,7 @@ public:
     const auto defaultDirs = config.getString("instrumentDefinition.directory");
     config.setString("instrumentDefinition.directory", m_testRoot);
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Environment", createEnvironmentProps());
+    alg->setProperty("Environment", createEnvironmentProps("10mm"));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     config.setString("instrumentDefinition.directory", defaultDirs);
@@ -198,7 +230,7 @@ public:
     const auto defaultDirs = config.getString("instrumentDefinition.directory");
     config.setString("instrumentDefinition.directory", m_testRoot);
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Environment", createEnvironmentProps());
+    alg->setProperty("Environment", createEnvironmentProps("10mm"));
     alg->setProperty("Geometry", createOverrideGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -221,6 +253,25 @@ public:
         getSphereRadius(
             dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)),
         1e-08);
+  }
+
+  void test_Setting_Environment_Without_Sample() {
+    using Mantid::Geometry::SampleEnvironment;
+    using Mantid::Kernel::ConfigService;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
+
+    // Algorithm uses instrument directories as a search location, alter this
+    // for the test
+    auto &config = ConfigService::Instance();
+    const auto defaultDirs = config.getString("instrumentDefinition.directory");
+    config.setString("instrumentDefinition.directory", m_testRoot);
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Environment", createEnvironmentProps("10mm_empty"));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
   void test_Setting_Geometry_As_FlatPlate() {
@@ -815,6 +866,52 @@ public:
     }
   }
 
+  void test_Geometry_Override_On_Fixed_Sample_Shape_Gives_Error() {
+    using Mantid::Geometry::SampleEnvironment;
+    using Mantid::Kernel::ConfigService;
+    using Mantid::Kernel::PropertyManager;
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
+
+    // Algorithm uses instrument directories as a search location, alter this
+    // for the test
+    auto &config = ConfigService::Instance();
+    const auto defaultDirs = config.getString("instrumentDefinition.directory");
+    config.setString("instrumentDefinition.directory", m_testRoot);
+    auto alg = createAlgorithm(inputWS);
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(
+        std::make_unique<StringProperty>("Name", m_envName + "_fixedgeometry"),
+        "");
+    alg->setProperty("Environment", props);
+    alg->setProperty("Geometry", createOverrideGeometryProps());
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  }
+
+  void test_Geometry_Override_On_Environment_Without_Sample_Gives_Error() {
+    using Mantid::Geometry::SampleEnvironment;
+    using Mantid::Kernel::ConfigService;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
+
+    // Algorithm uses instrument directories as a search location, alter this
+    // for the test
+    auto &config = ConfigService::Instance();
+    const auto defaultDirs = config.getString("instrumentDefinition.directory");
+    config.setString("instrumentDefinition.directory", m_testRoot);
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Environment", createEnvironmentProps("10mm_empty"));
+    alg->setProperty("Geometry", createOverrideGeometryProps());
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  }
+
   //----------------------------------------------------------------------------
   // Non-test methods
   //----------------------------------------------------------------------------
@@ -892,7 +989,8 @@ private:
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr createEnvironmentProps() {
+  Mantid::Kernel::PropertyManager_sptr
+  createEnvironmentProps(const std::string &containerName) {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
@@ -900,7 +998,7 @@ private:
     props->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
                            "");
     props->declareProperty(
-        std::make_unique<StringProperty>("Container", "10mm"), "");
+        std::make_unique<StringProperty>("Container", containerName), "");
     return props;
   }
 
