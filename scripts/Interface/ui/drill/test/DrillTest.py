@@ -6,27 +6,36 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
+import mock
 import sys
 
-from qtpy.QtWidgets import QApplication, QTableWidgetItem
+from qtpy.QtWidgets import QApplication
 from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
 from Interface.ui.drill.view.DrillView import DrillView
 from Interface.ui.drill.model.DrillModel import DrillModel
 from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
+from Interface.ui.drill.model.specifications import RundexSettings
 
 app = QApplication(sys.argv)
 
-class DrillTest(unittest.TestCase):
-    def setUp(self):
-        self.view = DrillView()
-        self.model = DrillModel()
-        self.presenter = DrillPresenter(self.model, self.view)
-        # select a supported instrument
-        self.presenter.instrumentChanged("D22")
 
-    def select_cell(self, row, column, modifier):
+class DrillTest(unittest.TestCase):
+
+    ###########################################################################
+    # helper methods                                                          #
+    ###########################################################################
+
+    def selectCell(self, row, column, modifier):
+        """
+        Select a cell by clicking on it.
+
+        Args:
+            row (int): row index
+            column (int): column index
+            modifier (Qt::KeyboardModifier): modifier key
+        """
         # find the middle of the cell
         y = self.view.table.rowViewportPosition(row) \
             + self.view.table.rowHeight(row) / 2
@@ -36,7 +45,14 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.table.viewport(),
                          Qt.LeftButton, modifier, QPoint(x, y))
 
-    def select_row(self, row, modifier):
+    def selectRow(self, row, modifier):
+        """
+        Select a full row by clicking on its header.
+
+        Args:
+            row (int): row index
+            modifier (Qt::KeyboardModifier): modifier key
+        """
         # find the middle of the row header
         vertical_header = self.view.table.verticalHeader()
         x = 0 + vertical_header.length() / 2
@@ -46,7 +62,14 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(vertical_header.viewport(),
                          Qt.LeftButton, modifier, QPoint(x, y))
 
-    def select_column(self, column, modifier):
+    def selectColumn(self, column, modifier):
+        """
+        Select a full column by clicking on its header.
+
+        Args:
+            column (int): column index
+            modifier (Qt::KeyboardModifier): modifier key
+        """
         # find the middle of the column header
         horizontal_header = self.view.table.horizontalHeader()
         x = horizontal_header.sectionPosition(column) \
@@ -56,7 +79,14 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(horizontal_header.viewport(),
                          Qt.LeftButton, modifier, QPoint(x, y))
 
-    def edit_cell(self, row, column):
+    def editCell(self, row, column):
+        """
+        Enter in cell editing mode (cell double click).
+
+        Args:
+            row (int): row index
+            column (int): column index
+        """
         y = self.view.table.rowViewportPosition(row) + 1
         x = self.view.table.columnViewportPosition(column) + 1
         QTest.mouseClick(self.view.table.viewport(),
@@ -65,207 +95,108 @@ class DrillTest(unittest.TestCase):
                           Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
 
     ###########################################################################
-    # test view interface and model connections                               #
+    # tests                                                                   #
     ###########################################################################
 
-    def test_sans_instrument(self):
-        self.presenter.instrumentChanged("D22")
+    def setUp(self):
+        self.view = DrillView()
+        self.model = DrillModel()
+        self.presenter = DrillPresenter(self.model, self.view)
+
+    def test_changeInstrument(self):
+        for i in range(self.view.instrumentselector.count()):
+            self.view.instrumentselector.setCurrentIndex(i)
+            mInstrument = self.model.instrument
+            mAcquisitionMode = self.model.acquisitionMode
+            mColumns = self.model.columns
+            mAlgorithm = self.model.algorithm
+            mSettings = self.model.settings
+            self.assertEqual(mInstrument,
+                             self.view.instrumentselector.currentText())
+            self.assertEqual(mAcquisitionMode,
+                             RundexSettings.ACQUISITION_MODES[mInstrument][0])
+            self.assertEqual(mColumns,
+                             RundexSettings.COLUMNS[mAcquisitionMode])
+            self.assertEqual(mAlgorithm,
+                             RundexSettings.ALGORITHM[mAcquisitionMode])
+            self.assertDictEqual(mSettings,
+                                 RundexSettings.SETTINGS[mAcquisitionMode])
+
+    def test_changeAcquisitionMode(self):
+        # D17 has two acquisition modes
+        self.view.instrumentselector.setCurrentText("D17")
+
+        for i in range(self.view.modeSelector.count()):
+            self.view.modeSelector.setCurrentIndex(i)
+            mInstrument = self.model.instrument
+            mAcquisitionMode = self.model.acquisitionMode
+            mColumns = self.model.columns
+            mAlgorithm = self.model.algorithm
+            mSettings = self.model.settings
+            self.assertEqual(mInstrument,
+                             self.view.instrumentselector.currentText())
+            self.assertEqual(mAcquisitionMode,
+                             RundexSettings.ACQUISITION_MODES[mInstrument][i])
+            self.assertEqual(mAlgorithm,
+                             RundexSettings.ALGORITHM[mAcquisitionMode])
+            self.assertEqual(mColumns,
+                             RundexSettings.COLUMNS[mAcquisitionMode])
+            self.assertDictEqual(mSettings,
+                                 RundexSettings.SETTINGS[mAcquisitionMode])
+
+    @mock.patch('Interface.ui.drill.view.DrillView.manageuserdirectories')
+    def test_userDirectories(self, mDirectoriesManager):
+        QTest.mouseClick(self.view.datadirs, Qt.LeftButton)
+        mDirectoriesManager.ManageUserDirectories.assert_called_once()
+        mDirectoriesManager.reset_mock()
+        self.view.actionManageDirectories.trigger()
+        mDirectoriesManager.ManageUserDirectories.assert_called_once()
+
+    def test_settingsWindow(self):
+        self.view.showSettings = mock.Mock()
+        QTest.mouseClick(self.view.settings, Qt.LeftButton)
+        self.view.showSettings.emit.assert_called_once()
+        self.view.showSettings.reset_mock()
+        self.view.actionSettings.trigger()
+        self.view.showSettings.emit.assert_called_once()
+
+    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
+    @mock.patch('Interface.ui.drill.model.DrillModel.json')
+    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    def test_loadRundex(self, mOpen, mJson, mFileDialog):
+        mFileDialog.getOpenFileName.return_value = ["test", "test"]
+        mJson.load.return_value = {
+                'Instrument': 'D11',
+                'AcquisitionMode': 'SANS',
+                'GlobalSettings': {},
+                'Samples': [],
+                }
+        QTest.mouseClick(self.view.load, Qt.LeftButton)
+        self.assertEqual(self.model.instrument, "D11")
+        self.assertEqual(self.view.instrumentselector.currentText(), "D11")
         self.assertEqual(self.model.acquisitionMode, "SANS")
-        self.assertEqual(self.view.table.columnCount(),
-                         len(self.model.columns))
+        self.assertEqual(self.view.modeSelector.currentText(), "SANS")
+        self.assertEqual(self.model.algorithm, RundexSettings.ALGORITHM['SANS'])
+        self.assertEqual(self.model.columns, RundexSettings.COLUMNS['SANS'])
+        self.assertDictEqual(self.model.settings, RundexSettings.SETTINGS['SANS'])
+        self.assertEqual(self.model.samples, [{}])
+        self.assertEqual(self.view.table.columnCount(), len(self.model.columns))
 
-    def test_add_rows(self):
-        self.presenter.instrumentChanged("D22")
-        self.assertEqual(self.view.table.rowCount(), 1)
-        self.assertEqual(len(self.model.samples), 1)
-        # add through the icon
-        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        # add through the menu
-        self.view.actionAddRow.trigger()
-        self.assertEqual(self.view.table.rowCount(), 3)
-        self.assertEqual(len(self.model.samples), 3)
-
-    def test_del_rows(self):
-        self.presenter.instrumentChanged("D22")
-        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        self.assertEqual(self.view.table.rowCount(), 5)
-        self.assertEqual(len(self.model.samples), 5)
-
-        # click in the first row
-        self.select_row(0, Qt.NoModifier)
-
-        # ctrl-click on the second row
-        self.select_row(1, Qt.ControlModifier)
-
-        # delete the first two rows
-        QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
-        self.assertEqual(self.view.table.rowCount(), 3)
-        self.assertEqual(len(self.model.samples), 3)
-
-        # click in the first row
-        self.select_row(0, Qt.NoModifier)
-
-        # shift-click on the third row
-        self.select_row(2, Qt.ShiftModifier)
-
-        # delete the first three rows with the menu
-        self.view.actionDelRow.trigger()
-        self.assertEqual(self.view.table.rowCount(), 0)
-        self.assertEqual(len(self.model.samples), 0)
-
-    def test_cell_modification(self):
-        self.presenter.instrumentChanged("D22")
-
-        # edit the first cell
-        self.edit_cell(0, 0)
-        QTest.keyClick(self.view.table.viewport().focusWidget(),
-                       Qt.Key_Enter)
-        QTest.keyClick(self.view.table.viewport().focusWidget(),
-                       Qt.Key_T)
-        QTest.keyClick(self.view.table.viewport().focusWidget(),
-                       Qt.Key_E)
-        QTest.keyClick(self.view.table.viewport().focusWidget(),
-                       Qt.Key_S)
-        QTest.keyClick(self.view.table.viewport().focusWidget(),
-                       Qt.Key_T)
-
-        # remove focus to validate the input
-        self.select_cell(0, 1, Qt.NoModifier)
-
-        self.assertEqual(self.model.samples[0]["SampleRuns"], "test")
-
-    def test_erase_row(self):
-        self.presenter.instrumentChanged("D22")
-
-        self.view.add_row_after()
-        # add contents (last column has a special treatment !)
-        for i in range(self.view.table.columnCount() - 1):
-            item = QTableWidgetItem("test")
-            self.view.table.setItem(0, i, item)
-            item = QTableWidgetItem("test")
-            self.view.table.setItem(1, i, item)
-        #item = QTableWidgetItem("test=test")
-        #self.view.table.setItem(0, self.view.table.columnCount() - 1, item)
-        #item = QTableWidgetItem("test=test")
-        #self.view.table.setItem(1, self.view.table.columnCount() - 1, item)
-        self.assertEqual(len(self.model.samples[0]),
-                         self.view.table.columnCount() - 1)
-        self.assertEqual(len(self.model.samples[1]),
-                        self.view.table.columnCount() - 1)
-
-        # erase row with icon
-        self.select_row(0, Qt.NoModifier)
-        QTest.mouseClick(self.view.erase, Qt.LeftButton)
-        self.assertEqual(len(self.model.samples[0]), 0)
-
-        #erase row with menu
-        self.select_row(1, Qt.NoModifier)
-        self.view.actionErase.trigger()
-        self.assertEqual(len(self.model.samples[1]), 0)
-
-    def test_copy_fill(self):
-        self.view.add_row_after()
-        self.view.add_row_after()
-        n_rows = self.view.table.rowCount()
-        self.assertEqual(n_rows, 3)
-        # one cell filling
-        row = 0
-        column = 0
-        test_str = "test"
-        cell = QTableWidgetItem(test_str)
-        self.view.table.setItem(row, column, cell)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        for r in range(1, n_rows):
-            self.assertIsNone(self.view.table.item(r, column))
-        # no selection
-        QTest.mouseClick(self.view.fill, Qt.LeftButton)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        for r in range(1, n_rows):
-            self.assertIsNone(self.view.table.item(r, column))
-        # individual selections
-        self.select_cell(row, column, Qt.NoModifier)
-        self.select_cell(row + 1, column, Qt.ControlModifier)
-        QTest.mouseClick(self.view.fill, Qt.LeftButton)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        self.assertEqual(self.view.table.item(row + 1, column).text(), test_str)
-        for r in range(2, n_rows):
-            self.assertIsNone(self.view.table.item(r, column))
-        # whole column selection
-        self.select_column(column, Qt.NoModifier)
-        QTest.mouseClick(self.view.fill, Qt.LeftButton)
-        for r in range(n_rows):
-            self.assertEqual(self.view.table.item(r, column).text(), test_str)
-
-    def test_increment_fill(self):
-        self.view.add_row_after()
-        self.view.add_row_after()
-        n_rows = self.view.table.rowCount()
-        self.assertEqual(n_rows, 3)
-        # one cell filling
-        row = 0
-        column = 0
-        test_str = "10,20,30"
-        cell = QTableWidgetItem(test_str)
-        self.view.table.setItem(row, column, cell)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        for r in range(1, n_rows):
-            self.assertIsNone(self.view.table.item(r, column))
-        # 0 increment fill
-        self.select_column(column, Qt.NoModifier)
-        self.view.increment.setValue(0)
-        QTest.mouseClick(self.view.fill, Qt.LeftButton)
-        for r in range(n_rows):
-            self.assertEqual(self.view.table.item(r, column).text(), test_str)
-        # increment
-        increment_value = 99
-        column = 1
-        cell = QTableWidgetItem(test_str)
-        self.view.table.setItem(row, column, cell)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        for r in range(1, n_rows):
-            self.assertIsNone(self.view.table.item(r, column))
-        self.select_column(column, Qt.NoModifier)
-        self.view.increment.setValue(increment_value)
-        QTest.mouseClick(self.view.fill, Qt.LeftButton)
-        i = 0
-        for r in range(n_rows):
-            test_str_increment = ','.join([str(int(n) + i * increment_value)
-                                           for n in test_str.split(',')])
-            self.assertEqual(self.view.table.item(r, column).text(),
-                             test_str_increment)
-            i += 1
-        # increment a text
-        column = 2
-        test_str = "a=b,test,54"
-        cell = QTableWidgetItem(test_str)
-        self.view.table.setItem(row, column, cell)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        for r in range(1, n_rows):
-            self.assertIsNone(self.view.table.item(r, column))
-        self.select_column(column, Qt.NoModifier)
-        self.view.increment.setValue(increment_value)
-        QTest.mouseClick(self.view.fill, Qt.LeftButton)
-        for r in range(n_rows):
-            self.assertEqual(self.view.table.item(r, column).text(), test_str)
-        # increment a valid numor string
-        increment_value = 1
-        column = 3
-        test_str = "1000,2000+3000,5000:8000,15000-16000"
-        cell = QTableWidgetItem(test_str)
-        self.view.table.setItem(row, column, cell)
-        self.assertEqual(self.view.table.item(row, column).text(), test_str)
-        self.select_column(column, Qt.NoModifier)
-        self.view.increment.setValue(increment_value)
-        QTest.mouseClick(self.view.fill, Qt.LeftButton)
-        self.assertEqual(self.view.table.item(1, column).text(),
-                         "1001,2001+3001,8001:11001,16001-17001")
-        self.assertEqual(self.view.table.item(2, column).text(),
-                         "1002,2002+3002,11002:14002,17002-18002")
+    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
+    @mock.patch('Interface.ui.drill.model.DrillModel.json')
+    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    def test_saveRundex(self, mOpen, mJson, mFileDialog):
+        self.model.setInstrument("D11")
+        mFileDialog.getSaveFileName.return_value = ["test", "test"]
+        QTest.mouseClick(self.view.save, Qt.LeftButton)
+        json = {
+                'Instrument': 'D11',
+                'AcquisitionMode': 'SANS',
+                'GlobalSettings': RundexSettings.SETTINGS['SANS'],
+                'Samples': [],
+                }
+        self.assertDictEqual(json, mJson.dump.call_args[0][0])
 
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -430,6 +430,9 @@ class InstrumentSelector : QWidget {
 public:
   InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
   void setTechniques(const QStringList &techniques);
+  void setCurrentIndex(int);
+  QString currentText();
+  int count();
 };
 
 // ---------------------------------
