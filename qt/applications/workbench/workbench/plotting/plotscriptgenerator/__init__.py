@@ -52,12 +52,15 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
+    plot_headers = ['import matplotlib.pyplot as plt']
     for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes):
             continue
         ax_object_var = get_axes_object_variable(ax)
         if axes_type(ax) in [FigureType.Image]:
-            plot_commands.extend(get_plot_2d_cmd(ax, ax_object_var))  # ax.imshow or pcolormesh
+            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var) # ax.imshow or pcolormesh
+            plot_commands.extend(colormap_lines)
+            plot_headers.extend(colormap_headers)
         else:
             if not curve_in_ax(ax):
                 continue
@@ -73,6 +76,8 @@ def generate_script(fig, exclude_headers=False):
         return
 
     cmds = [] if exclude_headers else [DEFAULT_SCRIPT_CONTENT]
+    if plot_headers:
+        cmds.extend(plot_headers)
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)

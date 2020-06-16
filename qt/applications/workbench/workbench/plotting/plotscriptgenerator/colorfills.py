@@ -36,16 +36,19 @@ def generate_plot_2d_command(artist,ax_object_var):
         base_command = BASE_PCOLORMESH_COMMAND
     arg_string = convert_args_to_string(pos_args, kwargs)
     lines.append(f"{CFILL_NAME} = {ax_object_var}.{base_command}({arg_string})")
-    lines.extend(get_colorbar(artist, CFILL_NAME, ax_object_var))
-    return lines
+    cbar_lines, cbar_headers = get_colorbar(artist, CFILL_NAME, ax_object_var)
+    lines.extend(cbar_lines)
+    return lines, cbar_headers
 
 
 def get_colorbar(artist, image_name, ax_object_var):
     lines = []
+    headers = []
     if artist.colorbar:
         if isinstance(artist.colorbar.norm, LogNorm):
-            lines.append('from matplotlib.colors import LogNorm')
-            lines.append('from matplotlib.ticker import LogLocator')
+            headers.append('import numpy as np')
+            headers.append('from matplotlib.colors import LogNorm')
+            headers.append('from matplotlib.ticker import LogLocator')
             lines.append(f"{CFILL_NAME}.set_norm(LogNorm(vmin={artist.colorbar.vmin}, vmax={artist.colorbar.vmax}))")
             lines.append('# If no ticks appear on the color bar remove the subs argument inside the LogLocator below')
             lines.append(f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], ticks=LogLocator(subs=np.arange(1, 10)), pad=0.06)")
@@ -54,13 +57,13 @@ def get_colorbar(artist, image_name, ax_object_var):
             lines.append(f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], pad=0.06)")
 
         try:
-            label = artist.colorbar.ax.yaxis.label[2]
+            label = artist.colorbar.ax.yaxis.label.get_text()
             if label:
-                lines.append(f"cbar.set_label('{label}')")
+                lines.append(f'cbar.set_label({repr(label)})')
         except:
             # can't access the label it probably does not have one
             pass
-    return lines
+    return lines, headers
 
 
 def get_plot_command_pos_args(artist):
