@@ -11,6 +11,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidPythonInterface/core/Policies/AsType.h"
@@ -177,31 +178,17 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
 
   // In order to recreate a history record of the final binary operation
   // there must be a record of the creation of the single value workspace used
-  // on the RHS here. This is achieved by running CreateSingleValuedWorkspace
-  // algorithm and adding the output workspace to the ADS. Adding the output
-  // to the ADS is critical so that workspace.name() is updated, by the ADS, to
-  // return the same string. WorkspaceProperty<TYPE>::createHistory() then
-  // records the correct workspace name for input into the final binary
-  // operation rather than creating a temporary name.
-  auto alg = API::AlgorithmManager::Instance().createUnmanaged(
-      "CreateSingleValuedWorkspace");
-  alg->setChild(false);
-  // we manually store the workspace as it's easier to retrieve the correct
-  // type from alg->getProperty rather than calling the ADS again and casting
-  alg->setAlwaysStoreInADS(false);
-  alg->initialize();
-  alg->setProperty<double>("DataValue", value);
-  const std::string tmpName("__python_binary_op_single_value");
-  alg->setPropertyValue("OutputWorkspace", tmpName);
-  alg->execute();
+  // on the RHS here. This is achieved by using the workspace factory to create
+  // a WorkspaceSingleValue and adding it to the ADS. Adding the output to the
+  // ADS is critical so that workspace.name() is updated, by the ADS, to return
+  // the same string. WorkspaceProperty<TYPE>::createHistory() then records the
+  // correct workspace name for input into the final binary operation rather
+  // than creating a temporary name. Beam spreader transmission
+  MatrixWorkspace_sptr singleValue = std::dynamic_pointer_cast<MatrixWorkspace>(
+      WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1));
+  singleValue->dataY(0)[0] = value;
 
-  MatrixWorkspace_sptr singleValue;
-  if (alg->isExecuted()) {
-    singleValue = alg->getProperty("OutputWorkspace");
-  } else {
-    throw std::runtime_error("performBinaryOp: Error in execution of "
-                             "CreateSingleValuedWorkspace");
-  }
+  const std::string tmpName("__python_binary_op_single_value");
   ScopedADSEntry removeOnExit(tmpName, singleValue);
   ResultType result =
       performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(
