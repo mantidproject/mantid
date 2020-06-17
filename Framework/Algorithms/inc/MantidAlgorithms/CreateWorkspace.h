@@ -53,7 +53,7 @@ public:
   } ///< @return version number of algorithm
 
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateSampleWorkspace"};
+    return {"CreateSingleValuedWorkspace", "CreateSampleWorkspace"};
   }
   std::map<std::string, std::string> validateInputs() override;
 
