@@ -68,7 +68,6 @@ public:
   void test_D7_monochromatic() {
     // Tests monochromatic data loading for D7
     LoadILLPolarizedDiffraction alg;
-    // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -126,7 +125,6 @@ public:
   void test_D7_timeOfFlight() {
     // Tests loading TOF data for D7
     LoadILLPolarizedDiffraction alg;
-    // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -359,7 +357,6 @@ public:
   void test_D7_default_alignment() {
     // Tests default pixel position alignment coming from the IDF file
     LoadILLPolarizedDiffraction alg;
-    // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -506,7 +503,6 @@ public:
   void test_D7_transpose() {
     // Tests monochromatic data loading for D7
     LoadILLPolarizedDiffraction alg;
-    // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -543,7 +539,6 @@ public:
   void test_D7_convert_spectral_axis() {
     // Tests monochromatic data loading for D7
     LoadILLPolarizedDiffraction alg;
-    // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
