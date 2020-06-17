@@ -8,7 +8,7 @@
  * Helper file to gather common routines to the Loaders
  * */
 
-#include "MantidNexus/LoadHelper.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
@@ -20,7 +20,7 @@
 #include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid {
-namespace Nexus {
+namespace DataHandling {
 
 namespace {
 /// static logger
@@ -588,5 +588,5 @@ V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws,
   return pos;
 }
 
-} // namespace Nexus
+} // namespace DataHandling
 } // namespace Mantid

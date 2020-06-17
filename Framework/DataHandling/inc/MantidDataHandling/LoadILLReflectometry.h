@@ -8,8 +8,8 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -94,7 +94,7 @@ private:
   const static double PIXEL_CENTER;
   double m_pixelWidth{0.0};
   double m_sampleZOffset{0.0};
-  Mantid::Nexus::LoadHelper m_loader;
+  Mantid::DataHandling::LoadHelper m_loader;
 };
 
 } // namespace DataHandling

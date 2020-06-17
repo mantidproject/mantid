@@ -16,7 +16,7 @@ namespace Kernel {
 class Quat;
 }
 
-namespace Nexus {
+namespace DataHandling {
 
 /** LoadHelper : Auxiliary File for Loading Files
  */
@@ -55,5 +55,6 @@ private:
                                        std::string &parent_name,
                                        std::string &parent_class, int level);
 };
-} // namespace Nexus
+} // namespace DataHandling
+// namespace DataHandling
 } // namespace Mantid

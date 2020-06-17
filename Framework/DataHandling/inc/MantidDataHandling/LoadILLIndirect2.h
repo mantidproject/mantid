@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -69,7 +69,7 @@ private:
       251}; // A flag holding the rounded angle of the first tube
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
-  Nexus::LoadHelper m_loader;
+  LoadHelper m_loader;
 };
 
 } // namespace DataHandling

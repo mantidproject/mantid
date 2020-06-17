@@ -61,6 +61,7 @@ set(SRC_FILES
     src/LoadGSS.cpp
     src/LoadGeometry.cpp
     src/LoadHFIRSANS.cpp
+    src/LoadHelper.cpp
     src/LoadIDFFromNexus.cpp
     src/LoadILLDiffraction.cpp
     src/LoadILLIndirect2.cpp
@@ -275,6 +276,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadGSS.h
     inc/MantidDataHandling/LoadGeometry.h
     inc/MantidDataHandling/LoadHFIRSANS.h
+    inc/MantidDataHandling/LoadHelper.h
     inc/MantidDataHandling/LoadIDFFromNexus.h
     inc/MantidDataHandling/LoadILLDiffraction.h
     inc/MantidDataHandling/LoadILLIndirect2.h
