@@ -76,6 +76,7 @@ Bugfixes
 - Fixed a crash when opening the plot options for a sample logs plot.
 - Fixed a crash when you defined a new Fit Function after deleting a plot.
 - Fixed a crash when plotting the logs from a multi-dimensional workspace, that combines several different original workspaces.
+- Fixed a crash when masking a workspace while the worspace data table was on the screen.
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly
 - Opening figure options on a plot with an empty legend no longer causes an unhandled exception.

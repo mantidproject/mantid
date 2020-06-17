@@ -50,7 +50,8 @@ class ObservingPresenter(object):
         return self.model.workspace_equals(name)
 
     def replace_workspace(self, workspace_name, workspace):
-        raise NotImplementedError("This method must be overridden.")
+        if self.model.workspace_equals(workspace_name):
+            self.container.emit_replace(workspace_name, workspace)
 
     def rename_workspace(self, old_name, new_name):
         if self.model.workspace_equals(old_name):
