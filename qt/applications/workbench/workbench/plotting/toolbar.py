@@ -7,7 +7,6 @@
 #    This file is part of the mantid workbench.
 #
 #
-
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from matplotlib.collections import LineCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
@@ -225,6 +224,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 fig.get_axes()[0].is_waterfall():
             self.set_generate_plot_script_enabled(False)
 
+        #reenable script generation for colormaps
+        if self.is_colormap(fig):
+            self.set_generate_plot_script_enabled(True)
+
         # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
         if not isinstance(fig.get_axes()[0], MantidAxes) or not fig.get_axes()[0].is_waterfall():
             self.set_waterfall_options_enabled(False)
@@ -235,6 +238,15 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
         if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe]:
             self.adjust_for_3d_plots()
+
+    def is_colormap(self, fig):
+        """Identify as a single colopur map if it has a axes, one with the plot and the other the colorbar"""
+        if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
+            if len(fig.get_axes()[0].get_images()) == 1 and len(fig.get_axes()[1].get_images()) == 0 \
+                    and not hasattr(fig.get_axes()[1], 'get_subplotspec'):
+                return True
+        else:
+            return False
 
     def set_up_color_selector_toolbar_button(self, fig):
         # check if the action is already in the toolbar

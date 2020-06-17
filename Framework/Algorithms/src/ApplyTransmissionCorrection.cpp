@@ -191,7 +191,7 @@ void ApplyTransmissionCorrection::exec() {
       createSingleAlg->executeAsChildAlg();
       MatrixWorkspace_sptr singleWS =
           createSingleAlg->getProperty("OutputWorkspace");
-
+   
       divideAlg->setProperty("RHSWorkspace", singleWS);
     }
     divideAlg->setProperty("OutputWorkspace",

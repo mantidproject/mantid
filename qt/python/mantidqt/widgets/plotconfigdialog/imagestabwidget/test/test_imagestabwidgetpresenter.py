@@ -67,31 +67,6 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                     'Second Axes: (1, 1) - {}'.format(self.img1_label): self.img1}
         self.assertEqual(presenter.image_names_dict, expected)
 
-    def test_set_selected_image_label_updates_select_image_combo_box(self):
-        presenter = self._generate_presenter()
-        presenter.set_selected_image_label('New Label')
-        presenter.view.replace_selected_image_name.assert_called_once_with(
-            'Second Axes: (1, 1) - New Label')
-
-    def test_set_selected_image_label_updates_image_names_dict(self):
-        presenter = self._generate_presenter()
-        try:
-            presenter.set_selected_image_label('New Label')
-            new_img_name = 'Second Axes: (1, 1) - New Label'
-            self.assertIn(new_img_name, presenter.image_names_dict.keys())
-            self.assertEqual(self.img1, presenter.image_names_dict[new_img_name])
-        finally:
-            self.img1.set_label(self.img1_label)
-
-    def test_set_selected_image_label_removes_old_label_from_image_names_dict(self):
-        presenter = self._generate_presenter()
-        try:
-            presenter.set_selected_image_label('New Label')
-            old_img_name = 'Second Axes: (1, 1) - Im2 label'
-            self.assertNotIn(old_img_name, presenter.image_names_dict)
-        finally:
-            self.img1.set_label(self.img1_label)
-
     def test_generate_image_name(self):
         generated_name = ImagesTabWidgetPresenter.generate_image_name(self.img0)
         expected_name = '(0, 1) - {}'.format(self.img0.get_label())
@@ -108,6 +83,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        fig.colorbar(img)
         props = {'title': '(0, 0) - img label',
                  'label': 'New Label',
                  'colormap': 'jet',
@@ -119,7 +95,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.get_label())
+        self.assertEqual("New Label", img.colorbar._label)
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0, img.norm.vmin)
         self.assertEqual(2, img.norm.vmax)
@@ -129,6 +105,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        fig.colorbar(img)
         props = {'title': '(0, 0) - img label',
                  'label': 'New Label',
                  'colormap': 'jet',
@@ -140,7 +117,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.get_label())
+        self.assertEqual("New Label", img.colorbar._label)
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0.0001, img.norm.vmin)
         self.assertEqual(4, img.norm.vmax)
@@ -150,6 +127,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        fig.colorbar(img)
         props = {'title': '(0, 0) - img label',
                  'label': 'New Label',
                  'colormap': 'jet',
@@ -161,7 +139,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.get_label())
+        self.assertEqual("New Label", img.colorbar._label)
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0.0001, img.norm.vmin)
         self.assertEqual(1, img.norm.vmax)
@@ -202,6 +180,10 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
 
         for ax in range(2):
             image = fig.axes[ax].images[0]
+
+            if image.colorbar:
+                self.assertEqual('New Label', image.colorbar._label)
+
             self.assertEqual('jet', image.cmap.name)
             self.assertEqual(0, image.norm.vmin)
             self.assertEqual(2, image.norm.vmax)
