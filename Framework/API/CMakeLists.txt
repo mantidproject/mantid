@@ -11,7 +11,6 @@ set(SRC_FILES
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
-    src/AsciiPointBase.cpp
     src/Axis.cpp
     src/BinEdgeAxis.cpp
     src/BoostOptionalToAlgorithmProperty.cpp
@@ -178,7 +177,6 @@ set(INC_FILES
     inc/MantidAPI/AnalysisDataService.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
-    inc/MantidAPI/AsciiPointBase.h
     inc/MantidAPI/Axis.h
     inc/MantidAPI/BinEdgeAxis.h
     inc/MantidAPI/BoostOptionalToAlgorithmProperty.h

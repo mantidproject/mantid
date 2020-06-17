@@ -16,8 +16,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidReflectometry/CreatePolarizationEfficiencies.h"
-#include "MantidReflectometry/JoinISISPolarizationEfficiencies.h"
 #include "MantidReflectometry/PolarizationCorrectionFredrikze.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

@@ -3,17 +3,11 @@ set(SRC_FILES
     src/CalculateSlits.cpp
     src/ConvertToReflectometryQ.cpp
     src/CreateFloodWorkspace.cpp
-    src/CreatePolarizationEfficiencies.cpp
-    src/CreatePolarizationEfficienciesBase.cpp
     src/CreateTransmissionWorkspace.cpp
     src/CreateTransmissionWorkspace2.cpp
     src/CreateTransmissionWorkspaceAuto.cpp
     src/CreateTransmissionWorkspaceAuto2.cpp
     src/FindReflectometryLines2.cpp
-    src/JoinISISPolarizationEfficiencies.cpp
-    src/LoadILLPolarizationFactors.cpp
-    src/LoadILLReflectometry.cpp
-    src/LoadISISPolarizationEfficiencies.cpp
     src/NRCalculateSlitResolution.cpp
     src/PolarizationCorrectionFredrikze.cpp
     src/PolarizationCorrectionWildes.cpp
@@ -31,11 +25,6 @@ set(SRC_FILES
     src/ReflectometryWorkflowBase.cpp
     src/ReflectometryWorkflowBase2.cpp
     src/RefRoi.cpp
-    src/SaveANSTOAscii.cpp
-    src/SaveILLCosmosAscii.cpp
-    src/SaveReflCustomAscii.cpp
-    src/SaveReflThreeColumnAscii.cpp
-    src/SaveReflectometryAscii.cpp
     src/SpecularReflectionAlgorithm.cpp
     src/SpecularReflectionCalculateTheta.cpp
     src/SpecularReflectionCalculateTheta2.cpp
@@ -47,17 +36,11 @@ set(INC_FILES
     inc/MantidReflectometry/CalculateSlits.h
     inc/MantidReflectometry/ConvertToReflectometryQ.h
     inc/MantidReflectometry/CreateFloodWorkspace.h
-    inc/MantidReflectometry/CreatePolarizationEfficiencies.h
-    inc/MantidReflectometry/CreatePolarizationEfficienciesBase.h
     inc/MantidReflectometry/CreateTransmissionWorkspace.h
     inc/MantidReflectometry/CreateTransmissionWorkspace2.h
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto.h
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto2.h
     inc/MantidReflectometry/FindReflectometryLines2.h
-    inc/MantidReflectometry/JoinISISPolarizationEfficiencies.h
-    inc/MantidReflectometry/LoadILLPolarizationFactors.h
-    inc/MantidReflectometry/LoadILLReflectometry.h
-    inc/MantidReflectometry/LoadISISPolarizationEfficiencies.h
     inc/MantidReflectometry/NRCalculateSlitResolution.h
     inc/MantidReflectometry/PolarizationCorrectionFredrikze.h
     inc/MantidReflectometry/PolarizationCorrectionWildes.h
@@ -75,11 +58,6 @@ set(INC_FILES
     inc/MantidReflectometry/ReflectometryWorkflowBase.h
     inc/MantidReflectometry/ReflectometryWorkflowBase2.h
     inc/MantidReflectometry/RefRoi.h
-    inc/MantidReflectometry/SaveANSTOAscii.h
-    inc/MantidReflectometry/SaveILLCosmosAscii.h
-    inc/MantidReflectometry/SaveReflCustomAscii.h
-    inc/MantidReflectometry/SaveReflThreeColumnAscii.h
-    inc/MantidReflectometry/SaveReflectometryAscii.h
     inc/MantidReflectometry/SpecularReflectionAlgorithm.h
     inc/MantidReflectometry/SpecularReflectionCalculateTheta.h
     inc/MantidReflectometry/SpecularReflectionCalculateTheta2.h
@@ -90,16 +68,11 @@ set(TEST_FILES
     ApplyFloodWorkspaceTest.h
     CalculateSlitsTest.h
     ConvertToReflectometryQTest.h
-    CreatePolarizationEfficienciesTest.h
     CreateTransmissionWorkspace2Test.h
     CreateTransmissionWorkspaceAuto2Test.h
     CreateTransmissionWorkspaceAutoTest.h
     CreateTransmissionWorkspaceTest.h
     FindReflectometryLines2Test.h
-    JoinISISPolarizationEfficienciesTest.h
-    LoadILLPolarizationFactorsTest.h
-    LoadILLReflectometryTest.h
-    LoadISISPolarizationEfficienciesTest.h
     NRCalculateSlitResolutionTest.h
     PolarizationCorrectionFredrikzeTest.h
     PolarizationCorrectionWildesTest.h
@@ -113,11 +86,6 @@ set(TEST_FILES
     ReflectometryTransformPTest.h
     ReflectometryTransformQxQzTest.h
     ReflectometrySumInQTest.h
-    SaveANSTOAsciiTest.h
-    SaveILLCosmosAsciiTest.h
-    SaveReflCustomAsciiTest.h
-    SaveReflThreeColumnAsciiTest.h
-    SaveReflectometryAsciiTest.h
     SpecularReflectionCalculateTheta2Test.h
     SpecularReflectionCalculateThetaTest.h
     SpecularReflectionPositionCorrect2Test.h
