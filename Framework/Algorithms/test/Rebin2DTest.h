@@ -198,6 +198,34 @@ public:
     }
   }
 
+  void test_BothAxes_FractionalArea_Repeat() {
+    MatrixWorkspace_sptr inputWS =
+        makeInputWS(false, false, false); // 10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWSa =
+        runAlgorithm(inputWS, "5.,0.9,15", "-0.5,1.25,9.5", true);
+    MatrixWorkspace_sptr outputWS =
+        runAlgorithm(outputWSa, "5.,1.8,15", "-0.5,2.5,9.5", true);
+    TS_ASSERT_EQUALS(outputWS->id(), "RebinnedOutput");
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
+
+    const double epsilon(1e-08);
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      const auto &y = outputWS->y(i);
+      const auto &e = outputWS->e(i);
+      const size_t numBins = y.size();
+      for (size_t j = 0; j < numBins; ++j) {
+        TS_ASSERT_DELTA(y[j], 2, epsilon);
+        if (j < 5) {
+          TS_ASSERT_DELTA(e[j], 2. / 3., epsilon);
+        } else {
+          // Last bin
+          TS_ASSERT_DELTA(e[j], sqrt(0.8), epsilon);
+        }
+      }
+    }
+  }
+
   void test_BothAxes_PointData() {
     MatrixWorkspace_sptr inputWS =
         makeInputWS(false, false, false, false); // 10 spectra, 10 points
