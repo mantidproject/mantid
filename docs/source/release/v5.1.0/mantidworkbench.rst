@@ -37,6 +37,7 @@ Improvements
 - The "Show sample logs" dialog will now hide the plot and statistics display if there are no suitable logs in the workspace that need it.  This is particularly applicable for some of the reactor based instruments.
 - The plot toolbar now shows the correct buttons for 3D plots.
 - Plots now have a Help button on the toolbar, which will direct the user to a relevant documentation page informing them about that type of plot.
+- Colorfill plots can now be scripted just like line plots, as long as there is only one colorfill on the plot.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
