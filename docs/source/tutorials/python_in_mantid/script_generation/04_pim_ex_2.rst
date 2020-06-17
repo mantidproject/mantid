@@ -118,6 +118,7 @@ Generating a script from a plot
 #. **Delete all workspaces and plots and run the script to reprocess and plot the data**
 
 
+:ref: `Solutions <02_pim_sol>`
 
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png  
    :width: 30px

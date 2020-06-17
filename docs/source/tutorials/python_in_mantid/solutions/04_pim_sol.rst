@@ -64,8 +64,6 @@ A - Create a MatrixWorkspace
 B - Create a TableWorkspace
 ---------------------------
 
-Using a table workspace for the output.
-
 .. code-block:: python
 
     ws = Load(Filename="HRP39182.RAW")

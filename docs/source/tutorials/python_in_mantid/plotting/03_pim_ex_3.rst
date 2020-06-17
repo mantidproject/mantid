@@ -7,8 +7,22 @@ Python in Mantid: Exercise 3
 .. contents:: Table of contents
     :local:
 
+A - Direct Matplotlib with SNS Data
+===================================
 
-A - plotSpectrum with ISIS Data
+#. Load the processed CNCS data file Training_Exercise3a_SNS.nxs
+#. Directly using MPL (eg. axes.plot() ), plot the first 5 spectra
+#. Optionally set labels and colors for each spectrum
+
+#. Again directly in MPL, plot the final spectrum with errorbars
+#. Optionally, set a capsize > 0, and choose a color and label
+
+#. Rescale x-axis limits to -1.5 < x < 1.8
+#. Change the y-axis to have a log scale
+#. Give the plot a title, legend and don't forget to show the plot
+
+
+B - plotSpectrum with ISIS Data
 ===============================
 
 #. Load the GEM data set - `GEM40979.raw` using SpectrumMin=431 & SpectrumMax=750
@@ -23,21 +37,6 @@ A - plotSpectrum with ISIS Data
 #. Change the label of the Y axis
 #. Give the plot a legend with labels for each curve
 #. Give the plot a title
-
-
-B - Direct Matplotlib with SNS Data
-===================================
-
-#. Load the processed CNCS data file Training_Exercise3a_SNS.nxs
-#. Directly using MPL (eg. axes.plot() ), plot the first 5 spectra
-#. Optionally set labels and colors for each spectrum
-
-#. Again directly in MPL, plot the final spectrum with errorbars
-#. Optionally, set a capsize > 0, and choose a color and label
-
-#. Rescale x-axis limits to -1.5 < x < 1.8
-#. Change the y-axis to have a log scale
-#. Give the plot a title, legend and don't forget to show the plot
 
 
 C - 2D and 3D Plot ILL Data
@@ -60,3 +59,6 @@ C - 2D and 3D Plot ILL Data
 #. Set the title for each subplot as 'Surface' and 'Wireframe'
 
 #. Remember to show the plots
+
+
+:ref: `Solutions <03_pim_sol>`
