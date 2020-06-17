@@ -87,9 +87,7 @@ Click the generate a script button |GenerateAScript.png| on a `Colorfill Plot <h
 
 For more advice: 
 
-.. * :ref:`01_basic_plot_scripting`
-
-* `Basic 1D 2D and 3D Plots <https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/01_basic_plot_scripting.html>`_
+* :ref:`01_basic_plot_scripting`
 * :ref:`02_scripting_plots`
 
 |
@@ -173,9 +171,7 @@ Basic example of plotting a `Contour Plot <https://matplotlib.org/api/_as_gen/ma
 
 For more advice: 
 
-.. * :ref:`01_basic_plot_scripting`
-
-* `Basic 1D 2D and 3D Plots <https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/01_basic_plot_scripting.html>`_
+* :ref:`01_basic_plot_scripting`
 * :ref:`02_scripting_plots`
 
 |

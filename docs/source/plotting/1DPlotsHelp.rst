@@ -154,7 +154,7 @@ Click Menus
 |FigureOptionsGear.png| ptions Menu
 -----------------------------------
 
-Tiled plots are essentially an array of axes (1D plots) on the same figure. As such, when editing them in the Options Menu, you should take care to select the correct plot figure:
+Tiled plots are essentially an array of axes (1D plots) on the same figure. As such, when editing them in the Options Menu, you should take care to select the correct set of axes:
 
 .. figure:: /images/PlotOptionsTiledAxes.png
    :alt: Plot Options Tiled Axes
