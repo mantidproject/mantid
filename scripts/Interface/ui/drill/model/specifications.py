@@ -205,3 +205,4 @@ class RundexSettings(object):
     SETTINGS_JSON_KEY = "GlobalSettings"
     SAMPLES_JSON_KEY = "Samples"
     CUSTOM_OPT_JSON_KEY = "CustomOptions"
+    VISUAL_SETTINGS_JSON_KEY = "VisualSettings"

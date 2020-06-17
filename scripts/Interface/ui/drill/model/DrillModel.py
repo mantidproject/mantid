@@ -50,6 +50,7 @@ class DrillModel(QObject):
         self.settings = dict()
         self.controller = None
         self.rundexFile = None
+        self.visualSettings = None
 
         # set the instrument and default acquisition mode
         self.setInstrument(config['default.instrument'])
@@ -377,6 +378,13 @@ class DrillModel(QObject):
         self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
         self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
 
+        # visual setings
+        if RundexSettings.VISUAL_SETTINGS_JSON_KEY in json_data:
+            self.visualSettings = json_data[
+                    RundexSettings.VISUAL_SETTINGS_JSON_KEY]
+        else:
+            self.visualSettings = None
+
         # global settings
         self.settings.update(json_data[RundexSettings.SETTINGS_JSON_KEY])
 
@@ -386,16 +394,21 @@ class DrillModel(QObject):
             self.samples.append(sample)
         self.rundexFile = filename
 
-    def exportRundexData(self, filename):
+    def exportRundexData(self, filename, visualSettings=None):
         """
         Export the data in a Json rundex file.
 
         Args:
-            filename(str): rundex file path
+            filename (str): rundex file path
+            visualSettings (dict): settings that the view produced and can read
         """
         json_data = dict()
         json_data[RundexSettings.INSTRUMENT_JSON_KEY] = self.instrument
         json_data[RundexSettings.MODE_JSON_KEY] = self.acquisitionMode
+
+        # visual setings
+        if visualSettings:
+            json_data[RundexSettings.VISUAL_SETTINGS_JSON_KEY] = visualSettings
 
         # global settings
         json_data[RundexSettings.SETTINGS_JSON_KEY] = self.settings
@@ -417,6 +430,15 @@ class DrillModel(QObject):
             str: rundex file
         """
         return self.rundexFile
+
+    def getVisualSettings(self):
+        """
+        Get the saved visual settings
+
+        Returns:
+            dict: visual settings that the view understands
+        """
+        return self.visualSettings
 
     def get_columns(self):
         return self.columns if self.columns is not None else list()

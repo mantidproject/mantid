@@ -761,3 +761,29 @@ class DrillView(QMainWindow):
         w.setDetailedText(text)
         w.exec()
 
+    def setVisualSettings(self, visualSettings):
+        """
+        Deal with the visual settings that the model saved.
+
+        Args:
+            visualSettings (dict): dictionnary containing some visual
+                                   parameters that the view can deal with
+        """
+        # folding state
+        if ("FoldingState" in visualSettings):
+            self.table.setHeaderFoldingState(visualSettings["FoldingState"])
+
+    def getVisualSettings(self):
+        """
+        Used by the model to get some visualisation data that should be saved
+        in rundex file. This data will be them handled by the setVisualSettings
+        associated method.
+
+        Returns:
+            dict: visual settings dictionnay
+        """
+        vs = dict()
+        # folding state
+        vs["FoldingState"] = self.table.getHeaderFoldingState()
+
+        return vs

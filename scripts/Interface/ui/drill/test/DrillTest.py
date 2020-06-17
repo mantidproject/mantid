@@ -192,8 +192,25 @@ class DrillTest(unittest.TestCase):
         json = {
                 'Instrument': 'D11',
                 'AcquisitionMode': 'SANS',
+                'VisualSettings': {
+                    'FoldingState': [
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False
+                        ]
+                    },
                 'GlobalSettings': RundexSettings.SETTINGS['SANS'],
-                'Samples': [],
+                'Samples': []
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
 

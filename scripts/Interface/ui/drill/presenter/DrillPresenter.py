@@ -39,9 +39,7 @@ class DrillPresenter:
         self.view.process.connect(self.process)
         self.view.processStopped.connect(self.stopProcessing)
         self.view.rundexLoaded.connect(self.rundexLoaded)
-        self.view.rundexSaved.connect(
-                lambda filename: self.model.exportRundexData(filename)
-                )
+        self.view.rundexSaved.connect(self.rundexSaved)
         self.view.showSettings.connect(self.settingsWindow)
 
         # model signals connection
@@ -135,6 +133,17 @@ class DrillPresenter:
         self.model.importRundexData(filename)
         self.updateViewFromModel()
 
+    def rundexSaved(self, filename):
+        """
+        Forward the rundex file saving to the model. This method transmit also
+        some potential visual settings that the view wants to save.
+
+        Args:
+            filename (str): rundex file path
+        """
+        vs = self.view.getVisualSettings()
+        self.model.exportRundexData(filename, vs)
+
     def settingsWindow(self):
         """
         Show the setting window. This function creates a special dialog that
@@ -172,3 +181,7 @@ class DrillPresenter:
         # update the table
         self.view.set_table(self.model.get_columns())
         self.view.fill_table(self.model.get_rows_contents())
+        # set the visual settings if they exist
+        vs = self.model.getVisualSettings()
+        if vs:
+            self.view.setVisualSettings(vs)
