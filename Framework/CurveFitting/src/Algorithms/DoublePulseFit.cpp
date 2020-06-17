@@ -31,31 +31,33 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
 
-void setMultiDataProperties(const Mantid::API::IAlgorithm &qensFit,
+void setMultiDataProperties(const Mantid::API::IAlgorithm &fittingAlgorithm,
                             Mantid::API::IAlgorithm &fit,
                             const Mantid::API::MatrixWorkspace_sptr &workspace,
                             const std::string &suffix) {
   fit.setProperty("InputWorkspace" + suffix, workspace);
 
-  int workspaceIndex = qensFit.getProperty("WorkspaceIndex" + suffix);
+  int workspaceIndex = fittingAlgorithm.getProperty("WorkspaceIndex" + suffix);
   fit.setProperty("WorkspaceIndex" + suffix, workspaceIndex);
 
-  double startX = qensFit.getProperty("StartX" + suffix);
-  double endX = qensFit.getProperty("EndX" + suffix);
+  double startX = fittingAlgorithm.getProperty("StartX" + suffix);
+  double endX = fittingAlgorithm.getProperty("EndX" + suffix);
   fit.setProperty("StartX" + suffix, startX);
   fit.setProperty("EndX" + suffix, endX);
 
-  std::vector<double> exclude = qensFit.getProperty("Exclude" + suffix);
+  std::vector<double> exclude =
+      fittingAlgorithm.getProperty("Exclude" + suffix);
   fit.setProperty("Exclude" + suffix, exclude);
 }
 
 void setMultiDataProperties(
-    const Mantid::API::IAlgorithm &qensFit, Mantid::API::IAlgorithm &fit,
+    const Mantid::API::IAlgorithm &fittingAlgorithm,
+    Mantid::API::IAlgorithm &fit,
     const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces) {
-  setMultiDataProperties(qensFit, fit, workspaces[0], "");
+  setMultiDataProperties(fittingAlgorithm, fit, workspaces[0], "");
 
   for (auto i = 1u; i < workspaces.size(); ++i)
-    setMultiDataProperties(qensFit, fit, workspaces[i],
+    setMultiDataProperties(fittingAlgorithm, fit, workspaces[i],
                            "_" + std::to_string(i));
 }
 
@@ -143,9 +145,9 @@ DoublePulseFit::DoublePulseFit() : IFittingAlgorithm() {}
  */
 void DoublePulseFit::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")
-      ->setDocumentation("Math expressions defining ties between parameters of "
-                         "the fitting function.");
+  getPointerToProperty("Ties")->setDocumentation(
+      "Math expressions defining ties between parameters of "
+      "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
@@ -237,6 +239,16 @@ void DoublePulseFit::execConcrete() {
     throw std::runtime_error("Incompatible function form. DoublePulseFit.cpp");
   }
 
+  g_log.notice(doublePulseFunction->asString());
+  auto newFunc = Mantid::API::FunctionFactory::Instance().createInitialized(
+      doublePulseFunction->asString());
+  auto newFunc1 = Mantid::API::FunctionFactory::Instance().createInitialized(
+      "composite=Convolution,FixResolution=false,NumDeriv=true;name=GausOsc,A="
+      "0.2,Sigma=0.2,Frequency=1,Phi=0;(name=DeltaFunction,Height=1,Centre=-0."
+      "33,ties=(Height=1,Centre=-0.33);name=DeltaFunction,Height=1,Centre=0,"
+      "ties=(Height=1,Centre=0))");
+  g_log.notice(newFunc->asString());
+  g_log.notice(newFunc1->asString());
   runFitAlgorith(fitAlg, doublePulseFunction, getProperty("MaxIterations"));
 
   createOutput(fitAlg, doublePulseFunction);
@@ -261,10 +273,9 @@ void DoublePulseFit::declareAdditionalProperties() {
         std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
             "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
         "The name of the TableWorkspace in which to store the final "
-        "covariance "
-        "matrix");
+        "covariance matrix");
     setPropertyValue("OutputNormalisedCovarianceMatrix",
-                     baseName + "NormalisedCovarianceMatrix");
+                     baseName + "_NormalisedCovarianceMatrix");
 
     declareProperty(
         std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
@@ -272,7 +283,7 @@ void DoublePulseFit::declareAdditionalProperties() {
         "The name of the TableWorkspace in which to store the "
         "final fit parameters");
 
-    setPropertyValue("OutputParameters", baseName + "Parameters");
+    setPropertyValue("OutputParameters", baseName + "_Parameters");
 
     if (m_outputFitData) {
       if (m_multiDomain) {
@@ -282,7 +293,7 @@ void DoublePulseFit::declareAdditionalProperties() {
                 "OutputWorkspace", "", Kernel::Direction::Output),
             "Name of the output Workspace holding resulting simulated "
             "spectrum");
-        setPropertyValue("OutputWorkspace", baseName + "Workspace");
+        setPropertyValue("OutputWorkspace", baseName + "_Workspace");
       } else {
         declareProperty(
             std::make_unique<
@@ -290,7 +301,7 @@ void DoublePulseFit::declareAdditionalProperties() {
                 "OutputWorkspace", "", Kernel::Direction::Output),
             "Name of the output Workspace holding resulting simulated "
             "spectrum");
-        setPropertyValue("OutputWorkspace", baseName + "Workspace");
+        setPropertyValue("OutputWorkspace", baseName + "_Workspace");
       }
     }
   }
@@ -327,6 +338,7 @@ void DoublePulseFit::runFitAlgorith(Mantid::API::IAlgorithm_sptr fitAlg,
   const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool outputParametersOnly = getProperty("OutputParametersOnly");
 
+  fitAlg->setLogging(true);
   fitAlg->setProperty("Function", function);
   setMultiDataProperties(*this, *fitAlg, getWorkspaces());
   fitAlg->setProperty("IgnoreInvalidData", ignoreInvalidData);
@@ -365,18 +377,11 @@ void DoublePulseFit::createOutput(Mantid::API::IAlgorithm_sptr fitAlg,
   setProperty("OutputStatus", outputStatus);
   setProperty("OutputChi2overDoF", outputChi2overDoF);
   if (m_makeOutput) {
-    // The scientists want the details of the double pulse analysis to be
-    // hidden.
-    // This alg is used to produce the output covariance matrix and property
-    // table as though the double pulse functions were not there.
-    Mantid::API::Algorithm_sptr figAlgForOutputs = createChildAlgorithm("Fit");
-    runFitAlgorith(figAlgForOutputs, extractedFunction, 0);
-
     Mantid::API::ITableWorkspace_sptr covarianceMatrix =
-        figAlgForOutputs->getProperty("OutputNormalisedCovarianceMatrix");
+        fitAlg->getProperty("OutputNormalisedCovarianceMatrix");
     setProperty("OutputNormalisedCovarianceMatrix", covarianceMatrix);
     Mantid::API::ITableWorkspace_sptr parametersTable =
-        figAlgForOutputs->getProperty("OutputParameters");
+        fitAlg->getProperty("OutputParameters");
     setProperty("OutputParameters", parametersTable);
     if (m_outputFitData) {
       if (m_multiDomain) {
