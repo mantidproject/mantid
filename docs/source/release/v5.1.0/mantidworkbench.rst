@@ -98,5 +98,6 @@ Bugfixes
 - Colorfill plots now correctly use the workspace name as the plot title.
 - Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
+- Changing a curve's properties on a plot no longer changes the order of the plot legend.
 
 :ref:`Release 5.1.0 <v5.1.0>`
