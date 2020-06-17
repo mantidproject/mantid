@@ -79,7 +79,7 @@ QGroupBox:title {
           </item>
           <item>
            <property name="text">
-            <string>d-spacing</string>
+            <string>dSpacing</string>
            </property>
           </item>
          </widget>

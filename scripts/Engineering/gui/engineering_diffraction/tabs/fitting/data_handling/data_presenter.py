@@ -38,10 +38,10 @@ class FittingDataPresenter(object):
         print('changed')
         # self.view.combo_xunit.showPopup()
 
-    def on_load_clicked(self):
+    def on_load_clicked(self, xunit):
         if self._validate():
             filenames = self._get_filenames()
-            self._start_load_worker(filenames)
+            self._start_load_worker(filenames, xunit)
 
     def remove_workspace(self, ws_name):
         if ws_name in self.get_loaded_workspaces():
@@ -76,12 +76,12 @@ class FittingDataPresenter(object):
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
 
-    def _start_load_worker(self, filenames):
+    def _start_load_worker(self, filenames, xunit):
         """
         Load one to many files into mantid that are tracked by the interface.
         :param filenames: Comma separated list of filenames to load
         """
-        self.worker = AsyncTask(self.model.load_files, (filenames,),
+        self.worker = AsyncTask(self.model.load_files, (filenames, xunit),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._emit_enable_button_signal,
                                 success_cb=self._on_worker_success)
@@ -113,10 +113,8 @@ class FittingDataPresenter(object):
                     bank = "cropped"
                 checked = name in self.plotted
                 if name in self.bg_params:
-                    print(self.bg_params[name])
                     self._add_row_to_table(name, i, run_no, bank, checked, *self.bg_params[name])
                 else:
-                    print('Not bg params')
                     self._add_row_to_table(name, i, run_no, bank, checked)
             except RuntimeError:
                 self._add_row_to_table(name, i)
@@ -222,8 +220,15 @@ class FittingDataPresenter(object):
         return True
 
     def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=100,
-                          xwindow=1000, SG=True):
+                          xwindow=None, SG=True):
         words = ws_name.split("_")
+        # find xwindow from ws xunit if not specified
+        if not xwindow:
+            ws = self.model.get_loaded_workspaces()[ws_name]
+            if ws.getAxis(0).getUnit().unitID() == "TOF":
+                xwindow = 1000
+            else:
+                xwindow = 0.05
         if run_no is not None and bank is not None:
             self.view.add_table_row(run_no, bank, checked, bgsub, niter, xwindow, SG)
             self.row_numbers[ws_name] = row

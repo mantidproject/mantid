@@ -39,7 +39,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # =================
 
     def set_on_load_clicked(self, slot):
-        self.button_load.clicked.connect(slot)
+        self.button_load.clicked.connect(lambda: slot(self.combo_xunit.currentText()))
 
     def set_on_xunit_changed(self, slot):
         self.combo_xunit.currentIndexChanged.connect(slot)

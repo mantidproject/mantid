@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits
 
 
 class FittingDataModel(object):
@@ -15,13 +15,15 @@ class FittingDataModel(object):
         self._background_workspaces = {}
         self._last_added = []  # List of workspace names loaded in the last load action.
 
-    def load_files(self, filenames_string):
+    def load_files(self, filenames_string, xunit):
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
-            ws_name = self._generate_workspace_name(filename)
+            ws_name = self._generate_workspace_name(filename, xunit)
             try:
                 ws = Load(filename, OutputWorkspace=ws_name)
+                if xunit != "TOF":
+                    ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
                 if ws.getNumberHistograms() == 1:
                     self._loaded_workspaces[ws_name] = ws
                     self._background_workspaces[ws_name] = None
@@ -54,5 +56,5 @@ class FittingDataModel(object):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
 
     @staticmethod
-    def _generate_workspace_name(filepath):
-        return path.splitext(path.split(filepath)[1])[0]
+    def _generate_workspace_name(filepath, xunit):
+        return path.splitext(path.split(filepath)[1])[0] + '_' + xunit
