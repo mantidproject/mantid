@@ -12,7 +12,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view impo
 
 
 @start_qapplication
-class SampleTransmissionCalculatorViewTest(unittest.TestCase):
+class MarkerTabWidgetViewTest(unittest.TestCase):
     def setUp(self):
         self.view = MarkerTabWidgetView()
 
