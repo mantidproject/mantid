@@ -16,6 +16,7 @@ import matplotlib
 from matplotlib import colors
 from matplotlib.patches import BoxStyle
 
+from mantid.plots.datafunctions import get_legend_handles
 from mantid.plots.utility import legend_set_draggable
 
 
@@ -134,11 +135,12 @@ class LegendProperties(dict):
     @classmethod
     def create_legend(cls, props, ax):
         if not props:
-            legend_set_draggable(ax.legend(), True)
+            legend_set_draggable(ax.legend(handles=get_legend_handles(ax)), True)
             return
 
         if int(matplotlib.__version__[0]) >= 2:
-            legend = ax.legend(ncol=props['columns'],
+            legend = ax.legend(handles=get_legend_handles(ax),
+                               ncol=props['columns'],
                                prop={'size': props['entries_size']},
                                numpoints=props['markers'],
                                markerfirst=props['marker_position'] == "Left of Entries",
@@ -155,7 +157,8 @@ class LegendProperties(dict):
                                handletextpad=props['marker_label_padding'],
                                columnspacing=props['column_spacing'])
         else:
-            legend = ax.legend(ncol=props['columns'],
+            legend = ax.legend(handles=get_legend_handles(ax),
+                               ncol=props['columns'],
                                prop={'size': props['entries_size']},
                                numpoints=props['markers'],
                                markerfirst=props['marker_position'] == "Left of Entries",
