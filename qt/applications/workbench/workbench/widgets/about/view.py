@@ -63,7 +63,7 @@ class AboutView(QDialog):
         if hasattr(QGuiApplication,"screenAt"):
             screen = QGuiApplication.screenAt(self.parent().geometry().center())
         else:
-            screen = QGuiApplication.prmaryScreen()
+            screen = QGuiApplication.primaryScreen()
 
         if screen is not None:
             screen_width = screen.size().width()
