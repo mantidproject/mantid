@@ -107,7 +107,7 @@ public:
     groupingAlg->setPropertyValue("OutputWorkspace", "group");
     groupingAlg->execute();
 
-    WorkspaceGroup_sptr group = groupingAlg->getProperty("OutputWorkspace");
+    std::string group = groupingAlg->getProperty("OutputWorkspace");
 
     alg.initialize();
     alg.setProperty("InputWorkspace", group);
