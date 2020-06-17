@@ -34,7 +34,7 @@ A - Using ISIS Data
     # Focus the data
     DiffractionFocussing(InputWorkspace="aligned-withoutpulse",OutputWorkspace="focussed-withoutpulse",GroupingFileName=cal_file)
     # Subract the processed data with and without pulse from eachother
-    Subtract(LHSWorkspace="focussed-withpulse", RHSWorkspace="focussed-withoutpulse", OutputWorkspace="difference")
+    Minus(LHSWorkspace="focussed-withpulse", RHSWorkspace="focussed-withoutpulse", OutputWorkspace="difference")
 
     # Now plot a focussed spectrum with and without prompt peak removal so that you can see the difference
     plotSpectrum(["focussed-withoutpulse","difference", "focussed-withpulse"],0)

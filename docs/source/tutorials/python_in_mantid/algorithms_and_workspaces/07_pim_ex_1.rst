@@ -22,7 +22,7 @@ The aim of this exercise is to use Mantid to write a script, which excludes this
 #. :ref:`algm-AlignDetectors` - Correct the masked workspace for small variations in detector position, using the calibration file `hrpd_new_072_01_corr.cal`. (Note: This performs an explicit conversion to dSpacing)
 #. :ref:`algm-DiffractionFocussing` - Focus the data in the masked workspace using the same cal file as the previous step (called a grouping file here)
 
-Bonus: Can you run the Align-Focus process on the original, unmasked data and :ref:`algm-Subtract` the final workspaces of data, processed without and with the pulse from each other? Plot the difference workspace with the final processed data to compare.
+Bonus: Can you run the Align-Focus process on the original, unmasked data and :ref:`algm-Minus` the final workspace processed without the pulse from the final workspace processed with the pulse? Plot the difference workspace with the final processed data to compare.
 
 B - SNS Data
 ============
