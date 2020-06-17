@@ -60,9 +60,15 @@ class AboutView(QDialog):
 
         # gets the width of the screen where the main window is
         screen = None
-        if hasattr(QGuiApplication,"screenAt"):
-            screen = QGuiApplication.screenAt(self.parent().geometry().center())
-        else:
+        try:
+            if hasattr(QGuiApplication,"screenAt"):
+                screen = QGuiApplication.screenAt(self.parent().geometry().center())
+            else:
+                # get the screen from the last top level window
+                windows = QGuiApplication.topLevelWindows()
+                screen = windows[-1].screen()
+        except Exception:
+            # something failed just take the primary screen
             screen = QGuiApplication.primaryScreen()
 
         if screen is not None:
@@ -101,7 +107,7 @@ QCommandLinkButton{{
     border-radius: {self.rescale_w(15)}px;
 }}
 QCommandLinkButton:hover {{
-    background-color: rgba(200, 200, 200, 40);
+    background-color: rgba(45, 105, 45, 40);
 }}""")
 
         # version label section at th etop
@@ -328,6 +334,6 @@ font: {self.rescale_w(12)}px;
         self.lbl_version.setText(self.lbl_version.text() + version_label)
 
     def closeEvent(self, event):
-        self.presenter.action_close()
+        self.presenter.save_on_closing()
         self.deleteLater()
         super(AboutView, self).closeEvent(event)

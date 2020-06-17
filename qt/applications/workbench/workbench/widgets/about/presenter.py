@@ -117,13 +117,18 @@ class AboutPresenter(object):
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
         :param new_facility: The name of the new facility that was selected
         """
-        current_value = ConfigService.getFacility().name()
-        if new_facility != current_value:
-            ConfigService.setFacility(new_facility)
+        self.store_facility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
         self.view.cb_instrument.clear()
         self.view.cb_instrument.addItems(
             [instr.name() for instr in ConfigService.getFacility(new_facility).instruments()])
+
+    def store_facility(self, new_facility):
+        current_value = ConfigService.getFacility().name()
+        if new_facility != current_value:
+            ConfigService.setFacility(new_facility)
+            return True
+        return False
 
     def action_instrument_changed(self, new_instrument):
         current_value = ConfigService.getString(self.INSTRUMENT)
@@ -178,12 +183,15 @@ class AboutPresenter(object):
         settings.endGroup()
 
     def action_close(self):
+        self.view.close()
+
+    def save_on_closing(self):
         # make sure the Last Version is updated on closing
         settings = QSettings()
         settings.beginGroup(self.DO_NOT_SHOW_GROUP)
         settings.setValue(self.LAST_VERSION, release_notes_url())
         settings.endGroup()
-
+        self.store_facility(self.view.cb_facility.currentText())
+        self.action_instrument_changed(self.view.cb_instrument.currentText())
         ConfigService.saveConfig(ConfigService.getUserFilename())
         self.parent.config_updated()
-        self.view.close()
