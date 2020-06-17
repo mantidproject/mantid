@@ -1,8 +1,8 @@
 .. _the_tabs_results:
 
-========
+==================
 The Tabs - Results
-========
+==================
 
 .. index:: The Tabs - Results
 
@@ -42,9 +42,9 @@ to them in the table below. By default, checking the box next to a workspace in 
 
 As an exercise, follow the instructions below in order to produce a results table for a single individual or sequential fit.
 
-1.  Load the HIFI00062798 file from the reference folder, guess alpha as described in `Grouping`_ then fit the ExpDecayOsc function to it. 
+1.  Load the HIFI00062798 file from the reference folder, guess alpha as described in :ref:`grouping <the_tabs_grouping>` then fit the ExpDecayOsc function to it. 
     To instead demonstrate a sequential fit table, load the EMU00019631-4 files, don't guess alpha, and then perform a sequential fit of ExpDecayOsc on those files.
-    (See `Using Fit Functions`_ for instructions on single and sequential fits.)
+    (See :ref:`using fit functions <data_fitting>` for instructions on single and sequential fits.)
 2.  In the Results tab, the default individual fit table should already be set up. Check that the Function Name and workspace(s) selected in the lower part of the tab show the 
     fit function and data used so far, respectively.
 3.  Use the table in the 'Log Values' section to select parameters to include in the results table. This is done by checking the box next to them - try this now for 

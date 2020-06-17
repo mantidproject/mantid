@@ -1,10 +1,8 @@
 .. _data_fitting:
 
-========
+============
 Data Fitting
-========
-
-.. index:: Data Fitting
+============
 
 .. contents:: Table of Contents
   :local:

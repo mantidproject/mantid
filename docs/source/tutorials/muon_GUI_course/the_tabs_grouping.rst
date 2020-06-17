@@ -1,8 +1,8 @@
 .. _the_tabs_grouping:
 
-========
+===================
 The Tabs - Grouping
-========
+===================
 
 .. index:: The Tabs - Grouping
 
@@ -38,7 +38,7 @@ When a workspace is opened using the Muon Analysis GUI, a plot of the data autom
 plot is set to show the asymmetry by default, which is the normalised ratio of the Forward (F) and Backward (B) detector banks' positron counts; as given by the equation:
 
 .. math:: P_z(t) = A_0G_z(t) = \frac{F(t) - \alpha B(t)}{F(t) + \alpha B(t)}
-    :name: Equation 1
+    :name: Equation 2
 
 .. figure:: /images/PlotWindow2.PNG
     :align: center
@@ -92,7 +92,7 @@ A Group Pair is a combination of two different detector groups. For example, the
 and bwd are in a pair called 'long'. This combines the detectors from both groups in order to be able to view them together, for example
 for the MuSR equipment this default case means viewing all 64 detectors. A detector group pair can include any two groups found in the group table. 
 
-To try assigning new detector groups and pairs with the MUSR00024563 file (see `Home`_ for how to load files), 
+To try assigning new detector groups and pairs with the MUSR00024563 file (see :ref:`Home <the_tabs_home>` for how to load files), 
 follow the instructions below. For assistance, see figures 22 and 23.
 
 1.  First, go to the Grouping tab in the mantid muon GUI.
@@ -121,7 +121,7 @@ used. E.g. '1,3-5,15,17-18' would be valid.*
     Figure 23: Adding a new group pair in the Muon Analysis GUI. 
 
 Once defined, these new user grouping options propagate through the Muon Analysis tabs.
-For example, in the `Home`_ tab, the options under Group/Group Pair are automatically
+For example, in the :ref:`Home <the_tabs_home>`, the options under Group/Group Pair are automatically
 updated to include user defined detector configurations. From there, the new groups can be plotted
 as they would be for the default long, bwd and fwd groups. 
 

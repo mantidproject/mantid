@@ -83,7 +83,7 @@ To demonstrate this, follow the example below.
 1.  MUSR00024563.nxs should still be loaded from the previous task; if not, re-load the file.
 2.  Ensure that the Group / Pair drop-down menu is set to either 'bwd' or 'fwd', as the plot type will not change if this is set to 'long'.
 3.  Underneath the Plot Data section, in the Plot Type box change the type from 'Asymmetry' to 'Counts'. 
-There should be a change in the data plot. See Figure 2(d) for the process.
+    There should be a change in the data plot. See Figure 2(d) for the process.
 
 .. figure:: /images/plot_type2.gif
     :align: center
@@ -162,7 +162,7 @@ follow the instructions below. For assistance, see figures 4(b) and 4(c).
 
 1.  First, go to the Grouping tab in the mantid muon GUI.
 2.  Under the box labelled 'Description:', there is a table of the existing groups, with 'Group Name', 'Detector IDs' and 'N Detectors' as columns. 
-'bwd' and 'fwd' should already be saved as groups.
+    'bwd' and 'fwd' should already be saved as groups.
 3.  In the blank space under the existing group names, right click and enter the name 'sample_fwd'. This will be one of our new groups.
 4.  Assign this new group Detector IDs of 1-2, in the blank space in the same row. Ndet will then fill automatically.
 5.  Repeat this process to also add a group called 'sample_bwd' with Detector IDs of 10-11.
@@ -178,7 +178,7 @@ used. E.g. '1,3-5,15,17-18' would be valid.*
 6.  At the bottom of the tab there should be a table containing the default 'long' pair details. The columns in this table read 'Pair Name', 'Group 1', 'Group 2', 'Alpha', and 'Guess Alpha'.
 7.  In the blank space under 'long' in the Name column, right click and enter a name for the new pair, such as 'sample_long'. 
 8.  In the same row as the new pair, in the Forward drop down list select 'sample_fwd' and the Backward list select 'sample_bwd'. To update the Alpha value, click Guess Alpha. This process is 
-shown in figure 4(c) below.
+    shown in figure 4(c) below.
 
 
 .. figure:: /images/group_pair2.gif
@@ -344,9 +344,9 @@ To create a fit function involving adding and multiplying functions, follow the 
 6.  Add the ProductFunction function (from the General function type), and remove ExpDecayMuon by right clicking on it and selecting remove function.
 7.  Right click on the newly added ProductFunction and add two functions to it - ExpDecayMuon and GausOsc.
 8.  The total function now consists of :math:`StaticKuboToyabe + (ExpDecayMuon * GausOsc)`. 
-(The perceptive reader may have noticed that the same effect can be achieved by adding StaticKuboToyabe and GausOsc, this is true, however it would not demonstrate the use of the ProductFunction)
+    (The perceptive reader may have noticed that the same effect can be achieved by adding StaticKuboToyabe and GausOsc, this is true, however it would not demonstrate the use of the ProductFunction)
 9.  Fit the new function to the data, note that Chi squared has decreased from 6.844 to 1.02 - the new fit function is a much better fit to the data. (Note: for a view of the plot with only this fit,
-plot the workspace 'EMU19631; Pair Asym; long; MA; Fitted; StaticKuboToyabe, Productfunction')
+    plot the workspace 'EMU19631; Pair Asym; long; MA; Fitted; StaticKuboToyabe, Productfunction')
 
 .. figure:: /images/multiply_functions2.gif
     :align: center
@@ -372,10 +372,10 @@ Follow the instructions below in order to sequentially fit a function to a range
 2.  Set up a function where StaticKuboToyabe and ExpDecayMuon are added together.
 3.  Under the 'Fit' button, check the circle labelled Sequential Fit.
 4.  To make a custom selection of data to fit, click the Select data to fit button; the check boxes in the menu which opens allows data to be selected. 
-For this example, select the four 'Pair Asym; long' data sets loaded in step 1.
+    For this example, select the four 'Pair Asym; long' data sets loaded in step 1.
 5.  To confirm the choice of data and leave the menu, click 'Select' at the bottom left of the window, the data can then be fitted by pressing the Fit button as before. 
-Note that the GUI currently plots all data to a single window, which may not be ideal for sequential fits, see Loading Data in :ref:`basics_of_data_reductions` to
-find out how to instead plot data directly from the workspace.
+    Note that the GUI currently plots all data to a single window, which may not be ideal for sequential fits, see Loading Data in :ref:`basics_of_data_reductions` to
+    find out how to instead plot data directly from the workspace.
 
 .. figure:: /images/sequential_fit2.gif
     :align: center
@@ -421,12 +421,12 @@ to them in the table below. By default, checking the box next to a workspace in 
 As an exercise, follow the instructions below in order to produce a results table for a single individual or sequential fit.
 
 1.  Load the HIFI00062798 file from the reference folder, guess alpha as described in `Grouping`_ then fit the ExpDecayOsc function to it. 
-To instead demonstrate a sequential fit table, load the EMU00019631-4 files, don't guess alpha, and then perform a sequential fit of ExpDecayOsc on those files.
-(See `Using Fit Functions`_ for instructions on single and sequential fits.)
+    To instead demonstrate a sequential fit table, load the EMU00019631-4 files, don't guess alpha, and then perform a sequential fit of ExpDecayOsc on those files.
+    (See `Using Fit Functions`_ for instructions on single and sequential fits.)
 2.  In the Results tab, the default individual fit table should already be set up. Check that the Function Name and workspace(s) selected in the lower part of the tab show the
-fit function and data used so far, respectively.
+    fit function and data used so far, respectively.
 3.  Use the table in the 'Log Values' section to select parameters to include in the results table. This is done by checking the box next to them - try this now for 
-run number and Temp_Sample.
+    run number and Temp_Sample.
 4.  Pick a name for the table, then click Output Results. See figure 8(b) for the process for an individual fit, and 8(c) for sequential.
 5. To view a table, right click it in the workspaces pane and Show Data.
 
@@ -449,7 +449,7 @@ against each other, to see the relationship between the two.
 Follow the instructions below in order to plot a graph from parameters in a Results Table. 
 
 1.  Files EMU00019631.nxs to EMU00019634.nxs should already have been loaded, sequentially fitted and a Results Table produced from them during the last section. 
-If not then load the files, fit and produce a table. 
+    If not then load the files, fit and produce a table. 
 2.  This example plots Temp_Sample against Lambda, which should automatically be assigned to the X and Y axes by Mantid (labelled X1 and Y1 respectively) click on Temp_Sample to select it. 
         
 *NB If data is not automatically assigned to the desired axes this can be changed manually. As an example, if in step 2. Temp_Sample was not already assigned to X, 

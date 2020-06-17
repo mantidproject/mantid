@@ -1,8 +1,8 @@
 .. _the_tabs_home:
 
-========
+===============
 The Tabs - Home
-========
+===============
 
 .. index:: The Tabs - Home
 

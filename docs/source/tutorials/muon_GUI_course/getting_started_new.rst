@@ -54,7 +54,7 @@ The window shown in Figure 2 will appear. Data can be added as a path by browsin
 directory name in the field below Data Search Directories and then clicking Add Directory. See Figure 3 for the process for how to do this for
 the Reference Materials folder. Once a path has been added, data stored in that location can be accessed simply by referencing the run number.
 
-.. figure:: /images/gettingstartedfig2.jpg
+.. figure:: /images/gettingstartedfig2.png
     :align: center
 
     Figure 2: The Manage User Directories window

@@ -1,8 +1,8 @@
 .. _the_tabs_fitting:
 
-========
+==================
 The Tabs - Fitting
-========
+==================
 
 .. index:: The Tabs - Fitting
 
@@ -71,13 +71,14 @@ from which one can select a function to use.
 
 Follow the following instructions for an example of fitting: 
     
-1. Load the HIFI00062798 file from the reference material folder in the `Home`_ tab. 
+1. Load the HIFI00062798 file from the reference material folder in the home tab. 
 2. Open the Fitting tab and right click in the functions box and select Add Function.
 3. Go to the Muon drop-down title in the Fit dialogue box.
 4. Select MuonGeneric and then ExpDecayOsc, and press the fit button. This process is shown in Figure 25.
 
 .. figure:: /images/thetabsfittingfig25.gif
     :align: center
+
     Figure 25: How to add a function to a data set. 
 
 *NB: To remove the function, right click on the function name and select Remove.*
@@ -101,17 +102,18 @@ To illustrate this:
 
 1. If not already done, load the HIFI00062798 file and add ExpDecayOsc function (see above for instructions).
 2. Adjust the fit limits in the lower table, for instance set start and end times of 0.2 and 12 :math:`{\mu s}` respectively.
-3. Click on the large Fit button top of the tab. This process is shown in Figure 26. Note that a better fit can be achieved if Alpha is guessed via the `Grouping`_ tab.
+3. Click on the large Fit button top of the tab. This process is shown in Figure 26. Note that a better fit can be achieved if Alpha is guessed via the grouping tab.
 4. The resulting plot should look like Figure 27.
 
 .. figure:: /images/thetabsfittingfig26.gif
     :align: center
+
     Figure 26: How to change the fitting scale of a function. 
 
-.. figure:: /images/thetabsfittingfig27.PNG
+.. figure:: /images/thetabsfittingfig27.png
         :align: center
 
-Figure 27: The result of fitting function ‘ExpDecayOsc’ to HIFI00062798. The fit is shown in orange, while the green line indicates the difference between it and the data.
+    Figure 27: The result of fitting function ‘ExpDecayOsc’ to HIFI00062798. The fit is shown in orange, while the green line indicates the difference between it and the data.
 
 Each fit parameter can also be bound by certain fit limits (+/- 10% of its starting value, +/- 50% or
 a custom value), fixed at a specific user determined value, or tied together using some functional form.
@@ -133,12 +135,13 @@ To create a fit function involving adding and multiplying functions, follow the 
     
 .. figure:: /images/thefittingfig28.gif
     :align: center
+    
     Figure 28: How to add two functions together. 
     
 4.  At this point, it is possible to fit the composite function to the data. Do so now, and consider the quality of the fit between from X=0 and X=12 
     (see Overlaying and Styling Plots in :ref:`other_mantid_functions` for changing plot limits).
 
-.. figure:: /images/thetabsfittingfig29.PNG
+.. figure:: /images/thetabsfittingfig29.png
     :align: center
 
 Figure 29: A plot of the ExpDecayMuon and StaticKuboToyabe functions added together and fitted to EMU19631. 
@@ -153,6 +156,7 @@ Figure 29: A plot of the ExpDecayMuon and StaticKuboToyabe functions added toget
 
 .. figure:: /images/thetabsfittingfig30.gif
     :align: center
+    
     Figure 30: How to add a function which is a product of two other functions to a third.
 
 Sequentially Fitting Multiple Datasets
@@ -169,6 +173,7 @@ Follow the instructions below in order to sequentially fit a function to a range
         
 .. figure:: /images/thetabsfittingfig31.gif
     :align: center
+    
     Figure 31: How to use sequential fit on multiple data sets.
 
 For more specifics on each option in the Fitting tab, see the Fitting section of :ref:`Muon_Analysis-ref`

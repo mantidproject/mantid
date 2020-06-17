@@ -1,4 +1,4 @@
-.. _other_mantid_functions:
+.. _other_mantid_functions_old:
 
 ==================================================
 Other Mantid Functions and Basic Data Manipulation 
