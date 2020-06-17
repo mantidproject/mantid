@@ -70,7 +70,21 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="2">
+		<item row="2" column="1">
+         <widget class="QComboBox" name="combo_xunit">
+          <item>
+           <property name="text">
+            <string>TOF</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>d-spacing</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="1">
          <widget class="QCheckBox" name="check_addToPlot">
           <property name="text">
            <string>Add to Plot</string>

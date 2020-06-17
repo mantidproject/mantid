@@ -17,11 +17,22 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def __init__(self, parent=None):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
-
+        # file finder
         self.finder_data.setLabelText("Focused Run Files")
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
+        # xunit combo box
+        self.setup_xunit_combobox()
+
+    # =================
+    # XUnit combo box
+    # =================
+    def setup_xunit_combobox(self):
+        self.combo_xunit.setEditable(False)
+        # make TOF default
+        index = self.combo_xunit.findText("TOF")
+        self.combo_xunit.setCurrentIndex(index)
 
     # =================
     # Slot Connectors
@@ -29,6 +40,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def set_on_load_clicked(self, slot):
         self.button_load.clicked.connect(slot)
+
+    def set_on_xunit_changed(self, slot):
+        self.combo_xunit.currentIndexChanged.connect(slot)
 
     def set_enable_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
@@ -115,13 +129,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             self.remove_table_row(row)
         return selected
 
-    def toggle_checkbox(self,row,col):
-        checkbox = self.get_table_item(row, col)
-        checkbox.setCheckState(QtCore.Qt.Unchecked)
-        # get checkbox again as sometimes overwritten
-        checkbox = self.get_table_item(row, col)
-        checkbox.setCheckState(QtCore.Qt.Checked)
-
     # =================
     # Component Getters
     # =================
@@ -158,11 +165,3 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def is_searching(self):
         return self.finder_data.isSearching()
 
-    # # =================
-    # # validators
-    # # =================
-    # class IntDelegate(QtWidgets.QItemDelegate):
-    #     def createEditor(self, parent, option, index):
-    #         w = QtWigdets.Q
-    #         w.setInputMask("HH")
-    #         return w

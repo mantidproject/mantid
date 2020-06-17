@@ -27,12 +27,16 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
-        # need something here
+        self.view.set_on_xunit_changed(self._hide_xunits)
 
         # Observable Setup
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
+
+    def _hide_xunits(self):
+        print('changed')
+        # self.view.combo_xunit.showPopup()
 
     def on_load_clicked(self):
         if self._validate():
