@@ -44,7 +44,8 @@ class PlotsSettingsTest(unittest.TestCase):
                                                        call(PlotSettings.ERROR_WIDTH),
                                                        call(PlotSettings.CAPSIZE),
                                                        call(PlotSettings.CAP_THICKNESS),
-                                                       call(PlotSettings.ERROR_EVERY)])
+                                                       call(PlotSettings.ERROR_EVERY),
+                                                       call(PlotSettings.LEGEND_LOCATION)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_normalization_changed(self, mock_ConfigService):
@@ -213,3 +214,21 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_error_every_changed(5)
         mock_ConfigService.setString.assert_called_once_with(PlotSettings.ERROR_EVERY, "5")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_legend_every_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_legend_location_changed('best')
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.LEGEND_LOCATION, 'best')
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_legend_location_changed('upper left')
+        mock_ConfigService.setString.assert_called_once_with(PlotSettings.LEGEND_LOCATION, 'upper left')
+
+
+if __name__ == "__main__":
+    unittest.main()

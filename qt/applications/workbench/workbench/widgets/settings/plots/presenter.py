@@ -31,7 +31,7 @@ class PlotSettings(object):
     LEGEND_LOCATION = "plots.LegendLocation"
     AXES_SCALE = ['Linear', 'Log']
     LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
-                       'center left', 'upper left', 'upper center']
+                            'center left', 'upper left', 'upper center']
 
     def __init__(self, parent, view=None):
         self.view = view if view else PlotsSettingsView(parent, self)
