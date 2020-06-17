@@ -10,6 +10,7 @@ New
 
 - The Advanced Plotting menu is now in Workbench. This enables creating surface and contour plots of three or more workspaces, and choosing which log value to plot against.
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
+- A default legend location can be set in the Workbench settings.
 
 Improvements
 ############
