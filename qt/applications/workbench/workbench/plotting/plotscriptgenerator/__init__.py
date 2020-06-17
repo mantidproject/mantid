@@ -17,7 +17,9 @@ from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_com
                                                          generate_axis_scale_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
+from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
+from mantidqt.plotting.figuretype import FigureType, axes_type
 
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "axes"
@@ -50,11 +52,19 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
+    plot_headers = ['import matplotlib.pyplot as plt']
     for ax in fig.get_axes():
-        if not isinstance(ax, MantidAxes) or not curve_in_ax(ax):
+        if not isinstance(ax, MantidAxes):
             continue
         ax_object_var = get_axes_object_variable(ax)
-        plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
+        if axes_type(ax) in [FigureType.Image]:
+            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var) # ax.imshow or pcolormesh
+            plot_commands.extend(colormap_lines)
+            plot_headers.extend(colormap_headers)
+        else:
+            if not curve_in_ax(ax):
+                continue
+            plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
@@ -66,6 +76,8 @@ def generate_script(fig, exclude_headers=False):
         return
 
     cmds = [] if exclude_headers else [DEFAULT_SCRIPT_CONTENT]
+    if plot_headers:
+        cmds.extend(plot_headers)
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
@@ -80,6 +92,14 @@ def get_plot_cmds(ax, ax_object_var):
     for artist in sorted_lines_in(ax, ax.get_tracked_artists()):
         cmds.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_var,
                                             cmd=generate_plot_command(artist)))
+    return cmds
+
+
+def get_plot_2d_cmd(ax, ax_object_var):
+    """Get commands such as imshow or pcolormesh"""
+    cmds = []
+    for artist in ax.get_tracked_artists():
+        cmds.extend(generate_plot_2d_command(artist,ax_object_var))
     return cmds
 
 
@@ -121,8 +141,12 @@ def get_axes_object_variable(ax):
     # plt.subplots returns an Axes object if there's only one axes being
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
-    if ax.numRows > 1:
-        ax_object_var += "[{row_num}]".format(row_num=ax.rowNum)
-    if ax.numCols > 1:
-        ax_object_var += "[{col_num}]".format(col_num=ax.colNum)
+    try:
+        if ax.numRows > 1:
+            ax_object_var += "[{row_num}]".format(row_num=ax.rowNum)
+        if ax.numCols > 1:
+            ax_object_var += "[{col_num}]".format(col_num=ax.colNum)
+    except AttributeError:
+        # No numRows or NumCols members, so no list use the default
+        pass
     return ax_object_var

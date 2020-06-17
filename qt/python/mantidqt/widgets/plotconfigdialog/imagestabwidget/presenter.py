@@ -39,9 +39,11 @@ class ImagesTabWidgetPresenter:
             images = self.image_names_dict.values()
         else:
             images = [self.get_selected_image()]
-        self.set_selected_image_label(props.label)
 
         for image in images:
+            if image.colorbar:
+                image.colorbar.set_label(props.label)
+
             image.set_cmap(props.colormap)
             if props.interpolation:
                 image.set_interpolation(props.interpolation)
@@ -69,15 +71,9 @@ class ImagesTabWidgetPresenter:
             self._populate_select_image_combo_box()
         self.update_view()
 
-    def set_selected_image_label(self, label):
-        image = self.image_names_dict.pop(self.view.get_selected_image_name())
-        image.set_label(label)
-        new_name = self.generate_image_name(image)
-        self.image_names_dict[new_name] = image
-        self.view.replace_selected_image_name(new_name)
-
     def update_view(self):
         img_props = ImageProperties.from_image(self.get_selected_image())
+        self.view.label_line_edit.setEnabled(bool(get_colorbars_from_fig(self.fig)))
         self.view.set_label(img_props.label)
         self.view.set_colormap(img_props.colormap)
         self.view.set_reverse_colormap(img_props.reverse_colormap)

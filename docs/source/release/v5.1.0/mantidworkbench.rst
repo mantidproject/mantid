@@ -37,6 +37,7 @@ Improvements
 - The "Show sample logs" dialog will now hide the plot and statistics display if there are no suitable logs in the workspace that need it.  This is particularly applicable for some of the reactor based instruments.
 - The plot toolbar now shows the correct buttons for 3D plots.
 - Plots now have a Help button on the toolbar, which will direct the user to a relevant documentation page informing them about that type of plot.
+- Colorfill plots can now be scripted just like line plots, as long as there is only one colorfill on the plot.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
@@ -62,11 +63,12 @@ Improvements
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 - The figure options menu now has a help button which opens the documentation for the menu.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
+- The colorbar on colorfill plots is now labelled, and the label can be set in the figure options.
 - Monitors are no longer shown on bin and colorfill plots.
-- The colorbar on colorfill plots is now labelled.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
 - Added an option to set the default ```drawstyle``` within the workbench settings window. Additionally, the ```linestyle``` can now be set to 'None'.
 - Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
+- Added an option to matrix workspaces to export bins and spectra to a table workspace.
 
 Bugfixes
 ########
