@@ -6,6 +6,7 @@ set(TEST_PY_FILES
     DirectEnergyConversionTest.py
     DirectPropertyManagerTest.py
     DirectReductionHelpersTest.py
+    DoublePulseFitTest.py
     ErrorReportPresenterTest.py
     IndirectCommonTests.py
     InelasticDirectDetpackmapTest.py
