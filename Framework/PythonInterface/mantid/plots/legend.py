@@ -16,7 +16,6 @@ import matplotlib
 from matplotlib import colors
 from matplotlib.patches import BoxStyle
 
-from mantid.plots.datafunctions import get_legend_handles
 from mantid.plots.utility import legend_set_draggable
 
 
@@ -134,6 +133,9 @@ class LegendProperties(dict):
 
     @classmethod
     def create_legend(cls, props, ax):
+        # Imported here to prevent circular import.
+        from mantid.plots.datafunctions import get_legend_handles
+
         if not props:
             legend_set_draggable(ax.legend(handles=get_legend_handles(ax)), True)
             return
