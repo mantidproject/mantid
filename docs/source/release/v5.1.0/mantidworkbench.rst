@@ -23,6 +23,7 @@ Improvements
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
 - The ``Python extensions directory`` setting from MantidPlot is now available in Workbench within the Manage User Directories window.
+- The script generation functionality attached to workbench plots will now include fitting code if the user has performed a fit.
 
 .. figure:: ../../images/wb_invalid_log_shading.png
    :align: right
