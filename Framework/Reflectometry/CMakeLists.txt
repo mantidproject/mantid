@@ -3,9 +3,7 @@ set(SRC_FILES
     src/CalculateSlits.cpp
     src/ConvertToReflectometryQ.cpp
     src/CreateFloodWorkspace.cpp
-    src/CreateTransmissionWorkspace.cpp
     src/CreateTransmissionWorkspace2.cpp
-    src/CreateTransmissionWorkspaceAuto.cpp
     src/CreateTransmissionWorkspaceAuto2.cpp
     src/FindReflectometryLines2.cpp
     src/NRCalculateSlitResolution.cpp
@@ -36,9 +34,7 @@ set(INC_FILES
     inc/MantidReflectometry/CalculateSlits.h
     inc/MantidReflectometry/ConvertToReflectometryQ.h
     inc/MantidReflectometry/CreateFloodWorkspace.h
-    inc/MantidReflectometry/CreateTransmissionWorkspace.h
     inc/MantidReflectometry/CreateTransmissionWorkspace2.h
-    inc/MantidReflectometry/CreateTransmissionWorkspaceAuto.h
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto2.h
     inc/MantidReflectometry/FindReflectometryLines2.h
     inc/MantidReflectometry/NRCalculateSlitResolution.h
@@ -70,8 +66,6 @@ set(TEST_FILES
     ConvertToReflectometryQTest.h
     CreateTransmissionWorkspace2Test.h
     CreateTransmissionWorkspaceAuto2Test.h
-    CreateTransmissionWorkspaceAutoTest.h
-    CreateTransmissionWorkspaceTest.h
     FindReflectometryLines2Test.h
     NRCalculateSlitResolutionTest.h
     PolarizationCorrectionFredrikzeTest.h
