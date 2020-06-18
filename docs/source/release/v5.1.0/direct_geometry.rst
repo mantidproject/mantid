@@ -16,6 +16,9 @@ For ILL time-of-flight instruments, :ref:`LoadILLTOF <algm-LoadILLTOF-v2>` now a
 number by default, but you can still convert to time-of-flight using the `ConvertToTOF` property.
 The incident energy calibration has been fixed for PANTHER and IN6 in :ref:`DirectILLCollectData <algm-DirectILLCollectData-v1>`.
 
+An update to the instrument definition for 'old' mari has added in a definition for the sectra 4 as a monitor.
+This will not affect data after July 2017, when MARI was updated as this uses a different instrument definition.
+
 Bugfixes
 --------
 
