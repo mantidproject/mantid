@@ -7,9 +7,9 @@
 #  This file is part of the mantid workbench.
 
 from mantid.plots.mantidaxes import MantidAxes
-
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from matplotlib.legend import Legend
+
 from workbench.config import DEFAULT_SCRIPT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
@@ -19,6 +19,7 @@ from workbench.plotting.plotscriptgenerator.figure import generate_subplots_comm
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
+from workbench.plotting.plotscriptgenerator.fitting import get_fit_cmds
 from mantidqt.plotting.figuretype import FigureType, axes_type
 
 FIG_VARIABLE = "fig"
@@ -75,9 +76,15 @@ def generate_script(fig, exclude_headers=False):
     if not plot_commands:
         return
 
+    fit_commands, fit_headers = get_fit_cmds(fig)
+
     cmds = [] if exclude_headers else [DEFAULT_SCRIPT_CONTENT]
+    if exclude_headers and fit_headers:
+        cmds.extend(fit_headers)
     if plot_headers:
         cmds.extend(plot_headers)
+    if fit_commands:
+        cmds.extend(fit_commands + [''])
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
