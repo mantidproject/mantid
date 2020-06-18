@@ -143,8 +143,8 @@ class LegendProperties(dict):
             legend_set_draggable(ax.legend(loc=loc), True)
             return
 
-        if 'loc' not in props.keys():
-            props['loc'] = loc
+        if 'loc' in props.keys():
+            loc = props['loc']
         if int(matplotlib.__version__[0]) >= 2:
             legend = ax.legend(ncol=props['columns'],
                                prop={'size': props['entries_size']},
@@ -162,7 +162,7 @@ class LegendProperties(dict):
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
                                columnspacing=props['column_spacing'],
-                               loc=props['loc'])
+                               loc=loc)
         else:
             legend = ax.legend(ncol=props['columns'],
                                prop={'size': props['entries_size']},
@@ -178,7 +178,7 @@ class LegendProperties(dict):
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
                                columnspacing=props['column_spacing'],
-                               loc=props['loc'])
+                               loc=loc)
 
         title = legend.get_title()
         title.set_fontname(props['title_font'])
