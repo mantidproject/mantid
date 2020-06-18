@@ -50,6 +50,7 @@ public:
     AnalysisDataService::Instance().clear();
     delete m_view;
     delete m_presenter;
+    m_model = nullptr;
   }
 
   void test_doFit() {

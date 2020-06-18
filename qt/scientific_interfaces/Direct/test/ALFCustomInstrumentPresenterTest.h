@@ -64,7 +64,7 @@ public:
     delete m_model;
     delete m_view;
     delete m_paneView;
-    m_paneModel = NULL;
+    delete m_paneModel;
     delete m_presenter;
     delete m_pane;
   }

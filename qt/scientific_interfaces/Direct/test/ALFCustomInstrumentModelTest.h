@@ -106,8 +106,6 @@ public:
     TS_ASSERT(isDataValid["IsItDSpace"]);
   }
 
-  void test_transformData() { return; }
-
   void test_storeSingleTube() {
     auto data = mockALFData("CURVES", "ALF", 6113, false);
 

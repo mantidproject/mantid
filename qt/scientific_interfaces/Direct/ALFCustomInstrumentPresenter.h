@@ -38,8 +38,6 @@ public:
   void loadSideEffects() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
-
-public:
   void setUpInstrumentAnalysisSplitter() override;
 
   void extractSingleTube();
