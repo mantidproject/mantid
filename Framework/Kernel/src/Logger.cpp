@@ -258,40 +258,40 @@ std::ostream &Logger::information() {
 std::ostream &Logger::debug() { return getLogStream(Priority::PRIO_DEBUG); }
 
 /**
- * Accummulates a message to the buffer
+ * accumulates a message to the buffer
  * @param msg the log message
  */
-void Logger::accummulate(const std::string &msg) {
-  m_logStream->accummulate(msg);
+void Logger::accumulate(const std::string &msg) {
+  m_logStream->accumulate(msg);
 }
 
 /**
- * Flushes the accummulated message to the current channel
+ * Flushes the accumulated message to the current channel
  */
 void Logger::report() { log(m_logStream->flush(), Priority(getLevel())); }
 
 /**
- * Flushes the accummulated message to the given priority
+ * Flushes the accumulated message to the given priority
  * @param priority the log level priority
  */
 void Logger::report(Priority priority) { log(m_logStream->flush(), priority); }
 
-/// Reports the accummulated message with debug priority
+/// Reports the accumulated message with debug priority
 void Logger::reportDebug() { report(Poco::Message::PRIO_DEBUG); }
 
-/// Reports the accummulated message with information priority
+/// Reports the accumulated message with information priority
 void Logger::reportInformation() { report(Poco::Message::PRIO_INFORMATION); }
 
-/// Reports the accummulated message with notice priority
+/// Reports the accumulated message with notice priority
 void Logger::reportNotice() { report(Poco::Message::PRIO_NOTICE); }
 
-/// Reports the accummulated message with warning priority
+/// Reports the accumulated message with warning priority
 void Logger::reportWarning() { report(Poco::Message::PRIO_WARNING); }
 
-/// Reports the accummulated message with error priority
+/// Reports the accumulated message with error priority
 void Logger::reportError() { report(Poco::Message::PRIO_ERROR); }
 
-/// Reports the accummulated message with fatal priority
+/// Reports the accumulated message with fatal priority
 void Logger::reportFatal() { report(Poco::Message::PRIO_FATAL); }
 
 /** Shuts down the logging framework and releases all Loggers.

@@ -73,11 +73,11 @@ public:
   void information(const std::string &msg);
   /// Logs at debug level
   void debug(const std::string &msg);
-  /// Accummulates a message
-  void accummulate(const std::string &msg);
-  /// Reports accummulated messages
+  /// accumulates a message
+  void accumulate(const std::string &msg);
+  /// Reports accumulated messages
   void report();
-  /// Reports accummulated messages to the given priority
+  /// Reports accumulated messages to the given priority
   void report(Priority);
   void reportDebug();
   void reportInformation();

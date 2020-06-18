@@ -45,7 +45,7 @@ public:
                          Poco::Message::Priority priority);
   int overflow(char c);
   using Poco::LogStreamBuf::overflow;
-  void accummulate(const std::string &message);
+  void accumulate(const std::string &message);
   std::string flush();
 
 private:
@@ -145,9 +145,9 @@ public:
   ThreadSafeLogStream &debug(const std::string &message);
   /// Sets the priority for log messages.
   ThreadSafeLogStream &priority(Poco::Message::Priority priority);
-  /// Accummulates the message to the accummulator buffer
-  ThreadSafeLogStream &accummulate(const std::string &message);
-  /// Returns and flushes the accummulated messages
+  /// accumulates the message to the accummulator buffer
+  ThreadSafeLogStream &accumulate(const std::string &message);
+  /// Returns and flushes the accumulated messages
   std::string flush();
 };
 } // namespace Kernel
