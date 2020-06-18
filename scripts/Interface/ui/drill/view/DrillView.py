@@ -15,6 +15,8 @@ from mantidqt.widgets import manageuserdirectories, instrumentselector
 from mantid.kernel import config  # noqa
 from mantidqt import icons
 
+from ..presenter.DrillPresenter import DrillPresenter
+
 
 class DrillView(QMainWindow):
 
@@ -111,6 +113,8 @@ class DrillView(QMainWindow):
         self.invalidCells = set()
         self.coloredRows = set()
         self.rundexFile = None
+
+        self._presenter = DrillPresenter(self)
 
     def setup_header(self):
         """

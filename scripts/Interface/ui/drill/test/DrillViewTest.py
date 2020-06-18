@@ -36,6 +36,11 @@ class DrillViewTest(unittest.TestCase):
         self.mUserDir = patch.start()
         self.addCleanup(patch.stop)
 
+        patch = mock.patch(
+                'Interface.ui.drill.view.DrillView.DrillPresenter')
+        self.mPresenter = patch.start()
+        self.addCleanup(patch.stop)
+
         self.view = DrillView()
         self.view.table = mock.Mock()
 

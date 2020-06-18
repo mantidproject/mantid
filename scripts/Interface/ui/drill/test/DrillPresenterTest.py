@@ -19,13 +19,14 @@ class DrillPresenterTest(unittest.TestCase):
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
 
-        self.view = mock.Mock()
-        self.model = mock.Mock()
-        self.presenter = DrillPresenter(self.model, self.view)
+        patch = mock.patch(
+                'Interface.ui.drill.presenter.DrillPresenter.DrillModel')
+        self.mModel = patch.start()
+        self.addCleanup(patch.stop)
 
-    def test_show(self):
-        self.presenter.show()
-        self.view.show.assert_called_once()
+        self.view = mock.Mock()
+        self.presenter = DrillPresenter(self.view)
+        self.model = self.mModel.return_value
 
     def test_process(self):
         self.presenter.process(["test", "test"])

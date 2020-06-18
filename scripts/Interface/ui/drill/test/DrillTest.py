@@ -100,8 +100,8 @@ class DrillTest(unittest.TestCase):
 
     def setUp(self):
         self.view = DrillView()
-        self.model = DrillModel()
-        self.presenter = DrillPresenter(self.model, self.view)
+        self.presenter = self.view._presenter
+        self.model = self.presenter.model
 
     def test_changeInstrument(self):
         for i in range(self.view.instrumentselector.count()):

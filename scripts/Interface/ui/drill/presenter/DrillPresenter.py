@@ -6,11 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from ..view.SettingsDialog import SettingsDialog
+from ..model.DrillModel import DrillModel
 
 
 class DrillPresenter:
 
-    def __init__(self, model, view):
+    def __init__(self, view):
         """
         Initialize the presenter by giving a view and a model. This method
         connects all the view and model signals.
@@ -19,7 +20,7 @@ class DrillPresenter:
             model (DrillModel): the model
             view (DrillView): the view
         """
-        self.model = model
+        self.model = DrillModel()
         self.view = view
         self.view.set_available_instruments(self.model.getAvailableTechniques())
 
@@ -65,12 +66,6 @@ class DrillPresenter:
                 )
 
         self.updateViewFromModel()
-
-    def show(self):
-        """
-        Show the view. This method is here for convenience.
-        """
-        self.view.show()
 
     def process(self, rows):
         """

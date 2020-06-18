@@ -20,12 +20,10 @@ else:
     else:
         from mantidqt.gui_helper import get_qapplication
         from Interface.ui.drill.view.DrillView import DrillView
-        from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
-        from Interface.ui.drill.model.DrillModel import DrillModel
 
         app, within_mantid = get_qapplication()
         if 'drillInterface' not in globals():
-            drillInterface = DrillPresenter(DrillModel(), DrillView())
+            drillInterface = DrillView()
         drillInterface.show()
         if not within_mantid:
             sys.exit(app.exec_())
