@@ -177,8 +177,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._model.set_double_pulse_time(double_pulse_time)
 
     def handle_double_pulse_enabled(self):
-        enabled = self._view.double_pulse_state()
-        self._view.double_pulse_edit_enabled(not enabled)
+        pulseType = self._view.double_pulse_state()
+        enabled = pulseType == 'Double Pulse'
+        self._view.double_pulse_edit_enabled(enabled)
         self._model.set_double_pulse_enabled(enabled)
 
     # ------------------------------------------------------------------------------------------------------------------

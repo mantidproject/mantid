@@ -52,7 +52,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
         self.last_good_data_edit_enabled(True)
-        self.double_pulse_edit_enabled(True)
+        self.double_pulse_edit_enabled(False)
 
         self._on_time_zero_changed = lambda: 0
         self._on_first_good_data_changed = lambda: 0
@@ -398,17 +398,14 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.double_pulse_data_unit_label = QtWidgets.QLabel(self)
         self.double_pulse_data_unit_label.setText(u" \u03BCs (Double pulse ")
 
-        self.double_pulse_data_checkbox = QtWidgets.QCheckBox(self)
-        self.double_pulse_data_checkbox.setChecked(False)
-
-        self.double_pulse_data_label_2 = QtWidgets.QLabel(self)
-        self.double_pulse_data_label_2.setText(" )")
+        self.double_pulse_data_combobox = QtWidgets.QComboBox(self)
+        self.double_pulse_data_combobox.addItem('Single Pulse')
+        self.double_pulse_data_combobox.addItem('Double Pulse')
 
         self.double_pulse_data_layout = QtWidgets.QHBoxLayout()
         self.double_pulse_data_layout.addSpacing(10)
         self.double_pulse_data_layout.addWidget(self.double_pulse_data_unit_label)
-        self.double_pulse_data_layout.addWidget(self.double_pulse_data_checkbox)
-        self.double_pulse_data_layout.addWidget(self.double_pulse_data_label_2)
+        self.double_pulse_data_layout.addWidget(self.double_pulse_data_combobox)
         self.double_pulse_data_layout.addStretch(0)
 
         self.layout.addWidget(self.double_pulse_label, 4, 0)
@@ -423,17 +420,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             "{0:.3f}".format(round(float(double_pulse_time), 3)))
 
     def on_double_pulse_checkState_changed(self, slot):
-        self.double_pulse_data_checkbox.stateChanged.connect(slot)
+        self.double_pulse_data_combobox.currentIndexChanged.connect(slot)
 
     def double_pulse_state(self):
-        return self.double_pulse_data_checkbox.checkState()
+        return self.double_pulse_data_combobox.currentText()
 
-    def on_last_double_pulse_checkbox_state_change(self):
-        self.double_pulse_data_edit(
-            self.double_pulse_data_checkbox.checkState())
-
-    def double_pulse_edit_enabled(self, disabled):
-        self.double_pulse_data_edit.setEnabled(not disabled)
+    def double_pulse_edit_enabled(self, enabled):
+        self.double_pulse_data_edit.setEnabled(enabled)
 
     def get_double_pulse_time(self):
         return float(self.double_pulse_data_edit.text())
