@@ -26,6 +26,7 @@ else:
 if IS_IN_MANTIDGUI:
     from qtpy.QtCore import QObject, Signal, Slot
     from mantid.plots._compatability import plotSpectrum
+    from matplotlib import pyplot
     from mantidqt.plotting.markers import RangeMarker
 
 class RangeSelector(object):
@@ -39,21 +40,18 @@ class RangeSelector(object):
         """
             Selector class for selecting ranges in Mantidplot
         """
-
-        #fit_range_changed = Signal(list)
-
         def __init__(self):
             super().__init__()
             self._call_back = None
             self._ws_output_base = None
             self._graph = "Range Selector"
+            self.cid = None
 
         def disconnect(self):
-            pass
-            #if IS_IN_MANTIDGUI:
-            #mantidplot.app.disconnect(mantidplot.app.mantidUI,
-            #                          QtCore.SIGNAL("x_range_update(double,double)"),
-            #                          self._call_back)
+            if IS_IN_MANTIDGUI:
+                fig = pyplot.gcf()
+                ax = fig.axes[0]
+                ax.remove_callback(self.cid)
 
         def connect(self, ws, call_back, xmin=None, xmax=None,
                     range_min=None, range_max=None, x_title=None,
@@ -65,10 +63,6 @@ class RangeSelector(object):
 
             self._call_back = call_back
             self._ws_output_base = ws_output_base
-
-            #mantidplot.app.connect(mantidplot.app.mantidUI,
-            #                       QtCore.SIGNAL("x_range_update(double,double)"),
-            #                       self._call_back)
 
             g = plotSpectrum(ws, [0], True)
             g.suptitle(self._graph)
@@ -92,7 +86,8 @@ class RangeSelector(object):
             else:
                 self.fit_range = RangeMarker(l.figure.canvas, 'green', 0.0, 0.0)
 
-            self.fit_range.range_changed.connect(self.fit_range_changed)
+            self.cid = l.callbacks.connect('xlim_changed', self._call_back)
+            #self.fit_range.range_changed.connect(self.fit_range_changed)
             self.fit_range.set_visible(True)
             self.fit_range.redraw()
 
