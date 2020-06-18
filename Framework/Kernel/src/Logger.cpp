@@ -257,6 +257,43 @@ std::ostream &Logger::information() {
  */
 std::ostream &Logger::debug() { return getLogStream(Priority::PRIO_DEBUG); }
 
+/**
+ * Accummulates a message to the buffer
+ * @param msg the log message
+ */
+void Logger::accummulate(const std::string &msg) {
+  m_logStream->accummulate(msg);
+}
+
+/**
+ * Flushes the accummulated message to the current channel
+ */
+void Logger::report() { log(m_logStream->flush(), Priority(getLevel())); }
+
+/**
+ * Flushes the accummulated message to the given priority
+ * @param priority the log level priority
+ */
+void Logger::report(Priority priority) { log(m_logStream->flush(), priority); }
+
+/// Reports the accummulated message with debug priority
+void Logger::reportDebug() { report(Poco::Message::PRIO_DEBUG); }
+
+/// Reports the accummulated message with information priority
+void Logger::reportInformation() { report(Poco::Message::PRIO_INFORMATION); }
+
+/// Reports the accummulated message with notice priority
+void Logger::reportNotice() { report(Poco::Message::PRIO_NOTICE); }
+
+/// Reports the accummulated message with warning priority
+void Logger::reportWarning() { report(Poco::Message::PRIO_WARNING); }
+
+/// Reports the accummulated message with error priority
+void Logger::reportError() { report(Poco::Message::PRIO_ERROR); }
+
+/// Reports the accummulated message with fatal priority
+void Logger::reportFatal() { report(Poco::Message::PRIO_FATAL); }
+
 /** Shuts down the logging framework and releases all Loggers.
  * Static method.
  */
@@ -367,7 +404,7 @@ std::ostream &Logger::getLogStream(Logger::Priority priority) {
  */
 Logger::Priority Logger::applyLevelOffset(Logger::Priority proposedLevel) {
   int retVal = proposedLevel;
-  // fast exit is offset is 0
+  // fast exit if offset is 0
   if (m_levelOffset == 0) {
     return proposedLevel;
   } else {

@@ -43,10 +43,10 @@ public:
   /// Constructor
   ThreadSafeLogStreamBuf(Poco::Logger &logger,
                          Poco::Message::Priority priority);
-
-public:
   int overflow(char c);
   using Poco::LogStreamBuf::overflow;
+  void accummulate(const std::string &message);
+  std::string flush();
 
 private:
   /// Overridden fron base to write to the device in a thread-safe manner.
@@ -55,6 +55,8 @@ private:
 private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
+  /// Store a global accummulator of messages
+  std::string m_accumulator;
   /// mutex protecting logstream
   std::mutex m_mutex;
 };
@@ -143,6 +145,10 @@ public:
   ThreadSafeLogStream &debug(const std::string &message);
   /// Sets the priority for log messages.
   ThreadSafeLogStream &priority(Poco::Message::Priority priority);
+  /// Accummulates the message to the accummulator buffer
+  ThreadSafeLogStream &accummulate(const std::string &message);
+  /// Returns and flushes the accummulated messages
+  std::string flush();
 };
 } // namespace Kernel
 } // namespace Mantid

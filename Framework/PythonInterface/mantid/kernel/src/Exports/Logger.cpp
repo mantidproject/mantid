@@ -14,6 +14,7 @@
 using Mantid::Kernel::Logger;
 using namespace boost::python;
 using LoggerMsgFunction = void (Logger::*)(const std::string &);
+using LoggerFlushFunction = void (Logger::*)();
 
 namespace {
 /**
@@ -69,6 +70,29 @@ void export_Logger() {
            "Send a message at debug priority:"
            ". Anything that may be useful to understand what the code has been "
            "doing for debugging purposes.")
+      .def("accummulate", (LoggerMsgFunction)&Logger::accummulate,
+           (arg("self"), arg("message")),
+           "Accummulate a message to report later")
+      .def("report", (LoggerFlushFunction)&Logger::report, (arg("self")),
+           "Flush the accummulated message to the current channel.")
+      .def("reportDebug", (LoggerFlushFunction)&Logger::reportDebug,
+           (arg("self")),
+           "Flush the accummulated message to the debug channel.")
+      .def("reportInformation", (LoggerFlushFunction)&Logger::reportInformation,
+           (arg("self")),
+           "Flush the accummulated message to the debug channel.")
+      .def("reportNotice", (LoggerFlushFunction)&Logger::reportNotice,
+           (arg("self")),
+           "Flush the accummulated message to the notice channel.")
+      .def("reportWarning", (LoggerFlushFunction)&Logger::reportWarning,
+           (arg("self")),
+           "Flush the accummulated message to the warning channel.")
+      .def("reportError", (LoggerFlushFunction)&Logger::reportError,
+           (arg("self")),
+           "Flush the accummulated message to the error channel.")
+      .def("reportFatal", (LoggerFlushFunction)&Logger::reportFatal,
+           (arg("self")),
+           "Flush the accummulated message to the fatal channel.")
       // -- deprecated  --
       .def("get", &getLogger,
            "Creates the named logger. "

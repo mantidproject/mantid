@@ -73,6 +73,18 @@ public:
   void information(const std::string &msg);
   /// Logs at debug level
   void debug(const std::string &msg);
+  /// Accummulates a message
+  void accummulate(const std::string &msg);
+  /// Reports accummulated messages
+  void report();
+  /// Reports accummulated messages to the given priority
+  void report(Priority);
+  void reportDebug();
+  void reportInformation();
+  void reportNotice();
+  void reportWarning();
+  void reportError();
+  void reportFatal();
 
   /// Logs at Fatal level
   std::ostream &fatal();
