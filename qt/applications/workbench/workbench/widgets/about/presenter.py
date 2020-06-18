@@ -29,30 +29,30 @@ class AboutPresenter(object):
         self.usage_reporting_verification_view = usage_reporting_verification_view \
             if usage_reporting_verification_view  else UsageReportingVerificationView(parent, self)
         self.parent = parent
-        self.view.clbReleaseNotes.clicked.connect(self.action_open_release_notes)
-        self.view.clbSampleDatasets.clicked.connect(self.action_open_download_website)
-        self.view.clbMantidIntroduction.clicked.connect(self.action_open_mantid_introduction)
-        self.view.clbPythonIntroduction.clicked.connect(self.action_open_python_introduction)
-        self.view.clbPythonInMantid.clicked.connect(self.action_open_python_in_mantid)
-        self.view.clbExtendingMantid.clicked.connect(self.action_open_extending_mantid)
-        self.view.lblPrivacyPolicy.linkActivated.connect(self.action_open_external_link)
-        self.view.pbMUD.clicked.connect(self.action_manage_user_directories)
-        self.view.pbClose.clicked.connect(self.action_close)
+        self.view.clb_release_notes.clicked.connect(self.action_open_release_notes)
+        self.view.clb_sample_datasets.clicked.connect(self.action_open_download_website)
+        self.view.clb_mantid_introduction.clicked.connect(self.action_open_mantid_introduction)
+        self.view.clb_python_introduction.clicked.connect(self.action_open_python_introduction)
+        self.view.clb_python_in_mantid.clicked.connect(self.action_open_python_in_mantid)
+        self.view.clb_extending_mantid.clicked.connect(self.action_open_extending_mantid)
+        self.view.lbl_privacy_policy.linkActivated.connect(self.action_open_external_link)
+        self.view.pb_manage_user_directories.clicked.connect(self.action_manage_user_directories)
+        self.view.pb_close.clicked.connect(self.action_close)
         self.setup_facilities_group()
 
-        # set chkAllowUsageData
+        # set chk_allow_usage_data
         isUsageReportEnabled = ConfigService.getString(self.USAGE_REPORTING, True)
         if isUsageReportEnabled == "0":
-            self.view.chkAllowUsageData.setChecked(False)
-        self.view.chkAllowUsageData.stateChanged.connect(self.action_usage_data_changed)
+            self.view.chk_allow_usage_data.setChecked(False)
+        self.view.chk_allow_usage_data.stateChanged.connect(self.action_usage_data_changed)
 
         # set do not show
         qSettings = QSettings()
         qSettings.beginGroup(self.DO_NOT_SHOW_GROUP)
         doNotShowUntilNextRelease = int(qSettings.value(self.DO_NOT_SHOW, "0"))
         qSettings.endGroup()
-        self.view.chkDoNotShowUntilNextRelease.setChecked(doNotShowUntilNextRelease)
-        self.view.chkDoNotShowUntilNextRelease.stateChanged.connect(self.action_do_not_show_until_next_release)
+        self.view.chk_do_not_show_until_next_release.setChecked(doNotShowUntilNextRelease)
+        self.view.chk_do_not_show_until_next_release.stateChanged.connect(self.action_do_not_show_until_next_release)
 
     @staticmethod
     def should_show_on_startup():
@@ -94,36 +94,41 @@ class AboutPresenter(object):
         facilities = ConfigService.getFacilityNames()
         if not facilities:
             return
-        self.view.cbFacility.addItems(facilities)
+        self.view.cb_facility.addItems(facilities)
 
         try:
             default_facility = ConfigService.getFacility().name()
         except RuntimeError:
             default_facility = facilities[0]
-        self.view.cbFacility.setCurrentIndex(self.view.cbFacility.findText(default_facility))
+        self.view.cb_facility.setCurrentIndex(self.view.cb_facility.findText(default_facility))
         self.action_facility_changed(default_facility)
-        self.view.cbFacility.currentTextChanged.connect(self.action_facility_changed)
+        self.view.cb_facility.currentTextChanged.connect(self.action_facility_changed)
 
         try:
             default_instrument = ConfigService.getInstrument().name()
-            self.view.cbInstrument.setCurrentIndex(self.view.cbInstrument.findText(default_instrument))
+            self.view.cb_instrument.setCurrentIndex(self.view.cb_instrument.findText(default_instrument))
         except RuntimeError:
-            default_instrument = self.view.cbInstrument.itemText(0)
+            default_instrument = self.view.cb_instrument.itemText(0)
         self.action_instrument_changed(default_instrument)
-        self.view.cbInstrument.currentTextChanged.connect(self.action_instrument_changed)
+        self.view.cb_instrument.currentTextChanged.connect(self.action_instrument_changed)
 
     def action_facility_changed(self, new_facility):
         """
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
         :param new_facility: The name of the new facility that was selected
         """
+        self.store_facility(new_facility)
+        # refresh the instrument selection to contain instruments about the selected facility only
+        self.view.cb_instrument.clear()
+        self.view.cb_instrument.addItems(
+            [instr.name() for instr in ConfigService.getFacility(new_facility).instruments()])
+
+    def store_facility(self, new_facility):
         current_value = ConfigService.getFacility().name()
         if new_facility != current_value:
             ConfigService.setFacility(new_facility)
-        # refresh the instrument selection to contain instruments about the selected facility only
-        self.view.cbInstrument.clear()
-        self.view.cbInstrument.addItems(
-            [instr.name() for instr in ConfigService.getFacility(new_facility).instruments()])
+            return True
+        return False
 
     def action_instrument_changed(self, new_instrument):
         current_value = ConfigService.getString(self.INSTRUMENT)
@@ -167,7 +172,7 @@ class AboutPresenter(object):
                 # No was clicked, or no button was clicked
                 # set the checkbox back to checked
                 checkedState = Qt.Checked
-                self.view.chkAllowUsageData.setCheckState(checkedState)
+                self.view.chk_allow_usage_data.setCheckState(checkedState)
 
         ConfigService.setString(self.USAGE_REPORTING, "1" if checkedState == Qt.Checked else "0")
 
@@ -178,12 +183,15 @@ class AboutPresenter(object):
         settings.endGroup()
 
     def action_close(self):
+        self.view.close()
+
+    def save_on_closing(self):
         # make sure the Last Version is updated on closing
         settings = QSettings()
         settings.beginGroup(self.DO_NOT_SHOW_GROUP)
         settings.setValue(self.LAST_VERSION, release_notes_url())
         settings.endGroup()
-
+        self.store_facility(self.view.cb_facility.currentText())
+        self.action_instrument_changed(self.view.cb_instrument.currentText())
         ConfigService.saveConfig(ConfigService.getUserFilename())
         self.parent.config_updated()
-        self.view.close()

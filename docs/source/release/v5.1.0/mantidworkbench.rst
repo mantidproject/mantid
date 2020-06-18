@@ -38,10 +38,22 @@ Improvements
 - The "Show sample logs" dialog will now hide the plot and statistics display if there are no suitable logs in the workspace that need it.  This is particularly applicable for some of the reactor based instruments.
 - The plot toolbar now shows the correct buttons for 3D plots.
 - Plots now have a Help button on the toolbar, which will direct the user to a relevant documentation page informing them about that type of plot.
+- Colorfill plots can now be scripted just like line plots, as long as there is only one colorfill on the plot.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
 - We have neatened up the the slice viewer user interface, to reduce the amount of wasted space and devote more to the data view itself.
+- We have implemented the interactive  plot details functionality from the SpectrumViewer in Mantidplot into the slice viewer there is now a table of details that update as you move your cursor over the data this includes the diension value and signal for multidimensional workspaces, and for matrix workspaces with a spectrum axis:
+   - Signal
+   - Spectra Number
+   - Detector ID
+   - Two Theta
+   - Azimuthal Angle
+   - Time of Flight
+   - Wavelength
+   - Energy
+   - d-Spacing
+   - Mod Q
 - Surface plots no longer spill over the axes when their limits are reduced.
 - The instrument view now ignores non-finite (infinity and NaN) values and should now display workspaces containing those values.
   If there are no valid values for that detector the value will appear as invalid (grayed out).
@@ -51,9 +63,14 @@ Improvements
 - The x-axis tick labels on colorfill plots are now horizontal.
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 - The figure options menu now has a help button which opens the documentation for the menu.
+- Added a profiling option to the workbench launch script, allowing for timing of startup and other internal processes.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
-- The colorbar on colorfill plots is now labelled.
+- The colorbar on colorfill plots is now labelled, and the label can be set in the figure options.
+- Monitors are no longer shown on bin and colorfill plots.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
+- When choosing a marker in the figure options, if one of the marker colours would not be used that selection is disabled.
+- Added an option to set the default ```drawstyle``` within the workbench settings window. Additionally, the ```linestyle``` can now be set to 'None'.
+- Added an option to matrix workspaces to export bins and spectra to a table workspace.
 
 Bugfixes
 ########

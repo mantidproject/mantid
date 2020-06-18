@@ -38,6 +38,7 @@ class PlotsSettingsTest(unittest.TestCase):
                                                        call(PlotSettings.X_AXES_SCALE),
                                                        call(PlotSettings.Y_AXES_SCALE),
                                                        call(PlotSettings.LINE_STYLE),
+                                                       call(PlotSettings.DRAW_STYLE),
                                                        call(PlotSettings.LINE_WIDTH),
                                                        call(PlotSettings.MARKER_STYLE),
                                                        call(PlotSettings.MARKER_SIZE),

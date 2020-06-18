@@ -4,10 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import (Load, DeleteWorkspace, PaalmanPingsMonteCarloAbsorption)
-
+from mantid.simpleapi import (Load, PaalmanPingsMonteCarloAbsorption, mtd)
+from mantid.api import WorkspaceGroup
 import unittest
 
 
@@ -18,18 +16,22 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
     _indirect_elastic_ws = None
     _indirect_fws_ws = None
 
+    @classmethod
+    def setUpClass(cls):
+        Load('irs26176_graphite002_red.nxs', OutputWorkspace='red_ws')
+        Load('irs26173_graphite002_red.nxs', OutputWorkspace='container_ws')
+        Load('osi104367_elf.nxs', OutputWorkspace='indirect_elastic_ws')
+        Load('ILL_IN16B_FWS_Reduced.nxs', OutputWorkspace='indirect_fws_ws')
+
     def setUp(self):
-        red_ws = Load('irs26176_graphite002_red.nxs')
-        container_ws = Load('irs26173_graphite002_red.nxs')
-        indirect_elastic_ws = Load('osi104367_elf.nxs')
-        indirect_fws_ws = Load('ILL_IN16B_FWS_Reduced.nxs')
-        self._red_ws = red_ws
-        self._container_ws = container_ws
-        self._indirect_elastic_ws = indirect_elastic_ws
+        self._red_ws = mtd['red_ws']
+        self._container_ws = mtd['container_ws']
+        self._indirect_elastic_ws = mtd['indirect_elastic_ws']
+        self._indirect_fws_ws = mtd['indirect_fws_ws']
+
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
         self._expected_hist = 10
         self._expected_blocksize = 1905
-        self._indirect_fws_ws = indirect_fws_ws
 
         self._arguments = {'SampleChemicalFormula': 'H2-O',
                            'SampleDensityType': 'Mass Density',
@@ -45,13 +47,9 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
                                 'ContainerDensity':1.0 }
         self._test_arguments = dict()
 
-    def tearDown(self):
-        DeleteWorkspace(self._red_ws)
-
-        if self._container_ws is not None:
-            DeleteWorkspace(self._container_ws)
-        if self._indirect_elastic_ws is not None:
-            DeleteWorkspace(self._indirect_elastic_ws)
+    @classmethod
+    def tearDownClass(cls):
+        mtd.clear()
 
     def _flat_plate_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0

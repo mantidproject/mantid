@@ -9,7 +9,7 @@
 #
 from mantid.kernel import ConfigService
 from workbench.widgets.settings.plots.view import PlotsSettingsView
-from workbench.plotting.style import VALID_LINE_STYLE
+from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
 
 from qtpy.QtCore import Qt
@@ -23,6 +23,7 @@ class PlotSettings(object):
     ERROR_EVERY = "plots.errorbar.errorEvery"
     ERROR_WIDTH = "plots.errorbar.Width"
     LINE_STYLE = "plots.line.Style"
+    DRAW_STYLE = "plots.line.DrawStyle"
     LINE_WIDTH = "plots.line.Width"
     MARKER_STYLE = "plots.marker.Style"
     MARKER_SIZE = "plots.marker.Size"
@@ -69,19 +70,18 @@ class PlotSettings(object):
 
     def setup_line_group(self):
         line_style = ConfigService.getString(self.LINE_STYLE)
-        self.view.line_style.addItems(VALID_LINE_STYLE)
-        if line_style in VALID_LINE_STYLE:
-            self.view.line_style.setCurrentIndex(self.view.line_style.findText(line_style))
-        else:
-            self.view.line_style.setCurrentIndex(0)
+        self._setup_style_combo_boxes(line_style, self.view.line_style, VALID_LINE_STYLE)
+
+        draw_style = ConfigService.getString(self.DRAW_STYLE)
+        self._setup_style_combo_boxes(draw_style, self.view.draw_style, VALID_DRAW_STYLE)
 
         line_width = float(ConfigService.getString(self.LINE_WIDTH))
         self.view.line_width.setValue(line_width)
 
     def setup_marker_group(self):
         marker_style = ConfigService.getString(self.MARKER_STYLE)
-        self.view.marker_style.addItems(MARKER_STYLES)
-        if marker_style in MARKER_STYLES:
+        self.view.marker_style.addItems(MARKER_STYLES.keys())
+        if marker_style in MARKER_STYLES.keys():
             self.view.marker_style.setCurrentIndex(self.view.marker_style.findText(marker_style))
         else:
             self.view.marker_style.setCurrentIndex(0)
@@ -106,12 +106,21 @@ class PlotSettings(object):
         if legend_location in self.LEGEND_LOCATION_LIST:
             self.view.legend_location.setCurrentIndex(self.view.legend_location.findText(legend_location))
 
+    @staticmethod
+    def _setup_style_combo_boxes(current_style, style_combo, combo_items):
+        style_combo.addItems(combo_items)
+        if current_style in combo_items:
+            style_combo.setCurrentIndex(style_combo.findText(current_style))
+        else:
+            style_combo.setCurrentIndex(0)
+
     def setup_signals(self):
         self.view.normalize_to_bin_width.stateChanged.connect(self.action_normalization_changed)
         self.view.show_title.stateChanged.connect(self.action_show_title_changed)
         self.view.x_axes_scale.currentTextChanged.connect(self.action_default_x_axes_changed)
         self.view.y_axes_scale.currentTextChanged.connect(self.action_default_y_axes_changed)
         self.view.line_style.currentTextChanged.connect(self.action_line_style_changed)
+        self.view.draw_style.currentTextChanged.connect(self.action_draw_style_changed)
         self.view.line_width.valueChanged.connect(self.action_line_width_changed)
         self.view.marker_style.currentTextChanged.connect(self.action_marker_style_changed)
         self.view.marker_size.valueChanged.connect(self.action_marker_size_changed)
@@ -135,6 +144,9 @@ class PlotSettings(object):
 
     def action_line_style_changed(self, style):
         ConfigService.setString(self.LINE_STYLE, style)
+
+    def action_draw_style_changed(self, style):
+        ConfigService.setString(self.DRAW_STYLE, style)
 
     def action_line_width_changed(self, value):
         ConfigService.setString(self.LINE_WIDTH, str(value))

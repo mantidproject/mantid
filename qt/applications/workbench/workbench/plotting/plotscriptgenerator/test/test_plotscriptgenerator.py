@@ -24,7 +24,8 @@ GEN_SUBPLOTS_CMD = 'workbench.plotting.plotscriptgenerator.generate_subplots_com
 GEN_AXIS_LIMIT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_axis_limit_commands'
 GET_AUTOSCALE_LIMITS = 'workbench.plotting.plotscriptgenerator.axes.get_autoscale_limits'
 
-SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
+SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
+                 "from mantid.api import AnalysisDataService\n"
                  "\n"
                  "ADS.retrieve(...)\n"
                  "\n"
@@ -64,6 +65,9 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             'get_tracked_artists': lambda: [],
             'get_lines': lambda: [Mock()],
             'legend_': False,
+            'lines': [],
+            'collections': [],
+            'images': [],
             'containers': [],
             'get_xlabel': lambda: '',
             'get_ylabel': lambda: '',
@@ -104,7 +108,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
                                          get_lines=lambda: [None],
                                          numRows=1, numCols=2, colNum=1)
-        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2])
+        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2],
+                        axes= [mock_axes1, mock_axes2])
 
         output_script = generate_script(mock_fig, exclude_headers=True)
         self.assertEqual(SAMPLE_SCRIPT, output_script)

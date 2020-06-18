@@ -923,6 +923,31 @@ signals:
 };
 
 // ---------------------------------
+// ImageInformationWidget
+// ---------------------------------
+class ImageInfoWidget : public QTableWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ImageInfoWidget.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
+%End
+public:
+    ImageInfoWidget(std::string workspace_type, QWidget *parent = nullptr);
+    void updateTable(const double x, const double y, const double z);
+    void setWorkspace(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      auto extractor = Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(boost::python::object(boost::python::handle<>(a0)));
+      sipCpp->setWorkspace(extractor());
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+};
+
+// ---------------------------------
 // DataSelector
 // ---------------------------------
 class DataSelector : QWidget
