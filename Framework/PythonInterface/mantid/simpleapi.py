@@ -28,6 +28,7 @@ Importing this module starts the FrameworkManager instance.
 """
 # std libs
 from collections import OrderedDict, namedtuple
+from contextlib import contextmanager
 import inspect
 import os
 import sys
@@ -38,7 +39,6 @@ from mantid import __gui__, api as _api, kernel as _kernel, apiVersion
 from mantid.kernel import plugins as _plugin_helper
 from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_info as _lhs_info, \
     replace_signature as _replace_signature
-from mantid.kernel.packagesetup import update_sys_paths as _update_sys_paths
 
 # register matplotlib projection
 try:
@@ -1454,6 +1454,21 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
                                              algm_object.workspaceMethodOn())
 
 
+@contextmanager
+def _update_sys_path(dirs):
+    """
+    Temporarily update the system path with a list of directories
+    :param dirs: List of directories to add.
+    """
+    for dir_path in dirs:
+        sys.path.append(dir_path)
+    try:
+        yield
+    finally:
+        for dir_path in dirs:
+            sys.path.remove(dir_path)
+
+
 # Initialization:
 #   - start FrameworkManager (if necessary). The check is necessary as
 #    _FrameworkManagerImpl.Instance() will import this module and deadlock if it
@@ -1482,28 +1497,25 @@ from . import _plugins  # noqa
 # but we need to do this earlier
 setattr(mantid, MODULE_NAME, sys.modules['mantid.{}'.format(MODULE_NAME)])
 try:
-    _plugins_key = 'python.plugins.directories'
-    _user_key = 'user.%s' % _plugins_key
-    plugin_dirs = _plugin_helper.get_plugin_paths_as_set(_plugins_key)
-    plugin_dirs.update(_plugin_helper.get_plugin_paths_as_set(_user_key))
-    _update_sys_paths(plugin_dirs, recursive=True)
-
-    # Load
-    plugin_files = []
-    alg_files = []
-    for directory in plugin_dirs:
-        try:
-            all_plugins, algs = _plugin_helper.find_plugins(directory)
-            plugin_files.extend(all_plugins)
-            alg_files.extend(algs)
-        except ValueError as exc:
-            logger.warning('Exception encountered during plugin discovery: {0}'.format(str(exc)))
-            continue
+    # Use a cmake generated manifest of all the python algorithms to load them into the api
+    plugins_manifest_path = "/home/conor/builds/mantid-d/Framework/PythonInterface/plugins/python-plugin-manifest.txt"
+    plugins_dir = os.path.dirname(plugins_manifest_path)
+    with open(plugins_manifest_path) as manifest:
+        _plugin_files = []
+        _plugin_dirs = set()
+        plugin_paths = manifest.read().splitlines()
+        for path in plugin_paths:
+            plugin_name = os.path.splitext(path)[0]
+            if not os.path.isabs(path):
+                path = os.path.join(plugins_dir, path)
+            _plugin_dirs.add(os.path.dirname(path))
+            _plugin_files.append(path)
 
     # Mock out the expected functions
-    _mockup(alg_files)
+    _mockup(_plugin_files)
     # Load the plugins.
-    _plugin_modules = _plugin_helper.load(plugin_files)
+    with _update_sys_path(_plugin_dirs):
+        _plugin_modules = _plugin_helper.load(_plugin_files)
     # Create the final proper algorithm definitions for the plugins
     _plugin_attrs = _translate()
     # Finally, overwrite the mocked function definitions in the loaded modules with the real ones
