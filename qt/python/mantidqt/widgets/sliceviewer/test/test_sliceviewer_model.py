@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
+from contextlib import contextmanager
 import unittest
 from unittest.mock import MagicMock, patch
 import sys
@@ -40,7 +41,23 @@ def _create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, ext
     ws = _create_mock_workspace(IMDHistoWorkspace, coords, has_oriented_lattice=False, ndims=ndims)
     ws.getSignalArray.return_value = signal
     ws.getErrorSquaredArray.return_value = error
+    ws.hasOriginalWorkspace.return_value = False
     return _add_dimensions(ws, names, isq, extents, nbins, units)
+
+
+@contextmanager
+def _attach_as_original(histo_ws, mde_ws):
+    """
+    Temporarily attach an MDEventWorkspace to a MDHistoWorkspace
+    as an original workspace
+    :param histo_ws: A mock MDHistoWorkspace
+    :param mde_ws: A mock MDEventWorkspace
+    """
+    histo_ws.hasOriginalWorkspace.return_value = True
+    histo_ws.getOriginalWorkspace.return_value = mde_ws
+    yield
+    histo_ws.hasOriginalWorkspace.return_value = False
+    histo_ws.getOriginalWorkspace.return_value = MagicMock()
 
 
 def _create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
@@ -94,6 +111,7 @@ def _create_mock_workspace(ws_type,
         if ws_type == IMDHistoWorkspace:
             ws.isMDHistoWorkspace.return_value = True
             ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]
+            ws.hasOriginalWorkspace.return_value = False
         else:
             ws.isMDHistoWorkspace.return_value = False
 
@@ -201,6 +219,7 @@ class SliceViewerModelTest(unittest.TestCase):
                                                        distribution=True,
                                                        names=('Wavelength', 'Energy transfer'),
                                                        units=('Angstrom', 'meV'))
+        self.ws2d_histo.name.return_value = 'ws2d_histo'
 
     def test_model_MDH(self):
         model = SliceViewerModel(self.ws_MD_3D)
@@ -243,7 +262,7 @@ class SliceViewerModelTest(unittest.TestCase):
 
         self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4)), self.ws_MDE_3D)
         mock_binmd.assert_called_once_with(InputWorkspace=self.ws_MDE_3D,
-                                           OutputWorkspace='ws_MDE_3D_rebinned',
+                                           OutputWorkspace='ws_MDE_3D_svrebinned',
                                            AlignedDim0='h,-3,3,1',
                                            AlignedDim1='k,-4,4,2',
                                            AlignedDim2='l,-2.0,2.0,1',
@@ -275,6 +294,12 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['type'], 'MDE')
         self.assertEqual(dim_info['qdim'], False)
 
+    def test_model_given_MDH_with_original_uses_original_as_data_ws(self):
+        with _attach_as_original(self.ws_MD_3D, self.ws_MDE_3D):
+            model = SliceViewerModel(self.ws_MD_3D)
+
+            self.assertEqual(self.ws_MDE_3D, model._get_ws())
+
     @patch('mantidqt.widgets.sliceviewer.model.BinMD')
     def test_get_ws_MDE_with_limits_uses_limits_over_dimension_extents(self, mock_binmd):
         model = SliceViewerModel(self.ws_MDE_3D)
@@ -283,7 +308,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1))),
                             self.ws_MDE_3D)
         call_params = dict(InputWorkspace=self.ws_MDE_3D,
-                           OutputWorkspace='ws_MDE_3D_rebinned',
+                           OutputWorkspace='ws_MDE_3D_svrebinned',
                            AlignedDim0='h,-2,2,1',
                            AlignedDim1='k,-1,1,2',
                            AlignedDim2='l,-2.0,2.0,1',
@@ -462,6 +487,27 @@ class SliceViewerModelTest(unittest.TestCase):
     def test_matrixworkspace_does_not_dynamic_rebinning(self):
         self._assert_supports_dynamic_rebinning(False, MatrixWorkspace)
 
+    def test_title_for_matrixworkspace_just_contains_ws_name(self):
+        model = SliceViewerModel(self.ws2d_histo)
+
+        self.assertEqual('Sliceviewer - ws2d_histo', model.get_title())
+
+    def test_title_for_mdeventworkspace_just_contains_ws_name(self):
+        model = SliceViewerModel(self.ws_MDE_3D)
+
+        self.assertEqual('Sliceviewer - ws_MDE_3D', model.get_title())
+
+    def test_title_for_mdhistoworkspace_without_original_just_contains_ws_name(self):
+        model = SliceViewerModel(self.ws_MD_3D)
+
+        self.assertEqual('Sliceviewer - ws_MD_3D', model.get_title())
+
+    def test_title_for_mdhistoworkspace_with_original_contains_original_name(self):
+        with _attach_as_original(self.ws_MD_3D, self.ws_MDE_3D):
+            model = SliceViewerModel(self.ws_MD_3D)
+
+            self.assertEqual('Sliceviewer - ws_MDE_3D (original of ws_MD_3D)', model.get_title())
+
     def test_create_non_orthogonal_transform_raises_error_if_not_supported(self):
         model = SliceViewerModel(
             _create_mock_workspace(MatrixWorkspace,
@@ -569,7 +615,7 @@ class SliceViewerModelTest(unittest.TestCase):
         model.rebin(slicepoint=(None, 0, None), limits=((-1, 1), (-2, 2)))
 
         mock_binmd.assert_called_once_with(InputWorkspace=self.ws_MD_3D,
-                                           OutputWorkspace='ws_MD_3D_rebinned',
+                                           OutputWorkspace='ws_MD_3D_svrebinned',
                                            AxisAligned=False,
                                            EnableLogging=False,
                                            BasisVector0='Dim1,MomentumTransfer,1.0,0.0,0.0',
@@ -593,7 +639,7 @@ class SliceViewerModelTest(unittest.TestCase):
         model.rebin(slicepoint=(None, 0, None), limits=((-1, 1), (-2, 2)))
         model.rebin(slicepoint=(None, 0, None), limits=((-0.5, 0.5), (-2, 2)))
         self.assertEqual(2, mock_binmd.call_count)
-        self.assertEqual(self.ws_MD_3D.name() + '_rebinned',
+        self.assertEqual(self.ws_MD_3D.name() + '_svrebinned',
                          mock_binmd.call_args[-1]['OutputWorkspace'])
 
     @patch('mantidqt.widgets.sliceviewer.model.BinMD')
@@ -643,6 +689,8 @@ class SliceViewerModelTest(unittest.TestCase):
             ws.hasOriginalWorkspace.return_value = False
         elif has_original_workspace is not None:
             ws.hasOriginalWorkspace.return_value = has_original_workspace
+            if has_original_workspace:
+                ws.getOriginalWorkspace.return_value = self.ws_MDE_3D
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_dynamic_rebinning())
 

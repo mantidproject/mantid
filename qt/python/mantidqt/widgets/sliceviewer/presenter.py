@@ -45,7 +45,7 @@ class SliceViewer(object):
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent)
         self.view.data_view.create_axes_orthogonal(
-            redraw_on_zoom=(self.model.get_ws_type() == WS_TYPE.MATRIX))
+            redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -58,7 +58,7 @@ class SliceViewer(object):
         if self.model.get_ws_type() == WS_TYPE.MATRIX:
             self.view.data_view.image_info_widget.setWorkspace(ws)
 
-        self.view.setWindowTitle(f"SliceViewer - {self.model.get_ws_name()}")
+        self.view.setWindowTitle(self.model.get_title())
 
         self.new_plot()
 

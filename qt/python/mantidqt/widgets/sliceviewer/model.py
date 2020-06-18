@@ -31,6 +31,9 @@ class WS_TYPE(Enum):
 class SliceViewerModel:
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
     def __init__(self, ws):
+        # reference to the workspace requested to be viewed
+        # For MDH the view will show the original NDE if possible
+        self._selected_ws = ws
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
@@ -40,6 +43,8 @@ class SliceViewerModel:
             if ws.isMDHistoWorkspace():
                 if len(ws.getNonIntegratedDimensions()) < 2:
                     raise ValueError("workspace must have at least 2 non-integrated dimensions")
+                if ws.hasOriginalWorkspace(0):
+                    ws = ws.getOriginalWorkspace(0)
             else:
                 if ws.getNumDims() < 2:
                     raise ValueError("workspace must have at least 2 dimensions")
@@ -47,7 +52,7 @@ class SliceViewerModel:
             raise ValueError("only works for MatrixWorkspace and MDWorkspace")
 
         self._ws = ws
-        self._rebinned_name = self.get_ws_name() + '_rebinned'
+        self._rebinned_name = self.get_ws_name() + '_svrebinned'
 
         self.rebin = _noop
         if self.get_ws_type() == WS_TYPE.MDE:
@@ -63,9 +68,6 @@ class SliceViewerModel:
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
             return True
         return False
-
-    def get_ws_name(self) -> str:
-        return self._ws.name()
 
     def can_support_nonorthogonal_axes(self) -> bool:
         """
@@ -109,9 +111,22 @@ class SliceViewerModel:
 
         return False
 
+    def get_ws_name(self) -> str:
+        """Return the name of the workspace being viewed"""
+        return self._ws.name()
+
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
         return self._ws.getSpecialCoordinateSystem()
+
+    def get_title(self) -> str:
+        """Return a title for model"""
+        ws_name = self.get_ws_name()
+        title = f'Sliceviewer - {ws_name}'
+        selected_name = self._selected_ws.name()
+        if selected_name != ws_name:
+            title += f' (original of {selected_name})'
+        return title
 
     def get_ws_MDE(self,
                    slicepoint: Sequence[Optional[float]],
