@@ -157,6 +157,7 @@
     <location z="-4.739" />
     <location z="-1.442" />
     <location z="5.82" />
+    <location z="1" />
   </component>
   
   <type name="monitor" is="monitor">
@@ -1379,7 +1380,7 @@
   </idlist> 
   
   <idlist idname="monitor">
-    <id start="1" end="3" />   
+    <id start="1" end="4" />   
   </idlist>
   
   <!--DETECTOR PARAMETERS-->
