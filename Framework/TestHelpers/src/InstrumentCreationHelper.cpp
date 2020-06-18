@@ -80,7 +80,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   instrument->add(source);
   instrument->markAsSource(source);
 
-  // Define a sample as a simple sphere
+  // Define a sample position
   Component *sample = new Component("samplePos", instrument.get());
   instrument->setPos(0.0, 0.0, 0.0);
   instrument->add(sample);
