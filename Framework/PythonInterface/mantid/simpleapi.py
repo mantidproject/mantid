@@ -1498,7 +1498,7 @@ from . import _plugins  # noqa
 setattr(mantid, MODULE_NAME, sys.modules['mantid.{}'.format(MODULE_NAME)])
 try:
     # Use a cmake generated manifest of all the python algorithms to load them into the api
-    plugins_manifest_path = "/home/conor/builds/mantid-d/Framework/PythonInterface/plugins/python-plugin-manifest.txt"
+    plugins_manifest_path = ConfigService.Instance()["python.plugins.manifest"]
     plugins_dir = os.path.dirname(plugins_manifest_path)
     with open(plugins_manifest_path) as manifest:
         _plugin_files = []
