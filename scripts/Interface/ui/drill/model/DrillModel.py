@@ -280,7 +280,7 @@ class DrillModel(QObject):
 
         if (self.columns[column] == RundexSettings.CUSTOM_OPT_JSON_KEY):
             options = dict()
-            for option in contents.split(','):
+            for option in contents.split(';'):
                 if ('=' not in option):
                     self.param_error.emit(row, self.columns[column],
                                           "Badly formatted custom options")
@@ -462,7 +462,7 @@ class DrillModel(QObject):
                 options = list()
                 for (k, v) in sample[self.columns[-1]].items():
                     options.append(str(k) + "=" + str(v))
-                row.append(','.join(options))
+                row.append(';'.join(options))
             rows.append(row)
         return rows
 

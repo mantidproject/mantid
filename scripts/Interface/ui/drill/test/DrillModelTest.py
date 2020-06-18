@@ -372,8 +372,8 @@ class DrillModelTest(unittest.TestCase):
         self.mController.reset_mock()
         self.model.changeParameter(0,
                                    self.model.columns.index("CustomOptions"),
-                                   "str=test_str,bool=True")
-        samples[0]["CustomOptions"] = {"str": "test_str", "bool": True}
+                                   "str=test1,test2;bool=True")
+        samples[0]["CustomOptions"] = {"str": "test1,test2", "bool": True}
         self.assertEqual(self.model.samples, samples)
         self.mController.return_value.addParameter.assert_called()
 
