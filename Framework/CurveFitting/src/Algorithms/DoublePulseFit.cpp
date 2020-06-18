@@ -291,7 +291,7 @@ void DoublePulseFit::declareAdditionalProperties() {
             std::make_unique<
                 API::WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
                 "OutputWorkspace", "", Kernel::Direction::Output),
-            "Name of the output Workspace holding resulting simulated "
+            "Name of the output Workspace holding resulting fitted "
             "spectrum");
         setPropertyValue("OutputWorkspace", baseName + "_Workspace");
       } else {

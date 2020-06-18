@@ -17,7 +17,7 @@ class SingleDomainDoublePulseFitTest(unittest.TestCase):
         x = np.linspace(0.,15.,100)
         x_offset = np.linspace(delta, 15. + delta, 100)
 
-        testFunction = GausOsc()
+        testFunction = GausOsc(Frequency = 1.5, A=0.22)
         y1 = testFunction(x)
         y2 = testFunction(x_offset)
         y = y1+y2
@@ -59,7 +59,7 @@ class MultiDomainDoublePulseFitTest(unittest.TestCase):
         x = np.linspace(0.,15.,100)
         x_offset = np.linspace(delta, 15. + delta, 100)
 
-        testFunction = GausOsc()
+        testFunction = GausOsc(Frequency = 1.5, A=0.22)
         y1 = testFunction(x)
         y2 = testFunction(x_offset)
         y = y1+y2
