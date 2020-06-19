@@ -170,6 +170,9 @@ class FigureInteraction(object):
                     self.canvas.toolbar.release_pan(event)
                 finally:
                     event.button = 3
+        elif event.button == self.canvas.buttond.get(Qt.RightButton) and self.toolbar_manager.is_zoom_active():
+            # Reset the axes limits if you right click while using the zoom tool.
+            self.toolbar_manager.emit_sig_home_clicked()
 
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:

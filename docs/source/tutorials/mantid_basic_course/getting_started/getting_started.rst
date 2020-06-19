@@ -58,3 +58,14 @@ You may find a bug at some stage using Mantid, and here is how to tell us about 
 .. figure:: /images/ErrorReporterTutorial.PNG
    :alt: Error Reporter
    :align: center
+
+Profiling
+=========
+
+Mantid supports profiling of its underlying code using the `cProfile <https://docs.python.org/3/library/profile.html>`_ module from python.
+
+Launch Mantid Workbench from the command line using the script in the installation folder, adding the ``--profile`` modifier with a path to the output file.
+
+E.g: ``path/to/install/bin/workbench --profile path/to/outputFile.prof``
+
+This profile can then either be sent to the developers upon request or be analysed using the python module `snakeviz <https://pypi.org/project/snakeviz/>`_.

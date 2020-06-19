@@ -76,8 +76,8 @@ class PlotSettings(object):
 
     def setup_marker_group(self):
         marker_style = ConfigService.getString(self.MARKER_STYLE)
-        self.view.marker_style.addItems(MARKER_STYLES)
-        if marker_style in MARKER_STYLES:
+        self.view.marker_style.addItems(MARKER_STYLES.keys())
+        if marker_style in MARKER_STYLES.keys():
             self.view.marker_style.setCurrentIndex(self.view.marker_style.findText(marker_style))
         else:
             self.view.marker_style.setCurrentIndex(0)
