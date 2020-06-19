@@ -59,6 +59,9 @@ class FittingTabPresenter(object):
             self.update_view_from_model)
 
         self.initialise_model_options()
+        self.double_pulse_observer = GenericObserverWithArgPassing(
+            self.handle_double_pulse_set)
+        self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
 
     @property
     def selected_data(self):
@@ -252,6 +255,10 @@ class FittingTabPresenter(object):
                                     global_parameters=self.view.get_global_parameters())
 
         self.fit_function_changed_notifier.notify_subscribers()
+    
+    def handle_double_pulse_set(self, updated_variables):
+        if 'DoublePulseEnabled' in updated_variables:
+            self.view.tf_asymmetry_mode = False
 
     def handle_tf_asymmetry_mode_changed(self):
         def calculate_tf_fit_function(original_fit_function):
@@ -276,6 +283,11 @@ class FittingTabPresenter(object):
             return
 
         if self._tf_asymmetry_mode == self.view.tf_asymmetry_mode:
+            return
+
+        if self.model.context.gui_context['DoublePulseEnabled'] and self.view.tf_asymmetry_mode:
+            self.view.tf_asymmetry_mode = False
+            self.view.warning_popup('Tf asymmetry mode incompatible with double pulse analysis.')
             return
 
         self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
