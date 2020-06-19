@@ -135,7 +135,6 @@ class FittingDataPresenter(object):
         for row in row_numbers:
             # check bg exists - or make bg?
             ws_name = ws_name = self.row_numbers[row]
-            print('DEBUG PLOT', row, ws_name)
             ws = self.model.get_loaded_workspaces()[ws_name]
             ws_bg = self.model.get_background_workspaces()[ws_name]
             if ws_bg and self.view.get_item_checked(row, 3):

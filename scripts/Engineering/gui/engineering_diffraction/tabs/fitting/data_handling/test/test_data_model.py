@@ -24,21 +24,21 @@ class TestFittingDataModel(unittest.TestCase):
         mock_ws.getNumberHistograms.return_value = 1
         mock_load.return_value = mock_ws
 
-        self.model.load_files("/ar/a_filename.whatever")
+        self.model.load_files("/ar/a_filename.whatever", "TOF")
 
         self.assertEqual(1, len(self.model._loaded_workspaces))
-        self.assertEqual(mock_ws, self.model._loaded_workspaces["a_filename"])
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
+        self.assertEqual(mock_ws, self.model._loaded_workspaces["a_filename_TOF"])
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_TOF")
 
     @patch(file_path + ".logger")
     @patch(file_path + ".Load")
     def test_loading_single_file_invalid(self, mock_load, mock_logger):
         mock_load.side_effect = RuntimeError("Invalid Path")
 
-        self.model.load_files("/ar/a_filename.whatever")
+        self.model.load_files("/ar/a_filename.whatever", "TOF")
 
         self.assertEqual(0, len(self.model._loaded_workspaces))
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_TOF")
         self.assertEqual(1, mock_logger.error.call_count)
 
     @patch(file_path + ".Load")
@@ -47,13 +47,13 @@ class TestFittingDataModel(unittest.TestCase):
         mock_ws.getNumberHistograms.return_value = 1
         mock_load.return_value = mock_ws
 
-        self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
+        self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
 
         self.assertEqual(2, len(self.model._loaded_workspaces))
-        self.assertEqual(mock_ws, self.model._loaded_workspaces["file1"])
-        self.assertEqual(mock_ws, self.model._loaded_workspaces["file2"])
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
+        self.assertEqual(mock_ws, self.model._loaded_workspaces["file1_TOF"])
+        self.assertEqual(mock_ws, self.model._loaded_workspaces["file2_TOF"])
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_TOF")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
 
     @patch(file_path + ".logger")
     @patch(file_path + ".Load")
@@ -62,11 +62,11 @@ class TestFittingDataModel(unittest.TestCase):
         mock_ws.getNumberHistograms.return_value = 2
         mock_load.return_value = mock_ws
 
-        self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
+        self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
 
         self.assertEqual(0, len(self.model._loaded_workspaces))
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_TOF")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
         self.assertEqual(2, mock_logger.warning.call_count)
 
     @patch(file_path + ".logger")
@@ -74,11 +74,11 @@ class TestFittingDataModel(unittest.TestCase):
     def test_loading_multiple_files_invalid(self, mock_load, mock_logger):
         mock_load.side_effect = RuntimeError("Invalid Path")
 
-        self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
+        self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
 
         self.assertEqual(0, len(self.model._loaded_workspaces))
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_TOF")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
         self.assertEqual(2, mock_logger.error.call_count)
 
 
