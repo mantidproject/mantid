@@ -16,9 +16,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
 
-using BinaryOperationTable = std::vector<int64_t>;
-using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
-
 namespace Mantid {
 namespace Algorithms {
 

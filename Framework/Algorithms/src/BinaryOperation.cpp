@@ -28,8 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
-using BinaryOperationTable = std::vector<int64_t>;
-using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
+using Mantid::API::OperatorOverloads::BinaryOperationTable;
+using Mantid::API::OperatorOverloads::BinaryOperationTable_sptr;
 using std::size_t;
 
 namespace Mantid {
@@ -919,7 +919,6 @@ void BinaryOperation::checkRequirements() {
   m_useHistogramForRhsEventWorkspace = false;
 }
 
-auto table = std::make_shared<BinaryOperationTable>();
 Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   if (static_cast<bool>(getProperty("AllowDifferentNumberSpectra")))

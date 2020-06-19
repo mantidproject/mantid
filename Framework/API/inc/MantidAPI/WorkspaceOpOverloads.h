@@ -26,8 +26,8 @@ using BinaryOperationTable = std::vector<int64_t>;
 using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
 
 BinaryOperationTable_sptr MANTID_API_DLL
-buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,
-                          const API::MatrixWorkspace_const_sptr &rhs);
+buildBinaryOperationTable(const MatrixWorkspace_const_sptr &lhs,
+                          const MatrixWorkspace_const_sptr &rhs);
 } // namespace OperatorOverloads
 
 bool MANTID_API_DLL equals(const MatrixWorkspace_sptr &lhs,
