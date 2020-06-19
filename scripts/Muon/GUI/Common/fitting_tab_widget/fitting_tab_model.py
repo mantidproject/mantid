@@ -179,7 +179,7 @@ class FittingTabModel(object):
             alg = self._create_double_pulse_alg()
         else:
             alg = mantid.AlgorithmManager.create("Fit")
-        
+
         output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix = run_Fit(
             parameters_dict, alg)
         CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'], OutputWorkspace=output_workspace, StoreInADS=False)
@@ -189,9 +189,9 @@ class FittingTabModel(object):
         alg = mantid.AlgorithmManager.create("DoublePulseFit")
         offset = self.context.gui_context['DoublePulseTime']
         muon_halflife = 2.2;
-        decay = math.exp(-offset / muon_halflife);
-        first_pulse_weighting = decay / (1 + decay);
-        second_pulse_weighting = 1 / (1 + decay);
+        decay = math.exp(-offset / muon_halflife)
+        first_pulse_weighting = decay / (1 + decay)
+        second_pulse_weighting = 1 / (1 + decay)
         alg.setProperty("PulseOffset", offset)
         alg.setProperty("FirstPulseWeight", first_pulse_weighting)
         alg.setProperty("SecondPulseWeight", second_pulse_weighting)
