@@ -163,8 +163,8 @@ class ConfigServiceTest(unittest.TestCase):
                            'MantidOptions.ReusePlotInstances',
                            'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory',
                            'paraview.ignore', 'paraview.path', 'paraview.pythonpaths', 'pvplugins.directory',
-                           'python.plugins.directories',
-                       ]
+                           'python.plugins.directories', "python.plugins.manifest"
+                           ]
 
         # create the list of things
         undocumented = []
