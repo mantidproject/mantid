@@ -13,21 +13,18 @@ import sys
 import mantid.api
 from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
 from mantid.plots.datafunctions import get_normalize_by_bin_width
-from matplotlib import gridspec
-from matplotlib.artist import setp as set_artist_property
 from matplotlib.figure import Figure
-from matplotlib.transforms import Bbox, BboxTransform
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-import numpy as np
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from mantidqt.widgets.sliceviewer.imageinfowidget import ImageInfoWidget
 from .dimensionwidget import DimensionWidget
+from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
+from .lineplots import LinePlotter, PixelLinePlot
 from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar, ToolItemText
 from .peaksviewer.workspaceselection import \
@@ -36,7 +33,6 @@ from .peaksviewer.workspaceselection import \
 from .peaksviewer.view import PeaksViewerCollectionView
 from .peaksviewer.representation.painter import MplPainter
 from .zoom import ScrollZoomMixin
-
 
 # Constants
 DBLMAX = sys.float_info.max
@@ -58,6 +54,9 @@ class SliceViewerDataView(QWidget):
         self.can_normalise = can_normalise
         self.nonortho_tr = None
         self.ws_type = dims_info[0]['type']
+
+        self._line_plotter = None
+        self._image_info_tracker = None
 
         # Dimension widget
         self.dimensions_layout = QGridLayout()
@@ -83,6 +82,7 @@ class SliceViewerDataView(QWidget):
             self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
             self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
         self.track_cursor.setChecked(True)
+        self.track_cursor.stateChanged.connect(self.on_track_cursor_state_change)
 
         # normalization options
         if can_normalise:
@@ -96,14 +96,10 @@ class SliceViewerDataView(QWidget):
         # MPL figure + colorbar
         self.fig = Figure()
         self.ax = None
-        self.axx, self.axy = None, None
         self.image = None
         self._grid_on = False
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
-        self.canvas.mpl_connect('motion_notify_event', self.mouse_move)
-        self.canvas.mpl_connect('axes_leave_event', self.mouse_outside_image)
-        self.canvas.mpl_connect('button_press_event', self.mouse_click)
         self.canvas.mpl_connect('button_release_event', self.mouse_release)
 
         self.colorbar_label = QLabel("Colormap")
@@ -111,7 +107,6 @@ class SliceViewerDataView(QWidget):
         self.colorbar = ColorbarWidget(self)
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
-        self.colorbar.colorbarChanged.connect(self.update_line_plot_limits)
         # make width larger to fit image readout table
         if self.ws_type == 'MDE':
             self.colorbar.setMaximumWidth(155)
@@ -193,30 +188,8 @@ class SliceViewerDataView(QWidget):
         """
         if self.line_plots:
             return
-
         self.line_plots = True
-        image_axes = self.ax
-        if image_axes is None:
-            return
-
-        # Create a new GridSpec and reposition the existing image Axes
-        gs = gridspec.GridSpec(2,
-                               2,
-                               width_ratios=[1, 4],
-                               height_ratios=[4, 1],
-                               wspace=0.0,
-                               hspace=0.0)
-        image_axes.set_position(gs[1].get_position(self.fig))
-        set_artist_property(image_axes.get_xticklabels(), visible=False)
-        set_artist_property(image_axes.get_yticklabels(), visible=False)
-        self.axx = self.fig.add_subplot(gs[3], sharex=image_axes)
-        self.axx.yaxis.tick_right()
-        self.axy = self.fig.add_subplot(gs[0], sharey=image_axes)
-        self.axy.xaxis.tick_top()
-        self.update_line_plot_limits()
-        self.update_line_plot_labels()
-        self.mpl_toolbar.update()  # sync list of axes in navstack
-        self.canvas.draw_idle()
+        self._line_plotter = LinePlotter(self.ax, self.colorbar, PixelLinePlot)
 
     def remove_line_plots(self):
         """Assuming line plots are currently enabled, remove them from the current figure
@@ -224,26 +197,10 @@ class SliceViewerDataView(QWidget):
         if not self.line_plots:
             return
 
+        #self._cursor_tracker.unsubscribe(self._line_plotter)
+        self._line_plotter.close()
+        self._line_plotter = None
         self.line_plots = False
-        image_axes = self.ax
-        if image_axes is None:
-            return
-
-        self.delete_line_plot_lines()
-        all_axes = self.fig.axes
-        # The order is defined by the order of the add_subplot calls so we always want to remove
-        # the last two Axes. Do it backwards to cope with the container size change
-        all_axes[2].remove()
-        all_axes[1].remove()
-
-        gs = gridspec.GridSpec(1, 1)
-        image_axes.set_position(gs[0].get_position(self.fig))
-        image_axes.xaxis.tick_bottom()
-        image_axes.yaxis.tick_left()
-        self.axx, self.axy = None, None
-
-        self.mpl_toolbar.update()  # sync list of axes in navstack
-        self.canvas.draw_idle()
 
     def plot_MDH_orthogonal(self, ws, **kwargs):
         """
@@ -256,6 +213,8 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
+        self.on_track_cursor_state_change(self.track_cursor.isChecked())
+
         # ensure the axes data limits are updated to match the
         # image. For example if the axes were zoomed and the
         # swap dimensions was clicked we need to restore the
@@ -274,6 +233,8 @@ class SliceViewerDataView(QWidget):
                                               transpose=self.dimensions.transpose,
                                               norm=self.colorbar.get_norm(),
                                               **kwargs)
+        self.on_track_cursor_state_change(self.track_cursor.isChecked())
+
         # swapping dimensions in nonorthogonal mode currently resets back to the
         # full data limits as the whole axes has been recreated so we don't have
         # access to the original limits
@@ -306,6 +267,7 @@ class SliceViewerDataView(QWidget):
                                      norm=self.colorbar.get_norm(),
                                      extent=old_extent,
                                      **kwargs)
+        self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         self.draw_plot()
 
@@ -313,7 +275,7 @@ class SliceViewerDataView(QWidget):
         """Removes any image from the axes"""
         if self.image is not None:
             if self.line_plots:
-                self.delete_line_plot_lines()
+                self._line_plotter.delete_line_plot_lines()
             self.image_info_widget.updateTable(DBLMAX, DBLMAX, DBLMAX)
             self.image.remove()
             self.image = None
@@ -321,8 +283,7 @@ class SliceViewerDataView(QWidget):
     def clear_figure(self):
         """Removes everything from the figure"""
         if self.line_plots:
-            self.delete_line_plot_lines()
-            self.axx, self.axy = None, None
+            self._line_plotter.close()
         self.image = None
         self.canvas.disable_zoom_on_scroll()
         self.fig.clf()
@@ -333,8 +294,9 @@ class SliceViewerDataView(QWidget):
         self.colorbar.set_mappable(self.image)
         self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
-        self.delete_line_plot_lines()
-        self.update_line_plot_labels()
+        if self.line_plots:
+            self._line_plotter.delete_line_plot_lines()
+            self._line_plotter.update_line_plot_labels()
         self.canvas.draw_idle()
 
     def select_zoom(self):
@@ -352,12 +314,27 @@ class SliceViewerDataView(QWidget):
             self.image.set_data(data.T)
         self.colorbar.update_clim()
 
+    def on_track_cursor_state_change(self, state):
+        """
+        Called to notify the current state of the track cursor box
+        """
+        self._image_info_tracker = ImageInfoTracker(image=self.image,
+                                                    transpose_xy=self.dimensions.transpose,
+                                                    widget=self.image_info_widget)
+        if state:
+            self._image_info_tracker.connect()
+
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
         self.presenter.show_all_data_requested()
 
     def on_line_plots_toggle(self, state):
+        """Switch state of the line plots"""
         self.presenter.line_plots(state)
+
+    def on_region_selection_toggled(self, state):
+        """Switch state of the region selection"""
+        self.presenter.region_selection(state)
 
     def on_non_orthogonal_axes_toggle(self, state):
         """
@@ -373,15 +350,21 @@ class SliceViewerDataView(QWidget):
 
     def enable_lineplots_button(self):
         """
-        Enables line plots functionality
+        Enable line plot button
         """
         self.mpl_toolbar.set_action_enabled(ToolItemText.LINEPLOTS, True)
 
     def disable_lineplots_button(self):
         """
-        Disabled line plots functionality
+        Disable line plot button
         """
         self.mpl_toolbar.set_action_enabled(ToolItemText.LINEPLOTS, False)
+
+    def deactivate_lineplots(self):
+        """
+        Turn off the lineplots as if a user had clicked the button
+        """
+        self.mpl_toolbar.set_action_checked(ToolItemText.LINEPLOTS, False)
 
     def enable_peaks_button(self):
         """
@@ -406,18 +389,6 @@ class SliceViewerDataView(QWidget):
         Disables non-orthorognal axes functionality
         """
         self.mpl_toolbar.set_action_enabled(ToolItemText.NONORTHOGONAL_AXES, state=False)
-
-    def delete_line_plot_lines(self):
-        try:  # clear old plots
-            try:
-                self.xfig.remove()
-                self.yfig.remove()
-            except ValueError:
-                pass
-            del self.xfig
-            del self.yfig
-        except AttributeError:
-            pass
 
     def get_axes_limits(self):
         """
@@ -461,108 +432,19 @@ class SliceViewerDataView(QWidget):
         self.ax.grid(self._grid_on)
         self.canvas.draw_idle()
 
-    def mouse_move(self, event):
-        if event.inaxes == self.ax:
-            signal = self.update_image_data(event.xdata, event.ydata, self.line_plots)
-            if self.track_cursor.checkState() == Qt.Checked:
-                self.update_image_table_widget(event.xdata, event.ydata, signal)
-
-    def mouse_outside_image(self, _):
-        """
-        Indicates that the mouse have moved outside of an axes.
-        We clear the line plots so that it is not confusing what they mean.
-        """
-        if self.line_plots:
-            self.delete_line_plot_lines()
-            self.canvas.draw_idle()
-
-    def mouse_click(self, event):
-        if self.track_cursor.checkState() == Qt.Unchecked \
-                and event.inaxes == self.ax and event.button == 1:
-            signal = self.update_image_data(event.xdata, event.ydata)
-            self.update_image_table_widget(event.xdata, event.ydata, signal)
-
     def mouse_release(self, event):
-        if event.button == 3 and event.inaxes == self.ax:
+        if event.inaxes != self.ax:
+            return
+        if event.button == 1:
+            self._image_info_tracker.on_cursor_at(event.xdata, event.ydata)
+        if event.button == 3:
             self.on_home_clicked()
-
-    def update_image_table_widget(self, xdata, ydata, signal):
-        if signal is not None:
-            if self.dimensions.transpose and self.ws_type == "MATRIX":
-                self.image_info_widget.updateTable(ydata, xdata, signal)
-            else:
-                self.image_info_widget.updateTable(xdata, ydata, signal)
-
-    def plot_x_line(self, x, y):
-        try:
-            self.xfig.set_data(x, y)
-        except (AttributeError, IndexError):
-            self.axx.clear()
-            self.xfig = self.axx.plot(x, y, scalex=False)[0]
-            self.update_line_plot_labels()
-            self.update_line_plot_limits()
-        self.canvas.draw_idle()
-
-    def plot_y_line(self, x, y):
-        try:
-            self.yfig.set_data(y, x)
-        except (AttributeError, IndexError):
-            self.axy.clear()
-            self.yfig = self.axy.plot(y, x, scaley=False)[0]
-            self.update_line_plot_labels()
-            self.update_line_plot_limits()
-        self.canvas.draw_idle()
 
     def update_data_clim(self):
         self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())
+        if self.line_plots:
+            self._line_plotter.update_line_plot_limits()
         self.canvas.draw_idle()
-
-    def update_line_plot_limits(self):
-        try:  # set line plot intensity axes to match colorbar limits
-            self.axx.set_ylim(self.colorbar.cmin_value, self.colorbar.cmax_value)
-            self.axy.set_xlim(self.colorbar.cmin_value, self.colorbar.cmax_value)
-            self.update_line_plot_scale()
-        except AttributeError:
-            pass
-
-    def update_line_plot_scale(self):
-        # set line plot scale axes to match colorbar scale
-        scale, kwargs = self.colorbar.get_colorbar_scale()
-        try:
-            self.axx.set_yscale(scale, **kwargs)
-            self.axy.set_xscale(scale, **kwargs)
-        except AttributeError:
-            pass
-
-    def update_line_plot_labels(self):
-        try:  # ensure plot labels are in sync with main axes
-            self.axx.set_xlabel(self.ax.get_xlabel())
-            self.axy.set_ylabel(self.ax.get_ylabel())
-        except AttributeError:
-            pass
-
-    def update_image_data(self, x, y, update_line_plot=False):
-        xmin, xmax, ymin, ymax = self.image.get_extent()
-        arr = self.image.get_array()
-        data_extent = Bbox([[ymin, xmin], [ymax, xmax]])
-        array_extent = Bbox([[0, 0], arr.shape[:2]])
-        trans = BboxTransform(boxin=data_extent, boxout=array_extent)
-        point = trans.transform_point([y, x])
-        if any(np.isnan(point)):
-            return
-        i, j = point.astype(int)
-
-        if update_line_plot:
-            if 0 <= i < arr.shape[0]:
-                self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
-            if 0 <= j < arr.shape[1]:
-                self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
-
-        # Clip the coordinates at array bounds
-        if not (0 <= i < arr.shape[0]) or not (0 <= j < arr.shape[1]):
-            return None
-        else:
-            return arr[i, j]
 
     def set_normalization(self, ws, **kwargs):
         normalize_by_bin_width, _ = get_normalize_by_bin_width(ws, self.ax, **kwargs)
