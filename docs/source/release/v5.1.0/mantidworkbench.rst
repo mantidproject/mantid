@@ -82,6 +82,7 @@ Improvements
 - The curves in the dropdown list in the Curves tab of the figure options are now listed in the same order as the plot legend.
 - Added an option in the settings to specify the default legend size.
 - Added an option to the settings window to set the default colormap for image plots.
+- Improved loading of python plugins at startup on slow disks.
 
 Bugfixes
 ########
