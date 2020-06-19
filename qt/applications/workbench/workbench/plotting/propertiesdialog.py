@@ -153,7 +153,7 @@ class AxisEditor(PropertiesEditorBase):
 
         self.lim_setter(self.limit_min, self.limit_max)
 
-        which = 'both' if axes.show_minor_gridlines else 'major'
+        which = 'both' if hasattr(axes, 'show_minor_gridlines') and axes.show_minor_gridlines else 'major'
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
     def error_occurred(self, exc):

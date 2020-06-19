@@ -73,6 +73,10 @@ def generate_script(fig, exclude_headers=False):
         if not isinstance(ax.xaxis.minor.locator, NullLocator):
             plot_commands.append("axes.minorticks_on()")
 
+            if hasattr(ax, 'show_minor_gridlines'):
+                plot_commands.append(f"axes.show_minor_gridlines = {ax.show_minor_gridlines}")
+
+        plot_commands.extend(get_grid_cmds(ax))
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
@@ -167,3 +171,17 @@ def get_axes_object_variable(ax):
         # No numRows or NumCols members, so no list use the default
         pass
     return ax_object_var
+
+
+def get_grid_cmds(ax):
+    if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
+        axis = 'both'
+    elif ax.xaxis._gridOnMajor:
+        axis = 'x'
+    elif ax.yaxis._gridOnMajor:
+        axis = 'y'
+    else:
+        return []
+
+    which = 'both' if hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
+    return [f"axes.grid(True, axis='{axis}', which='{which}')"]
