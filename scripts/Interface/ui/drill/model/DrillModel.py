@@ -57,21 +57,11 @@ class DrillModel(QObject):
 
         self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
-        self.tasksPool.signals.taskStarted.connect(
-                lambda row : self.process_started.emit(row)
-                )
-        self.tasksPool.signals.taskFinished.connect(
-                lambda row : self.process_done.emit(row)
-                )
-        self.tasksPool.signals.taskError.connect(
-                lambda row : self.process_error.emit(row)
-                )
-        self.tasksPool.signals.progressUpdate.connect(
-                lambda p : self.progress_update.emit(p)
-                )
-        self.tasksPool.signals.processingDone.connect(
-                lambda : self.processing_done.emit()
-                )
+        self.tasksPool.signals.taskStarted.connect(self.process_started.emit)
+        self.tasksPool.signals.taskSuccess.connect(self.process_done.emit)
+        self.tasksPool.signals.taskError.connect(self.process_error.emit)
+        self.tasksPool.signals.progressUpdate.connect(self.progress_update.emit)
+        self.tasksPool.signals.processingDone.connect(self.processing_done.emit)
 
     def setInstrument(self, instrument):
         """

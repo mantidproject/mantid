@@ -16,8 +16,7 @@ class DrillTaskSignals(QObject):
     Signals that the DrillTask could send.
     """
     started = Signal(int)         # task reference
-    finished = Signal(int)        # task reference
-    error = Signal(int)           # task reference
+    finished = Signal(int, int)   # task reference, return value (0: success)
     progress = Signal(int, float) # task reference and progress between 0.0 and 1.0
 
 
@@ -43,12 +42,9 @@ class DrillTask(QRunnable):
         # setup the observer
         self.observer = DrillAlgorithmObserver()
         self.observer.observeFinish(self.alg)
-        self.observer.signals.finished.connect(
-                lambda : self.signals.finished.emit(self.ref)
-                )
         self.observer.observeError(self.alg)
-        self.observer.signals.error.connect(
-                lambda : self.signals.error.emit(self.ref)
+        self.observer.signals.finished.connect(
+                lambda ret : self.signals.finished.emit(self.ref, ret)
                 )
         self.observer.observeProgress(self.alg)
         self.observer.signals.progress.connect(
