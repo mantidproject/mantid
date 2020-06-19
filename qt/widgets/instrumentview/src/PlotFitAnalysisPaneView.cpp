@@ -106,7 +106,7 @@ Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() {
 }
 
 void PlotFitAnalysisPaneView::updateFunction(
-    const Mantid::API::IFunction_sptr &func) {
+    const Mantid::API::IFunction_sptr func) {
   m_fitBrowser->updateMultiDatasetParameters(*func);
 }
 
