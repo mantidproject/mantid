@@ -383,20 +383,16 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     # -------------------------------------------------------------------------------------------------------------------
 
     def setup_double_pulse_row(self):
-
-        self.double_pulse_label = QtWidgets.QLabel(self)
-        self.double_pulse_label.setText("Double pulse time offset : ")
-
         self.double_pulse_data_edit = QtWidgets.QLineEdit(self)
 
         double_pulse_data_validator = QtGui.QRegExpValidator(
             QtCore.QRegExp(valid_float_regex),
             self.double_pulse_data_edit)
         self.double_pulse_data_edit.setValidator(double_pulse_data_validator)
-        self.double_pulse_data_edit.setText("0.0")
+        self.double_pulse_data_edit.setText("0.33")
 
         self.double_pulse_data_unit_label = QtWidgets.QLabel(self)
-        self.double_pulse_data_unit_label.setText(u" \u03BCs (Double pulse ")
+        self.double_pulse_data_unit_label.setText(u" \u03BCs")
 
         self.double_pulse_data_combobox = QtWidgets.QComboBox(self)
         self.double_pulse_data_combobox.addItem('Single Pulse')
@@ -405,10 +401,9 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.double_pulse_data_layout = QtWidgets.QHBoxLayout()
         self.double_pulse_data_layout.addSpacing(10)
         self.double_pulse_data_layout.addWidget(self.double_pulse_data_unit_label)
-        self.double_pulse_data_layout.addWidget(self.double_pulse_data_combobox)
         self.double_pulse_data_layout.addStretch(0)
 
-        self.layout.addWidget(self.double_pulse_label, 4, 0)
+        self.layout.addWidget(self.double_pulse_data_combobox, 4, 0)
         self.layout.addWidget(self.double_pulse_data_edit, 4, 1)
         self.layout.addItem(self.double_pulse_data_layout, 4, 2)
 

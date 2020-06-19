@@ -23,7 +23,7 @@ class InstrumentWidgetModel(object):
         self._data = context.data_context
         self._context = context
         self._context.gui_context['RebinType'] = 'None'
-        self._context.gui_context['DoublePulseTime'] = 0.0
+        self._context.gui_context['DoublePulseTime'] = 0.33
         self._context.gui_context['DoublePulseEnabled'] = False
 
     def clear_data(self):
