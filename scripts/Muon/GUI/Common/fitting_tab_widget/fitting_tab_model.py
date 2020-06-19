@@ -188,7 +188,7 @@ class FittingTabModel(object):
     def _create_double_pulse_alg(self):
         alg = mantid.AlgorithmManager.create("DoublePulseFit")
         offset = self.context.gui_context['DoublePulseTime']
-        muon_halflife = 2.2;
+        muon_halflife = 2.2
         decay = math.exp(-offset / muon_halflife)
         first_pulse_weighting = decay / (1 + decay)
         second_pulse_weighting = 1 / (1 + decay)

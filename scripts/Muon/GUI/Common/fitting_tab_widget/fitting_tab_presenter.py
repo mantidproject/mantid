@@ -255,7 +255,7 @@ class FittingTabPresenter(object):
                                     global_parameters=self.view.get_global_parameters())
 
         self.fit_function_changed_notifier.notify_subscribers()
-    
+
     def handle_double_pulse_set(self, updated_variables):
         if 'DoublePulseEnabled' in updated_variables:
             self.view.tf_asymmetry_mode = False

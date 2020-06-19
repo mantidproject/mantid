@@ -25,7 +25,7 @@ The function output by this algorithm corrospond to the inner function only whil
 Usage
 -----
 
-.. code-block:: python
+.. testcode::
 
   import numpy as np
   from mantid.simpleapi import DoublePulseFit, CreateWorkspace, GausOsc
@@ -41,8 +41,37 @@ Usage
   y = y1+y2
   ws = CreateWorkspace(x,y)
 
+  # Create functions to fit
+  convolution =  FunctionFactory.createCompositeFunction('Convolution')
   innerFunction = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0')
-  DoublePulseFit(Function=innerFunction, InputWorkspace=ws,  PulseOffset = delta, StartX=0.0, EndX=15.0, Output='DoublePulseFit')
+  deltaFunctions = FunctionFactory.createInitialized('(name=DeltaFunction,Height=1,Centre=-0.33,ties=(Height=1,Centre=-0.33);name=DeltaFunction,Height=1,Centre=0,ties=(Height=1,Centre=0))')
+  convolution.setAttributeValue('FixResolution', False)
+  convolution.add(innerFunction)
+  convolution.add(deltaFunctions)
+  innerFunctionSingle = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0')
+  
+  DoublePulseFit(Function=innerFunctionSingle, InputWorkspace=ws,  PulseOffset = delta, StartX=0.0, EndX=15.0, Output='DoublePulseFit')
+  Fit(Function=convolution, InputWorkspace=ws, CreateOutput = True, StartX=0.0, EndX=15.0, Output='Fit', MaxIterations=1)
+
+  double_parameter_workspace = AnalysisDataService.retrieve('DoublePulseFit_Parameters')
+  double_col_values = double_parameter_workspace.column(1)
+
+  single_parameter_workspace = AnalysisDataService.retrieve('DoublePulseFit_Parameters')
+  col_values = single_parameter_workspace.column(1)
+  
+  print('Fitted value of A from DoublePulseFit is {}'.format(double_col_values[0]))
+  print('Fitted value of Frequency from DoublePulseFit is {}'.format(double_col_values[2]))
+  print('Fitted value of A from Fit is {}'.format(col_values[0]))
+  print('Fitted value of Frequency from Fit is {}'.format(col_values[2]))
+
+Output:
+
+.. testoutput::
+
+  Fitted value of A from DoublePulseFit is -0.22
+  Fitted value of Frequency from DoublePulseFit is 1.5
+  Fitted value of A from Fit is -0.22
+  Fitted value of Frequency from Fit is 1.5
 
 .. figure:: /images/DoublePulseFitExample.png
   :figwidth: 50%
