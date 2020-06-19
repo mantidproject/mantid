@@ -15,7 +15,7 @@ FIT_COMMANDS_ORDER = {"Function": 1, "InputWorkspace": 2, "WorkspaceIndex": 3, "
 
 def get_fit_cmds(fig):
     if not hasattr(fig.canvas.manager, 'fit_browser'):
-        return
+        return [], []
     cmds = []
     fit_headers = [BASE_FIT_INCLUDE]
     fit_browser = fig.canvas.manager.fit_browser

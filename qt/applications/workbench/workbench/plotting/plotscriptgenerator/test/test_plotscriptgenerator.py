@@ -47,6 +47,7 @@ SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
 
 SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "import matplotlib.pyplot as plt\n"
+                          "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
                           "Function=\"GaussOsc\"\n"
                           "InputWorkspace=\"TestWorkspace\"\n"
                           "Output=\"TestOutput\"\n"

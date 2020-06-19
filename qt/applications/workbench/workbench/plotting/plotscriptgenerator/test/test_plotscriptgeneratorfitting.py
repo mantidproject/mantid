@@ -45,11 +45,15 @@ class PlotScriptGeneratorFittingTest(unittest.TestCase):
         self.assertEqual(commands, [])
         self.assertEqual(headers, [])
 
-    def test_returns_if_no_fit_browser(self):
+    def test_returns_empty_commands_if_no_fit_browser(self):
         mock_fig = Mock()
         # Figure manager base has no fit browser
         mock_fig.canvas.manager = Mock(spec=FigureManagerBase)
-        self.assertEqual(None, get_fit_cmds(mock_fig))
+
+        commands, headers = get_fit_cmds(mock_fig)
+
+        self.assertEqual(commands, [])
+        self.assertEqual(headers, [])
 
     def test_get_fit_cmds_returns_expected_commands(self):
         self.mock_browser.fit_result_ws_name = "TestWorkspace"

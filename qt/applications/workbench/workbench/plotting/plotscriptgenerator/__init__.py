@@ -28,6 +28,8 @@ if hasattr(Legend, "set_draggable"):
     SET_DRAGGABLE_METHOD = "set_draggable(True)"
 else:
     SET_DRAGGABLE_METHOD = "draggable()"
+FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more " \
+                           "details"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -84,6 +86,7 @@ def generate_script(fig, exclude_headers=False):
     if plot_headers:
         cmds.extend(plot_headers)
     if fit_commands:
+        cmds.append(FIT_DOCUMENTATION_STRING)
         cmds.extend(fit_commands + [''])
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
