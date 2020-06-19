@@ -12,6 +12,7 @@ New
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
 - A default legend location can be set in the Workbench settings.
 - The Sample Transmission Calculator is now implemented in workbench.
+- The number of significant figures on plots can be set from the axis property dialogue.
 
 Improvements
 ############
