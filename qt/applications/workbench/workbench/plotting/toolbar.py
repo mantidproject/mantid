@@ -214,7 +214,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                     if ax.get_artists_sample_log_plot_details(artist) is not None:
                         self._set_fit_enabled(False)
                         break
-                except ValueError:
+                except Exception:
                     #The artist is not tracked - ignore this one and check the rest
                     continue
 
