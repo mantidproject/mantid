@@ -16,6 +16,7 @@ class MockObservingView(ObservingView):
     def __init__(self, _):
         self.close_signal = MockQtSignal()
         self.rename_signal = MockQtSignal()
+        self.replace_signal = MockQtSignal()
         self.presenter = Mock()
         self.presenter.clear_observer = Mock()
         self.setWindowTitle = Mock()
