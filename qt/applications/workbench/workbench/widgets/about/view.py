@@ -13,6 +13,8 @@ from qtpy.QtWidgets import QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, Q
 
 REFERENCE_HEIGHT = 642
 REFERENCE_WIDTH = 745
+REFERENCE_ASPECT_RATIO = REFERENCE_WIDTH / REFERENCE_HEIGHT
+WIDESCREEN_ASPECT_RATIO = 16/9
 
 
 class AboutView(QDialog):
@@ -58,7 +60,6 @@ class AboutView(QDialog):
         width = REFERENCE_WIDTH
         height = REFERENCE_HEIGHT
 
-        # gets the width of the screen where the main window is
         screen = None
         try:
             if hasattr(QGuiApplication,"screenAt"):
@@ -73,11 +74,25 @@ class AboutView(QDialog):
 
         if screen is not None:
             screen_width = screen.size().width()
+            screen_height = screen.size().height()
+
             # the proportion of the whole window size for the about screen
             window_scaling = 0.4
-            width = int(
-                screen_width * window_scaling) if screen_width * window_scaling > REFERENCE_WIDTH else REFERENCE_WIDTH
-            height = int(REFERENCE_HEIGHT * (width / REFERENCE_WIDTH))
+            width = int(screen_width * window_scaling)
+
+            # also calculate the intended width but using the hieght and a standard screen aspect ratio
+            width_by_height= int(screen_height * WIDESCREEN_ASPECT_RATIO * window_scaling)
+            # take the smaller of the width from the screen width and height
+            if width_by_height < width:
+                width = width_by_height
+
+            # set a minimum size
+            if width < REFERENCE_WIDTH:
+                width = REFERENCE_WIDTH
+
+            # calculate height from the width and aspect ratio
+            height = int(width / REFERENCE_ASPECT_RATIO)
+
         return width, height
 
     def rescale_w(self, value):
