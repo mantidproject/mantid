@@ -455,6 +455,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def update_toolbar_waterfall_plot(self, is_waterfall):
         self.toolbar.set_waterfall_options_enabled(is_waterfall)
+        self.toolbar.set_fit_enabled(not is_waterfall)
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
 
     def change_line_collection_colour(self, colour):
