@@ -143,7 +143,7 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'thickness': 0.1
         }
         validation = self.model.validate(input_dict)
-        self.assertEqual(validation, {'histogram': 'Histogram requires 3 values.'})
+        self.assertEqual(validation, {'histogram': 'Histogram requires an odd number of values.'})
 
     def test_validate_no_formula(self):
         input_dict = {

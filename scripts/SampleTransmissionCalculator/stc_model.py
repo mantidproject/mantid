@@ -60,13 +60,14 @@ class SampleTransmissionCalculatorModel(object):
             if bin_list:
                 try:
                     bin_list = [float(i) for i in bin_list]
-                    if len(bin_list) == 3:
-                        if bin_list[0] < 0.0 or bin_list[1] <= 0.0 or bin_list[2] <= 0.0:
-                            validation['histogram'] = 'Histogram must be greater than zero.'
-                        if bin_list[2] <= bin_list[0]:
-                            validation['histogram'] = 'Upper histogram edge must be greater than the lower bin.'
+                    if len(bin_list) % 2 == 1 and len(bin_list) != 1:
+                        for i in range(len(bin_list) // 2):
+                            if bin_list[0+2*i] < 0.0 or bin_list[1+2*i] <= 0.0 or bin_list[2+2*i] <= 0.0:
+                                validation['histogram'] = 'Histogram must be greater than zero.'
+                            if bin_list[2+2*i] <= bin_list[0+2*i]:
+                                validation['histogram'] = 'Upper histogram edge must be greater than the lower bin.'
                     else:
-                        validation['histogram'] = 'Histogram requires 3 values.'
+                        validation['histogram'] = 'Histogram requires an odd number of values.'
                 except ValueError:
                     validation['histogram'] = 'Histogram string not readable.'
         if not input_dict['chemical_formula']:
