@@ -24,6 +24,16 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+namespace {
+bool singleValued(const MatrixWorkspace &ws) {
+  if (ws.getNumberHistograms() == 1 && ws.blocksize() == 1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -116,7 +126,6 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     }
     if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
-
       // Don't plot 1D spectra if only one X value
       bool multipleBins = false;
       try {
@@ -130,7 +139,6 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           }
         }
       }
-
       if (multipleBins) {
         plotSubMenu->addAction(m_plotSpectrum);
         plotSubMenu->addAction(m_overplotSpectrum);
@@ -140,7 +148,6 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       } else {
         plotSubMenu->addAction(m_plotBin);
       }
-
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
 
@@ -152,19 +159,23 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
 
         plotSubMenu->addMenu(plot3DSubMenu);
       }
+      if (!singleValued(*matrixWS)) {
+        menu->addMenu(plotSubMenu);
+        menu->addSeparator();
+        menu->addAction(m_showData);
+        menu->addAction(m_showAlgorithmHistory);
+        menu->addAction(m_showInstrument);
+        m_showInstrument->setEnabled(
+            matrixWS->getInstrument() &&
+            !matrixWS->getInstrument()->getName().empty() &&
+            matrixWS->getAxis(1)->isSpectra());
+        menu->addAction(m_sampleLogs);
+        menu->addAction(m_sliceViewer);
+        menu->addAction(m_showDetectors);
+      } else {
+        menu->addAction(m_showData);
+      }
 
-      menu->addMenu(plotSubMenu);
-      menu->addSeparator();
-      menu->addAction(m_showData);
-      menu->addAction(m_showAlgorithmHistory);
-      menu->addAction(m_showInstrument);
-      m_showInstrument->setEnabled(
-          matrixWS->getInstrument() &&
-          !matrixWS->getInstrument()->getName().empty() &&
-          matrixWS->getAxis(1)->isSpectra());
-      menu->addAction(m_sampleLogs);
-      menu->addAction(m_sliceViewer);
-      menu->addAction(m_showDetectors);
     } else if (std::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);

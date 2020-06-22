@@ -7,7 +7,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"

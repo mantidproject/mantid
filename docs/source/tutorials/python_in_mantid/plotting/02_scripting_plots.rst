@@ -1,4 +1,4 @@
-.. _scripting_plots:
+.. _02_scripting_plots:
 
 ==============================
 Formatting Plots with a script

@@ -10,6 +10,7 @@ New
 
 - The Advanced Plotting menu is now in Workbench. This enables creating surface and contour plots of three or more workspaces, and choosing which log value to plot against.
 - There is now a dialog for project saving that allows you to choose between saving all workspaces or only saving workspaces which have been altered.
+- A default legend location can be set in the Workbench settings.
 
 Improvements
 ############
@@ -23,6 +24,7 @@ Improvements
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
 - The ``Python extensions directory`` setting from MantidPlot is now available in Workbench within the Manage User Directories window.
+- The script generation functionality attached to workbench plots will now include fitting code if the user has performed a fit.
 
 .. figure:: ../../images/wb_invalid_log_shading.png
    :align: right
@@ -37,6 +39,7 @@ Improvements
 - The "Show sample logs" dialog will now hide the plot and statistics display if there are no suitable logs in the workspace that need it.  This is particularly applicable for some of the reactor based instruments.
 - The plot toolbar now shows the correct buttons for 3D plots.
 - Plots now have a Help button on the toolbar, which will direct the user to a relevant documentation page informing them about that type of plot.
+- Colorfill plots can now be scripted just like line plots, as long as there is only one colorfill on the plot.
 - On 3D plots you can now double-click on the z-axis to change its limits or label.
 - Plots extracted from "Show Sample Logs" by double clicking the plot can now be converted to a python script, just like other workbench plots.
 - The workspace sample logs interface now responds to keyboard input from the cursor keys to move between logs.
@@ -61,11 +64,16 @@ Improvements
 - The x-axis tick labels on colorfill plots are now horizontal.
 - Improved the usability of the fit function and peak selection pop-up menus by allowing the user to immediately search for the desired function and activate autocompletion by pressing "enter" if there is just a single possible function.
 - The figure options menu now has a help button which opens the documentation for the menu.
+- Added a profiling option to the workbench launch script, allowing for timing of startup and other internal processes.
 - Variables assigned in python scripts are now cleared when a script is run in its entirety.
+- The colorbar on colorfill plots is now labelled, and the label can be set in the figure options.
 - Monitors are no longer shown on bin and colorfill plots.
-- The colorbar on colorfill plots is now labelled.
 - User data directories are no longer checked at startup, reducing launch times with slow network drives.
+- When choosing a marker in the figure options, if one of the marker colours would not be used that selection is disabled.
 - Added an option to set the default ```drawstyle``` within the workbench settings window. Additionally, the ```linestyle``` can now be set to 'None'.
+- Added an option to matrix workspaces to export bins and spectra to a table workspace.
+- Improved the handling of ``WorkspaceSingleValue`` workspaces in workbench. This fixes a crash which occurred when interacting with workspaces of this type.
+- Right-clicking a plot without dragging while using the zoom tool now resets the axes limits.
 
 Bugfixes
 ########
@@ -76,6 +84,7 @@ Bugfixes
 - Fixed a crash when opening the plot options for a sample logs plot.
 - Fixed a crash when you defined a new Fit Function after deleting a plot.
 - Fixed a crash when plotting the logs from a multi-dimensional workspace, that combines several different original workspaces.
+- Fixed a crash when masking a workspace while the worspace data table was on the screen.
 - The scale of the color bars on colorfill plots of ragged workspaces now uses the maximum and minimum values of the data.
 - Fixed a bug where setting columns to Y error in table workspaces wasn't working. The links between the Y error and Y columns weren't being set up properly
 - Opening figure options on a plot with an empty legend no longer causes an unhandled exception.
@@ -96,5 +105,6 @@ Bugfixes
 - Colorfill plots now correctly use the workspace name as the plot title.
 - Overplotting no longer resets the axes scales.
 - Fixed a bug with the peak cursor immediately resetting to the default cursor when trying to add a peak.
+- Changing a curve's properties on a plot no longer changes the order of the plot legend.
 
 :ref:`Release 5.1.0 <v5.1.0>`

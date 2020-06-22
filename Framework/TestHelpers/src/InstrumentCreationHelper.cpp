@@ -80,11 +80,8 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   instrument->add(source);
   instrument->markAsSource(source);
 
-  // Define a sample as a simple sphere
-  ObjComponent *sample = new ObjComponent(
-      "samplePos",
-      ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-      instrument.get());
+  // Define a sample position
+  Component *sample = new Component("samplePos", instrument.get());
   instrument->setPos(0.0, 0.0, 0.0);
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
@@ -102,10 +99,10 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
  * @param name :: name of the component
  * @return a component pointer
  */
-ObjComponent *addComponent(Mantid::Geometry::Instrument_sptr &instrument,
-                           const Mantid::Kernel::V3D &position,
-                           const std::string &name) {
-  auto *component = new ObjComponent(name);
+Component *addComponent(Mantid::Geometry::Instrument_sptr &instrument,
+                        const Mantid::Kernel::V3D &position,
+                        const std::string &name) {
+  auto *component = new Component(name);
   component->setPos(position);
   instrument->add(component);
   return component;

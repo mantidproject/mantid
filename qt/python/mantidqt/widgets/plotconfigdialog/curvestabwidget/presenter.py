@@ -53,6 +53,8 @@ class CurvesTabWidgetPresenter:
             self.line_apply_to_all)
         self.view.marker.apply_to_all_button.clicked.connect(
             self.marker_apply_to_all)
+        self.view.marker.marker_style_combo_box.currentTextChanged.connect(
+            self.view.marker.set_colour_fields_enabled)
         self.view.errorbars.apply_to_all_button.clicked.connect(
             self.errorbars_apply_to_all)
 

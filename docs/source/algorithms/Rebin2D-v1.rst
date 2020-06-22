@@ -40,7 +40,7 @@ need to run first.
 Usage
 -----
 
-**Example - A simple example using the fractional area**  
+**Example - A simple example using the fractional area**
 
 .. testcode:: ExUseFractionalArea
 
@@ -59,7 +59,7 @@ Output:
     Bins in the X axis: 200
     Bins in the Y axis: 120
 
-**Example - Transposing the Result**  
+**Example - Transposing the Result**
 
 .. testcode:: ExTranspose
 
@@ -70,7 +70,7 @@ Output:
     rb = Rebin2D(wsc,[0,100,20000],[0,0.01,1.2],Transpose=True)
     print("Bins in the X axis: {}".format(rb.blocksize()))
     print("Bins in the Y axis: {}".format(rb.getNumberHistograms()))
-    
+
 Output:
 
 .. testoutput:: ExTranspose
@@ -78,7 +78,27 @@ Output:
     Bins in the X axis: 120
     Bins in the Y axis: 200
 
+**Example - Rebinning twice preserves signal/errors**
+
+.. testcode:: ExRebinTwice
+
+    import numpy as np
+    # prepare an input workspace
+    theta_tof = CreateSampleWorkspace()
+    theta_tof = ConvertSpectrumAxis(theta_tof, "theta")
+
+    theta_tof_rb1 = Rebin2D(theta_tof, '100,400,20000', '0, 0.001,1', UseFractionalArea=True)
+    theta_tof_rb2 = Rebin2D(theta_tof_rb1, '100,400,20000', '0, 0.004,1', UseFractionalArea=True)
+    theta_tof_rb_final = Rebin2D(theta_tof,  '100,400,20000', '0, 0.004, 1', UseFractionalArea=True)
+    print(f'Signal difference = {np.median(np.abs(theta_tof_rb_final.readY(0) - theta_tof_rb2.readY(0))):.3f}')
+    print(f'Errors difference = {np.median(np.abs(theta_tof_rb_final.readE(0) - theta_tof_rb2.readE(0))):.3f}')
+
+.. testoutput:: ExRebinTwice
+
+    Signal difference = 0.000
+    Errors difference = 0.000
+
+
 .. categories::
 
 .. sourcelink::
-

@@ -514,8 +514,8 @@ void LoadGSS::createInstrumentGeometry(
       new Geometry::Instrument(instrumentname));
 
   // Add dummy source and samplepos to instrument
-  Geometry::ObjComponent *samplepos =
-      new Geometry::ObjComponent("Sample", instrument.get());
+  Geometry::Component *samplepos =
+      new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0, 0.0, 0.0);

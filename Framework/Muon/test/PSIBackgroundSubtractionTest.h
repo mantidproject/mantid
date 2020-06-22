@@ -97,7 +97,7 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_that_algorithm_does_not_execute_if_invalid_workspace_type() {
+  void test_that_algorithm_does_not_execute_if_invalid_y_label() {
     PSIBackgroundSubtraction alg;
     auto ws = createInvalidTestWorkspace(2, 100);
 
