@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidReflectometry/DllConfig.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
 #include <memory>
 
@@ -16,7 +16,7 @@ namespace API {
 class WorkspaceGroup;
 class MatrixWorkspace;
 } // namespace API
-namespace Reflectometry {
+namespace Algorithms {
 
 /** PolarizationCorrectionFredrikze : Algorithm to perform polarisation
  corrections on
@@ -24,7 +24,7 @@ namespace Reflectometry {
  Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica
  B 297 (2001)
  */
-class MANTID_REFLECTOMETRY_DLL PolarizationCorrectionFredrikze
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionFredrikze
     : public API::Algorithm {
 public:
   const std::string name() const override;
@@ -51,5 +51,5 @@ private:
            const double &rhs);
 };
 
-} // namespace Reflectometry
+} // namespace Algorithms
 } // namespace Mantid

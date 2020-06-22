@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidReflectometry/PolarizationCorrectionFredrikze.h"
+#include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -112,7 +112,7 @@ using VecDouble = std::vector<double>;
 } // namespace
 
 namespace Mantid {
-namespace Reflectometry {
+namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PolarizationCorrectionFredrikze)
@@ -380,5 +380,5 @@ void PolarizationCorrectionFredrikze::exec() {
   this->setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Reflectometry
+} // namespace Algorithms
 } // namespace Mantid

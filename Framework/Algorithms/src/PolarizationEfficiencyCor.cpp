@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidReflectometry/PolarizationEfficiencyCor.h"
+#include "MantidAlgorithms/PolarizationEfficiencyCor.h"
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
@@ -50,7 +50,7 @@ static const std::string FREDRIKZE{"Fredrikze"};
 } // namespace
 
 namespace Mantid {
-namespace Reflectometry {
+namespace Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -347,5 +347,5 @@ API::MatrixWorkspace_sptr PolarizationEfficiencyCor::getEfficiencies() {
   return efficiencies;
 }
 
-} // namespace Reflectometry
+} // namespace Algorithms
 } // namespace Mantid

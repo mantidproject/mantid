@@ -13,16 +13,16 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidReflectometry/PolarizationCorrectionFredrikze.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <memory>
 
 using namespace Mantid::API;
-using namespace Mantid::Reflectometry;
+using namespace Mantid::Algorithms;
 using namespace WorkspaceCreationHelper;
 
 class PolarizationCorrectionFredrikzeTest : public CxxTest::TestSuite {

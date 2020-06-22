@@ -7,9 +7,6 @@ set(SRC_FILES
     src/CreateTransmissionWorkspaceAuto2.cpp
     src/FindReflectometryLines2.cpp
     src/NRCalculateSlitResolution.cpp
-    src/PolarizationCorrectionFredrikze.cpp
-    src/PolarizationCorrectionWildes.cpp
-    src/PolarizationEfficiencyCor.cpp
     src/ReflectometryBackgroundSubtraction.cpp
     src/ReflectometryBeamStatistics.cpp
     src/ReflectometryMomentumTransfer.cpp
@@ -38,9 +35,6 @@ set(INC_FILES
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto2.h
     inc/MantidReflectometry/FindReflectometryLines2.h
     inc/MantidReflectometry/NRCalculateSlitResolution.h
-    inc/MantidReflectometry/PolarizationCorrectionFredrikze.h
-    inc/MantidReflectometry/PolarizationCorrectionWildes.h
-    inc/MantidReflectometry/PolarizationEfficiencyCor.h
     inc/MantidReflectometry/ReflectometryBackgroundSubtraction.h
     inc/MantidReflectometry/ReflectometryBeamStatistics.h
     inc/MantidReflectometry/ReflectometryMomentumTransfer.h
@@ -68,9 +62,6 @@ set(TEST_FILES
     CreateTransmissionWorkspaceAuto2Test.h
     FindReflectometryLines2Test.h
     NRCalculateSlitResolutionTest.h
-    PolarizationCorrectionFredrikzeTest.h
-    PolarizationCorrectionWildesTest.h
-    PolarizationEfficiencyCorTest.h
     ReflectometryBeamStatisticsTest.h
     ReflectometryMomentumTransferTest.h
     ReflectometryReductionOne2Test.h

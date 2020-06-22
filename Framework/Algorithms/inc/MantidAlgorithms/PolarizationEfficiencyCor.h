@@ -8,18 +8,17 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidReflectometry/DllConfig.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
-namespace Reflectometry {
+namespace Algorithms {
 
 /** PolarizationEfficiencyCor: a generalised polarization correction
   algorithm. Depending on the value of property "CorrectionMethod" it
   calls either PolarizationCorrectionFredrikze or PolarizationCorrectionWildes
   inetrnally.
 */
-class MANTID_REFLECTOMETRY_DLL PolarizationEfficiencyCor
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationEfficiencyCor : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -51,5 +50,5 @@ private:
               const API::MatrixWorkspace_sptr &inWS);
 };
 
-} // namespace Reflectometry
+} // namespace Algorithms
 } // namespace Mantid

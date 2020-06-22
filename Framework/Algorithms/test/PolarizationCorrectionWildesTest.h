@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidReflectometry/PolarizationCorrectionWildes.h"
+#include "MantidAlgorithms/PolarizationCorrectionWildes.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,7 +20,7 @@
 
 #include <Eigen/Dense>
 
-using Mantid::Reflectometry::PolarizationCorrectionWildes;
+using Mantid::Algorithms::PolarizationCorrectionWildes;
 
 class PolarizationCorrectionWildesTest : public CxxTest::TestSuite {
 public:
