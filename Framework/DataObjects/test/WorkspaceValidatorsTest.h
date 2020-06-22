@@ -176,7 +176,7 @@ public:
     { // default validator
       auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
       auto inst = std::make_shared<Mantid::Geometry::Instrument>();
-      auto *sample = new Mantid::Geometry::ObjComponent("Sample");
+      auto *sample = new Mantid::Geometry::Component("Sample");
       inst->add(sample);
       inst->markAsSamplePos(sample);
 
@@ -214,7 +214,7 @@ public:
       TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the "
                                              "following components: "
                                              "source,sample holder");
-      auto *sample = new Mantid::Geometry::ObjComponent("Sample");
+      auto *sample = new Mantid::Geometry::Component("Sample");
       inst->add(sample);
       inst->markAsSamplePos(sample);
       auto *src = new Mantid::Geometry::ObjComponent("Source");

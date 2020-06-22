@@ -59,7 +59,7 @@ createTestInstrument(const Mantid::detid_t id,
   source->setPos(sourcePosition);
   inst->add(source);
   inst->markAsSource(source);
-  auto *sampleHolder = new ObjComponent("samplePos");
+  auto *sampleHolder = new Component("samplePos");
   sampleHolder->setPos(samplePosition);
   inst->add(sampleHolder);
   inst->markAsSamplePos(sampleHolder);

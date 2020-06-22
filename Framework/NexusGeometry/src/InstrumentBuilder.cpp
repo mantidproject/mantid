@@ -44,7 +44,7 @@ InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
 Geometry::IComponent *
 InstrumentBuilder::addComponent(const std::string &compName,
                                 const Eigen::Vector3d &position) {
-  Geometry::IComponent *component(new Geometry::ObjCompAssembly(compName));
+  Geometry::IComponent *component(new Geometry::CompAssembly(compName));
   component->setPos(position(0), position(1), position(2));
   m_instrument->add(component);
   return component;

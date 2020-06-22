@@ -497,10 +497,7 @@ private:
     inst->markAsSource(source);
 
     // Add the sample position
-    ObjComponent *sample = new ObjComponent(
-        "samplePos",
-        ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-        inst.get());
+    Component *sample = new Component("samplePos", inst.get());
     inst->setPos(0.0, 0.0, 0.0);
     inst->add(sample);
     inst->markAsSamplePos(sample);
