@@ -9,8 +9,8 @@
 #include "RectF.h"
 
 #include <QColor>
-#include <QPointF>
 #include <QPainterPath>
+#include <QPointF>
 class QPainter;
 class QMouseEvent;
 class QWheelEvent;
