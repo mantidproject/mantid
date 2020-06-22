@@ -50,8 +50,9 @@ class RangeSelector(object):
         def disconnect(self):
             if IS_IN_MANTIDGUI:
                 fig = pyplot.gcf()
-                ax = fig.axes[0]
-                ax.remove_callback(self.cid)
+                if len(fig.axes) > 0:
+                  ax = fig.axes[0]
+                  ax.remove_callback(self.cid)
 
         def connect(self, ws, call_back, xmin=None, xmax=None,
                     range_min=None, range_max=None, x_title=None,
@@ -87,9 +88,6 @@ class RangeSelector(object):
                 self.fit_range = RangeMarker(l.figure.canvas, 'green', 0.0, 0.0)
 
             self.cid = l.callbacks.connect('xlim_changed', self._call_back)
-            #self.fit_range.range_changed.connect(self.fit_range_changed)
-            self.fit_range.set_visible(True)
-            self.fit_range.redraw()
 
 
     @classmethod

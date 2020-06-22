@@ -195,7 +195,8 @@ class StitcherWidget(BaseWidget):
             User requested to select range common to data sets 1 and 2
         """
         if self._low_q_data is not None:
-            def call_back(xmin, xmax):
+            def call_back(event_ax):
+                xmin, xmax = event_ax.get_xlim()
                 self._content.low_min_edit.setText("%-6.3g" % xmin)
                 self._content.low_max_edit.setText("%-6.3g" % xmax)
 
@@ -211,7 +212,8 @@ class StitcherWidget(BaseWidget):
             User requested to select range common to data sets 2 and 3
         """
         if self._medium_q_data is not None:
-            def call_back(xmin, xmax):
+            def call_back(event_ax):
+                xmin, xmax = event_ax.get_xlim()
                 self._content.medium_min_edit.setText("%-6.3g" % xmin)
                 self._content.medium_max_edit.setText("%-6.3g" % xmax)
 
