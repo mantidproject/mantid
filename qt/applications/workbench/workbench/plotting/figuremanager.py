@@ -447,6 +447,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if ax.get_legend():
             ax.make_legend()
 
+        self.canvas.draw()
+
     def launch_waterfall_offset_options(self):
         WaterfallPlotOffsetDialogPresenter(self.canvas.figure, parent=self.window)
 
