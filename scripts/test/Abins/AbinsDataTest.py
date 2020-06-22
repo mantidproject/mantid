@@ -7,14 +7,14 @@
 import unittest
 from unittest.mock import MagicMock
 
-import AbinsModules
-from AbinsModules.AbinsData import AbinsData
+import abins
+from abins.abinsdata import AbinsData
 
 
 class TestAbinsData(unittest.TestCase):
     def setUp(self):
-        self.mock_ad = MagicMock(spec=AbinsModules.AtomsData)
-        self.mock_kpd = MagicMock(spec=AbinsModules.KpointsData)
+        self.mock_ad = MagicMock(spec=abins.AtomsData)
+        self.mock_kpd = MagicMock(spec=abins.KpointsData)
 
     def test_init_typeerror(self):
         with self.assertRaises(TypeError):

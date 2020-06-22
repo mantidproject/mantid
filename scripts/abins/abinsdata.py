@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Any, Dict
 
-import abins
 from abins.kpointsdata import KpointsData
 from abins.atomsdata import AtomsData
 

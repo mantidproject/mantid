@@ -23,7 +23,6 @@ from .scalculatorfactory import SCalculatorFactory
 from .spowdersemiempiricalcalculator import SPowderSemiEmpiricalCalculator
 
 # Data
-from .generaldata import GeneralData
 from .kpointsdata import KpointsData
 from .atomsdata import AtomsData
 from .abinsdata import AbinsData
