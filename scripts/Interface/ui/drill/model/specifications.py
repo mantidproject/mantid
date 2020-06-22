@@ -106,8 +106,8 @@ class RundexSettings(object):
     SETTINGS = {
             SANS_ACQ : {
                 "ThetaDependent": True,
-                "SensitivityMaps": None,
-                "DefaultMaskFile": None,
+                "SensitivityMaps": "",
+                "DefaultMaskFile": "",
                 "NormaliseBy": "Timer",
                 "SampleThickness": 0.1,
                 "BeamRadius": 0.05,
@@ -116,7 +116,7 @@ class RundexSettings(object):
                 "CalculateResolution": "None",
                 "DefaultQBinning": "PixelSizeBased",
                 "BinningFactor": 1,
-                "OutputBinning": None,
+                "OutputBinning": "",
                 "NPixelDivision": 1,
                 "NumberOfWedges": 0,
                 "WedgeAngle": 30,
@@ -125,17 +125,17 @@ class RundexSettings(object):
                 "MaxQxy": 0,
                 "DeltaQ": 0,
                 "IQxQyLogBinning": False,
-                "PanelOutputWorkspaces": None
+                "PanelOutputWorkspaces": ""
                 },
             OMEGA_SCAN : {
                 },
             REFL_POL : {
-                "PolarizationEfficiencyFile": None,
+                "PolarizationEfficiencyFile": "",
                 "DirectFlatBackground": "Background Constant Fit",
                 "ReflFlatBackground": "Background Constant Fit",
                 "SubalgorithmLogging": "Logging OFF",
                 "Cleanup": "Cleanup ON",
-                "WaterWorkspace": None,
+                "WaterWorkspace": "",
                 "SlitNormalisation": "Slit Normalisation AUTO",
                 "FluxNormalisation": "Normalise To Time",
                 "CacheDirectBeam": False,
@@ -168,7 +168,7 @@ class RundexSettings(object):
                 "ReflFlatBackground": "Background Constant Fit",
                 "SubalgorithmLogging": "Logging OFF",
                 "Cleanup": "Cleanup ON",
-                "WaterWorkspace": None,
+                "WaterWorkspace": "",
                 "SlitNormalisation": "Slit Normalisation AUTO",
                 "FluxNormalisation": "Normalise To Time",
                 "CacheDirectBeam": False,
