@@ -258,9 +258,12 @@ class WorkspaceWidget(PluginWidget):
             self._do_show_data([name])
         except ValueError:
             if hasattr(ws, 'blocksize') and ws.blocksize() == 1:
-                #this is just single bin data, it makes more sense to plot the bin
-                plot_kwargs = {"axis": MantidAxType.BIN}
-                plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
+                #If this is ws is just a single value show the data, else plot the bin
+                if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
+                    self._do_show_data([name])
+                else:
+                    plot_kwargs = {"axis": MantidAxType.BIN}
+                    plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
             else:
                 plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 

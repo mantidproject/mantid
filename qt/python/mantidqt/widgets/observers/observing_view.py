@@ -15,7 +15,7 @@ class ObservingView(object):
 
     It is designed to be used with a presenter that inherits `ObservingPresenter`.
 
-    If this class is inherited a `close_signal` and a `rename_signal` must be declared.
+    If this class is inherited a `close_signal`, a `replace_signal` and a `rename_signal` must be declared.
 
     It is not possible to do that here, as this is not a QObject, however it was
     attempted to do the declaration here, but the signals don't seem to work
@@ -50,6 +50,9 @@ class ObservingView(object):
 
     def emit_rename(self, new_name):
         self.rename_signal.emit(new_name)
+
+    def emit_replace(self, name, workspace):
+        self.replace_signal.emit(name, workspace)
 
     def _rename(self, new_name):
         self.setWindowTitle(self.TITLE_STRING.format(new_name))

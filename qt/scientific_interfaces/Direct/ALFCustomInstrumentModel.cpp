@@ -26,10 +26,20 @@ namespace CustomInterfaces {
 
 ALFCustomInstrumentModel::ALFCustomInstrumentModel()
     : m_numberOfTubesInAverage(0) {
-  m_tmpName = "ALF_tmp";
-  m_instrumentName = "ALF";
-  m_wsName = "ALFData";
-  m_currentRun = 0;
+  m_base =
+      new MantidWidgets::BaseCustomInstrumentModel("ALF_tmp", "ALF", "ALFData");
+}
+
+/*
+ * Runs load data alg
+ * @param name:: string name for ALF data
+ */
+void ALFCustomInstrumentModel::loadAlg(const std::string &name) {
+  auto alg = AlgorithmManager::Instance().create("Load");
+  alg->initialize();
+  alg->setProperty("Filename", name);
+  alg->setProperty("OutputWorkspace", getTmpName()); // write to tmp ws
+  alg->execute();
 }
 
 /*
@@ -40,13 +50,9 @@ ALFCustomInstrumentModel::ALFCustomInstrumentModel()
  */
 std::pair<int, std::string>
 ALFCustomInstrumentModel::loadData(const std::string &name) {
-  auto alg = AlgorithmManager::Instance().create("Load");
-  alg->initialize();
-  alg->setProperty("Filename", name);
-  alg->setProperty("OutputWorkspace", m_tmpName); // write to tmp ws
-  alg->execute();
+  loadAlg(name);
   auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   int runNumber = ws->getRunNumber();
   std::string message = "success";
   auto bools = isDataValid();
@@ -55,7 +61,7 @@ ALFCustomInstrumentModel::loadData(const std::string &name) {
     m_numberOfTubesInAverage = 0;
   } else {
     // reset to the previous data
-    message = "Not the corrct instrument, expected " + m_instrumentName;
+    message = "Not the correct instrument, expected " + getInstrument();
     remove();
   }
   if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
@@ -70,17 +76,17 @@ ALFCustomInstrumentModel::loadData(const std::string &name) {
  */
 std::map<std::string, bool> ALFCustomInstrumentModel::isDataValid() {
   auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tmpName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   bool isItALF = false;
-  bool isItDSpace = false;
 
-  if (ws->getInstrument()->getName() == m_instrumentName) {
+  if (ws->getInstrument()->getName() == getInstrument()) {
     isItALF = true;
   }
   auto axis = ws->getAxis(0);
   auto unit = axis->unit()->unitID();
-  if (unit == "dSpacing") {
-    isItDSpace = true;
+  bool isItDSpace = true;
+  if (unit != "dSpacing") {
+    isItDSpace = false;
   }
   return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}};
 }
@@ -92,15 +98,15 @@ std::map<std::string, bool> ALFCustomInstrumentModel::isDataValid() {
 void ALFCustomInstrumentModel::transformData() {
   auto normAlg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
-  normAlg->setProperty("InputWorkspace", m_wsName);
-  normAlg->setProperty("OutputWorkspace", m_wsName);
+  normAlg->setProperty("InputWorkspace", getWSName());
+  normAlg->setProperty("OutputWorkspace", getWSName());
   normAlg->execute();
 
   auto dSpacingAlg = AlgorithmManager::Instance().create("ConvertUnits");
   dSpacingAlg->initialize();
-  dSpacingAlg->setProperty("InputWorkspace", m_wsName);
+  dSpacingAlg->setProperty("InputWorkspace", getWSName());
   dSpacingAlg->setProperty("Target", "dSpacing");
-  dSpacingAlg->setProperty("OutputWorkspace", m_wsName);
+  dSpacingAlg->setProperty("OutputWorkspace", getWSName());
   dSpacingAlg->execute();
 }
 
@@ -122,12 +128,12 @@ void ALFCustomInstrumentModel::storeSingleTube(const std::string &name) {
 }
 
 std::string ALFCustomInstrumentModel::WSName() {
-  std::string name = m_instrumentName + std::to_string(getCurrentRun());
+  std::string name = getInstrument() + std::to_string(getCurrentRun());
   return EXTRACTEDWS + name;
 }
 
 void ALFCustomInstrumentModel::averageTube() {
-  const std::string name = m_instrumentName + std::to_string(getCurrentRun());
+  const std::string name = getInstrument() + std::to_string(getCurrentRun());
   const int oldTotalNumber = m_numberOfTubesInAverage;
   // multiply up current average
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -163,7 +169,7 @@ bool ALFCustomInstrumentModel::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
 
-bool ALFCustomInstrumentModel::extractTubeConditon(
+bool ALFCustomInstrumentModel::extractTubeCondition(
     std::map<std::string, bool> tabBools) {
   try {
 
@@ -175,7 +181,7 @@ bool ALFCustomInstrumentModel::extractTubeConditon(
   }
 }
 
-bool ALFCustomInstrumentModel::averageTubeConditon(
+bool ALFCustomInstrumentModel::averageTubeCondition(
     std::map<std::string, bool> tabBools) {
   try {
 
@@ -183,14 +189,14 @@ bool ALFCustomInstrumentModel::averageTubeConditon(
                     tabBools.find("hasCurve")->second);
     return (m_numberOfTubesInAverage > 0 && tabBools.find("isTube")->second &&
             ifCurve &&
-            hasTubeBeenExtracted(m_instrumentName +
+            hasTubeBeenExtracted(getInstrument() +
                                  std::to_string(getCurrentRun())));
   } catch (...) {
     return false;
   }
 }
 void ALFCustomInstrumentModel::extractSingleTube() {
-  storeSingleTube(m_instrumentName + std::to_string(getCurrentRun()));
+  storeSingleTube(getInstrument() + std::to_string(getCurrentRun()));
   m_numberOfTubesInAverage = 1;
 }
 

@@ -55,10 +55,13 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.view.set_context_menu_actions(self.view.table_x)
         self.view.set_context_menu_actions(self.view.table_e)
 
+        # connect to replace_signal signal to handle replacement of the workspace
+        self.container.replace_signal.connect(self.action_replace_workspace)
+
     def show_view(self):
         self.container.show()
 
-    def replace_workspace(self, workspace_name, workspace):
+    def action_replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):
             self.model = MatrixWorkspaceDisplayModel(workspace)
             self.setup_tables()

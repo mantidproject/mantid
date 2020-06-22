@@ -16,6 +16,7 @@ import matplotlib
 from matplotlib import colors
 from matplotlib.patches import BoxStyle
 
+from mantid.kernel import ConfigService
 from mantid.plots.utility import legend_set_draggable
 
 
@@ -136,9 +137,17 @@ class LegendProperties(dict):
         # Imported here to prevent circular import.
         from mantid.plots.datafunctions import get_legend_handles
 
+        if ConfigService.getString('plots.LegendLocation'):
+            loc = ConfigService.getString('plots.LegendLocation')
+        else:
+            loc = 'best'
+
         if not props:
-            legend_set_draggable(ax.legend(handles=get_legend_handles(ax)), True)
+            legend_set_draggable(ax.legend(handles=get_legend_handles(ax), loc=loc), True)
             return
+
+        if 'loc' in props.keys():
+            loc = props['loc']
 
         if int(matplotlib.__version__[0]) >= 2:
             legend = ax.legend(handles=get_legend_handles(ax),
@@ -157,7 +166,8 @@ class LegendProperties(dict):
                                labelspacing=props['label_spacing'],
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
-                               columnspacing=props['column_spacing'])
+                               columnspacing=props['column_spacing'],
+                               loc=loc)
         else:
             legend = ax.legend(handles=get_legend_handles(ax),
                                ncol=props['columns'],
@@ -173,7 +183,8 @@ class LegendProperties(dict):
                                labelspacing=props['label_spacing'],
                                handlelength=props['marker_size'],
                                handletextpad=props['marker_label_padding'],
-                               columnspacing=props['column_spacing'])
+                               columnspacing=props['column_spacing'],
+                               loc=loc)
 
         title = legend.get_title()
         title.set_fontname(props['title_font'])

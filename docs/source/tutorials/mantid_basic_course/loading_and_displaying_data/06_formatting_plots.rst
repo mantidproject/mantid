@@ -90,7 +90,7 @@ File > Settings
 
 **Other Plotting Documentation**
 
-* :ref:`scripting_plots`
+* :ref:`02_scripting_plots`
 * :ref:`plotting`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 

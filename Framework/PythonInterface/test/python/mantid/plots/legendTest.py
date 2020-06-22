@@ -7,10 +7,15 @@
 #
 
 import unittest
-
+from unittest import mock
 import matplotlib.pyplot as plt
 
 from mantid.plots.legend import LegendProperties
+
+
+class MockConfigService(object):
+    def __init__(self):
+        self.getString = mock.Mock()
 
 
 class LegendTest(unittest.TestCase):
@@ -21,11 +26,15 @@ class LegendTest(unittest.TestCase):
 
         self.assertEqual(props, None)
 
-    def test_calling_create_legend_with_no_props_adds_legend_to_plot(self):
+    @mock.patch('mantid.plots.legend.ConfigService', new_callable=MockConfigService)
+    def test_calling_create_legend_with_no_props_adds_legend_to_plot(self, mock_ConfigService):
         ax = plt.gca()
+        mock_ConfigService.getString = unittest.mock.Mock()
+        mock_ConfigService.getString.return_value = 'best'
 
         LegendProperties.create_legend(props=None, ax=ax)
-
+        mock_ConfigService.getString.assert_has_calls([mock.call('plots.LegendLocation'),
+                                                       mock.call('plots.LegendLocation')])
         self.assertNotEqual(ax.get_legend(), None)
 
 
