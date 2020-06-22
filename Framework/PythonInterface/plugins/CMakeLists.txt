@@ -358,3 +358,15 @@ file(WRITE ${BUILD_FILE} ${ABS_PATHS})
 set(PACKAGE_FILE ${CMAKE_CURRENT_BINARY_DIR}/python-plugin-manifest.txt.install)
 list(JOIN PYTHON_PLUGINS "\n" PYTHON_PLUGINS)
 file(WRITE ${PACKAGE_FILE} ${PYTHON_PLUGINS})
+
+install(
+    FILES ${PACKAGE_FILE}
+    DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
+    RENAME "python-plugin-manifest.txt"
+)
+
+install(
+    FILES ${PACKAGE_FILE}
+    DESTINATION ${PLUGINS_DIR}/python
+    RENAME "python-plugin-mantifest.txt"
+)

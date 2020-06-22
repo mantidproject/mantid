@@ -301,6 +301,9 @@ private:
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
 
+  /// List of config paths that may be relative
+  std::set<std::string> m_configPaths;
+
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet

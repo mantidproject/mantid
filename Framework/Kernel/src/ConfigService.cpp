@@ -84,15 +84,6 @@ namespace { // anonymous namespace for some utility functions
 /// static Logger object
 Logger g_log("ConfigService");
 
-/// Identifier for a key that will contain a path. This is defined
-/// so as to catch both the word directory and directories in a key name.
-/// Any keys found containing this string are assumed to contain paths
-/// and if their values are relative paths then when fetched they
-/// are transformed to absolute paths using the application directory
-/// as a base. This is necessary to avoid problems with the interpretation of
-/// a relative path if current directory s changed at runtime.
-std::string DIRECTORY_KEY_MAGIC{"director"};
-
 /**
  * Split the supplied string on semicolons.
  *
@@ -148,6 +139,24 @@ ConfigServiceImpl::ConfigServiceImpl()
       new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
   setBaseDirectory();
+
+  m_configPaths.insert("mantidqt.python_interfaces_directory");
+  m_configPaths.insert("framework.plugins.directory");
+  m_configPaths.insert("pvplugins.directory");
+  m_configPaths.insert("mantidqt.plugins.directory");
+  m_configPaths.insert("instrumentDefinition.directory");
+  m_configPaths.insert("instrumentDefinition.vtpDirectory");
+  m_configPaths.insert("groupingFiles.directory");
+  m_configPaths.insert("maskFiles.directory");
+  m_configPaths.insert("colormaps.directory");
+  m_configPaths.insert("requiredpythonscript.directories");
+  m_configPaths.insert("pythonscripts.directory");
+  m_configPaths.insert("pythonscripts.directories");
+  m_configPaths.insert("python.plugins.directories");
+  m_configPaths.insert("user.python.plugins.directories");
+  m_configPaths.insert("icatDownload.directory");
+  m_configPaths.insert("datasearch.directories");
+  m_configPaths.insert("python.plugins.manifest");
 
   // attempt to load the default properties file that resides in the directory
   // of the executable
@@ -477,8 +486,11 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
   } else {
     converted = dir;
   }
-  converted = Poco::Path(converted).makeDirectory().toString();
-
+  if (Poco::Path(converted).getExtension() != "") {
+    converted = Poco::Path(converted).toString();
+  } else {
+    converted = Poco::Path(converted).makeDirectory().toString();
+  }
   // Backward slashes cannot be allowed to go into our properties file
   // Note this is a temporary fix for ticket #2445.
   // Ticket #2460 prompts a review of our path handling in the config service.
@@ -784,8 +796,8 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
                                          bool pathAbsolute) const {
   if (m_pConf->hasProperty(keyName)) {
     std::string value = m_pConf->getString(keyName);
-    if (pathAbsolute &&
-        keyName.rfind(DIRECTORY_KEY_MAGIC) != std::string::npos) {
+    const auto key = m_configPaths.find(keyName);
+    if (pathAbsolute && key != m_configPaths.end()) {
       value = makeAbsolute(value, keyName);
     }
     return value;
