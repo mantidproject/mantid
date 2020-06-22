@@ -67,7 +67,7 @@ Scripting
 
 Click the generate a script button |GenerateAScript.png| on a `Colorfill Plot <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.imshow.html>`_:
 
-.. code-block::
+.. code-block:: python
 
    import matplotlib.pyplot as plt
    import numpy as np
@@ -93,6 +93,8 @@ Click the generate a script button |GenerateAScript.png| on a `Colorfill Plot <h
 
 .. plot::
 
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
    import matplotlib.pyplot as plt
    import numpy as np
    from matplotlib.colors import LogNorm
