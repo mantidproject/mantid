@@ -31,11 +31,11 @@ class FittingDataModel(object):
                 else:
                     logger.warning(
                         "Invalid number of spectra in workspace {}. Skipping loading of file.".
-                        format(ws_name))
+                            format(ws_name))
             except RuntimeError as e:
                 logger.error(
                     "Failed to load file: {}. Error: {}. \n Continuing loading of other files.".
-                    format(filename, e))
+                        format(filename, e))
 
     def get_loaded_workspaces(self):
         return self._loaded_workspaces
@@ -44,7 +44,7 @@ class FittingDataModel(object):
         return self._background_workspaces
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
-        ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name+"_bg",
+        ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
                                                NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
         self._background_workspaces[ws_name] = ws_bg
         return ws_bg

@@ -10,6 +10,7 @@ from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from matplotlib.pyplot import subplots
 
+
 class FittingDataPresenter(object):
     def __init__(self, model, view):
         self.model = model
@@ -142,9 +143,9 @@ class FittingDataPresenter(object):
                                    subplot_kw={'projection': 'mantid'})
                 # background has been subtracted from workspace
                 tmp = Plus(LHSWorkspace=ws_name, RHSWorkspace=ws_bg, StoreInADS=False)
-                ax[0].plot(tmp,'x')
-                ax[0].plot(ws_bg,'-r')
-                ax[1].plot(ws,'x')
+                ax[0].plot(tmp, 'x')
+                ax[0].plot(ws_bg, '-r')
+                ax[1].plot(ws, 'x')
                 fig.show()
 
     def _remove_all_tracked_workspaces(self):

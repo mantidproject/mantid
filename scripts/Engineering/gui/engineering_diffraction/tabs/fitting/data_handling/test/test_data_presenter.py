@@ -11,9 +11,6 @@ from unittest.mock import patch
 from mantid.simpleapi import CreateSimulationWorkspace
 from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import data_model, data_presenter, data_view
 
-# import pydevd_pycharm
-# pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
-
 dir_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling"
 
 
@@ -98,8 +95,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter._on_worker_success("info")
 
         self.assertEqual(1, self.view.remove_all.call_count)
-        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100,1000,True)
-        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100,0.05,True)
+        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100, 1000, True)
+        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100, 0.05, True)
 
     @patch(dir_path + ".data_presenter.logger")
     def test_worker_success_invalid_filename(self, mock_logger):
@@ -113,7 +110,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.view.remove_all.call_count)
         self.assertEqual(2, self.view.add_table_row.call_count)
-        self.view.add_table_row.assert_any_call("invalid", "N/A", False, False, 100,1000,True)
+        self.view.add_table_row.assert_any_call("invalid", "N/A", False, False, 100, 1000, True)
         self.assertEqual(2, mock_logger.warning.call_count)
 
     @patch(dir_path + ".data_presenter.logger")
@@ -128,8 +125,8 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.view.remove_all.call_count)
         self.assertEqual(2, self.view.add_table_row.call_count)
-        self.view.add_table_row.assert_any_call("10", "2", False, False, 100,1000,True)
-        self.view.add_table_row.assert_any_call("20", "1", False, False, 100,1000,True)
+        self.view.add_table_row.assert_any_call("10", "2", False, False, 100, 1000, True)
+        self.view.add_table_row.assert_any_call("20", "1", False, False, 100, 1000, True)
         self.assertEqual(2, mock_logger.notice.call_count)
 
     def test_remove_workspace_tracked(self):
@@ -284,6 +281,60 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual(0, self.presenter.plot_added_notifier.notify_subscribers.call_count)
         self.assertEqual(0, self.presenter.plot_removed_notifier.notify_subscribers.call_count)
+
+    @patch(dir_path + ".data_presenter.Plus")
+    @patch(dir_path + ".data_presenter.Minus")
+    def test_handle_background_subtracted(self, mock_minus, mock_plus):
+        # setup row
+        mocked_table_item = mock.MagicMock()
+        mocked_table_item.checkState.return_value = True
+        self.view.get_table_item.return_value = mocked_table_item
+        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
+        self.presenter.row_numbers["name1"] = 0
+        self.presenter.row_numbers["name2"] = 1
+        model_dict = {"name1": self.ws1, "name2": self.ws2}
+        self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.estimate_background.return_value = self.ws2
+
+        # activate bg subtraction before background is made (nothing should happen)
+        self.view.get_item_checked.return_value = False  # determines is bgSubtract is checked or not
+        self.view.get_background_params.return_value = [False, 40, 800, False]
+        self.model.get_background_workspaces.return_value = {a: None for a, b in model_dict.items()}
+        self.presenter._handle_table_cell_changed(1, 3)
+        self.assertEqual(self.model.estimate_background.call_count, 0)
+        self.assertEqual(mock_plus.call_count, 0)
+        self.assertEqual(mock_minus.call_count, 0)
+
+        # subtract background for first time
+        self.view.get_item_checked.return_value = True
+        self.view.get_background_params.return_value = [True, 40, 800, False]
+        self.model.get_background_workspaces.return_value = {a: None for a, b in model_dict.items()}
+        self.presenter._handle_table_cell_changed(1, 3)
+        self.assertEqual(self.model.estimate_background.call_count, 1)
+        self.assertEqual(mock_plus.call_count, 0)
+        self.assertEqual(mock_minus.call_count, 1)
+
+        # change background while still checked
+        self.view.get_background_params.return_value = [True, 200, 800, False]
+        self.model.get_background_workspaces.return_value = {"name2": self.ws2}
+        self.presenter._handle_table_cell_changed(1, 4)
+        self.assertEqual(self.model.estimate_background.call_count, 2)
+        self.assertEqual(mock_plus.call_count, 1)
+        self.assertEqual(mock_minus.call_count, 2)
+
+        # undo background subtraction
+        self.view.get_item_checked.return_value = False
+        self.presenter._handle_table_cell_changed(1, 3)
+        self.assertEqual(self.model.estimate_background.call_count, 2)
+        self.assertEqual(mock_plus.call_count, 2)
+        self.assertEqual(mock_minus.call_count, 2)
+
+        # subtract existing background (don't re-evaluate)
+        self.view.get_item_checked.return_value = True
+        self.presenter._handle_table_cell_changed(1, 3)
+        self.assertEqual(self.model.estimate_background.call_count, 2)
+        self.assertEqual(mock_plus.call_count, 2)
+        self.assertEqual(mock_minus.call_count, 3)
 
 
 if __name__ == '__main__':
