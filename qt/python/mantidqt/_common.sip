@@ -461,6 +461,7 @@ public:
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
     void postDeleteHandle(const std::string &wsName);
+    std::string getFitAlgorithmParameters() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
