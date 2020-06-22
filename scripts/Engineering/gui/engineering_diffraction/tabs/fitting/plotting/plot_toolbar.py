@@ -53,7 +53,7 @@ class FittingPlotToolbar(NavigationToolbar2QT):
         self.push_current()
 
     def toggle_fit(self):
-        fit_action = self._actions['toggle_fit']
+        self._actions['toggle_fit']
         self.sig_toggle_fit_triggered.emit()
 
     def handle_fit_browser_close(self):

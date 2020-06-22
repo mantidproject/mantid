@@ -28,16 +28,15 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
-        self.view.set_on_xunit_changed(self._hide_xunits)
+        self.view.set_on_xunit_changed(self._log_xunit_change)
 
         # Observable Setup
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
 
-    def _hide_xunits(self):
-        print('changed')
-        # self.view.combo_xunit.showPopup()
+    def _log_xunit_change(self,xunit):
+        logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
 
     def on_load_clicked(self, xunit):
         if self._validate():

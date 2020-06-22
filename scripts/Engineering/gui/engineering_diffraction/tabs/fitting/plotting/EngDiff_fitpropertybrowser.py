@@ -7,12 +7,12 @@
 #  This file is part of the mantidqt package
 #
 #
-from qtpy.QtCore import Qt, Signal, Slot
 
 from mantidqt.utils.qt import import_qt
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser, FitInteractiveTool
-from mantid import logger
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
+
 
 class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     """
@@ -29,4 +29,3 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         :return: None
         """
         return None
-

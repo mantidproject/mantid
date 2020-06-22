@@ -10,6 +10,7 @@ from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 import numpy as np
 from scipy.signal import savgol_filter
 
+
 class EnggEstimateFocussedBackground(PythonAlgorithm):
 
     def category(self):

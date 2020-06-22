@@ -30,12 +30,10 @@ class FittingDataModel(object):
                     self._last_added.append(ws_name)
                 else:
                     logger.warning(
-                        "Invalid number of spectra in workspace {}. Skipping loading of file.".
-                            format(ws_name))
+                        "Invalid number of spectra in workspace {}. Skipping loading of file.".format(ws_name))
             except RuntimeError as e:
                 logger.error(
-                    "Failed to load file: {}. Error: {}. \n Continuing loading of other files.".
-                        format(filename, e))
+                    "Failed to load file: {}. Error: {}. \n Continuing loading of other files.".format(filename, e))
 
     def get_loaded_workspaces(self):
         return self._loaded_workspaces

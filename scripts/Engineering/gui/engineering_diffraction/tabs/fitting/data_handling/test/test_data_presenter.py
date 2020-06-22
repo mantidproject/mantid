@@ -8,7 +8,6 @@ import unittest
 
 from unittest import mock
 from unittest.mock import patch
-from mantid.simpleapi import CreateSimulationWorkspace
 from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import data_model, data_presenter, data_view
 
 dir_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling"
