@@ -58,7 +58,7 @@ Categories
 Plots
 =====
 
-- General: Choose whether to plot workspaces normalised by their bin width and whether to show their title.
+- General: Choose whether to plot workspaces normalised by their bin width, whether to show their title, and whether to show minor ticks and gridlines.
 - Axes: Should the Axes on plots be linear or logarithmic?
 - Line: Choose a line style and width.
 - Marker: Choose a default marker for plots, such as 'point'.
