@@ -123,14 +123,14 @@ set_property(TARGET Reflectometry PROPERTY FOLDER "MantidFramework")
 generate_mantid_export_header(Reflectometry FALSE)
 
 target_include_directories(Reflectometry PUBLIC
-  inc ${CMAKE_BINARY_DIR}/Framework/Reflectometry ../Nexus/inc)
+  ${CMAKE_BINARY_DIR}/Framework/Reflectometry)
+
+include_directories(inc)
 
 target_link_libraries(Reflectometry
-                      PUBLIC
+                      LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
-                      Nexus
-                      ${NEXUS_LIBRARIES}
                       ${GSL_LIBRARIES})
 
 # Add the unit tests directory

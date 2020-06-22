@@ -13,19 +13,16 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/ComponentCreationHelper.cpp
       ../../TestHelpers/src/InstrumentCreationHelper.cpp
       ../../TestHelpers/src/ReflectometryHelper.cpp
-      ../../TestHelpers/src/ScopedFileHelper.cpp
       ../../TestHelpers/src/WorkspaceCreationHelper.cpp)
 
-  cxxtest_add_test(ReflectometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  cxxtest_add_test(ReflectometryTest ${TEST_FILES})
   target_link_libraries(ReflectometryTest
                         LINK_PRIVATE
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Algorithms
                         Reflectometry
-                        Nexus
                         gmock
-                        ${NEXUS_LIBRARIES}
 )
   add_dependencies(FrameworkTests ReflectometryTest)
   # Test data
@@ -35,4 +32,7 @@ if(CXXTEST_FOUND)
   set_property(TARGET ReflectometryTest PROPERTY FOLDER "UnitTests")
 endif()
 
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} Reflectometry.Python ${TEST_PY_FILES})
+# python unit tests
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.Reflectometry
+                    ${TEST_PY_FILES})
+
