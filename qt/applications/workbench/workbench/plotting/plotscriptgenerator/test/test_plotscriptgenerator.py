@@ -16,7 +16,7 @@ from matplotlib.legend import Legend
 from matplotlib.ticker import NullLocator
 
 from mantid.plots import MantidAxes
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator import generate_script
 
@@ -115,8 +115,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             'get_yscale': lambda: 'linear',
             'get_xlim': lambda: (-0.02, 1.02),
             'get_ylim': lambda: (-0.02, 1.02),
-            'xaxis': MagicMock(),
-            'yaxis': MagicMock()
+            'xaxis': Mock(),
+            'yaxis': Mock()
         }
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
@@ -171,6 +171,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
         mock_ax = self._gen_mock_axes(legend_=True)
         mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
         if hasattr(Legend, "set_draggable"):
             self.assertIn('.legend().set_draggable(True)', generate_script(mock_fig))
         else:
@@ -209,6 +210,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_ax = self._gen_mock_axes()
         mock_ax.xaxis.minor.locator = Mock()
         mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
         self.assertIn('axes.minorticks_on()', generate_script(mock_fig))
 
@@ -230,6 +232,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_ax.xaxis.minor.locator = Mock()
         mock_ax.show_minor_gridlines = True
         mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
         self.assertIn('axes.show_minor_gridlines = True', generate_script(mock_fig))
 
@@ -252,6 +255,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_ax.xaxis._gridOnMajor = True
         mock_ax.yaxis._gridOnMajor = True
         mock_fig = Mock(get_axes=lambda: [mock_ax])
+        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
         self.assertIn('axes.grid(True, axis=\'both\', which=\'both\')', generate_script(mock_fig))
 
