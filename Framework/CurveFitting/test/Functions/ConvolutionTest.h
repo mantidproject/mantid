@@ -8,8 +8,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
+#include "MantidCurveFitting/Functions/FlatBackground.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -398,6 +401,53 @@ public:
       TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] * xa[i]),
                       1e-10);
     }
+  }
+
+  void test_convoluting_two_composite_functions() {
+    Convolution conv;
+    auto compositeFunction1 = std::make_shared<CompositeFunction>();
+    auto compositeFunction2 = std::make_shared<CompositeFunction>();
+    auto deltaFunction1 = std::make_shared<DeltaFunction>();
+    auto deltaFunction2 = std::make_shared<DeltaFunction>();
+    auto flatBackground = std::make_shared<FlatBackground>();
+    auto gaussOsc = std::make_shared<Gaussian>();
+
+    compositeFunction1->addFunction(deltaFunction1);
+    compositeFunction1->addFunction(deltaFunction2);
+    compositeFunction2->addFunction(flatBackground);
+    compositeFunction2->addFunction(gaussOsc);
+    conv.addFunction(compositeFunction1);
+    conv.addFunction(compositeFunction2);
+
+    // Define domains
+    const int N = 116;
+    double xs[N]; // symmetric range
+    double xa[N]; // asymmetric range
+    double xm{-4.0}, xMs{4.0}, xMa{8.0};
+    double dxs{(xMs - xm) / (N - 1)}, dxa{(xMa - xm) / (N - 1)};
+    for (int i = 0; i < N; i++) {
+      xs[i] = xm + i * dxs;
+      xa[i] = xm + i * dxa;
+    }
+    // Carry out the convolution
+    FunctionDomain1DView ds(&xs[0], N); // symmetric domain
+    FunctionDomain1DView da(&xa[0], N); // asymmetric domain
+    FunctionValues outs(ds), outa(da);
+    conv.function(ds, outs);
+    conv.function(da, outa);
+
+    // TS_ASSERT_DELTA(outs.getCalculated(0), 7, 1e-10);
+    //   xs[i]),
+    //                   1e-10);
+    // Check output is the original resolution function
+    // for (int i = 0; i < N; i++) {
+    //   TS_ASSERT_DELTA(outs.getCalculated(i), h1 * h2 * exp(-s1 * xs[i] *
+    //   xs[i]),
+    //                   1e-10);
+    //   TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] *
+    //   xa[i]),
+    //                   1e-10);
+    // }
   }
 
   void testForCategories() {
